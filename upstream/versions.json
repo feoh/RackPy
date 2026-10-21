@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-10-21",
+  "rack": {
+    "repository": "https://github.com/VCVRack/Rack",
+    "version": "2.6.6",
+    "tag": "v2.6.6",
+    "tag_object": "lightweight tag; refs/tags/v2.6.6 points directly at the commit",
+    "commit": "061ccf63c1758599396ac1bb10d47345d9d34076",
+    "decision": "Retain the research baseline. v2.6.6 is the newest v2 tag; refs/heads/v2 and HEAD also pointed at this commit on the verification date. Target the commit, never the mutable v2 branch.",
+    "observed_refs": {
+      "refs/heads/v2": "061ccf63c1758599396ac1bb10d47345d9d34076",
+      "HEAD": "061ccf63c1758599396ac1bb10d47345d9d34076",
+      "newest_v2_tag": "v2.6.6"
+    },
+    "github_releases": "none published; SDK and host binaries come from vcvrack.com/downloads"
+  },
+  "sdk": {
+    "note": "Download URLs are mutable vendor URLs, so the SHA-256 is the pin. Archives and extractions stay outside git (bin/rack-sdk uses $XDG_CACHE_HOME/rackpy/sdk).",
+    "archives": [
+      {
+        "platform": "lin-x64",
+        "url": "https://vcvrack.com/downloads/Rack-SDK-2.6.6-lin-x64.zip",
+        "sha256": "420da2452def7b195f98e3a0650c35f1e0f058a98a71840b4347d3d203618532",
+        "size": 9325383,
+        "root": "Rack-SDK"
+      },
+      {
+        "platform": "mac-x64",
+        "url": "https://vcvrack.com/downloads/Rack-SDK-2.6.6-mac-x64.zip",
+        "sha256": "9b8b0d7582ca25fac879f8f64de40f2481df2fd903b65f3abb5d6801689060ec",
+        "size": 8080438,
+        "root": "Rack-SDK"
+      },
+      {
+        "platform": "mac-arm64",
+        "url": "https://vcvrack.com/downloads/Rack-SDK-2.6.6-mac-arm64.zip",
+        "sha256": "29414e52417992cbafa47e30f947c3c0c7a34e5c424bb83c5a0af8c24840481f",
+        "size": 8180779,
+        "root": "Rack-SDK"
+      },
+      {
+        "platform": "win-x64",
+        "url": "https://vcvrack.com/downloads/Rack-SDK-2.6.6-win-x64.zip",
+        "sha256": "12f2043311db98592bdf73a7797e8a957c47950c3c8c17c7ff6421eb0015a05c",
+        "size": 3154102,
+        "root": "Rack-SDK"
+      }
+    ],
+    "unavailable": [
+      {
+        "platform": "lin-arm64",
+        "url": "https://vcvrack.com/downloads/Rack-SDK-2.6.6-lin-arm64.zip",
+        "observed": "HTTP 404 HTML page"
+      },
+      {
+        "platform": "win-arm64",
+        "url": "https://vcvrack.com/downloads/Rack-SDK-2.6.6-win-arm64.zip",
+        "observed": "HTTP 404 HTML page"
+      }
+    ]
+  },
+  "host": {
+    "note": "Rack Free host binaries for actual-host validation (RP-04 onward). Not redistributed.",
+    "archives": [
+      {
+        "platform": "lin-x64",
+        "url": "https://vcvrack.com/downloads/RackFree-2.6.6-lin-x64.zip",
+        "sha256": "69acf0c98d47db381291a115d609dcfbb99887bd7bd8641f0489da063fb0fc6e",
+        "size": 20689007
+      },
+      {
+        "platform": "mac-x64+arm64",
+        "url": "https://vcvrack.com/downloads/RackFree-2.6.6-mac-x64+arm64.pkg",
+        "sha256": "5ecbe5c0c1e66c8628c98d7902e6c7542204e0199168907a74e812d08423096c",
+        "size": 25883353
+      },
+      {
+        "platform": "win-x64",
+        "url": "https://vcvrack.com/downloads/RackFree-2.6.6-win-x64.exe",
+        "sha256": "2852c52c052155af8fa8690ae763f78778eebf1dcacfcea2743c0d4e1c76111c",
+        "size": 15965333
+      }
+    ]
+  },
+  "dependencies": {
+    "note": "Pins for libraries whose headers are reachable from rack.hpp. Submodule commits are gitlinks in the pinned Rack tree; tarball hashes come from the pinned dep/Makefile.",
+    "submodules": {
+      "dep/glfw": {"url": "https://github.com/VCVRack/glfw.git", "commit": "69f04b5504150a9dfed371d82c0fd75ab0f79464"},
+      "dep/nanosvg": {"url": "https://github.com/memononen/nanosvg.git", "commit": "25241c5a8f8451d41ab1b02ab2d865b01600d949"},
+      "dep/nanovg": {"url": "https://github.com/VCVRack/nanovg.git", "commit": "0bebdb314aff9cfa28fde4744bcb037a2b3fd756"},
+      "dep/oui-blendish": {"url": "https://github.com/VCVRack/oui-blendish.git", "commit": "2fc6405883f8451944ed080547d073c8f9f31898"},
+      "dep/pffft": {"url": "https://bitbucket.org/jpommier/pffft.git", "commit": "74d7261be17cf659d5930d4830609406bd7553e3"},
+      "dep/simde": {"url": "https://github.com/simd-everywhere/simde.git", "commit": "dd0b662fd8cf4b1617dbbb4d08aa053e512b08e4"},
+      "dep/speexdsp": {"url": "https://gitlab.xiph.org/xiph/speexdsp.git", "commit": "27ddf98b627ab425d5337b1a0d8b80d7528f9b30"}
+    },
+    "tarballs": {
+      "glew": {"version": "2.2.0", "file": "glew-2.2.0.tgz", "sha256": "d4fc82893cfb00109578d0a1a2337fb8ca335b3ceccf97b97e5cc7f08e4353e1"},
+      "jansson": {"version": "2.12", "file": "jansson-2.12.tar.gz", "sha256": "5f8dec765048efac5d919aded51b26a32a05397ea207aa769ff6b53c7027d2c9"}
+    }
+  },
+  "official_toolchain": {
+    "repository": "https://github.com/VCVRack/rack-plugin-toolchain",
+    "branch": "v2",
+    "commit": "4fd1318701624051cee54b385343f23d59b4845c",
+    "rack_sdk_version": "2.6.6",
+    "linux": "crosstool-ng 899e015abf8c70088e8b67e87586ae81f305711c, sample x86_64-ubuntu16.04-linux-gnu",
+    "windows": "crosstool-ng x86_64-w64-mingw32 with mingw-w64 v10.0.0",
+    "macos": "osxcross 4372d5560307c649af5dbbfa20b39199c9ef48be, clang 20.1.1, MacOSX 12.3 SDK, rcodesign 0.22.0",
+    "note": "Recorded from the Makefile; RackPy has not built this toolchain yet."
+  }
+}

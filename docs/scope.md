@@ -5,6 +5,9 @@
 Research baseline: **Rack v2.6.6**, commit
 `061ccf63c1758599396ac1bb10d47345d9d34076`.
 These sources were read during planning; this is not a binary-compatibility test.
+RP-02 kept this baseline and pinned the SDK archives; see
+[compatibility](compatibility.md). The reached headers and how they map to the
+families below are in [coverage](coverage.md#pinned-surface-rp-02).
 
 | Source | What it establishes |
 | --- | --- |
@@ -46,7 +49,8 @@ escalate the scope decision and keep the full-coverage release blocked.
 
 ## Coverage families
 
-1. Common/value utilities: math, color, strings, random, logger, quantity, mutexes.
+1. Common/value utilities: math, color, strings, random, logger, quantity, mutexes,
+   weak pointers and the common macros.
 2. Engine: module lifecycle/configuration, params, ports, lights, engine, cables,
    parameter handles, events, bypass, state and expanders.
 3. Plugin/model registration, callbacks, asset lookup and helpers.
@@ -59,7 +63,10 @@ escalate the scope decision and keep the full-coverage release blocked.
    transitive families discovered by the inventory.
 9. Public context-dependent history/patch operations, if supported by the
    rack.hpp closure. Merely forward-declared internals do not become supported
-   API by guessing their definitions.
+   API by guessing their definitions. RP-02 found that `history.hpp` is in the
+   closure (through `app/ModuleWidget.hpp`), so its public actions are in scope.
+   `patch::Manager` is only forward-declared, so `Context::patch` is an opaque
+   handle.
 
 ## Not established yet
 

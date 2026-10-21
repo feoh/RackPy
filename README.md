@@ -32,6 +32,7 @@ they must not disappear from the coverage denominator.
 | You want to… | Read |
 | --- | --- |
 | Understand scope and upstream evidence | [Scope and research](docs/scope.md) |
+| See the pinned SDK, toolchain and platform targets | [Compatibility baseline](docs/compatibility.md) |
 | Understand the Python/native boundary | [Architecture](docs/architecture.md) |
 | See how completeness will be proved | [API coverage contract](docs/coverage.md) |
 | Review the planned sample ports | [Example inventory](examples/README.md) |
@@ -43,9 +44,11 @@ they must not disappear from the coverage denominator.
 ## Decisions
 
 The project owner selected in-process execution, **GPL-3.0-or-later**, and a
-repository-and-plan deliverable before implementation. The initial research
-baseline is Rack **2.6.6**, commit
-`061ccf63c1758599396ac1bb10d47345d9d34076`. Compatibility is not yet tested.
+repository-and-plan deliverable before implementation. The baseline is Rack
+**2.6.6**, commit `061ccf63c1758599396ac1bb10d47345d9d34076`. RP-02 rechecked
+it and pinned the SDK archives by SHA-256
+([compatibility baseline](docs/compatibility.md)). Loading in a real Rack host
+is not yet tested.
 Python versions, binding library, supported architectures, and latency budgets
 remain gated decisions; do not infer them from the host used to plan this work.
 

@@ -1,0 +1,1670 @@
+{
+  "archives": {
+    "lin-x64": {
+      "dep_include_tree_sha256": "4b9f621792efc681dd0342d85f1fa1502177d0f1f9d27508f47a9cf35841d3ed",
+      "include_tree_sha256": "2d2d2d202da05f545c07eeb3f71ab7816081a2baca144a2301ea4d575f6d566f",
+      "library": {
+        "name": "libRack.so",
+        "sha256": "448502076511fecfe27cc0661940f4e61ee38ab9554f41fe7e23d5bc47697ba7"
+      }
+    },
+    "mac-arm64": {
+      "dep_include_tree_sha256": "c10be6066b76524b64b835a550e613949b4c7f2fe810f90b64da2873926484d6",
+      "include_tree_sha256": "2d2d2d202da05f545c07eeb3f71ab7816081a2baca144a2301ea4d575f6d566f",
+      "library": {
+        "name": "libRack.dylib",
+        "sha256": "55dd40f7dff09a6ed7b93374b150f33931034d3754c128da7b209ea37b6aaf1c"
+      }
+    },
+    "mac-x64": {
+      "dep_include_tree_sha256": "c10be6066b76524b64b835a550e613949b4c7f2fe810f90b64da2873926484d6",
+      "include_tree_sha256": "2d2d2d202da05f545c07eeb3f71ab7816081a2baca144a2301ea4d575f6d566f",
+      "library": {
+        "name": "libRack.dylib",
+        "sha256": "43c6abb80a1663633c2e784930ccafcbcb3d0eb427e632f324ffb584310c7ebd"
+      }
+    },
+    "win-x64": {
+      "dep_include_tree_sha256": "54d9b27088b668e74e34fa5ffd5bfec4ca038a72291c7c2a1906d0c62e0b1b2c",
+      "include_tree_sha256": "2d2d2d202da05f545c07eeb3f71ab7816081a2baca144a2301ea4d575f6d566f",
+      "library": {
+        "name": "libRack.dll.a",
+        "sha256": "0c9bb5aa69a54bc966ecced4d02fa4eb192fc79e39298e5e18eca0e0736c2b51"
+      }
+    }
+  },
+  "closure": {
+    "dep_headers": {
+      "dep/include/GL/glew.h": "d3a05edf0b6c45bdbdb5704cacfa68a4666ae682e09b7970bb7310d38cfc3d0e",
+      "dep/include/GLFW/glfw3.h": "f89b2bad340f5c64f03fcda5e922c586e638cd2aa1dfda42a42e61691ab92a6d",
+      "dep/include/blendish.h": "f25c7bc0d2add66d5309bd97e7baec69df2349c15b21bdcaee50d1b952387871",
+      "dep/include/jansson.h": "e1604a55055b8b8c464e1538ddbe236f45006dc88747d70ce774536b7339a592",
+      "dep/include/jansson_config.h": "3fbee9af15d0707d4aba19e14397f8657b02b91898a8d3f03da41539798e5d1b",
+      "dep/include/nanosvg.h": "f693ec60f1a8c9481fa91df8b55b7d2d0ff95f1c5e5328117c3fa7b12e35257a",
+      "dep/include/nanovg.h": "dbf8acf5fc365cf3a24d64da236d7b491f94193f24acabd215c83be701759e84",
+      "dep/include/nanovg_gl.h": "0cafc4a7351b92cc38cfb3fb9f4a555c27687fe84d770de6b0af6c53ada5cdaf",
+      "dep/include/nanovg_gl_utils.h": "1cb8f69a29fb95f10b0ab25bca5c011576eb6d36d0a3eca8505ca2f6b1f3cef2",
+      "dep/include/pffft.h": "32a44c944e8f8f8d693286aebcb564d14183ead4ecbf28ca53dabd47a97aafc7",
+      "dep/include/speex/speex_resampler.h": "7e439ec0dd30c32216b3ced17135f8992e5aaf53389d3f5996a7d900c453e65f",
+      "dep/include/speex/speexdsp_config_types.h": "adae4ec8c26f2ed0fcc9cb5d1bdc029b0e21fde99af6dbcbd430e729a48afa18",
+      "dep/include/speex/speexdsp_types.h": "4f97187c057fd8493c787f2526752859cf57007d50fef8d2e03c9b79b2fed490"
+    },
+    "entry": "include/rack.hpp",
+    "flags": [
+      "-std=c++11",
+      "-march=nehalem",
+      "-fPIC",
+      "-funsafe-math-optimizations"
+    ],
+    "rack_headers": {
+      "include/Quantity.hpp": "baed08ded185838bef32bd54cc9a8aedb780b90571338e87d59613069c2a3c3d",
+      "include/app/AudioDisplay.hpp": "73d846c20605ac4fc55fcd63ccc7af11f1f21543b18eedc7d929d6050691fb3d",
+      "include/app/CableWidget.hpp": "489ed1623af001024f879112b5b2bf3e3c4e7ae63d36820de9cb9d5513712e6f",
+      "include/app/CircularShadow.hpp": "9eb0c27b4ae7bd5c2e60f5638bb5c2d01db65a0471353660513a1bf60c041bc1",
+      "include/app/Knob.hpp": "dda6c3a7fbce19c6fdaed5b93d8317418dde0c8a7fbe19a871b3e98e6a9a60ad",
+      "include/app/LedDisplay.hpp": "ad76e5a84d03d8b8241340df9f8f64f4754515206770bfcf1a080756808da10e",
+      "include/app/LightWidget.hpp": "96af490ca6a2bf33db46478edfbb793af0a41fc722221b2d68eec6283fe7b6d2",
+      "include/app/MidiDisplay.hpp": "81ee2316eec0b454fda03e2ba981cbe1b0e7677b3f1423dcb8410810001171bf",
+      "include/app/ModuleLightWidget.hpp": "7037848e14281c8d3532c3e7c481db1d6a8747635e73ac162a1eae263e9287be",
+      "include/app/ModuleWidget.hpp": "7987c8321a9b49c2a966f00096d1d92dbecc631f8b0c40b64436d156a45ea764",
+      "include/app/MultiLightWidget.hpp": "26349b63c50f1fd5489827c574632765191454d481f709b7f62820f7858deddb",
+      "include/app/ParamWidget.hpp": "da9241d7b8599889f209a8a6e526a4e12b35e50ff1c2bc5d690a0bea0f574773",
+      "include/app/PortWidget.hpp": "90a1d1fb66052d4c15f3410ff550172fe7c2d061450f31dc1ec17bce0c62cda0",
+      "include/app/RackScrollWidget.hpp": "0eae4e559d0b56284750f99547dab5dfdd1c25177089d02b94c14e11030bc69e",
+      "include/app/RackWidget.hpp": "0924e57f747157cff10ddcc84e42596a9351d702b3071b5563b6b00ca6cd6230",
+      "include/app/RailWidget.hpp": "1a147812bbee1e85b6b031f8f2f26770bdc608fea03ef3b7b38d433ab9803b1f",
+      "include/app/Scene.hpp": "bae9e11db3ddbf94c5aa8571373887154694d1c72be66f2bccc27502d1418960",
+      "include/app/SliderKnob.hpp": "bc7d88a3a80118caf25f3d0a3f93b0b0930f6e532f6de4a89fe31a434ff974d6",
+      "include/app/SvgButton.hpp": "1804bb0c5b2c3a7730923306abd1a6e42dbdc13bf8ab49e71ede7e7b2fd30fda",
+      "include/app/SvgKnob.hpp": "e74b5be3d20d66bc783ddc824ad6debf896be9e6e734d052668871200df51976",
+      "include/app/SvgPanel.hpp": "dd4bec6eaf8c68b29f1161e544f6045bd3cbcf67003ecb866e2927d939b66556",
+      "include/app/SvgPort.hpp": "3ff9516d681ae3ac12ad7bcfe8d16e46bdc3e1dd2a09d9a069fd295d3a8ee3d8",
+      "include/app/SvgScrew.hpp": "380e5060e986cb35604ae8dac50ce5516105cac646ac6ca8ec492d2b4a626360",
+      "include/app/SvgSlider.hpp": "2c8460d7c0310bd139fb35f47c49b224d8b4c82ca241995286092d7f367a4158",
+      "include/app/SvgSwitch.hpp": "007e91ae9f8a7bb3560bffca24910f4642b0d477f809fb3983a8d8555539b19d",
+      "include/app/Switch.hpp": "12ceabd612d9681acb0988eaf14d87c708f25ad7e645822ad9ffb8019b736fb4",
+      "include/app/common.hpp": "674ffe054165b8512d556ba9aed2f20b06ade1f81f416dcc3155834c3bfc10ea",
+      "include/arch.hpp": "23db3d64e762e3d573ef28d4084394f02d7bd805d2b1bc600dd2afa0157e08de",
+      "include/asset.hpp": "73fb63781084f077cb8719facd9bc563fca9b5bdc37aafaba85fd1c7f1cda7d4",
+      "include/audio.hpp": "10b6c95796abdef951efa4d411582c4710954dd614b5b324b379beadac8432bb",
+      "include/color.hpp": "aa406ffb438ac469da9dde55eb7cabc159de7172de38c02ab993104be73f9539",
+      "include/common.hpp": "117daca440093184abcf0fe97305b1633dad574a7a0e3977dbab4bcb5656439d",
+      "include/componentlibrary.hpp": "33ac083d73fabc7798cfe8a2ecf9cf1a020a0039fe2c3153e0d74408f13d6f55",
+      "include/context.hpp": "5f83e171e6642aebc49fdc8dc3a44b093fdfd4e7a23c5dc4bcf943b8a259f791",
+      "include/dsp/approx.hpp": "1356dc25905e74ace9eeaabd72cfa663b331d8fe9e26ecd76c64671aed2025ca",
+      "include/dsp/common.hpp": "73cdb6c6689e79f6d3668160e5041b39beeb8e86b55d28a461675c0049e2665e",
+      "include/dsp/convert.hpp": "4955941a79b26619d10e2ece72a837c9697f356fd3a00a2d69447f24eda5a29b",
+      "include/dsp/digital.hpp": "aed0c00a6abb0bd87eb32ede393db8786a0e568df477a648d1f8c451c7848296",
+      "include/dsp/fft.hpp": "49ca9221619ee8d148337f3fb517ced75147ac60382b14f9a69623a1c98996c3",
+      "include/dsp/filter.hpp": "18d4d490eb754259c6c3b335445f9f5369c4a1edfe03ba7f110cf48d0665d8e1",
+      "include/dsp/fir.hpp": "c9dac7440acc9910b1c90cc38b4e190d0fcbc1147f549e63c76f201af2e16697",
+      "include/dsp/midi.hpp": "cf465dafdd32612c831ab84af88061f5117acd99fea878dc5b3938a4de182cb1",
+      "include/dsp/minblep.hpp": "0ba749aacdecc5bedbdc981b4e8b6bb046c8f630831f41f86c0e99d67497db11",
+      "include/dsp/ode.hpp": "5e3b21021e825268e19c7363f8bcdc5b78422c1cf3eb15c4a9eb5ae73842b0da",
+      "include/dsp/resampler.hpp": "54bed1d0bc5477c062f53b4dce498a0ce569c553bae858437c32bd50a31c7983",
+      "include/dsp/ringbuffer.hpp": "5a6f7c04c0bae1cfcc980a34408a4eb35a612c736e95010c34268904f022d9aa",
+      "include/dsp/vumeter.hpp": "58fc6a7fedd9419f152ef9a0c1c2572d3fa68b3bb7e029261593a1947d2dd377",
+      "include/dsp/window.hpp": "2e4e6fd1b746e775bfc7b49ca849a92a38f10d36bb83e90c68b6c74afb0bd3d4",
+      "include/engine/Cable.hpp": "0c0af168df3e81cb7802b57afda707ca3f6f6e1e7d41ee5abe0fde094c67786c",
+      "include/engine/Engine.hpp": "7bda3047858540e8941f6d6dd4f322d9076841de06965c6dbf0494591cc087dd",
+      "include/engine/Light.hpp": "70affe4a5f167d5e018633da41931d7d1666a113ea8358fa8f01a63cae46e4c2",
+      "include/engine/LightInfo.hpp": "4fd466dbf9732de9cfdfd9a701b4f0c65d1221127f9fcf80af092a76c59c90bd",
+      "include/engine/Module.hpp": "a258d8151835ccef0c50cdc76fb3727c63fce7fa39acb0abd6d5493fd595c8df",
+      "include/engine/Param.hpp": "7f7a3a0a286cae099ad6b884d4ca1648be1bcf658f398b2a15366c27a6c373aa",
+      "include/engine/ParamHandle.hpp": "929e4581fbbdc46b84ab992d68d4393d9726f6bc9c4a03610afb4e3b233867b9",
+      "include/engine/ParamQuantity.hpp": "cb37427911a3306354987bef1506e561c5bb33e66b53d04103827bb71c974157",
+      "include/engine/Port.hpp": "4adb82ddf9168eb92a02a49c0d1b666545647bb37e38c8559bd0b6135a0c89e2",
+      "include/engine/PortInfo.hpp": "21b1c84d5bb517f7327033222db5cd2602a3e99a41ff9ba941a84d44f9724611",
+      "include/helpers.hpp": "1a6d915909a7dcb581869749a4ee558b020c20e886bf068299776fae13e6b537",
+      "include/history.hpp": "b9682353155f62100977b4ced926c13a7d586a831d3d28758c4a50951a13911f",
+      "include/logger.hpp": "b9d095bb1ebfcf84d1c75fa4505c8b1b3aa5f27f4677b3c25ba5111b6419b273",
+      "include/math.hpp": "154bf143e14071e782b28c54c5c4a0782290d5ef0428e113583cef2ba9f209de",
+      "include/midi.hpp": "2dfb1fd885006b889420e2da3bbd21e45a117e9b3026650fc396cbb6e0acb8a9",
+      "include/mutex.hpp": "1bb24c633704ddfa3756339687ffefe532b5624375cd6c58b447654948d7354d",
+      "include/network.hpp": "bfef07950735d47f23baea66131c2b7b5c0a85f3233dc166f0a87c687e84b8a2",
+      "include/plugin.hpp": "607320ba106c2c0dc57d7c68f694cb2a4c436cc38fc9bf17084f27722be2b820",
+      "include/plugin/Model.hpp": "2a72fb2ec14f2a45e4de04a1acdb077f09e98a827e0789fdc567e7c8d00ffbc4",
+      "include/plugin/Plugin.hpp": "8831907ee660c7da79fa9dc6accf5f48b15c20ebf0106439595d0d73a5e6f234",
+      "include/plugin/callbacks.hpp": "fb555bdc04dc777ea45a42c37c0f03663405221e29f4302dd9ed7620c06a6922",
+      "include/rack.hpp": "dadeba5143b5adc50665c973e2b04f301faa2e1075b4997287974bc7fa2b2a26",
+      "include/random.hpp": "2ccbca07e22d981811521beb93d8dea6b9390a5ae87452a7c39fd604ded64d34",
+      "include/settings.hpp": "fc71e3ba11233e605b83f31713478d1247b92497673744046875370ed3c8a6fd",
+      "include/simd/Vector.hpp": "368c5e7a1ab8f550d689d0f11a2a9d85d71d00974bc1977a0ef3ec15c108207f",
+      "include/simd/common.hpp": "a019adabd99cedd00e8a9fc1c1276ff742adb9fbad9fa7248adf0e6e9978cc45",
+      "include/simd/functions.hpp": "5f53878b105958127813f0fe1669bbf7ff8242afdbef64c412e618b50186412d",
+      "include/simd/sse_mathfun.h": "9e84be29c3d5738206f6c10c37b7a72920a343e7a9da87deea15ea96a1866fca",
+      "include/simd/sse_mathfun_extension.h": "f1f87d463d44676c9850b86a2985076d0ab5e5c80df72f7d7846535d29759493",
+      "include/string.hpp": "28cb47d6770e62e22d74cb4d079830be2daf0d5c320bf84f446ced563c68a7b0",
+      "include/system.hpp": "eaac57848af0f4a471d9e487b1ee6e52dcb1b182bcade3695a8a33d5f35057fb",
+      "include/ui/Button.hpp": "5c082e90893428bb47d652b678e955115807889e2fd1452a4de79f71580a289a",
+      "include/ui/ChoiceButton.hpp": "8011838485570b69058594e223b6b1a277b4821ae4d6aa1ba031f941963443c9",
+      "include/ui/Label.hpp": "b3cf8adf016e36f548d811812eccd4b5409cbc9a81a2fd8ec1f2c70234787c2c",
+      "include/ui/List.hpp": "e1d7cb7e12c072cad0b8245b4a87cc80eda551cd65a678c0180530bb995ed325",
+      "include/ui/Menu.hpp": "8443a4b34d59929b3d02a106ff1737a23c0c83bac04351bc978746e55c8e3d0c",
+      "include/ui/MenuEntry.hpp": "b1e7e85f3610ce649eafb26d23363d71e0e36d2b2075c7efb2b0b43090048fc5",
+      "include/ui/MenuItem.hpp": "78eea5e682ad472a81a3326724b221d48ed4705e9d0361b39c964b58d77ca4d0",
+      "include/ui/MenuLabel.hpp": "f7d660a14073a713899aebf189fba2525238c477eb702642c3d7ce6ab81267b8",
+      "include/ui/MenuOverlay.hpp": "2ada7995c36337dd71b9f8c2fbfa87e2a44694515d0725e647c6ab5242ae1b19",
+      "include/ui/MenuSeparator.hpp": "21d66251b6ab26e343687915a96386be27dfaf39dbb278f97de57e16965a98b5",
+      "include/ui/OptionButton.hpp": "dc856547d016477106c424dfa354cbfc090ae2d4850b02b486631f2dcd344d70",
+      "include/ui/ProgressBar.hpp": "f52a0086831e903b9f4814fd502a495a50dc88acdb9b39714d44a1e293ce0e1f",
+      "include/ui/RadioButton.hpp": "7cb5086a1d60c8536fabf8f70bbb67045c43245ab1336cf7873d940db22de0be",
+      "include/ui/ScrollWidget.hpp": "20cd38f58452bb80d8efebc5239d2e4ee089285d0c782f9ad67e0d7320486b45",
+      "include/ui/Scrollbar.hpp": "cb63b088eca21a9ead1f8be300676cf56459678f791e705d918ef65b01e88fce",
+      "include/ui/SequentialLayout.hpp": "5c73ac3bd5f14ff76befbfcbe3ac0326e22020f554bee166bf34cb769c6d25f6",
+      "include/ui/Slider.hpp": "b431895b26d4fb2765958abc1755823b92c92cefcb81b6f38cf96116e356aa02",
+      "include/ui/TextField.hpp": "a50c74f1bc8e4d5fa444278310ed86b5da97afee535360e7705692c24be776b6",
+      "include/ui/Tooltip.hpp": "0463659fa90a2ea9e5f231dae3b329cee58bb8677a8a84aa5094193fef62f7aa",
+      "include/ui/TooltipOverlay.hpp": "5f7df2f2dff9247034711f96f9cbcd56c10437ef435180b9af193da15a4f9536",
+      "include/ui/common.hpp": "4ff7a3a11c8dec7177c671dc14d15eae9a6002c68106c499925959e56e9c8f2e",
+      "include/weakptr.hpp": "8ae1408c02aad745d73db763ad6a05ee1843cf358bf87d31567768effd1803fc",
+      "include/widget/FramebufferWidget.hpp": "18d66d7563c75c6a84934c6deeedac2b975c6f003103e7b40ed0d9d0fb52d2fb",
+      "include/widget/OpaqueWidget.hpp": "5ecee0603ac77626a97cb475657585dc47926a9f596ffd2287d5f853243a429c",
+      "include/widget/OpenGlWidget.hpp": "4f1ced5663ec50d0b7801165aa0439293d05a0224e53289a1a3a538c48a4f6b2",
+      "include/widget/SvgWidget.hpp": "c96c4370915521aa5fbfddfaa146663ed0ada8f63c139bf5f106354dd9c2b85f",
+      "include/widget/TransformWidget.hpp": "ff397e9e7f938503ce7d153c3a7613528f99a761fd20bb6403f78b7e63777c8b",
+      "include/widget/TransparentWidget.hpp": "d88a23e3ce278e111381477dbcedc634a058ca6031ee1f35a8698f31abf85b53",
+      "include/widget/Widget.hpp": "6834d8825bc28d3efe0b0514d3178ec59a71ea231127662986982e900ffa55e8",
+      "include/widget/ZoomWidget.hpp": "cb7fd0225a90642882ce7eb515e3e4254d49bd6c729f51c51b8e26b7e2fab8b0",
+      "include/widget/event.hpp": "c8043da670921310537ea0d39f670d2fa26404b091ca40284e65ec1b9024861d",
+      "include/window/Svg.hpp": "a0bc5532a88de58b45dbd19846b10a1f32fd81215605162df1b205fcc857668a",
+      "include/window/Window.hpp": "e02eab81061bea5680f1d7d315a722ef8271c3b4ea432cdff22df870bba9cb5c"
+    },
+    "shipped_rack_headers_not_reached": [
+      "include/app/Browser.hpp",
+      "include/app/MenuBar.hpp",
+      "include/app/TipWindow.hpp",
+      "include/gamepad.hpp",
+      "include/keyboard.hpp",
+      "include/library.hpp",
+      "include/midiloopback.hpp",
+      "include/patch.hpp",
+      "include/rack0.hpp",
+      "include/rtaudio.hpp",
+      "include/rtmidi.hpp",
+      "include/tag.hpp"
+    ]
+  },
+  "description": "Recorded RP-02 provenance for the pinned Rack 2.6.6 SDK. Regenerate sections with bin/rack-sdk closure --write and survey --write; verify with bin/rack-sdk verify/closure/survey.",
+  "preliminary_survey": {
+    "comment_only_deprecations": [
+      {
+        "declaration": "ParamWidget* touchedParam = NULL;",
+        "header": "include/app/RackWidget.hpp",
+        "line": 25
+      },
+      {
+        "declaration": "math::Vec mousePos;",
+        "header": "include/app/Scene.hpp",
+        "line": 23
+      },
+      {
+        "declaration": "void setSmoothBrightness(float brightness, float deltaTime) {",
+        "header": "include/engine/Light.hpp",
+        "line": 37
+      },
+      {
+        "declaration": "virtual void step() {}",
+        "header": "include/engine/Module.hpp",
+        "line": 335
+      },
+      {
+        "declaration": "virtual void onAdd() {}",
+        "header": "include/engine/Module.hpp",
+        "line": 454
+      },
+      {
+        "declaration": "virtual void onRemove() {}",
+        "header": "include/engine/Module.hpp",
+        "line": 456
+      },
+      {
+        "declaration": "virtual void onReset() {}",
+        "header": "include/engine/Module.hpp",
+        "line": 458
+      },
+      {
+        "declaration": "virtual void onRandomize() {}",
+        "header": "include/engine/Module.hpp",
+        "line": 460
+      },
+      {
+        "declaration": "virtual void onSampleRateChange() {}",
+        "header": "include/engine/Module.hpp",
+        "line": 462
+      },
+      {
+        "declaration": "float value;",
+        "header": "include/engine/Port.hpp",
+        "line": 19
+      },
+      {
+        "declaration": "uint8_t channels = 0;",
+        "header": "include/engine/Port.hpp",
+        "line": 24
+      },
+      {
+        "declaration": "uint8_t active;",
+        "header": "include/engine/Port.hpp",
+        "line": 29
+      }
+    ],
+    "deprecated_attribute_declarations": [
+      {
+        "header": "include/app/ModuleWidget.hpp",
+        "kind": "CXXConstructorDecl",
+        "name": "rack::app::ModuleWidget::ModuleWidget"
+      },
+      {
+        "header": "include/app/RackWidget.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::RackWidget::getIncompleteCable"
+      },
+      {
+        "header": "include/app/SvgButton.hpp",
+        "kind": "TypedefDecl",
+        "name": "rack::app::SVGButton"
+      },
+      {
+        "header": "include/app/SvgKnob.hpp",
+        "kind": "TypedefDecl",
+        "name": "rack::app::SVGKnob"
+      },
+      {
+        "header": "include/app/SvgPanel.hpp",
+        "kind": "TypedefDecl",
+        "name": "rack::app::SVGPanel"
+      },
+      {
+        "header": "include/app/SvgPort.hpp",
+        "kind": "TypedefDecl",
+        "name": "rack::app::SVGPort"
+      },
+      {
+        "header": "include/app/SvgScrew.hpp",
+        "kind": "TypedefDecl",
+        "name": "rack::app::SVGScrew"
+      },
+      {
+        "header": "include/app/SvgSlider.hpp",
+        "kind": "TypedefDecl",
+        "name": "rack::app::SVGSlider"
+      },
+      {
+        "header": "include/app/SvgSwitch.hpp",
+        "kind": "TypedefDecl",
+        "name": "rack::app::SVGSwitch"
+      },
+      {
+        "header": "include/app/SvgKnob.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::SvgKnob::setSVG"
+      },
+      {
+        "header": "include/app/SvgPort.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::SvgPort::setSVG"
+      },
+      {
+        "header": "include/app/SvgSlider.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::SvgSlider::setBackgroundSVG"
+      },
+      {
+        "header": "include/app/SvgSlider.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::SvgSlider::setHandleSVG"
+      },
+      {
+        "header": "include/app/SvgSlider.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::SvgSlider::setSVGs"
+      },
+      {
+        "header": "include/context.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::appGet"
+      },
+      {
+        "header": "include/dsp/filter.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::dsp::TExponentialFilter::process"
+      },
+      {
+        "header": "include/dsp/filter.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::dsp::TExponentialSlewLimiter::process"
+      },
+      {
+        "header": "include/dsp/filter.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::dsp::TPeakFilter::peak"
+      },
+      {
+        "header": "include/dsp/filter.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::dsp::TPeakFilter::process"
+      },
+      {
+        "header": "include/dsp/filter.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::dsp::TPeakFilter::setRate"
+      },
+      {
+        "header": "include/dsp/filter.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::dsp::TSlewLimiter::process"
+      },
+      {
+        "header": "include/dsp/vumeter.hpp",
+        "kind": "TypedefDecl",
+        "name": "rack::dsp::VUMeter"
+      },
+      {
+        "header": "include/engine/Engine.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Engine::getParamHandle"
+      },
+      {
+        "header": "include/engine/Light.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Light::setBrightnessSmooth"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "kind": "CXXConstructorDecl",
+        "name": "rack::engine::Module::Module"
+      },
+      {
+        "header": "include/engine/ParamQuantity.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::ParamQuantity::getSmoothValue"
+      },
+      {
+        "header": "include/engine/ParamQuantity.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::ParamQuantity::setSmoothValue"
+      },
+      {
+        "header": "include/engine/Port.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Port::normalize"
+      },
+      {
+        "header": "include/ui/Scrollbar.hpp",
+        "kind": "TypedefDecl",
+        "name": "rack::ui::ScrollBar"
+      },
+      {
+        "header": "include/widget/event.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::widget::EventState::setDragHovered"
+      },
+      {
+        "header": "include/widget/event.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::widget::EventState::setDragged"
+      },
+      {
+        "header": "include/widget/event.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::widget::EventState::setHovered"
+      },
+      {
+        "header": "include/widget/event.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::widget::EventState::setSelected"
+      },
+      {
+        "header": "include/widget/SvgWidget.hpp",
+        "kind": "TypedefDecl",
+        "name": "rack::widget::SVGWidget"
+      },
+      {
+        "header": "include/widget/SvgWidget.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::widget::SvgWidget::setSVG"
+      },
+      {
+        "header": "include/widget/Widget.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::widget::Widget::draw"
+      },
+      {
+        "header": "include/window/Window.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::window::Font::load"
+      },
+      {
+        "header": "include/window/Window.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::window::Image::load"
+      },
+      {
+        "header": "include/window/Svg.hpp",
+        "kind": "TypedefDecl",
+        "name": "rack::window::SVG"
+      }
+    ],
+    "incomplete_rack_records": [
+      {
+        "header": "include/app/CableWidget.hpp",
+        "name": "rack::app::CableWidget::Internal"
+      },
+      {
+        "header": "include/app/Knob.hpp",
+        "name": "rack::app::Knob::Internal"
+      },
+      {
+        "header": "include/app/ModuleLightWidget.hpp",
+        "name": "rack::app::ModuleLightWidget::Internal"
+      },
+      {
+        "header": "include/app/ModuleWidget.hpp",
+        "name": "rack::app::ModuleWidget::Internal"
+      },
+      {
+        "header": "include/app/ParamWidget.hpp",
+        "name": "rack::app::ParamWidget::Internal"
+      },
+      {
+        "header": "include/app/CableWidget.hpp",
+        "name": "rack::app::PlugWidget::Internal"
+      },
+      {
+        "header": "include/app/PortWidget.hpp",
+        "name": "rack::app::PortWidget::Internal"
+      },
+      {
+        "header": "include/app/RackScrollWidget.hpp",
+        "name": "rack::app::RackScrollWidget::Internal"
+      },
+      {
+        "header": "include/app/RackWidget.hpp",
+        "name": "rack::app::RackWidget::Internal"
+      },
+      {
+        "header": "include/app/RailWidget.hpp",
+        "name": "rack::app::RailWidget::Internal"
+      },
+      {
+        "header": "include/app/Scene.hpp",
+        "name": "rack::app::Scene::Internal"
+      },
+      {
+        "header": "include/app/SvgSwitch.hpp",
+        "name": "rack::app::SvgSwitch::Internal"
+      },
+      {
+        "header": "include/app/Switch.hpp",
+        "name": "rack::app::Switch::Internal"
+      },
+      {
+        "header": "include/engine/Engine.hpp",
+        "name": "rack::engine::Engine::Internal"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "name": "rack::engine::Module::Internal"
+      },
+      {
+        "header": "include/history.hpp",
+        "name": "rack::history::State::Internal"
+      },
+      {
+        "header": "include/midi.hpp",
+        "name": "rack::midi::InputQueue::Internal"
+      },
+      {
+        "header": "include/context.hpp",
+        "name": "rack::midiloopback::Context"
+      },
+      {
+        "header": "include/context.hpp",
+        "name": "rack::patch::Manager"
+      },
+      {
+        "header": "include/simd/Vector.hpp",
+        "name": "rack::simd::Vector"
+      },
+      {
+        "header": "include/ui/ScrollWidget.hpp",
+        "name": "rack::ui::ScrollWidget::Internal"
+      },
+      {
+        "header": "include/ui/Scrollbar.hpp",
+        "name": "rack::ui::Scrollbar::Internal"
+      },
+      {
+        "header": "include/widget/FramebufferWidget.hpp",
+        "name": "rack::widget::FramebufferWidget::Internal"
+      },
+      {
+        "header": "include/window/Window.hpp",
+        "name": "rack::window::Window::Internal"
+      }
+    ],
+    "note": "Preliminary RP-02 navigation data. Not an inventory or coverage count; RP-05 supersedes it.",
+    "platform_conditionals": [
+      {
+        "directive": "#if defined __x86_64__",
+        "header": "include/arch.hpp",
+        "line": 4
+      },
+      {
+        "directive": "#if defined __aarch64__",
+        "header": "include/arch.hpp",
+        "line": 7
+      },
+      {
+        "directive": "#if defined _WIN32",
+        "header": "include/arch.hpp",
+        "line": 12
+      },
+      {
+        "directive": "#if defined __APPLE__",
+        "header": "include/arch.hpp",
+        "line": 15
+      },
+      {
+        "directive": "#if defined __linux__",
+        "header": "include/arch.hpp",
+        "line": 18
+      },
+      {
+        "directive": "#if defined ARCH_WIN",
+        "header": "include/common.hpp",
+        "line": 133
+      },
+      {
+        "directive": "#ifdef __SSE4_2__",
+        "header": "include/simd/common.hpp",
+        "line": 3
+      },
+      {
+        "directive": "#if defined ARCH_WIN",
+        "header": "include/string.hpp",
+        "line": 142
+      },
+      {
+        "directive": "#if defined ARCH_MAC",
+        "header": "include/widget/event.hpp",
+        "line": 13
+      }
+    ],
+    "private_declarations": [
+      {
+        "header": "include/app/ModuleWidget.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::ModuleWidget::dragEnabled"
+      },
+      {
+        "header": "include/app/ModuleWidget.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::ModuleWidget::dragOffset"
+      },
+      {
+        "header": "include/app/ModuleWidget.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::ModuleWidget::releaseModule"
+      },
+      {
+        "header": "include/app/CableWidget.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::PlugWidget::setAngle"
+      },
+      {
+        "header": "include/app/CableWidget.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::PlugWidget::setColor"
+      },
+      {
+        "header": "include/app/CableWidget.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::PlugWidget::setTop"
+      },
+      {
+        "header": "include/app/RackScrollWidget.hpp",
+        "kind": "CXXConstructorDecl",
+        "name": "rack::app::RackScrollWidget::RackScrollWidget"
+      },
+      {
+        "header": "include/app/RackScrollWidget.hpp",
+        "kind": "CXXDestructorDecl",
+        "name": "rack::app::RackScrollWidget::~RackScrollWidget"
+      },
+      {
+        "header": "include/app/RackWidget.hpp",
+        "kind": "CXXConstructorDecl",
+        "name": "rack::app::RackWidget::RackWidget"
+      },
+      {
+        "header": "include/app/RackWidget.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::RackWidget::squeezeModulePos"
+      },
+      {
+        "header": "include/app/RackWidget.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::RackWidget::unsqueezeModulePos"
+      },
+      {
+        "header": "include/app/RackWidget.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::app::RackWidget::updateExpanders"
+      },
+      {
+        "header": "include/app/RackWidget.hpp",
+        "kind": "CXXDestructorDecl",
+        "name": "rack::app::RackWidget::~RackWidget"
+      },
+      {
+        "header": "include/app/Scene.hpp",
+        "kind": "CXXConstructorDecl",
+        "name": "rack::app::Scene::Scene"
+      },
+      {
+        "header": "include/app/Scene.hpp",
+        "kind": "CXXDestructorDecl",
+        "name": "rack::app::Scene::~Scene"
+      },
+      {
+        "header": "include/asset.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::asset::init"
+      },
+      {
+        "header": "include/audio.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::audio::destroy"
+      },
+      {
+        "header": "include/audio.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::audio::init"
+      },
+      {
+        "header": "include/engine/Cable.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Cable::jsonStripIds"
+      },
+      {
+        "header": "include/engine/Engine.hpp",
+        "kind": "CXXConstructorDecl",
+        "name": "rack::engine::Engine::Engine"
+      },
+      {
+        "header": "include/engine/Engine.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Engine::addCable_NoLock"
+      },
+      {
+        "header": "include/engine/Engine.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Engine::addModule_NoLock"
+      },
+      {
+        "header": "include/engine/Engine.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Engine::clear_NoLock"
+      },
+      {
+        "header": "include/engine/Engine.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Engine::removeCable_NoLock"
+      },
+      {
+        "header": "include/engine/Engine.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Engine::removeModule_NoLock"
+      },
+      {
+        "header": "include/engine/Engine.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Engine::removeParamHandle_NoLock"
+      },
+      {
+        "header": "include/engine/Engine.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Engine::setSampleRate"
+      },
+      {
+        "header": "include/engine/Engine.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Engine::startFallbackThread"
+      },
+      {
+        "header": "include/engine/Engine.hpp",
+        "kind": "CXXDestructorDecl",
+        "name": "rack::engine::Engine::~Engine"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Module::doProcess"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Module::jsonStripIds"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Module::meterBuffer"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Module::meterIndex"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Module::meterLength"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Module::setBypassed"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::engine::Module::setExpanderModule"
+      },
+      {
+        "header": "include/history.hpp",
+        "kind": "CXXConstructorDecl",
+        "name": "rack::history::State::State"
+      },
+      {
+        "header": "include/history.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::history::State::clear"
+      },
+      {
+        "header": "include/history.hpp",
+        "kind": "CXXDestructorDecl",
+        "name": "rack::history::State::~State"
+      },
+      {
+        "header": "include/logger.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::logger::destroy"
+      },
+      {
+        "header": "include/logger.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::logger::init"
+      },
+      {
+        "header": "include/logger.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::logger::wasTruncated"
+      },
+      {
+        "header": "include/midi.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::midi::destroy"
+      },
+      {
+        "header": "include/midi.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::midi::init"
+      },
+      {
+        "header": "include/network.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::network::destroy"
+      },
+      {
+        "header": "include/network.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::network::init"
+      },
+      {
+        "header": "include/plugin.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::plugin::destroy"
+      },
+      {
+        "header": "include/plugin.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::plugin::init"
+      },
+      {
+        "header": "include/plugin.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::plugin::settingsMergeJson"
+      },
+      {
+        "header": "include/settings.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::settings::destroy"
+      },
+      {
+        "header": "include/settings.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::settings::fromJson"
+      },
+      {
+        "header": "include/settings.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::settings::init"
+      },
+      {
+        "header": "include/settings.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::settings::load"
+      },
+      {
+        "header": "include/settings.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::settings::save"
+      },
+      {
+        "header": "include/settings.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::settings::toJson"
+      },
+      {
+        "header": "include/system.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::system::init"
+      },
+      {
+        "header": "include/ui/MenuItem.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::ui::MenuItem::drawOffset"
+      },
+      {
+        "header": "include/ui/common.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::ui::destroy"
+      },
+      {
+        "header": "include/ui/common.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::ui::init"
+      },
+      {
+        "header": "include/window/Window.hpp",
+        "kind": "CXXConstructorDecl",
+        "name": "rack::window::Window::Window"
+      },
+      {
+        "header": "include/window/Window.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::window::Window::fbCount"
+      },
+      {
+        "header": "include/window/Window.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::window::Window::fbDirtyOnSubpixelChange"
+      },
+      {
+        "header": "include/window/Window.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::window::Window::run"
+      },
+      {
+        "header": "include/window/Window.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::window::Window::screenshot"
+      },
+      {
+        "header": "include/window/Window.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::window::Window::screenshotModules"
+      },
+      {
+        "header": "include/window/Window.hpp",
+        "kind": "CXXMethodDecl",
+        "name": "rack::window::Window::step"
+      },
+      {
+        "header": "include/window/Window.hpp",
+        "kind": "CXXDestructorDecl",
+        "name": "rack::window::Window::~Window"
+      },
+      {
+        "header": "include/window/Window.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::window::destroy"
+      },
+      {
+        "header": "include/window/Window.hpp",
+        "kind": "FunctionDecl",
+        "name": "rack::window::init"
+      }
+    ],
+    "templates": [
+      {
+        "header": "include/common.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::DeferWrapper"
+      },
+      {
+        "header": "include/mutex.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::SharedLock"
+      },
+      {
+        "header": "include/weakptr.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::WeakPtr"
+      },
+      {
+        "header": "include/app/ModuleWidget.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::app::ModuleWidget::getModule"
+      },
+      {
+        "header": "include/common.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::bitCast"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "TypeAliasTemplateDecl",
+        "name": "rack::componentlibrary::LEDBezelLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "TypeAliasTemplateDecl",
+        "name": "rack::componentlibrary::LEDLightBezel"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "TypeAliasTemplateDecl",
+        "name": "rack::componentlibrary::LEDLightButton"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "TypeAliasTemplateDecl",
+        "name": "rack::componentlibrary::LEDLightSlider"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "TypeAliasTemplateDecl",
+        "name": "rack::componentlibrary::LEDSliderLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::LargeLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::LargeSimpleLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::LightButton"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::LightSlider"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::MediumLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::MediumSimpleLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::MomentarySwitch"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::PB61303Light"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::RectangleLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::componentlibrary::SegmentDisplay::setLights"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::SmallLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::SmallSimpleLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::TBlueLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::TGrayModuleLightWidget"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::TGreenLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::TGreenRedLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::TRedGreenBlueLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::TRedLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::TSvgLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::TWhiteLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::TYellowLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::TinyLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::TinySimpleLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::VCVBezelLight"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::VCVLightBezel"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::VCVLightBezelLatch"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "TypeAliasTemplateDecl",
+        "name": "rack::componentlibrary::VCVLightButton"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::VCVLightLatch"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::VCVLightSlider"
+      },
+      {
+        "header": "include/componentlibrary.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::componentlibrary::VCVSliderLight"
+      },
+      {
+        "header": "include/common.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::construct"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createBoolMenuItem"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createBoolPtrMenuItem"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createCheckMenuItem"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createIndexPtrSubmenuItem"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createIndexSubmenuItem"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createInput"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createInputCentered"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createLight"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createLightCentered"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createLightParam"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createLightParamCentered"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createMenu"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createMenuItem"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createMenuLabel"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createModel"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createOutput"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createOutputCentered"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createPanel"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createParam"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createParamCentered"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createSubmenuItem"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createWidget"
+      },
+      {
+        "header": "include/helpers.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::createWidgetCentered"
+      },
+      {
+        "header": "include/common.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::deferWrapper"
+      },
+      {
+        "header": "include/dsp/ringbuffer.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::AppleRingBuffer"
+      },
+      {
+        "header": "include/dsp/resampler.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::Decimator"
+      },
+      {
+        "header": "include/dsp/ringbuffer.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::DoubleRingBuffer"
+      },
+      {
+        "header": "include/dsp/common.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::Frame"
+      },
+      {
+        "header": "include/dsp/filter.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::IIRFilter"
+      },
+      {
+        "header": "include/dsp/midi.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::MidiGenerator"
+      },
+      {
+        "header": "include/dsp/midi.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::MidiParser"
+      },
+      {
+        "header": "include/dsp/minblep.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::MinBlepGenerator"
+      },
+      {
+        "header": "include/dsp/ringbuffer.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::RingBuffer"
+      },
+      {
+        "header": "include/dsp/resampler.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::SampleRateConverter"
+      },
+      {
+        "header": "include/dsp/filter.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::TBiquadFilter"
+      },
+      {
+        "header": "include/dsp/filter.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::TExponentialFilter"
+      },
+      {
+        "header": "include/dsp/filter.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::TExponentialSlewLimiter"
+      },
+      {
+        "header": "include/dsp/filter.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::TPeakFilter"
+      },
+      {
+        "header": "include/dsp/filter.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::TRCFilter"
+      },
+      {
+        "header": "include/dsp/digital.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::TSchmittTrigger"
+      },
+      {
+        "header": "include/dsp/filter.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::TSlewLimiter"
+      },
+      {
+        "header": "include/dsp/digital.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::TTimer"
+      },
+      {
+        "header": "include/dsp/resampler.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::dsp::Upsampler"
+      },
+      {
+        "header": "include/dsp/common.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::amplitudeToDb"
+      },
+      {
+        "header": "include/dsp/approx.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::approxExp2Floor"
+      },
+      {
+        "header": "include/dsp/approx.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::approxExp2_taylor5"
+      },
+      {
+        "header": "include/dsp/window.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::blackman"
+      },
+      {
+        "header": "include/dsp/window.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::blackmanHarris"
+      },
+      {
+        "header": "include/dsp/window.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::blackmanNuttall"
+      },
+      {
+        "header": "include/dsp/convert.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::convert"
+      },
+      {
+        "header": "include/dsp/common.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::cubic"
+      },
+      {
+        "header": "include/dsp/common.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::dbToAmplitude"
+      },
+      {
+        "header": "include/dsp/approx.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::exp2Floor"
+      },
+      {
+        "header": "include/dsp/approx.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::exp2_taylor5"
+      },
+      {
+        "header": "include/dsp/common.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::exponentialBipolar"
+      },
+      {
+        "header": "include/dsp/window.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::hann"
+      },
+      {
+        "header": "include/dsp/approx.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::polyDirect"
+      },
+      {
+        "header": "include/dsp/approx.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::polyEstrin"
+      },
+      {
+        "header": "include/dsp/approx.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::polyHorner"
+      },
+      {
+        "header": "include/dsp/common.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::quadraticBipolar"
+      },
+      {
+        "header": "include/dsp/common.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::quarticBipolar"
+      },
+      {
+        "header": "include/dsp/common.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::quintic"
+      },
+      {
+        "header": "include/dsp/common.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::sinc"
+      },
+      {
+        "header": "include/dsp/common.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::sqrtBipolar"
+      },
+      {
+        "header": "include/dsp/ode.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::stepEuler"
+      },
+      {
+        "header": "include/dsp/ode.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::stepRK2"
+      },
+      {
+        "header": "include/dsp/ode.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::dsp::stepRK4"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::engine::Module::configButton"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::engine::Module::configInput"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::engine::Module::configLight"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::engine::Module::configOutput"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::engine::Module::configParam"
+      },
+      {
+        "header": "include/engine/Module.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::engine::Module::configSwitch"
+      },
+      {
+        "header": "include/engine/Port.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::engine::Port::getNormalPolyVoltageSimd"
+      },
+      {
+        "header": "include/engine/Port.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::engine::Port::getNormalVoltageSimd"
+      },
+      {
+        "header": "include/engine/Port.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::engine::Port::getPolyVoltageSimd"
+      },
+      {
+        "header": "include/engine/Port.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::engine::Port::getVoltageSimd"
+      },
+      {
+        "header": "include/engine/Port.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::engine::Port::setVoltageSimd"
+      },
+      {
+        "header": "include/common.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::get"
+      },
+      {
+        "header": "include/history.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::history::InverseAction"
+      },
+      {
+        "header": "include/math.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::math::isEven"
+      },
+      {
+        "header": "include/math.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::math::isOdd"
+      },
+      {
+        "header": "include/math.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::math::isPow2"
+      },
+      {
+        "header": "include/math.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::math::sgn"
+      },
+      {
+        "header": "include/random.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::random::get"
+      },
+      {
+        "header": "include/simd/Vector.hpp",
+        "kind": "ClassTemplateDecl",
+        "name": "rack::simd::Vector"
+      },
+      {
+        "header": "include/simd/functions.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::simd::movemaskInverse"
+      },
+      {
+        "header": "include/simd/functions.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::simd::pow"
+      },
+      {
+        "header": "include/string.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::string::convertFArg"
+      },
+      {
+        "header": "include/string.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::string::f"
+      },
+      {
+        "header": "include/string.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::string::join"
+      },
+      {
+        "header": "include/system.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::system::join"
+      },
+      {
+        "header": "include/widget/Widget.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::widget::Widget::getAncestorOfType"
+      },
+      {
+        "header": "include/widget/Widget.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::widget::Widget::getFirstDescendantOfType"
+      },
+      {
+        "header": "include/widget/Widget.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::widget::Widget::recurseEvent"
+      },
+      {
+        "header": "include/widget/Widget.hpp",
+        "kind": "FunctionTemplateDecl",
+        "name": "rack::widget::Widget::recursePositionEvent"
+      }
+    ],
+    "unstable_api_mentions": [
+      {
+        "declaration": "float value = 0.f;",
+        "header": "include/engine/Light.hpp",
+        "line": 11
+      },
+      {
+        "declaration": "float value = 0.f;",
+        "header": "include/engine/Param.hpp",
+        "line": 11
+      },
+      {
+        "declaration": "float voltages[PORT_MAX_CHANNELS] = {};",
+        "header": "include/engine/Port.hpp",
+        "line": 17
+      },
+      {
+        "declaration": "float value;",
+        "header": "include/engine/Port.hpp",
+        "line": 19
+      },
+      {
+        "declaration": "uint8_t channels = 0;",
+        "header": "include/engine/Port.hpp",
+        "line": 24
+      },
+      {
+        "declaration": "uint8_t active;",
+        "header": "include/engine/Port.hpp",
+        "line": 29
+      }
+    ]
+  },
+  "rack_commit": "061ccf63c1758599396ac1bb10d47345d9d34076",
+  "recorded_with": {
+    "survey": {
+      "clang": "clang version 23.1.3"
+    }
+  },
+  "schema_version": 1,
+  "tree_digest_definition": "sha256 of `<sha256>  <path>\\n` lines for every file under the directory, sorted by path bytes, paths relative to Rack-SDK/, excluding .DS_Store; equals `find DIR -type f ! -name .DS_Store | LC_ALL=C sort | xargs sha256sum | sha256sum`."
+}

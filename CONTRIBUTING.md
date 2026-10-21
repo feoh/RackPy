@@ -31,6 +31,10 @@ Use `prek run --all-files`. The repository currently has no Python package,
 so mypy, runtime tests, and Rack integration are not yet applicable. Future
 tooling and those checks are work in the execution plan.
 
+The SDK pins can be checked now with `bin/rack-sdk verify`, `closure` and
+`survey` (see [compatibility](docs/compatibility.md#reproduce)). They download
+about 29 MB into a cache outside the repository.
+
 ## Releases and security
 
 Release publication, signing credentials, official library submission, and

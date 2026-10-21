@@ -1,0 +1,16 @@
+{
+  "slug": "RackPyRP02Probe",
+  "name": "RackPy RP-02 SDK probe",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "RackPy",
+  "author": "RackPy contributors",
+  "modules": [
+    {
+      "slug": "Probe",
+      "name": "Probe",
+      "description": "Build-only fixture; not a distributable module.",
+      "tags": []
+    }
+  ]
+}
