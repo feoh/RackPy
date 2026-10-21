@@ -92,6 +92,15 @@ branch `v2` at `4fd13187`, pinned to SDK 2.6.6. It builds crosstool-ng
 `x86_64-ubuntu16.04-linux-gnu`, mingw-w64 v10.0.0 and osxcross with clang
 20.1.1 and the macOS 12.3 SDK. RackPy has **not** built this toolchain.
 
+**Selected toolchains.**
+
+- *Development and validation on Linux x64:* the host GCC, driven by the
+  SDK's own `plugin.mk` so that the flags are Rack's. RP-02 validated the
+  rack.hpp-only probe this way.
+- *Distributable artifacts:* the official toolchain above, or an equivalent
+  that RP-08 pins. RP-08 must build and check it, because a host-built plugin
+  does not meet libRack's glibc floor (finding 1 below).
+
 ### Findings that constrain later tasks
 
 1. **A host-toolchain Linux build is not distributable.** The probe built with
