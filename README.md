@@ -53,9 +53,10 @@ remain gated decisions; do not infer them from the host used to plan this work.
 
 The detailed, dependency-linked task graph is in Witan and mirrored under
 [planning/](planning/README.md). Witan task descriptions contain their own
-implementation steps, target files, tests, and acceptance criteria. A Witan
-WorkflowProject record could not be created because of a server/schema mismatch;
-the [tracking manifest](planning/witan.json) records the recovery requirement.
+implementation steps, target files, tests, and acceptance criteria. The Witan
+project is `wp-rackpy-pythonic-full-surface-bindings-for-vcv-ra-7a9779`.
+An initial project-write schema error was resolved on retry; the
+[tracking manifest](planning/witan.json) records the project and all task slugs.
 
 ## License and independence
 

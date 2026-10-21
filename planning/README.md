@@ -71,13 +71,16 @@ all Fundamental modules, a general Python-to-native DSP compiler, untrusted-code
 sandboxing, Rack Pro/DAW embedding support without explicit testing, and
 redistributing the Rack SDK or restricted graphics.
 
-## Witan recovery
+## Witan project and recovery history
 
-The task API worked, but WorkflowProject search/create returned:
+The initial WorkflowProject search/create returned:
 `WorkflowProject has no property preauthorized (HTTP 400, bad_request)`.
-No project/session handle was fabricated. RP-01 describes repair verification and
-reassociation after the service owner resolves the schema mismatch. This session
-will retry the project write after repository/task-graph creation, as requested.
-The tracking manifest must be updated with the actual result.
+After the repository and task graph were published, the owner-requested retry
+succeeded. The project is
+`wp-rackpy-pythonic-full-surface-bindings-for-vcv-ra-7a9779`; its epic and all 45
+child tasks were attached and read back without duplication or dependency changes.
+No shared infrastructure was modified by this session.
 
-Never recreate all tasks just because the project record is absent.
+The [tracking manifest](witan.json) records real returned handles. RP-01 retains
+the recovery contract and its live resolution in Witan. Future sessions should
+join the existing project, not recreate it or its tasks.

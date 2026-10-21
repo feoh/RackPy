@@ -3,9 +3,9 @@
   "repo": "https://github.com/feoh/RackPy",
   "witan_repo": "https://github.com/feoh/rackpy",
   "epic_slug": "tk-vcvpy-deliver-full-surface-python-bindings-for-v-7f7b74",
-  "project_slug": null,
-  "project_status": "blocked_schema_mismatch",
-  "project_error": "WorkflowProject has no property preauthorized (HTTP 400, bad_request)",
+  "project_slug": "wp-rackpy-pythonic-full-surface-bindings-for-vcv-ra-7a9779",
+  "project_status": "created_and_tasks_attached",
+  "project_error": null,
   "project_recovery_task": "RP-01",
   "tasks": {
     "RP-00": "tk-vcvpy-00-publish-the-planning-repository-and-det-699437",
@@ -53,5 +53,7 @@
     "RP-42": "tk-rackpy-42-prove-complete-api-coverage-and-sample-2d39fe",
     "RP-43": "tk-rackpy-43-verify-performance-real-time-invariant-712411",
     "RP-44": "tk-rackpy-44-prepare-the-audited-release-and-obtain-30293c"
-  }
+  },
+  "project_history": "Initial write/search failed: WorkflowProject missing preauthorized. Owner-requested retry succeeded after repository/task graph publication; attached existing epic and 45 children without duplication.",
+  "session_slug": "ws-wp-rackpy-pythonic-full-surface-bindings-for-vcv-7ac5f9"
 }

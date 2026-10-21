@@ -18,9 +18,10 @@ IDs map to Witan slugs in planning/witan.json. Never claim all tasks in advance.
 The epic and bootstrap retain their original vcvpy-prefixed slugs after rename;
 their titles and repository scope are RackPy.
 
-WorkflowProject APIs failed with "WorkflowProject has no property preauthorized".
-Do not invent a project/session handle or repair shared infrastructure without
-authorization. Follow task RP-01 to attach existing tasks after service repair.
+The initial WorkflowProject write failed with a schema mismatch, but the
+owner-requested retry succeeded. All tasks are attached to the real project in
+planning/witan.json. Join that project at session start; do not recreate it or
+duplicate the task graph. RP-01 records the completed metadata recovery.
 
 ## Engineering guardrails
 
