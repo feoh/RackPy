@@ -1,0 +1,29 @@
+RackPy
+Copyright (C) 2026 RackPy contributors
+
+RackPy is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version. See LICENSE.
+
+RackPy is an independent project for VCV Rack. It is not made, endorsed or
+supported by VCV. "VCV" and the VCV logo are trademarks of VCV.
+
+Third-party material
+--------------------
+
+This repository contains no third-party source code, artwork or fonts.
+
+It records hashes and metadata about upstream material that it does not
+redistribute:
+
+  * VCV Rack and the Rack SDK, copyright VCV, GPL-3.0-or-later
+    (pins in upstream/versions.json).
+  * VCV Rack Manual pages and their code samples, copyright VCV; license
+    unclear (upstream/examples.json, docs/licensing.md). No manual text is
+    included.
+
+Binary artifacts will also carry the notices for code compiled from Rack
+headers and for any bundled Python runtime and binding library. Each artifact
+lists them in a generated third-party license manifest. docs/licensing.md
+describes the planned contents.

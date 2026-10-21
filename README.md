@@ -33,6 +33,7 @@ they must not disappear from the coverage denominator.
 | --- | --- |
 | Understand scope and upstream evidence | [Scope and research](docs/scope.md) |
 | See the pinned SDK, toolchain and platform targets | [Compatibility baseline](docs/compatibility.md) |
+| Check licenses, assets and sample provenance | [Licensing](docs/licensing.md) |
 | Understand the Python/native boundary | [Architecture](docs/architecture.md) |
 | See how completeness will be proved | [API coverage contract](docs/coverage.md) |
 | Review the planned sample ports | [Example inventory](examples/README.md) |
@@ -68,5 +69,7 @@ notices; artwork and documentation have separate provenance checks. No Rack
 artwork, logos, fonts, binaries, or SDK are redistributed here.
 
 RackPy is an independent project **for VCV Rack**, not an official VCV product.
-The name was changed from VCVPy during planning. Name/package availability and
-remaining trademark checks are tracked before release.
+The name was changed from VCVPy during planning. The terms, the asset ledger,
+sample provenance and the name checks are in [licensing](docs/licensing.md).
+Ports of manual code wait for an owner decision on the manual's license
+([ADR 001](docs/decisions/001-licensing-and-identity.md)).

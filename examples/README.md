@@ -16,14 +16,22 @@ pretending that Python-shaped pseudocode is a working Rack plugin.
 | Polyphony/SIMD/DSP | [API guide](https://vcvrack.com/manual/PluginGuide) | Polyphonic behavior and every guide snippet, including native vector processing |
 | Generated SDK template | [Pinned helper.py](https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/helper.py) | Equivalent plugin/model/manifest scaffold and runnable module |
 
-RP-03 must enumerate **every code block** in the pinned/captured tutorial and API
-guide, including multiple blocks per section. Assign stable source IDs and mark
-each as a port, supporting fragment, duplicate, or non-runtime shell command
-with rationale. The table above is not the final exhaustive inventory.
+The exhaustive inventory is [upstream/examples.json](../upstream/examples.json)
+(RP-03). It assigns every code block on the tutorial, API guide, panel, presets,
+migration and building pages a stable ID, and adds the `helper.py` templates:
+77 samples in all, each with a classification, a port task and a content hash.
+Check it against the live manual with `bin/manual-sources capture` followed by
+`bin/manual-sources check`.
+
+**Gate:** the manual's license is unclear, so every manual-derived port is
+`blocked-pending-license` until the owner decides
+([ADR 001](../docs/decisions/001-licensing-and-identity.md)). Ports of the
+`helper.py` templates are clear under GPL-3.0-or-later.
 
 Do not copy upstream mistakes blindly: verify event signatures against the pinned
 headers (the guide's randomize example should not override a ResetEvent).
-Record corrections as intentional port changes.
+Record corrections as intentional port changes. The known errata are listed in
+[licensing](../docs/licensing.md#errata-found-while-classifying).
 
 ## Optional stretch references, not “official samples”
 
