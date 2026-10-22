@@ -22,6 +22,7 @@ coverage
 values
 engine-components
 engine-module
+widget-trees
 ```
 
 ## The SDK surface, by family

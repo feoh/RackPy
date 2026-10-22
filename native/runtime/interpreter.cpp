@@ -20,6 +20,15 @@ PyThreadState* mainThreadState = nullptr;
 bool shutdownBegun = false;
 std::string outcome = "not started";
 std::vector<std::function<void()>> detachers;
+std::vector<std::function<void()>> uiCleanups, contextCleanups;
+
+void runCleanups(const std::vector<std::function<void()>>& hooks) noexcept {
+	for (const auto& hook : hooks) {
+		try { hook(); }
+		catch (const std::exception& e) { WARN("RackPy UI cleanup failed: %s", e.what()); }
+		catch (...) { WARN("RackPy UI cleanup failed"); }
+	}
+}
 
 void setError(RackPyHostInit* args, const std::string& msg) {
 	if (args->error && args->error_size)
@@ -90,6 +99,8 @@ bool bootstrapHook(const char* name) {
 struct Sentinel : rack::widget::Widget {
 	void step() override {
 		Widget::step();
+		if (!shutdownBegun)
+			runCleanups(uiCleanups);
 		// Python references dropped on engine threads are released here, on the UI thread.
 		if (pendingReleases())
 			callPython("deferred releases", [] {});
@@ -147,6 +158,10 @@ void beginContextShutdown(const char* source) {
 	INFO("RackPy context shutdown begins (%s)", source);
 	// Step 2: Python stops and joins its own threads while the context is still alive.
 	callPython("context closing", [] { bootstrapHook("context_closing"); });
+	// Detached UI objects must die while the context's EventState still exists.
+	runCleanups(contextCleanups);
+	contextCleanups.clear();
+	uiCleanups.clear();
 	// Step 3: in-flight engine calls from Python finish; later ones raise StaleHandleError.
 	binding().close();
 	INFO("RackPy context closed; handles to it are now stale");
@@ -201,6 +216,15 @@ void finalize() {
 
 void onFinalize(std::function<void()> detach) {
 	detachers.push_back(std::move(detach));
+}
+
+void onUiStep(std::function<void()> action) {
+	requireMainThread("registering UI cleanup");
+	uiCleanups.push_back(std::move(action));
+}
+void onContextClosing(std::function<void()> action) {
+	requireMainThread("registering context cleanup");
+	contextCleanups.push_back(std::move(action));
 }
 
 std::string finalizeOutcome() {
