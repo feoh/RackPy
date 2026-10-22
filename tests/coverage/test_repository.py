@@ -95,6 +95,20 @@ def test_builtin_metadata_adapters_do_not_complete_raw_or_template_semantics(sym
     assert record["tests"] and record["docs"]
 
 
+def test_builtin_quantity_adapters_do_not_complete_full_mappings() -> None:
+    records = [r for r in bm.load_json(bm.MANIFEST)["entries"] if "RP-14B2a partial" in (r["notes"] or "")]
+    assert len(records) == 46
+    for record in records:
+        assert record["status"] == "planned" and record["python"] is None
+        assert record["notes"].startswith("Responsible task: RP-14B2b")
+        assert "RP-22" in record["notes"] and "unregistered targets are rejected" in record["notes"]
+        assert record["tests"] and record["docs"]
+    # JSON is not part of the adapter slice and remains assigned to RP-15.
+    for record in bm.load_json(bm.MANIFEST)["entries"]:
+        if "ParamQuantity::" in record["id"] and "Json(" in record["id"]:
+            assert record["status"] == "unreviewed" and "RP-15" in record["notes"]
+
+
 def test_every_public_engine_method_has_a_lock_entry() -> None:
     inputs = bm.load_inputs()
     engine = [i for i, e in inputs.index.items() if bm.is_engine_method(e) and e["classification"] == "public"]

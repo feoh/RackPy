@@ -99,5 +99,31 @@ int main() {
 		c.close();
 		assert(!input->alive() && !output->alive() && !light->alive());
 	}
+	{
+		Construction c;
+		c.config(2, 0, 0, 0);
+		auto& m = c.get();
+		auto old = m.getParamQuantity(0);
+		auto token = m.paramQuantityTokens[0];
+		refuses<std::runtime_error>([&] {
+			c.replaceInfo(0, m.paramQuantities, m.paramQuantityTokens, [](rack::engine::ParamQuantity&) {
+				throw std::runtime_error("quantity preparation failed");
+			});
+		});
+		assert(m.getParamQuantity(0) == old && token->alive() && m.params[0].value == 0.f);
+		refuses<std::invalid_argument>([&] { c.configQuantity(0, 1, 1, 1, "", "", 0, 1, 0); });
+		assert(m.getParamQuantity(0) == old && token->alive());
+		c.configQuantity(0, -1, 1, 0.5f, "Pitch", " V", 0, 2, 3);
+		assert(!token->alive() && m.params[0].value == 0.5f);
+		assert(m.getParamQuantity(0)->module == &m && m.getParamQuantity(0)->paramId == 0);
+		c.configQuantity(1, 0, 1, 0, "Trigger", "", 0, 1, 0, 2);
+		auto button = dynamic_cast<rack::engine::SwitchQuantity*>(m.getParamQuantity(1));
+		assert(button && button->snapEnabled && !button->smoothEnabled && !button->randomizeEnabled);
+		auto last = m.paramQuantityTokens[1];
+		c.seal();
+		refuses<Ownership>([&] { c.configQuantity(0, 0, 1, 0, "", "", 0, 1, 0); });
+		c.close();
+		assert(!last->alive());
+	}
 	return 0;
 }

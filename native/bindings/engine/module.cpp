@@ -4,6 +4,7 @@
 // synchronously during construction on the main thread, before publication.
 #include "module.hpp"
 #include "components.hpp"
+#include "quantity.hpp"
 
 #include <pybind11/stl.h>
 
@@ -16,7 +17,7 @@ namespace bindings {
 
 namespace {
 
-enum class Kind { Param, Input, Output, Light, InputInfo, OutputInfo, LightInfo };
+enum class Kind { Param, Input, Output, Light, ParamQuantity, InputInfo, OutputInfo, LightInfo };
 
 py::object moduleObject(const std::shared_ptr<module::Construction>& state) {
 	auto& m = state->get();
@@ -72,7 +73,8 @@ auto bindInfoView(py::module_ engine, const char* name) {
 int count(const ModuleRef& ref, Kind kind) {
 	module::Module& m = ref.get();
 	switch (kind) {
-		case Kind::Param: return m.getNumParams();
+		case Kind::Param:
+		case Kind::ParamQuantity: return m.getNumParams();
 		case Kind::Input:
 		case Kind::InputInfo: return m.getNumInputs();
 		case Kind::Output:
@@ -88,6 +90,7 @@ py::object component(const ModuleRef& ref, Kind kind, int i) {
 	module::Construction::index(i, count(ref, kind));
 	switch (kind) {
 		case Kind::Param: return borrowParam(&m.getParam(i), m.token);
+		case Kind::ParamQuantity: return quantityView(ref, i);
 		case Kind::Input: return borrowInput(&m.getInput(i), m.token);
 		case Kind::Output: return borrowOutput(&m.getOutput(i), m.token);
 		case Kind::Light: return borrowLight(&m.getLight(i), m.token);
@@ -142,6 +145,7 @@ py::object create(py::object configure) {
 }  // namespace
 
 void bindModule(py::module_ engine) {
+	bindQuantityViews(engine);
 	bindInfoView<rack::engine::PortInfo>(engine, "PortInfoView")
 		.def_property_readonly("port_id", [](const PortInfoView& v) { return v.get().portId; })
 		.def_property_readonly("type", [](const PortInfoView& v) { return v.get().type; })
@@ -172,6 +176,24 @@ void bindModule(py::module_ engine) {
 		.def_property_readonly("alive", [](const ModuleRef& r) { return r.state->object != nullptr; })
 		.def("config", [](const ModuleRef& r, int p, int i, int o, int l) { r.state->config(p, i, o, l); },
 			py::arg("num_params"), py::arg("num_inputs"), py::arg("num_outputs"), py::arg("num_lights") = 0)
+		.def("config_param", [](const ModuleRef& r, int i, float min, float max, float def, std::string name,
+			std::string unit, float base, float multiplier, float offset) {
+			r.state->configQuantity(i, min, max, def, std::move(name), std::move(unit), base, multiplier, offset);
+			return component(r, Kind::ParamQuantity, i);
+		}, py::arg("param_id"), py::arg("min_value"), py::arg("max_value"), py::arg("default_value"),
+			py::arg("name") = "", py::arg("unit") = "", py::arg("display_base") = 0.f,
+			py::arg("display_multiplier") = 1.f, py::arg("display_offset") = 0.f,
+			"Configure built-in ParamQuantity only; complete class-factory semantics remain planned.")
+		.def("config_switch", [](const ModuleRef& r, int i, float min, float max, float def, std::string name,
+			std::vector<std::string> labels) {
+			r.state->configQuantity(i, min, max, def, std::move(name), "", 0.f, 1.f, 0.f, 1, std::move(labels));
+			return component(r, Kind::ParamQuantity, i);
+		}, py::arg("param_id"), py::arg("min_value"), py::arg("max_value"), py::arg("default_value"),
+			py::arg("name") = "", py::arg("labels") = std::vector<std::string>{})
+		.def("config_button", [](const ModuleRef& r, int i, std::string name) {
+			r.state->configQuantity(i, 0.f, 1.f, 0.f, std::move(name), "", 0.f, 1.f, 0.f, 2);
+			return component(r, Kind::ParamQuantity, i);
+		}, py::arg("param_id"), py::arg("name") = "")
 		.def("config_input", [](const ModuleRef& r, int i, std::string name) {
 			r.state->configPortInfo(i, std::move(name), true);
 			return component(r, Kind::InputInfo, i);
@@ -201,6 +223,7 @@ void bindModule(py::module_ engine) {
 		{Kind::Input, "inputs", "get_num_inputs", "get_input"},
 		{Kind::Output, "outputs", "get_num_outputs", "get_output"},
 		{Kind::Light, "lights", "get_num_lights", "get_light"},
+		{Kind::ParamQuantity, "param_quantities", nullptr, "get_param_quantity"},
 		{Kind::InputInfo, "input_infos", nullptr, "get_input_info"},
 		{Kind::OutputInfo, "output_infos", nullptr, "get_output_info"},
 		{Kind::LightInfo, "light_infos", nullptr, "get_light_info"}

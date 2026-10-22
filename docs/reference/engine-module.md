@@ -1,8 +1,9 @@
 # Module construction and components
 
-**Implemented slices: RP-14A and built-in port/light metadata adapters (RP-14B1),
-Linux x86_64 inside Rack Free 2.6.6.** This is not a registerable instrument yet.
-Parameter metadata and full metadata class factories (RP-14B2), native lifecycle
+**Implemented slices: RP-14A, built-in port/light metadata adapters (RP-14B1),
+and checked built-in quantities (RP-14B2a), Linux x86_64 inside Rack Free 2.6.6.**
+This is not a registerable instrument yet. Full quantity/metadata class factories
+and engine-owned smoothing (RP-14B2b), native lifecycle
 adapters (RP-14C), plugin/model factories (RP-16), DSP (RP-17), the Python callback
 laboratory (RP-22), and expanders (RP-23) remain planned. See the
 [coverage report](coverage.md) for declaration-level status.
@@ -14,7 +15,8 @@ binding. `Module.create(configure=None)` constructs an owned, empty Rack module.
 When supplied, `configure(module)` runs synchronously on Rack's main thread.
 Its return value is ignored; the factory returns the same Python handle it
 passed to the callback. Only that callback may call `config`, `config_bypass`,
-`config_input`, `config_output` and `config_light`. These are construction
+`config_input`, `config_output`, `config_light`, `config_param`, `config_switch`
+and `config_button`. These are construction
 operations, not engine commands.
 
 `config(num_params, num_inputs, num_outputs, num_lights=0)` calls Rack's
@@ -97,10 +99,93 @@ subclassable `PortInfo` / `LightInfo`. These helpers do not yet accept a class
 argument or transfer Python subclasses into native ownership. Arbitrary
 identity-field/module-pointer mutation, raw vector mutation and standalone
 metadata `module` fields are also absent. RP-14B2 retains these obligations,
-along with ParamQuantity/SwitchQuantity and their mixed-thread virtuals.
+along with full ParamQuantity/SwitchQuantity and their mixed-thread virtuals.
 Accordingly the template, getter and raw-field manifest records remain
 `planned`: built-in adapters alone are not complete public semantics. No
 production callback dispatches to Python in this slice.
+
+## Built-in parameter quantities
+
+`config_param(param_id, min_value, max_value, default_value, name="", unit="",
+display_base=0, display_multiplier=1, display_offset=0)` configures a built-in
+native ParamQuantity. `config_switch(param_id, min_value, max_value,
+default_value, name="", labels=())` configures a native SwitchQuantity with
+snapping enabled and smoothing disabled. `config_button(param_id, name="")`
+uses bounds 0–1 and default 0, also disabling module randomization of the button.
+All three helpers are constructor-only. Each writes the native Param's default,
+prepares replacements before retiring old quantities, and invalidates only the
+replaced quantity view, not the Param component itself.
+
+IDs are checked. Helper bounds must be finite and strictly increasing, with a
+finite default inside the range. Display coefficients must be finite; bases
+1 and -1 are rejected because they make the inverse undefined. These checked
+helpers do not cover arbitrary unbounded/raw C++ configuration semantics.
+
+`get_param_quantity(index)` and the fixed-size `param_quantities` collection
+return stable `ParamQuantityView` adapters (or `SwitchQuantityView` for switches
+and buttons). Rack's `config` initializes *every* parameter's quantity with
+bounds 0–1 and default 0; unlike light metadata, these slots are not initially
+null. Empty modules have empty collections. Negative indexing works only on the
+collection, not on getter/helper IDs. The views have no standalone constructor,
+no Python virtual trampoline, and do not inherit `rackpy.raw.Quantity`.
+
+Quantity views expose these native scalar/text fields for reading and writing:
+`min_value`, `max_value`, `default_value`, `name`, `unit`, `display_base`,
+`display_multiplier`, `display_offset`, `display_precision`, `description`,
+`reset_enabled`, `randomize_enabled`, `smooth_enabled`, and `snap_enabled`.
+Direct field assignments, like C++, do not reset the Param or revalidate the
+whole range. Keep the metadata coherent; use the checked construction helpers
+for initial configuration. `param_id` and `module` are read-only. `get_param()`
+returns the same checked Param as the owning module. `alive` remains a
+thread-independent liveness query. All other access requires the main thread.
+Replacement, failed construction, close and owner collection invalidate views;
+retaining a view does not keep the module alive.
+
+Metadata methods `get_min_value`, `get_max_value`, `get_default_value`,
+`get_display_precision`, `get_label`, `get_unit` and `get_description` work
+without an engine. `get_label()` falls back to a numbered label for empty names.
+Switch `labels` reads return a copied list: assign a whole sequence to write it
+back. Mutating that copy is **not** native vector mutation.
+
+Value/display methods require Rack's **live bound UI context**. Calling them
+at plugin startup, or from a foreign context, raises `ContextError` rather than
+dereferencing a missing engine. They pin the module across GIL release and take
+a context teardown lease before calling Rack's native implementation:
+
+- `get_value` / `set_value`, `get_immediate_value` / `set_immediate_value`;
+- `get_display_value` / `set_display_value`, `get_display_value_string` /
+  `set_display_value_string` (including Rack's expression parser);
+- `reset` and `randomize`; deprecated `get_smooth_value` / `set_smooth_value`
+  aliases emit `DeprecationWarning`.
+
+Display scaling follows Rack: linear for base 0, exponential for a positive
+base, logarithmic for a negative base, then multiply and offset. Display writes
+are immediate, clamp to the range and respect snapping. Switch text lookup is
+case-insensitive; unmatched labels or invalid numeric expressions leave the
+value unchanged. Out-of-integer-range switch label indices raise `ValueError`
+before Rack's float-to-int conversion. `reset()` / `randomize()` are direct
+quantity operations: the enable flags govern *module-level* reset/randomize,
+not these direct calls.
+
+**Smoothing is not implemented for these unregistered modules.** Setting
+`smooth_enabled=True` is metadata only. `set_value` (and its deprecated alias)
+then raises `OwnershipError`; `set_immediate_value` and display writes remain
+available. Rack's smoothing slot retains a raw module pointer, so starting a
+smoothing target here could outlive its owner. Full engine-owned smoothing and
+lifecycle cleanup remain RP-14B2b/RP-14C/RP-16. No target is queued implicitly,
+and no Python callback runs on the audio thread.
+
+```{rackpy-example} module_quantities.py
+```
+
+The snippet intentionally uses metadata only so it also runs before Rack's
+engine exists. Value/display behavior is tested separately on the live UI
+against a native C++ reference in the actual Rack process. These are partial
+adapters: full template/class factories, standalone and Python-overridable
+quantities, raw identity/vector mutation and JSON (RP-15) remain unimplemented.
+Their exact manifest records stay `planned` or `unreviewed`; adapters do not
+count as completed callback/template mappings. Mixed value/range virtuals remain
+native in production; RP-22 owns explicit laboratory semantics.
 
 ## Ownership and failure
 
@@ -145,7 +230,10 @@ constructors, wrong-thread access, checked indices and native differential
 fixtures. Metadata tests additionally exercise 1,000 replacements, 1,000 owner
 collections, slot-specific invalidation, null slots, backreference identity and
 native-reference names/descriptions/IDs/types. The native test injects a
-preparation exception to verify replacement rollback. The bypass dispatch hook
+preparation exception to verify replacement rollback. Quantity tests also cover
+1,000 slot replacements and 1,000 owner collections, stale getters/setters,
+thread/context rejection, validation rollback, native display/label/value
+comparisons, reset/randomize and unsafe smoothing rejection. The bypass dispatch hook
 is test-only and runs off the engine.
 
 Rack model registration, browser previews, native lifecycle/reset/randomize/

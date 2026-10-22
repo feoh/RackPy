@@ -12,7 +12,9 @@
     "RP-14B": "tk-rackpy-14b-module-parameter-and-component-metada-040154",
     "RP-14C": "tk-rackpy-14c-native-lifecycle-events-and-identity--929845",
     "RP-14B1": "tk-rackpy-14b1-checked-built-in-port-and-light-meta-82183d",
-    "RP-14B2": "tk-rackpy-14b2-quantity-mappings-and-complete-metad-bb5ae1"
+    "RP-14B2": "tk-rackpy-14b2-quantity-mappings-and-complete-metad-bb5ae1",
+    "RP-14B2a": "tk-rackpy-14b2a-checked-built-in-parameter-quantity-8643c7",
+    "RP-14B2b": "tk-rackpy-14b2b-complete-quantity-and-metadata-subc-ff231c"
   },
   "tasks": {
     "RP-00": "tk-vcvpy-00-publish-the-planning-repository-and-det-699437",

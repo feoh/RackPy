@@ -5,6 +5,8 @@
 
 #include "../bindings/engine/components.hpp"
 #include "../bindings/engine/module.hpp"
+#include "../tests/quantity_reference.hpp"
+#include "rackpy/runtime/json.hpp"
 
 #include <pybind11/stl.h>
 
@@ -232,8 +234,19 @@ void define(py::module_ m) {
 		return py::make_tuple(bindings::borrowParam(&pm.params[0], h.token), bindings::borrowInput(&pm.inputs[0], h.token),
 			bindings::borrowOutput(&pm.outputs[0], h.token), bindings::borrowLight(&pm.lights[0], h.token));
 	});
-	// RP-14A: exercise the native superclass implementation off the engine.
-	// This is a test hook, not the public processBypass/laboratory mapping.
+	// RP-14B2a: independent native quantity results from actual Rack's Engine.
+	m.def("quantity_reference", [] {
+		requireMainThread("quantity_reference");
+		auto context = liveContext();
+		std::unique_ptr<json_t, decltype(&json_decref)> result(nullptr, json_decref);
+		{
+			py::gil_scoped_release release;
+			EngineLease lease(*context);
+			result.reset(quantityReference());
+		}
+		return fromJson(result.get());
+	});
+	// RP-14A: superclass dispatch off the engine, not a public callback mapping.
 	m.def("module_process_bypass", [](const bindings::ModuleRef& r) {
 		r.get().processBypass({48000.f, 1.f / 48000.f, 0});
 	});
