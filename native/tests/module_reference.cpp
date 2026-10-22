@@ -42,6 +42,21 @@ int main() {
 		json_array_append_new(links, json_boolean(port.module == nullptr && light.module == nullptr));
 		json_object_set_new(root, "standalone_backreferences", links);
 	}
+	// Standalone quantities need no Engine while their module pointer is null.
+	json_t* standalone = json_array();
+	json_object_set_new(root, "standalone_quantities", standalone);
+	for (float base : {0.f, 2.f}) {
+		rack::engine::ParamQuantity q;
+		q.minValue = -2.f; q.maxValue = 3.f; q.defaultValue = 1.f;
+		q.displayBase = base; q.displayMultiplier = 3.f; q.displayOffset = 4.f;
+		q.paramId = 2; q.unit = " V"; q.description = "Description";
+		q.setValue(2.f); q.setImmediateValue(1.f); q.setDisplayValue(7.f);
+		q.setDisplayValueString("2 + 8"); q.reset(); q.randomize();
+		json_array_append_new(standalone, json_pack("{s:f,s:[fff],s:[sss],s:b,s:b}",
+			"base", base, "values", q.getValue(), q.getImmediateValue(), q.getDisplayValue(),
+			"text", q.getLabel().c_str(), q.getUnit().c_str(), q.getDescription().c_str(),
+			"null", q.module == nullptr && q.getParam() == nullptr, "bounded", q.isBounded()));
+	}
 	json_t* metadata = json_array();
 	json_object_set_new(root, "metadata", metadata);
 	for (std::string name : {"", "Pitch", "λ / 𝄞"}) {

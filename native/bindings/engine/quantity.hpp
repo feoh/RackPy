@@ -16,6 +16,8 @@ struct SwitchQuantityView : QuantityView {};
 
 pybind11::object quantityView(const ModuleRef& ref, int id);
 void bindQuantityViews(pybind11::module_ engine);
+void bindStandaloneQuantities(pybind11::module_ engine);
+pybind11::object ownedSwitchLabels(pybind11::object owner);
 
 }  // namespace bindings
 }  // namespace rackpy

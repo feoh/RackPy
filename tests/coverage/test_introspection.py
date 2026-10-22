@@ -53,6 +53,12 @@ def test_introspection_comes_from_the_running_package(artifact: Path) -> None:
     assert objects["rackpy.raw.engine.SwitchLabels"]["kind"] == "class"
     assert objects["rackpy.raw.engine.SwitchLabels.append"]["kind"] == "function"
     assert objects["rackpy.raw.engine.SwitchQuantityView.labels"]["kind"] == "property"
+    for name in ("ParamQuantity", "SwitchQuantity"):
+        assert objects[f"rackpy.raw.engine.{name}"]["kind"] == "class"
+        assert objects[f"rackpy.engine.{name}"]["kind"] == "class"
+    assert objects["rackpy.raw.engine.ParamQuantity.module"]["kind"] == "property"
+    assert objects["rackpy.raw.engine.ParamQuantity.get_description"]["kind"] == "function"
+    assert objects["rackpy.raw.engine.SwitchQuantity.labels"]["kind"] == "property"
     for method in (
         "get_string",
         "is_min",

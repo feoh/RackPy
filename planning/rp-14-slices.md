@@ -142,6 +142,25 @@ This child does not complete class factories, raw metadata collections, quantity
 subclasses, smoothing ownership or callback-laboratory semantics. Those remain
 on B2b; B2/B/14 and the implementation phase retain their original exit gates.
 
+**RP-14B2b3 — unattached standalone quantities and UI overrides**
+(`tk-rackpy-14b2b3-unattached-standalone-quantities-a-449390`). Real SDK
+ParamQuantity/SwitchQuantity constructors and Quantity inheritance, native
+null-module value/no-op semantics, scalar/text/paramId fields, owned mutable
+SwitchLabels aliases and all UI-safe virtuals (including getDescription).
+Mixed value/range overrides remain refused in production; RP-22 owns their
+laboratory semantics. Guard native access on the main thread, preserve raw
+unbounded/equal bounds, conversion atomicity, owned alias lifetime and default
+label/index overflow safety. Compare unattached SDK reference results and run
+actual Rack startup/live UI tests, callback/base/error/thread/null paths and
+1,000 owner/alias churns. Strict types, executable snippet, prose, manifest
+notes, full relevant checks and commit/checkpoints are required. Exact manifest
+scope: the 41 field/method/record ParamQuantity/SwitchQuantity entries except
+JSON, all still `planned`. `module` remains read-only `None`: attachment,
+transfer, complete factories, raw module collections and engine-owned smoothing
+are not implemented. B2b waits for this child too; all remaining original B2b
+and parent obligations remain intact. This does not complete the implementation
+phase.
+
 ## RackPy 14C: native lifecycle events and identity adapters
 
 **Witan slug:** `tk-rackpy-14c-native-lifecycle-events-and-identity--929845`

@@ -2,7 +2,8 @@
 
 **Implemented slices: RP-14A, built-in port/light metadata adapters (RP-14B1),
 checked built-in quantities (RP-14B2a), and borrowed quantity helpers / mutable
-switch-label views (RP-14B2b1), Linux x86_64 inside Rack Free 2.6.6.**
+switch-label views (RP-14B2b1), standalone metadata backreferences (RP-14B2b2),
+and unattached standalone quantities (RP-14B2b3), Linux x86_64 inside Rack Free 2.6.6.**
 This is not a registerable instrument yet. Full quantity/metadata class factories
 and engine-owned smoothing (RP-14B2b), native lifecycle
 adapters (RP-14C), plugin/model factories (RP-16), DSP (RP-17), the Python callback
@@ -98,12 +99,68 @@ retaining `view.module` does, just like retaining the original module handle.
 **Deliberately partial:** borrowed adapters are distinct from standalone,
 subclassable `PortInfo` / `LightInfo`. These helpers do not yet accept a class
 argument or transfer Python subclasses into native ownership. Arbitrary
-identity-field/module-pointer mutation, raw vector mutation and standalone
-metadata `module` fields are also absent. RP-14B2 retains these obligations,
+identity-field/module-pointer mutation on these borrowed adapters and raw vector
+mutation are also absent. Standalone metadata backreferences are documented in
+[Engine components](engine-components.md#portinfo-and-lightinfo). RP-14B2 retains these obligations,
 along with full ParamQuantity/SwitchQuantity and their mixed-thread virtuals.
 Accordingly the template, getter and raw-field manifest records remain
 `planned`: built-in adapters alone are not complete public semantics. No
 production callback dispatches to Python in this slice.
+
+(standalone-quantities)=
+## Unattached standalone quantities
+
+`rackpy.engine.ParamQuantity` and `SwitchQuantity` are aliases of the corresponding
+`rackpy.raw.engine` classes. They construct real, Python-owned SDK objects and
+inherit `rackpy.raw.Quantity`; a SwitchQuantity also inherits ParamQuantity.
+They are **unattached**, not a replacement for `Module.config_param` or an
+installable parameter factory. `module` is currently read-only and always `None`;
+`get_param()` returns `None`. Module attachment, ownership transfer, raw vector
+insertion and engine-owned smoothing remain RP-14B2b work. These partial mappings
+stay `planned` in the manifest, including their record entries.
+
+Rack's null-module semantics are important: these quantities do **not** store a
+value. `get_value()` and `get_immediate_value()` return zero, and native setters,
+reset and randomize do not change it. This also holds when `smooth_enabled` is
+true: with no module, Rack never reaches its engine. For a standalone quantity
+that actually stores a value, use `rackpy.types.ValueQuantity` instead.
+
+The same scalar/text fields listed below for borrowed quantities are mutable,
+as is `param_id` (initially -1). Assigning fields does not initialize a Param.
+Raw equal/unbounded ranges retain SDK behavior. `get_label()` supplies Rack's
+numbered default when `name` is empty. The maximum signed 32-bit `param_id` is
+storable, but requesting that default label raises `ValueError` rather than
+letting Rack overflow `paramId + 1`. Explicit names still work. Switch display
+strings reject nonfinite/out-of-int-range label indices before Rack's cast.
+
+Python subclasses may override the UI-safe virtuals `get_display_value`,
+`set_display_value`, `get_display_precision`, `get_display_value_string`,
+`set_display_value_string`, `get_label`, `get_unit`, `get_string`, `reset`,
+`randomize`, and `get_description`. Native virtual dispatch reaches those
+methods; `super()` reaches Rack's implementation. Errors propagate to Python
+callers. Mixed value/range virtuals cannot be Python overrides in production:
+subclass definitions of `get_value`, `set_value`, `get_min_value`, `get_max_value`
+or `get_default_value` raise `TypeError`, like Quantity. RP-22 retains their
+explicit laboratory semantics. These standalone aliases are UI-only and are
+never installed in a Module or visited by the production engine.
+
+All native access, construction and field operations require Rack's main thread.
+Python code in an override is ordinary user code, not a sandbox or an audio
+callback. Inherited helper methods and direct base-class calls use the same
+native guards. Deprecated smooth-value methods emit `DeprecationWarning`.
+JSON methods remain RP-15 and are not exposed here.
+
+`SwitchQuantity.labels` uses the mutable `SwitchLabels` vector interface described
+below, including atomic conversion before assignment/extension and copied
+iteration. Unlike a borrowed module alias, an **owned** label alias keeps its
+standalone quantity alive. Its ownership edge is visible to Python's garbage
+collector, so a subclass retaining its own label alias does not leak a cycle.
+Replacing the vector's contents preserves retained aliases; deleting the alias
+eventually releases that ownership. This storage
+never enters the production audio path.
+
+```{rackpy-example} standalone_quantities.py
+```
 
 ## Built-in parameter quantities
 

@@ -146,6 +146,7 @@ py::object create(py::object configure) {
 
 void bindModule(py::module_ engine) {
 	bindQuantityViews(engine);
+	bindStandaloneQuantities(engine);
 	bindInfoView<rack::engine::PortInfo>(engine, "PortInfoView")
 		.def_property_readonly("port_id", [](const PortInfoView& v) { return v.get().portId; })
 		.def_property_readonly("type", [](const PortInfoView& v) { return v.get().type; })

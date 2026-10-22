@@ -6,6 +6,7 @@
 #include <pybind11/stl.h>
 
 #include <limits>
+#include <optional>
 
 #include "rackpy/runtime/python.hpp"
 
@@ -87,9 +88,19 @@ void checkLabelIndex(rack::engine::ParamQuantity& q) {
 storage. Reallocation/whole-vector assignment keeps this alias valid; slot
 replacement/owner deletion invalidates it through the quantity token. */
 struct SwitchLabels {
-	SwitchQuantityView view;
+	std::optional<SwitchQuantityView> view;
+	// Owned labels keep the owner in their GC-visible Python instance dict,
+	// not a hidden C++ strong PyObject edge (which would leak subclass cycles).
+	// A weak native resolver also makes dict tampering safe, never dangling.
+	py::weakref owned;
 	std::vector<std::string>& get() const {
-		return static_cast<rack::engine::SwitchQuantity&>(view.get()).labels;
+		if (view)
+			return static_cast<rack::engine::SwitchQuantity&>(view->get()).labels;
+		runtime::requireMainThread("using standalone switch labels");
+		auto held = owned();
+		if (held.is_none())
+			throw runtime::StaleHandle("this standalone switch quantity was deleted");
+		return held.cast<rack::engine::SwitchQuantity&>().labels;
 	}
 	py::ssize_t index(py::ssize_t i) const {
 		auto n = static_cast<py::ssize_t>(get().size());
@@ -109,9 +120,20 @@ void field(py::class_<QuantityView>& cls, const char* name, T rack::engine::Para
 
 }  // namespace
 
+py::object ownedSwitchLabels(py::object owner) {
+	runtime::requireMainThread("using standalone switch labels");
+	auto& labels = owner.cast<rack::engine::SwitchQuantity&>().labels;
+	return runtime::identity(&labels, 0, [&] {
+		auto result = py::cast(SwitchLabels{std::nullopt, py::weakref(owner)});
+		result.attr("_rackpy_owner") = owner;
+		return result;
+	});
+}
+
 void bindQuantityViews(py::module_ engine) {
 	using Q = rack::engine::ParamQuantity;
-	py::class_<SwitchLabels>(engine, "SwitchLabels", "A checked mutable alias of a switch quantity's label vector.")
+	py::class_<SwitchLabels>(engine, "SwitchLabels", py::dynamic_attr(),
+		"A checked mutable alias of a switch quantity's label vector.")
 		.def("__len__", [](const SwitchLabels& v) { return v.get().size(); })
 		.def("__getitem__", [](const SwitchLabels& v, py::ssize_t i) { return v.get()[v.index(i)]; })
 		.def("__setitem__", [](const SwitchLabels& v, py::ssize_t i, std::string s) { v.get()[v.index(i)] = std::move(s); })
@@ -224,7 +246,7 @@ void bindQuantityViews(py::module_ engine) {
 	py::class_<SwitchQuantityView, QuantityView>(engine, "SwitchQuantityView")
 		.def_property("labels", [](const SwitchQuantityView& v) {
 			auto& labels = static_cast<rack::engine::SwitchQuantity&>(v.get()).labels;
-			return runtime::identity(&labels, v.token->generation, [&] { return py::cast(SwitchLabels{v}); });
+			return runtime::identity(&labels, v.token->generation, [&] { return py::cast(SwitchLabels{v, {}}); });
 		}, [](const SwitchQuantityView& v, std::vector<std::string> labels) {
 			static_cast<rack::engine::SwitchQuantity&>(v.get()).labels = std::move(labels);
 		}, "Checked mutable vector alias; assign a complete sequence to replace its contents.");

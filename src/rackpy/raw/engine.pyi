@@ -5,6 +5,8 @@ import enum
 from collections.abc import Callable, Iterator, Sequence
 from typing import overload
 
+from rackpy.raw import Quantity
+
 PORT_MAX_CHANNELS: int
 
 class Light:
@@ -192,6 +194,40 @@ class SwitchLabels:
     def tolist(self) -> list[str]: ...
 
 class SwitchQuantityView(ParamQuantityView):
+    @property
+    def labels(self) -> SwitchLabels: ...
+    @labels.setter
+    def labels(self, value: Sequence[str] | SwitchLabels) -> None: ...
+
+# Unattached standalone SDK objects. Unlike ParamQuantityView they inherit
+# Quantity and support UI-safe Python virtuals. Attachment/transfer is planned.
+class ParamQuantity(Quantity):
+    param_id: int
+    min_value: float
+    max_value: float
+    default_value: float
+    name: str
+    unit: str
+    display_base: float
+    display_multiplier: float
+    display_offset: float
+    display_precision: int
+    description: str
+    reset_enabled: bool
+    randomize_enabled: bool
+    smooth_enabled: bool
+    snap_enabled: bool
+    def __init__(self) -> None: ...
+    @property
+    def module(self) -> None: ...
+    def get_param(self) -> Param | None: ...
+    def get_immediate_value(self) -> float: ...
+    def set_immediate_value(self, value: float) -> None: ...
+    def get_description(self) -> str: ...
+    def set_smooth_value(self, value: float) -> None: ...
+    def get_smooth_value(self) -> float: ...
+
+class SwitchQuantity(ParamQuantity):
     @property
     def labels(self) -> SwitchLabels: ...
     @labels.setter

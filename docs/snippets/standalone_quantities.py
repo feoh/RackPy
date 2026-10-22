@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# rackpy-example: runs-in=rack
+from rackpy.engine import ParamQuantity, SwitchQuantity
+from rackpy.raw import Quantity
+
+
+class Captioned(ParamQuantity):
+    def get_label(self) -> str:
+        return super().get_label() + " (preview)"
+
+    def get_description(self) -> str:
+        return "An unattached quantity, not an engine parameter."
+
+
+quantity = Captioned()
+quantity.name = "Pitch"
+quantity.unit = " V"
+assert quantity.module is None and quantity.get_param() is None
+quantity.set_value(0.75)  # Rack's null-module setter is a no-op, not value storage.
+assert quantity.get_value() == 0
+assert Quantity.get_label(quantity) == "Pitch (preview)"  # native virtual dispatch
+assert quantity.get_description().startswith("An unattached")
+
+switch = SwitchQuantity()
+switch.labels = ["Low", "High"]
+labels = switch.labels
+labels[0] = "Bass"
+assert switch.get_display_value_string() == "Bass"
+switch.labels = ["First", "Second"]
+assert labels.tolist() == ["First", "Second"]
+# An owned alias keeps its standalone quantity alive; borrowed module aliases do not.
+del switch
+labels.append("Third")
+assert list(labels) == ["First", "Second", "Third"]
