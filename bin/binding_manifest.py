@@ -59,8 +59,12 @@ PYTHON_KINDS = frozenset(
         "factory",
         "context_manager",
         "alias",
+        "no_runtime_meaning",
     }
 )
+# Macros that exist only for the preprocessor or linker may be mapped to nothing, with a reviewed
+# reason and a documentation anchor (docs/coverage.md, policy 9: "build configuration").
+MACRO_KINDS = frozenset({"function_macro", "object_macro"})
 LOCKS = frozenset({"exclusive", "shared", "none", "caller_holds"})
 ENTRY_FIELDS = (
     "id",
@@ -77,7 +81,7 @@ ENTRY_FIELDS = (
     "notes",
     "reviewer",
 )
-PYTHON_FIELDS = frozenset({"raw", "facade", "kind", "gil_release", "stub"})
+PYTHON_FIELDS = frozenset({"raw", "facade", "kind", "gil_release"})
 DOTTED = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*$")
 FAMILY_SLUGS = {
     "0 entry point": "entry_point",
@@ -507,7 +511,21 @@ def validate(inputs: Inputs, manifest: dict[str, Any], introspection: dict[str, 
             if facade and facade in stubs:
                 add("not-implemented", ident, f"{facade} raises NotImplementedError; a stub is not an implementation")
 
-        if status in BOUND:
+        no_meaning = python is not None and python.get("kind") == "no_runtime_meaning"
+        if python is not None and no_meaning:
+            if entry["kind"] not in MACRO_KINDS:
+                add("no-runtime-meaning", ident, "only a macro can be mapped to nothing")
+            if python.get("raw") or python.get("facade"):
+                add("no-runtime-meaning", ident, "a macro with no runtime meaning has no Python name")
+            if not r.get("notes"):
+                add("no-runtime-meaning", ident, "say why the macro has no runtime meaning in notes")
+        if status in BOUND and no_meaning:
+            for ref in r.get("docs") or []:
+                if not doc_anchor_exists(repo, ref):
+                    add("docs", ident, f"documentation anchor {ref} does not exist")
+            if not r.get("docs"):
+                add("docs", ident, f"{status} needs documentation anchors")
+        elif status in BOUND:
             if not python or not python.get("raw") or not python.get("kind"):
                 add("unbound", ident, f"{status} needs python.raw and python.kind")
             impl = r.get("implementation")

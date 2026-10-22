@@ -207,14 +207,11 @@ def test_generation_is_deterministic_and_edits_are_detected(mini: Mini) -> None:
         by_id(manifest)[VOLTAGE],
         mini,
         raw="rackpy.raw.engine.Port.get_voltage",
-        stub="def get_voltage(channel: int = 0) -> float: ...",
     )
     changed = gb.generate_files(manifest, bm.dumps(manifest), mini.inputs(), mini.repo)
     assert changed != first
     registry = next(c for p, c in changed.items() if p.name == "registry.cpp")
-    assert 'bind_engine(raw.def_submodule("engine"));' in registry and VOLTAGE in registry
-    stub = next(c for p, c in changed.items() if p.name == "raw.pyi")
-    assert "def get_voltage(channel: int = 0) -> float: ..." in stub
+    assert "bind_engine(raw);" in registry and VOLTAGE in registry
 
 
 def test_generation_needs_an_adapter_for_each_bound_family(mini: Mini) -> None:

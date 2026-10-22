@@ -53,8 +53,8 @@ jobs:
       - run: uv sync --frozen
       - name: prek (ruff, strict mypy, JSON/YAML, planning, callback matrix)
         run: uvx prek@0.5.3 run --all-files --show-diff-on-failure
-      - name: Binding manifest consistency and generated files
-        run: bin/check_coverage.py check && bin/generate_bindings.py check
+      - name: Binding manifest consistency and generated files (names are checked against the built package in the host job)
+        run: bin/check_coverage.py check --without-built-package && bin/generate_bindings.py check
       - run: uv run --frozen pytest -m unit --junitxml=reports/unit.xml
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

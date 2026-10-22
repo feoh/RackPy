@@ -52,7 +52,7 @@ repos:
         files: ^(upstream/(api-surface|callback-rules)\.json|docs/reference/callback-matrix\.md|bin/callback-matrix)$
       - id: binding-manifest
         name: binding manifest and generated files
-        entry: bash -c 'bin/check_coverage.py check && bin/generate_bindings.py check'
+        entry: bash -c 'bin/check_coverage.py check --without-built-package && bin/generate_bindings.py check'
         language: system
         pass_filenames: false
         files: ^(bindings/|upstream/|native/bindings/|typings/_rackpy_host/raw\.pyi|docs/reference/coverage\.md|bin/(binding_manifest|check_coverage|generate_bindings)\.py|src/rackpy/)

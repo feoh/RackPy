@@ -28,10 +28,17 @@ root_doc = "index"
 exclude_patterns = ["_build", "_ext", "snippets", "Thumbs.db", ".DS_Store"]
 nitpicky = True
 # Warnings are errors (sphinx-build -W); these are the only reviewed exceptions.
-suppress_warnings: list[str] = []
-# The build is offline (no intersphinx), so references to standard-library
-# types in signatures cannot resolve. They are not RackPy's to document.
-nitpick_ignore_regex = [("py:class", r"(collections\.abc|typing)\.\w+")]
+# autoapi cannot follow a .pyi stub that imports from its own package's __init__.pyi
+# (rackpy.raw._types -> rackpy.raw.Quantity); the class is documented where it is defined.
+suppress_warnings = ["autoapi.python_import_resolution"]
+nitpick_ignore_regex = [
+    # The build is offline (no intersphinx): standard-library types in signatures cannot resolve.
+    ("py:class", r"(collections\.abc|typing|types)\.\w+"),
+    # PEP 695 type parameters (def f[T](...)) are not documented objects.
+    ("py:class", r"[A-Z]"),
+    # Private implementation modules; their public names are documented where rackpy.raw re-exports them.
+    ("py:class", r"rackpy\.raw\._\w+\.\w+"),
+]
 
 # --- Markdown ---
 myst_heading_anchors = 4
@@ -43,7 +50,8 @@ autoapi_dirs = [str(REPO / "src")]
 autoapi_root = "reference/python"
 autoapi_add_toctree_entry = False
 autoapi_keep_files = False
-autoapi_options = ["members", "undoc-members", "show-module-summary"]
+# imported-members: the facade modules (rackpy.math, rackpy.types) are curated re-exports.
+autoapi_options = ["members", "undoc-members", "show-module-summary", "imported-members"]
 autoapi_python_class_content = "both"
 
 # --- HTML ---

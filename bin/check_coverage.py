@@ -57,14 +57,31 @@ def fail(problems: list[bm.Problem], limit: int) -> None:
 
 
 @app.command
-def check(*, manifest: Path = bm.MANIFEST, introspection: Path | None = None, limit: int = 50) -> None:
-    """Fail on any inconsistency between the manifest and its sources."""
+def check(
+    *,
+    manifest: Path = bm.MANIFEST,
+    introspection: Path | None = None,
+    without_built_package: bool = False,
+    limit: int = 50,
+) -> None:
+    """Fail on any inconsistency between the manifest and its sources.
+
+    Bound records need --introspection. --without-built-package checks
+    everything else and says so; it is for jobs that cannot run Rack, never
+    a substitute for the check with the artifact.
+    """
     inputs, data, artifact = load(manifest, introspection)
     problems = bm.validate(inputs, data, artifact)
+    if without_built_package:
+        if introspection:
+            raise SystemExit("--without-built-package and --introspection contradict each other")
+        problems = [p for p in problems if p.code != "missing-runtime-artifact"]
     if problems:
         fail(problems, limit)
     totals = bm.report(inputs, data)["totals"]["lin-x64"]
     print("ok: " + ", ".join(f"{k} {v}" for k, v in sorted(totals.items())))
+    if without_built_package and any(r["status"] in bm.BOUND for r in data["entries"]):
+        print("note: Python names were NOT checked against the built package (--without-built-package)")
 
 
 @app.command

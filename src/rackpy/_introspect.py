@@ -14,7 +14,38 @@ import _rackpy_host
 
 import rackpy
 
-MODULES = ("rackpy", "rackpy.errors", "rackpy.runtime", "rackpy.raw")
+MODULES = ("rackpy", "rackpy.errors", "rackpy.runtime", "rackpy.raw", "rackpy.math", "rackpy.types")
+# Protocol methods a binding can map a C++ operator or lifetime to; recorded when a class defines them itself.
+DUNDERS = frozenset(
+    {
+        "__init__",
+        "__getitem__",
+        "__setitem__",
+        "__pos__",
+        "__neg__",
+        "__add__",
+        "__sub__",
+        "__mul__",
+        "__rmul__",
+        "__truediv__",
+        "__iadd__",
+        "__isub__",
+        "__imul__",
+        "__itruediv__",
+        "__eq__",
+        "__ne__",
+        "__iter__",
+        "__len__",
+        "__hash__",
+        "__enter__",
+        "__exit__",
+        "__str__",
+        "__repr__",
+        "__copy__",
+        "__deepcopy__",
+        "__init_subclass__",
+    }
+)
 
 
 def kind(obj: object) -> str:
@@ -51,11 +82,17 @@ def snapshot() -> dict[str, Any]:
             continue
         public = getattr(obj, "__all__", None) if inspect.ismodule(obj) else None
         for name, value in vars(obj).items():
-            if name.startswith("_") or (public is not None and name not in public):
+            protocol = inspect.isclass(obj) and name in DUNDERS
+            if (name.startswith("_") and not protocol) or (public is not None and name not in public):
                 continue
             if isinstance(value, ModuleType) and not value.__name__.startswith(("rackpy", "_rackpy_host")):
                 continue  # imported library modules
             queue.append((f"{path}.{name}", value, depth + 1))
+        if inspect.isclass(obj):
+            # Annotated instance attributes (set in __init__) are part of a class's API too.
+            for name in inspect.get_annotations(obj):
+                if not name.startswith("_"):
+                    objects.setdefault(f"{path}.{name}", {"kind": "attribute", "doc": "", "not_implemented": False})
     return {
         "schema_version": 1,
         "rackpy_version": rackpy.__version__,

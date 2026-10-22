@@ -54,6 +54,10 @@ Engine calls from your threads release Python's GIL while they wait for
 Rack's engine lock, so a slow Python thread cannot stall Rack and Rack cannot
 deadlock against Python.
 
+Rack runs with the CPU's flush-to-zero and denormals-are-zero modes, and
+threads you start inherit them, so subnormal floats read as zero everywhere in
+the process, Python included ([values](reference/values.md#numbers-cross-as-c-numbers)).
+
 ## Handles to Rack objects
 
 Rack owns its modules, widgets, cables and engine. Python holds **handles**

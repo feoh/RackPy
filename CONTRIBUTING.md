@@ -93,6 +93,13 @@ desktop. Paths that only an audio driver thread exercises remain untested
 **Do not run host tests in parallel** or while another Rack is starting: Rack
 creates and removes `/tmp/Rack2` as it loads plugins.
 
+**Suites that run inside Rack.** A directory named `in_rack` (for example
+`tests/values/in_rack/`) holds ordinary pytest tests that import `rackpy.raw`
+and so can only run in Rack. The outer run ignores them; a `host` test starts
+each suite with `tests.support.run_pytest_in_rack`, which copies pytest into a
+staged test bundle and runs the suite inside Rack's embedded interpreter
+([ADR 009](docs/decisions/009-values-and-raw-conventions.md)).
+
 Unit tests use a stand-in for the embedded `_rackpy_host` module and prove only
 rackpy's own logic. Native tests link the SDK's `libRack.so` outside Rack.
 Neither proves anything about loading in Rack; `tests/integration` does that.

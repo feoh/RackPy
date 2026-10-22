@@ -20,7 +20,6 @@ Derived files (never edit them):
   native/bindings/generated/registry.{hpp,cpp}  registration scaffold calling
                                             the hand-written adapters in
                                             native/bindings/<family>.cpp
-  typings/_rackpy_host/raw.pyi              stubs for bound records
   docs/reference/coverage.md                coverage report
 """
 
@@ -101,13 +100,13 @@ def generate_files(manifest: dict[str, Any], manifest_text: str, inputs: bm.Inpu
         "namespace rackpy {",
         "namespace bindings {",
         "",
-        "/** Bind every family that has bound records into `raw` (rackpy.raw). */",
+        "/** Bind every family that has bound records into `raw` (rackpy.raw), which mirrors the rack namespace. */",
         "void registerAll(pybind11::module_& raw);",
         "",
     ]
     if families:
         header.append("// Hand-written adapters, one per family, in native/bindings/<family>.cpp:")
-        header += [f"void bind_{bm.FAMILY_SLUGS[f]}(pybind11::module_ m);" for f in families]
+        header += [f"void bind_{bm.FAMILY_SLUGS[f]}(pybind11::module_ raw);" for f in families]
     else:
         header.append("// No family has bound records yet, so there are no adapters to call.")
     header += ["", "}  // namespace bindings", "}  // namespace rackpy", ""]
@@ -126,31 +125,17 @@ def generate_files(manifest: dict[str, Any], manifest_text: str, inputs: bm.Inpu
         slug = bm.FAMILY_SLUGS[family]
         source.append(f"\t// {family}: {len(by_family[family])} bound record(s)")
         for r in sorted(by_family[family], key=lambda r: r["id"]):
-            source.append(f"\t//   {r['id']} -> {r['python']['raw']}")
-        source.append(f'\tbind_{slug}(raw.def_submodule("{slug}"));')
+            source.append(f"\t//   {r['id']} -> {r['python'].get('raw') or '(no runtime meaning)'}")
+        source.append(f"\tbind_{slug}(raw);")
     if not families:
         source.append("\t(void) raw;  // nothing is bound yet")
     source += ["}", "", "}  // namespace bindings", "}  // namespace rackpy", ""]
-
-    stub = [
-        f"# {GENERATED_NOTE}",
-        f"# Inputs: {stamp}",
-        "# Stubs for _rackpy_host.raw, from python.stub of each bound record.",
-        "",
-    ]
-    for r in sorted(bound(manifest), key=lambda r: r["python"]["raw"]):
-        if r["python"].get("stub"):
-            stub.append(f"# {r['id']}")
-            stub.append(r["python"]["stub"])
-    if len(stub) == 4:
-        stub.append("# Nothing is bound yet.")
 
     report = bm.markdown_report(bm.report(inputs, manifest))
     return {
         repo / "bindings" / "generated" / "mapping.json": json.dumps(mapping, indent=2, sort_keys=True) + "\n",
         repo / "native" / "bindings" / "generated" / "registry.hpp": "\n".join(header),
         repo / "native" / "bindings" / "generated" / "registry.cpp": "\n".join(source),
-        repo / "typings" / "_rackpy_host" / "raw.pyi": "\n".join(stub) + "\n",
         repo / "docs" / "reference" / "coverage.md": report,
     }
 

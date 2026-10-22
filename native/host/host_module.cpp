@@ -10,6 +10,7 @@
 
 #include "rackpy/runtime/context.hpp"
 #include "rackpy/runtime/diagnostics.hpp"
+#include "rackpy/runtime/json.hpp"
 #include "rackpy/runtime/python.hpp"
 #include "rackpy/host_abi.h"
 #include "rackpy/runtime/threads.hpp"
@@ -64,6 +65,16 @@ PYBIND11_EMBEDDED_MODULE(_rackpy_host, m) {
 	m.def("transferred_objects", &rt::transferredObjects);
 	m.def("pending_releases", &rt::pendingReleases);
 	m.def("identity_entries", &rt::identityEntries);
+	m.attr("JSON_MAX_DEPTH") = rt::JSON_MAX_DEPTH;
+	m.def(
+		"json_round_trip",
+		[](py::handle value) {
+			json_t* json = rt::toJson(value);
+			py::object out = rt::fromJson(json);
+			json_decref(json);
+			return out;
+		},
+		py::arg("value"), "Python -> json_t -> Python through the runtime's JSON policy (for tests).");
 	py::module_ raw = m.def_submodule("raw", "Rack API bindings (rackpy.raw), registered from bindings/manifest.json.");
 	rackpy::bindings::registerAll(raw);
 #ifdef RACKPY_TEST_HOOKS

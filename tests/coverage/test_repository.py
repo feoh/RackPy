@@ -15,9 +15,16 @@ def run(*args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run([str(BIN / args[0]), *args[1:]], capture_output=True, text=True, check=False)
 
 
-def test_manifest_is_consistent() -> None:
-    proc = run("check_coverage.py", "check")
+def test_manifest_is_consistent_apart_from_the_built_package() -> None:
+    proc = run("check_coverage.py", "check", "--without-built-package")
     assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "NOT checked against the built package" in proc.stdout
+
+
+def test_bound_records_need_the_built_package() -> None:
+    """Outside Rack there is no artifact, so the full check must fail, not pass quietly."""
+    proc = run("check_coverage.py", "check")
+    assert proc.returncode != 0 and "missing-runtime-artifact" in proc.stderr
 
 
 def test_generated_files_are_current() -> None:
@@ -32,11 +39,14 @@ def test_the_release_bar_is_not_met_yet() -> None:
     assert "incomplete" in proc.stderr and "missing-runtime-artifact" in proc.stderr
 
 
-def test_every_record_is_seeded_unreviewed_or_excluded_by_policy() -> None:
+def test_every_record_is_accounted_for() -> None:
     inputs = bm.load_inputs()
     manifest = bm.load_json(bm.MANIFEST)
     statuses = {r["status"] for r in manifest["entries"]}
-    assert statuses <= {"unreviewed", "excluded_internal"}, "RP-11 binds nothing; later tasks promote records"
+    assert statuses <= {"unreviewed", "implemented", "verified", "excluded_internal"}
+    bound = [r for r in manifest["entries"] if r["status"] in bm.BOUND]
+    families = {bm.family_of(inputs.inventory, inputs.index[r["id"]]) for r in bound}
+    assert families <= {"1 common/value"}, "only family 1 (RP-12) is bound so far"
     counted = [e for e in inputs.index.values() if bm.counted(e)]
     assert len(manifest["entries"]) == len(counted) == 3058
     excluded = [r for r in manifest["entries"] if r["status"] == "excluded_internal"]

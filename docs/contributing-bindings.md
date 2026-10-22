@@ -13,14 +13,14 @@ rules behind this are the [coverage contract](coverage.md); the design is
 | `bindings/exclusions.json` | reviewers | The declarations RackPy deliberately does not bind, each with a policy and evidence |
 | `upstream/engine-locks.json` | reviewers | Which engine lock each `Engine` method takes |
 | `native/bindings/<family>.cpp` | **you, by hand** | The pybind11 adapters for one family |
-| `bindings/generated/`, `native/bindings/generated/`, `typings/_rackpy_host/raw.pyi`, `docs/reference/coverage.md` | `bin/generate_bindings.py generate` | Derived files; never edit them |
+| `bindings/generated/`, `native/bindings/generated/`, `docs/reference/coverage.md` | `bin/generate_bindings.py generate` | Derived files; never edit them |
 
 ## A record
 
 ```json
 {"id": "method:rack::engine::Port::getVoltage(uint8_t)", "fingerprint": "…", "status": "implemented",
  "python": {"raw": "rackpy.raw.engine.Port.get_voltage", "facade": null, "kind": "method",
-            "gil_release": false, "stub": "def get_voltage(self, channel: int = 0) -> float: ..."},
+            "gil_release": false},
  "callback": null, "locks_engine": null, "ownership": "borrowed", "thread": "any",
  "implementation": "native/bindings/engine.cpp",
  "tests": ["tests/bindings/test_port.py::test_get_voltage_reads_each_channel"],
@@ -28,6 +28,11 @@ rules behind this are the [coverage contract](coverage.md); the design is
 ```
 
 - `id` and `fingerprint` come from the inventory. Never edit them.
+- `python.kind` is `no_runtime_meaning` only for a macro that exists just for
+  the preprocessor or linker; such a record has no Python name, and needs a
+  reason in `notes` and a documentation anchor.
+- Typed stubs for `rackpy.raw` are hand-written next to it
+  (`src/rackpy/raw/<namespace>.pyi`); mypy checks the tests against them.
 - `callback` (the RP-06 strategy of a virtual method) and `locks_engine` are
   derived from `upstream/callback-rules.json` and `upstream/engine-locks.json`;
   `seed` keeps them in step and the check rejects a mismatch.
@@ -60,8 +65,12 @@ on each advertised platform. Nothing promotes a record automatically.
    `Borrowed<T>` handles with `identity()`, `requireMainThread`,
    `EngineLease` with the GIL released for engine calls, `PyRef` for stored
    callables, `callPython` for every call from Rack into Python.
-3. Write behavioural tests (in Rack where behaviour depends on the host) and
-   the documentation, with an anchor per record.
+3. Write behavioural tests and the documentation, with an anchor per record.
+   Tests that need the bindings go in the family's `in_rack/` suite and run
+   inside Rack ([ADR 009](decisions/009-values-and-raw-conventions.md)); add a
+   case to a compiled C++ reference wherever a result can be compared with
+   Rack's own, as `native/tests/values_reference.cpp` does for family 1.
+   Follow the naming and value/view conventions of ADR 009.
 4. Update the records: status, `python`, `implementation`, `tests`, `docs`.
 5. Regenerate and check:
 

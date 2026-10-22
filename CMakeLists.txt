@@ -48,11 +48,12 @@ set(RACKPY_RUNTIME_CORE native/runtime/threads.cpp native/runtime/diagnostics.cp
 
 # Rack API bindings: the registry bin/generate_bindings.py generates from bindings/manifest.json,
 # and the hand-written adapters it calls (native/bindings/<family>.cpp).
-file(GLOB RACKPY_BINDING_ADAPTERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/native/bindings/*.cpp")
+file(GLOB_RECURSE RACKPY_BINDING_ADAPTERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/native/bindings/*.cpp")
+list(FILTER RACKPY_BINDING_ADAPTERS EXCLUDE REGEX "/native/bindings/generated/")
 
 # rackpy_host.so: embeds CPython; exports only rackpy_host_init and rackpy_host_destroy.
 add_library(rackpy_host MODULE native/host/host.cpp native/host/host_module.cpp
-  ${RACKPY_RUNTIME_CORE} native/runtime/python.cpp native/runtime/interpreter.cpp
+  ${RACKPY_RUNTIME_CORE} native/runtime/python.cpp native/runtime/interpreter.cpp native/runtime/json.cpp
   native/bindings/generated/registry.cpp ${RACKPY_BINDING_ADAPTERS})
 if(RACKPY_TEST_HOOKS)
   target_sources(rackpy_host PRIVATE native/testing/testing.cpp)
@@ -84,6 +85,11 @@ if(RACKPY_BUILD_TESTS)
   target_include_directories(rackpy_runtime_tests PRIVATE native/include)
   target_link_libraries(rackpy_runtime_tests PRIVATE rackpy_sdk_program)
   add_test(NAME runtime_core COMMAND rackpy_runtime_tests)
+
+  # Rack's own results for the family 1 bindings; tests/values compares rackpy.raw against them inside Rack.
+  add_executable(rackpy_values_reference native/tests/values_reference.cpp)
+  set_target_properties(rackpy_values_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_link_libraries(rackpy_values_reference PRIVATE rackpy_sdk_program)
 endif()
 
 # Plugin directory layout. bin/rackpy-dev bundle adds the runtime as python/.

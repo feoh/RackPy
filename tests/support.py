@@ -71,14 +71,16 @@ class RackRun:
         return self.log[-4000:]
 
 
-def run_rack(rack: Path, user: Path, *, settle: float = 1.0, timeout: float = 60) -> RackRun:
+def run_rack(
+    rack: Path, user: Path, *, settle: float = 1.0, timeout: float = 60, env: dict[str, str] | None = None
+) -> RackRun:
     """Run Rack Free headless with a temporary user directory, then quit it through stdin.
 
     DISPLAY and WAYLAND_DISPLAY are cleared: Rack shows a blocking dialog, even
     headless, when a patch references an unavailable module. Rack creates and
     removes /tmp/Rack2 while it loads plugins, so runs must not overlap.
     """
-    environ = {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}
+    environ = {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}} | (env or {})
     log = user / "log.txt"
     (user / "autosave").mkdir(parents=True, exist_ok=True)
     patch = user / "autosave" / "patch.json"
@@ -169,3 +171,105 @@ def stage_plugin(bundle: Path, user: Path, *, entry: str | None = None, files: d
         config["entry"] = entry
         config_path.write_text(json.dumps(config))
     return plugin
+
+
+# --- pytest inside Rack ------------------------------------------------------------
+
+# pytest and its pinned dependencies (uv.lock), copied into a staged test bundle only.
+PYTEST_PACKAGES = ("pytest", "_pytest", "pluggy", "iniconfig", "packaging", "pygments", "py.py")
+
+IN_RACK_RUNNER = """
+import contextlib, io, json, sys
+sys.path.insert(0, DEPS)
+import pytest
+
+
+class Collector:
+    def __init__(self):
+        self.reports = []
+
+    def pytest_runtest_logreport(self, report):
+        if report.when == "call" or report.outcome != "passed":
+            self.reports.append({"nodeid": report.nodeid, "when": report.when, "outcome": report.outcome,
+                                 "longrepr": str(report.longrepr) if report.outcome != "passed" else None})
+
+    def pytest_collectreport(self, report):
+        if report.failed:
+            self.reports.append({"nodeid": report.nodeid, "when": "collect", "outcome": "failed",
+                                 "longrepr": str(report.longrepr)})
+
+
+collector = Collector()
+output = io.StringIO()
+with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
+    code = pytest.main(ARGS, plugins=[collector])
+with open(RESULT, "w") as f:
+    json.dump({"exit": int(code), "reports": collector.reports, "output": output.getvalue()}, f)
+"""
+
+
+@dataclass(frozen=True)
+class InRackResult:
+    exit: int
+    reports: list[dict[str, object]]
+    output: str
+    run: RackRun
+
+    def outcomes(self) -> dict[str, str]:
+        return {str(r["nodeid"]): str(r["outcome"]) for r in self.reports if r["when"] in {"call", "setup", "collect"}}
+
+    def failures(self) -> list[dict[str, object]]:
+        return [r for r in self.reports if r["outcome"] == "failed"]
+
+    def summary(self) -> str:
+        lines = [f"{r['nodeid']} ({r['when']}): {r['longrepr']}" for r in self.failures()]
+        return "\n\n".join(lines) + "\n--- pytest output ---\n" + self.output[-6000:]
+
+
+def run_pytest_in_rack(
+    bundle: Path, rack: Path, user: Path, tests: Path, *, args: list[str] | None = None, timeout: float = 120
+) -> InRackResult:
+    """Run a pytest suite inside Rack's embedded interpreter, in the built plugin, at plugin start-up.
+
+    The suite (a directory of test_*.py files that import rackpy) runs on
+    Rack's main thread before Rack creates its window or engine, so it suits
+    code that needs no Rack context. pytest comes from the project
+    environment and is copied into this test bundle only, never into a
+    production one.
+    """
+    import importlib.util
+
+    plugin = stage_plugin(bundle, user, entry="rackpy_in_rack_pytest")
+    deps = plugin / "pythonpath" / "_rackpy_test_deps"
+    deps.mkdir()
+    for name in PYTEST_PACKAGES:
+        spec = importlib.util.find_spec(name.removesuffix(".py"))
+        require("pytest-in-rack", spec is not None and spec.origin is not None, f"the project environment lacks {name}")
+        assert spec is not None and spec.origin is not None
+        origin = Path(spec.origin)
+        if origin.name == "__init__.py":
+            shutil.copytree(origin.parent, deps / origin.parent.name, ignore=shutil.ignore_patterns("__pycache__"))
+        else:
+            shutil.copy(origin, deps / origin.name)
+    result_path = user / "in_rack_result.json"
+    # --confcutdir keeps the repository's own tests/conftest.py (which ignores */in_rack/*) out of the run.
+    argv = [
+        str(tests),
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "--rootdir",
+        str(tests),
+        "-c",
+        "/dev/null",
+        "--confcutdir",
+        str(tests),
+    ]
+    argv += args or []
+    header = f"DEPS = {str(deps)!r}\nRESULT = {str(result_path)!r}\nARGS = {argv!r}\n"
+    (plugin / "pythonpath" / "rackpy_in_rack_pytest.py").write_text(header + IN_RACK_RUNNER)
+    run = run_rack(rack, user, settle=0.3, timeout=timeout)
+    assert run.returncode == 0, run.tail()
+    assert result_path.exists(), "the in-Rack pytest run wrote no result:\n" + run.tail()
+    data = json.loads(result_path.read_text())
+    return InRackResult(int(data["exit"]), list(data["reports"]), str(data["output"]), run)

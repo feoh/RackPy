@@ -1,5 +1,1504 @@
 {
-  "entries": [],
-  "inputs": "e85f783973e22c08",
+  "entries": [
+    {
+      "facade": null,
+      "id": "class_template:rack::DeferWrapper<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.DeferWrapper",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::DeferWrapper::DeferWrapper<F>($c0)",
+      "kind": "class",
+      "raw": "rackpy.raw.DeferWrapper",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::Exception::Exception(const char *, ...)",
+      "kind": "classmethod",
+      "raw": "rackpy.raw.Exception.printf",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::Exception::Exception(const std::string &)",
+      "kind": "class",
+      "raw": "rackpy.raw.Exception",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Rect",
+      "id": "constructor:rack::math::Rect::Rect()",
+      "kind": "class",
+      "raw": "rackpy.raw.math.Rect",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Rect",
+      "id": "constructor:rack::math::Rect::Rect(float, float, float, float)",
+      "kind": "class",
+      "raw": "rackpy.raw.math.Rect",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Rect",
+      "id": "constructor:rack::math::Rect::Rect(rack::math::Vec, rack::math::Vec)",
+      "kind": "class",
+      "raw": "rackpy.raw.math.Rect",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Vec",
+      "id": "constructor:rack::math::Vec::Vec()",
+      "kind": "class",
+      "raw": "rackpy.raw.math.Vec",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Vec",
+      "id": "constructor:rack::math::Vec::Vec(float)",
+      "kind": "class",
+      "raw": "rackpy.raw.math.Vec",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Vec",
+      "id": "constructor:rack::math::Vec::Vec(float, float)",
+      "kind": "class",
+      "raw": "rackpy.raw.math.Vec",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::DeferWrapper::~DeferWrapper<F>()",
+      "kind": "method",
+      "raw": "rackpy.raw.DeferWrapper.__exit__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::Quantity::~Quantity()",
+      "kind": "class",
+      "raw": "rackpy.raw.Quantity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::DeferWrapper::f",
+      "kind": "attribute",
+      "raw": "rackpy.raw.DeferWrapper.f",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::Exception::msg",
+      "kind": "attribute",
+      "raw": "rackpy.raw.Exception.msg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::math::Rect::pos",
+      "kind": "attribute",
+      "raw": "rackpy.raw.math.Rect.pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::math::Rect::size",
+      "kind": "attribute",
+      "raw": "rackpy.raw.math.Rect.size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::math::Vec::x",
+      "kind": "attribute",
+      "raw": "rackpy.raw.math.Vec.x",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::math::Vec::y",
+      "kind": "attribute",
+      "raw": "rackpy.raw.math.Vec.y",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:operator\"\"_f32(long double)",
+      "kind": "function",
+      "raw": "rackpy.raw.literals.f32",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:operator\"\"_f32(unsigned long long)",
+      "kind": "function",
+      "raw": "rackpy.raw.literals.f32",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:operator\"\"_f64(long double)",
+      "kind": "function",
+      "raw": "rackpy.raw.literals.f64",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:operator\"\"_f64(unsigned long long)",
+      "kind": "function",
+      "raw": "rackpy.raw.literals.f64",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:operator\"\"_i16(unsigned long long)",
+      "kind": "function",
+      "raw": "rackpy.raw.literals.i16",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:operator\"\"_i32(unsigned long long)",
+      "kind": "function",
+      "raw": "rackpy.raw.literals.i32",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:operator\"\"_i64(unsigned long long)",
+      "kind": "function",
+      "raw": "rackpy.raw.literals.i64",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:operator\"\"_i8(unsigned long long)",
+      "kind": "function",
+      "raw": "rackpy.raw.literals.i8",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:operator\"\"_u16(unsigned long long)",
+      "kind": "function",
+      "raw": "rackpy.raw.literals.u16",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:operator\"\"_u32(unsigned long long)",
+      "kind": "function",
+      "raw": "rackpy.raw.literals.u32",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:operator\"\"_u64(unsigned long long)",
+      "kind": "function",
+      "raw": "rackpy.raw.literals.u64",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:operator\"\"_u8(unsigned long long)",
+      "kind": "function",
+      "raw": "rackpy.raw.literals.u8",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::color::alpha(NVGcolor, float)",
+      "kind": "function",
+      "raw": "rackpy.raw.color.alpha",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::color::clamp(NVGcolor)",
+      "kind": "function",
+      "raw": "rackpy.raw.color.clamp",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::color::fromHexString(std::string)",
+      "kind": "function",
+      "raw": "rackpy.raw.color.from_hex_string",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::color::isEqual(NVGcolor, NVGcolor)",
+      "kind": "function",
+      "raw": "rackpy.raw.color.is_equal",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::color::lerp(NVGcolor, NVGcolor, float)",
+      "kind": "function",
+      "raw": "rackpy.raw.color.lerp",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::color::minus(NVGcolor, NVGcolor)",
+      "kind": "function",
+      "raw": "rackpy.raw.color.minus",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::color::mult(NVGcolor, NVGcolor)",
+      "kind": "function",
+      "raw": "rackpy.raw.color.mult",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::color::mult(NVGcolor, float)",
+      "kind": "function",
+      "raw": "rackpy.raw.color.mult",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::color::plus(NVGcolor, NVGcolor)",
+      "kind": "function",
+      "raw": "rackpy.raw.color.plus",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::color::screen(NVGcolor, NVGcolor)",
+      "kind": "function",
+      "raw": "rackpy.raw.color.screen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::color::toHexString(NVGcolor)",
+      "kind": "function",
+      "raw": "rackpy.raw.color.to_hex_string",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.chop",
+      "id": "function:rack::math::chop(float, float)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.chop",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.clamp",
+      "id": "function:rack::math::clamp(float, float, float)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.clamp",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.clamp",
+      "id": "function:rack::math::clamp(int, int, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.clamp",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.clamp_safe",
+      "id": "function:rack::math::clampSafe(float, float, float)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.clamp_safe",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.clamp_safe",
+      "id": "function:rack::math::clampSafe(int, int, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.clamp_safe",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.complex_mult",
+      "id": "function:rack::math::complexMult(float, float, float, float, float *, float *)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.complex_mult",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.crossfade",
+      "id": "function:rack::math::crossfade(float, float, float)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.crossfade",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.euc_div",
+      "id": "function:rack::math::eucDiv(int, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.euc_div",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.euc_div_mod",
+      "id": "function:rack::math::eucDivMod(int, int, int *, int *)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.euc_div_mod",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.euc_mod",
+      "id": "function:rack::math::eucMod(float, float)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.euc_mod",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.euc_mod",
+      "id": "function:rack::math::eucMod(int, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.euc_mod",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.interpolate_linear",
+      "id": "function:rack::math::interpolateLinear(const float *, float)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.interpolate_linear",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.is_near",
+      "id": "function:rack::math::isNear(float, float, float)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.is_near",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.log2",
+      "id": "function:rack::math::log2(int)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.log2",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.normalize_zero",
+      "id": "function:rack::math::normalizeZero(float)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.normalize_zero",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator!=(const rack::math::Rect &, const rack::math::Rect &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.__ne__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator!=(const rack::math::Vec &, const rack::math::Vec &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__ne__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator*(const float &, const rack::math::Vec &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__rmul__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator*(const rack::math::Vec &, const float &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__mul__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator*(const rack::math::Vec &, const rack::math::Vec &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__mul__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator*=(rack::math::Vec &, const float &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__imul__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator*=(rack::math::Vec &, const rack::math::Vec &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__imul__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator+(const rack::math::Vec &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__pos__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator+(const rack::math::Vec &, const rack::math::Vec &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__add__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator+=(rack::math::Vec &, const rack::math::Vec &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__iadd__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator-(const rack::math::Vec &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__neg__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator-(const rack::math::Vec &, const rack::math::Vec &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__sub__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator-=(rack::math::Vec &, const rack::math::Vec &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__isub__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator/(const rack::math::Vec &, const float &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__truediv__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator/(const rack::math::Vec &, const rack::math::Vec &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__truediv__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator/=(rack::math::Vec &, const float &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__itruediv__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator/=(rack::math::Vec &, const rack::math::Vec &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__itruediv__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator==(const rack::math::Rect &, const rack::math::Rect &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.__eq__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::math::operator==(const rack::math::Vec &, const rack::math::Vec &)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__eq__",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.rescale",
+      "id": "function:rack::math::rescale(float, float, float, float, float)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.rescale",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::bitCast<type, type>($1)",
+      "kind": "function",
+      "raw": "rackpy.raw.bit_cast",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::construct<type, type, type, type...>($1, $2, $3...)",
+      "kind": "function",
+      "raw": "rackpy.raw.construct",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::construct<type>()",
+      "kind": "function",
+      "raw": "rackpy.raw.construct",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::deferWrapper<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.defer_wrapper",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::get<type>(const $0 &, const typename $0::key_type &, const typename $0::mapped_type &)",
+      "kind": "function",
+      "raw": "rackpy.raw.get",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::get<type>(const $0 &, typename $0::size_type, const typename $0::value_type &)",
+      "kind": "function",
+      "raw": "rackpy.raw.get",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.is_even",
+      "id": "function_template:rack::math::isEven<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.is_even",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.is_odd",
+      "id": "function_template:rack::math::isOdd<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.is_odd",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.is_pow2",
+      "id": "function_template:rack::math::isPow2<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.is_pow2",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.sgn",
+      "id": "function_template:rack::math::sgn<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.math.sgn",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:ARCH_LIN",
+      "kind": "constant",
+      "raw": "rackpy.raw.macros.ARCH_LIN",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:ARCH_X64",
+      "kind": "constant",
+      "raw": "rackpy.raw.macros.ARCH_X64",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:BINARY",
+      "kind": "no_runtime_meaning",
+      "raw": null,
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:BINARY_END",
+      "kind": "no_runtime_meaning",
+      "raw": null,
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:BINARY_SIZE",
+      "kind": "no_runtime_meaning",
+      "raw": null,
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:BINARY_START",
+      "kind": "no_runtime_meaning",
+      "raw": null,
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:CONCAT",
+      "kind": "no_runtime_meaning",
+      "raw": null,
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:CONCAT_LITERAL",
+      "kind": "no_runtime_meaning",
+      "raw": null,
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:DEFER",
+      "kind": "function",
+      "raw": "rackpy.raw.macros.DEFER",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:DEPRECATED",
+      "kind": "function",
+      "raw": "rackpy.raw.macros.DEPRECATED",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:ENUMS",
+      "kind": "function",
+      "raw": "rackpy.raw.macros.ENUMS",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:LENGTHOF",
+      "kind": "function",
+      "raw": "rackpy.raw.macros.LENGTHOF",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:RECT_ARGS",
+      "kind": "function",
+      "raw": "rackpy.raw.macros.RECT_ARGS",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:TOSTRING",
+      "kind": "no_runtime_meaning",
+      "raw": null,
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:TOSTRING_LITERAL",
+      "kind": "no_runtime_meaning",
+      "raw": null,
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:VEC_ARGS",
+      "kind": "function",
+      "raw": "rackpy.raw.macros.VEC_ARGS",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Exception::what() const",
+      "kind": "method",
+      "raw": "rackpy.raw.Exception.what",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::fromScaled(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.from_scaled",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::getDefaultValue()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.get_default_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::getDisplayPrecision()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.get_display_precision",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::getDisplayValue()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.get_display_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::getDisplayValueString()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.get_display_value_string",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::getLabel()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.get_label",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::getMaxValue()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.get_max_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::getMinValue()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.get_min_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::getRange()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.get_range",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::getScaledValue()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.get_scaled_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::getString()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.get_string",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::getUnit()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.get_unit",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::getValue()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.get_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::isBounded()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.is_bounded",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::isMax()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.is_max",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::isMin()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.is_min",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::moveScaledValue(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.move_scaled_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::moveValue(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.move_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::randomize()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.randomize",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::setDisplayValue(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.set_display_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::setDisplayValueString(std::string)",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.set_display_value_string",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::setMax()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.set_max",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::setMin()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.set_min",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::setScaledValue(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.set_scaled_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::setValue(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.set_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::toScaled(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.to_scaled",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::Quantity::toggle()",
+      "kind": "method",
+      "raw": "rackpy.raw.Quantity.toggle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::clamp(rack::math::Rect) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.clamp",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::contains(rack::math::Rect) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.contains",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::contains(rack::math::Vec) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.contains",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::equals(rack::math::Rect) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.equals",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::expand(rack::math::Rect) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.expand",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::fromCorners(rack::math::Vec, rack::math::Vec)",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.math.Rect.from_corners",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::fromMinMax(rack::math::Vec, rack::math::Vec)",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.math.Rect.from_min_max",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Rect.bottom",
+      "id": "method:rack::math::Rect::getBottom() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.get_bottom",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::getBottomLeft() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.get_bottom_left",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::getBottomRight() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.get_bottom_right",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Rect.center",
+      "id": "method:rack::math::Rect::getCenter() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.get_center",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Rect.height",
+      "id": "method:rack::math::Rect::getHeight() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.get_height",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Rect.left",
+      "id": "method:rack::math::Rect::getLeft() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.get_left",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Rect.right",
+      "id": "method:rack::math::Rect::getRight() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.get_right",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Rect.top",
+      "id": "method:rack::math::Rect::getTop() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.get_top",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::getTopLeft() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.get_top_left",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::getTopRight() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.get_top_right",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Rect.width",
+      "id": "method:rack::math::Rect::getWidth() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.get_width",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::grow(rack::math::Vec) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.grow",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::inf()",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.math.Rect.inf",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::interpolate(rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.interpolate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::intersect(rack::math::Rect) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.intersect",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::intersects(rack::math::Rect) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.intersects",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::isContaining(rack::math::Vec) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.is_containing",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::isEqual(rack::math::Rect) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.is_equal",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::isIntersecting(rack::math::Rect) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.is_intersecting",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::nudge(rack::math::Rect) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.nudge",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::shrink(rack::math::Vec) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.shrink",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Rect::zeroPos() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Rect.zero_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::abs() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.abs",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::area() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.area",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::arg() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.arg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::ceil() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.ceil",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::clamp(rack::math::Rect) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.clamp",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::clampSafe(rack::math::Rect) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.clamp_safe",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::crossfade(rack::math::Vec, float)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.crossfade",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::div(float) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.div",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::div(rack::math::Vec) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.div",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::dot(rack::math::Vec) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.dot",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::equals(rack::math::Vec) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.equals",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::flip() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.flip",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::floor() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.floor",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::isEqual(rack::math::Vec) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.is_equal",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::isFinite() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.is_finite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::isZero() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.is_zero",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::max(rack::math::Vec) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.max",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::min(rack::math::Vec) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.min",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::minus(rack::math::Vec) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.minus",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::mult(float) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.mult",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::mult(rack::math::Vec) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.mult",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::neg() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.neg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::norm() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.norm",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::normalize() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.normalize",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::operator[](int)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__setitem__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::operator[](int) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.__getitem__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::plus(rack::math::Vec) const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.plus",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::rotate(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.rotate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::round() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.round",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::math::Vec::square() const",
+      "kind": "method",
+      "raw": "rackpy.raw.math.Vec.square",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::Exception",
+      "kind": "class",
+      "raw": "rackpy.raw.Exception",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::Quantity",
+      "kind": "class",
+      "raw": "rackpy.raw.Quantity",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Rect",
+      "id": "record:rack::math::Rect",
+      "kind": "class",
+      "raw": "rackpy.raw.math.Rect",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.math.Vec",
+      "id": "record:rack::math::Vec",
+      "kind": "class",
+      "raw": "rackpy.raw.math.Vec",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::API_URL",
+      "kind": "constant",
+      "raw": "rackpy.raw.API_URL",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::APP_CPU",
+      "kind": "constant",
+      "raw": "rackpy.raw.APP_CPU",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::APP_CPU_NAME",
+      "kind": "constant",
+      "raw": "rackpy.raw.APP_CPU_NAME",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::APP_EDITION",
+      "kind": "constant",
+      "raw": "rackpy.raw.APP_EDITION",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::APP_EDITION_NAME",
+      "kind": "constant",
+      "raw": "rackpy.raw.APP_EDITION_NAME",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::APP_NAME",
+      "kind": "constant",
+      "raw": "rackpy.raw.APP_NAME",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::APP_OS",
+      "kind": "constant",
+      "raw": "rackpy.raw.APP_OS",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::APP_OS_NAME",
+      "kind": "constant",
+      "raw": "rackpy.raw.APP_OS_NAME",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::APP_VERSION",
+      "kind": "constant",
+      "raw": "rackpy.raw.APP_VERSION",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::APP_VERSION_MAJOR",
+      "kind": "constant",
+      "raw": "rackpy.raw.APP_VERSION_MAJOR",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::color::BLACK",
+      "kind": "constant",
+      "raw": "rackpy.raw.color.BLACK",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::color::BLACK_TRANSPARENT",
+      "kind": "constant",
+      "raw": "rackpy.raw.color.BLACK_TRANSPARENT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::color::BLUE",
+      "kind": "constant",
+      "raw": "rackpy.raw.color.BLUE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::color::CYAN",
+      "kind": "constant",
+      "raw": "rackpy.raw.color.CYAN",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::color::GREEN",
+      "kind": "constant",
+      "raw": "rackpy.raw.color.GREEN",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::color::MAGENTA",
+      "kind": "constant",
+      "raw": "rackpy.raw.color.MAGENTA",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::color::RED",
+      "kind": "constant",
+      "raw": "rackpy.raw.color.RED",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::color::WHITE",
+      "kind": "constant",
+      "raw": "rackpy.raw.color.WHITE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::color::WHITE_TRANSPARENT",
+      "kind": "constant",
+      "raw": "rackpy.raw.color.WHITE_TRANSPARENT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::color::YELLOW",
+      "kind": "constant",
+      "raw": "rackpy.raw.color.YELLOW",
+      "status": "implemented"
+    }
+  ],
+  "inputs": "a03aaaedce663727",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

@@ -14,6 +14,14 @@ declaration's status in the binding manifest that CI checks. The
 coverage
 ```
 
+## Bound so far
+
+```{toctree}
+:maxdepth: 1
+
+values
+```
+
 ## The SDK surface, by family
 
 Generated from the [SDK inventory](surface-schema.md) of Rack

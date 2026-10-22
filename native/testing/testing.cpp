@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <thread>
 #include <vector>
 
 #include "rackpy/runtime/context.hpp"
@@ -261,6 +262,29 @@ void define(py::module_ m) {
 		leaked->emplace_back(std::move(o));
 	});
 	m.def("record_diagnostic", [](const std::string& message) { diagnose(DiagnosticCode::Test, message.c_str()); });
+
+	// Family 1 (RP-12): paths only Rack can take.
+	m.def("throw_rack_exception", [](const std::string& message) { throw rack::Exception("%s", message.c_str()); });
+	m.def("quantity_string_as_rack", [](rack::Quantity& q) {
+		// As a widget would: on the main thread, without the GIL, so Python overrides go through callPython.
+		py::gil_scoped_release release;
+		return q.getString();
+	});
+	m.def("read_quantity_on_rack_thread", [](rack::Quantity& q, int reads) {
+		// As Core MIDI-Map would: on a thread with a Rack context, where Python must never run.
+		float last = 0.f;
+		{
+			py::gil_scoped_release release;
+			std::thread worker([&] {
+				rack::contextSet(foreignContext());
+				for (int i = 0; i < reads; i++)
+					last = q.getValue() + q.getMinValue() + q.getMaxValue() + q.getDefaultValue() - q.getMinValue() -
+						q.getMaxValue() - q.getDefaultValue();
+			});
+			worker.join();
+		}
+		return last;
+	});
 	m.def("finalize_outcome", &finalizeOutcome);
 
 	// Drop the hooks' own callback references when the plugin is destroyed (but not the deliberate leaks).

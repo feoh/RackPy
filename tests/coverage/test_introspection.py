@@ -40,7 +40,10 @@ def test_introspection_comes_from_the_running_package(artifact: Path) -> None:
     assert objects["rackpy.raw"]["kind"] == "module"
     assert objects["rackpy.errors.StaleHandleError"]["kind"] == "class"
     assert objects["rackpy.runtime.diagnostics"]["kind"] == "function"
-    assert not [name for name in objects if name.startswith("rackpy.raw.")], "nothing is bound yet"
+    assert objects["rackpy.raw.math.Vec"]["kind"] == "class"
+    assert objects["rackpy.raw.math.Vec.__add__"]["kind"] == "function"
+    assert objects["rackpy.raw.Exception.msg"]["kind"] == "attribute"
+    assert objects["rackpy.math.Rect"]["kind"] == "class"
 
 
 def test_manifest_checks_against_the_built_package(artifact: Path) -> None:
