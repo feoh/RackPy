@@ -3,7 +3,6 @@
 
 import hashlib
 import json
-import subprocess
 from pathlib import Path
 from types import ModuleType
 from typing import Any
@@ -31,8 +30,7 @@ def entries(surface: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 def test_committed_inventory_is_current(inventory: ModuleType, real_sdk: Path, surface: dict[str, Any]) -> None:
     # The inventory records the exact libclang it was extracted with, so only that build can reproduce it.
-    found = subprocess.run(["clang++", "-print-file-name=libclang.so"], capture_output=True, text=True, check=True)
-    libclang = Path(found.stdout.strip())
+    libclang: Path = inventory.find_libclang("clang++")
     recorded = surface["toolchain"]
     same = libclang.is_file() and hashlib.sha256(libclang.read_bytes()).hexdigest() == recorded["libclang_sha256"]
     require(

@@ -159,8 +159,16 @@ Ninja 1.13.2, uv 0.9.18, Rack Free 2.6.6 headless.
 
 - `upstream/api-surface.json` records the libclang build that produced it, so
   only that build (clang 23.1.3 here) can reproduce it. CI's inventory job
-  allows `pinned-libclang` and skips that one comparison visibly. Reproducing it
-  in CI needs that exact LLVM, for example from the Arch Linux package archive.
+  allows `pinned-libclang` and skips that one comparison visibly; the extractor's
+  fixture tests run on LLVM 21 from apt.llvm.org, which moves with point
+  releases (21.1.8 when this was written). The extraction also depends on the
+  libstdc++ headers, so reproducing it in CI would need both the recorded LLVM
+  and GCC, for example from the Arch Linux package archive.
+- The first CI run found two portability bugs in the RP-05 extractor's
+  environment: Debian and Ubuntu keep `libclang.so` in the LLVM tree, where
+  `clang++ -print-file-name` does not look (`find_libclang` now falls back to
+  it), and the pinned `clang==21.1.7` bindings need libclang 21 or newer, while
+  Ubuntu 24.04 ships 18.
 - `bin/rack-sdk survey` compares a clang JSON AST dump and is not run in CI for
   the same reason.
 - The plugin is rejected, and `destroy()` never runs, if `plugin.json` names a

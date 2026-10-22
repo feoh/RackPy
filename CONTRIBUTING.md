@@ -25,7 +25,7 @@ You need:
 | [uv](https://docs.astral.sh/uv/) ≥ 0.9.18 | Python environments, tools and the `bin/` scripts |
 | CMake ≥ 3.25, Ninja, GCC with C++17 | the native build |
 | binutils (`readelf`, `nm`, `objdump`), GNU Make, `jq` | bundle inspection; the SDK probe and spikes use the SDK's own makefiles |
-| clang with `libclang.so` | the SDK inventory (`-m inventory`) |
+| clang ≥ 21 with `libclang.so` | the SDK inventory (`-m inventory`); the pinned Python bindings need libclang 21 or newer |
 | Xvfb (`xvfb-run`) and Mesa | windowed-Rack tests (`-m gui`) |
 | Docker | only to build the official Rack toolchain (`bin/rack-toolchain build`) |
 | Rack's runtime libraries: libGL, libX11, ALSA, JACK and PulseAudio client libraries | the native tests link `libRack.so`, and the host tests run Rack |
@@ -105,7 +105,7 @@ and on pull requests, on `ubuntu-24.04`:
 | Planning data | `bin/planning-check`, `bin/callback-matrix check` |
 | Hooks, typing and unit tests | `uv sync --frozen`, `prek run --all-files`, `pytest -m unit` |
 | SDK pins, native build and audio-path guard | `bin/rack-sdk verify`, `closure`, `probe`; `pytest -m "native and not host"` |
-| SDK inventory | `pytest -m inventory` with Ubuntu's clang; see below |
+| SDK inventory | `pytest -m inventory` with LLVM 21 from apt.llvm.org; see below |
 | Rack host smoke tests | `pytest -m "host and not dist"`: the skeleton, the RP-04 spike and the RP-06 probe in Rack Free 2.6.6 |
 | Distributable build (not on pull requests) | builds or restores the official toolchain, then `pytest -m dist` |
 
@@ -114,9 +114,10 @@ for 14 days. CI keeps no binaries: distributing a build needs the RP-39 license
 manifest and owner approval.
 
 **Known gap.** `upstream/api-surface.json` records the libclang build that
-produced it (clang 23.1.3 on the planning machine). Ubuntu's LLVM cannot
+produced it (clang 23.1.3 on the planning machine). CI's LLVM 21 cannot
 reproduce that record, so the inventory job allows `pinned-libclang` and skips
-that one comparison, visibly. Re-extracting needs the recorded libclang.
+that one comparison, visibly; the fixture tests of the extractor still run.
+Re-extracting needs the recorded libclang.
 
 ## Definition of done for implementation tasks
 

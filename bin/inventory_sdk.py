@@ -130,14 +130,32 @@ NATIVE = ("lin-x64", "lin-x64-simde")
 # --- libclang helpers -------------------------------------------------------
 
 
+def find_libclang(clangxx: str) -> Path:
+    """libclang.so from the same LLVM as `clangxx`.
+
+    `-print-file-name` finds it where the library sits on the compiler's search
+    path (Arch: /usr/lib). Debian and Ubuntu keep it in the LLVM tree instead
+    (/usr/lib/llvm-N/lib), which is two levels above the resource directory.
+    """
+    found = subprocess.run([clangxx, "-print-file-name=libclang.so"], capture_output=True, text=True, check=True)
+    direct = Path(found.stdout.strip())
+    if direct.is_absolute() and direct.is_file():
+        return direct
+    resource = subprocess.run([clangxx, "-print-resource-dir"], capture_output=True, text=True, check=True)
+    libdir = Path(resource.stdout.strip()).parents[1]
+    for pattern in ("libclang.so", "libclang.so.*", "libclang-[0-9]*.so*"):
+        if candidates := sorted(libdir.glob(pattern)):
+            return candidates[0]
+    return direct
+
+
 def configure_libclang(libclang: Path | None, clangxx: str) -> tuple[str, str]:
     """Load libclang from the same LLVM as `clangxx`; return (libclang path, resource dir)."""
     resource = subprocess.run(
         [clangxx, "-print-resource-dir"], capture_output=True, text=True, check=True
     ).stdout.strip()
     if libclang is None:
-        found = subprocess.run([clangxx, "-print-file-name=libclang.so"], capture_output=True, text=True, check=True)
-        libclang = Path(found.stdout.strip())
+        libclang = find_libclang(clangxx)
     if not libclang.is_file():
         raise ExtractionError(f"libclang not found at {libclang}; pass --libclang")
     if not ci.Config.loaded:
