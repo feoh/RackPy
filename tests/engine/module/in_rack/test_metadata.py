@@ -55,7 +55,7 @@ def test_metadata_matches_native_reference(reference: dict[str, Any]) -> None:
                 assert list(m.input_infos)[i] is inp
                 assert isinstance(inp, PortInfoView) and isinstance(light, LightInfoView)
                 # Distinct adapters: no claim to map standalone subclass factories.
-                assert not isinstance(inp, PortInfo)
+                assert type(inp) is PortInfoView
                 inp.name = out.name = light.name = "Renamed"
                 assert inp.get_full_name() == "Renamed input"
                 assert out.get_full_name() == "Renamed output"

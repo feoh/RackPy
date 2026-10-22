@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # rackpy-example: runs-in=rack
 from rackpy.engine import Module
+from rackpy.raw.engine import LightInfo, PortInfo
 
 
 def describe(module: Module) -> None:
@@ -11,6 +12,9 @@ def describe(module: Module) -> None:
 
 
 module = Module.create(describe)
+standalone_port, standalone_light = PortInfo(), LightInfo()
+standalone_port.module = standalone_light.module = module
+assert standalone_port.module is standalone_light.module is module
 try:
     info = module.get_input_info(0)
     assert info is module.input_infos[0]
@@ -19,3 +23,6 @@ try:
 finally:
     module.close()
 assert not info.alive
+assert standalone_port.module is standalone_light.module is None
+standalone_port.name = "Independent"
+assert standalone_port.get_name() == "Independent"

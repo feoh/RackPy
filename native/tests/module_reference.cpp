@@ -26,6 +26,22 @@ int main() {
 		}
 		json_array_append_new(cases, c);
 	}
+	// The public standalone pointer fields are nullable and reassignable;
+	// RackPy additionally clears them when the borrowed owner is destroyed.
+	{
+		rack::engine::Module first, second;
+		rack::engine::PortInfo port;
+		rack::engine::LightInfo light;
+		json_t* links = json_array();
+		json_array_append_new(links, json_boolean(port.module == nullptr && light.module == nullptr));
+		port.module = light.module = &first;
+		json_array_append_new(links, json_boolean(port.module == &first && light.module == &first));
+		port.module = light.module = &second;
+		json_array_append_new(links, json_boolean(port.module == &second && light.module == &second));
+		port.module = light.module = nullptr;
+		json_array_append_new(links, json_boolean(port.module == nullptr && light.module == nullptr));
+		json_object_set_new(root, "standalone_backreferences", links);
+	}
 	json_t* metadata = json_array();
 	json_object_set_new(root, "metadata", metadata);
 	for (std::string name : {"", "Pitch", "λ / 𝄞"}) {

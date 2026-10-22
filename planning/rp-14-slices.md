@@ -97,7 +97,7 @@ commits. The built-in child cannot close B2/B/14.
 
 ### RP-14B2b bounded groundwork
 
-RP-14B2b additionally waits for this child; completing it leaves all other
+RP-14B2b additionally waits for the children below; completing them leaves all other
 original B2b obligations on the parent. No backwards dependencies on C/16 are
 introduced and no original acceptance criterion is relaxed.
 
@@ -123,6 +123,24 @@ not new counted declarations or promotions. Full factories, standalone objects,
 metadata module/identity/vector fields, smoothing ownership and laboratory
 virtual semantics remain B2b/RP-22. This child does not close B2b/B2/B/14 or the
 implementation phase.
+
+**RP-14B2b2 — lifetime-safe standalone metadata module backreferences**
+(`tk-rackpy-14b2b2-lifetime-safe-standalone-metadata--3566d5`). Exact scope:
+`field:rack::engine::PortInfo::module` and
+`field:rack::engine::LightInfo::module`. Add nullable mutable weak backreferences
+to live RackPy Modules, preserving identity without owning the module or
+transferring metadata into its slots. Clear actual native pointers before owner
+teardown/GC/constructor rollback, preserve reassignment and failure atomicity,
+prune expired native registrations, and synchronize standalone metadata deletion
+on another thread without Python work in module cleanup. Field access is
+main-thread-only; closed/wrong-type assignments leave the old link intact.
+Validate native pointer clearing/reassignment/pruning/deletion races, real Rack
+startup/live UI native differential/null/identity/subclass/error/thread/rollback
+and 1,000 owner/metadata churns. Update types, executable snippet, prose, exact
+manifest entries, generated evidence and full relevant checks; commit/checkpoint.
+This child does not complete class factories, raw metadata collections, quantity
+subclasses, smoothing ownership or callback-laboratory semantics. Those remain
+on B2b; B2/B/14 and the implementation phase retain their original exit gates.
 
 ## RackPy 14C: native lifecycle events and identity adapters
 

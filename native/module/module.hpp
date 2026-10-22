@@ -4,7 +4,9 @@
 #pragma once
 #include <rack.hpp>
 
+#include <algorithm>
 #include <memory>
+#include <mutex>
 #include <stdexcept>
 
 #include "rackpy/runtime/context.hpp"
@@ -12,13 +14,49 @@
 namespace rackpy {
 namespace module {
 
+/** A Python-owned metadata object keeps this registration alive, not its
+module. Expiration removes the subscription; module teardown clears the actual
+SDK pointer without touching Python. Registration and module deletion are
+main-thread-only. A standalone metadata object's last Python reference may die
+on another thread: detach synchronizes with clear before its SDK field dies.
+This is not an audio-path primitive; engine-owned metadata factories are separate. */
+struct ModuleBackreference {
+	explicit ModuleBackreference(rack::engine::Module** target) : target(target) {}
+	void clear() {
+		std::lock_guard<std::mutex> lock(mutex);
+		if (target)
+			*target = nullptr;
+	}
+	void detach() {
+		std::lock_guard<std::mutex> lock(mutex);
+		target = nullptr;
+	}
+private:
+	std::mutex mutex;
+	rack::engine::Module** target;
+};
+
 struct Module : rack::engine::Module {
 	std::shared_ptr<runtime::ObjectToken> token = std::make_shared<runtime::ObjectToken>(nullptr);
 	// One generation per metadata slot. Replacement must invalidate retained
 	// views even while the module (and its component token) is still alive.
 	using Tokens = std::vector<std::shared_ptr<runtime::ObjectToken>>;
 	Tokens paramQuantityTokens, inputInfoTokens, outputInfoTokens, lightInfoTokens;
+	std::vector<std::weak_ptr<ModuleBackreference>> backreferences;
+	std::shared_ptr<ModuleBackreference> trackBackreference(rack::engine::Module** target) {
+		runtime::requireMainThread("linking standalone metadata to a module");
+		// Prune on registration, so repeated reassignments/deleted metadata do
+		// not leave an unbounded history on a long-lived module.
+		backreferences.erase(std::remove_if(backreferences.begin(), backreferences.end(),
+			[](const auto& link) { return link.expired(); }), backreferences.end());
+		auto link = std::make_shared<ModuleBackreference>(target);
+		backreferences.push_back(link);
+		return link;
+	}
 	~Module() override {
+		for (auto& weak : backreferences)
+			if (auto link = weak.lock())
+				link->clear();
 		token->invalidate();
 		for (auto* slots : {&paramQuantityTokens, &inputInfoTokens, &outputInfoTokens, &lightInfoTokens})
 			for (auto& slot : *slots)

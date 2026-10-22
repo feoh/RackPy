@@ -88,8 +88,22 @@ setter.
 Names and descriptions shown in Rack's UI. `PortInfo.get_full_name()` appends
 " input" or " output" to `get_name()`. A Python subclass may override
 `get_name` and `get_description` (Rack calls them on the UI thread). The
-standalone `module` field, a pointer back to the module, is not bound yet
-(RP-14B2). Module-owned built-in metadata is currently accessed through distinct,
+standalone `module` field is a nullable, mutable **weak** backreference to a
+RackPy `Module`: assigning `info.module = module` preserves identity but neither
+keeps that module alive nor inserts the metadata into its collections. Assign
+`None` to detach or another live module to reassign. Closed modules raise
+`StaleHandleError`; other object types raise `TypeError`, without changing the
+previous link. Reading or writing this field requires the main thread
+(`ThreadError` otherwise), even though the standalone object is Python-owned.
+
+Module closure, garbage collection, or failed construction clears both the
+actual native pointer and the Python property to `None`. The standalone metadata
+itself remains usable. Native teardown does not call Python; metadata destruction
+on a worker synchronizes only its standalone backreference cleanup. This is not
+an audio-path adapter or engine ownership transfer. Complete metadata class
+factories and mutable raw module collections remain RP-14B2b work.
+
+Module-owned built-in metadata is currently accessed through distinct,
 lifetime-checked `PortInfoView` / `LightInfoView` adapters, not these standalone
 classes; see [Module metadata](engine-module.md#built-in-port-and-light-metadata).
 

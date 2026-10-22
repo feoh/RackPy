@@ -12,6 +12,7 @@ struct ModuleRef {
 	module::Module& get() const { return state->get(); }
 };
 
+pybind11::object moduleObject(const std::shared_ptr<module::Construction>& state);
 void bindModule(pybind11::module_ engine);
 
 }  // namespace bindings

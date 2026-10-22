@@ -83,6 +83,7 @@ class Input(Port): ...
 class Output(Port): ...
 
 class PortInfo:
+    module: Module | None
     type: Port.Type
     port_id: int
     name: str
@@ -271,6 +272,7 @@ class Module:
     def bypass_routes(self) -> tuple[BypassRoute, ...]: ...
 
 class LightInfo:
+    module: Module | None
     light_id: int
     name: str
     description: str

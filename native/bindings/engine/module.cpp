@@ -15,14 +15,14 @@
 namespace rackpy {
 namespace bindings {
 
-namespace {
-
-enum class Kind { Param, Input, Output, Light, ParamQuantity, InputInfo, OutputInfo, LightInfo };
-
 py::object moduleObject(const std::shared_ptr<module::Construction>& state) {
 	auto& m = state->get();
 	return runtime::identity(&m, m.token->generation, [&] { return py::cast(ModuleRef{state}); });
 }
+
+namespace {
+
+enum class Kind { Param, Input, Output, Light, ParamQuantity, InputInfo, OutputInfo, LightInfo };
 
 /** A metadata view never owns the Module or the underlying metadata. Its
 slot generation dies on replacement, independently of the Module lifetime. */

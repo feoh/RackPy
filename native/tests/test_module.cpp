@@ -125,5 +125,50 @@ int main() {
 		c.close();
 		assert(!last->alive());
 	}
+	{
+		Construction first, second;
+		rack::engine::PortInfo port;
+		rack::engine::LightInfo light;
+		auto portLink = first.get().trackBackreference(&port.module);
+		auto lightLink = first.get().trackBackreference(&light.module);
+		port.module = light.module = &first.get();
+		// Retire the old subscription before pointing at a different module.
+		portLink->detach();
+		portLink = second.get().trackBackreference(&port.module);
+		port.module = &second.get();
+		first.abort();
+		assert(light.module == nullptr && port.module == &second.get());
+		second.abort();
+		assert(port.module == nullptr);
+	}
+	{
+		Construction c;
+		rack::engine::PortInfo port;
+		std::shared_ptr<rackpy::module::ModuleBackreference> link;
+		for (int i = 0; i < 1000; ++i) {
+			if (link)
+				link->detach();
+			link = c.get().trackBackreference(&port.module);
+			port.module = &c.get();
+			assert(c.get().backreferences.size() <= 2);
+		}
+		link->detach();
+		link.reset();
+		auto last = c.get().trackBackreference(&port.module);
+		assert(c.get().backreferences.size() == 1);
+		c.abort();
+		assert(port.module == nullptr);
+	}
+	// Native deletion of standalone metadata can race main-thread module
+	// cleanup. detach completes before the actual SDK field ceases to exist.
+	for (int i = 0; i < 100; ++i) {
+		Construction c;
+		auto info = std::make_unique<rack::engine::PortInfo>();
+		info->module = &c.get();
+		auto link = c.get().trackBackreference(&info->module);
+		std::thread worker([&] { link->detach(); info.reset(); });
+		c.abort();
+		worker.join();
+	}
 	return 0;
 }
