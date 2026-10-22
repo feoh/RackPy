@@ -3,13 +3,14 @@
   "retrieved_at": "2026-10-21T21:07:08Z",
   "notes": [
     "Page and block hashes are of the HTML as served and of each <pre> element's unescaped text (UTF-8). bin/manual-sources check re-derives them.",
-    "No manual text or code is stored in this repository. Code stays in the cache outside git until the license gate is resolved.",
-    "Classification: port = primary example to port; supporting-fragment = folded into the port named by part_of; illustration = explains a concept and is not ported; duplicate = covered by duplicate_of; shell/config/transcript = documented with a RackPy equivalent, not adapted; out-of-scope = not plugin API."
+    "Classification: port = primary example to port; supporting-fragment = folded into the port named by part_of; illustration = explains a concept and is not ported; duplicate = covered by duplicate_of; shell/config/transcript = documented with a RackPy equivalent, not adapted; out-of-scope = not plugin API.",
+    "No manual text or code is stored in this repository, and RackPy examples do not adapt it.",
+    "port_gate: original-example = RackPy writes its own example for the feature and links the source section; clear-with-attribution = may be derived from GPL Rack source (helper.py) with attribution; not-adapted = documented with a RackPy equivalent or out of scope."
   ],
   "manual": {
     "license_status": "unclear",
     "evidence": "No license is displayed on the manual pages. The manual index contains a CC BY-SA 4.0 statement inside an HTML comment, so it is not shown to readers.",
-    "gate": "Owner decision required before adapting code; see docs/decisions/001-licensing-and-identity.md"
+    "gate": "None for RackPy examples: by owner decision (ADR 001, option C) they are original code covering each sample's feature, not adaptations of the manual's code."
   },
   "pages": {
     "tutorial": {
@@ -164,7 +165,7 @@
       "port_task": "RP-33",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "part_of": "tutorial-07"
     },
     {
@@ -179,7 +180,7 @@
       "port_task": "RP-33",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-01",
@@ -193,7 +194,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "part_of": "guide-02"
     },
     {
@@ -208,7 +209,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-03",
@@ -222,7 +223,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-04",
@@ -236,7 +237,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-05",
@@ -250,7 +251,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-06",
@@ -264,7 +265,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-07",
@@ -278,7 +279,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "callback_note": "processBypass runs on the audio path: native in production, Python only in the RP-22 laboratory"
     },
     {
@@ -293,7 +294,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "erratum": "onRandomize is declared with const ResetEvent&; the override needs const RandomizeEvent& and does not compile as written"
     },
     {
@@ -308,7 +309,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-10",
@@ -322,7 +323,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-11",
@@ -336,7 +337,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-12",
@@ -350,7 +351,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-13",
@@ -364,7 +365,7 @@
       "port_task": "RP-36",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-14",
@@ -378,7 +379,7 @@
       "port_task": "RP-36",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-15",
@@ -392,7 +393,7 @@
       "port_task": "RP-36",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-16",
@@ -406,7 +407,7 @@
       "port_task": "RP-36",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "part_of": "guide-15"
     },
     {
@@ -421,7 +422,7 @@
       "port_task": "RP-35",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "asset_note": "Needs original light/dark panel SVGs; the guide's VCO panels are not copied"
     },
     {
@@ -436,7 +437,7 @@
       "port_task": "RP-35",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "erratum": "Comment says blue stroke; code strokes red (nvgRGBf(1, 0, 0))"
     },
     {
@@ -451,7 +452,7 @@
       "port_task": "RP-35",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "part_of": "guide-18"
     },
     {
@@ -466,7 +467,7 @@
       "port_task": "RP-35",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "asset_note": "Needs a font RackPy may redistribute; res/MyFont.ttf is a placeholder name"
     },
     {
@@ -481,7 +482,7 @@
       "port_task": "RP-35",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-22",
@@ -495,7 +496,7 @@
       "port_task": "RP-35",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license"
+      "port_gate": "original-example"
     },
     {
       "id": "guide-23",
@@ -509,7 +510,7 @@
       "port_task": "RP-35",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "part_of": "guide-22"
     },
     {
@@ -524,7 +525,7 @@
       "port_task": "RP-36",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "part_of": "guide-25"
     },
     {
@@ -539,7 +540,7 @@
       "port_task": "RP-36",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "erratum": "std::sin(2.f * M_PI * phase) passes the array; it must use phase[c]"
     },
     {
@@ -554,7 +555,7 @@
       "port_task": "RP-36",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "part_of": "guide-25"
     },
     {
@@ -569,7 +570,7 @@
       "port_task": "RP-36",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "part_of": "guide-25"
     },
     {
@@ -584,7 +585,7 @@
       "port_task": "RP-36",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "part_of": "guide-30"
     },
     {
@@ -599,7 +600,7 @@
       "port_task": "RP-36",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "part_of": "guide-30"
     },
     {
@@ -614,7 +615,7 @@
       "port_task": "RP-36",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "erratum": "float_t freq should be float_4; simd::sin(2.f * M_PI * phase) passes the array and must use phase[c / 4]"
     },
     {
@@ -744,7 +745,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "part_of": "guide-05"
     },
     {
@@ -759,7 +760,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "part_of": "migrate2-06"
     },
     {
@@ -774,7 +775,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "note": "Uses the correct RandomizeEvent type that guide-08 gets wrong"
     },
     {
@@ -819,7 +820,7 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "blocked-pending-license",
+      "port_gate": "original-example",
       "part_of": "guide-03"
     },
     {

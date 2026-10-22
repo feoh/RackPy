@@ -7,7 +7,7 @@ access to the complete supported public C++ plugin API. It will run **inside Rac
 not as an external remote-control service.
 
 > **Planning repository — no runtime is implemented yet.**
-> There is no installable package, working binding, or completed sample port.
+> There is no installable package, working binding, or completed example.
 > API designs below are proposals, not promises of available functionality.
 
 ## What we are building
@@ -18,7 +18,8 @@ not as an external remote-control service.
 - Native audio processing, with Python handling configuration and suitable UI work.
 - A tested story for ownership, thread affinity, interpreter lifetime, and errors.
 - Human-written tutorials and explanations alongside generated API reference.
-- Attributed ports of official Rack tutorial/API-guide examples.
+- Original, runnable examples for every feature the official Rack tutorial,
+  API guide and plugin template demonstrate.
 - Reproducible Linux, macOS, and Windows packages, subject to feasibility gates.
 
 **“Complete” is a release criterion, not the current state.** It means the pinned
@@ -36,7 +37,7 @@ they must not disappear from the coverage denominator.
 | Check licenses, assets and sample provenance | [Licensing](docs/licensing.md) |
 | Understand the Python/native boundary | [Architecture](docs/architecture.md) |
 | See how completeness will be proved | [API coverage contract](docs/coverage.md) |
-| Review the planned sample ports | [Example inventory](examples/README.md) |
+| Review the planned examples | [Example inventory](examples/README.md) |
 | Understand performance requirements | [Performance and safety](docs/performance.md) |
 | See the documentation experience we intend | [Documentation plan](docs/documentation.md) |
 | Pick up implementation work | [Execution plan](planning/README.md) |
@@ -71,5 +72,5 @@ artwork, logos, fonts, binaries, or SDK are redistributed here.
 RackPy is an independent project **for VCV Rack**, not an official VCV product.
 The name was changed from VCVPy during planning. The terms, the asset ledger,
 sample provenance and the name checks are in [licensing](docs/licensing.md).
-Ports of manual code wait for an owner decision on the manual's license
+RackPy's examples are original code, not adaptations of the VCV manual
 ([ADR 001](docs/decisions/001-licensing-and-identity.md)).

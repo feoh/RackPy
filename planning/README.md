@@ -71,6 +71,19 @@ all Fundamental modules, a general Python-to-native DSP compiler, untrusted-code
 sandboxing, Rack Pro/DAW embedding support without explicit testing, and
 redistributing the Rack SDK or restricted graphics.
 
+## Owner amendments
+
+**2026-10-21: examples, not manual ports.** In RP-33 to RP-36 and RP-42, "port"
+now means an *original* RackPy example that demonstrates the same feature as
+an official tutorial, API guide or template sample, linked to its source
+section. RackPy does not copy or adapt the VCV manual's code or text, so the
+manual's unclear license does not gate these tasks. The `helper.py` plugin
+template may still be derived from GPL Rack source with attribution. Coverage
+of every sample's feature is still required; see
+[ADR 001](../docs/decisions/001-licensing-and-identity.md). The task contracts
+below keep their original wording; this amendment and the Witan comments on
+those tasks take precedence.
+
 ## Witan project and recovery history
 
 The initial WorkflowProject search/create returned:

@@ -6,7 +6,7 @@ The future site should use four complementary kinds of writing.
 ## Tutorials — a guided first success
 
 1. Install a known-good platform artifact and confirm plugin/runtime versions.
-2. Build the official sine oscillator port using Python configuration and native DSP.
+2. Build a sine oscillator, as the official tutorial does, using Python configuration and native DSP.
 3. Add a control, a port, a light and an original panel.
 4. Save, reopen and safely remove a module.
 5. Diagnose a deliberately broken script without crashing Rack.
