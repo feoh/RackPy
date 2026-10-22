@@ -27,9 +27,11 @@ def test_version_matches_pyproject() -> None:
 
 
 def test_package_exports_nothing_but_the_version() -> None:
-    # The skeleton binds no Rack API; anything public here would be an unbacked claim.
+    # No Rack API is bound yet; anything public here would be an unbacked claim. The submodules
+    # rackpy.errors and rackpy.runtime are RackPy's own runtime API, not Rack bindings.
     assert rackpy.__all__ == ["__version__"]
-    assert not [n for n in vars(rackpy) if not n.startswith("_")]
+    names = [n for n, v in vars(rackpy).items() if not n.startswith("_") and not isinstance(v, types.ModuleType)]
+    assert names == []
 
 
 def test_bootstrap_outside_rack_names_the_reason(monkeypatch: pytest.MonkeyPatch) -> None:

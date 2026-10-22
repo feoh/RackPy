@@ -29,6 +29,9 @@ exclude_patterns = ["_build", "_ext", "snippets", "Thumbs.db", ".DS_Store"]
 nitpicky = True
 # Warnings are errors (sphinx-build -W); these are the only reviewed exceptions.
 suppress_warnings: list[str] = []
+# The build is offline (no intersphinx), so references to standard-library
+# types in signatures cannot resolve. They are not RackPy's to document.
+nitpick_ignore_regex = [("py:class", r"(collections\.abc|typing)\.\w+")]
 
 # --- Markdown ---
 myst_heading_anchors = 4

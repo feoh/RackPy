@@ -50,7 +50,7 @@ missing or different SDK is a configure error, not a warning.
 
 | Command | What it does |
 | --- | --- |
-| `bin/rackpy-dev build [--werror] [--toolchain rack-lin-x64]` | Configure, build, run the native unit tests |
+| `bin/rackpy-dev build [--werror] [--toolchain rack-lin-x64] [--test-hooks]` | Configure, build, run the native unit tests. `--test-hooks` adds the RuntimeProbe module the runtime tests drive; never distribute that build |
 | `bin/rackpy-dev bundle DEST [--runtime link\|copy]` | Install the build as the Rack plugin directory `DEST/RackPy` |
 | `bin/rackpy-dev inspect DEST/RackPy [--max-glibc 2.23]` | Check exports, `NEEDED`, `RUNPATH`, Python references and the glibc floor |
 | `bin/rackpy-dev audio-symbols FILE...` | Fail if an object references CPython (ADR 004's audio-path rule) |

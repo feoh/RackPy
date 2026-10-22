@@ -37,5 +37,19 @@ def start(plugin_dir: str, entry: str) -> None:
         importlib.import_module(entry)
 
 
+def context_closing() -> None:
+    """Rack is shutting down and the bound context is still alive: let plugin code stop its threads."""
+    from rackpy import runtime
+
+    runtime._run_closing_callbacks()
+
+
 def stop() -> None:
-    """Called before the interpreter is finalized. Nothing needs stopping yet."""
+    """Called from plugin destroy(), before the interpreter is finalized.
+
+    If RackPy never bound a context (no RackPy module was ever created),
+    context_closing() did not run, so the closing callbacks run here instead.
+    """
+    from rackpy import runtime
+
+    runtime._run_closing_callbacks()

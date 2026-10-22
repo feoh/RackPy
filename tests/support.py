@@ -5,6 +5,7 @@ import json
 import os
 import platform
 import shutil
+import signal
 import subprocess
 import sys
 import time
@@ -60,7 +61,7 @@ def require_tools(*names: str) -> None:
 
 @dataclass(frozen=True)
 class RackRun:
-    returncode: int
+    returncode: int | None  # None: killed by the watchdog
     log: str
 
     def lines(self, marker: str) -> list[str]:
@@ -108,6 +109,44 @@ def run_rack(rack: Path, user: Path, *, settle: float = 1.0, timeout: float = 60
         text = log.read_text(errors="replace") if log.exists() else "(no log)"
         pytest.fail(f"Rack did not exit within {timeout}s:\n{text[-3000:]}")
     return RackRun(returncode, log.read_text(errors="replace") if log.exists() else "")
+
+
+def run_rack_windowed(rack: Path, user: Path, *, timeout: float = 120) -> RackRun:
+    """Run Rack with a window on a virtual X display until it exits by itself (the test closes the window).
+
+    Needs xvfb-run. Rack renders with Mesa's software renderer and nothing
+    appears on the desktop. On timeout the whole process group (Rack, xvfb-run
+    and Xvfb) is killed and returncode is None.
+    """
+    require("xvfb-run", shutil.which("xvfb-run") is not None, "install Xvfb (xorg-server-xvfb or xvfb)")
+    environ = {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}
+    (user / "autosave").mkdir(parents=True, exist_ok=True)
+    cmd = ["xvfb-run", "-a", "-s", "-screen 0 1600x1000x24", str(rack / "Rack"), "-u", str(user)]
+    proc = subprocess.Popen(
+        cmd,
+        cwd=rack,
+        env=environ,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+    try:
+        returncode: int | None = proc.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        os.killpg(proc.pid, signal.SIGKILL)
+        proc.wait()
+        returncode = None
+    log = user / "log.txt"
+    return RackRun(returncode, log.read_text(errors="replace") if log.exists() else "")
+
+
+def write_patch(user: Path, modules: list[dict[str, object]]) -> None:
+    """Write the autosave patch Rack loads at start. Reference only modules that will load:
+    Rack shows a blocking dialog for unavailable ones, even headless."""
+    (user / "autosave").mkdir(parents=True, exist_ok=True)
+    patch = {"version": "2.6.6", "modules": modules, "cables": []}
+    (user / "autosave" / "patch.json").write_text(json.dumps(patch))
 
 
 def assert_clean_exit(run: RackRun) -> None:

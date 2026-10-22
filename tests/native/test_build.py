@@ -51,6 +51,9 @@ def test_bundle_has_the_expected_dynamic_shape(make_bundle: Callable[[], Path]) 
     assert expected <= layout
     assert "pythonpath/rackpy/__init__.py" in layout
     assert (plugin / "python").is_symlink()
+    manifest = json.loads((plugin / "plugin.json").read_text())
+    assert manifest["modules"] == [] and manifest["name"] == "RackPy"
+    assert b"RuntimeProbe" not in (plugin / "rackpy_host.so").read_bytes(), "test hooks leaked into a production build"
 
 
 def test_inspect_rejects_a_newer_glibc_than_allowed(make_bundle: Callable[[], Path]) -> None:

@@ -18,6 +18,7 @@ endif()
 
 option(RACKPY_WERROR "Treat warnings in RackPy sources as errors" OFF)
 option(RACKPY_BUILD_TESTS "Build the native unit tests (they link the SDK's libRack and run outside Rack)" ON)
+option(RACKPY_TEST_HOOKS "Add the RuntimeProbe module and _rackpy_host._testing (tests only; never ship this)" OFF)
 set(RACKPY_ENTRY "" CACHE STRING "Trusted module the host imports at start-up, or empty")
 
 include(cmake/RackSDK.cmake)
@@ -42,8 +43,17 @@ set_target_properties(rackpy_loader PROPERTIES
 target_include_directories(rackpy_loader PRIVATE native/include)
 target_link_libraries(rackpy_loader PRIVATE rackpy_sdk_plugin)
 
+# The runtime's native-only parts, shared by the host and the native unit tests.
+set(RACKPY_RUNTIME_CORE native/runtime/threads.cpp native/runtime/diagnostics.cpp native/runtime/context.cpp)
+
 # rackpy_host.so: embeds CPython; exports only rackpy_host_init and rackpy_host_destroy.
-add_library(rackpy_host MODULE native/host/host.cpp native/host/host_module.cpp)
+add_library(rackpy_host MODULE native/host/host.cpp native/host/host_module.cpp
+  ${RACKPY_RUNTIME_CORE} native/runtime/python.cpp native/runtime/interpreter.cpp)
+if(RACKPY_TEST_HOOKS)
+  target_sources(rackpy_host PRIVATE native/testing/testing.cpp)
+  target_compile_definitions(rackpy_host PRIVATE RACKPY_TEST_HOOKS)
+  target_include_directories(rackpy_host PRIVATE native/testing)
+endif()
 set_target_properties(rackpy_host PROPERTIES
   PREFIX ""
   CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF
@@ -63,12 +73,28 @@ if(RACKPY_BUILD_TESTS)
   target_include_directories(rackpy_loader_tests PRIVATE native/include native/loader)
   target_link_libraries(rackpy_loader_tests PRIVATE rackpy_sdk_program)
   add_test(NAME loader_config COMMAND rackpy_loader_tests)
+
+  add_executable(rackpy_runtime_tests native/tests/test_runtime.cpp ${RACKPY_RUNTIME_CORE})
+  set_target_properties(rackpy_runtime_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_include_directories(rackpy_runtime_tests PRIVATE native/include)
+  target_link_libraries(rackpy_runtime_tests PRIVATE rackpy_sdk_program)
+  add_test(NAME runtime_core COMMAND rackpy_runtime_tests)
 endif()
 
 # Plugin directory layout. bin/rackpy-dev bundle adds the runtime as python/.
+# Rack rejects a plugin whose manifest and registered models differ, so the
+# test-hooks build declares its probe module and says what it is.
+if(RACKPY_TEST_HOOKS)
+  set(RACKPY_MANIFEST_NAME "RackPy (test hooks build; do not distribute)")
+  set(RACKPY_MANIFEST_MODULES "[{\"slug\": \"RuntimeProbe\", \"name\": \"Runtime probe\", \"description\": \"RackPy test hook\", \"tags\": []}]")
+else()
+  set(RACKPY_MANIFEST_NAME "RackPy")
+  set(RACKPY_MANIFEST_MODULES "[]")
+endif()
+configure_file(packaging/plugin/plugin.json.in plugin.json @ONLY)
 configure_file(packaging/plugin/rackpy-loader.json.in rackpy-loader.json @ONLY)
 install(TARGETS rackpy_loader rackpy_host LIBRARY DESTINATION .)
-install(FILES packaging/plugin/plugin.json "${CMAKE_CURRENT_BINARY_DIR}/rackpy-loader.json" LICENSE NOTICE DESTINATION .)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/plugin.json" "${CMAKE_CURRENT_BINARY_DIR}/rackpy-loader.json" LICENSE NOTICE DESTINATION .)
 install(DIRECTORY src/rackpy DESTINATION pythonpath
   FILES_MATCHING PATTERN "*.py" PATTERN "py.typed"
   PATTERN "__pycache__" EXCLUDE)

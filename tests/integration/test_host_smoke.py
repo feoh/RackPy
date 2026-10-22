@@ -41,6 +41,8 @@ facts = {
     "prefix": sys.prefix,
     "rackpy_file": rackpy.__file__,
     "hijacked": hijacked,
+    "test_hooks": _rackpy_host.TEST_HOOKS,
+    "has_testing": hasattr(_rackpy_host, "_testing"),
 }
 _rackpy_host.log_info("smoke facts " + json.dumps(facts))
 """
@@ -78,6 +80,7 @@ def test_skeleton_loads_into_rack_and_finalizes(
     assert seen["version"] == "3.14.9"
     assert seen["isolated"] == 1 and seen["no_site"] == 1 and seen["ignore_environment"] == 1
     assert seen["dont_write_bytecode"] == 1
+    assert seen["test_hooks"] is False and seen["has_testing"] is False, "a production build must not have test hooks"
     assert seen["hijacked"] is False, "PYTHONPATH or the working directory leaked into sys.path"
     path = seen["path"]
     assert isinstance(path, list) and path[0] == str(plugin / "pythonpath")

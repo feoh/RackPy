@@ -115,10 +115,15 @@ def configure(
     build_dir: Path = DEFAULT_BUILD,
     toolchain: Toolchain = "host",
     werror: bool = False,
+    test_hooks: bool = False,
     entry: str = "",
     cache: CacheOpt = DEFAULT_CACHE,
 ) -> None:
-    """Configure the CMake build with the pinned SDK, runtime and pybind11."""
+    """Configure the CMake build with the pinned SDK, runtime and pybind11.
+
+    --test-hooks adds the RuntimeProbe module and _rackpy_host._testing for the runtime tests.
+    Never distribute such a build.
+    """
     sdk = capture([REPO / "bin" / "rack-sdk", "path"])
     python = runtimes(cache)["3.14"]
     pybind11 = capture(project_tool("python", "-m", "pybind11", "--cmakedir"))
@@ -135,6 +140,7 @@ def configure(
         f"-Dpybind11_DIR={pybind11}",
         f"-DRACKPY_WERROR={'ON' if werror else 'OFF'}",
         f"-DRACKPY_ENTRY={entry}",
+        f"-DRACKPY_TEST_HOOKS={'ON' if test_hooks else 'OFF'}",
     ]
     if toolchain == "rack-lin-x64":
         bindir = capture([REPO / "bin" / "rack-toolchain", "path"])
@@ -153,11 +159,12 @@ def build(
     build_dir: Path = DEFAULT_BUILD,
     toolchain: Toolchain = "host",
     werror: bool = False,
+    test_hooks: bool = False,
     test: bool = True,
     cache: CacheOpt = DEFAULT_CACHE,
 ) -> None:
     """Configure, build and run the native unit tests (CTest)."""
-    configure(build_dir=build_dir, toolchain=toolchain, werror=werror, cache=cache)
+    configure(build_dir=build_dir, toolchain=toolchain, werror=werror, test_hooks=test_hooks, cache=cache)
     run(["cmake", "--build", build_dir])
     if test and toolchain == "host":
         run(["ctest", "--test-dir", build_dir, "--output-on-failure"])

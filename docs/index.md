@@ -32,7 +32,8 @@ public plugin API, proved symbol by symbol; see the
 - **Can I use it yet?** No. [Installation](installation.md) says what exists and
   how to build it from source.
 - **How will it work?** Read the [architecture](architecture.md) and the
-  [decision records](decisions/index.md).
+  [decision records](decisions/index.md). [The embedded runtime](runtime.md)
+  explains what already works: start-up, threads, handles, shutdown and errors.
 - **What will be covered?** The [SDK reference](reference/index.md) lists every
   declaration RackPy must bind, and which are bound (none yet).
 - **Examples?** None are written yet; the [example plan](examples.md) lists the
@@ -50,6 +51,14 @@ then they do not exist, rather than exist as placeholders.
 
 installation
 examples
+```
+
+```{toctree}
+:caption: How it works
+:maxdepth: 1
+:hidden:
+
+runtime
 ```
 
 ```{toctree}
