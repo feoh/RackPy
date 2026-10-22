@@ -3,8 +3,8 @@
 :::{admonition} Incomplete
 :class: warning
 
-RackPy binds no Rack API yet. These pages list what it **must** bind, with each
-declaration's status in the binding manifest that CI checks. The
+RackPy binds only part of the Rack API. These pages list what it **must** bind,
+with each declaration's status in the binding manifest that CI checks. The
 [coverage report](coverage.md) has the totals.
 :::
 
@@ -21,6 +21,7 @@ coverage
 
 values
 engine-components
+engine-module
 ```
 
 ## The SDK surface, by family

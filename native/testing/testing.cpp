@@ -4,6 +4,7 @@
 #include "testing.hpp"
 
 #include "../bindings/engine/components.hpp"
+#include "../bindings/engine/module.hpp"
 
 #include <pybind11/stl.h>
 
@@ -230,6 +231,11 @@ void define(py::module_ m) {
 		ProbeModule& pm = live(h);
 		return py::make_tuple(bindings::borrowParam(&pm.params[0], h.token), bindings::borrowInput(&pm.inputs[0], h.token),
 			bindings::borrowOutput(&pm.outputs[0], h.token), bindings::borrowLight(&pm.lights[0], h.token));
+	});
+	// RP-14A: exercise the native superclass implementation off the engine.
+	// This is a test hook, not the public processBypass/laboratory mapping.
+	m.def("module_process_bypass", [](const bindings::ModuleRef& r) {
+		r.get().processBypass({48000.f, 1.f / 48000.f, 0});
 	});
 	m.def("try_python_on_engine_thread", [](const ModuleHandle& h) { live(h).tryPython.store(true); });
 	m.def("drop_on_engine_thread", [](const ModuleHandle& h, py::object o) {

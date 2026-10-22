@@ -7,6 +7,7 @@ This is a specification and task graph, not a completed implementation.
 - [Detailed human-readable task contracts](TASKS.md)
 - [Machine-readable task contracts and dependency DAG](tasks.json)
 - [Witan slugs and project-recovery state](witan.json)
+- [RP-14 bounded implementation slices](rp-14-slices.md) (supplements the original graph)
 
 Witan is authoritative for live task status, ownership, comments and blockers.
 Git holds a durable copy of task scope; status is deliberately not frozen into

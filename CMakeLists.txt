@@ -86,6 +86,12 @@ if(RACKPY_BUILD_TESTS)
   target_link_libraries(rackpy_runtime_tests PRIVATE rackpy_sdk_program)
   add_test(NAME runtime_core COMMAND rackpy_runtime_tests)
 
+  add_executable(rackpy_module_tests native/tests/test_module.cpp ${RACKPY_RUNTIME_CORE})
+  set_target_properties(rackpy_module_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_include_directories(rackpy_module_tests PRIVATE native/include)
+  target_link_libraries(rackpy_module_tests PRIVATE rackpy_sdk_program)
+  add_test(NAME module_construction COMMAND rackpy_module_tests)
+
   # Rack's own results for the family 1 bindings; tests/values compares rackpy.raw against them inside Rack.
   add_executable(rackpy_values_reference native/tests/values_reference.cpp)
   set_target_properties(rackpy_values_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
@@ -93,6 +99,9 @@ if(RACKPY_BUILD_TESTS)
   add_executable(rackpy_components_reference native/tests/components_reference.cpp)
   set_target_properties(rackpy_components_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_link_libraries(rackpy_components_reference PRIVATE rackpy_sdk_program)
+  add_executable(rackpy_module_reference native/tests/module_reference.cpp)
+  set_target_properties(rackpy_module_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_link_libraries(rackpy_module_reference PRIVATE rackpy_sdk_program)
 endif()
 
 # Plugin directory layout. bin/rackpy-dev bundle adds the runtime as python/.

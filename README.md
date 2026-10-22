@@ -6,11 +6,12 @@ RackPy aims to let you build Rack plugins with idiomatic Python while preserving
 access to the complete supported public C++ plugin API. It will run **inside Rack**,
 not as an external remote-control service.
 
-> **Early development — no Rack API is bound yet.**
-> A build skeleton exists: it builds a Rack plugin that starts and stops an
-> embedded Python interpreter inside Rack, and registers no modules. There is no
-> installable package, working binding, or completed example. API designs below
-> are proposals, not promises of available functionality.
+> **Early development — partial bindings, not a usable instrument toolkit.**
+> The Linux development plugin embeds Python and exposes common values, engine
+> components and scoped module construction. See the [coverage report](docs/reference/coverage.md)
+> for exact gaps. Production builds register no models; plugin/model factories,
+> DSP, lifecycle adapters and the planned instrument examples are not complete.
+> There is no published installable runtime bundle. Broader API designs remain proposals.
 
 ## What we are building
 

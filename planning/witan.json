@@ -7,6 +7,11 @@
   "project_status": "created_and_tasks_attached",
   "project_error": null,
   "project_recovery_task": "RP-01",
+  "supplemental_tasks": {
+    "RP-14A": "tk-rackpy-14a-checked-module-construction-and-compo-131230",
+    "RP-14B": "tk-rackpy-14b-module-parameter-and-component-metada-040154",
+    "RP-14C": "tk-rackpy-14c-native-lifecycle-events-and-identity--929845"
+  },
   "tasks": {
     "RP-00": "tk-vcvpy-00-publish-the-planning-repository-and-det-699437",
     "RP-01": "tk-rackpy-01-recover-witan-project-metadata-without-b1cb84",

@@ -33,7 +33,7 @@ def test_generated_files_are_current() -> None:
 
 
 def test_the_release_bar_is_not_met_yet() -> None:
-    """Nothing is bound, so a release check must fail, loudly."""
+    """Partial and planned bindings must still fail the full-surface release gate."""
     proc = run("check_coverage.py", "release", "lin-x64")
     assert proc.returncode != 0
     assert "incomplete" in proc.stderr and "missing-runtime-artifact" in proc.stderr
@@ -43,16 +43,34 @@ def test_every_record_is_accounted_for() -> None:
     inputs = bm.load_inputs()
     manifest = bm.load_json(bm.MANIFEST)
     statuses = {r["status"] for r in manifest["entries"]}
-    assert statuses <= {"unreviewed", "implemented", "verified", "excluded_internal"}
+    assert statuses <= {"unreviewed", "planned", "implemented", "verified", "excluded_internal"}
+    assert "planned" not in bm.BOUND | bm.FINAL  # tracking a gap never completes it
     bound = [r for r in manifest["entries"] if r["status"] in bm.BOUND]
     families = {bm.family_of(inputs.inventory, inputs.index[r["id"]]) for r in bound}
     assert families <= {"1 common/value", "2 engine"}, (
-        "only families 1 (RP-12) and 2 (RP-13 components) are bound so far"
+        "only families 1 (RP-12) and 2 (RP-13 components / RP-14A construction) are bound so far"
     )
     counted = [e for e in inputs.index.values() if bm.counted(e)]
     assert len(manifest["entries"]) == len(counted) == 3058
     excluded = [r for r in manifest["entries"] if r["status"] == "excluded_internal"]
     assert len(excluded) == len(inputs.exclusions) == 111
+
+
+def test_every_module_gap_retains_a_responsible_task() -> None:
+    manifest = bm.load_json(bm.MANIFEST)
+    records = [
+        r
+        for r in manifest["entries"]
+        if r["id"].split(":", 1)[1].startswith("rack::engine::Module") and r["status"] not in bm.BOUND | bm.FINAL
+    ]
+    assert records
+    for record in records:
+        assert record["status"] in {"planned", "unreviewed"}
+        assert record["notes"].startswith("Responsible task: RP-"), record["id"]
+    # These safe adapters do not claim the public mutable vectors are fully mapped.
+    vectors = {"params", "inputs", "outputs", "lights", "bypassRoutes"}
+    incomplete = {r["id"].rsplit("::", 1)[-1] for r in records}
+    assert vectors <= incomplete
 
 
 def test_every_public_engine_method_has_a_lock_entry() -> None:
