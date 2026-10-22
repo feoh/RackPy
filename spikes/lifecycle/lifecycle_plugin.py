@@ -16,6 +16,7 @@ import _rackpy_lifecycle as rp
 
 SCENARIO = json.loads((Path(__file__).parent / "scenario.json").read_text())
 MODE = SCENARIO.get("worker", "none")
+AT_LOAD = SCENARIO.get("worker_at_load", False)
 
 
 class Callbacks:
@@ -51,9 +52,8 @@ class Callbacks:
 
     def on_scenario(self, what: str, handle: rp.ModuleHandle) -> None:
         rp.log(f"scenario {what} role={rp.thread_role()} mode={MODE}")
-        if what == "start" and MODE in ("safe", "unsafe"):
-            self.worker = threading.Thread(target=self.work, name="rackpy-worker")
-            self.worker.start()
+        if what == "start" and MODE in ("safe", "unsafe") and self.worker is None:
+            self.start_worker()
         elif what == "stop" and self.worker is not None:
             self.stop.set()
             self.worker.join(timeout=10)
@@ -62,11 +62,28 @@ class Callbacks:
                 f"stale={self.stats['worker_stale']} live_reads={self.stats['worker_live_reads']}"
             )
 
+    def start_worker(self) -> None:
+        self.worker = threading.Thread(target=self.work, name="rackpy-worker")
+        self.worker.start()
+
+    def on_context_closing(self) -> None:
+        """RackPy's sentinel calls this before Rack deletes the engine."""
+        if self.worker is not None and self.worker.is_alive():
+            self.stop.set()
+            self.worker.join(timeout=10)
+        alive = self.worker.is_alive() if self.worker else False
+        rp.log(f"context closing: worker_alive={alive} calls={self.stats['worker_calls']}")
+
     def work(self) -> None:
         rp.log(f"worker role={rp.thread_role()} has_context={rp.thread_has_rack_context()}")
         release = MODE == "safe"
         while not self.stop.is_set():
-            rp.engine_module_count(release_gil=release)
+            try:
+                rp.engine_module_count(release_gil=release)
+            except ReferenceError:
+                # No module has bound a Rack context yet, or it is shutting down.
+                self.stats["worker_not_bound"] += 1
+                continue
             self.stats["worker_calls"] += 1
             for h in list(self.churned):
                 try:
@@ -92,5 +109,8 @@ class Callbacks:
             rp.log(f"engine call after context deletion: ReferenceError ({e})")
 
 
-rp.set_callbacks(Callbacks())
-rp.log(f"lifecycle script loaded mode={MODE}")
+CALLBACKS = Callbacks()
+rp.set_callbacks(CALLBACKS)
+rp.log(f"lifecycle script loaded mode={MODE} worker_at_load={AT_LOAD}")
+if AT_LOAD and MODE in ("safe", "unsafe"):
+    CALLBACKS.start_worker()

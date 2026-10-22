@@ -1,0 +1,294 @@
+{
+  "schema_version": 1,
+  "note": "Reviewed thread and lock rules for every public virtual method (RP-06). bin/callback-matrix applies them to upstream/api-surface.json; evidence is in docs/decisions/003-lifetimes-and-threads.md. The first matching rule wins.",
+  "strategies": {
+    "ui": "Main (UI) thread with no engine lock held. A Python override may run; the trampoline takes the GIL.",
+    "ui-exclusive": "Main thread, or whichever thread called the engine method, while Rack holds the engine mutex EXCLUSIVELY and audio processing is stopped. A Python override may run, but must not call any engine method that locks (RackPy refuses it), and its run time stalls audio.",
+    "ui-shared": "Main thread while Rack holds the engine mutex SHARED, so process() keeps running concurrently. A Python override may run synchronously, but must read module state through atomics or snapshots, never through fields that process() writes.",
+    "engine": "Engine worker or fallback threads during processing. Production: native code only. Python only in the separately enabled RP-22 laboratory.",
+    "driver": "Audio or MIDI driver threads (and, for some, the engine thread or UI under the exclusive lock). Native code only; Python receives queued notifications on the UI thread.",
+    "mixed": "Reachable from both the UI thread and engine threads. Native implementation only; Python may configure the native behaviour but never runs in the call.",
+    "lifecycle": "Destructor: runs on the thread that deletes the object, which Rack keeps on the main thread for widgets and modules. Trampolines release their Python state with the GIL there; production deletion paths do no Python work.",
+    "unresolved": "Not yet decided. Blocks the implementation task named in the rule.",
+    "value": "Not a callback: a virtual on a C++ exception or value type. RackPy translates or wraps it; Python never overrides it."
+  },
+  "rules": [
+    {
+      "family": "rack::engine::Module",
+      "methods": [
+        "process",
+        "processBypass",
+        "step"
+      ],
+      "strategy": "engine",
+      "evidence": "Engine_stepFrame from Engine::stepBlock (shared lock); probe: first process() call on engine threads only, four threads with threadCount 4."
+    },
+    {
+      "family": "rack::engine::Module",
+      "methods": [
+        "onExpanderChange"
+      ],
+      "strategy": "engine",
+      "evidence": "Engine_updateExpander_NoLock in stepBlock (engine thread, shared lock); also from removeModule on the main thread under the exclusive lock. Probe saw both."
+    },
+    {
+      "family": "rack::engine::Module",
+      "methods": [
+        "onSampleRateChange",
+        "onSetMaster",
+        "onUnsetMaster"
+      ],
+      "strategy": "driver",
+      "evidence": "Engine::setSampleRate and setMasterModule take the exclusive lock; Core Audio calls setSuggestedSampleRate/setMasterModule from processInput on the audio driver thread. Without a device they ran on the main thread in the probe."
+    },
+    {
+      "family": "rack::engine::Module",
+      "methods": [
+        "onAdd",
+        "onRemove",
+        "onReset",
+        "onRandomize",
+        "onBypass",
+        "onUnBypass",
+        "onPortChange",
+        "fromJson",
+        "dataFromJson",
+        "paramsFromJson"
+      ],
+      "strategy": "ui-exclusive",
+      "evidence": "Engine::addModule/removeModule/resetModule/randomizeModule/bypassModule/addCable/removeCable/moduleFromJson/fromJson hold the exclusive lock; probe: onReset saw 0 samples processed in 30 ms."
+    },
+    {
+      "family": "rack::engine::Module",
+      "methods": [
+        "toJson",
+        "dataToJson",
+        "paramsToJson",
+        "onSave"
+      ],
+      "strategy": "ui-shared",
+      "evidence": "Engine::toJson/moduleToJson/prepareSave hold the shared lock; probe: dataToJson saw processing continue."
+    },
+    {
+      "family": "rack::engine::Module",
+      "methods": [
+        "~"
+      ],
+      "strategy": "lifecycle",
+      "evidence": "ModuleWidget::setModule(NULL) calls engine->removeModule then delete on the main thread; probe: destruct on main."
+    },
+    {
+      "family": "rack::engine::ParamQuantity",
+      "methods": [
+        "toJson"
+      ],
+      "strategy": "ui-shared",
+      "evidence": "Called from Module::paramsToJson."
+    },
+    {
+      "family": "rack::engine::ParamQuantity",
+      "methods": [
+        "fromJson"
+      ],
+      "strategy": "ui-exclusive",
+      "evidence": "Called from Module::paramsFromJson."
+    },
+    {
+      "family": "rack::Quantity",
+      "methods": [
+        "reset",
+        "randomize"
+      ],
+      "strategy": "ui-exclusive",
+      "evidence": "Module::onReset/onRandomize default handlers reset and randomize ParamQuantities under the exclusive lock; menu actions go through the engine."
+    },
+    {
+      "family": "rack::Quantity",
+      "methods": [
+        "getValue",
+        "setValue",
+        "getMinValue",
+        "getMaxValue",
+        "getDefaultValue"
+      ],
+      "strategy": "mixed",
+      "evidence": "Core MIDI-Map's process() calls ParamQuantity isBounded/getScaledValue/fromScaled on the engine thread (core/MIDIMap.cpp:101-131); widgets call them on the UI thread."
+    },
+    {
+      "family": "rack::Quantity",
+      "methods": [
+        "*"
+      ],
+      "strategy": "ui",
+      "evidence": "Display and text methods are called by tooltips, menus and text fields on the UI thread."
+    },
+    {
+      "family": "rack::engine::PortInfo",
+      "methods": [
+        "*"
+      ],
+      "strategy": "ui",
+      "evidence": "Tooltips and menus."
+    },
+    {
+      "family": "rack::engine::LightInfo",
+      "methods": [
+        "*"
+      ],
+      "strategy": "ui",
+      "evidence": "Tooltips."
+    },
+    {
+      "family": "rack::plugin::Model",
+      "methods": [
+        "*"
+      ],
+      "strategy": "ui",
+      "evidence": "createModule/createModuleWidget from RackWidget, Browser, history and clone actions on the main thread; probe: construct on main."
+    },
+    {
+      "family": "rack::history::Action",
+      "methods": [
+        "*"
+      ],
+      "strategy": "ui",
+      "evidence": "Undo and redo run on the main thread from menus and key commands."
+    },
+    {
+      "family": "rack::widget::Widget",
+      "methods": [
+        "~"
+      ],
+      "strategy": "lifecycle",
+      "evidence": "Widget::clearChildren and RackWidget delete widgets on the main thread; probe: widget destruct on main, after onContextDestroy."
+    },
+    {
+      "family": "rack::widget::Widget",
+      "methods": [
+        "*"
+      ],
+      "strategy": "ui",
+      "evidence": "Window::step dispatches step, draw, drawLayer and input events on the main thread; ContextCreate/Destroy fire from Window construction and destruction only. Probe: step, draw, appendContextMenu, onContextDestroy on main."
+    },
+    {
+      "family": "rack::dsp::MidiGenerator",
+      "methods": [
+        "onMessage"
+      ],
+      "strategy": "engine",
+      "evidence": "Called from MidiGenerator::process inside a module's process()."
+    },
+    {
+      "family": "rack::midi::OutputDevice",
+      "methods": [
+        "sendMessage"
+      ],
+      "strategy": "engine",
+      "evidence": "midi::Output::sendMessage is called from modules' process() on engine threads."
+    },
+    {
+      "family": "rack::midi::Input",
+      "methods": [
+        "onMessage"
+      ],
+      "strategy": "driver",
+      "evidence": "InputDevice::onMessage runs on the MIDI driver thread and sets the context itself (midi.cpp)."
+    },
+    {
+      "family": "rack::audio::Port",
+      "methods": [
+        "processInput",
+        "processOutput",
+        "processBuffer",
+        "onStartStream",
+        "onStopStream"
+      ],
+      "strategy": "driver",
+      "evidence": "audio::Device::processBuffer/onStartStream/onStopStream run on the audio driver thread and set the context (audio.cpp)."
+    },
+    {
+      "family": "rack::audio::Driver",
+      "methods": [
+        "*"
+      ],
+      "strategy": "unresolved",
+      "blocks": "RP-29",
+      "evidence": "Driver and device implementations run partly on driver threads. RP-29 must decide whether Python may implement drivers or only use them."
+    },
+    {
+      "family": "rack::audio::Device",
+      "methods": [
+        "*"
+      ],
+      "strategy": "unresolved",
+      "blocks": "RP-29",
+      "evidence": "As for audio::Driver."
+    },
+    {
+      "family": "rack::midi::Driver",
+      "methods": [
+        "*"
+      ],
+      "strategy": "unresolved",
+      "blocks": "RP-29",
+      "evidence": "As for audio::Driver."
+    },
+    {
+      "family": "rack::midi::Device",
+      "methods": [
+        "*"
+      ],
+      "strategy": "unresolved",
+      "blocks": "RP-29",
+      "evidence": "As for audio::Driver."
+    },
+    {
+      "family": "rack::audio::Port",
+      "methods": [
+        "*"
+      ],
+      "strategy": "ui",
+      "evidence": "Remaining port methods are device selection and queries from menus."
+    },
+    {
+      "family": "rack::midi::Port",
+      "methods": [
+        "*"
+      ],
+      "strategy": "ui",
+      "evidence": "Device selection and queries from menus."
+    },
+    {
+      "family": "rack::midi::InputQueue",
+      "methods": [
+        "~"
+      ],
+      "strategy": "lifecycle",
+      "evidence": "Owned by modules; deleted with them on the main thread."
+    },
+    {
+      "family": "rack::midi::Output",
+      "methods": [
+        "~"
+      ],
+      "strategy": "lifecycle",
+      "evidence": "Owned by modules; deleted with them on the main thread."
+    },
+    {
+      "family": "rack::Exception",
+      "methods": [
+        "what"
+      ],
+      "strategy": "value",
+      "evidence": "rack::Exception derives from std::exception; RackPy maps it to a Python exception (RP-12)."
+    },
+    {
+      "family": "*",
+      "methods": [
+        "~"
+      ],
+      "strategy": "lifecycle",
+      "evidence": "Destructors run where the owner deletes the object."
+    }
+  ]
+}

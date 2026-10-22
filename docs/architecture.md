@@ -77,6 +77,10 @@ with Rack's expected JSON return value.
 
 ## Lifetime and concurrency
 
+RP-06 measured these rules in a real host and classified every public callback
+([ADR 003](decisions/003-lifetimes-and-threads.md),
+[callback matrix](reference/callback-matrix.md)).
+
 - One supported CPython owner per process initially; no claim of subinterpreter
   safety. Detect other interpreters and incompatible runtimes.
 - Configure isolated Python search paths. Do not inherit arbitrary current-directory

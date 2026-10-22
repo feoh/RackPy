@@ -18,6 +18,7 @@ import shutil
 import signal
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -89,7 +90,17 @@ def host(tmp_path_factory: pytest.TempPathFactory) -> Host:
     return Host(rack=Path(tool("rack-sdk", "host").strip()), build=build, python=Path(inputs["python-3.14"]))
 
 
-def stage(user: Path, host: Host, *, worker: str = "none", resets: int = 3, churn: int = 5, threads: int = 1) -> None:
+def stage(
+    user: Path,
+    host: Host,
+    *,
+    worker: str = "none",
+    resets: int = 3,
+    churn: int = 5,
+    threads: int = 1,
+    stop_before_close: bool = True,
+    worker_at_load: bool = False,
+) -> None:
     plugin = user / "plugins-lin-x64" / "RackPyLifecycle"
     plugin.mkdir(parents=True)
     shutil.copy(host.build / "loader" / "plugin.so", plugin)
@@ -112,7 +123,14 @@ def stage(user: Path, host: Host, *, worker: str = "none", resets: int = 3, chur
         "stdlib_marker": "lib/python3.14/os.py",
     }
     (plugin / "spike.json").write_text(json.dumps(loader))
-    scenario = {"worker": worker, "resets": resets, "churn": churn, "frames_before_close": 5}
+    scenario = {
+        "worker": worker,
+        "resets": resets,
+        "churn": churn,
+        "frames_before_close": 5,
+        "stop_before_close": stop_before_close,
+        "worker_at_load": worker_at_load,
+    }
     (plugin / "scenario.json").write_text(json.dumps(scenario))
     # Two adjacent probes so their expanders link; the first carries saved data.
     modules = [
@@ -147,6 +165,30 @@ def run_rack(host: Host, user: Path, *args: str, timeout: float = 90) -> Run:
     )
     try:
         returncode: int | None = proc.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        os.killpg(proc.pid, signal.SIGKILL)
+        proc.wait()
+        returncode = None
+    log = user / "log.txt"
+    return Run(returncode, log.read_text(errors="replace") if log.exists() else "")
+
+
+def run_headless(host: Host, user: Path, *, settle: float = 3.0, timeout: float = 60) -> Run:
+    """Run `Rack -h`, then press Enter after `settle` seconds. Kills the process group on timeout."""
+    env = {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}
+    proc = subprocess.Popen(
+        [str(host.rack / "Rack"), "-h", "-u", str(user)],
+        cwd=host.rack,
+        env=env,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+    time.sleep(settle)  # let the patch load and the worker run before pressing Enter
+    try:
+        proc.communicate(input=b"\n", timeout=timeout)
+        returncode: int | None = proc.returncode
     except subprocess.TimeoutExpired:
         os.killpg(proc.pid, signal.SIGKILL)
         proc.wait()
@@ -266,3 +308,35 @@ def test_multithreaded_engine_keeps_python_off_engine_threads(host: Host, tmp_pa
     assert_clean(run)
     tids = {e.tid for e in run.events("process(first on thread)")}
     assert len(tids) >= 2, tids
+
+
+def assert_sentinel_teardown(run: Run, source: str) -> None:
+    begin = run.log.index("event=shutdown begin role=main")
+    assert source in run.log[begin : begin + 300]
+    closing = run.lines("context closing: worker_alive=False")
+    assert closing and int(closing[0].split("calls=")[1].split()[0]) > 0
+    order = [
+        begin,
+        run.log.index("shutdown leases drained"),
+        run.log.index("Deleting engine"),
+        run.log.index("Py_FinalizeEx rc=0"),
+    ]
+    assert order == sorted(order), "workers must stop and leases drain before Rack deletes the engine"
+
+
+def test_sentinel_stops_workers_before_the_engine_is_deleted_windowed(host: Host, tmp_path: Path) -> None:
+    """No scripted stop: the sentinel's onContextDestroy is the earliest teardown signal."""
+    stage(tmp_path, host, worker="safe", resets=50, churn=20, stop_before_close=False)
+    run = run_rack(host, tmp_path)
+    assert_clean(run)
+    assert not run.lines("py: scenario stop")
+    assert_sentinel_teardown(run, "sentinel onContextDestroy")
+
+
+def test_sentinel_stops_workers_before_the_engine_is_deleted_headless(host: Host, tmp_path: Path) -> None:
+    """Headless Rack has no window, so the sentinel's destructor during scene deletion is the signal."""
+    stage(tmp_path, host, worker="safe", resets=0, churn=0, worker_at_load=True)
+    run = run_headless(host, tmp_path)
+    assert_clean(run)
+    assert_sentinel_teardown(run, "sentinel destructor")
+    assert run.log.index("Deleting scene") < run.log.index("event=shutdown begin")

@@ -11,6 +11,8 @@
 #include <cstdio>
 #include <functional>
 #include <memory>
+#include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <thread>
 #include <vector>
@@ -48,6 +50,9 @@ size_t tid() {
 // (contextGet() is thread-local), so engine calls from them scope this one.
 std::atomic<rack::Context*> boundContext{nullptr};
 std::atomic<bool> contextAlive{false};
+// RackPy-owned lease: every engine call from Python holds it shared. Shutdown
+// takes it exclusively, so in-flight calls finish before the engine is deleted.
+std::shared_mutex lease;
 
 struct ContextScope {
 	rack::Context* previous;
@@ -135,6 +140,33 @@ bool hasCallback(const char* name) {
 	return py::hasattr(callbacks, name);
 }
 
+/** Earliest teardown signal a plugin gets: the sentinel's onContextDestroy (window deleted first in
+~Context) or, headless, its destructor during scene deletion. Both come before the engine is deleted. */
+void shutdownBegin(const char* source) {
+	static bool begun = false;
+	if (begun)
+		return;
+	begun = true;
+	event("shutdown begin", -1, source);
+	callPython("on_context_closing", [&] {
+		if (hasCallback("on_context_closing"))
+			callbacks.attr("on_context_closing")();
+	});
+	{
+		std::unique_lock<std::shared_mutex> drain(lease);
+		contextAlive.store(false);
+	}
+	event("shutdown leases drained", -1);
+}
+
+struct Sentinel : rack::widget::Widget {
+	void onContextDestroy(const ContextDestroyEvent& e) override {
+		shutdownBegin("sentinel onContextDestroy");
+		Widget::onContextDestroy(e);
+	}
+	~Sentinel() override { shutdownBegin("sentinel destructor"); }
+};
+
 // --- probe module --------------------------------------------------------------
 
 struct ProbeModule : rack::engine::Module {
@@ -146,8 +178,11 @@ struct ProbeModule : rack::engine::Module {
 		configParam(0, 0.f, 1.f, 0.5f, "Probe");
 		rack::Context* c = rack::contextGet();
 		rack::Context* expected = nullptr;
-		if (c && boundContext.compare_exchange_strong(expected, c))
+		if (c && boundContext.compare_exchange_strong(expected, c)) {
 			contextAlive.store(true);
+			if (c->scene)
+				c->scene->addChild(new Sentinel);
+		}
 		event("construct", -1, c ? "context=set" : "context=null");
 	}
 	~ProbeModule() override {
@@ -252,6 +287,9 @@ Scenario scenario;
 int resetsRequested = 0;
 int churnRequested = 0;
 int framesBeforeClose = 0;
+bool stopBeforeClose = true;
+
+
 
 struct ProbeWidget : rack::app::ModuleWidget {
 	bool driver = false;
@@ -366,7 +404,8 @@ struct ProbeWidget : rack::app::ModuleWidget {
 		else if (!s.closing && f >= 10 + resetsRequested + 8 + 2 * churnRequested + framesBeforeClose) {
 			s.closing = true;
 			// Shutdown ordering step 1: stop Python workers while the context is alive.
-			scenarioCallback("stop");
+			if (stopBeforeClose)
+				scenarioCallback("stop");
 			event("scenario close", module->id);
 			APP->window->close();
 		}
@@ -400,16 +439,20 @@ PYBIND11_EMBEDDED_MODULE(_rackpy_lifecycle, m) {
 			if (exclusiveDepth > 0)
 				throw EngineRefused{"engine calls are refused inside callbacks that Rack runs under the exclusive "
 									"engine lock; they would deadlock this thread"};
-			rack::Context* c = boundContext.load();
-			if (!c || !contextAlive.load())
-				throw StaleHandle{-1};
-			ContextScope scope(c);
 			// getModuleIds() takes the engine's shared lock. (getNumModules() does not lock at all.)
+			auto call = []() -> size_t {
+				std::shared_lock<std::shared_mutex> held(lease);
+				rack::Context* c = boundContext.load();
+				if (!c || !contextAlive.load())
+					throw StaleHandle{-1};
+				ContextScope scope(c);
+				return APP->engine->getModuleIds().size();
+			};
 			if (releaseGil) {
 				py::gil_scoped_release release;
-				return APP->engine->getModuleIds().size();
+				return call();
 			}
-			return APP->engine->getModuleIds().size();
+			return call();
 		},
 		py::arg("release_gil") = true);
 
@@ -436,6 +479,8 @@ int init(RackPySpikeHostInit* args) {
 		resetsRequested = (int) json_integer_value(json_object_get(cfg, "resets"));
 		churnRequested = (int) json_integer_value(json_object_get(cfg, "churn"));
 		framesBeforeClose = (int) json_integer_value(json_object_get(cfg, "frames_before_close"));
+		json_t* stopJ = json_object_get(cfg, "stop_before_close");
+		stopBeforeClose = !stopJ || json_is_true(stopJ);
 		json_decref(cfg);
 	}
 
