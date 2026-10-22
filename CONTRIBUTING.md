@@ -58,6 +58,7 @@ missing or different SDK is a configure error, not a warning.
 | `bin/rack-sdk verify\|closure\|probe` | SDK pins ([compatibility](docs/compatibility.md#reproduce)) |
 | `bin/rack-toolchain build\|check\|path` | The official Linux toolchain for distributable builds (about an hour, once) |
 | `bin/planning-check` | `planning/` files agree with each other and form a DAG |
+| `uv run sphinx-build -W --keep-going -n -b html docs build/docs/html` | The documentation site; conventions in [docs/contributing-docs.md](docs/contributing-docs.md) |
 
 `bin/rackpy-dev --help` and each command's `--help` list every option.
 
@@ -73,6 +74,7 @@ missing, so no test can fall outside every CI job:
 | `inventory` | clang and libclang | `uv run pytest -m inventory` |
 | `host` | the pinned Rack Free 2.6.6 host (downloaded on first use); `gui` tests also need Xvfb | `uv run pytest -m "host and not dist"` |
 | `dist` | the official toolchain from `bin/rack-toolchain build` | `uv run pytest -m dist` |
+| `docs` | the docs toolchain (installed by `uv sync`); snippets marked `runs-in=rack` are also `host` | `uv run pytest -m "docs and not host"` |
 
 **A missing requirement fails the test.** A test that needs the SDK, Rack,
 Xvfb, clang or the toolchain and cannot find it reports a setup error that
@@ -106,12 +108,14 @@ and on pull requests, on `ubuntu-24.04`:
 | Hooks, typing and unit tests | `uv sync --frozen`, `prek run --all-files`, `pytest -m unit` |
 | SDK pins, native build and audio-path guard | `bin/rack-sdk verify`, `closure`, `probe`; `pytest -m "native and not host"` |
 | SDK inventory | `pytest -m inventory` with LLVM 21 from apt.llvm.org; see below |
-| Rack host smoke tests | `pytest -m "host and not dist"`: the skeleton, the RP-04 spike and the RP-06 probe in Rack Free 2.6.6 |
-| Distributable build (not on pull requests) | builds or restores the official toolchain, then `pytest -m dist` |
+| Documentation site | `sphinx-build -W` and `pytest -m "docs and not host"`; keeps the HTML |
+| Documentation external links (weekly and on demand) | `sphinx-build -b linkcheck` |
+| Rack host smoke tests | `pytest -m "host and not dist"`: the skeleton, the docs snippets that run in Rack, the RP-04 spike and the RP-06 probe in Rack Free 2.6.6 |
+| Distributable build (pushes to `main` and on demand) | builds or restores the official toolchain, then `pytest -m dist` |
 
-Each job keeps its JUnit report, and the host jobs keep every Rack `log.txt`,
-for 14 days. CI keeps no binaries: distributing a build needs the RP-39 license
-manifest and owner approval.
+Each job keeps its JUnit report, the host jobs keep every Rack `log.txt`, and
+the docs job keeps the built site, for 14 days. CI keeps no binaries:
+distributing a build needs the RP-39 license manifest and owner approval.
 
 **Known gap.** `upstream/api-surface.json` records the libclang build that
 produced it (clang 23.1.3 on the planning machine). CI's LLVM 21 cannot

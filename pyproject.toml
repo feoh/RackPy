@@ -23,12 +23,21 @@ dev = [
     "ruff>=0.14",
 ]
 
+docs = [
+    "furo",              # accessible theme with light and dark modes
+    "myst-parser",       # the site is written in Markdown
+    "sphinx",
+    "sphinx-autoapi",    # documents src/rackpy by parsing it; nothing is imported
+    "types-docutils",    # for strict mypy over docs/_ext
+]
+
 [build-system]
 requires = ["uv_build>=0.9.18,<0.10"]
 build-backend = "uv_build"
 
 [tool.uv]
 required-version = ">=0.9.18"
+default-groups = ["dev", "docs"]
 # Resolve as of a fixed date, like the bin/ scripts; uv.lock pins the result.
 exclude-newer = "2026-10-21T00:00:00Z"
 
@@ -50,11 +59,11 @@ ignore = [
 [tool.mypy]
 strict = true
 python_version = "3.14"
-mypy_path = ["typings", "src"]
+mypy_path = ["typings", "src", "docs/_ext"]
 explicit_package_bases = true
 # bin/ utilities without a .py suffix all map to module __main__, so
 # `bin/rackpy-dev typecheck` runs mypy on each of them separately.
-files = ["src", "tests", "bin/inventory_sdk.py"]
+files = ["src", "tests", "docs/conf.py", "docs/_ext", "bin/inventory_sdk.py"]
 warn_unreachable = true
 
 [tool.pytest.ini_options]
@@ -68,4 +77,5 @@ markers = [
     "host: runs the real Rack Free host (Linux x86_64)",
     "gui: runs windowed Rack inside Xvfb (needs xvfb-run)",
     "dist: builds with the official Rack plugin toolchain (bin/rack-toolchain build first)",
+    "docs: builds the documentation site or runs its snippets",
 ]

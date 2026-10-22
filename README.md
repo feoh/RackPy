@@ -41,7 +41,7 @@ they must not disappear from the coverage denominator.
 | See how completeness will be proved | [API coverage contract](docs/coverage.md) |
 | Review the planned examples | [Example inventory](examples/README.md) |
 | Understand performance requirements | [Performance and safety](docs/performance.md) |
-| See the documentation experience we intend | [Documentation plan](docs/documentation.md) |
+| See the documentation experience we intend | [Documentation plan](docs/documentation.md); build the site with `uv run sphinx-build -W -n -b html docs build/docs/html` |
 | Pick up implementation work | [Execution plan](planning/README.md) |
 | Build, test and run CI checks locally | [Contributing](CONTRIBUTING.md) and [ADR 005](docs/decisions/005-build-and-ci.md) |
 

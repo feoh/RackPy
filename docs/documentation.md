@@ -48,9 +48,10 @@ reference/{facade,raw,mapping,coverage}
 examples / troubleshooting / contributing / release-notes
 ```
 
-RP-09 will choose and pin Sphinx or MkDocs after checking native docstring,
-type-stub and cross-reference support. Runtime imports must not require opening
-Rack just to read docs: use verified stubs/manifest plus selected in-host doctests.
+RP-09 chose Sphinx with MyST and sphinx-autoapi
+([ADR 006](decisions/006-documentation-toolchain.md)). Building the docs never
+imports the runtime or opens Rack: API pages come from source and stubs, and
+snippets that need Rack run in Rack through the host tests.
 
 ## Quality gates
 
@@ -64,5 +65,7 @@ Rack just to read docs: use verified stubs/manifest plus selected in-host doctes
 - Have a reader unfamiliar with Rack run the first tutorial; record blockers.
 - Version documentation with releases and include API/SDK/Python support tables.
 
-Only this planning documentation exists today. The runtime manual and completed
-sample walkthroughs are explicitly future tasks.
+RP-09 built the site skeleton and its checks
+([ADR 006](decisions/006-documentation-toolchain.md),
+[conventions](contributing-docs.md)). The runtime manual and the sample
+walkthroughs are still future tasks.

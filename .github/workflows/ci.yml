@@ -11,6 +11,8 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: "17 6 * * 1"  # weekly: external links, and a fresh look at the pinned downloads
 
 permissions:
   contents: read
@@ -57,6 +59,56 @@ jobs:
         with:
           name: python-reports
           path: reports/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  docs:
+    name: Documentation site
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+      - run: uv sync --frozen
+      - name: Build with warnings as errors (pages, anchors, repository links, labelled code, alt text)
+        run: uv run --frozen sphinx-build -W --keep-going -n -b html docs build/docs/html
+      - name: Docs checks and runs-in=python snippets (runs-in=rack snippets run in the host job)
+        run: uv run --frozen pytest -m "docs and not host" -v --junitxml=reports/docs.xml
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: docs-html
+          path: build/docs/html/
+          retention-days: 14
+          if-no-files-found: ignore
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: docs-reports
+          path: reports/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  docs-links:
+    name: Documentation external links
+    # External sites must not block pull requests; this runs weekly and on demand.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+      - run: uv sync --frozen
+      - run: uv run --frozen sphinx-build -b linkcheck docs build/docs/linkcheck
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: docs-linkcheck
+          path: build/docs/linkcheck/output.*
           retention-days: 14
           if-no-files-found: ignore
 
@@ -155,7 +207,7 @@ jobs:
             ~/.cache/rackpy/spike-inputs
           key: rackpy-host-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json', 'spikes/embedding/inputs.json') }}
       - run: uv sync --frozen
-      - name: Production skeleton, RP-04 embedding spike and RP-06 lifecycle probe in Rack Free 2.6.6
+      - name: Skeleton, docs snippets, RP-04 embedding spike and RP-06 lifecycle probe in Rack Free 2.6.6
         run: >
           uv run --frozen pytest -m "host and not dist" -v --basetemp="$RUNNER_TEMP/pytest"
           --junitxml=reports/host.xml
@@ -176,7 +228,7 @@ jobs:
     name: Distributable build with the official Rack toolchain
     # Building the toolchain takes about an hour on a cache miss, so this runs
     # on main and on demand, not on every pull request.
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 300
     steps:

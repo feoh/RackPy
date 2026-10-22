@@ -9,7 +9,7 @@ import pytest
 
 from tests.support import BIN, REPO, require_tools, tool
 
-CATEGORIES = ("unit", "native", "inventory", "host", "dist")
+CATEGORIES = ("unit", "native", "inventory", "host", "dist", "docs")
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
