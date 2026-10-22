@@ -1,12 +1,18 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Spot checks of the committed inventory against the pinned Rack 2.6.6 SDK."""
 
+import hashlib
 import json
+import subprocess
 from pathlib import Path
 from types import ModuleType
 from typing import Any
 
 import pytest
+
+from tests.support import require
+
+pytestmark = pytest.mark.inventory
 
 REPO = Path(__file__).resolve().parents[2]
 SURFACE = REPO / "upstream" / "api-surface.json"
@@ -24,6 +30,18 @@ def entries(surface: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 
 def test_committed_inventory_is_current(inventory: ModuleType, real_sdk: Path, surface: dict[str, Any]) -> None:
+    # The inventory records the exact libclang it was extracted with, so only that build can reproduce it.
+    found = subprocess.run(["clang++", "-print-file-name=libclang.so"], capture_output=True, text=True, check=True)
+    libclang = Path(found.stdout.strip())
+    recorded = surface["toolchain"]
+    same = libclang.is_file() and hashlib.sha256(libclang.read_bytes()).hexdigest() == recorded["libclang_sha256"]
+    require(
+        "pinned-libclang",
+        same,
+        f"upstream/api-surface.json was extracted with {recorded['libclang']} (libclang.so sha256 "
+        f"{recorded['libclang_sha256'][:12]}...), and {libclang} differs. Run this on a machine with that libclang, "
+        "or re-extract with bin/inventory_sdk.py extract and review the diff",
+    )
     variants = tuple(r["variant"] for r in surface["extractions"])
     fresh = inventory.build(real_sdk, None, "clang++", variants)
     assert inventory.dumps(fresh) == SURFACE.read_text(encoding="utf-8"), inventory.diff(surface, fresh)

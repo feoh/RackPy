@@ -90,23 +90,29 @@ Rack expects of a plugin, not anything RackPy has shipped.
 Official cross toolchain: [rack-plugin-toolchain](https://github.com/VCVRack/rack-plugin-toolchain)
 branch `v2` at `4fd13187`, pinned to SDK 2.6.6. It builds crosstool-ng
 `x86_64-ubuntu16.04-linux-gnu`, mingw-w64 v10.0.0 and osxcross with clang
-20.1.1 and the macOS 12.3 SDK. RackPy has **not** built this toolchain.
+20.1.1 and the macOS 12.3 SDK. RP-08 built the **Linux** toolchain with
+`bin/rack-toolchain build` (GCC 15.1.0, sysroot glibc 2.23); the Windows and
+macOS toolchains have not been built.
 
 **Selected toolchains.**
 
 - *Development and validation on Linux x64:* the host GCC, driven by the
   SDK's own `plugin.mk` so that the flags are Rack's. RP-02 validated the
   rack.hpp-only probe this way.
-- *Distributable artifacts:* the official toolchain above, or an equivalent
-  that RP-08 pins. RP-08 must build and check it, because a host-built plugin
-  does not meet libRack's glibc floor (finding 1 below).
+- *Distributable artifacts:* the official toolchain above. For Linux, RP-08
+  pinned it (commit, `Makefile` SHA-256, a digest-pinned Docker build image),
+  built it and checked it: the skeleton built with it needs at most
+  `GLIBC_2.14`, and the bundled `libpython` needs `GLIBC_2.17`
+  ([ADR 005](decisions/005-build-and-ci.md)).
 
 ### Findings that constrain later tasks
 
 1. **A host-toolchain Linux build is not distributable.** The probe built with
    the host GCC needs `GLIBC_2.35`; libRack itself needs only `GLIBC_2.17`.
    Linux release artifacts need the official toolchain or an equivalent old-glibc
-   sysroot. Host builds are fine for development and tests. (RP-08, RP-39)
+   sysroot. Host builds are fine for development and tests. RP-08 builds with
+   the official toolchain in CI and checks the floor with
+   `bin/rackpy-dev inspect --max-glibc 2.23`. (RP-39 owns the release artifact.)
 2. **Windows mixes C runtimes unless proven otherwise.** Plugins link against
    a MinGW import library. python.org CPython is built with MSVC. RP-04 and
    RP-41 must probe CRT and C++ runtime coexistence before choosing an ABI.
@@ -164,7 +170,7 @@ evidence on a real host.
 
 | Target | SDK | Status |
 | --- | --- | --- |
-| Linux x86_64 | yes | **Initial validation target.** SDK verified; rack.hpp-only probe builds. Host load **untested**. |
+| Linux x86_64 | yes | **Initial validation target.** SDK verified; the RP-08 skeleton (no bindings) builds and loads in Rack Free 2.6.6, headless and in Xvfb. No release artifact. |
 | macOS arm64 | yes | Candidate. Headers verified; **nothing built or run**. Needs native hardware. |
 | macOS x86_64 | yes | Candidate. Headers verified; **nothing built or run**. Needs native hardware. |
 | Windows x86_64 | yes | Candidate. Headers verified; **nothing built or run**. CRT risk above. |

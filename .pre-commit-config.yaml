@@ -4,10 +4,48 @@ repos:
     hooks:
       - id: check-json
       - id: check-yaml
+      - id: check-toml
       - id: check-merge-conflict
+      - id: check-executables-have-shebangs
       - id: check-added-large-files
         # The generated SDK inventory is about 1.1 MB, stored one entry per line
         # so diffs stay reviewable. bin/inventory_sdk.py check verifies it.
         exclude: ^upstream/api-surface\.json$
       - id: trailing-whitespace
       - id: end-of-file-fixer
+  # Project tools come from uv.lock, so hooks and CI use the same versions.
+  - repo: local
+    hooks:
+      # bin/ utilities have no .py suffix and an `env -S uv run` shebang that
+      # file-type detection does not recognise, so these hooks check the whole
+      # tree (pyproject.toml includes bin/*) whenever Python or bin/ changes.
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --frozen ruff check
+        language: system
+        pass_filenames: false
+        files: (\.pyi?$|^bin/|^pyproject\.toml$)
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --frozen ruff format --check
+        language: system
+        pass_filenames: false
+        files: (\.pyi?$|^bin/|^pyproject\.toml$)
+      - id: mypy
+        name: mypy (strict)
+        entry: bin/rackpy-dev typecheck
+        language: system
+        pass_filenames: false
+        files: (\.pyi?$|^bin/|^pyproject\.toml$)
+      - id: planning-check
+        name: planning data
+        entry: bin/planning-check
+        language: system
+        pass_filenames: false
+        files: ^planning/
+      - id: callback-matrix
+        name: callback matrix
+        entry: bin/callback-matrix check
+        language: system
+        pass_filenames: false
+        files: ^(upstream/(api-surface|callback-rules)\.json|docs/reference/callback-matrix\.md|bin/callback-matrix)$

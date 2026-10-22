@@ -1,0 +1,11 @@
+{
+  "slug": "RackPy",
+  "name": "RackPy",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "RackPy",
+  "author": "RackPy contributors",
+  "description": "Development skeleton of RackPy, Python for VCV Rack plugins. It has no modules.",
+  "sourceUrl": "https://github.com/feoh/RackPy",
+  "modules": []
+}

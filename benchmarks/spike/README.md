@@ -15,7 +15,7 @@ data is in [../baseline.json](../baseline.json).
 
 ```bash
 bin/perf-baseline run      # everything; rewrites benchmarks/baseline.json (about 7 minutes)
-uv run --with pytest pytest tests/integration/test_perf_guard.py   # guard and equivalence checks
+uv run pytest tests/integration/test_perf_guard.py   # guard and equivalence checks
 ```
 
 The slow-UI and exclusive-stall checks use `spikes/lifecycle` and need

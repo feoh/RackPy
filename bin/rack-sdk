@@ -306,7 +306,7 @@ def probe(*, cache: CacheOpt = DEFAULT_CACHE, make: str = "make") -> None:
     with tempfile.TemporaryDirectory(prefix="rackpy-probe-") as tmp:
         work = Path(tmp) / "probe"
         shutil.copytree(PROBE, work)
-        build = subprocess.run([make, "-C", str(work), f"RACK_DIR={sdk}"], capture_output=True, text=True)
+        build = subprocess.run([make, "-C", str(work), f"RACK_DIR={sdk}"], capture_output=True, text=True, check=False)
         print(build.stdout + build.stderr)
         if build.returncode:
             raise SystemExit(f"probe build failed with exit status {build.returncode}")

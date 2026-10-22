@@ -4,7 +4,7 @@
 Runs Rack Free 2.6.6 with a window inside Xvfb (and once in screenshot mode)
 on Linux x86_64, using the RP-04 loader and the spikes/lifecycle host.
 
-    uv run --with pytest pytest tests/integration/test_lifecycle_probe.py -v
+    uv run pytest tests/integration/test_lifecycle_probe.py -v
 
 Needs `xvfb-run`. Rack creates and removes /tmp/Rack2 while it loads plugins,
 so do not run these in parallel or while another Rack instance is starting.
@@ -24,12 +24,15 @@ from pathlib import Path
 
 import pytest
 
+from tests.support import require
+
 REPO = Path(__file__).resolve().parents[2]
 SPIKE = REPO / "spikes" / "lifecycle"
 EVENT = re.compile(r"RACKPY_LC event=(?P<name>.+?) role=(?P<role>\w+) tid=(?P<tid>\d+) module=(?P<module>-?\d+)")
 pytestmark = [
+    pytest.mark.host,
+    pytest.mark.gui,
     pytest.mark.skipif(sys.platform != "linux" or platform.machine() != "x86_64", reason="Linux x86_64 only"),
-    pytest.mark.skipif(shutil.which("xvfb-run") is None, reason="needs xvfb-run (xorg-server-xvfb)"),
 ]
 
 
@@ -72,6 +75,7 @@ class Run:
 
 @pytest.fixture(scope="module")
 def host(tmp_path_factory: pytest.TempPathFactory) -> Host:
+    require("xvfb-run", shutil.which("xvfb-run") is not None, "install Xvfb (xorg-server-xvfb or xvfb)")
     inputs = json.loads(tool("spike-inputs", "paths"))
     build = tmp_path_factory.mktemp("lifecycle-build")
     subprocess.run(

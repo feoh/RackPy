@@ -1,0 +1,11 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+   rackpy_host.so exports exactly the loader ABI (native/include/rackpy/host_abi.h).
+   Everything else, including std:: template instances and the static C++
+   runtime, stays local so nothing can interpose on another DSO's copy. */
+{
+  global:
+    rackpy_host_init;
+    rackpy_host_destroy;
+  local:
+    *;
+};

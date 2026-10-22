@@ -110,9 +110,10 @@ unknown-state behavior. Never serialize Python code or unpickle patches.
 
 ## Packaging proposal
 
-Use a uv-managed Python project, CMake/scikit-build-core, and a Rack plugin
-packaging adapter only after the spike proves their interaction with the SDK
-toolchain. Pin CPython minor/ABI, binding library, compiler and SDK per artifact.
+RP-08 chose CMake and Ninja for the plugin, driven by `bin/rackpy-dev`, and a
+uv-managed project (`uv_build`) for the pure-Python package and tools; it does
+not use scikit-build-core ([ADR 005](decisions/005-build-and-ci.md)). Pin CPython
+minor/ABI, binding library, compiler and SDK per artifact.
 Publish a host plugin/runtime bundle and developer tooling as distinct artifacts;
 a PyPI wheel alone is not a working Rack plugin.
 

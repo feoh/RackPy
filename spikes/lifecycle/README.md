@@ -28,7 +28,7 @@ one pybind11 host, `src/lifecycle.cpp`:
 test into the plugin directory) selects the worker mode.
 
 ```bash
-uv run --with pytest pytest tests/integration/test_lifecycle_probe.py -v
+uv run pytest tests/integration/test_lifecycle_probe.py -v
 ```
 
 Needs `xvfb-run` (package `xorg-server-xvfb`): Rack runs with a real window on

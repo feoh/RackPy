@@ -1,12 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Fixtures for the RP-05 inventory tests.
 
-uv run --with pytest --with clang==21.1.7 --with cyclopts pytest tests/inventory -v
+uv run pytest tests/inventory -v
 """
 
 import importlib.util
 import shutil
-import subprocess
 import sys
 from collections.abc import Callable
 from pathlib import Path
@@ -15,14 +14,15 @@ from typing import Any
 
 import pytest
 
+from tests.support import require, tool
+
 REPO = Path(__file__).resolve().parents[2]
 FIXTURE = Path(__file__).resolve().parent / "fixtures" / "minisdk"
 
 
 @pytest.fixture(scope="session")
 def inventory() -> ModuleType:
-    if shutil.which("clang++") is None:
-        pytest.skip("clang++ is required")
+    require("clang++", shutil.which("clang++") is not None, "install clang (its libclang drives the inventory)")
     spec = importlib.util.spec_from_file_location("inventory_sdk", REPO / "bin" / "inventory_sdk.py")
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
@@ -49,8 +49,4 @@ def build(inventory: ModuleType) -> Callable[[Path], dict[str, Any]]:
 
 @pytest.fixture(scope="session")
 def real_sdk() -> Path:
-    try:
-        out = subprocess.run([str(REPO / "bin" / "rack-sdk"), "path"], capture_output=True, text=True, check=True)
-    except (OSError, subprocess.CalledProcessError) as e:
-        pytest.skip(f"pinned SDK unavailable: {e}")
-    return Path(out.stdout.strip())
+    return Path(tool("rack-sdk", "path").strip())

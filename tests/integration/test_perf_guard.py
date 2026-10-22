@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """RP-07: the audio-path guard catches forbidden calls, and RackPy-shaped kernels match native output.
 
-    uv run --with pytest pytest tests/integration/test_perf_guard.py -v
+    uv run pytest tests/integration/test_perf_guard.py -v
 
 Builds benchmarks/spike against the pinned SDK. Timing numbers are not asserted
 here; bin/perf-baseline records them.
@@ -19,7 +19,10 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 SPIKE = REPO / "benchmarks" / "spike"
-pytestmark = pytest.mark.skipif(sys.platform != "linux" or platform.machine() != "x86_64", reason="Linux x86_64 only")
+pytestmark = [
+    pytest.mark.native,
+    pytest.mark.skipif(sys.platform != "linux" or platform.machine() != "x86_64", reason="Linux x86_64 only"),
+]
 
 
 def tool(*args: str) -> str:
@@ -63,7 +66,7 @@ def test_guard_detects_injected_violations(build: Path, variant: str, event: str
 
 
 def test_guard_requires_preload(build: Path) -> None:
-    proc = subprocess.run([str(build / "bench"), "guard"], capture_output=True, text=True)
+    proc = subprocess.run([str(build / "bench"), "guard"], capture_output=True, text=True, check=False)
     assert proc.returncode == 2 and "LD_PRELOAD" in proc.stderr
 
 

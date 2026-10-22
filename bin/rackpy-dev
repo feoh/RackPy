@@ -1,0 +1,375 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["cyclopts>=5.2,<6"]
+#
+# [tool.uv]
+# exclude-newer = "2026-10-21T00:00:00Z"
+# ///
+"""Build, bundle, inspect and check the RackPy plugin skeleton (RP-08).
+
+Every input is pinned: the Rack SDK by bin/rack-sdk, the bundled CPython by
+packaging/inputs.json, and pybind11 and the Python tools by uv.lock. Downloads
+and builds stay outside git. Tools from the project environment run through
+`uv run --frozen --project <repo>`, so `uv sync --frozen` must work first.
+
+Linux x86_64 only for now. A build with the host compiler is for development
+and tests; `--toolchain rack-lin-x64` uses the official Rack plugin toolchain
+(bin/rack-toolchain) for a build with the glibc floor of Rack's own plugins.
+"""
+
+import hashlib
+import json
+import os
+import re
+import shutil
+import statistics
+import subprocess
+import tarfile
+import tempfile
+import time
+import urllib.request
+from pathlib import Path
+from typing import Annotated, Any, Literal
+
+import cyclopts
+
+REPO = Path(__file__).resolve().parent.parent
+INPUTS = REPO / "packaging" / "inputs.json"
+TOOLCHAIN_FILE = REPO / "cmake" / "toolchains" / "rack-lin-x64.cmake"
+DEFAULT_CACHE = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "rackpy" / "build-inputs"
+DEFAULT_BUILD = REPO / "build" / "dev"
+SLUG = "RackPy"
+HOST_EXPORTS = {"rackpy_host_init", "rackpy_host_destroy"}
+LINKER_SYMBOLS = {"__bss_start", "_edata", "_end"}
+LOADER_EXPORTS = {"init", "destroy"}
+
+app = cyclopts.App(help=__doc__)
+CacheOpt = Annotated[Path, cyclopts.Parameter(help="Download cache outside git.")]
+Toolchain = Literal["host", "rack-lin-x64"]
+
+
+def run(args: list[str | Path], **kwargs: Any) -> str:
+    """Run a command, echoing it; return stdout when capture is requested."""
+    printable = " ".join(str(a) for a in args)
+    print(f"+ {printable}", flush=True)
+    proc = subprocess.run([str(a) for a in args], check=False, text=True, **kwargs)
+    if proc.returncode:
+        detail = f"\n{proc.stderr}" if kwargs.get("capture_output") and proc.stderr else ""
+        raise SystemExit(f"command failed with exit status {proc.returncode}: {printable}{detail}")
+    return proc.stdout or ""
+
+
+def capture(args: list[str | Path]) -> str:
+    return run(args, capture_output=True).strip()
+
+
+def project_tool(*args: str) -> list[str | Path]:
+    return ["uv", "run", "--frozen", "--project", REPO, *args]
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def fetch_runtime(entry: dict[str, Any], cache: Path) -> Path:
+    archive: Path = cache / "archives" / entry["file"]
+    if not archive.exists() or sha256_file(archive) != entry["sha256"]:
+        archive.parent.mkdir(parents=True, exist_ok=True)
+        partial = archive.with_name(archive.name + ".partial")
+        with urllib.request.urlopen(entry["url"], timeout=300) as response, partial.open("wb") as out:
+            shutil.copyfileobj(response, out)
+        partial.replace(archive)
+    if (actual := sha256_file(archive)) != entry["sha256"]:
+        raise SystemExit(f"{entry['file']}: sha256 {actual} does not match pinned {entry['sha256']}")
+    dest = cache / "extracted" / entry["sha256"][:16]
+    if not dest.is_dir():
+        cache.mkdir(parents=True, exist_ok=True)
+        staging = Path(tempfile.mkdtemp(prefix="extract-", dir=cache))
+        with tarfile.open(archive) as tf:
+            tf.extractall(staging, filter="data")
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        staging.replace(dest)
+    root: Path = dest / entry["root"]
+    return root
+
+
+def runtimes(cache: Path) -> dict[str, Path]:
+    pins: dict[str, dict[str, Any]] = json.loads(INPUTS.read_text(encoding="utf-8"))["python_runtime"]
+    return {minor: fetch_runtime(entry, cache) for minor, entry in pins.items()}
+
+
+@app.command
+def inputs(*, cache: CacheOpt = DEFAULT_CACHE) -> None:
+    """Fetch and verify the pinned bundled runtimes; print their locations as JSON."""
+    print(json.dumps({f"python-{k}": str(v) for k, v in runtimes(cache).items()}, indent=2, sort_keys=True))
+
+
+@app.command
+def configure(
+    *,
+    build_dir: Path = DEFAULT_BUILD,
+    toolchain: Toolchain = "host",
+    werror: bool = False,
+    entry: str = "",
+    cache: CacheOpt = DEFAULT_CACHE,
+) -> None:
+    """Configure the CMake build with the pinned SDK, runtime and pybind11."""
+    sdk = capture([REPO / "bin" / "rack-sdk", "path"])
+    python = runtimes(cache)["3.14"]
+    pybind11 = capture(project_tool("python", "-m", "pybind11", "--cmakedir"))
+    args: list[str | Path] = [
+        "cmake",
+        "-S",
+        REPO,
+        "-B",
+        build_dir,
+        "-G",
+        "Ninja",
+        f"-DRACK_SDK_DIR={sdk}",
+        f"-DRACKPY_PYTHON_HOME={python}",
+        f"-Dpybind11_DIR={pybind11}",
+        f"-DRACKPY_WERROR={'ON' if werror else 'OFF'}",
+        f"-DRACKPY_ENTRY={entry}",
+    ]
+    if toolchain == "rack-lin-x64":
+        bindir = capture([REPO / "bin" / "rack-toolchain", "path"])
+        # Native tests link libRack's X11/GL/audio dependencies, which the toolchain sysroot lacks.
+        args += [
+            f"-DCMAKE_TOOLCHAIN_FILE={TOOLCHAIN_FILE}",
+            f"-DRACK_TOOLCHAIN_BIN={bindir}",
+            "-DRACKPY_BUILD_TESTS=OFF",
+        ]
+    run(args)
+
+
+@app.command
+def build(
+    *,
+    build_dir: Path = DEFAULT_BUILD,
+    toolchain: Toolchain = "host",
+    werror: bool = False,
+    test: bool = True,
+    cache: CacheOpt = DEFAULT_CACHE,
+) -> None:
+    """Configure, build and run the native unit tests (CTest)."""
+    configure(build_dir=build_dir, toolchain=toolchain, werror=werror, cache=cache)
+    run(["cmake", "--build", build_dir])
+    if test and toolchain == "host":
+        run(["ctest", "--test-dir", build_dir, "--output-on-failure"])
+
+
+@app.command
+def bundle(
+    dest: Path,
+    *,
+    build_dir: Path = DEFAULT_BUILD,
+    runtime: Literal["link", "copy"] = "link",
+    cache: CacheOpt = DEFAULT_CACHE,
+) -> None:
+    """Install a built tree as DEST/RackPy, a Rack plugin directory, with the runtime as python/.
+
+    `--runtime link` symlinks the cached runtime (fast, for tests on this
+    machine). `--runtime copy` copies it and strips the binaries.
+    """
+    plugin = dest / SLUG
+    if plugin.exists():
+        raise SystemExit(f"{plugin} already exists; choose an empty destination")
+    run(["cmake", "--install", build_dir, "--prefix", plugin, *(["--strip"] if runtime == "copy" else [])])
+    python = runtimes(cache)["3.14"]
+    if runtime == "link":
+        (plugin / "python").symlink_to(python, target_is_directory=True)
+    else:
+        shutil.copytree(python, plugin / "python", symlinks=True)
+    print(plugin)
+
+
+def dynamic_facts(path: Path) -> dict[str, Any]:
+    dynamic = capture(["readelf", "-d", "-W", path])
+    exported = capture(["nm", "-D", "--defined-only", path])
+    undefined = capture(["nm", "-D", "--undefined-only", path])
+    versions = capture(["objdump", "-T", path])
+    glibc = sorted(set(re.findall(r"GLIBC_([0-9.]+)", versions)), key=lambda v: tuple(map(int, v.split("."))))
+    return {
+        "needed": re.findall(r"\(NEEDED\)\s+Shared library: \[(.+?)\]", dynamic),
+        "runpath": re.findall(r"\((?:RUNPATH|RPATH)\)\s+Library (?:runpath|rpath): \[(.+?)\]", dynamic),
+        "exports": sorted({line.split()[-1] for line in exported.splitlines()} - LINKER_SYMBOLS),
+        "python_references": sorted(
+            {line.split()[-1] for line in undefined.splitlines() if line.split()[-1].startswith(("Py", "_Py"))}
+        ),
+        "max_glibc": glibc[-1] if glibc else None,
+    }
+
+
+def version_tuple(version: str) -> tuple[int, ...]:
+    return tuple(int(p) for p in version.split("."))
+
+
+@app.command
+def inspect(plugin: Path, *, max_glibc: str | None = None) -> None:
+    """Check a bundled plugin directory's ELF files and print their dynamic facts as JSON.
+
+    Fails if the loader references Python, if either library exports more than
+    the RackPy ABI, if the RUNPATHs differ from ADR 002, or if a library needs a
+    glibc newer than --max-glibc.
+    """
+    loader = dynamic_facts(plugin / "plugin.so")
+    host = dynamic_facts(plugin / "rackpy_host.so")
+    found: list[str] = []
+    if loader["python_references"]:
+        found.append(f"plugin.so references Python symbols: {loader['python_references'][:5]}")
+    if "libpython" in " ".join(loader["needed"]):
+        found.append("plugin.so links libpython; the loader must not depend on Python")
+    if not set(loader["exports"]) >= LOADER_EXPORTS:
+        found.append(f"plugin.so does not export {sorted(LOADER_EXPORTS)}")
+    if set(host["exports"]) != HOST_EXPORTS:
+        found.append(f"rackpy_host.so exports {sorted(set(host['exports']) ^ HOST_EXPORTS)} beyond the host ABI")
+    if loader["runpath"] != ["/tmp/Rack2"]:
+        found.append(f"plugin.so RUNPATH is {loader['runpath']}, expected ['/tmp/Rack2']")
+    if host["runpath"] != ["/tmp/Rack2:$ORIGIN/python/lib"]:
+        found.append(f"rackpy_host.so RUNPATH is {host['runpath']}, expected ['/tmp/Rack2:$ORIGIN/python/lib']")
+    for name, facts in (("plugin.so", loader), ("rackpy_host.so", host)):
+        if "libRack.so" not in facts["needed"]:
+            found.append(f"{name} does not link libRack.so")
+        if any("libstdc++" in n or "libgcc_s" in n for n in facts["needed"]):
+            found.append(f"{name} links the C++ runtime dynamically; the SDK requires static libstdc++/libgcc")
+        if max_glibc and facts["max_glibc"] and version_tuple(facts["max_glibc"]) > version_tuple(max_glibc):
+            found.append(f"{name} needs GLIBC_{facts['max_glibc']}, newer than {max_glibc}")
+    report = {"plugin.so": loader, "rackpy_host.so": host}
+    report["rackpy_host.so"]["python_references"] = len(host["python_references"])
+    print(json.dumps(report, indent=2))
+    if found:
+        raise SystemExit("bundle problems:\n" + "\n".join(f"- {p}" for p in found))
+
+
+@app.command(name="audio-symbols")
+def audio_symbols(objects: list[Path]) -> None:
+    """Fail if any object or library references a CPython symbol (ADR 004 audio-path rule)."""
+    offenders: dict[str, list[str]] = {}
+    for obj in objects:
+        listing = capture(["nm", "--undefined-only", "--format=just-symbols", obj])
+        refs = sorted({s for s in listing.split() if s.startswith(("Py", "_Py"))})
+        if refs:
+            offenders[str(obj)] = refs
+    if offenders:
+        raise SystemExit("CPython symbols on the audio path:\n" + json.dumps(offenders, indent=2))
+    print(f"ok: {len(objects)} file(s) reference no CPython symbols")
+
+
+def rack_log_times(log: str) -> dict[str, float]:
+    """Seconds since Rack started for each first occurrence of the markers RackPy start-up passes."""
+    markers = {
+        "load_start": "Loading plugin from",
+        "interpreter": "RackPy interpreter started",
+        "host_ready": "RackPy host rackpy_host.so ready",
+        "loaded": f"Loaded plugin {SLUG} ",
+    }
+    found: dict[str, float] = {}
+    for line in log.splitlines():
+        for key, marker in markers.items():
+            if key not in found and marker in line and (key != "load_start" or line.rstrip().endswith(f"/{SLUG}")):
+                found[key] = float(line[1:].split()[0])
+    return found
+
+
+def measure_rack(rack: Path, plugin: Path | None) -> dict[str, Any]:
+    with tempfile.TemporaryDirectory(prefix="rackpy-startup-") as tmp:
+        user = Path(tmp)
+        if plugin:
+            shutil.copytree(plugin, user / "plugins-lin-x64" / SLUG, symlinks=True)
+        (user / "autosave").mkdir()
+        (user / "autosave" / "patch.json").write_text('{"version": "2.6.6", "modules": [], "cables": []}')
+        env = {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}
+        proc = subprocess.Popen(
+            [rack / "Rack", "-h", "-u", user],
+            cwd=rack,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            env=env,
+        )
+        log = user / "log.txt"
+        deadline = time.monotonic() + 60
+        while time.monotonic() < deadline and not (log.exists() and "Loading autosave" in log.read_text()):
+            time.sleep(0.05)
+        time.sleep(0.5)
+        status = Path(f"/proc/{proc.pid}/status").read_text()
+        rss = {
+            k: int(v.split()[0])
+            for k, v in (line.split(":", 1) for line in status.splitlines())
+            if k in {"VmRSS", "VmHWM"}
+        }
+        assert proc.stdin is not None
+        proc.stdin.write(b"\n")
+        proc.stdin.close()
+        proc.wait(timeout=60)
+        text = log.read_text()
+        times = rack_log_times(text)
+        result: dict[str, Any] = {"rss_kib": rss["VmRSS"], "peak_rss_kib": rss["VmHWM"], "exit": proc.returncode}
+        if plugin:
+            if "loaded" not in times or "interpreter" not in times:
+                raise SystemExit("RackPy did not load:\n" + text[-3000:])
+            result["plugin_init_ms"] = round((times["loaded"] - times["load_start"]) * 1000, 1)
+        return result
+
+
+@app.command
+def startup(plugin: Path, *, runs: int = 5) -> None:
+    """Measure RackPy's start-up cost in headless Rack Free; print the raw runs and medians as JSON.
+
+    Alternates runs without and with PLUGIN (a bundled plugin directory) in
+    fresh user directories. plugin_init_ms comes from Rack's log timestamps
+    (millisecond resolution) between "Loading plugin from .../RackPy" and
+    "Loaded plugin RackPy"; RSS comes from /proc after the patch has loaded.
+    """
+    rack = Path(capture([REPO / "bin" / "rack-sdk", "host"]))
+    raw: dict[str, list[dict[str, Any]]] = {"without_rackpy": [], "with_rackpy": []}
+    for _ in range(runs):
+        raw["without_rackpy"].append(measure_rack(rack, None))
+        raw["with_rackpy"].append(measure_rack(rack, plugin))
+
+    def median(variant: str, key: str) -> float:
+        return float(statistics.median(r[key] for r in raw[variant]))
+
+    summary = {
+        "plugin_init_ms_median": median("with_rackpy", "plugin_init_ms"),
+        "rss_delta_kib_median": median("with_rackpy", "rss_kib") - median("without_rackpy", "rss_kib"),
+        "peak_rss_delta_kib_median": median("with_rackpy", "peak_rss_kib") - median("without_rackpy", "peak_rss_kib"),
+    }
+    print(json.dumps({"runs": raw, "summary": summary}, indent=2))
+
+
+def scripts() -> list[Path]:
+    """Python utilities in bin/ without a .py suffix (mypy needs one run per __main__ module)."""
+    found = []
+    for path in sorted((REPO / "bin").iterdir()):
+        if path.is_file() and not path.suffix:
+            with path.open(encoding="utf-8", errors="replace") as f:
+                if "uv run" in f.readline():
+                    found.append(path)
+    return found
+
+
+@app.command
+def lint() -> None:
+    """Ruff lint and format checks over the repository, including bin/ scripts."""
+    run(project_tool("ruff", "check", str(REPO)), cwd=REPO)
+    run(project_tool("ruff", "format", "--check", str(REPO)), cwd=REPO)
+
+
+@app.command
+def typecheck() -> None:
+    """Strict mypy over src/, tests/ and every bin/ utility."""
+    run(project_tool("mypy"), cwd=REPO)
+    for script in scripts():
+        run(project_tool("mypy", "--strict", str(script.relative_to(REPO))), cwd=REPO)
+
+
+if __name__ == "__main__":
+    # This script runs in its own uv environment; project tools must use the project's.
+    os.environ.pop("VIRTUAL_ENV", None)
+    app()

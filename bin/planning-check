@@ -1,0 +1,118 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["cyclopts>=5.2,<6"]
+#
+# [tool.uv]
+# exclude-newer = "2026-10-21T00:00:00Z"
+# ///
+"""Check that the committed planning data is self-consistent (RP-08).
+
+planning/tasks.json is the machine-readable task graph, planning/TASKS.md its
+human copy and planning/witan.json the map to live Witan slugs. This checks
+that all three describe the same tasks and that the dependency graph is a DAG.
+It does not check live Witan status, which is authoritative and not in git.
+"""
+
+import json
+import re
+from pathlib import Path
+from typing import Any
+
+import cyclopts
+
+REPO = Path(__file__).resolve().parent.parent
+PLANNING = REPO / "planning"
+TASK_ID = re.compile(r"^RP-\d\d$")
+SLUG = re.compile(r"^tk-[a-z0-9-]+$")
+FIELDS = {"id", "title", "priority", "depends_on", "outputs", "steps", "validation", "acceptance", "notes"}
+
+app = cyclopts.App(help=__doc__)
+
+
+def problems(tasks_doc: dict[str, Any], witan: dict[str, Any], markdown: str) -> list[str]:
+    found: list[str] = []
+    tasks: list[dict[str, Any]] = tasks_doc["tasks"]
+    ids = [t.get("id", "") for t in tasks]
+    if len(set(ids)) != len(ids):
+        found.append("duplicate task ids in tasks.json")
+    known = set(ids)
+    for t in tasks:
+        tid = t.get("id", "?")
+        if not TASK_ID.match(tid):
+            found.append(f"{tid}: id is not RP-NN")
+        if missing := FIELDS - set(t):
+            found.append(f"{tid}: missing fields {sorted(missing)}")
+        if t.get("priority") not in {"p0", "p1", "p2", "p3"}:
+            found.append(f"{tid}: priority {t.get('priority')!r} is not p0-p3")
+        for dep in t.get("depends_on", []):
+            if dep not in known:
+                found.append(f"{tid}: depends on unknown task {dep}")
+            if dep == tid:
+                found.append(f"{tid}: depends on itself")
+        for key in ("steps", "validation", "acceptance"):
+            if not t.get(key):
+                found.append(f"{tid}: {key} is empty")
+
+    # Dependency cycles, by depth-first search.
+    graph = {t["id"]: list(t.get("depends_on", [])) for t in tasks if "id" in t}
+    state: dict[str, int] = {}
+
+    def visit(node: str, path: list[str]) -> None:
+        state[node] = 1
+        for dep in graph.get(node, []):
+            if state.get(dep) == 1:
+                found.append("dependency cycle: " + " -> ".join([*path, node, dep]))
+            elif dep in graph and dep not in state:
+                visit(dep, [*path, node])
+        state[node] = 2
+
+    for node in sorted(graph):
+        if node not in state:
+            visit(node, [])
+
+    slugs: dict[str, str] = witan.get("tasks", {})
+    if set(slugs) != known:
+        found.append(f"witan.json task ids differ from tasks.json: {sorted(set(slugs) ^ known)}")
+    if len(set(slugs.values())) != len(slugs):
+        found.append("witan.json maps two tasks to one slug")
+    for tid, slug in sorted(slugs.items()):
+        if not SLUG.match(slug):
+            found.append(f"witan.json {tid}: {slug!r} is not a tk- slug")
+    for key in ("project_slug", "epic_slug"):
+        if not str(witan.get(key, "")).startswith("wp-" if key == "project_slug" else "tk-"):
+            found.append(f"witan.json {key} is missing or malformed")
+
+    headings = dict(re.findall(r"^## (RP-\d\d) — (.+)$", markdown, re.MULTILINE))
+    if set(headings) != known:
+        found.append(f"TASKS.md sections differ from tasks.json: {sorted(set(headings) ^ known)}")
+    for t in tasks:
+        if t.get("id") in headings and headings[t["id"]] != t.get("title"):
+            found.append(f"{t['id']}: TASKS.md title {headings[t['id']]!r} differs from tasks.json")
+    for tid, priority, deps in re.findall(
+        r"^## (RP-\d\d) — .+?\n\n\*\*Priority:\*\* (p\d) · \*\*Depends on:\*\* (.+)$", markdown, re.MULTILINE
+    ):
+        task = next((t for t in tasks if t.get("id") == tid), None)
+        if task is None:
+            continue
+        listed = [] if deps.strip() == "none" else [d.strip() for d in deps.split(",")]
+        if priority != task.get("priority") or listed != task.get("depends_on"):
+            found.append(f"{tid}: TASKS.md priority/dependencies differ from tasks.json")
+    return found
+
+
+@app.default
+def check(planning: Path = PLANNING) -> None:
+    """Fail with a list of problems if the planning files disagree."""
+    tasks_doc = json.loads((planning / "tasks.json").read_text(encoding="utf-8"))
+    witan = json.loads((planning / "witan.json").read_text(encoding="utf-8"))
+    markdown = (planning / "TASKS.md").read_text(encoding="utf-8")
+    found = problems(tasks_doc, witan, markdown)
+    if found:
+        raise SystemExit("planning data problems:\n" + "\n".join(f"- {p}" for p in found))
+    deps = sum(len(t["depends_on"]) for t in tasks_doc["tasks"])
+    print(f"ok: {len(tasks_doc['tasks'])} tasks, {deps} dependencies, acyclic; TASKS.md and witan.json agree")
+
+
+if __name__ == "__main__":
+    app()

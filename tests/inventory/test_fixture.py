@@ -9,6 +9,8 @@ from typing import Any
 
 import pytest
 
+pytestmark = pytest.mark.inventory
+
 Build = Callable[[Path], dict[str, Any]]
 
 

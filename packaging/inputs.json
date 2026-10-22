@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "note": "Pinned inputs for the RackPy plugin build that uv.lock cannot pin. pybind11 comes from uv.lock. Downloads go to a cache outside git; see bin/rackpy-dev inputs.",
+  "python_runtime": {
+    "3.14": {
+      "source": "https://github.com/astral-sh/python-build-standalone",
+      "release": "20261021",
+      "flavor": "install_only",
+      "platform": "x86_64-unknown-linux-gnu",
+      "version": "3.14.9",
+      "file": "cpython-3.14.9+20261021-x86_64-unknown-linux-gnu-install_only.tar.gz",
+      "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-unknown-linux-gnu-install_only.tar.gz",
+      "sha256": "dfa4c5a40c47f338f41658017be550c72247c391e6bfb1fa4da03ebc8451abdf",
+      "root": "python"
+    }
+  }
+}

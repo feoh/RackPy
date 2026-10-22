@@ -14,7 +14,7 @@ bin/inventory_sdk.py extract          # regenerate upstream/api-surface.json
 bin/inventory_sdk.py check            # re-extract; fail if the committed file differs
 bin/inventory_sdk.py diff OLD NEW     # added, removed and changed IDs between two inventories
 bin/inventory_sdk.py summary --write  # regenerate docs/reference/surface-summary.md
-uv run --with pytest --with clang==21.1.7 --with cyclopts pytest tests/inventory
+uv run pytest tests/inventory
 ```
 
 The tool needs `clang++` and the `libclang.so` from the same LLVM release

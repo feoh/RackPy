@@ -4,7 +4,7 @@
 Runs real Rack headless (`Rack -h -u <temporary user dir>`) on Linux x86_64.
 Pinned inputs are fetched and verified by bin/rack-sdk and bin/spike-inputs.
 
-    uv run --with pytest pytest tests/integration/test_embedding_smoke.py -v
+    uv run pytest tests/integration/test_embedding_smoke.py -v
 
 Rack creates and removes /tmp/Rack2 while it loads plugins, so do not run these
 in parallel or while another Rack instance is starting.
@@ -25,10 +25,13 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 SPIKE = REPO / "spikes" / "embedding"
 READY = "Loading autosave"
-pytestmark = pytest.mark.skipif(
-    sys.platform != "linux" or platform.machine() != "x86_64",
-    reason="the RP-04 spike targets Linux x86_64 only",
-)
+pytestmark = [
+    pytest.mark.host,
+    pytest.mark.skipif(
+        sys.platform != "linux" or platform.machine() != "x86_64",
+        reason="the RP-04 spike targets Linux x86_64 only",
+    ),
+]
 
 
 def tool(*args: str) -> str:
@@ -181,7 +184,7 @@ def test_loader_host_lifecycle(inputs: Inputs, builds: dict[str, Path], tmp_path
     run = run_rack(inputs, tmp_path)
     assert_clean_exit(run)
 
-    assert run.lines(f"interpreter initialized binding={host.split('_')[1].split('.')[0]}"), run.log[-3000:]
+    assert run.lines(f"interpreter initialized binding={host.split('_')[1].split('.', maxsplit=1)[0]}"), run.log[-3000:]
     assert run.lines(f" python={minor}."), "interpreter did not report the bundled version"
     assert run.lines("flags isolated=1 no_site=1 dont_write_bytecode=1")
     prefix = [line for line in run.lines("py: python ") if "prefix=" in line]
@@ -257,17 +260,16 @@ def test_second_rackpy_plugin_is_refused(inputs: Inputs, builds: dict[str, Path]
     assert len(run.lines("a CPython runtime is already loaded in this process")) == 1
 
 
-SYSTEM_LIBPYTHON = Path("/usr/lib/libpython3.14.so.1.0")
-
-
-@pytest.mark.skipif(not SYSTEM_LIBPYTHON.exists(), reason="needs a system libpython to preload")
 def test_foreign_preloaded_python_is_refused(inputs: Inputs, builds: dict[str, Path], tmp_path: Path) -> None:
+    # Any libpython that RackPy did not load counts as foreign; the pinned 3.15
+    # runtime is always available, unlike a distribution's system Python.
+    foreign = inputs.python["3.15"] / "lib" / "libpython3.15.so.1.0"
     stage(tmp_path, inputs, builds["3.14"])
     write_patch(tmp_path, [])
-    run = run_rack(inputs, tmp_path, settle=0.5, env={"LD_PRELOAD": str(SYSTEM_LIBPYTHON)})
+    run = run_rack(inputs, tmp_path, settle=0.5, env={"LD_PRELOAD": str(foreign)})
     assert_clean_exit(run)
     refused = run.lines("a CPython runtime is already loaded in this process")
-    assert refused and str(SYSTEM_LIBPYTHON) in refused[0]
+    assert refused and str(foreign) in refused[0]
     assert not run.lines("interpreter initialized")
 
 

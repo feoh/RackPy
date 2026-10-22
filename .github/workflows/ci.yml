@@ -1,0 +1,207 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# RackPy CI (RP-08). Linux x86_64 only; macOS and Windows jobs arrive with RP-40 and RP-41.
+#
+# Every input is pinned and checksum-verified by the bin/ tools, so the caches
+# below only save downloads. CI keeps logs and test reports, never binaries:
+# distributing a build needs the RP-39 license manifest and owner approval.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_VERSION: "0.9.18"
+  # Missing tools or inputs fail tests (tests/support.py); jobs list what they deliberately lack.
+  RACKPY_ALLOW_MISSING: ""
+
+jobs:
+  planning:
+    name: Planning data
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+      - run: bin/planning-check
+      - run: bin/callback-matrix check
+
+  python:
+    name: Hooks, typing and unit tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+      - run: uv sync --frozen
+      - name: prek (ruff, strict mypy, JSON/YAML, planning, callback matrix)
+        run: uvx prek@0.5.3 run --all-files --show-diff-on-failure
+      - run: uv run --frozen pytest -m unit --junitxml=reports/unit.xml
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: python-reports
+          path: reports/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  native:
+    name: SDK pins, native build and audio-path guard
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+      - name: Libraries libRack links (native tests run outside Rack)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build jq libgl1 libx11-6 libasound2t64 libjack-jackd2-0 libpulse0
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/rackpy/sdk
+            ~/.cache/rackpy/build-inputs
+            ~/.cache/rackpy/spike-inputs
+          key: rackpy-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json', 'spikes/embedding/inputs.json') }}
+      - run: uv sync --frozen
+      - run: bin/rack-sdk environment
+      - name: SDK archives, header trees and libraries match the pins
+        run: bin/rack-sdk verify
+      - name: rack.hpp include closure matches the fixture
+        run: bin/rack-sdk closure
+      - name: rack.hpp-only probe builds with the SDK's plugin.mk
+        run: bin/rack-sdk probe
+      - name: Native build (warnings as errors), CTest, inspection, setup errors, audio-path guard
+        run: uv run --frozen pytest -m "native and not host" -v --junitxml=reports/native.xml
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: native-reports
+          path: reports/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  inventory:
+    name: SDK inventory
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      # The committed inventory records the libclang build that produced it
+      # (clang 23.1.3 on the planning machine); Ubuntu's LLVM cannot reproduce
+      # that record, so only that comparison is skipped here, and visibly.
+      RACKPY_ALLOW_MISSING: pinned-libclang
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang libclang-dev
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/rackpy/sdk
+          key: rackpy-sdk-${{ hashFiles('upstream/versions.json') }}
+      - run: uv sync --frozen
+      - run: uv run --frozen pytest -m inventory -v --junitxml=reports/inventory.xml
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: inventory-reports
+          path: reports/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  host:
+    name: Rack host smoke tests (headless and Xvfb, no audio device)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+      - name: Rack's runtime libraries, Mesa for the Xvfb window, and Xvfb
+        run: >
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build jq
+          libgl1 libgl1-mesa-dri libx11-6 libasound2t64 libjack-jackd2-0 libpulse0 libpulse-mainloop-glib0 xvfb xauth
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/rackpy/sdk
+            ~/.cache/rackpy/build-inputs
+            ~/.cache/rackpy/spike-inputs
+          key: rackpy-host-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json', 'spikes/embedding/inputs.json') }}
+      - run: uv sync --frozen
+      - name: Production skeleton, RP-04 embedding spike and RP-06 lifecycle probe in Rack Free 2.6.6
+        run: >
+          uv run --frozen pytest -m "host and not dist" -v --basetemp="$RUNNER_TEMP/pytest"
+          --junitxml=reports/host.xml
+      - if: always()
+        name: Collect Rack logs
+        run: |
+          mkdir -p reports/rack-logs
+          cd "$RUNNER_TEMP/pytest" 2>/dev/null && find . -name log.txt -exec cp --parents {} "$GITHUB_WORKSPACE/reports/rack-logs/" \; || true
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: host-reports
+          path: reports/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  dist:
+    name: Distributable build with the official Rack toolchain
+    # Building the toolchain takes about an hour on a cache miss, so this runs
+    # on main and on demand, not on every pull request.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+      - run: >
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build jq
+          libgl1 libx11-6 libasound2t64 libjack-jackd2-0 libpulse0
+      - name: Restore the toolchain
+        id: toolchain
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/rackpy/toolchain/*/local
+          key: rack-toolchain-lin-x64-${{ hashFiles('upstream/versions.json', 'packaging/toolchain/lin-x64.Dockerfile') }}
+      - if: steps.toolchain.outputs.cache-hit != 'true'
+        run: bin/rack-toolchain build --jobs "$(nproc)"
+      - run: bin/rack-toolchain check
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/rackpy/sdk
+            ~/.cache/rackpy/build-inputs
+          key: rackpy-dist-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json') }}
+      - run: uv sync --frozen
+      - run: uv run --frozen pytest -m dist -v -s --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/dist.xml
+      - if: always()
+        name: Collect Rack logs
+        run: |
+          mkdir -p reports/rack-logs
+          cd "$RUNNER_TEMP/pytest" 2>/dev/null && find . -name log.txt -exec cp --parents {} "$GITHUB_WORKSPACE/reports/rack-logs/" \; || true
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist-reports
+          path: reports/
+          retention-days: 14
+          if-no-files-found: ignore

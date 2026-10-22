@@ -135,7 +135,7 @@ violations must be impossible to optimize away.
 | Audio deadline misses attributable to RackPy | Zero in a 30-minute stress run | Not measurable here: no audio device | Unchanged; RP-43 on controlled hardware |
 | Interactive UI response | p95 < 50 ms | Not measured | Unchanged; RP-43 |
 | Lifetime stability | No live-object growth over 1,000 create/delete cycles | RP-06 ran 40 cycles | Unchanged; RP-38 |
-| Plugin start-up before user scripts | ≤ 250 ms and ≤ 64 MB RSS | Runtime 5 ms / 9 MB; the full bindings are still unknown | Provisional; re-measure in RP-08 and RP-11 |
+| Plugin start-up before user scripts | ≤ 250 ms and ≤ 64 MB RSS | Runtime 5 ms / 9 MB; the full bindings are still unknown. RP-08 skeleton in Rack: 12 ms, +14.2 MiB ([ADR 005](005-build-and-ci.md#results-on-the-planning-machine)) | Provisional; re-measure in RP-11 |
 
 ## Recommendation: go, with conditions
 

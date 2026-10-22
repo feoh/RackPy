@@ -1,6 +1,8 @@
 # RP-04 embedding spike
 
-**Spike code, not RackPy.** It exists to prove, in a real Rack host, that a
+**Spike code, not RackPy.** The production loader and host in `native/`
+started from it ([ADR 005](../../docs/decisions/005-build-and-ci.md#7-spike-code-is-retained));
+this spike stays as the ADR 002 evidence. It exists to prove, in a real Rack host, that a
 Rack plugin can embed CPython and expose Rack objects through a binding
 library. Its Python module, `_rackpy_spike`, is not a proposed API. The
 results and the decisions they support are in
@@ -21,7 +23,7 @@ results and the decisions they support are in
 ## Run it
 
 ```bash
-uv run --with pytest pytest tests/integration/test_embedding_smoke.py -v
+uv run pytest tests/integration/test_embedding_smoke.py -v
 ```
 
 The test fetches and verifies every pinned input (`bin/rack-sdk path`,

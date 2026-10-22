@@ -6,9 +6,11 @@ RackPy aims to let you build Rack plugins with idiomatic Python while preserving
 access to the complete supported public C++ plugin API. It will run **inside Rack**,
 not as an external remote-control service.
 
-> **Planning repository — no runtime is implemented yet.**
-> There is no installable package, working binding, or completed example.
-> API designs below are proposals, not promises of available functionality.
+> **Early development — no Rack API is bound yet.**
+> A build skeleton exists: it builds a Rack plugin that starts and stops an
+> embedded Python interpreter inside Rack, and registers no modules. There is no
+> installable package, working binding, or completed example. API designs below
+> are proposals, not promises of available functionality.
 
 ## What we are building
 
@@ -41,7 +43,7 @@ they must not disappear from the coverage denominator.
 | Understand performance requirements | [Performance and safety](docs/performance.md) |
 | See the documentation experience we intend | [Documentation plan](docs/documentation.md) |
 | Pick up implementation work | [Execution plan](planning/README.md) |
-| Contribute safely | [Contributing](CONTRIBUTING.md) |
+| Build, test and run CI checks locally | [Contributing](CONTRIBUTING.md) and [ADR 005](docs/decisions/005-build-and-ci.md) |
 
 ## Decisions
 
@@ -49,10 +51,11 @@ The project owner selected in-process execution, **GPL-3.0-or-later**, and a
 repository-and-plan deliverable before implementation. The baseline is Rack
 **2.6.6**, commit `061ccf63c1758599396ac1bb10d47345d9d34076`. RP-02 rechecked
 it and pinned the SDK archives by SHA-256
-([compatibility baseline](docs/compatibility.md)). Loading in a real Rack host
-is not yet tested.
-Python versions, binding library, supported architectures, and latency budgets
-remain gated decisions; do not infer them from the host used to plan this work.
+([compatibility baseline](docs/compatibility.md)). RP-04 chose a bundled
+CPython 3.14 and pybind11 3.1.0 ([ADR 002](docs/decisions/002-embedding-and-bindings.md));
+RP-07 set the working performance budgets ([ADR 004](docs/decisions/004-performance-budgets.md)).
+The RP-08 skeleton loads into Rack Free 2.6.6 on Linux x86_64. macOS and
+Windows have not been built or run.
 
 ## Tracking
 

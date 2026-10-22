@@ -137,6 +137,7 @@
     "linux": "crosstool-ng 899e015abf8c70088e8b67e87586ae81f305711c, sample x86_64-ubuntu16.04-linux-gnu",
     "windows": "crosstool-ng x86_64-w64-mingw32 with mingw-w64 v10.0.0",
     "macos": "osxcross 4372d5560307c649af5dbbfa20b39199c9ef48be, clang 20.1.1, MacOSX 12.3 SDK, rcodesign 0.22.0",
-    "note": "Recorded from the Makefile; RackPy has not built this toolchain yet."
+    "note": "Recorded from the Makefile. RP-08 builds the Linux toolchain with bin/rack-toolchain inside packaging/toolchain/lin-x64.Dockerfile; Windows and macOS toolchains are not built.",
+    "makefile_sha256": "4c73d69c93adb08a30c903bf5ce94d78ef2ca9c8070d5ef6d41b3ca8b5258bd2"
   }
 }
