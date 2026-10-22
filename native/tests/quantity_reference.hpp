@@ -40,6 +40,33 @@ inline json_t* quantityReference() {
 		}
 		s->setDisplayValueString("mIDdle");
 		json_object_set_new(c, "switch_parsed", json_real(s->getValue()));
+		json_t* helpers = json_array();
+		json_object_set_new(c, "helpers", helpers);
+		q->setImmediateValue(2.5f);
+		auto record = [&](const char* method, float arg = 0.f) {
+			json_array_append_new(helpers, json_pack("[sfffbbs]", method, arg, q->getValue(), q->getScaledValue(),
+				q->isMin(), q->isMax(), q->getString().c_str()));
+		};
+		q->setMin(); record("set_min");
+		q->toggle(); record("toggle");
+		q->moveValue(-2.f); record("move_value", -2.f);
+		q->setScaledValue(0.25f); record("set_scaled_value", 0.25f);
+		q->moveScaledValue(0.5f); record("move_scaled_value", 0.5f);
+		q->setMax(); record("set_max");
+		q->toggle(); record("toggle");
+		json_object_set_new(c, "range", json_real(q->getRange()));
+		json_object_set_new(c, "bounded", json_boolean(q->isBounded()));
+		json_t* scaling = json_array();
+		json_object_set_new(c, "scaling", scaling);
+		for (float x : {-1.f, 0.f, 0.5f, 1.f, 3.f})
+			json_array_append_new(scaling, json_pack("[fff]", x, q->toScaled(x), q->fromScaled(x)));
+		// Mutate the real SDK vector, then exercise its label search and display.
+		s->labels[0] = "Bass";
+		s->labels.erase(s->labels.begin() + 1);
+		s->labels.insert(s->labels.begin() + 1, "Center");
+		s->labels.push_back("Extra");
+		s->setDisplayValueString("cENTER");
+		json_object_set_new(c, "edited_switch", json_pack("[fs]", s->getValue(), s->getDisplayValueString().c_str()));
 	}
 	return quantities;
 }

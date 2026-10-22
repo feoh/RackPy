@@ -48,6 +48,26 @@ def test_introspection_comes_from_the_running_package(artifact: Path) -> None:
     assert objects["rackpy.raw.engine.Module.get_light_info"]["kind"] == "function"
     assert objects["rackpy.raw.engine.PortInfoView.module"]["kind"] == "property"
     assert objects["rackpy.raw.engine.LightInfoView"]["kind"] == "class"
+    assert objects["rackpy.raw.engine.SwitchLabels"]["kind"] == "class"
+    assert objects["rackpy.raw.engine.SwitchLabels.append"]["kind"] == "function"
+    assert objects["rackpy.raw.engine.SwitchQuantityView.labels"]["kind"] == "property"
+    for method in (
+        "get_string",
+        "is_min",
+        "is_max",
+        "set_min",
+        "set_max",
+        "toggle",
+        "move_value",
+        "get_range",
+        "is_bounded",
+        "to_scaled",
+        "from_scaled",
+        "set_scaled_value",
+        "get_scaled_value",
+        "move_scaled_value",
+    ):
+        assert objects[f"rackpy.raw.engine.ParamQuantityView.{method}"]["kind"] == "function"
 
 
 def test_manifest_checks_against_the_built_package(artifact: Path) -> None:

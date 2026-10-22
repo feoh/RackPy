@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # rackpy-example: runs-in=rack
 from rackpy.engine import Module
+from rackpy.raw.engine import SwitchQuantityView
 
 
 def configure(module: Module) -> None:
@@ -19,6 +20,15 @@ try:
     assert level.display_multiplier == 100
     # Metadata/defaults work even at plugin startup, before Rack creates its engine.
     assert level.get_param().value == level.default_value == 0.5
+    assert level.get_range() == 1 and level.to_scaled(0.5) == 0.5
+    mode = module.get_param_quantity(1)
+    assert isinstance(mode, SwitchQuantityView)
+    labels = mode.labels  # a checked write-through alias, not a list copy
+    labels[0] = "Bass"
+    labels.append("Extra")
+    assert mode.labels.tolist() == ["Bass", "Middle", "High", "Extra"]
+    mode.labels = ["First", "Second"]
+    assert list(labels) == ["First", "Second"]  # same retained alias
 finally:
     module.close()
 assert not level.alive

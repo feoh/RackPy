@@ -63,13 +63,43 @@ auto withEngine(const QuantityView& view, F action) -> decltype(action(view.get(
 	return action(q);
 }
 
-void setValue(rack::engine::ParamQuantity& q, float value) {
+void requireUnsmoothed(rack::engine::ParamQuantity& q) {
 	// An unregistered module cannot be left in Rack's global smoothing slot:
 	// Engine would retain a raw pointer after the owned Module is deleted.
 	if (q.smoothEnabled)
 		throw runtime::Ownership("smoothing targets require engine-owned modules; use set_immediate_value for this unregistered module");
+}
+
+void setValue(rack::engine::ParamQuantity& q, float value) {
+	requireUnsmoothed(q);
 	q.setValue(value);
 }
+
+void checkLabelIndex(rack::engine::ParamQuantity& q) {
+	if (dynamic_cast<rack::engine::SwitchQuantity*>(&q)) {
+		double index = std::floor(q.getValue() - q.getMinValue());
+		if (!std::isfinite(index) || index < std::numeric_limits<int>::min() || index > std::numeric_limits<int>::max())
+			throw std::invalid_argument("switch label index cannot be represented as an integer");
+	}
+}
+
+/** Resolve the vector afresh on every operation, not a pointer into its
+storage. Reallocation/whole-vector assignment keeps this alias valid; slot
+replacement/owner deletion invalidates it through the quantity token. */
+struct SwitchLabels {
+	SwitchQuantityView view;
+	std::vector<std::string>& get() const {
+		return static_cast<rack::engine::SwitchQuantity&>(view.get()).labels;
+	}
+	py::ssize_t index(py::ssize_t i) const {
+		auto n = static_cast<py::ssize_t>(get().size());
+		if (i < 0)
+			i += n;
+		if (i < 0 || i >= n)
+			throw py::index_error("switch label index out of range");
+		return i;
+	}
+};
 
 template <typename T>
 void field(py::class_<QuantityView>& cls, const char* name, T rack::engine::ParamQuantity::*member) {
@@ -81,6 +111,33 @@ void field(py::class_<QuantityView>& cls, const char* name, T rack::engine::Para
 
 void bindQuantityViews(py::module_ engine) {
 	using Q = rack::engine::ParamQuantity;
+	py::class_<SwitchLabels>(engine, "SwitchLabels", "A checked mutable alias of a switch quantity's label vector.")
+		.def("__len__", [](const SwitchLabels& v) { return v.get().size(); })
+		.def("__getitem__", [](const SwitchLabels& v, py::ssize_t i) { return v.get()[v.index(i)]; })
+		.def("__setitem__", [](const SwitchLabels& v, py::ssize_t i, std::string s) { v.get()[v.index(i)] = std::move(s); })
+		.def("__delitem__", [](const SwitchLabels& v, py::ssize_t i) {
+			auto index = v.index(i);
+			v.get().erase(v.get().begin() + index);
+		})
+		.def("insert", [](const SwitchLabels& v, py::ssize_t i, std::string s) {
+			auto& labels = v.get();
+			auto n = static_cast<py::ssize_t>(labels.size());
+			if (i < 0)
+				i += n;
+			i = std::max(py::ssize_t(0), std::min(i, n));
+			labels.insert(labels.begin() + i, std::move(s));
+		}, py::arg("index"), py::arg("label"))
+		.def("append", [](const SwitchLabels& v, std::string s) { v.get().push_back(std::move(s)); }, py::arg("label"))
+		.def("extend", [](const SwitchLabels& v, std::vector<std::string> items) {
+			// Materialize/convert all items before touching the destination.
+			auto& labels = v.get();
+			labels.insert(labels.end(), items.begin(), items.end());
+		}, py::arg("labels"))
+		.def("clear", [](const SwitchLabels& v) { v.get().clear(); })
+		.def("tolist", [](const SwitchLabels& v) { return v.get(); })
+		.def("__iter__", [](const SwitchLabels& v) { return py::iter(py::cast(v.get())); },
+			"Iterate a copied snapshot, not invalidatable native vector iterators.");
+
 	auto cls = py::class_<QuantityView>(engine, "ParamQuantityView",
 		"Checked built-in module quantity; not a standalone Quantity or Python virtual trampoline.");
 	cls.def_property_readonly("alive", [](const QuantityView& v) { return v.token->alive(); })
@@ -100,6 +157,28 @@ void bindQuantityViews(py::module_ engine) {
 		.def("get_label", [](const QuantityView& v) { return v.get().getLabel(); })
 		.def("get_unit", [](const QuantityView& v) { return v.get().getUnit(); })
 		.def("get_description", [](const QuantityView& v) { return v.get().getDescription(); })
+		.def("get_range", [](const QuantityView& v) { return v.get().getRange(); })
+		.def("is_bounded", [](const QuantityView& v) { return v.get().isBounded(); })
+		.def("to_scaled", [](const QuantityView& v, float x) { return v.get().toScaled(x); }, py::arg("value"))
+		.def("from_scaled", [](const QuantityView& v, float x) { return v.get().fromScaled(x); }, py::arg("scaled_value"))
+		.def("get_string", [](const QuantityView& v) {
+			return withEngine(v, [](Q& q) { checkLabelIndex(q); return q.getString(); });
+		})
+		.def("is_min", [](const QuantityView& v) { return withEngine(v, [](Q& q) { return q.isMin(); }); })
+		.def("is_max", [](const QuantityView& v) { return withEngine(v, [](Q& q) { return q.isMax(); }); })
+		.def("get_scaled_value", [](const QuantityView& v) { return withEngine(v, [](Q& q) { return q.getScaledValue(); }); })
+		.def("set_min", [](const QuantityView& v) { withEngine(v, [](Q& q) { requireUnsmoothed(q); q.setMin(); }); })
+		.def("set_max", [](const QuantityView& v) { withEngine(v, [](Q& q) { requireUnsmoothed(q); q.setMax(); }); })
+		.def("toggle", [](const QuantityView& v) { withEngine(v, [](Q& q) { requireUnsmoothed(q); q.toggle(); }); })
+		.def("move_value", [](const QuantityView& v, float x) {
+			withEngine(v, [x](Q& q) { requireUnsmoothed(q); q.moveValue(x); });
+		}, py::arg("delta_value"))
+		.def("set_scaled_value", [](const QuantityView& v, float x) {
+			withEngine(v, [x](Q& q) { requireUnsmoothed(q); q.setScaledValue(x); });
+		}, py::arg("scaled_value"))
+		.def("move_scaled_value", [](const QuantityView& v, float x) {
+			withEngine(v, [x](Q& q) { requireUnsmoothed(q); q.moveScaledValue(x); });
+		}, py::arg("delta_scaled_value"))
 		.def("get_value", [](const QuantityView& v) { return withEngine(v, [](Q& q) { return q.getValue(); }); })
 		.def("set_value", [](const QuantityView& v, float x) { withEngine(v, [x](Q& q) { setValue(q, x); }); }, py::arg("value"))
 		.def("get_immediate_value", [](const QuantityView& v) { return withEngine(v, [](Q& q) { return q.getImmediateValue(); }); })
@@ -108,11 +187,7 @@ void bindQuantityViews(py::module_ engine) {
 		.def("set_display_value", [](const QuantityView& v, float x) { withEngine(v, [x](Q& q) { q.setDisplayValue(x); }); }, py::arg("display_value"))
 		.def("get_display_value_string", [](const QuantityView& v) {
 			return withEngine(v, [](Q& q) {
-				if (dynamic_cast<rack::engine::SwitchQuantity*>(&q)) {
-					double index = std::floor(q.getValue() - q.getMinValue());
-					if (!std::isfinite(index) || index < std::numeric_limits<int>::min() || index > std::numeric_limits<int>::max())
-						throw std::invalid_argument("switch label index cannot be represented as an integer");
-				}
+				checkLabelIndex(q);
 				return q.getDisplayValueString();
 			});
 		})
@@ -148,10 +223,11 @@ void bindQuantityViews(py::module_ engine) {
 
 	py::class_<SwitchQuantityView, QuantityView>(engine, "SwitchQuantityView")
 		.def_property("labels", [](const SwitchQuantityView& v) {
-			return static_cast<rack::engine::SwitchQuantity&>(v.get()).labels;
+			auto& labels = static_cast<rack::engine::SwitchQuantity&>(v.get()).labels;
+			return runtime::identity(&labels, v.token->generation, [&] { return py::cast(SwitchLabels{v}); });
 		}, [](const SwitchQuantityView& v, std::vector<std::string> labels) {
 			static_cast<rack::engine::SwitchQuantity&>(v.get()).labels = std::move(labels);
-		}, "Copied list; assign a complete sequence to replace labels. Not a mutable vector alias.");
+		}, "Checked mutable vector alias; assign a complete sequence to replace its contents.");
 }
 
 }  // namespace bindings

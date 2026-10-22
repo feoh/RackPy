@@ -1,7 +1,8 @@
 # Module construction and components
 
 **Implemented slices: RP-14A, built-in port/light metadata adapters (RP-14B1),
-and checked built-in quantities (RP-14B2a), Linux x86_64 inside Rack Free 2.6.6.**
+checked built-in quantities (RP-14B2a), and borrowed quantity helpers / mutable
+switch-label views (RP-14B2b1), Linux x86_64 inside Rack Free 2.6.6.**
 This is not a registerable instrument yet. Full quantity/metadata class factories
 and engine-owned smoothing (RP-14B2b), native lifecycle
 adapters (RP-14C), plugin/model factories (RP-16), DSP (RP-17), the Python callback
@@ -144,8 +145,33 @@ retaining a view does not keep the module alive.
 Metadata methods `get_min_value`, `get_max_value`, `get_default_value`,
 `get_display_precision`, `get_label`, `get_unit` and `get_description` work
 without an engine. `get_label()` falls back to a numbered label for empty names.
-Switch `labels` reads return a copied list: assign a whole sequence to write it
-back. Mutating that copy is **not** native vector mutation.
+
+(borrowed-quantity-helpers)=
+### Borrowed quantity helpers and switch labels
+
+The views also expose Rack's inherited `Quantity` helpers without pretending to
+inherit the standalone Python `Quantity` class. `get_range()`, `is_bounded()`,
+`to_scaled(value)` and `from_scaled(scaled_value)` work without an engine. They
+preserve Rack's scaling rules, including equal bounds (scaled value 0) and
+unbounded ranges (identity conversion), and do not clamp conversion results.
+
+`SwitchQuantityView.labels` returns a **mutable `SwitchLabels` alias**, not a
+copied list. Integer reads/writes/deletion, negative indices, `insert`, `append`,
+`extend` and `clear` operate on the native vector. Insertion clamps an
+out-of-range index as Python lists do; other indexed operations raise
+`IndexError`. Slicing is not supported. Assigning a complete string sequence to
+`quantity.labels` replaces the vector's contents. A retained alias sees that
+replacement and remains valid across native vector reallocations. String
+conversion failures do not partially apply a replacement or extension.
+
+`labels.tolist()` and `list(labels)` return independent copies. Iteration takes
+a snapshot when the iterator is created; that copied iterator remains usable
+after vector edits or owner deletion. Operations on the **alias itself** always
+check its quantity's slot generation and main-thread rule. Replacing the
+quantity, failing construction, closing the module or dropping its final handle
+makes retained aliases stale. Label aliases do not keep the module alive.
+This adds borrowed vector editing, not standalone SwitchQuantity or full
+metadata-array mutation semantics.
 
 Value/display methods require Rack's **live bound UI context**. Calling them
 at plugin startup, or from a foreign context, raises `ContextError` rather than
@@ -156,7 +182,10 @@ a context teardown lease before calling Rack's native implementation:
 - `get_display_value` / `set_display_value`, `get_display_value_string` /
   `set_display_value_string` (including Rack's expression parser);
 - `reset` and `randomize`; deprecated `get_smooth_value` / `set_smooth_value`
-  aliases emit `DeprecationWarning`.
+  aliases emit `DeprecationWarning`;
+- `get_string`, `is_min`, `is_max`, `get_scaled_value`, `set_min`, `set_max`,
+  `toggle`, `move_value`, `set_scaled_value` and `move_scaled_value`.
+  These are native Rack helpers, including switch snapping and formatted units.
 
 Display scaling follows Rack: linear for base 0, exponential for a positive
 base, logarithmic for a negative base, then multiply and offset. Display writes
@@ -168,8 +197,11 @@ quantity operations: the enable flags govern *module-level* reset/randomize,
 not these direct calls.
 
 **Smoothing is not implemented for these unregistered modules.** Setting
-`smooth_enabled=True` is metadata only. `set_value` (and its deprecated alias)
-then raises `OwnershipError`; `set_immediate_value` and display writes remain
+`smooth_enabled=True` is metadata only. `set_value` (and its deprecated alias),
+`set_min`, `set_max`, `toggle`, `move_value`, `set_scaled_value` and
+`move_scaled_value` then raise `OwnershipError` before changing any target.
+The helpers must not bypass this guard by indirectly calling native `setValue`.
+`set_immediate_value` and display writes remain
 available. Rack's smoothing slot retains a raw module pointer, so starting a
 smoothing target here could outlive its owner. Full engine-owned smoothing and
 lifecycle cleanup remain RP-14B2b/RP-14C/RP-16. No target is queued implicitly,
@@ -233,7 +265,11 @@ native-reference names/descriptions/IDs/types. The native test injects a
 preparation exception to verify replacement rollback. Quantity tests also cover
 1,000 slot replacements and 1,000 owner collections, stale getters/setters,
 thread/context rejection, validation rollback, native display/label/value
-comparisons, reset/randomize and unsafe smoothing rejection. The bypass dispatch hook
+comparisons, reset/randomize and unsafe smoothing rejection. Borrowed-helper
+and label tests add native differential helper replay and edited label lookup,
+mutable alias/snapshot behavior, 1,000 alias replacements and owner collections,
+conversion failure atomicity, degenerate scaling and indirect smoothing refusal.
+The bypass dispatch hook
 is test-only and runs off the engine.
 
 Rack model registration, browser previews, native lifecycle/reset/randomize/

@@ -95,6 +95,35 @@ contracts still require native differential and actual-host tests, errors,
 reset/randomize/save/reload coordination, mappings/types/docs, validation and
 commits. The built-in child cannot close B2/B/14.
 
+### RP-14B2b bounded groundwork
+
+RP-14B2b additionally waits for this child; completing it leaves all other
+original B2b obligations on the parent. No backwards dependencies on C/16 are
+introduced and no original acceptance criterion is relaxed.
+
+**RP-14B2b1 — borrowed quantity helpers and mutable switch-label views**
+(`tk-rackpy-14b2b1-borrowed-quantity-helpers-and-muta-924aae`). Expose inherited
+Quantity helpers on ParamQuantityView: get_string/is_min/is_max/set_min/set_max/
+toggle/move_value/get_range/is_bounded/to_scaled/from_scaled/set_scaled_value/
+get_scaled_value/move_scaled_value. Keep native behavior, context/lifetime/thread
+checks and reject indirect smoothing-target writes on unregistered modules.
+Replace copied SwitchQuantityView.labels reads with a checked mutable vector
+alias supporting indexed assignment/deletion, insert/append/extend/clear,
+negative indices, whole-sequence replacement and copied iteration/tolist.
+Resolve storage afresh so reallocations/reassignments preserve aliases, while
+slot replacement, deletion and rollback invalidate them. No owner retention.
+Test native SDK differential helper/value/label behavior inside actual Rack,
+startup/live UI context, invalid inputs, failure atomicity, stale/wrong-thread
+aliases and 1,000 replacements/owner collections. Update strict types, runnable
+snippet, prose, mapping notes and validation evidence; commit/checkpoint.
+Exact manifest scope: `field:rack::engine::SwitchQuantity::labels` stays planned
+because standalone semantics remain absent. The 14 inherited `rack::Quantity`
+method records already mapped by RP-12 gain evidence/notes for borrowed adapters,
+not new counted declarations or promotions. Full factories, standalone objects,
+metadata module/identity/vector fields, smoothing ownership and laboratory
+virtual semantics remain B2b/RP-22. This child does not close B2b/B2/B/14 or the
+implementation phase.
+
 ## RackPy 14C: native lifecycle events and identity adapters
 
 **Witan slug:** `tk-rackpy-14c-native-lifecycle-events-and-identity--929845`

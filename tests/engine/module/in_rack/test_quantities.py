@@ -77,12 +77,12 @@ def test_quantity_defaults_metadata_and_identity() -> None:
             assert isinstance(switch, SwitchQuantityView)
             assert (switch.snap_enabled, switch.smooth_enabled, switch.randomize_enabled) == (True, False, i == 1)
             expected = ["Low", "Middle", "High"] if i == 1 else []
-            assert switch.labels == expected
-            copy = switch.labels
+            assert switch.labels.tolist() == expected
+            copy = switch.labels.tolist()
             copy.append("Not written through")
-            assert switch.labels == expected
+            assert switch.labels.tolist() == expected
             switch.labels = ["a", "b"]
-            assert switch.labels == ["a", "b"]
+            assert switch.labels.tolist() == ["a", "b"]
     finally:
         m.close()
 
@@ -99,6 +99,16 @@ def value_actions(q: ParamQuantityView) -> list[Callable[[], Any]]:
         lambda: q.set_display_value_string("0.5"),
         q.reset,
         q.randomize,
+        q.get_string,
+        q.is_min,
+        q.is_max,
+        q.set_min,
+        q.set_max,
+        q.toggle,
+        lambda: q.move_value(0.25),
+        lambda: q.set_scaled_value(0.5),
+        q.get_scaled_value,
+        lambda: q.move_scaled_value(0.25),
     ]
 
 
@@ -162,8 +172,9 @@ def test_native_value_display_and_switch_reference_or_missing_context() -> None:
             switch.set_display_value_string("missing label")
             assert switch.get_value() == case["switch_parsed"]
             m.params[1].value = 1e30
-            with pytest.raises(ValueError, match="label index"):
-                switch.get_display_value_string()
+            for stringify in (switch.get_display_value_string, switch.get_string):
+                with pytest.raises(ValueError, match="label index"):
+                    stringify()
             switch.set_immediate_value(0)
             for _ in range(100):
                 switch.randomize()
@@ -271,6 +282,10 @@ def accesses(q: ParamQuantityView) -> list[Callable[[], Any]]:
         q.get_unit,
         q.get_description,
         q.get_display_precision,
+        q.get_range,
+        q.is_bounded,
+        lambda: q.to_scaled(0.5),
+        lambda: q.from_scaled(0.5),
         q.get_smooth_value,
         lambda: q.set_smooth_value(0),
     ]
