@@ -125,8 +125,9 @@ from the upstream text:
 
 ## Components in RackPy artifacts
 
-RP-04 picks the binding library and the Python distribution. This table records
-the candidates' terms so that the choice can be checked. "Audit" means the
+RP-04 chose pybind11 and python-build-standalone CPython 3.14
+([ADR 002](decisions/002-embedding-and-bindings.md)); nanobind is listed because it
+was evaluated. This table records the terms so that the choice can be checked. "Audit" means the
 exact files in an artifact must be listed with their licenses before release.
 
 | Component | License | Obligations in a binary artifact |

@@ -67,7 +67,8 @@
         "platform": "lin-x64",
         "url": "https://vcvrack.com/downloads/RackFree-2.6.6-lin-x64.zip",
         "sha256": "69acf0c98d47db381291a115d609dcfbb99887bd7bd8641f0489da063fb0fc6e",
-        "size": 20689007
+        "size": 20689007,
+        "root": "Rack2Free"
       },
       {
         "platform": "mac-x64+arm64",
@@ -86,17 +87,46 @@
   "dependencies": {
     "note": "Pins for libraries whose headers are reachable from rack.hpp. Submodule commits are gitlinks in the pinned Rack tree; tarball hashes come from the pinned dep/Makefile.",
     "submodules": {
-      "dep/glfw": {"url": "https://github.com/VCVRack/glfw.git", "commit": "69f04b5504150a9dfed371d82c0fd75ab0f79464"},
-      "dep/nanosvg": {"url": "https://github.com/memononen/nanosvg.git", "commit": "25241c5a8f8451d41ab1b02ab2d865b01600d949"},
-      "dep/nanovg": {"url": "https://github.com/VCVRack/nanovg.git", "commit": "0bebdb314aff9cfa28fde4744bcb037a2b3fd756"},
-      "dep/oui-blendish": {"url": "https://github.com/VCVRack/oui-blendish.git", "commit": "2fc6405883f8451944ed080547d073c8f9f31898"},
-      "dep/pffft": {"url": "https://bitbucket.org/jpommier/pffft.git", "commit": "74d7261be17cf659d5930d4830609406bd7553e3"},
-      "dep/simde": {"url": "https://github.com/simd-everywhere/simde.git", "commit": "dd0b662fd8cf4b1617dbbb4d08aa053e512b08e4"},
-      "dep/speexdsp": {"url": "https://gitlab.xiph.org/xiph/speexdsp.git", "commit": "27ddf98b627ab425d5337b1a0d8b80d7528f9b30"}
+      "dep/glfw": {
+        "url": "https://github.com/VCVRack/glfw.git",
+        "commit": "69f04b5504150a9dfed371d82c0fd75ab0f79464"
+      },
+      "dep/nanosvg": {
+        "url": "https://github.com/memononen/nanosvg.git",
+        "commit": "25241c5a8f8451d41ab1b02ab2d865b01600d949"
+      },
+      "dep/nanovg": {
+        "url": "https://github.com/VCVRack/nanovg.git",
+        "commit": "0bebdb314aff9cfa28fde4744bcb037a2b3fd756"
+      },
+      "dep/oui-blendish": {
+        "url": "https://github.com/VCVRack/oui-blendish.git",
+        "commit": "2fc6405883f8451944ed080547d073c8f9f31898"
+      },
+      "dep/pffft": {
+        "url": "https://bitbucket.org/jpommier/pffft.git",
+        "commit": "74d7261be17cf659d5930d4830609406bd7553e3"
+      },
+      "dep/simde": {
+        "url": "https://github.com/simd-everywhere/simde.git",
+        "commit": "dd0b662fd8cf4b1617dbbb4d08aa053e512b08e4"
+      },
+      "dep/speexdsp": {
+        "url": "https://gitlab.xiph.org/xiph/speexdsp.git",
+        "commit": "27ddf98b627ab425d5337b1a0d8b80d7528f9b30"
+      }
     },
     "tarballs": {
-      "glew": {"version": "2.2.0", "file": "glew-2.2.0.tgz", "sha256": "d4fc82893cfb00109578d0a1a2337fb8ca335b3ceccf97b97e5cc7f08e4353e1"},
-      "jansson": {"version": "2.12", "file": "jansson-2.12.tar.gz", "sha256": "5f8dec765048efac5d919aded51b26a32a05397ea207aa769ff6b53c7027d2c9"}
+      "glew": {
+        "version": "2.2.0",
+        "file": "glew-2.2.0.tgz",
+        "sha256": "d4fc82893cfb00109578d0a1a2337fb8ca335b3ceccf97b97e5cc7f08e4353e1"
+      },
+      "jansson": {
+        "version": "2.12",
+        "file": "jansson-2.12.tar.gz",
+        "sha256": "5f8dec765048efac5d919aded51b26a32a05397ea207aa769ff6b53c7027d2c9"
+      }
     }
   },
   "official_toolchain": {

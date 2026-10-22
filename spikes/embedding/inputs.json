@@ -1,0 +1,40 @@
+{
+  "nanobind": {
+    "file": "nanobind-3.1.0-py3-none-any.whl",
+    "package_dir": "nanobind",
+    "sha256": "96984dbe8154ffb86e653b1b60aaeed6985c710c5e75ad0279eb87943c66292d",
+    "url": "https://files.pythonhosted.org/packages/36/c1/6fd56f7a02a478d54a1a3e6000eccd34b446b1c45cbf0d002fe5d2937126/nanobind-3.1.0-py3-none-any.whl",
+    "version": "3.1.0"
+  },
+  "note": "Pinned inputs for the RP-04 embedding spike. Downloads go to a cache outside git; see bin/spike-inputs.",
+  "pybind11": {
+    "file": "pybind11-3.1.0-py3-none-any.whl",
+    "package_dir": "pybind11",
+    "sha256": "b8488090f8acffbcb6b5d6a85571a6827a0a2981ffb75e5a0b27b87c4a6b7dd0",
+    "url": "https://files.pythonhosted.org/packages/33/fd/8762f7ee3e4e4be6d1d846cffb4916dd9bb02b2f800d3603718a0efe494c/pybind11-3.1.0-py3-none-any.whl",
+    "version": "3.1.0"
+  },
+  "python_build_standalone": {
+    "assets": {
+      "3.14": {
+        "file": "cpython-3.14.9+20261021-x86_64-unknown-linux-gnu-install_only.tar.gz",
+        "root": "python",
+        "sha256": "dfa4c5a40c47f338f41658017be550c72247c391e6bfb1fa4da03ebc8451abdf",
+        "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-unknown-linux-gnu-install_only.tar.gz",
+        "version": "3.14.9"
+      },
+      "3.15": {
+        "file": "cpython-3.15.1+20261021-x86_64-unknown-linux-gnu-install_only.tar.gz",
+        "root": "python",
+        "sha256": "67875a8b80b611c06f4829dcae7ffc3146422cf4dcbcd978f65feb9a81cdb710",
+        "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.15.1%2B20261021-x86_64-unknown-linux-gnu-install_only.tar.gz",
+        "version": "3.15.1"
+      }
+    },
+    "flavor": "install_only",
+    "platform": "x86_64-unknown-linux-gnu",
+    "release": "20261021",
+    "repository": "https://github.com/astral-sh/python-build-standalone"
+  },
+  "schema_version": 1
+}

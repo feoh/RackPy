@@ -1,0 +1,101 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["cyclopts>=5.2,<6"]
+#
+# [tool.uv]
+# exclude-newer = "2026-10-21T00:00:00Z"
+# ///
+"""Fetch and verify the pinned RP-04 embedding-spike inputs (spikes/embedding/inputs.json).
+
+Python runtimes and binding-library wheels are downloaded into a cache outside
+git, checked against their pinned SHA-256 and extracted safely. `paths` prints
+the extracted locations as JSON for the integration test.
+"""
+
+import hashlib
+import json
+import os
+import shutil
+import tarfile
+import tempfile
+import urllib.request
+import zipfile
+from pathlib import Path
+from typing import Annotated, Any
+
+import cyclopts
+
+REPO = Path(__file__).resolve().parent.parent
+INPUTS = REPO / "spikes" / "embedding" / "inputs.json"
+DEFAULT_CACHE = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "rackpy" / "spike-inputs"
+
+app = cyclopts.App(help=__doc__)
+CacheOpt = Annotated[Path, cyclopts.Parameter(help="Cache directory outside git.")]
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def fetch(entry: dict[str, Any], cache: Path) -> Path:
+    dest: Path = cache / "archives" / entry["file"]
+    if not dest.exists() or sha256_file(dest) != entry["sha256"]:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        partial = dest.with_name(dest.name + ".partial")
+        with urllib.request.urlopen(entry["url"], timeout=300) as response, partial.open("wb") as out:
+            shutil.copyfileobj(response, out)
+        partial.replace(dest)
+    actual = sha256_file(dest)
+    if actual != entry["sha256"]:
+        raise SystemExit(f"{entry['file']}: sha256 {actual} does not match pinned {entry['sha256']}")
+    return dest
+
+
+def extract(archive: Path, cache: Path, digest: str) -> Path:
+    dest = cache / "extracted" / digest[:16]
+    if dest.is_dir():
+        return dest
+    staging = Path(tempfile.mkdtemp(prefix="extract-", dir=cache))
+    if archive.name.endswith(".tar.gz"):
+        with tarfile.open(archive) as tf:
+            tf.extractall(staging, filter="data")
+    else:
+        with zipfile.ZipFile(archive) as zf:
+            for member in zf.namelist():
+                if not (staging / member).resolve().is_relative_to(staging.resolve()):
+                    raise SystemExit(f"{archive.name}: refusing member outside archive root: {member}")
+            zf.extractall(staging)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    staging.replace(dest)
+    return dest
+
+
+def entries() -> dict[str, dict[str, Any]]:
+    data = json.loads(INPUTS.read_text(encoding="utf-8"))
+    found: dict[str, dict[str, Any]] = {}
+    for minor, asset in data["python_build_standalone"]["assets"].items():
+        found[f"python-{minor}"] = asset
+    found["pybind11"] = data["pybind11"]
+    found["nanobind"] = data["nanobind"]
+    return found
+
+
+@app.command
+def paths(*, cache: CacheOpt = DEFAULT_CACHE) -> None:
+    """Fetch, verify and extract every input; print their locations as JSON."""
+    cache.mkdir(parents=True, exist_ok=True)
+    result: dict[str, str] = {}
+    for name, entry in entries().items():
+        root = extract(fetch(entry, cache), cache, entry["sha256"])
+        sub = entry.get("root") or entry["package_dir"]
+        result[name] = str(root / sub)
+    print(json.dumps(result, indent=2, sort_keys=True))
+
+
+if __name__ == "__main__":
+    app()

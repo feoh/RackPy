@@ -143,7 +143,9 @@ which this machine does not have. RP-05 records that gap.
 
 ## Python candidates
 
-RP-04 chooses the version and ABI. As of 2026-10-21
+RP-04 chose **CPython 3.14** (full ABI, with the GIL) from python-build-standalone
+`20261021` as the first runtime, with 3.15 next. Both passed the Linux x64 host
+tests ([ADR 002](decisions/002-embedding-and-bindings.md)). As of 2026-10-21
 ([devguide](https://devguide.python.org/versions/)):
 
 | Branch | Status | Candidate for embedding? |

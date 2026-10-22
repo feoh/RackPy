@@ -82,12 +82,12 @@ def tree_digest(root: Path, subdir: str) -> str:
     return hashlib.sha256(listing.encode()).hexdigest()
 
 
-def archives(platforms: list[str] | None) -> list[dict[str, Any]]:
-    entries: list[dict[str, Any]] = load_json(VERSIONS)["sdk"]["archives"]
+def archives(platforms: list[str] | None, section: str = "sdk") -> list[dict[str, Any]]:
+    entries: list[dict[str, Any]] = load_json(VERSIONS)[section]["archives"]
     if platforms:
         unknown = set(platforms) - {a["platform"] for a in entries}
         if unknown:
-            raise SystemExit(f"no pinned SDK archive for: {', '.join(sorted(unknown))}")
+            raise SystemExit(f"no pinned {section} archive for: {', '.join(sorted(unknown))}")
         entries = [a for a in entries if a["platform"] in platforms]
     return entries
 
@@ -127,6 +127,11 @@ def extract(archive: Path, entry: dict[str, Any], cache: Path) -> Path:
             if not target.is_relative_to(staging.resolve()):
                 raise SystemExit(f"{archive.name}: refusing member outside archive root: {member}")
         zf.extractall(staging)
+        for info in zf.infolist():
+            # zipfile drops Unix modes; restore permission bits so executables run.
+            mode = (info.external_attr >> 16) & 0o777
+            if mode and not info.is_dir():
+                (staging / info.filename).chmod(mode)
     dest.parent.mkdir(parents=True, exist_ok=True)
     staging.replace(dest)
     return root
@@ -135,6 +140,23 @@ def extract(archive: Path, entry: dict[str, Any], cache: Path) -> Path:
 def prepare(platforms: list[str] | None, cache: Path, fresh: bool = False) -> dict[str, Path]:
     cache.mkdir(parents=True, exist_ok=True)
     return {e["platform"]: extract(fetch_archive(e, cache, fresh), e, cache) for e in archives(platforms)}
+
+
+@app.command
+def path(platform: str = "lin-x64", *, cache: CacheOpt = DEFAULT_CACHE) -> None:
+    """Print the root of the verified, extracted SDK for PLATFORM."""
+    print(prepare([platform], cache)[platform])
+
+
+@app.command
+def host(platform: str = "lin-x64", *, cache: CacheOpt = DEFAULT_CACHE) -> None:
+    """Fetch and verify a pinned Rack Free host; extract and print its directory when it is a zip."""
+    (entry,) = archives([platform], "host")
+    archive = fetch_archive(entry, cache / "host", fresh=False)
+    if "root" not in entry:
+        print(archive)
+        return
+    print(extract(archive, entry, cache / "host"))
 
 
 def sdk_flags(sdk: Path) -> list[str]:

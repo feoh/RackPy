@@ -16,7 +16,9 @@ Do not require camelCase everywhere to achieve coverage. Aliases are for
 discoverability and migration, not a second independently implemented engine.
 
 An internal native extension and Rack-loadable C++ plugin host provide both.
-pybind11 is the initial candidate, compared against nanobind in RP-04.
+RP-04 chose pybind11 3.1 over nanobind after measuring both in a real Rack host,
+and chose a thin loader plugin that loads a bundled CPython before the binding host
+([ADR 002](decisions/002-embedding-and-bindings.md)).
 No ctypes-only or IPC-only approach can satisfy the in-process subclassing goal.
 
 ## Runtime sketch
