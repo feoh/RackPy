@@ -3,6 +3,8 @@
 // tests exercise the runtime in Rack. Test hooks only; see testing.hpp.
 #include "testing.hpp"
 
+#include "../bindings/engine/components.hpp"
+
 #include <pybind11/stl.h>
 
 #include <algorithm>
@@ -41,7 +43,7 @@ struct ProbeModule : rack::engine::Module {
 	ProbeWidget* widget = nullptr;
 
 	ProbeModule() {
-		config(1, 1, 1, 0);
+		config(1, 1, 1, 1);
 		configParam(0, 0.f, 1.f, 0.5f, "Probe");
 		token = std::make_shared<ObjectToken>(bindCurrentContext());
 	}
@@ -50,6 +52,9 @@ struct ProbeModule : rack::engine::Module {
 	}
 	void process(const ProcessArgs& args) override {
 		processed.fetch_add(1, std::memory_order_relaxed);
+		// Engine-side writes the component tests observe from the UI thread.
+		outputs[0].setVoltage(params[0].getValue() * 10.f);
+		lights[0].setBrightness(params[0].getValue());
 		if (tryPython.exchange(false))
 			callPython("RuntimeProbe process", [] {});  // must be refused: this is an engine thread
 		if (dropPending.load(std::memory_order_acquire)) {
@@ -219,6 +224,12 @@ void define(py::module_ m) {
 		py::gil_scoped_release release;
 		EngineLease lease(*ctx);
 		return APP->engine->getModuleIds().size();
+	});
+	m.def("probe_components", [](const ModuleHandle& h) {
+		// Rack-owned components, borrowed with the module's token (RP-13; RP-14 hands these out publicly).
+		ProbeModule& pm = live(h);
+		return py::make_tuple(bindings::borrowParam(&pm.params[0], h.token), bindings::borrowInput(&pm.inputs[0], h.token),
+			bindings::borrowOutput(&pm.outputs[0], h.token), bindings::borrowLight(&pm.lights[0], h.token));
 	});
 	m.def("try_python_on_engine_thread", [](const ModuleHandle& h) { live(h).tryPython.store(true); });
 	m.def("drop_on_engine_thread", [](const ModuleHandle& h, py::object o) {

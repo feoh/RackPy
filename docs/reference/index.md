@@ -20,6 +20,7 @@ coverage
 :maxdepth: 1
 
 values
+engine-components
 ```
 
 ## The SDK surface, by family

@@ -86,6 +86,41 @@
     },
     {
       "facade": null,
+      "id": "destructor:rack::engine::LightInfo::~LightInfo()",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.LightInfo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::engine::PortInfo::~PortInfo()",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.PortInfo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enum:rack::engine::Port::Type",
+      "kind": "enum",
+      "raw": "rackpy.raw.engine.Port.Type",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::engine::Port::Type::INPUT",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.engine.Port.Type.INPUT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::engine::Port::Type::OUTPUT",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.engine.Port.Type.OUTPUT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::DeferWrapper::f",
       "kind": "attribute",
       "raw": "rackpy.raw.DeferWrapper.f",
@@ -96,6 +131,104 @@
       "id": "field:rack::Exception::msg",
       "kind": "attribute",
       "raw": "rackpy.raw.Exception.msg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::Light::value",
+      "kind": "attribute",
+      "raw": "rackpy.raw.engine.Light.value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::LightInfo::description",
+      "kind": "attribute",
+      "raw": "rackpy.raw.engine.LightInfo.description",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::LightInfo::lightId",
+      "kind": "attribute",
+      "raw": "rackpy.raw.engine.LightInfo.light_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::LightInfo::name",
+      "kind": "attribute",
+      "raw": "rackpy.raw.engine.LightInfo.name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::Param::value",
+      "kind": "attribute",
+      "raw": "rackpy.raw.engine.Param.value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::Port::active",
+      "kind": "attribute",
+      "raw": "rackpy.raw.engine.Port.active",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::Port::channels",
+      "kind": "attribute",
+      "raw": "rackpy.raw.engine.Port.channels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::Port::plugLights",
+      "kind": "attribute",
+      "raw": "rackpy.raw.engine.Port.plug_lights",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::Port::value",
+      "kind": "attribute",
+      "raw": "rackpy.raw.engine.Port.value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::Port::voltages",
+      "kind": "attribute",
+      "raw": "rackpy.raw.engine.Port.voltages",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::PortInfo::description",
+      "kind": "attribute",
+      "raw": "rackpy.raw.engine.PortInfo.description",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::PortInfo::name",
+      "kind": "attribute",
+      "raw": "rackpy.raw.engine.PortInfo.name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::PortInfo::portId",
+      "kind": "attribute",
+      "raw": "rackpy.raw.engine.PortInfo.port_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::PortInfo::type",
+      "kind": "attribute",
+      "raw": "rackpy.raw.engine.PortInfo.type",
       "status": "implemented"
     },
     {
@@ -918,6 +1051,209 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.engine.Light.brightness",
+      "id": "method:rack::engine::Light::getBrightness()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Light.get_brightness",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Light::setBrightness(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Light.set_brightness",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Light::setBrightnessSmooth(float, float, float)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Light.set_brightness_smooth",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Light::setBrightnessSmooth(float, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Light.set_brightness_smooth",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Light::setSmoothBrightness(float, float)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Light.set_smooth_brightness",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::LightInfo::getDescription()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.LightInfo.get_description",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::LightInfo::getName()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.LightInfo.get_name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Param::getValue()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Param.get_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Param::setValue(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Param.set_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Port::clearVoltages()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.clear_voltages",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.Port.channel_count",
+      "id": "method:rack::engine::Port::getChannels()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.get_channels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Port::getNormalPolyVoltage(float, uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.get_normal_poly_voltage",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Port::getNormalVoltage(float, uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.get_normal_voltage",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Port::getPolyVoltage(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.get_poly_voltage",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.Port.voltage",
+      "id": "method:rack::engine::Port::getVoltage(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.get_voltage",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Port::getVoltageRMS()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.get_voltage_rms",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Port::getVoltageSum()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.get_voltage_sum",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Port::getVoltages(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.get_voltages",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.Port.connected",
+      "id": "method:rack::engine::Port::isConnected()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.is_connected",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.Port.monophonic",
+      "id": "method:rack::engine::Port::isMonophonic()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.is_monophonic",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.Port.polyphonic",
+      "id": "method:rack::engine::Port::isPolyphonic()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.is_polyphonic",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Port::normalize(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.normalize",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Port::readVoltages(float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.read_voltages",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Port::setChannels(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.set_channels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Port::setVoltage(float, uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.set_voltage",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Port::writeVoltages(const float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.write_voltages",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::PortInfo::getDescription()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.PortInfo.get_description",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::PortInfo::getFullName()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.PortInfo.get_full_name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::PortInfo::getName()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.PortInfo.get_name",
+      "status": "implemented"
+    },
+    {
       "facade": null,
       "id": "method:rack::math::Rect::clamp(rack::math::Rect) const",
       "kind": "method",
@@ -1345,6 +1681,55 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.engine.Input",
+      "id": "record:rack::engine::Input",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.Input",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.Light",
+      "id": "record:rack::engine::Light",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.Light",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.LightInfo",
+      "id": "record:rack::engine::LightInfo",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.LightInfo",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.Output",
+      "id": "record:rack::engine::Output",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.Output",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.Param",
+      "id": "record:rack::engine::Param",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.Param",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.Port",
+      "id": "record:rack::engine::Port",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.Port",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.PortInfo",
+      "id": "record:rack::engine::PortInfo",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.PortInfo",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.math.Rect",
       "id": "record:rack::math::Rect",
       "kind": "class",
@@ -1497,8 +1882,15 @@
       "kind": "constant",
       "raw": "rackpy.raw.color.YELLOW",
       "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.PORT_MAX_CHANNELS",
+      "id": "variable:rack::engine::PORT_MAX_CHANNELS",
+      "kind": "constant",
+      "raw": "rackpy.raw.engine.PORT_MAX_CHANNELS",
+      "status": "implemented"
     }
   ],
-  "inputs": "a03aaaedce663727",
+  "inputs": "13385a7b672811fd",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

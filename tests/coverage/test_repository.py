@@ -46,7 +46,9 @@ def test_every_record_is_accounted_for() -> None:
     assert statuses <= {"unreviewed", "implemented", "verified", "excluded_internal"}
     bound = [r for r in manifest["entries"] if r["status"] in bm.BOUND]
     families = {bm.family_of(inputs.inventory, inputs.index[r["id"]]) for r in bound}
-    assert families <= {"1 common/value"}, "only family 1 (RP-12) is bound so far"
+    assert families <= {"1 common/value", "2 engine"}, (
+        "only families 1 (RP-12) and 2 (RP-13 components) are bound so far"
+    )
     counted = [e for e in inputs.index.values() if bm.counted(e)]
     assert len(manifest["entries"]) == len(counted) == 3058
     excluded = [r for r in manifest["entries"] if r["status"] == "excluded_internal"]

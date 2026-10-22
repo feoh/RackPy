@@ -208,6 +208,35 @@ with open(RESULT, "w") as f:
 """
 
 
+# Runs the suite from the RuntimeProbe widget's step(), on Rack's UI thread with a live context and engine.
+IN_RACK_UI_RUNNER = """
+from _rackpy_host import _testing
+
+_started = [False]
+
+
+def _on_step(frame, handle):
+    if _started[0] or frame < 3:
+        return
+    _started[0] = True
+    try:
+        _run()
+    finally:
+        _testing.close_window()
+
+
+_testing.set_step_callback(_on_step)
+"""
+
+PROBE_MODULE = {
+    "id": 1,
+    "plugin": "RackPy",
+    "model": "RuntimeProbe",
+    "version": "2.0.0",
+    "params": [{"id": 0, "value": 0.5}],
+}
+
+
 @dataclass(frozen=True)
 class InRackResult:
     exit: int
@@ -227,13 +256,23 @@ class InRackResult:
 
 
 def run_pytest_in_rack(
-    bundle: Path, rack: Path, user: Path, tests: Path, *, args: list[str] | None = None, timeout: float = 120
+    bundle: Path,
+    rack: Path,
+    user: Path,
+    tests: Path,
+    *,
+    args: list[str] | None = None,
+    timeout: float = 120,
+    during_ui: bool = False,
 ) -> InRackResult:
-    """Run a pytest suite inside Rack's embedded interpreter, in the built plugin, at plugin start-up.
+    """Run a pytest suite inside Rack's embedded interpreter, in the built plugin.
 
-    The suite (a directory of test_*.py files that import rackpy) runs on
-    Rack's main thread before Rack creates its window or engine, so it suits
-    code that needs no Rack context. pytest comes from the project
+    By default the suite (a directory of test_*.py files that import rackpy)
+    runs at plugin start-up, on Rack's main thread before Rack creates its
+    window or engine, so it suits code that needs no Rack context. With
+    ``during_ui=True`` it runs from the RuntimeProbe widget's step() instead,
+    in windowed Rack under Xvfb, with a live context and a running engine;
+    that needs the test-hooks bundle. pytest comes from the project
     environment and is copied into this test bundle only, never into a
     production one.
     """
@@ -267,8 +306,22 @@ def run_pytest_in_rack(
     ]
     argv += args or []
     header = f"DEPS = {str(deps)!r}\nRESULT = {str(result_path)!r}\nARGS = {argv!r}\n"
-    (plugin / "pythonpath" / "rackpy_in_rack_pytest.py").write_text(header + IN_RACK_RUNNER)
-    run = run_rack(rack, user, settle=0.3, timeout=timeout)
+    if during_ui:
+        body = "def _run():\n" + "".join(f"    {line}\n" if line else "\n" for line in IN_RACK_RUNNER.splitlines())
+        source = (
+            header
+            + body.replace("    collector = Collector()", "    global collector\n    collector = Collector()")
+            + IN_RACK_UI_RUNNER
+        )
+        write_patch(user, [PROBE_MODULE])
+    else:
+        source = header + IN_RACK_RUNNER
+    (plugin / "pythonpath" / "rackpy_in_rack_pytest.py").write_text(source)
+    run = (
+        run_rack_windowed(rack, user, timeout=timeout)
+        if during_ui
+        else run_rack(rack, user, settle=0.3, timeout=timeout)
+    )
     assert run.returncode == 0, run.tail()
     assert result_path.exists(), "the in-Rack pytest run wrote no result:\n" + run.tail()
     data = json.loads(result_path.read_text())

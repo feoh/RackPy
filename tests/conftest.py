@@ -10,7 +10,7 @@ import pytest
 from tests.support import BIN, REPO, require_tools, tool
 
 # Suites under */in_rack/ run inside Rack (tests.support.run_pytest_in_rack); outside Rack they cannot import.
-collect_ignore_glob = ["*/in_rack/*"]
+collect_ignore_glob = ["*/in_rack", "*/in_rack/*"]
 
 CATEGORIES = ("unit", "native", "inventory", "host", "dist", "docs")
 

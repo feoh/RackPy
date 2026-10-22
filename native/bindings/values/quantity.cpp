@@ -18,6 +18,7 @@
 #include <mutex>
 #include <string>
 
+#include "../support/overrides.hpp"
 #include "rackpy/runtime/diagnostics.hpp"
 #include "rackpy/runtime/python.hpp"
 #include "rackpy/runtime/threads.hpp"
@@ -27,57 +28,10 @@ namespace rackpy {
 namespace values {
 
 namespace rt = rackpy::runtime;
+using bindings::overrideOr;
+using bindings::overrideOrVoid;
 
 namespace {
-
-/** Call a Python override if there is one, else `base`. From Python (GIL held), errors propagate to
-Python; from Rack, they are caught at the boundary, recorded, and `base` answers instead.
-`self` must be the most-derived bound C++ type: pybind11 finds the Python object by exact type. */
-template <typename T, typename Self, typename Base, typename... Args>
-T overrideOr(const Self* self, const char* name, Base base, Args&&... args) {
-	// PyGILState_Check() returns 1 once finalization has started, so test the interpreter first.
-	if (!rt::interpreterAlive())
-		return base();
-	if (PyGILState_Check()) {
-		if (py::function f = py::get_override(self, name))
-			return f(std::forward<Args>(args)...).template cast<T>();
-		return base();
-	}
-	bool answered = false;
-	T result{};
-	rt::callPython(name, [&] {
-		if (py::function f = py::get_override(self, name)) {
-			result = f(std::forward<Args>(args)...).template cast<T>();
-			answered = true;
-		}
-	});
-	return answered ? result : base();
-}
-
-template <typename Self, typename Base, typename... Args>
-void overrideOrVoid(const Self* self, const char* name, Base base, Args&&... args) {
-	if (!rt::interpreterAlive()) {
-		base();
-		return;
-	}
-	if (PyGILState_Check()) {
-		if (py::function f = py::get_override(self, name)) {
-			f(std::forward<Args>(args)...);
-			return;
-		}
-		base();
-		return;
-	}
-	bool answered = false;
-	rt::callPython(name, [&] {
-		if (py::function f = py::get_override(self, name)) {
-			f(std::forward<Args>(args)...);
-			answered = true;
-		}
-	});
-	if (!answered)
-		base();
-}
 
 /** Time a ui-exclusive override when Rack runs it with the engine locked (ADR 004: 1 ms budget). */
 struct ExclusiveBudget {

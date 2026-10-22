@@ -33,7 +33,7 @@ nitpicky = True
 suppress_warnings = ["autoapi.python_import_resolution"]
 nitpick_ignore_regex = [
     # The build is offline (no intersphinx): standard-library types in signatures cannot resolve.
-    ("py:class", r"(collections\.abc|typing|types)\.\w+"),
+    ("py:class", r"(collections\.abc|typing|types|array)\.\w+"),
     # PEP 695 type parameters (def f[T](...)) are not documented objects.
     ("py:class", r"[A-Z]"),
     # Private implementation modules; their public names are documented where rackpy.raw re-exports them.

@@ -90,6 +90,9 @@ if(RACKPY_BUILD_TESTS)
   add_executable(rackpy_values_reference native/tests/values_reference.cpp)
   set_target_properties(rackpy_values_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_link_libraries(rackpy_values_reference PRIVATE rackpy_sdk_program)
+  add_executable(rackpy_components_reference native/tests/components_reference.cpp)
+  set_target_properties(rackpy_components_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_link_libraries(rackpy_components_reference PRIVATE rackpy_sdk_program)
 endif()
 
 # Plugin directory layout. bin/rackpy-dev bundle adds the runtime as python/.

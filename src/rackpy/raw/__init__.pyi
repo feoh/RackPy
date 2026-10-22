@@ -3,6 +3,7 @@
 from rackpy.raw import _arch as _arch
 from rackpy.raw import _types as _types
 from rackpy.raw import color as color
+from rackpy.raw import engine as engine
 from rackpy.raw import literals as literals
 from rackpy.raw import macros as macros
 from rackpy.raw import math as math
