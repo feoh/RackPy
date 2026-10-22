@@ -27,6 +27,13 @@ The low-level names are in `rackpy.raw` (C++ namespace for namespace:
 - NaN and infinities pass through with Rack's semantics: `rescale` over an
   empty range divides by zero, giving `±inf` (or NaN when `x` is the range's
   start), as Rack's does.
+- **The sign of a zero is not part of Rack's semantics.** Rack and RackPy are
+  compiled with `-funsafe-math-optimizations`, which implies
+  `-fno-signed-zeros`, so a function may return `0.0` or `-0.0` for the same
+  input depending on the compiler and call site: `clamp(-0.0)` is `0.0` from
+  one build and `-0.0` from another. Compare results with `==`, which treats
+  them as equal. `normalize_zero` is the exception: Rack compiles it to keep
+  signed zeros, and it always returns `+0.0`.
 - **Denormals are flushed to zero inside Rack.** Rack's `main()` sets the CPU's
   flush-to-zero and denormals-are-zero modes (`system::resetFpuFlags()`), and
   threads inherit them, so in a Rack process *all* float arithmetic, including

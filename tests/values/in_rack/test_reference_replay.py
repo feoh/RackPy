@@ -41,24 +41,31 @@ def decode(value: Any) -> Any:
     return value
 
 
-def same_float(actual: float, expected: float) -> bool:
-    """Equal bit patterns, so -0.0 differs from 0.0; any NaN equals any NaN (payloads are not API)."""
+# Rack compiles with -funsafe-math-optimizations, which implies -fno-signed-zeros: the sign of a
+# zero result is not part of Rack's semantics, and two builds of the same function (GCC 13 against
+# GCC 16, or two call sites) may differ in it. Only normalize_zero, which Rack compiles with
+# optimize("signed-zeros"), promises a sign, so only its zeros are compared with their sign.
+SIGNED_ZEROS = {"normalize_zero"}
+
+
+def same_float(actual: float, expected: float, signed_zeros: bool) -> bool:
+    """Equal bit patterns; any NaN equals any NaN (payloads are not API); ±0 equal unless signed_zeros."""
     if math.isnan(expected):
         return math.isnan(actual)
+    if expected == 0.0 and not signed_zeros:
+        return actual == 0.0
     return struct.pack("<f", actual) == struct.pack("<f", expected)
 
 
-def same(actual: Any, expected: Any) -> bool:
+def same(actual: Any, expected: Any, signed_zeros: bool = False) -> bool:
     if isinstance(expected, float):
-        return isinstance(actual, float) and same_float(actual, expected)
+        return isinstance(actual, float) and same_float(actual, expected, signed_zeros)
     if isinstance(expected, Vec):
-        return isinstance(actual, Vec) and same_float(actual.x, expected.x) and same_float(actual.y, expected.y)
+        return isinstance(actual, Vec) and same(actual.x, expected.x) and same(actual.y, expected.y)
     if isinstance(expected, Rect):
         return isinstance(actual, Rect) and same(actual.pos, expected.pos) and same(actual.size, expected.size)
     if isinstance(expected, NVGcolor):
-        return isinstance(actual, NVGcolor) and all(
-            same_float(a, e) for a, e in zip(actual.rgba, expected.rgba, strict=True)
-        )
+        return isinstance(actual, NVGcolor) and all(map(same, actual.rgba, expected.rgba, strict=True))
     if isinstance(expected, list):
         return (
             isinstance(actual, list | tuple)
@@ -225,6 +232,11 @@ def test_reference_is_the_running_rack_version(reference: list[dict[str, Any]]) 
     assert rackpy.raw.APP_VERSION == "2.6.6"
 
 
+def test_normalize_zero_keeps_its_promise_about_signs() -> None:
+    assert math.copysign(1.0, m.normalize_zero(-0.0)) == 1.0
+    assert math.copysign(1.0, m.normalize_zero(0.0)) == 1.0
+
+
 def test_every_reference_case_matches_rack(reference: list[dict[str, Any]]) -> None:
     mismatches: list[str] = []
     seen: Counter[str] = Counter()
@@ -234,7 +246,7 @@ def test_every_reference_case_matches_rack(reference: list[dict[str, Any]]) -> N
         args = decode(case["args"])
         expected = decode(case["result"])
         actual = CALLS[fn](*args)
-        if not same(actual, expected):
+        if not same(actual, expected, signed_zeros=fn in SIGNED_ZEROS):
             mismatches.append(f"{fn}{tuple(args)!r}: Rack gives {expected!r}, rackpy.raw gives {actual!r}")
     assert not mismatches, f"{len(mismatches)} of {len(reference)} cases differ:\n" + "\n".join(mismatches[:40])
     assert set(seen) == set(CALLS), "every reference function is replayed, and nothing else"

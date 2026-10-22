@@ -31,7 +31,13 @@ reference page.
 3. **Rack's code, not a copy of it.** Bindings call Rack's functions (inline
    ones compiled with the SDK's flags). A compiled C++ reference evaluates the
    same functions over edge cases and the bindings must match it bit for bit
-   inside Rack; for family 1 that is 7,214 cases.
+   inside Rack, for family 1 7,214 cases, with two exceptions that are not
+   Rack semantics: NaN payloads, and the sign of a zero. The SDK's
+   `-funsafe-math-optimizations` implies `-fno-signed-zeros`, and CI's GCC 13
+   build returned `-0.0` where the planning machine's GCC 16 build returned
+   `0.0` from the same `clamp` (15 cases, all `fmin`/`fmax` with a negative
+   zero). Zeros are therefore compared by value, except for `normalizeZero`,
+   which Rack compiles with signed zeros on purpose.
 4. **Preconditions become exceptions.** Where Rack only documents a
    precondition whose violation crashes or hangs (a non-positive divisor, a
    negative `log2`, an out-of-range array index), RackPy checks it first and
