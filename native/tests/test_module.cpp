@@ -57,5 +57,47 @@ int main() {
 		worker.join();
 		assert(c.get().getNumParams() == 1);
 	}
+	{
+		Construction c;
+		refuses<std::out_of_range>([&] { c.configPortInfo(0, "", true); });
+		c.config(0, 1, 1, 1);
+		auto& m = c.get();
+		assert(m.getLightInfo(0) == nullptr);
+		auto oldToken = m.inputInfoTokens[0];
+		auto old = m.getInputInfo(0);
+		// Exercise preparation failure deterministically, without allocation
+		// fault injection or a Python/testing hook in production bindings.
+		refuses<std::runtime_error>([&] {
+			c.replaceInfo(0, m.inputInfos, m.inputInfoTokens, [](rack::engine::PortInfo&) {
+				throw std::runtime_error("preparation failed");
+			});
+		});
+		assert(m.getInputInfo(0) == old && oldToken->alive());
+		assert(m.inputInfoTokens[0] == oldToken);
+		c.configPortInfo(0, "Pitch", true);
+		assert(!oldToken->alive());
+		assert(m.getInputInfo(0)->module == &m);
+		assert(m.getInputInfo(0)->type == rack::engine::Port::INPUT);
+		assert(m.getInputInfo(0)->portId == 0);
+		assert(m.getInputInfo(0)->getName() == "Pitch");
+		c.configPortInfo(0, "Signal", false);
+		assert(m.getOutputInfo(0)->type == rack::engine::Port::OUTPUT);
+		c.configLightInfo(0, "Activity");
+		assert(m.getLightInfo(0)->module == &m && m.getLightInfo(0)->lightId == 0);
+		auto input = m.inputInfoTokens[0], output = m.outputInfoTokens[0], light = m.lightInfoTokens[0];
+		refuses<std::out_of_range>([&] { c.configPortInfo(-1, "", true); });
+		refuses<std::out_of_range>([&] { c.configLightInfo(1, ""); });
+		assert(input->alive() && output->alive() && light->alive());
+		c.seal();
+		refuses<Ownership>([&] { c.configPortInfo(0, "", true); });
+		refuses<Ownership>([&] { c.configLightInfo(0, ""); });
+		std::thread worker([&] {
+			refuses<WrongThread>([&] { c.configPortInfo(0, "", false); });
+			refuses<WrongThread>([&] { c.configLightInfo(0, ""); });
+		});
+		worker.join();
+		c.close();
+		assert(!input->alive() && !output->alive() && !light->alive());
+	}
 	return 0;
 }

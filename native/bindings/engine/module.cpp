@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// RP-14A: scoped construction and checked, non-resizable component views.
+// RP-14A/B1: scoped construction, components and built-in metadata views.
 // No Module virtual calls dispatch to Python. The sole Python call happens
 // synchronously during construction on the main thread, before publication.
 #include "module.hpp"
@@ -9,20 +9,76 @@
 
 #include <vector>
 
+#include "rackpy/runtime/python.hpp"
+
 namespace rackpy {
 namespace bindings {
 
 namespace {
 
-enum class Kind { Param, Input, Output, Light };
+enum class Kind { Param, Input, Output, Light, InputInfo, OutputInfo, LightInfo };
+
+py::object moduleObject(const std::shared_ptr<module::Construction>& state) {
+	auto& m = state->get();
+	return runtime::identity(&m, m.token->generation, [&] { return py::cast(ModuleRef{state}); });
+}
+
+/** A metadata view never owns the Module or the underlying metadata. Its
+slot generation dies on replacement, independently of the Module lifetime. */
+template <typename Info>
+struct InfoView {
+	Info* ptr;
+	std::shared_ptr<runtime::ObjectToken> token;
+	std::weak_ptr<module::Construction> state;
+	Info& get() const {
+		runtime::requireMainThread("using module metadata");
+		if (!token->alive())
+			throw runtime::StaleHandle("this metadata was replaced or its module was deleted");
+		return *ptr;
+	}
+	py::object owner() const {
+		get();
+		auto held = state.lock();
+		if (!held)
+			throw runtime::StaleHandle("this metadata belonged to a deleted module");
+		return moduleObject(held);
+	}
+};
+
+using PortInfoView = InfoView<rack::engine::PortInfo>;
+using LightInfoView = InfoView<rack::engine::LightInfo>;
+
+template <typename Info>
+py::object infoView(const ModuleRef& ref, Info* ptr, const std::shared_ptr<runtime::ObjectToken>& token) {
+	if (!ptr)
+		return py::none();
+	return runtime::identity(ptr, token->generation, [&] { return py::cast(InfoView<Info>{ptr, token, ref.state}); });
+}
+
+template <typename Info>
+auto bindInfoView(py::module_ engine, const char* name) {
+	using View = InfoView<Info>;
+	return py::class_<View>(engine, name, "Checked built-in metadata; not a standalone metadata class or a Python virtual trampoline.")
+		.def_property_readonly("alive", [](const View& v) { return v.token->alive(); })
+		.def_property_readonly("module", &View::owner)
+		.def_property("name", [](const View& v) { return v.get().name; },
+			[](const View& v, std::string name) { v.get().name = std::move(name); })
+		.def_property("description", [](const View& v) { return v.get().description; },
+			[](const View& v, std::string description) { v.get().description = std::move(description); })
+		.def("get_name", [](const View& v) { return v.get().getName(); })
+		.def("get_description", [](const View& v) { return v.get().getDescription(); });
+}
 
 int count(const ModuleRef& ref, Kind kind) {
 	module::Module& m = ref.get();
 	switch (kind) {
 		case Kind::Param: return m.getNumParams();
-		case Kind::Input: return m.getNumInputs();
-		case Kind::Output: return m.getNumOutputs();
-		case Kind::Light: return m.getNumLights();
+		case Kind::Input:
+		case Kind::InputInfo: return m.getNumInputs();
+		case Kind::Output:
+		case Kind::OutputInfo: return m.getNumOutputs();
+		case Kind::Light:
+		case Kind::LightInfo: return m.getNumLights();
 	}
 	throw std::logic_error("unknown component kind");
 }
@@ -35,6 +91,9 @@ py::object component(const ModuleRef& ref, Kind kind, int i) {
 		case Kind::Input: return borrowInput(&m.getInput(i), m.token);
 		case Kind::Output: return borrowOutput(&m.getOutput(i), m.token);
 		case Kind::Light: return borrowLight(&m.getLight(i), m.token);
+		case Kind::InputInfo: return infoView(ref, m.getInputInfo(i), m.inputInfoTokens[i]);
+		case Kind::OutputInfo: return infoView(ref, m.getOutputInfo(i), m.outputInfoTokens[i]);
+		case Kind::LightInfo: return infoView(ref, m.getLightInfo(i), m.lightInfoTokens[i]);
 	}
 	throw std::logic_error("unknown component kind");
 }
@@ -67,7 +126,7 @@ py::object create(py::object configure) {
 	if (!configure.is_none() && !PyCallable_Check(configure.ptr()))
 		throw py::type_error("configure must be callable or None");
 	auto state = std::make_shared<module::Construction>();
-	py::object result = py::cast(ModuleRef{state});
+	py::object result = moduleObject(state);
 	try {
 		if (!configure.is_none())
 			configure(result);
@@ -83,6 +142,12 @@ py::object create(py::object configure) {
 }  // namespace
 
 void bindModule(py::module_ engine) {
+	bindInfoView<rack::engine::PortInfo>(engine, "PortInfoView")
+		.def_property_readonly("port_id", [](const PortInfoView& v) { return v.get().portId; })
+		.def_property_readonly("type", [](const PortInfoView& v) { return v.get().type; })
+		.def("get_full_name", [](const PortInfoView& v) { return v.get().getFullName(); });
+	bindInfoView<rack::engine::LightInfo>(engine, "LightInfoView")
+		.def_property_readonly("light_id", [](const LightInfoView& v) { return v.get().lightId; });
 	py::class_<Components>(engine, "Components", "A checked, fixed-size view; it does not keep its module alive.")
 		.def("__len__", &Components::size)
 		.def("__getitem__", &Components::item)
@@ -107,6 +172,19 @@ void bindModule(py::module_ engine) {
 		.def_property_readonly("alive", [](const ModuleRef& r) { return r.state->object != nullptr; })
 		.def("config", [](const ModuleRef& r, int p, int i, int o, int l) { r.state->config(p, i, o, l); },
 			py::arg("num_params"), py::arg("num_inputs"), py::arg("num_outputs"), py::arg("num_lights") = 0)
+		.def("config_input", [](const ModuleRef& r, int i, std::string name) {
+			r.state->configPortInfo(i, std::move(name), true);
+			return component(r, Kind::InputInfo, i);
+		}, py::arg("port_id"), py::arg("name") = "",
+			"Configure built-in PortInfo only. Class-factory template semantics are not implemented yet.")
+		.def("config_output", [](const ModuleRef& r, int i, std::string name) {
+			r.state->configPortInfo(i, std::move(name), false);
+			return component(r, Kind::OutputInfo, i);
+		}, py::arg("port_id"), py::arg("name") = "")
+		.def("config_light", [](const ModuleRef& r, int i, std::string name) {
+			r.state->configLightInfo(i, std::move(name));
+			return component(r, Kind::LightInfo, i);
+		}, py::arg("light_id"), py::arg("name") = "")
 		.def("config_bypass", [](const ModuleRef& r, int i, int o) { r.state->configBypass(i, o); },
 			py::arg("input_id"), py::arg("output_id"))
 		.def_property_readonly("bypass_routes", [](const ModuleRef& r) {
@@ -122,9 +200,13 @@ void bindModule(py::module_ engine) {
 		{Kind::Param, "params", "get_num_params", "get_param"},
 		{Kind::Input, "inputs", "get_num_inputs", "get_input"},
 		{Kind::Output, "outputs", "get_num_outputs", "get_output"},
-		{Kind::Light, "lights", "get_num_lights", "get_light"}
+		{Kind::Light, "lights", "get_num_lights", "get_light"},
+		{Kind::InputInfo, "input_infos", nullptr, "get_input_info"},
+		{Kind::OutputInfo, "output_infos", nullptr, "get_output_info"},
+		{Kind::LightInfo, "light_infos", nullptr, "get_light_info"}
 	}) {
-		cls.def(g.count, [g](const ModuleRef& r) { return count(r, g.kind); });
+		if (g.count)
+			cls.def(g.count, [g](const ModuleRef& r) { return count(r, g.kind); });
 		cls.def(g.get, [g](const ModuleRef& r, int i) { return component(r, g.kind, i); }, py::arg("index"));
 		cls.def_property_readonly(g.field, [g](const ModuleRef& r) {
 			r.get();

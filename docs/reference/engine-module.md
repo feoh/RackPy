@@ -1,7 +1,8 @@
 # Module construction and components
 
-**Implemented slice: RP-14A, Linux x86_64 inside Rack Free 2.6.6.** This is
-not a registerable instrument yet. Parameter metadata (RP-14B), native lifecycle
+**Implemented slices: RP-14A and built-in port/light metadata adapters (RP-14B1),
+Linux x86_64 inside Rack Free 2.6.6.** This is not a registerable instrument yet.
+Parameter metadata and full metadata class factories (RP-14B2), native lifecycle
 adapters (RP-14C), plugin/model factories (RP-16), DSP (RP-17), the Python callback
 laboratory (RP-22), and expanders (RP-23) remain planned. See the
 [coverage report](coverage.md) for declaration-level status.
@@ -12,8 +13,9 @@ laboratory (RP-22), and expanders (RP-23) remain planned. See the
 binding. `Module.create(configure=None)` constructs an owned, empty Rack module.
 When supplied, `configure(module)` runs synchronously on Rack's main thread.
 Its return value is ignored; the factory returns the same Python handle it
-passed to the callback. Only that callback may call `config` and
-`config_bypass`. These are construction operations, not engine commands.
+passed to the callback. Only that callback may call `config`, `config_bypass`,
+`config_input`, `config_output` and `config_light`. These are construction
+operations, not engine commands.
 
 `config(num_params, num_inputs, num_outputs, num_lights=0)` calls Rack's
 implementation once. Counts must be nonnegative. Even `config(0, 0, 0)`
@@ -54,8 +56,51 @@ Iteration snapshots the component *handles*, not their changing values.
 
 A checked, non-resizable view does not expose every operation of C++'s public
 mutable vector fields. Those four manifest records therefore remain
-`planned`, not completed mappings. Metadata and its named lookup are RP-14B.
+`planned`, not completed mappings. Named lookup remains planned.
 For port channel and buffer rules, see [Engine components](engine-components.md).
+
+(module-metadata)=
+## Built-in port and light metadata
+
+`config_input(port_id, name="")`, `config_output(port_id, name="")` and
+`config_light(light_id, name="")` configure **built-in** Rack metadata during
+construction. They return checked `PortInfoView` / `LightInfoView` adapters.
+IDs must be nonnegative and below the corresponding component count.
+
+`get_input_info(index)`, `get_output_info(index)` and `get_light_info(index)`
+return the same live adapters. Rack initializes input/output metadata in
+`config`; light slots are `None` until explicitly configured. `input_infos`,
+`output_infos` and `light_infos` are fixed-size `Components` collections with
+negative indexing and iteration, not replaceable or resizable raw vectors.
+
+The adapters expose mutable `name` and `description`, `get_name()` and
+`get_description()`. A port also has `get_full_name()` (Rack appends " input"
+or " output"), read-only `type` and `port_id`; a light has read-only `light_id`.
+The read-only `module` property returns the original owning Python handle.
+All native metadata access requires the main thread, including null-slot
+lookups. `alive` is a liveness query and may be read from any thread.
+
+Configuring the same slot again is permitted **during construction**. The old
+adapter immediately becomes stale; it cannot read a replacement that happens
+to reuse its address. Only that slot's generation changes. Replacement prepares
+its native object, strings and generation before retiring the previous one, so
+a preparation exception leaves the old metadata intact. Closing the module,
+dropping its last handle, or failing construction invalidates every adapter,
+including retained collections. Views do not keep the module alive; explicitly
+retaining `view.module` does, just like retaining the original module handle.
+
+```{rackpy-example} module_metadata.py
+```
+
+**Deliberately partial:** borrowed adapters are distinct from standalone,
+subclassable `PortInfo` / `LightInfo`. These helpers do not yet accept a class
+argument or transfer Python subclasses into native ownership. Arbitrary
+identity-field/module-pointer mutation, raw vector mutation and standalone
+metadata `module` fields are also absent. RP-14B2 retains these obligations,
+along with ParamQuantity/SwitchQuantity and their mixed-thread virtuals.
+Accordingly the template, getter and raw-field manifest records remain
+`planned`: built-in adapters alone are not complete public semantics. No
+production callback dispatches to Python in this slice.
 
 ## Ownership and failure
 
@@ -97,7 +142,11 @@ The host tests construct and delete these owned native modules **inside actual
 Rack**, both at plugin startup and on the UI thread with a live engine. They
 exercise 1,000 construction/deletion cycles, retained views, failed and nested
 constructors, wrong-thread access, checked indices and native differential
-fixtures. The bypass dispatch hook is test-only and runs off the engine.
+fixtures. Metadata tests additionally exercise 1,000 replacements, 1,000 owner
+collections, slot-specific invalidation, null slots, backreference identity and
+native-reference names/descriptions/IDs/types. The native test injects a
+preparation exception to verify replacement rollback. The bypass dispatch hook
+is test-only and runs off the engine.
 
 Rack model registration, browser previews, native lifecycle/reset/randomize/
 sample-rate adapters, save/reload, engine ownership transfer and instrumented

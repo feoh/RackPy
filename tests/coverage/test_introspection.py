@@ -44,6 +44,10 @@ def test_introspection_comes_from_the_running_package(artifact: Path) -> None:
     assert objects["rackpy.raw.math.Vec.__add__"]["kind"] == "function"
     assert objects["rackpy.raw.Exception.msg"]["kind"] == "attribute"
     assert objects["rackpy.math.Rect"]["kind"] == "class"
+    assert objects["rackpy.raw.engine.Module.config_input"]["kind"] == "function"
+    assert objects["rackpy.raw.engine.Module.get_light_info"]["kind"] == "function"
+    assert objects["rackpy.raw.engine.PortInfoView.module"]["kind"] == "property"
+    assert objects["rackpy.raw.engine.LightInfoView"]["kind"] == "class"
 
 
 def test_manifest_checks_against_the_built_package(artifact: Path) -> None:

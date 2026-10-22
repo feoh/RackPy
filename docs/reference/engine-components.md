@@ -88,7 +88,10 @@ setter.
 Names and descriptions shown in Rack's UI. `PortInfo.get_full_name()` appends
 " input" or " output" to `get_name()`. A Python subclass may override
 `get_name` and `get_description` (Rack calls them on the UI thread). The
-`module` field, a pointer back to the module, is bound with `Module` (RP-14).
+standalone `module` field, a pointer back to the module, is not bound yet
+(RP-14B2). Module-owned built-in metadata is currently accessed through distinct,
+lifetime-checked `PortInfoView` / `LightInfoView` adapters, not these standalone
+classes; see [Module metadata](engine-module.md#built-in-port-and-light-metadata).
 
 (components-deprecated)=
 ## Deprecated and unstable members

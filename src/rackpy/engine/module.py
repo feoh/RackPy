@@ -2,7 +2,8 @@
 """Owned native modules, configured in a scoped construction callback (RP-14A).
 
 Available inside Rack only. This is the construction/component-access slice:
-model registration, parameter metadata and lifecycle adapters are still planned.
+built-in port/light metadata adapters are available, but model registration,
+parameter metadata, metadata class factories and lifecycle adapters are still planned.
 The callback passed to :meth:`rackpy.raw.engine.Module.create` is construction code, not DSP.
 """
 

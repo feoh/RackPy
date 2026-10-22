@@ -73,6 +73,28 @@ def test_every_module_gap_retains_a_responsible_task() -> None:
     assert vectors <= incomplete
 
 
+@pytest.mark.parametrize(
+    "symbol",
+    [
+        "field:rack::engine::Module::inputInfos",
+        "field:rack::engine::Module::outputInfos",
+        "field:rack::engine::Module::lightInfos",
+        "method:rack::engine::Module::getInputInfo(int)",
+        "method:rack::engine::Module::getOutputInfo(int)",
+        "method:rack::engine::Module::getLightInfo(int)",
+        "method_template:rack::engine::Module::configInput<type>(int, std::string)",
+        "method_template:rack::engine::Module::configOutput<type>(int, std::string)",
+        "method_template:rack::engine::Module::configLight<type>(int, std::string)",
+    ],
+)
+def test_builtin_metadata_adapters_do_not_complete_raw_or_template_semantics(symbol: str) -> None:
+    record = next(r for r in bm.load_json(bm.MANIFEST)["entries"] if r["id"] == symbol)
+    assert record["status"] == "planned"
+    assert record["python"] is None
+    assert "RP-14B1" in record["notes"] and "RP-14B2" in record["notes"]
+    assert record["tests"] and record["docs"]
+
+
 def test_every_public_engine_method_has_a_lock_entry() -> None:
     inputs = bm.load_inputs()
     engine = [i for i, e in inputs.index.items() if bm.is_engine_method(e) and e["classification"] == "public"]

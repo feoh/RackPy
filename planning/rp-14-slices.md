@@ -17,6 +17,40 @@ Bounded RP-14 slice. Read AGENTS and full RP-14 contract/comments; claim with re
 
 Remaining RP-14 construction/metadata slice; inherits full RP-14 contract/comments and AGENTS validation. Implement configParam/configSwitch/configButton/configInput/configOutput/configLight full class-factory template semantics, including Python subclasses where thread-safe, native-only mixed ParamQuantity value/range methods with explicit later laboratory semantics, checked IDs/ranges and metadata replacement invalidation. Bind all ParamQuantity/SwitchQuantity declarations (JSON deferred explicitly RP-15), metadata arrays and lookup, PortInfo/LightInfo::module fields. Preserve ownership/null semantics and identity; reject wrong-phase calls/repeated unsafe config; exception-safe metadata ownership transfer. Differential tests: display scales/log/exponential, labels/defaults/snap/button flags, smoothing/immediate semantics, name/description overrides, bad ranges, callback errors; real Rack construct/reset/randomize/save/reload tests coordinated with RP-14C/RP-15. Native-only helpers do not count complete Python virtual/template semantics. Update manifest/tests/types/human docs, run full relevant checks and commit. RP-14 remains blocked until this and C pass.
 
+### RP-14B subdivisions
+
+RP-14B is additionally blocked by both children below; B2 waits for B1.
+This bounds the ownership groundwork without declaring native built-ins to be
+complete template mappings. All original B acceptance criteria remain in force.
+
+**RP-14B1 — checked built-in port and light metadata views**
+(`tk-rackpy-14b1-checked-built-in-port-and-light-meta-82183d`). Implement
+constructor-only built-in `config_input/output/light`, `get_*_info`, fixed
+metadata collections and null light slots. Distinct borrowed view adapters
+preserve per-slot generation identity and weak module backreferences, validate
+IDs/thread/phase, invalidate on replacement/deletion/failed construction, and
+prepare replacements before retiring old metadata. Do not alter standalone
+PortInfo/LightInfo subclass semantics or claim full template/raw-field coverage.
+Native differential tests cover names/descriptions/IDs/types/backreferences;
+actual Rack tests cover startup/live UI, 1,000 replacements and owner collections,
+stale/wrong-thread/invalid-input/rollback paths. Native preparation-failure test,
+strict stubs, executable snippet, prose, manifest notes, hooks/native/host/
+introspection/coverage/docs and a commit/checkpoint are required. Closes only B1.
+
+**RP-14B2 — quantity mappings and complete metadata class factories**
+(`tk-rackpy-14b2-quantity-mappings-and-complete-metad-bb5ae1`). Complete all
+ParamQuantity/SwitchQuantity records (JSON remains RP-15), `configParam/Switch/
+Button`, quantity lookup/arrays, and full `configInput/Output/Light` class factories
+including Python subclasses, exception-safe native ownership transfer and stale
+view handling. Complete standalone metadata module fields and raw identity-field/
+vector semantics that checked adapters do not provide. Mixed-thread value/range
+virtuals must be native in production; RP-22 owns explicit laboratory semantics,
+not a silently omitted callback. Validate ranges, display scaling/log/exponential,
+labels/defaults/snap/button/smoothing/immediate behavior, overrides/errors;
+coordinate actual-host reset/randomize/save/reload with RP-14C/RP-15. Complete
+original B mapping/type/doc/test/validation/commit obligations. B/14 remain blocked
+until their original acceptance criteria are fully evidenced.
+
 ## RackPy 14C: native lifecycle events and identity adapters
 
 **Witan slug:** `tk-rackpy-14c-native-lifecycle-events-and-identity--929845`

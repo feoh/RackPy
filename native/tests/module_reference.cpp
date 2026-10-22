@@ -26,6 +26,37 @@ int main() {
 		}
 		json_array_append_new(cases, c);
 	}
+	json_t* metadata = json_array();
+	json_object_set_new(root, "metadata", metadata);
+	for (std::string name : {"", "Pitch", "λ / 𝄞"}) {
+		rack::engine::Module m;
+		m.config(0, 2, 2, 2);
+		json_t* c = json_object();
+		json_array_append_new(metadata, c);
+		json_object_set_new(c, "name", json_string(name.c_str()));
+		json_t* defaults = json_array();
+		json_object_set_new(c, "defaults", defaults);
+		for (int i = 0; i < 2; ++i) {
+			json_array_append_new(defaults, json_pack("[ssb]", m.getInputInfo(i)->getName().c_str(),
+				m.getOutputInfo(i)->getName().c_str(), m.getLightInfo(i) == nullptr));
+		}
+		json_t* configured = json_array();
+		json_object_set_new(c, "configured", configured);
+		for (int i = 0; i < 2; ++i) {
+			auto input = m.configInput(i, name);
+			auto output = m.configOutput(i, name);
+			auto light = m.configLight(i, name);
+			input->description = output->description = light->description = "A description";
+			// getFullName() uses Rack's loaded translation catalogue, absent
+			// from this standalone fixture. Test that separately in actual Rack.
+			json_array_append_new(configured, json_pack("[issssssbbbbb]", i,
+				input->getName().c_str(), input->getDescription().c_str(),
+				output->getName().c_str(), output->getDescription().c_str(),
+				light->getName().c_str(), light->getDescription().c_str(),
+				input->module == &m, output->module == &m, light->module == &m,
+				input->type == rack::engine::Port::INPUT, output->type == rack::engine::Port::OUTPUT));
+		}
+	}
 	json_t* bypass = json_array();
 	json_object_set_new(root, "bypass", bypass);
 	for (int channels : {0, 1, rack::engine::PORT_MAX_CHANNELS}) {

@@ -8,7 +8,8 @@ not as an external remote-control service.
 
 > **Early development — partial bindings, not a usable instrument toolkit.**
 > The Linux development plugin embeds Python and exposes common values, engine
-> components and scoped module construction. See the [coverage report](docs/reference/coverage.md)
+> components, scoped module construction and built-in port/light metadata adapters.
+> See the [coverage report](docs/reference/coverage.md)
 > for exact gaps. Production builds register no models; plugin/model factories,
 > DSP, lifecycle adapters and the planned instrument examples are not complete.
 > There is no published installable runtime bundle. Broader API designs remain proposals.
