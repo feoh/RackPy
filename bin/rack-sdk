@@ -411,7 +411,7 @@ def survey(*, cache: CacheOpt = DEFAULT_CACHE, clang: str = "clang++", write: bo
         split = split_comments((sdk / rel).read_text(encoding="utf-8").splitlines())
         for number, (text, comment) in enumerate(split, 1):
             following = text.strip() or next_code_line(split, number)
-            if re.search(r"\bDEPRECATED\b", comment) and not following.startswith("#define"):
+            if re.search(r"\bDEPRECATED\b|\bDeprecated\b", comment) and not following.startswith("#define"):
                 comment_deprecations.append({"header": rel, "line": number, "declaration": following})
             if "Unstable API" in comment:
                 unstable.append({"header": rel, "line": number, "declaration": following})
@@ -441,7 +441,7 @@ def survey(*, cache: CacheOpt = DEFAULT_CACHE, clang: str = "clang++", write: bo
     print(
         f"PRIVATE declarations: {len(result['private_declarations'])}; "
         f"deprecated (attribute): {len(result['deprecated_attribute_declarations'])}; "
-        f"comment-only deprecation notes: {len(comment_deprecations)}; "
+        f"doc comments mentioning deprecation: {len(comment_deprecations)}; "
         f"incomplete rack records: {len(result['incomplete_rack_records'])}; "
         f"template declarations: {len(result['templates'])}"
     )

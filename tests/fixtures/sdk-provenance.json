@@ -199,6 +199,46 @@
         "line": 23
       },
       {
+        "declaration": "struct LEDSliderGreen : VCVLightSlider<GreenLight> {};",
+        "header": "include/componentlibrary.hpp",
+        "line": 745
+      },
+      {
+        "declaration": "template <typename TLight>",
+        "header": "include/componentlibrary.hpp",
+        "line": 885
+      },
+      {
+        "declaration": "DEPRECATED inline Context* appGet() {",
+        "header": "include/context.hpp",
+        "line": 65
+      },
+      {
+        "declaration": "template <typename T>",
+        "header": "include/dsp/approx.hpp",
+        "line": 105
+      },
+      {
+        "declaration": "template <typename T>",
+        "header": "include/dsp/approx.hpp",
+        "line": 134
+      },
+      {
+        "declaration": "bool state;",
+        "header": "include/dsp/digital.hpp",
+        "line": 18
+      },
+      {
+        "declaration": "bool state;",
+        "header": "include/dsp/digital.hpp",
+        "line": 91
+      },
+      {
+        "declaration": "struct VuMeter {",
+        "header": "include/dsp/vumeter.hpp",
+        "line": 9
+      },
+      {
         "declaration": "void setSmoothBrightness(float brightness, float deltaTime) {",
         "header": "include/engine/Light.hpp",
         "line": 37
@@ -234,6 +274,16 @@
         "line": 462
       },
       {
+        "declaration": "DEPRECATED void setSmoothValue(float value);",
+        "header": "include/engine/ParamQuantity.hpp",
+        "line": 114
+      },
+      {
+        "declaration": "DEPRECATED float getSmoothValue();",
+        "header": "include/engine/ParamQuantity.hpp",
+        "line": 116
+      },
+      {
         "declaration": "float value;",
         "header": "include/engine/Port.hpp",
         "line": 19
@@ -247,6 +297,11 @@
         "declaration": "uint8_t active;",
         "header": "include/engine/Port.hpp",
         "line": 29
+      },
+      {
+        "declaration": "namespace event {",
+        "header": "include/widget/Widget.hpp",
+        "line": 528
       }
     ],
     "deprecated_attribute_declarations": [

@@ -2,10 +2,14 @@
 
 ## Establish a denominator before writing bindings
 
-RP-02/RP-05 will create a normalized, versioned SDK inventory. Parse a translation
-unit including only `rack.hpp`, using the actual SDK defines, dependency headers
-and compiler configuration for each supported platform. Combine AST data with
-preprocessor records; scrape neither Doxygen HTML nor regex alone.
+The denominator is the SDK inventory,
+[`upstream/api-surface.json`](../upstream/api-surface.json) (RP-05). It is generated
+by `bin/inventory_sdk.py`, described in the [surface schema](reference/surface-schema.md)
+and counted in the [surface summary](reference/surface-summary.md). The tool parses
+a translation unit including only `rack.hpp` with the SDK's defines, dependency
+headers and compiler flags, and combines AST data with preprocessor records. It
+uses regular expressions only for code the preprocessor skipped. So far only
+Linux x64 has been extracted; macOS and Windows are recorded gaps.
 
 Keep stable IDs from qualified C++ name, kind, canonical signature, template
 parameters, source provenance and conditional availability. Enumerate inherited
@@ -73,10 +77,14 @@ APIs are not in the denominator. Policy 13 covers their role in Rack signatures.
 
 **Preliminary survey.** `bin/rack-sdk survey` records lists for RP-05 to
 cross-check. Its counts are navigation data, not inventory:
-69 PRIVATE declarations, 39 attribute-deprecated declarations, 12 comment-only
-deprecation notes, 6 "Unstable API" notes, 24 incomplete Rack record types and
-137 template declarations. RP-05's inventory must contain every one of these
-items or explain the difference.
+69 PRIVATE declarations, 39 attribute-deprecated declarations, 23 doc comments
+that mention deprecation, 6 "Unstable API" notes, 24 incomplete Rack record types
+and 137 template declarations. The RP-05 inventory agrees on the PRIVATE,
+attribute-deprecated and incomplete-record counts (a test checks this). It also
+found 7 comment-only deprecations that the first version of the survey missed
+because it matched only uppercase `DEPRECATED`. The survey now matches
+`Deprecated` too. The inventory additionally treats the 34 aliases in the
+deprecated `rack::event` namespace as deprecated.
 
 Two inventory hazards turned up while building the survey:
 
@@ -102,7 +110,8 @@ in this file.
    not rely on a failing build.
 3. **Pimpl internals.** A public `Internal* internal` member whose type is an
    incomplete `Internal` struct is `excluded_internal`, with the incomplete type
-   as evidence. The survey finds 21 such types. They are never exposed.
+   as evidence. The inventory finds 21 such types and 21 such members. They are
+   never exposed.
 4. **Opaque forward declarations.** `patch::Manager` and
    `midiloopback::Context` are declared but never defined in the closure. The
    public fields that hold them are entries. They are mapped as opaque,
