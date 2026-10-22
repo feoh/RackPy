@@ -59,11 +59,20 @@ ignore = [
 [tool.mypy]
 strict = true
 python_version = "3.14"
-mypy_path = ["typings", "src", "docs/_ext"]
+mypy_path = ["typings", "src", "docs/_ext", "bin"]
 explicit_package_bases = true
 # bin/ utilities without a .py suffix all map to module __main__, so
 # `bin/rackpy-dev typecheck` runs mypy on each of them separately.
-files = ["src", "tests", "docs/conf.py", "docs/_ext", "bin/inventory_sdk.py"]
+files = [
+    "src",
+    "tests",
+    "docs/conf.py",
+    "docs/_ext",
+    "bin/inventory_sdk.py",
+    "bin/binding_manifest.py",
+    "bin/check_coverage.py",
+    "bin/generate_bindings.py",
+]
 warn_unreachable = true
 
 [tool.pytest.ini_options]

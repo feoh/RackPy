@@ -273,6 +273,23 @@ class RackPyConceptual(SphinxDirective):
 
 
 @cache
+def manifest_status(repo: Path = REPO) -> dict[str, str]:
+    """Each record's status in bindings/manifest.json (RP-11)."""
+    doc = json.loads((repo / "bindings" / "manifest.json").read_text(encoding="utf-8"))
+    return {r["id"]: r["status"] for r in doc["entries"]}
+
+
+STATUS_TEXT = {
+    "unreviewed": "unreviewed",
+    "planned": "planned",
+    "implemented": "implemented",
+    "verified": "verified",
+    "unrepresentable": "unrepresentable",
+    "excluded_internal": "excluded (internal)",
+}
+
+
+@cache
 def surface(repo: Path = REPO) -> dict[str, Any]:
     doc: dict[str, Any] = json.loads((repo / "upstream" / "api-surface.json").read_text(encoding="utf-8"))
     return doc
@@ -313,6 +330,8 @@ class RackPySurface(SphinxDirective):
     def run(self) -> list[nodes.Node]:
         family = self.arguments[0]
         self.env.note_dependency(str(REPO / "upstream" / "api-surface.json"))
+        self.env.note_dependency(str(REPO / "bindings" / "manifest.json"))
+        statuses = manifest_status()
         entries = family_entries(family)
         if not entries:
             raise self.error(f"family {family!r} has no entries in upstream/api-surface.json")
@@ -329,7 +348,7 @@ class RackPySurface(SphinxDirective):
             where = nodes.paragraph(
                 "", "", nodes.reference("", f"{e['header'].removeprefix('include/')}:{e['line']}", refuri=url)
             )
-            status = "excluded (internal)" if e["classification"] == "excluded_internal" else "not bound"
+            status = STATUS_TEXT.get(statuses.get(e["id"], ""), "unknown")
             # The ID carries the signature, which tells overloads apart.
             declaration = e["id"].split(":", 1)[1]
             rows.append(
@@ -342,13 +361,13 @@ class RackPySurface(SphinxDirective):
                 ]
             )
         counts = f"{len(entries)} entries. "
+        bound = sum(1 for e in entries if statuses.get(e["id"]) in {"implemented", "verified"})
         note = nodes.paragraph(
             "",
-            counts + "Generated from upstream/api-surface.json. "
-            "“Not bound” means RackPy provides no Python mapping yet; the binding manifest (RP-11) will record each "
-            "entry's status, Python name, tests and documentation.",
+            counts + f"{bound} bound. Generated from upstream/api-surface.json and bindings/manifest.json; "
+            "the status column is each declaration's record in the binding manifest.",
         )
-        return [note, table(["Declaration", "Kind", "Header", "Flags", "RackPy"], rows, [40, 10, 22, 16, 12])]
+        return [note, table(["Declaration", "Kind", "Header", "Flags", "Status"], rows, [40, 10, 22, 16, 12])]
 
 
 # --- checks on every page ----------------------------------------------------------

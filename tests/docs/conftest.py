@@ -15,7 +15,7 @@ from tests.support import REPO
 DOCS = REPO / "docs"
 sys.path.insert(0, str(DOCS / "_ext"))
 # Top-level entries a docs build reads; everything else stays out of the copies.
-NEEDED = ("pyproject.toml", "uv.lock", "upstream", "packaging", "src", "README.md", "CONTRIBUTING.md")
+NEEDED = ("pyproject.toml", "uv.lock", "upstream", "packaging", "src", "bindings", "README.md", "CONTRIBUTING.md")
 LINKED = (
     *NEEDED,
     "examples",

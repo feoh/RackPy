@@ -46,9 +46,14 @@ target_link_libraries(rackpy_loader PRIVATE rackpy_sdk_plugin)
 # The runtime's native-only parts, shared by the host and the native unit tests.
 set(RACKPY_RUNTIME_CORE native/runtime/threads.cpp native/runtime/diagnostics.cpp native/runtime/context.cpp)
 
+# Rack API bindings: the registry bin/generate_bindings.py generates from bindings/manifest.json,
+# and the hand-written adapters it calls (native/bindings/<family>.cpp).
+file(GLOB RACKPY_BINDING_ADAPTERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/native/bindings/*.cpp")
+
 # rackpy_host.so: embeds CPython; exports only rackpy_host_init and rackpy_host_destroy.
 add_library(rackpy_host MODULE native/host/host.cpp native/host/host_module.cpp
-  ${RACKPY_RUNTIME_CORE} native/runtime/python.cpp native/runtime/interpreter.cpp)
+  ${RACKPY_RUNTIME_CORE} native/runtime/python.cpp native/runtime/interpreter.cpp
+  native/bindings/generated/registry.cpp ${RACKPY_BINDING_ADAPTERS})
 if(RACKPY_TEST_HOOKS)
   target_sources(rackpy_host PRIVATE native/testing/testing.cpp)
   target_compile_definitions(rackpy_host PRIVATE RACKPY_TEST_HOOKS)
@@ -59,7 +64,7 @@ set_target_properties(rackpy_host PROPERTIES
   CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF
   CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON
   BUILD_WITH_INSTALL_RPATH ON INSTALL_RPATH "$ORIGIN/python/lib")
-target_include_directories(rackpy_host PRIVATE native/include)
+target_include_directories(rackpy_host PRIVATE native/include native/bindings/generated)
 target_link_libraries(rackpy_host PRIVATE rackpy_sdk_plugin rackpy_python pybind11::headers)
 # libstdc++ gives std:: instances and its static objects default visibility, so
 # -fvisibility=hidden is not enough; the version script exports the ABI only.

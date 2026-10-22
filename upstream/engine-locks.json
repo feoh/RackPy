@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "note": "Which engine lock each public rack::engine::Engine method takes, read from src/engine/Engine.cpp at the pinned Rack commit (RP-11, from the ADR 003 table). exclusive and shared take Engine::Internal::mutex; caller_holds means the caller must already hold it (the _NoLock variants), so Python may call it only inside a callback Rack runs under the lock. bin/check_coverage.py fails if a public Engine method is missing here, and bin/generate_bindings.py refuses a Python mapping of an exclusive or shared method that does not release the GIL.",
+  "rack_commit": "061ccf63c1758599396ac1bb10d47345d9d34076",
+  "locks": {
+    "exclusive": "takes the engine mutex exclusively: audio stops for the call",
+    "shared": "takes the engine mutex shared: concurrent with audio, blocked by exclusive holders",
+    "none": "takes no engine lock",
+    "caller_holds": "requires the caller to hold the engine mutex already"
+  },
+  "methods": [
+    {
+      "id": "method:rack::engine::Engine::addCable(rack::engine::Cable *)",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:973"
+    },
+    {
+      "id": "method:rack::engine::Engine::addModule(rack::engine::Module *)",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:756"
+    },
+    {
+      "id": "method:rack::engine::Engine::addParamHandle(rack::engine::ParamHandle *)",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:1152"
+    },
+    {
+      "id": "method:rack::engine::Engine::bypassModule(rack::engine::Module *, bool)",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:889"
+    },
+    {
+      "id": "method:rack::engine::Engine::clear()",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:526"
+    },
+    {
+      "id": "method:rack::engine::Engine::fromJson(json_t *)",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:1277",
+      "note": "calls clear() (exclusive), creates modules unlocked, then locks exclusively"
+    },
+    {
+      "id": "method:rack::engine::Engine::getBlock()",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:692"
+    },
+    {
+      "id": "method:rack::engine::Engine::getBlockDuration()",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:712"
+    },
+    {
+      "id": "method:rack::engine::Engine::getBlockFrame()",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:697"
+    },
+    {
+      "id": "method:rack::engine::Engine::getBlockFrames()",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:707"
+    },
+    {
+      "id": "method:rack::engine::Engine::getBlockTime()",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:702"
+    },
+    {
+      "id": "method:rack::engine::Engine::getCable(int64_t)",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:1107"
+    },
+    {
+      "id": "method:rack::engine::Engine::getCableIds()",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:962"
+    },
+    {
+      "id": "method:rack::engine::Engine::getCableIds(int64_t *, size_t)",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:949"
+    },
+    {
+      "id": "method:rack::engine::Engine::getFrame()",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:687"
+    },
+    {
+      "id": "method:rack::engine::Engine::getMasterModule()",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:636"
+    },
+    {
+      "id": "method:rack::engine::Engine::getMeterAverage()",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:717"
+    },
+    {
+      "id": "method:rack::engine::Engine::getMeterMax()",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:722"
+    },
+    {
+      "id": "method:rack::engine::Engine::getModule(int64_t)",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:855"
+    },
+    {
+      "id": "method:rack::engine::Engine::getModuleIds()",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:745"
+    },
+    {
+      "id": "method:rack::engine::Engine::getModuleIds(int64_t *, size_t)",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:732"
+    },
+    {
+      "id": "method:rack::engine::Engine::getModule_NoLock(int64_t)",
+      "lock": "caller_holds",
+      "evidence": "src/engine/Engine.cpp:861"
+    },
+    {
+      "id": "method:rack::engine::Engine::getNumCables()",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:944"
+    },
+    {
+      "id": "method:rack::engine::Engine::getNumModules()",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:727"
+    },
+    {
+      "id": "method:rack::engine::Engine::getParamHandle(int64_t, int)",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:1200"
+    },
+    {
+      "id": "method:rack::engine::Engine::getParamHandle(rack::engine::Module *, int)",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:1200",
+      "note": "no lock of its own; calls getParamHandle(int64_t, int), which share-locks"
+    },
+    {
+      "id": "method:rack::engine::Engine::getParamHandle_NoLock(int64_t, int)",
+      "lock": "caller_holds",
+      "evidence": "src/engine/Engine.cpp:1192"
+    },
+    {
+      "id": "method:rack::engine::Engine::getParamSmoothValue(rack::engine::Module *, int)",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:1145"
+    },
+    {
+      "id": "method:rack::engine::Engine::getParamValue(rack::engine::Module *, int)",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:1128"
+    },
+    {
+      "id": "method:rack::engine::Engine::getSampleRate()",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:641"
+    },
+    {
+      "id": "method:rack::engine::Engine::getSampleTime()",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:677"
+    },
+    {
+      "id": "method:rack::engine::Engine::hasCable(rack::engine::Cable *)",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:1099"
+    },
+    {
+      "id": "method:rack::engine::Engine::hasModule(rack::engine::Module *)",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:847"
+    },
+    {
+      "id": "method:rack::engine::Engine::moduleFromJson(rack::engine::Module *, json_t *)",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:922"
+    },
+    {
+      "id": "method:rack::engine::Engine::moduleToJson(rack::engine::Module *)",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:916"
+    },
+    {
+      "id": "method:rack::engine::Engine::prepareSave()",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:935"
+    },
+    {
+      "id": "method:rack::engine::Engine::prepareSaveModule(rack::engine::Module *)",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:928"
+    },
+    {
+      "id": "method:rack::engine::Engine::randomizeModule(rack::engine::Module *)",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:880"
+    },
+    {
+      "id": "method:rack::engine::Engine::removeCable(rack::engine::Cable *)",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:1039"
+    },
+    {
+      "id": "method:rack::engine::Engine::removeModule(rack::engine::Module *)",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:791"
+    },
+    {
+      "id": "method:rack::engine::Engine::removeParamHandle(rack::engine::ParamHandle *)",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:1168"
+    },
+    {
+      "id": "method:rack::engine::Engine::resetModule(rack::engine::Module *)",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:871"
+    },
+    {
+      "id": "method:rack::engine::Engine::setMasterModule(rack::engine::Module *)",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:603",
+      "note": "returns early without locking if the module is already the master"
+    },
+    {
+      "id": "method:rack::engine::Engine::setMasterModule_NoLock(rack::engine::Module *)",
+      "lock": "caller_holds",
+      "evidence": "src/engine/Engine.cpp:611"
+    },
+    {
+      "id": "method:rack::engine::Engine::setParamSmoothValue(rack::engine::Module *, int, float)",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:1133"
+    },
+    {
+      "id": "method:rack::engine::Engine::setParamValue(rack::engine::Module *, int, float)",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:1118"
+    },
+    {
+      "id": "method:rack::engine::Engine::setSuggestedSampleRate(float)",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:663",
+      "note": "no lock of its own; calls setSampleRate(), which locks exclusively"
+    },
+    {
+      "id": "method:rack::engine::Engine::stepBlock(int)",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:552",
+      "note": "share-locks for the whole block, plus blockMutex; Rack calls it on engine and driver threads"
+    },
+    {
+      "id": "method:rack::engine::Engine::toJson()",
+      "lock": "shared",
+      "evidence": "src/engine/Engine.cpp:1248"
+    },
+    {
+      "id": "method:rack::engine::Engine::updateParamHandle(rack::engine::ParamHandle *, int64_t, int, bool)",
+      "lock": "exclusive",
+      "evidence": "src/engine/Engine.cpp:1205"
+    },
+    {
+      "id": "method:rack::engine::Engine::updateParamHandle_NoLock(rack::engine::ParamHandle *, int64_t, int, bool)",
+      "lock": "caller_holds",
+      "evidence": "src/engine/Engine.cpp:1211"
+    },
+    {
+      "id": "method:rack::engine::Engine::yieldWorkers()",
+      "lock": "none",
+      "evidence": "src/engine/Engine.cpp:682"
+    }
+  ]
+}

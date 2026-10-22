@@ -1,0 +1,783 @@
+{
+  "schema_version": 1,
+  "note": "Reviewed allowlist of declarations RackPy deliberately does not bind. Each one must be classified excluded_internal in upstream/api-surface.json with source evidence; bin/check_coverage.py rejects anything else. Adding an entry needs a policy from docs/coverage.md and a reviewer; relaxing a policy needs owner review.",
+  "entries": [
+    {
+      "id": "constructor:rack::app::RackScrollWidget::RackScrollWidget()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "constructor:rack::app::RackWidget::RackWidget()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "constructor:rack::app::Scene::Scene()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "constructor:rack::engine::Engine::Engine()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "constructor:rack::history::State::State()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "constructor:rack::window::Window::Window()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "destructor:rack::app::RackScrollWidget::~RackScrollWidget()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "destructor:rack::app::RackWidget::~RackWidget()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "destructor:rack::app::Scene::~Scene()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "destructor:rack::engine::Engine::~Engine()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "destructor:rack::history::State::~State()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "destructor:rack::window::Window::~Window()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::app::CableWidget::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::app::Knob::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::app::ModuleLightWidget::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::app::ModuleWidget::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::app::ParamWidget::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::app::PlugWidget::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::app::PortWidget::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::app::RackScrollWidget::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::app::RackWidget::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::app::RailWidget::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::app::Scene::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::app::SvgSwitch::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::app::Switch::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::engine::Engine::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::engine::Module::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::history::State::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::midi::InputQueue::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::ui::ScrollWidget::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::ui::Scrollbar::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::widget::FramebufferWidget::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "field:rack::window::Window::internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::asset::init()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::audio::destroy()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::audio::init()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::logger::destroy()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::logger::init()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::logger::wasTruncated()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::midi::destroy()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::midi::init()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::network::destroy()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::network::init()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::plugin::destroy()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::plugin::init()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::plugin::settingsMergeJson(json_t *)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::settings::destroy()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::settings::fromJson(json_t *)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::settings::init()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::settings::load(std::string)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::settings::save(std::string)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::settings::toJson()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::system::init()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::ui::destroy()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::ui::init()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::window::destroy()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "function:rack::window::init()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::app::ModuleWidget::dragEnabled()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::app::ModuleWidget::dragOffset()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::app::ModuleWidget::releaseModule()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::app::PlugWidget::setAngle(float)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::app::PlugWidget::setColor(NVGcolor)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::app::PlugWidget::setTop(bool)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::app::RackWidget::squeezeModulePos(rack::app::ModuleWidget *, rack::math::Vec)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::app::RackWidget::unsqueezeModulePos(rack::app::ModuleWidget *)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::app::RackWidget::updateExpanders()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Cable::jsonStripIds(json_t *)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Engine::addCable_NoLock(rack::engine::Cable *)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Engine::addModule_NoLock(rack::engine::Module *)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Engine::clear_NoLock()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Engine::removeCable_NoLock(rack::engine::Cable *)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Engine::removeModule_NoLock(rack::engine::Module *)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Engine::removeParamHandle_NoLock(rack::engine::ParamHandle *)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Engine::setSampleRate(float)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Engine::startFallbackThread()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Module::doProcess(const rack::engine::Module::ProcessArgs &)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Module::jsonStripIds(json_t *)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Module::meterBuffer()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Module::meterIndex()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Module::meterLength()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Module::setBypassed(bool)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::engine::Module::setExpanderModule(rack::engine::Module *, uint8_t)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::history::State::clear()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::ui::MenuItem::drawOffset(NVGcontext *, float)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::window::Window::fbCount()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::window::Window::fbDirtyOnSubpixelChange()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::window::Window::run()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::window::Window::screenshot(const std::string &)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::window::Window::screenshotModules(const std::string &, float)",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "method:rack::window::Window::step()",
+      "evidence": "PRIVATE attribute",
+      "policy": 2,
+      "reason": "carries Rack's PRIVATE attribute (docs/coverage.md, completeness policy 2): never callable, including from rackpy.raw",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::app::CableWidget::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::app::Knob::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::app::ModuleLightWidget::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::app::ModuleWidget::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::app::ParamWidget::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::app::PlugWidget::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::app::PortWidget::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::app::RackScrollWidget::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::app::RackWidget::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::app::RailWidget::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::app::Scene::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::app::SvgSwitch::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::app::Switch::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::engine::Engine::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::engine::Module::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::history::State::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::midi::InputQueue::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::ui::ScrollWidget::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::ui::Scrollbar::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::widget::FramebufferWidget::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    },
+    {
+      "id": "opaque_record:rack::window::Window::Internal",
+      "evidence": "pimpl Internal type is incomplete in the rack.hpp closure",
+      "policy": 3,
+      "reason": "pimpl: its Internal type is incomplete in the rack.hpp closure (docs/coverage.md, completeness policy 3): never exposed",
+      "reviewer": "RP-11 (policy rule applied to the RP-05 inventory evidence)"
+    }
+  ]
+}

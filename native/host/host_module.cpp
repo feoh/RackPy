@@ -13,6 +13,7 @@
 #include "rackpy/runtime/python.hpp"
 #include "rackpy/host_abi.h"
 #include "rackpy/runtime/threads.hpp"
+#include "registry.hpp"
 
 #ifdef RACKPY_TEST_HOOKS
 #include "testing.hpp"
@@ -63,6 +64,8 @@ PYBIND11_EMBEDDED_MODULE(_rackpy_host, m) {
 	m.def("transferred_objects", &rt::transferredObjects);
 	m.def("pending_releases", &rt::pendingReleases);
 	m.def("identity_entries", &rt::identityEntries);
+	py::module_ raw = m.def_submodule("raw", "Rack API bindings (rackpy.raw), registered from bindings/manifest.json.");
+	rackpy::bindings::registerAll(raw);
 #ifdef RACKPY_TEST_HOOKS
 	rackpy::testing::define(m.def_submodule("_testing", "Test hooks; only in RACKPY_TEST_HOOKS builds."));
 #endif

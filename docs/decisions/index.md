@@ -13,4 +13,5 @@ consequences. Later records refine earlier ones; none is silently rewritten.
 005-build-and-ci
 006-documentation-toolchain
 007-runtime
+008-binding-manifest
 ```

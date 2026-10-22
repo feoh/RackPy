@@ -30,7 +30,7 @@ def test_front_page_states_status_and_pinned_versions(site: Build) -> None:
     assert facts["python_version"] == "3.14.9" and facts["pybind11_version"] == "3.1.0"
 
 
-def test_surface_pages_list_every_inventory_entry_as_not_bound(site: Build) -> None:
+def test_surface_pages_list_every_inventory_entry_with_its_manifest_status(site: Build) -> None:
     doc = rackpy_docs.surface()
     families = sorted(set(doc["families"].values()))
     shown = 0
@@ -40,7 +40,9 @@ def test_surface_pages_list_every_inventory_entry_as_not_bound(site: Build) -> N
         body = html.split("<tbody>", 1)[1].split("</tbody>", 1)[0]
         rows = body.count("<tr")
         shown += rows
-        assert rows == body.count("not bound") + body.count("excluded (internal)"), page.name
+        statuses = [f"<td><p>{s}</p></td>" for s in rackpy_docs.STATUS_TEXT.values()]
+        assert rows == sum(body.count(s) for s in statuses), page.name
+        assert "<td><p>unknown</p></td>" not in body, page.name
     expected = sum(len(rackpy_docs.family_entries(f)) for f in families)
     assert shown == expected == sum(1 for e in doc["entries"] if e["classification"] != "import")
 

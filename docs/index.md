@@ -89,5 +89,6 @@ reference/index
 :maxdepth: 1
 :hidden:
 
+contributing-bindings
 contributing-docs
 ```

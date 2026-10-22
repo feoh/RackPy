@@ -191,6 +191,18 @@ in this file.
     and blocks a full-coverage release. A failed extraction is an error, never
     an empty report.
 
+## The binding manifest (RP-11)
+
+The per-symbol records below live in
+[bindings/manifest.json](../bindings/manifest.json), one per counted inventory
+entry. `bin/check_coverage.py check` enforces this page's policies against the
+inventory, the reviewed exclusion allowlist, the callback and engine-lock
+tables, the cited tests and docs, and an introspection of the built package;
+`bin/generate_bindings.py` derives the registration scaffold, stubs and the
+[coverage report](reference/coverage.md) from it. The design is
+[ADR 008](decisions/008-binding-manifest.md); the workflow is
+[Adding bindings](contributing-bindings.md).
+
 ## Per-symbol record
 
 Each entry must have:

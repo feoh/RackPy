@@ -3,10 +3,16 @@
 :::{admonition} Incomplete
 :class: warning
 
-RackPy binds no Rack API yet. These pages list what it **must** bind. When the
-binding manifest exists (RP-11), each entry will show its Python name, status,
-tests and documentation, generated from the same manifest that CI checks.
+RackPy binds no Rack API yet. These pages list what it **must** bind, with each
+declaration's status in the binding manifest that CI checks. The
+[coverage report](coverage.md) has the totals.
 :::
+
+```{toctree}
+:maxdepth: 1
+
+coverage
+```
 
 ## The SDK surface, by family
 
