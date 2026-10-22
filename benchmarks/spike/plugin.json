@@ -1,0 +1,16 @@
+{
+  "slug": "RackPyBench",
+  "name": "RackPy benchmark",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "RackPy",
+  "author": "RackPy contributors",
+  "modules": [
+    {"slug": "NativeSine", "name": "Native sine", "tags": []},
+    {"slug": "RackPySine", "name": "RackPy sine", "tags": []},
+    {"slug": "NativePoly", "name": "Native poly", "tags": []},
+    {"slug": "RackPyPoly", "name": "RackPy poly", "tags": []},
+    {"slug": "NativeFeedback", "name": "Native feedback", "tags": []},
+    {"slug": "RackPyFeedback", "name": "RackPy feedback", "tags": []}
+  ]
+}

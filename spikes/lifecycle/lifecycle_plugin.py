@@ -9,6 +9,7 @@ scenario.json in the plugin directory chooses the worker mode:
 
 import json
 import threading
+import time
 from collections import Counter
 from pathlib import Path
 
@@ -17,6 +18,7 @@ import _rackpy_lifecycle as rp
 SCENARIO = json.loads((Path(__file__).parent / "scenario.json").read_text())
 MODE = SCENARIO.get("worker", "none")
 AT_LOAD = SCENARIO.get("worker_at_load", False)
+EXCLUSIVE_STALL_MS = SCENARIO.get("exclusive_stall_ms", 0)
 
 
 class Callbacks:
@@ -32,12 +34,17 @@ class Callbacks:
         if self.stats["resets"] > 1:
             return
         self.kept.append(handle)
+        if EXCLUSIVE_STALL_MS:
+            time.sleep(EXCLUSIVE_STALL_MS / 1000)  # Python work while Rack holds the exclusive lock
         rp.log(f"on_reset role={rp.thread_role()} has_context={rp.thread_has_rack_context()}")
         try:
             rp.engine_module_count()
             rp.log("reentry from exclusive callback: allowed (UNEXPECTED)")
         except RuntimeError as e:
             rp.log(f"reentry from exclusive callback refused: {e}")
+
+    def on_slow_ui(self, ms: int) -> None:
+        time.sleep(ms / 1000)  # a slow Python UI callback; no engine lock is held
 
     def data_to_json(self, handle: rp.ModuleHandle) -> str:
         self.stats["data_to_json"] += 1

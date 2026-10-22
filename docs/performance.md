@@ -20,6 +20,11 @@ presented as production performance.
 
 ## Proposed measurable budgets
 
+**RP-07 measured these on the planning machine and froze working budgets in
+[ADR 004](decisions/004-performance-budgets.md)** (raw data:
+[benchmarks/baseline.json](../benchmarks/baseline.json)). Two revisions await
+owner approval there. The table below is the original candidate list.
+
 | Measurement | Initial candidate |
 | --- | --- |
 | Native-path overhead versus equivalent C++ module | ≤10% median and ≤20% p99 processing cost for representative nontrivial kernels |

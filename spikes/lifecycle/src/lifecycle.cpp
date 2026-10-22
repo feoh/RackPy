@@ -288,6 +288,8 @@ int resetsRequested = 0;
 int churnRequested = 0;
 int framesBeforeClose = 0;
 bool stopBeforeClose = true;
+int slowUiMs = 0;
+int slowUiFrames = 0;
 
 
 
@@ -347,22 +349,59 @@ struct ProbeWidget : rack::app::ModuleWidget {
 		});
 	}
 
+	/** Samples processed and wall time across a window, to show whether audio kept running. */
+	struct Window {
+		uint64_t processed = 0;
+		double t = 0;
+		void start(const Token& tok) {
+			processed = tok.processed.load();
+			t = rack::system::getTime();
+		}
+		std::string finish(const Token& tok, float rate) {
+			double elapsed = rack::system::getTime() - t;
+			uint64_t done = tok.processed.load() - processed;
+			return rack::string::f("elapsed_ms=%.1f processed=%llu expected_at_rate=%.0f", elapsed * 1000,
+				(unsigned long long) done, elapsed * rate);
+		}
+	};
+	Window slowWindow, stallWindow;
+
 	void drive() {
 		Scenario& s = scenario;
 		auto* engine = APP->engine;
 		int f = ++s.frame;
+		const Token& tok = *probe()->token;
 		if (f == 5) {
 			event("scenario start", module->id);
 			scenarioCallback("start");
 			s.resetsLeft = resetsRequested;
 			s.churnLeft = churnRequested;
 		}
+		// Slow-UI phase: Python on the UI thread (no engine lock) sleeps every frame.
+		if (slowUiFrames > 0 && f >= 6 && f < 6 + slowUiFrames) {
+			if (f == 6)
+				slowWindow.start(tok);
+			callPython("on_slow_ui", [&] {
+				if (hasCallback("on_slow_ui"))
+					callbacks.attr("on_slow_ui")(slowUiMs);
+			});
+			if (f == 6 + slowUiFrames - 1)
+				event("slow ui result", module->id, slowWindow.finish(tok, engine->getSampleRate()).c_str());
+			return;
+		}
+		if (f >= 6)
+			f -= slowUiFrames;  // later steps keep their original frame numbers
 		if (f < 10)
 			return;
 		if (s.resetsLeft > 0) {
 			// Each reset takes the engine lock exclusively and calls Python from onReset.
+			bool first = s.resetsLeft == resetsRequested;
 			s.resetsLeft--;
+			if (first)
+				stallWindow.start(tok);
 			engine->resetModule(module);
+			if (first)
+				event("exclusive stall result", module->id, stallWindow.finish(tok, engine->getSampleRate()).c_str());
 			return;
 		}
 		if (f == 10 + resetsRequested + 1)
@@ -479,6 +518,8 @@ int init(RackPySpikeHostInit* args) {
 		resetsRequested = (int) json_integer_value(json_object_get(cfg, "resets"));
 		churnRequested = (int) json_integer_value(json_object_get(cfg, "churn"));
 		framesBeforeClose = (int) json_integer_value(json_object_get(cfg, "frames_before_close"));
+		slowUiMs = (int) json_integer_value(json_object_get(cfg, "slow_ui_ms"));
+		slowUiFrames = (int) json_integer_value(json_object_get(cfg, "slow_ui_frames"));
 		json_t* stopJ = json_object_get(cfg, "stop_before_close");
 		stopBeforeClose = !stopJ || json_is_true(stopJ);
 		json_decref(cfg);
