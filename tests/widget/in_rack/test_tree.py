@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
+import copy
 import gc
 import threading
 import weakref
@@ -11,6 +12,7 @@ import pytest
 
 import rackpy._bootstrap
 import rackpy.raw.widget
+from rackpy._introspect import snapshot
 from rackpy.errors import ContextError, OwnershipError, StaleHandleError, ThreadError
 from rackpy.raw.math import Rect, Vec
 from rackpy.widget import WidgetNode
@@ -123,6 +125,99 @@ def test_snapshot_box_copy_and_layout(root: WidgetNode) -> None:
     assert a.get_box().pos.x == 2
     root.clear_children()
     assert not snapshot[0].alive
+
+
+def test_raw_box_live_aliases_and_value_copies(root: WidgetNode) -> None:
+    box = root.box
+    pos, size = box.pos, box.size
+    root.box = Rect(1, 2, 3, 4)
+    assert pos.copy() == Vec(1, 2) and size.copy() == Vec(3, 4)
+    pos.x = 10
+    pos[1] = 20
+    size.y = 40
+    assert root.get_box() == Rect(10, 20, 3, 40)
+    box.pos += Vec(2, 3)
+    box.size -= Vec(1, 2)
+    assert root.get_box() == Rect(12, 23, 2, 38)
+    box.pos = box.size
+    root.box = box  # aliasing assignment copies before writing
+    assert pos.copy() == size.copy() == Vec(2, 38)
+    root.set_box(Rect(4, 5, 6, 7))
+    assert box.copy() == Rect(4, 5, 6, 7)
+    assert pos.copy() == Vec(4, 5)
+    independent = box.copy()
+    independent.pos.x = 999
+    assert root.get_position() == Vec(4, 5)
+    assert copy.copy(box) == copy.deepcopy(box) == box.copy()
+    assert copy.copy(pos) == copy.deepcopy(pos) == pos.copy()
+    for index in (-1, 2):
+        with pytest.raises(IndexError):
+            _ = pos[index]
+        with pytest.raises(IndexError):
+            pos[index] = 7
+    before = root.get_box()
+    with pytest.raises(TypeError):
+        root.box = "not a Rect"  # type: ignore[assignment]
+    with pytest.raises(TypeError):
+        box.pos = (1, 2)  # type: ignore[assignment]
+    with pytest.raises(TypeError):
+        pos.x = "not a float"  # type: ignore[assignment]
+    assert root.get_box() == before
+    assert "rackpy.raw.widget.WidgetNode.box" in snapshot()["objects"]
+
+
+def test_box_views_survive_attached_wrapper_but_not_native_owner(root: WidgetNode) -> None:
+    child = WidgetNode.create()
+    root.add_child(child)
+    box, pos = child.box, child.box.pos
+    marker = weakref.ref(child)
+    del child
+    gc.collect()
+    assert marker() is None
+    pos.x = 7
+    assert root.children[0].get_position().x == 7
+    root.clear_children()
+    for action in (box.copy, pos.copy, lambda: box.pos, lambda: setattr(pos, "x", 8)):
+        with pytest.raises(StaleHandleError):
+            action()
+    owner = WidgetNode.create()
+    orphaned_view = owner.box
+    weak_owner = weakref.ref(owner)
+    del owner
+    gc.collect()
+    assert weak_owner() is None
+    with pytest.raises(StaleHandleError):
+        orphaned_view.copy()
+
+
+def test_box_view_context_thread_and_source_validation(root: WidgetNode) -> None:
+    box, pos = root.box, root.box.pos
+    with pytest.raises(ContextError):
+        _rackpy_host._testing.with_foreign_context(box.copy)
+    with pytest.raises(ContextError):
+        _rackpy_host._testing.with_foreign_context(lambda: setattr(pos, "y", 3))
+    errors: list[BaseException] = []
+
+    def use() -> None:
+        for action in (box.copy, pos.copy, lambda: setattr(pos, "x", 9), lambda: setattr(box, "pos", Vec())):
+            try:
+                action()
+            except BaseException as exc:
+                errors.append(exc)
+
+    thread = threading.Thread(target=use)
+    thread.start()
+    thread.join()
+    assert len(errors) == 4 and all(isinstance(exc, ThreadError) for exc in errors)
+    other = WidgetNode.create()
+    stale_box, stale_pos = other.box, other.box.pos
+    other.close()
+    before = root.get_box()
+    with pytest.raises(StaleHandleError):
+        root.box = stale_box
+    with pytest.raises(StaleHandleError):
+        box.pos = stale_pos
+    assert root.get_box() == before
 
 
 def test_geometry_visibility_and_coordinate_queries(root: WidgetNode) -> None:
@@ -261,8 +356,6 @@ def test_final_adapter_cannot_hide_python_overrides() -> None:
 
 
 def test_introspection_and_runnable_snippet(root: WidgetNode) -> None:
-    from rackpy._introspect import snapshot
-
     objects = snapshot()["objects"]
     assert "rackpy.raw.widget.WidgetNode.add_child" in objects
     assert "rackpy.widget.WidgetNode" in objects

@@ -25,6 +25,12 @@ def exercise_tree() -> None:
         assert child.get_absolute_offset(Vec()) == Vec(14, 26)
         child.set_size(Vec(20, 12))
         assert child.get_size() == Vec(20, 12)
+        position = child.box.pos  # checked raw field alias, no layout events
+        position.x = 8
+        assert child.get_position() == Vec(8, 6)
+        independent = child.box.copy()
+        independent.pos.x = 999
+        assert position.x == 8
         child.hide()
         assert not child.is_visible()
         child.visible = True  # raw field write; unlike show(), emits no event

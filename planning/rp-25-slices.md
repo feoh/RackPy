@@ -82,11 +82,30 @@ read/write and interplay with the event-triggering visibility methods on an
 actual Rack UI thread; document the behavioral distinction. Do not expose
 `requestedDelete` as a raw field. No project phase completion.
 
+## RP-25 continuation: checked raw box field views
+
+Executed under the existing RP-25 parent claim, without another task graph.
+`WidgetNode.box` exposes checked direct-field assignment and live nested
+`WidgetBoxView`/`WidgetVecView` locators. Views revalidate context/thread/lifetime
+on every native access. They do not retain a root or its owning handle, but
+survive collection of an attached child's wrapper. Whole-field replacement
+updates existing aliases. Direct writes bypass layout events; copied
+`get_box()` behavior is unchanged. Explicit `copy()` produces ordinary values
+for remaining Rect/Vec operations and value-taking APIs. Full view method/
+operator interoperability remains an open raw box mapping requirement, so the
+exact field entry stays `planned`.
+
+Validation includes native alias/replacement/ownership/invalidation checks and
+actual-Rack nested reads/writes, source validation, stale/foreign/thread access,
+attached-wrapper collection, root collection, copy/deepcopy and the executable
+snippet. Stubs, exact manifest evidence/generated coverage and human docs are
+updated with this checkpoint; no full Widget or phase completion is claimed.
+
 ## Remaining RP-25 acceptance
 
 The original parent retains complete class-factory/subclass and lifecycle
-semantics, raw live field/container mutations, add-above/below, traversal/
-typed ancestor/descendant lookup, transforms/zoom/viewport, base class variants,
+semantics, remaining raw field/container mutations and box view interoperability,
+traversal/typed ancestor/descendant lookup, transforms/zoom variants, base class variants,
 callback-scoped events and propagation/consumption, exception containment,
 module-browser/null-preview/scene attachment and window-recreation teardown.
 Resource/drawing integration belongs with RP-27, not silently omitted from

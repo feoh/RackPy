@@ -54,8 +54,33 @@ public list. It neither retains the parent nor promises the children will
 remain alive.
 
 `get_box()` returns a **copied** Rect; editing it does not alter the widget.
-Call `set_box(rect)` to apply a layout change. `is_visible()` and
-`set_visible(bool)` use Rack's native visibility methods.
+Call `set_box(rect)` to apply an event-triggering layout change. For direct raw
+field semantics, `box` is a checked write-through `WidgetBoxView`:
+
+- `node.box = Rect(...)` assigns the native public field without calling setters.
+- `node.box.pos` and `.size` return `WidgetVecView` aliases. Their `x`, `y`, and
+  indices `0`/`1` write through. Assign a `Vec` or another checked vector view to
+  `.pos`/`.size`; `+=` and `-=` also write through using Rack's Vec arithmetic.
+- Existing views follow changes made by `set_box()` or whole-field replacement;
+  they do not become stale copies of the previous geometry.
+- `box.copy()` returns an independent `Rect`, and `box.pos.copy()` an independent
+  `Vec`. `copy.copy()` and `copy.deepcopy()` also take checked snapshots. The
+  views are **not** Rect/Vec subclasses: use these snapshots for other math
+  operations or arguments to existing value-taking APIs. Other Rect/Vec methods
+  and implicit conversions are not yet mapped on the views; the box record stays
+  **planned**, not completed coverage.
+
+Direct field writes bypass `setBox()` and therefore do **not** generate
+Reposition/Resize events. Use `set_box()`, `set_position()`, and `set_size()` when
+those events should occur. All view reads and writes require the live UI context
+and main thread. A view can outlive an attached widget's Python wrapper, but
+cannot keep its native widget or owning root alive. Owner collection, subtree
+removal by deletion, or context shutdown invalidates it; subsequent access fails
+with `StaleHandleError` or `ContextError`, never a borrowed-pointer dereference.
+There is no public constructor for the view types. Cross-view assignment first
+takes a checked value snapshot, so an invalid source does not change the target.
+
+`is_visible()` and `set_visible(bool)` use Rack's native visibility methods.
 `get_children_bounding_box()` and `get_visible_children_bounding_box()`
 use Rack's SDK implementation, including its empty-tree infinities. Position and
 size methods use Rack's setters, so real changes trigger its reposition/resize
@@ -93,7 +118,8 @@ SDK widgets, tests 1,000 lifetimes, a real SDK list-allocation failure,
 worker final release, 100 worker/shutdown races and context cleanup.
 `tests/widget/test_tree.py` separately tests startup refusal in production
 Rack and exercises identity, transfer/reparenting, failure atomicity, snapshots,
-stale handles, wrong-thread access, wrapper collection and 1,000 owner churns
+stale handles, raw box/vector aliasing and snapshots, view invalidation,
+wrong-thread/context access, wrapper collection and 1,000 owner churns
 in actual Rack Free's live UI under Xvfb.
 
 These are detached-tree tests, **not** proof of module-browser integration,

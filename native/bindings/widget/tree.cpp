@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "tree.hpp"
-#include "../../widget/tree.hpp"
+#include "../../widget/geometry.hpp"
 
 #include "rackpy/runtime/interpreter.hpp"
 #include "rackpy/runtime/python.hpp"
@@ -11,7 +11,76 @@ namespace py = pybind11;
 namespace {
 
 using Handle = widget::Handle;
+using BoxView = widget::BoxView;
+using VecView = widget::VecView;
 std::weak_ptr<widget::Manager> active;
+
+rack::math::Rect rectValue(py::handle value) {
+	if (py::isinstance<BoxView>(value))
+		return value.cast<const BoxView&>().get();
+	if (!py::isinstance<rack::math::Rect>(value))
+		throw py::type_error("box must be a Rect or WidgetBoxView");
+	return value.cast<rack::math::Rect>();
+}
+
+rack::math::Vec vecValue(py::handle value) {
+	if (py::isinstance<VecView>(value))
+		return value.cast<const VecView&>().get();
+	if (!py::isinstance<rack::math::Vec>(value))
+		throw py::type_error("vector must be a Vec or WidgetVecView");
+	return value.cast<rack::math::Vec>();
+}
+
+void bindGeometryViews(py::module_ mod) {
+	py::class_<VecView>(mod, "WidgetVecView", py::is_final(),
+		"Checked write-through Widget box vector; copy() returns an independent Vec.")
+		.def_property("x", [](const VecView& v) { return v.get().x; },
+			[](const VecView& v, float x) { v.get().x = x; })
+		.def_property("y", [](const VecView& v) { return v.get().y; },
+			[](const VecView& v, float y) { v.get().y = y; })
+		.def("__getitem__", [](const VecView& v, int i) {
+			auto& vec = v.get();
+			if (i != 0 && i != 1)
+				throw py::index_error("Vec index must be 0 (x) or 1 (y)");
+			return vec[i];
+		})
+		.def("__setitem__", [](const VecView& v, int i, float value) {
+			auto& vec = v.get();
+			if (i != 0 && i != 1)
+				throw py::index_error("Vec index must be 0 (x) or 1 (y)");
+			vec[i] = value;
+		})
+		.def("__add__", [](const VecView& v, py::object other) {
+			auto value = vecValue(other);
+			return v.get() + value;
+		})
+		.def("__sub__", [](const VecView& v, py::object other) {
+			auto value = vecValue(other);
+			return v.get() - value;
+		})
+		.def("__iadd__", [](py::object self, py::object other) {
+			auto value = vecValue(other);
+			self.cast<const VecView&>().get() += value;
+			return self;
+		})
+		.def("__isub__", [](py::object self, py::object other) {
+			auto value = vecValue(other);
+			self.cast<const VecView&>().get() -= value;
+			return self;
+		})
+		.def("copy", [](const VecView& v) { return rack::math::Vec(v.get()); })
+		.def("__copy__", [](const VecView& v) { return rack::math::Vec(v.get()); })
+		.def("__deepcopy__", [](const VecView& v, py::dict) { return rack::math::Vec(v.get()); }, py::arg("memo"));
+	py::class_<BoxView>(mod, "WidgetBoxView", py::is_final(),
+		"Checked write-through Widget.box; direct writes do not trigger layout events.")
+		.def_property("pos", [](const BoxView& v) { v.get(); return VecView{v.owner, false}; },
+			[](const BoxView& v, py::object value) { auto copy = vecValue(value); v.get().pos = copy; })
+		.def_property("size", [](const BoxView& v) { v.get(); return VecView{v.owner, true}; },
+			[](const BoxView& v, py::object value) { auto copy = vecValue(value); v.get().size = copy; })
+		.def("copy", [](const BoxView& v) { return rack::math::Rect(v.get()); })
+		.def("__copy__", [](const BoxView& v) { return rack::math::Rect(v.get()); })
+		.def("__deepcopy__", [](const BoxView& v, py::dict) { return rack::math::Rect(v.get()); }, py::arg("memo"));
+}
 
 std::shared_ptr<widget::Manager> manager() {
 	runtime::requireMainThread("creating a detached widget");
@@ -59,6 +128,7 @@ void bindWidgetTrees(py::module_ raw) {
 		return held ? held->roots.size() : size_t(0);
 	});
 #endif
+	bindGeometryViews(mod);
 	py::class_<Handle, std::shared_ptr<Handle>>(mod, "WidgetNode", py::is_final(),
 		"A detached native base Widget with checked tree ownership and geometry. No Python subclass callbacks or scene insertion.")
 		.def_static("create", [] { return object(manager()->create()); })
@@ -95,6 +165,8 @@ void bindWidgetTrees(py::module_ raw) {
 		.def("remove_child", [](const Handle& h, const Handle& c) { h.manager->remove(h, c); }, py::arg("child"))
 		.def("clear_children", [](const Handle& h) { h.get().clearChildren(); })
 		.def("has_child", [](const Handle& h, const Handle& c) { return h.get().hasChild(&c.get()); }, py::arg("child"))
+		.def_property("box", [](const Handle& h) { h.get(); return BoxView{h}; },
+			[](const Handle& h, py::object value) { auto copy = rectValue(value); h.get().box = copy; })
 		.def("get_box", [](const Handle& h) { return h.get().getBox(); })
 		.def("set_box", [](const Handle& h, rack::math::Rect r) { h.get().setBox(r); }, py::arg("box"))
 		.def("is_visible", [](const Handle& h) { return h.get().isVisible(); })

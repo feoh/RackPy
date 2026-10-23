@@ -5,7 +5,7 @@
 #include <new>
 #include <thread>
 
-#include "../widget/tree.hpp"
+#include "../widget/geometry.hpp"
 
 // Fail the actual SDK child-list allocation, including its early parent
 // assignment. Replacement allocators are confined to this test executable.
@@ -174,6 +174,33 @@ int main() {
 	manager->close(*orderParent);
 	manager->close(*failedParent);
 	nativeOrder.clearChildren();
+
+	// Field locators recheck on every access, alias replacement storage, and
+	// do not retain the wrapper which keeps an independently rooted Node alive.
+	auto fieldParent = manager->create();
+	auto fieldChild = manager->create();
+	manager->add(*fieldParent, *fieldChild);
+	widget::BoxView fieldBox{*fieldChild};
+	widget::VecView fieldPos{*fieldChild, false};
+	fieldBox.get() = rack::math::Rect(1, 2, 3, 4);
+	fieldPos.get().x = 9;
+	assert(fieldChild->get().box == rack::math::Rect(9, 2, 3, 4));
+	fieldChild->get().setBox(rack::math::Rect(5, 6, 7, 8));
+	assert(fieldPos.get() == rack::math::Vec(5, 6));
+	fieldChild.reset();
+	assert(fieldPos.get() == rack::math::Vec(5, 6));
+	manager->close(*fieldParent);
+	bool staleField = false;
+	try { fieldBox.get(); }
+	catch (const runtime::StaleHandle&) { staleField = true; }
+	assert(staleField);
+	auto fieldRoot = manager->create();
+	widget::BoxView unownedBox{*fieldRoot};
+	fieldRoot.reset();
+	staleField = false;
+	try { unownedBox.get(); }
+	catch (const runtime::StaleHandle&) { staleField = true; }
+	assert(staleField);
 
 	// A worker dropping the last owning handle only flags collection. Native
 	// children remain alive until a main-thread drain, then become stale.
