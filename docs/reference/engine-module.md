@@ -4,9 +4,9 @@
 checked built-in quantities (RP-14B2a), and borrowed quantity helpers / mutable
 switch-label views (RP-14B2b1), standalone metadata backreferences (RP-14B2b2),
 unattached and attached standalone quantities (RP-14B2b3/b4), and port/light
-metadata class factories (RP-14B2b5), Linux x86_64 inside Rack Free 2.6.6.**
-This is not a registerable instrument yet. Quantity class factories, raw
-metadata collections and engine-owned smoothing (RP-14B2b), native lifecycle
+and parameter-quantity class factories (RP-14B2b5/b6), Linux x86_64 inside
+Rack Free 2.6.6.** This is not a registerable instrument yet. Raw metadata
+collections and engine-owned smoothing (RP-14B2b), native lifecycle
 adapters (RP-14C), plugin/model factories (RP-16), DSP (RP-17), the Python callback
 laboratory (RP-22), and expanders (RP-23) remain planned. See the
 [coverage report](coverage.md) for declaration-level status.
@@ -147,10 +147,57 @@ to configure the same slot; RackPy checks the construction phase and the ID
 again afterwards, and the outer call's object then replaces the inner one.
 
 These six records (the three templates and `get_input_info`,
-`get_output_info`, `get_light_info`) are `implemented`. Quantity class factories
-(`config_param` and its relatives with a `ParamQuantity` subclass) are not:
-quantities have value/range virtuals that Rack's engine threads call, so they
-need native production semantics first (RP-14B2b, RP-22).
+`get_output_info`, `get_light_info`) are `implemented`. Parameter quantities
+have their own class factories, described next.
+
+## Quantity class factories
+
+Rack's `configParam<TParamQuantity>`, `configSwitch<TSwitchQuantity>` and
+`configButton<TSwitchQuantity>` work the same way: pass the class as
+`quantity_type`. `config_param` takes `ParamQuantity` or any subclass,
+including `SwitchQuantity`; `config_switch` and `config_button` need
+`SwitchQuantity` or a subclass. RackPy checks Rack's arguments (IDs, bounds,
+display coefficients) **before** it calls `quantity_type()`, then sets exactly
+the fields Rack's template sets: `module`, `param_id`, the bounds and default,
+`name`, `unit` and the display coefficients; `config_switch` also enables
+snapping, disables smoothing and replaces `labels`; `config_button` enables
+snapping and disables smoothing and randomization, and leaves `labels` as your
+constructor set them. Anything else your `__init__` sets (a description,
+`display_precision`, `randomize_enabled`) survives. Finally the Param takes the
+quantity's default value. The call returns your object, and
+`get_param_quantity` and `param_quantities` return it again.
+
+```{rackpy-example} quantity_factories.py
+```
+
+The ownership, retirement, error and reentrancy rules are those of
+[metadata class factories](#metadata-class-factories): main thread only, `alive`
+becomes `False` and every member raises `StaleHandleError` once the slot
+releases the object, including a retained `labels` alias. Calls from Python
+keep the rules of [attached quantities](#standalone-quantities):
+value and display methods need Rack's live bound UI context, and smoothing
+writes are refused because the module is not registered with Rack's engine.
+
+**Calls from Rack.** A slot quantity is the one place in this API that Rack
+itself may call from another thread: Core's MIDI-Map reads and writes mapped
+parameters from the engine thread. Those calls arrive without the GIL. They
+get Rack's own native behaviour for the mixed value/range methods, never a
+Python call and never an exception into Rack. A UI-safe override that Rack
+calls on the main thread runs through RackPy's contained dispatch: if it
+raises, Rack's own answer is used. Mixed value/range overrides are refused
+when the class is defined, as for every Quantity; RP-22 owns their laboratory
+semantics. RackPy modules are not yet registered with Rack's engine (RP-16),
+so in this release only the test hooks make such calls.
+
+Retiring an object hands it back to Python and may run its finalizer. An
+override that closes its own module leaves its object stale: the rest of that
+call raises `StaleHandleError`. Rack's C++ API gives no protection against a
+callback deleting its own module, so do not do that in a callback Rack makes.
+
+The three templates and `get_param_quantity` are `implemented`. The raw
+`paramQuantities` vector stays `planned`, and the ParamQuantity and
+SwitchQuantity records stay `planned` too: their mixed overrides belong to
+RP-22 and their smoothing to engine ownership (RP-14C/RP-16).
 
 (standalone-quantities)=
 ## Standalone quantities and weak module attachment
@@ -158,8 +205,8 @@ need native production semantics first (RP-14B2b, RP-22).
 `rackpy.engine.ParamQuantity` and `SwitchQuantity` are aliases of the corresponding
 `rackpy.raw.engine` classes. They construct real, Python-owned SDK objects and
 inherit `rackpy.raw.Quantity`; a SwitchQuantity also inherits ParamQuantity.
-They are **not** installed in `Module` slots and are not replacements for
-`Module.config_param` or an installable parameter factory. Their mutable
+Constructing one does not install it in a `Module` slot; pass its class to a
+[quantity class factory](#quantity-class-factories) for that. Their mutable
 `module` field is a weak backreference: assigning a live RackPy `Module` preserves
 identity but neither retains that module nor transfers quantity ownership. Assign
 `None` to detach. When the module closes, construction rolls back or becomes
@@ -172,9 +219,9 @@ UI context and a valid parameter ID; invalid IDs are rejected before Rack's
 unchecked vector access. Unattached values retain Rack's null-module no-op/zero
 behavior. Smoothing writes to an attached quantity are refused because these
 objects are not registered with Engine; use `set_immediate_value()` where the
-immediate semantics are intended. Engine-owned smoothing, factory transfer and
-raw module-vector insertion remain unimplemented. The complete quantity manifest
-records remain `planned`, not complete mappings.
+immediate semantics are intended. Engine-owned smoothing and raw module-vector
+insertion remain unimplemented. The complete quantity manifest records remain
+`planned`, not complete mappings.
 
 Rack's null-module semantics are important: these quantities do **not** store a
 value. `get_value()` and `get_immediate_value()` return zero, and native setters,
@@ -198,8 +245,8 @@ methods; `super()` reaches Rack's implementation. Errors propagate to Python
 callers. Mixed value/range virtuals cannot be Python overrides in production:
 subclass definitions of `get_value`, `set_value`, `get_min_value`, `get_max_value`
 or `get_default_value` raise `TypeError`, like Quantity. RP-22 retains their
-explicit laboratory semantics. These standalone aliases are UI-only and are
-never installed in a Module or visited by the production engine.
+explicit laboratory semantics. A standalone object is UI-only; only a class
+factory installs one in a Module slot.
 
 All native access, construction and field operations require Rack's main thread.
 Assigning a closed module or a non-Module value fails without changing an existing
@@ -230,6 +277,8 @@ native ParamQuantity. `config_switch(param_id, min_value, max_value,
 default_value, name="", labels=())` configures a native SwitchQuantity with
 snapping enabled and smoothing disabled. `config_button(param_id, name="")`
 uses bounds 0–1 and default 0, also disabling module randomization of the button.
+Each also accepts `quantity_type` ([quantity class factories](#quantity-class-factories));
+without it, they configure the built-ins described here.
 All three helpers are constructor-only. Each writes the native Param's default,
 prepares replacements before retiring old quantities, and invalidates only the
 replaced quantity view, not the Param component itself.
@@ -379,8 +428,10 @@ exercise 1,000 construction/deletion cycles, retained views, failed and nested
 constructors, wrong-thread access, checked indices and native differential
 fixtures. Metadata tests additionally exercise 1,000 replacements, 1,000 owner
 collections, slot-specific invalidation, null slots, backreference identity and
-native-reference names/descriptions/IDs/types. Class-factory tests replay a
-native `configInput<CustomInfo>` fixture, including replacement, and cover
+native-reference names/descriptions/IDs/types. Class-factory tests replay
+native `configInput<CustomInfo>` and `configParam/Switch/Button<Custom>`
+fixtures, including replacement, read slot quantities from a Rack thread
+without the GIL, and cover
 1,000 replacements and owner collections with the transferred-object count
 back to its baseline, rollback, reentrant constructors, wrong classes and
 threads, and Rack-side overrides without the GIL. The native test injects a

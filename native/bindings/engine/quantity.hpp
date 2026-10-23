@@ -18,6 +18,12 @@ pybind11::object quantityView(const ModuleRef& ref, int id);
 void bindQuantityViews(pybind11::module_ engine);
 void bindStandaloneQuantities(pybind11::module_ engine);
 pybind11::object ownedSwitchLabels(pybind11::object owner);
+/** RP-14B2b6: construct quantity_type() for slot `id` and disown it. A switch
+or button slot needs a SwitchQuantity class. */
+std::unique_ptr<rack::engine::ParamQuantity> makeTransferredQuantity(const ModuleRef& ref, pybind11::handle type,
+	bool switchOnly, int id);
+/** Check a Python-created quantity's thread, slot ownership and liveness. */
+void guardQuantity(rack::engine::ParamQuantity& q);
 
 }  // namespace bindings
 }  // namespace rackpy

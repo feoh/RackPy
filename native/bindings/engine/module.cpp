@@ -129,40 +129,16 @@ struct Components {
 };
 
 /** Rack's `new TInfo` for configInput/configOutput/configLight<TInfo>, with a
-Python class. The constructor may reenter the module, so the construction phase
-and the slot ID are checked again before anything is transferred. */
+Python class. The construction phase and slot ID are checked again after the
+(reentrant) constructor, before anything is transferred. */
 template <typename Info>
 std::unique_ptr<Info> makeTransferred(const ModuleRef& ref, py::handle type, const char* base, int id,
 	size_t (*slots)(module::Module&)) {
-	py::object cls = py::type::of<Info>();
-	int subclass = PyType_Check(type.ptr()) ? PyObject_IsSubclass(type.ptr(), cls.ptr()) : 0;
-	if (subclass < 0)
-		throw py::error_already_set();
-	if (!subclass)
-		throw py::type_error(std::string("info_type must be ") + base + " or a subclass of it");
-	py::object instance = type();
-	ref.state->requireConstruction();
-	module::Construction::index(id, slots(ref.get()));
-	if (reinterpret_cast<PyObject*>(Py_TYPE(instance.ptr())) != type.ptr())
-		throw py::type_error("info_type() must return a new instance of exactly info_type");
-	auto& alias = infoAlias(instance.cast<Info&>());
-	if (alias.retired)
-		throw runtime::StaleHandle("info_type() returned metadata that a module slot already released");
-	if (alias.inSlot)
-		throw runtime::Ownership("info_type() returned metadata that a module slot already owns");
-	std::unique_ptr<Info> owned;
-	try {
-		owned = instance.cast<std::unique_ptr<Info>>();
-	}
-	catch (const std::exception& e) {
-		throw runtime::Ownership(std::string("this metadata cannot be transferred to a module (") + e.what() + ")");
-	}
-	// Committed: nothing below throws. The slot supersedes a standalone link.
-	alias.detachLink();
-	alias.moduleState = ref.state;
-	alias.inSlot = true;
-	runtime::noteTransferred();
-	return owned;
+	py::object instance = constructForSlot<Info>(type, "info_type", base, [&] {
+		ref.state->requireConstruction();
+		module::Construction::index(id, slots(ref.get()));
+	});
+	return disownForSlot<Info>(instance, infoAlias(instance.cast<Info&>()), ref.state);
 }
 
 size_t inputSlots(module::Module& m) { return m.inputInfos.size(); }
@@ -233,23 +209,36 @@ void bindModule(py::module_ engine) {
 		.def("config", [](const ModuleRef& r, int p, int i, int o, int l) { r.state->config(p, i, o, l); },
 			py::arg("num_params"), py::arg("num_inputs"), py::arg("num_outputs"), py::arg("num_lights") = 0)
 		.def("config_param", [](const ModuleRef& r, int i, float min, float max, float def, std::string name,
-			std::string unit, float base, float multiplier, float offset) {
-			r.state->configQuantity(i, min, max, def, std::move(name), std::move(unit), base, multiplier, offset);
+			std::string unit, float base, float multiplier, float offset, py::object type) {
+			if (type.is_none())
+				r.state->configQuantity(i, min, max, def, std::move(name), std::move(unit), base, multiplier, offset);
+			else
+				r.state->configQuantity(i, min, max, def, std::move(name), std::move(unit), base, multiplier, offset, 0, {},
+					[&] { return makeTransferredQuantity(r, type, false, i); });
 			return component(r, Kind::ParamQuantity, i);
 		}, py::arg("param_id"), py::arg("min_value"), py::arg("max_value"), py::arg("default_value"),
 			py::arg("name") = "", py::arg("unit") = "", py::arg("display_base") = 0.f,
-			py::arg("display_multiplier") = 1.f, py::arg("display_offset") = 0.f,
-			"Configure built-in ParamQuantity only; complete class-factory semantics remain planned.")
+			py::arg("display_multiplier") = 1.f, py::arg("display_offset") = 0.f, py::arg("quantity_type") = py::none(),
+			"Rack's configParam<TParamQuantity>. With quantity_type, construct that ParamQuantity class and transfer "
+			"it into the slot; without, configure a built-in quantity and return its checked view.")
 		.def("config_switch", [](const ModuleRef& r, int i, float min, float max, float def, std::string name,
-			std::vector<std::string> labels) {
-			r.state->configQuantity(i, min, max, def, std::move(name), "", 0.f, 1.f, 0.f, 1, std::move(labels));
+			std::vector<std::string> labels, py::object type) {
+			if (type.is_none())
+				r.state->configQuantity(i, min, max, def, std::move(name), "", 0.f, 1.f, 0.f, 1, std::move(labels));
+			else
+				r.state->configQuantity(i, min, max, def, std::move(name), "", 0.f, 1.f, 0.f, 1, std::move(labels),
+					[&] { return makeTransferredQuantity(r, type, true, i); });
 			return component(r, Kind::ParamQuantity, i);
 		}, py::arg("param_id"), py::arg("min_value"), py::arg("max_value"), py::arg("default_value"),
-			py::arg("name") = "", py::arg("labels") = std::vector<std::string>{})
-		.def("config_button", [](const ModuleRef& r, int i, std::string name) {
-			r.state->configQuantity(i, 0.f, 1.f, 0.f, std::move(name), "", 0.f, 1.f, 0.f, 2);
+			py::arg("name") = "", py::arg("labels") = std::vector<std::string>{}, py::arg("quantity_type") = py::none())
+		.def("config_button", [](const ModuleRef& r, int i, std::string name, py::object type) {
+			if (type.is_none())
+				r.state->configQuantity(i, 0.f, 1.f, 0.f, std::move(name), "", 0.f, 1.f, 0.f, 2);
+			else
+				r.state->configQuantity(i, 0.f, 1.f, 0.f, std::move(name), "", 0.f, 1.f, 0.f, 2, {},
+					[&] { return makeTransferredQuantity(r, type, true, i); });
 			return component(r, Kind::ParamQuantity, i);
-		}, py::arg("param_id"), py::arg("name") = "")
+		}, py::arg("param_id"), py::arg("name") = "", py::arg("quantity_type") = py::none())
 		.def("config_input", [](const ModuleRef& r, int i, std::string name, py::object type) {
 			return configPort(r, i, std::move(name), std::move(type), true);
 		}, py::arg("port_id"), py::arg("name") = "", py::arg("info_type") = py::none(),

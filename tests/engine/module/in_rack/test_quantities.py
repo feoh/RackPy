@@ -12,7 +12,17 @@ import _rackpy_host
 import pytest
 
 from rackpy.errors import ContextError, OwnershipError, StaleHandleError, ThreadError
-from rackpy.raw.engine import Module, ParamQuantityView, SwitchQuantityView
+from rackpy.raw.engine import Module, ParamQuantity, ParamQuantityView, SwitchQuantityView
+
+
+def as_view(q: ParamQuantityView | ParamQuantity) -> ParamQuantityView:
+    # Built-in configuration only: a class factory would return its own object.
+    assert isinstance(q, ParamQuantityView)
+    return q
+
+
+def builtin_views(m: Module) -> list[ParamQuantityView]:
+    return [as_view(q) for q in m.param_quantities]
 
 
 def configure(m: Module, base: float = 0) -> None:
@@ -116,7 +126,7 @@ def test_native_value_display_and_switch_reference_or_missing_context() -> None:
     if _rackpy_host.bound_context_generation() is None:
         m = Module.create(configure)
         try:
-            for q in m.param_quantities:
+            for q in builtin_views(m):
                 for action in value_actions(q):
                     with pytest.raises(ContextError, match="live bound"):
                         action()
@@ -133,7 +143,7 @@ def test_native_value_display_and_switch_reference_or_missing_context() -> None:
 
         m = Module.create(build)
         try:
-            q = m.param_quantities[0]
+            q = as_view(m.param_quantities[0])
             assert [p.value for p in m.params] == case["defaults"]
             for index, key in ((1, "switch_flags"), (2, "button_flags")):
                 quantity = m.param_quantities[index]
@@ -202,7 +212,7 @@ def test_quantity_validation_and_replacement_rollback() -> None:
         with pytest.raises(IndexError):
             m.config_param(0, 0, 1, 0)
         m.config(2, 0, 0)
-        old = m.get_param_quantity(0)
+        old = as_view(m.get_param_quantity(0))
         for bounds in (
             (1, 1, 1),
             (2, 1, 1),
@@ -239,7 +249,7 @@ def test_quantity_validation_and_replacement_rollback() -> None:
         assert old.alive and old is m.param_quantities[0]
         # Template/class arguments are not silently accepted and ignored.
         with pytest.raises(TypeError):
-            m.config_param(0, 0, 1, 0, quantity_class=object)  # type: ignore[call-arg]
+            m.config_param(0, 0, 1, 0, quantity_class=object)  # type: ignore[call-overload]
         new = m.config_button(0)
         assert_stale(old)
         assert new is m.param_quantities[0]
@@ -330,9 +340,9 @@ def test_quantity_slot_replacement_churn_and_owner_collection() -> None:
 
     def build(m: Module) -> None:
         m.config(2, 0, 0)
-        untouched = m.param_quantities[1]
+        untouched = as_view(m.param_quantities[1])
         param = m.params[0]
-        old = m.param_quantities[0]
+        old = as_view(m.param_quantities[0])
         for i in range(1000):
             new = m.config_button(0) if i % 2 else m.config_param(0, 0, 1, 0.25)
             assert_stale(old)
@@ -349,7 +359,7 @@ def test_quantity_slot_replacement_churn_and_owner_collection() -> None:
     for _ in range(1000):
         m = Module.create(lambda m: m.config(1, 0, 0))
         seen.add(m)
-        q, group = m.param_quantities[0], m.param_quantities
+        q, group = as_view(m.param_quantities[0]), m.param_quantities
         del m
         assert_stale(q)
         with pytest.raises(StaleHandleError):
@@ -359,7 +369,7 @@ def test_quantity_slot_replacement_churn_and_owner_collection() -> None:
 
     def fail(m: Module) -> None:
         configure(m)
-        retained.append(m.param_quantities[0])
+        retained.append(as_view(m.param_quantities[0]))
         raise RuntimeError("after quantities")
 
     with pytest.raises(RuntimeError, match="after quantities"):
@@ -377,7 +387,7 @@ def test_quantity_wrong_thread() -> None:
         lambda: m.config_param(0, 0, 1, 0),
         lambda: m.config_switch(0, 0, 1, 0),
     ]
-    for q in m.param_quantities:
+    for q in builtin_views(m):
         actions.extend(accesses(q))
     errors: list[BaseException] = []
 

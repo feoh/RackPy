@@ -3,6 +3,7 @@
 #include <rack.hpp>
 
 #include <cstdio>
+#include <type_traits>
 
 // RP-14B2b5: class factories construct the subclass, then set Rack's fields.
 static int deletedInfos = 0;
@@ -12,6 +13,32 @@ struct CustomInfo : Base {
 	~CustomInfo() override { deletedInfos++; }
 	std::string getName() override { return "Custom " + this->name; }
 };
+
+// RP-14B2b6: the quantity templates keep everything else the constructor set.
+template <typename Base>
+struct CustomQuantity : Base {
+	CustomQuantity() {
+		this->description = "From constructor";
+		this->randomizeEnabled = false;
+		this->displayPrecision = 3;
+		if constexpr (std::is_base_of<rack::engine::SwitchQuantity, Base>::value)
+			this->labels = {"Off", "On"};
+	}
+	~CustomQuantity() override { deletedInfos++; }
+	std::string getLabel() override { return "Custom " + this->name; }
+};
+
+json_t* quantityRecord(rack::engine::Module& m, int id) {
+	rack::engine::ParamQuantity* q = m.paramQuantities[id];
+	json_t* labels = json_array();
+	if (auto* s = dynamic_cast<rack::engine::SwitchQuantity*>(q))
+		for (const auto& label : s->labels)
+			json_array_append_new(labels, json_string(label.c_str()));
+	return json_pack("[ssssiffffffibbbbfo]", q->getLabel().c_str(), q->description.c_str(), q->name.c_str(),
+		q->unit.c_str(), q->paramId, q->minValue, q->maxValue, q->defaultValue, q->displayBase,
+		q->displayMultiplier, q->displayOffset, q->displayPrecision, q->snapEnabled, q->smoothEnabled,
+		q->randomizeEnabled, q->module == &m, m.params[id].value, labels);
+}
 
 int main() {
 	json_t* root = json_object();
@@ -123,6 +150,29 @@ int main() {
 		json_array_append_new(replaced, json_integer(deletedInfos));
 		json_array_append_new(replaced, json_string(m.inputInfos[0]->getName().c_str()));
 		json_object_set_new(root, "factory_replacement", replaced);
+	}
+	{
+		using rack::engine::ParamQuantity;
+		using rack::engine::SwitchQuantity;
+		rack::engine::Module m;
+		m.config(4, 0, 0, 0);
+		m.configParam<CustomQuantity<ParamQuantity>>(0, -1.f, 1.f, 0.5f, "Gain", " dB", 0.f, 2.f, 3.f);
+		m.configSwitch<CustomQuantity<SwitchQuantity>>(1, 0.f, 2.f, 1.f, "Mode", {"X", "Y", "Z"});
+		m.configButton<CustomQuantity<SwitchQuantity>>(2, "Push");
+		// configParam with a switch class: no switch fields are touched.
+		m.configParam<CustomQuantity<SwitchQuantity>>(3, 0.f, 4.f, 2.f, "Steps");
+		json_t* quantities = json_array();
+		for (int i = 0; i < 4; i++)
+			json_array_append_new(quantities, quantityRecord(m, i));
+		json_object_set_new(root, "quantity_factories", quantities);
+		int before = deletedInfos;
+		m.configParam<CustomQuantity<ParamQuantity>>(0, 0.f, 1.f, 0.25f, "Again");
+		json_t* replaced = json_pack("[if]", deletedInfos - before, m.params[0].value);
+		m.configParam(0, 0.f, 1.f, 0.75f, "Plain");
+		json_array_append_new(replaced, json_integer(deletedInfos - before));
+		json_array_append_new(replaced, json_string(m.paramQuantities[0]->getLabel().c_str()));
+		json_array_append_new(replaced, json_real(m.params[0].value));
+		json_object_set_new(root, "quantity_replacement", replaced);
 	}
 	json_t* bypass = json_array();
 	json_object_set_new(root, "bypass", bypass);

@@ -113,7 +113,8 @@ def test_metadata_class_factories_complete_only_templates_and_getters(symbol: st
 
 def test_builtin_quantity_adapters_do_not_complete_full_mappings() -> None:
     records = [r for r in bm.load_json(bm.MANIFEST)["entries"] if "RP-14B2a partial" in (r["notes"] or "")]
-    assert len(records) == 46
+    # The three quantity templates and getParamQuantity left this set in RP-14B2b6.
+    assert len(records) == 42
     for record in records:
         assert record["status"] == "planned" and record["python"] is None
         assert record["notes"].startswith("Responsible task: RP-14B2b")
@@ -123,6 +124,25 @@ def test_builtin_quantity_adapters_do_not_complete_full_mappings() -> None:
     for record in bm.load_json(bm.MANIFEST)["entries"]:
         if "ParamQuantity::" in record["id"] and "Json(" in record["id"]:
             assert record["status"] == "unreviewed" and "RP-15" in record["notes"]
+
+
+@pytest.mark.parametrize(
+    "symbol",
+    [
+        "method:rack::engine::Module::getParamQuantity(int)",
+        "method_template:rack::engine::Module::configParam<type>"
+        "(int, float, float, float, std::string, std::string, float, float, float)",
+        "method_template:rack::engine::Module::configSwitch<type>"
+        "(int, float, float, float, std::string, std::vector<std::string>)",
+        "method_template:rack::engine::Module::configButton<type>(int, std::string)",
+    ],
+)
+def test_quantity_class_factories_complete_only_templates_and_getter(symbol: str) -> None:
+    record = next(r for r in bm.load_json(bm.MANIFEST)["entries"] if r["id"] == symbol)
+    assert record["status"] == "implemented" and record["python"]["raw"].startswith("rackpy.raw.engine.Module.")
+    assert record["notes"].startswith("RP-14B2b6") and "macOS/Windows unvalidated" in record["notes"]
+    assert ("RP-22" in record["notes"] and "RP-16" in record["notes"]) or "stays planned" in record["notes"]
+    assert any("test_transferred_quantities.py" in t for t in record["tests"])
 
 
 def test_every_public_engine_method_has_a_lock_entry() -> None:

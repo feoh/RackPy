@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// RP-14B2b3/b4: owned SDK quantities with weak module links. No factory transfer.
+// RP-14B2b3/b4: owned SDK quantities with weak module links. RP-14B2b6: the
+// same objects transferred into module slots by the class factories.
 #include "quantity.hpp"
 #include "components.hpp"
+#include "metadata.hpp"
 #include "rackpy/runtime/python.hpp"
 #include "../support/quantity.hpp"
 
@@ -22,29 +24,32 @@ struct StandaloneGuard {
 };
 
 /** Always use the alias, including for the base Python types. Mixed virtuals
-remain native: Python cannot override value/range methods. These objects are
-not installable in Module slots, and are never reached by an engine/audio thread.
-A future ownership-transfer implementation must not reuse this UI-only guard. */
+remain native: Python cannot override value/range methods (rackpy.raw refuses
+such a subclass). Standalone objects are never reached by an engine/audio
+thread, so their guard is UI-only. A slot-owned object can be: Rack then calls
+without the GIL, and gets the SDK's native behaviour with no guard that could
+throw into Rack (rackCaller). Calls from Python keep every check. */
 template <typename Base>
-struct StandaloneQuantity : QuantityTrampoline<Base, StandaloneGuard> {
-	std::weak_ptr<module::Construction> moduleState;
-	std::shared_ptr<module::ModuleBackreference> moduleLink;
+struct StandaloneQuantity : QuantityTrampoline<Base, StandaloneGuard>, SlotTransfer<Base, StandaloneQuantity<Base>> {
+	using Slot = SlotTransfer<Base, StandaloneQuantity<Base>>;
 	StandaloneQuantity() { StandaloneGuard::check(); }
-	~StandaloneQuantity() override {
-		if (moduleLink)
-			moduleLink->detach();
+	void guard() const {
+		if (this->rackCaller())
+			return;
+		StandaloneGuard::check();
+		Slot::check("using a parameter quantity that a module owns");
 	}
 	std::shared_ptr<module::Construction> owner() const {
-		StandaloneGuard::check();
+		guard();
 		if (!this->module)
 			return {};
-		auto held = moduleState.lock();
+		auto held = this->moduleState.lock();
 		if (!held || !held->object || held->object.get() != this->module)
-			throw runtime::StaleHandle("standalone quantity has an untracked module pointer");
+			throw runtime::StaleHandle("parameter quantity has an untracked module pointer");
 		return held;
 	}
 	void checkAccess(bool engine = false) const override {
-		if (!owner() || !engine)
+		if (this->rackCaller() || !owner() || !engine)
 			return;
 		module::Construction::index(this->paramId, this->module->params.size());
 		auto context = runtime::binding().current();
@@ -55,18 +60,20 @@ struct StandaloneQuantity : QuantityTrampoline<Base, StandaloneGuard> {
 	}
 	void setValue(float value) override {
 		checkAccess(true);
-		if (this->module && this->smoothEnabled)
+		// Rack cannot reach an unregistered module's slot, so a Rack caller
+		// here implies an engine-owned module (RP-16), where smoothing is safe.
+		if (!this->rackCaller() && this->module && this->smoothEnabled)
 			throw runtime::Ownership("smoothing targets require engine-owned modules; use set_immediate_value");
 		Base::setValue(value);
 	}
 	float getValue() override { checkAccess(true); return Base::getValue(); }
 	float immediate() { checkAccess(true); return this->getImmediateValue(); }
 	void immediate(float value) { checkAccess(true); this->setImmediateValue(value); }
-	float getMinValue() override { StandaloneGuard::check(); return Base::getMinValue(); }
-	float getMaxValue() override { StandaloneGuard::check(); return Base::getMaxValue(); }
-	float getDefaultValue() override { StandaloneGuard::check(); return Base::getDefaultValue(); }
+	float getMinValue() override { guard(); return Base::getMinValue(); }
+	float getMaxValue() override { guard(); return Base::getMaxValue(); }
+	float getDefaultValue() override { guard(); return Base::getDefaultValue(); }
 	std::string getLabel() override {
-		StandaloneGuard::check();
+		guard();
 		return overrideOr<std::string>(static_cast<const Base*>(this), "get_label", [this] {
 			// Guard only the SDK fallback, not a Python override that handles
 			// raw metadata differently. Rack computes paramId + 1 as an int.
@@ -88,22 +95,26 @@ struct StandaloneQuantity : QuantityTrampoline<Base, StandaloneGuard> {
 		});
 	}
 	std::string getDescription() override {
-		StandaloneGuard::check();
+		guard();
 		return overrideOr<std::string>(static_cast<const Base*>(this), "get_description", [this] { return Base::getDescription(); });
 	}
 };
-
-template <typename T>
-void field(py::classh<Q, rack::Quantity, StandaloneQuantity<Q>>& cls, const char* name, T Q::*member) {
-	cls.def_property(name, [member](const Q& q) { StandaloneGuard::check(); return q.*member; },
-		[member](Q& q, T value) { StandaloneGuard::check(); q.*member = std::move(value); });
-}
 
 template <typename F>
 decltype(auto) standalone(Q& q, F action) {
 	if (auto* s = dynamic_cast<StandaloneQuantity<S>*>(&q))
 		return action(*s);
 	return action(dynamic_cast<StandaloneQuantity<Q>&>(q));
+}
+
+void guard(Q& q) {
+	standalone(q, [](auto& alias) { alias.guard(); });
+}
+
+template <typename T>
+void field(py::classh<Q, rack::Quantity, StandaloneQuantity<Q>>& cls, const char* name, T Q::*member) {
+	cls.def_property(name, [member](Q& q) { guard(q); return q.*member; },
+		[member](Q& q, T value) { guard(q); q.*member = std::move(value); });
 }
 
 py::object quantityModule(Q& q) {
@@ -114,8 +125,8 @@ py::object quantityModule(Q& q) {
 }
 
 void setQuantityModule(Q& q, py::object value) {
-	StandaloneGuard::check();
 	standalone(q, [&](auto& alias) {
+		alias.guard();
 		std::shared_ptr<module::Construction> state;
 		std::shared_ptr<module::ModuleBackreference> link;
 		if (!value.is_none()) {
@@ -136,11 +147,27 @@ void setQuantityModule(Q& q, py::object value) {
 
 }  // namespace
 
+void guardQuantity(Q& q) {
+	guard(q);
+}
+
+std::unique_ptr<Q> makeTransferredQuantity(const ModuleRef& ref, py::handle type, bool switchOnly, int id) {
+	auto recheck = [&] {
+		ref.state->requireConstruction();
+		module::Construction::index(id, ref.get().paramQuantities.size());
+	};
+	py::object instance = switchOnly ? constructForSlot<S>(type, "quantity_type", "SwitchQuantity", recheck)
+		: constructForSlot<Q>(type, "quantity_type", "ParamQuantity", recheck);
+	return standalone(instance.cast<Q&>(), [&](auto& alias) { return disownForSlot<Q>(instance, alias, ref.state); });
+}
+
 void bindStandaloneQuantities(py::module_ engine) {
 	auto cls = py::classh<Q, rack::Quantity, StandaloneQuantity<Q>>(engine, "ParamQuantity",
-		"Owned SDK ParamQuantity with a nullable weak module link. No class-factory transfer.");
+		"rack::engine::ParamQuantity with a nullable weak module link. A class factory may transfer it into a module slot.");
 	cls.def(py::init_alias<>())
 		.def_property("module", &quantityModule, &setQuantityModule)
+		.def_property_readonly("alive", [](Q& q) { return standalone(q, [](auto& a) { return !a.retired; }); },
+			"False once the module slot that owned this quantity replaced it or was deleted.")
 		.def("get_param", [](Q& q) -> py::object {
 			return standalone(q, [&](auto& alias) -> py::object {
 				auto state = alias.owner();
@@ -150,14 +177,14 @@ void bindStandaloneQuantities(py::module_ engine) {
 		})
 		.def("get_immediate_value", [](Q& q) { return standalone(q, [](auto& a) { return a.immediate(); }); })
 		.def("set_immediate_value", [](Q& q, float value) { standalone(q, [value](auto& a) { a.immediate(value); }); }, py::arg("value"))
-		.def("get_description", &Q::getDescription)
+		.def("get_description", [](Q& q) { return q.getDescription(); })
 		.def("set_smooth_value", [](Q& q, float value) {
-			StandaloneGuard::check();
+			guard(q);
 			deprecated("set_smooth_value is deprecated in Rack; use set_value");
 			q.setValue(value);
 		}, py::arg("value"))
 		.def("get_smooth_value", [](Q& q) {
-			StandaloneGuard::check();
+			guard(q);
 			deprecated("get_smooth_value is deprecated in Rack; use get_value");
 			return q.getValue();
 		});
@@ -178,10 +205,13 @@ void bindStandaloneQuantities(py::module_ engine) {
 	field(cls, "snap_enabled", &Q::snapEnabled);
 
 	py::classh<S, Q, StandaloneQuantity<S>>(engine, "SwitchQuantity",
-		"Owned SDK SwitchQuantity; mutable labels, weak module link, UI-safe overrides, no engine transfer.")
+		"rack::engine::SwitchQuantity: mutable labels, weak module link, UI-safe overrides; transferable to a module slot.")
 		.def(py::init_alias<>())
-		.def_property("labels", [](py::object self) { return ownedSwitchLabels(self); },
-			[](S& q, std::vector<std::string> labels) { StandaloneGuard::check(); q.labels = std::move(labels); });
+		.def_property("labels", [](py::object self) {
+			guard(self.cast<S&>());
+			return ownedSwitchLabels(self);
+		},
+			[](S& q, std::vector<std::string> labels) { guard(q); q.labels = std::move(labels); });
 }
 
 }  // namespace bindings

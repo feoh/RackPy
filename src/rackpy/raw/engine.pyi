@@ -202,8 +202,9 @@ class SwitchQuantityView(ParamQuantityView):
     @labels.setter
     def labels(self, value: Sequence[str] | SwitchLabels) -> None: ...
 
-# Owned standalone SDK objects with weak module links and UI-safe virtuals.
-# They are not installed into module slots; factory transfer remains planned.
+# SDK quantities with weak module links and UI-safe virtuals, owned by Python
+# until a class factory (config_param(..., quantity_type=...)) moves one into a
+# module slot (RP-14B2b6).
 class ParamQuantity(Quantity):
     param_id: int
     min_value: float
@@ -221,6 +222,8 @@ class ParamQuantity(Quantity):
     smooth_enabled: bool
     snap_enabled: bool
     def __init__(self) -> None: ...
+    @property
+    def alive(self) -> bool: ...
     @property
     def module(self) -> Module | None: ...
     @module.setter
@@ -255,6 +258,7 @@ class Module:
     @property
     def alive(self) -> bool: ...
     def config(self, num_params: int, num_inputs: int, num_outputs: int, num_lights: int = 0) -> None: ...
+    @overload
     def config_param(
         self,
         param_id: int,
@@ -266,7 +270,24 @@ class Module:
         display_base: float = 0.0,
         display_multiplier: float = 1.0,
         display_offset: float = 0.0,
+        quantity_type: None = None,
     ) -> ParamQuantityView: ...
+    @overload
+    def config_param[Q: ParamQuantity](
+        self,
+        param_id: int,
+        min_value: float,
+        max_value: float,
+        default_value: float,
+        name: str = "",
+        unit: str = "",
+        display_base: float = 0.0,
+        display_multiplier: float = 1.0,
+        display_offset: float = 0.0,
+        *,
+        quantity_type: type[Q],
+    ) -> Q: ...
+    @overload
     def config_switch(
         self,
         param_id: int,
@@ -275,11 +296,27 @@ class Module:
         default_value: float,
         name: str = "",
         labels: Sequence[str] = (),
+        quantity_type: None = None,
     ) -> SwitchQuantityView: ...
-    def config_button(self, param_id: int, name: str = "") -> SwitchQuantityView: ...
-    def get_param_quantity(self, index: int) -> ParamQuantityView: ...
+    @overload
+    def config_switch[S: SwitchQuantity](
+        self,
+        param_id: int,
+        min_value: float,
+        max_value: float,
+        default_value: float,
+        name: str = "",
+        labels: Sequence[str] = (),
+        *,
+        quantity_type: type[S],
+    ) -> S: ...
+    @overload
+    def config_button(self, param_id: int, name: str = "", quantity_type: None = None) -> SwitchQuantityView: ...
+    @overload
+    def config_button[S: SwitchQuantity](self, param_id: int, name: str = "", *, quantity_type: type[S]) -> S: ...
+    def get_param_quantity(self, index: int) -> ParamQuantityView | ParamQuantity: ...
     @property
-    def param_quantities(self) -> Components[ParamQuantityView]: ...
+    def param_quantities(self) -> Components[ParamQuantityView | ParamQuantity]: ...
     @overload
     def config_input(self, port_id: int, name: str = "", info_type: None = None) -> PortInfoView: ...
     @overload

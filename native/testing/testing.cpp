@@ -337,6 +337,26 @@ void define(py::module_ m) {
 		}
 		return py::make_tuple(name, description);
 	});
+	m.def("read_slot_quantity_as_engine", [](const bindings::ModuleRef& r, int id, int reads) {
+		// As Core MIDI-Map would: a module's own slot quantity, on a Rack
+		// thread with the live context and without the GIL. Mixed reads only.
+		rack::engine::ParamQuantity* q = r.get().paramQuantities.at(id);
+		rack::Context* context = rack::contextGet();
+		if (!q || !context || !context->engine)
+			throw std::invalid_argument("needs a configured quantity and Rack's live context");
+		float last = 0.f;
+		{
+			py::gil_scoped_release release;
+			std::thread worker([&] {
+				rack::contextSet(context);
+				for (int i = 0; i < reads; i++)
+					last = q->getScaledValue() + q->getMinValue() + q->getMaxValue() + q->getDefaultValue() -
+						q->getMinValue() - q->getMaxValue() - q->getDefaultValue();
+			});
+			worker.join();
+		}
+		return last;
+	});
 	m.def("finalize_outcome", &finalizeOutcome);
 
 	// Drop the hooks' own callback references when the plugin is destroyed (but not the deliberate leaks).

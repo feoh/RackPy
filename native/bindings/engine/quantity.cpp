@@ -34,6 +34,8 @@ py::object quantityView(const ModuleRef& ref, int id) {
 	auto ptr = m.getParamQuantity(id);
 	if (!ptr)
 		return py::none();
+	if (module::transferredIn(ptr))
+		return py::cast(ptr, py::return_value_policy::reference);  // the transferred object itself
 	auto token = m.paramQuantityTokens[id];
 	return runtime::identity(ptr, token->generation, [&]() -> py::object {
 		QuantityView view{ptr, token, ref.state};
@@ -100,7 +102,9 @@ struct SwitchLabels {
 		auto held = owned();
 		if (held.is_none())
 			throw runtime::StaleHandle("this standalone switch quantity was deleted");
-		return held.cast<rack::engine::SwitchQuantity&>().labels;
+		auto& q = held.cast<rack::engine::SwitchQuantity&>();
+		guardQuantity(q);  // a slot-owned or retired quantity has stricter rules
+		return q.labels;
 	}
 	py::ssize_t index(py::ssize_t i) const {
 		auto n = static_cast<py::ssize_t>(get().size());

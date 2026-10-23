@@ -89,6 +89,7 @@ struct Module : rack::engine::Module {
 				slot->invalidate();
 		// Rack's base destructor deletes every slot. Take transferred metadata
 		// out first; retiring may run Python finalizers, so empty the slot before.
+		retireTransferred(paramQuantities);
 		retireTransferred(inputInfos);
 		retireTransferred(outputInfos);
 		retireTransferred(lightInfos);
@@ -206,10 +207,21 @@ struct Construction {
 	void configLightInfo(int id, std::string name) {
 		configLightInfo(id, std::move(name), [] { return std::make_unique<rack::engine::LightInfo>(); });
 	}
-	/** Built-in quantities only: no Python virtuals in the native module.
+	/** Rack's configParam/configSwitch/configButton<TQuantity>. `make` returns
+	the new quantity (kind 0: any ParamQuantity, otherwise a SwitchQuantity).
 	Prepare all strings/labels before committing a slot or its Param default. */
 	void configQuantity(int id, float min, float max, float def, std::string name, std::string unit,
 		float base, float multiplier, float offset, int kind = 0, std::vector<std::string> labels = {}) {
+		configQuantity(id, min, max, def, std::move(name), std::move(unit), base, multiplier, offset, kind,
+			std::move(labels), [kind]() -> std::unique_ptr<rack::engine::ParamQuantity> {
+				if (kind)
+					return std::make_unique<rack::engine::SwitchQuantity>();
+				return std::make_unique<rack::engine::ParamQuantity>();
+			});
+	}
+	template <typename Make>
+	void configQuantity(int id, float min, float max, float def, std::string name, std::string unit,
+		float base, float multiplier, float offset, int kind, std::vector<std::string> labels, Make make) {
 		requireConstruction();
 		Module& m = get();
 		index(id, m.paramQuantities.size());
@@ -228,21 +240,21 @@ struct Construction {
 			q.displayBase = base;
 			q.displayMultiplier = multiplier;
 			q.displayOffset = offset;
+			// As Rack's configSwitch/configButton: only these fields, so a
+			// class factory's constructor keeps everything else it set.
 			if (kind) {
 				q.snapEnabled = true;
 				q.smoothEnabled = false;
-				q.randomizeEnabled = kind != 2;
-				static_cast<rack::engine::SwitchQuantity&>(q).labels = std::move(labels);
 			}
+			if (kind == 1)
+				static_cast<rack::engine::SwitchQuantity&>(q).labels = std::move(labels);
+			if (kind == 2)
+				q.randomizeEnabled = false;
 		};
-		replaceInfoWith(id, m.paramQuantities, m.paramQuantityTokens, prepare,
-			[kind]() -> std::unique_ptr<rack::engine::ParamQuantity> {
-				if (kind)
-					return std::make_unique<rack::engine::SwitchQuantity>();
-				return std::make_unique<rack::engine::ParamQuantity>();
-			});
-		// Built-in getDefaultValue and Param::setValue cannot throw. Nothing
-		// mutates the Param before preparation has succeeded.
+		replaceInfoWith(id, m.paramQuantities, m.paramQuantityTokens, prepare, make);
+		// getDefaultValue is native (Python cannot override it) and, like
+		// Param::setValue, cannot throw here. Nothing mutates the Param before
+		// preparation has succeeded.
 		m.params[id].setValue(m.paramQuantities[id]->getDefaultValue());
 	}
 	void configBypass(int input, int output) {

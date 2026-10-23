@@ -6,7 +6,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/trampoline_self_life_support.h>
 
+#include <functional>
 #include <memory>
+#include <string>
 
 #include "module.hpp"
 #include "../support/overrides.hpp"
@@ -18,37 +20,46 @@ namespace bindings {
 
 namespace py = pybind11;
 
-/** Python overrides of the info classes' virtual names (callback strategy "ui").
-
-Standalone, Python owns the object and only `module` is main-thread-only.
-Transferred, the module slot owns the native object and keeps its Python half
-alive; Rack-owned metadata is used on the main thread only, like a module's
-component views. Retired, the slot has handed it back: the Python object
-survives while referenced, but every bound access raises StaleHandle. */
-template <typename Base>
-struct InfoTrampoline : Base, module::TransferredMetadata, py::trampoline_self_life_support {
-	using Base::Base;
+/** Python-created metadata or quantities that a class factory moved into a
+module slot (RP-14B2b5/b6). `Base` is the bound SDK type, `Alias` the
+trampoline deriving from both. Transferred, the slot owns the native object
+and keeps its Python half alive; Rack-owned objects are used on the main
+thread only, like a module's component views. Retired, the slot has handed
+it back: the Python object survives while referenced, but every bound access
+raises StaleHandle. */
+template <typename Base, typename Alias>
+struct SlotTransfer : module::TransferredMetadata {
 	std::weak_ptr<module::Construction> moduleState;
 	std::shared_ptr<module::ModuleBackreference> moduleLink;
 	bool inSlot = false;
 	bool retired = false;
 
-	~InfoTrampoline() override {
+	~SlotTransfer() override {
 		if (moduleLink)
 			moduleLink->detach();
 	}
 	bool transferred() const override { return inSlot; }
-	void check() const {
+	/** Rack calls a slot's virtuals without the GIL, possibly off the main
+	thread: those calls get native semantics and must never throw. */
+	bool rackCaller() const { return inSlot && !PyGILState_Check(); }
+	void check(const char* what) const {
 		if (!inSlot && !retired)
 			return;
-		runtime::requireMainThread("using metadata that a module owns");
+		runtime::requireMainThread(what);
 		if (retired)
-			throw runtime::StaleHandle("this metadata was replaced or its module was deleted");
+			throw runtime::StaleHandle("this object was replaced or its module was deleted");
 	}
 	void detachLink() {
 		if (moduleLink)
 			moduleLink->detach();
 		moduleLink.reset();
+	}
+	/** Committed transfer into `state`'s slot: nothing here throws. */
+	void enterSlot(const std::shared_ptr<module::Construction>& state) {
+		detachLink();
+		moduleState = state;
+		inSlot = true;
+		runtime::noteTransferred();
 	}
 	/** Hand native ownership back to the Python object (pybind11 reclaim).
 	Runs on the thread deleting the module or replacing the slot, normally the
@@ -61,9 +72,10 @@ struct InfoTrampoline : Base, module::TransferredMetadata, py::trampoline_self_l
 			return;
 		}
 		PyGILState_STATE gil = PyGILState_Ensure();
+		Base* self = static_cast<Alias*>(this);
 		inSlot = false;
 		retired = true;
-		this->module = nullptr;
+		self->module = nullptr;
 		moduleState.reset();
 		detachLink();
 		runtime::noteTransferredDeleted();
@@ -71,7 +83,7 @@ struct InfoTrampoline : Base, module::TransferredMetadata, py::trampoline_self_l
 			// The slot's ownership returns to the existing Python object. Its
 			// last reference may go here and run Python finalizers: the slot is
 			// already empty and this object is already retired.
-			py::object self = py::cast(std::unique_ptr<Base>(this));
+			py::object owner = py::cast(std::unique_ptr<Base>(self));
 		}
 		catch (...) {
 			// A failed reclaim leaves the unique_ptr owning, which deleted the
@@ -80,6 +92,14 @@ struct InfoTrampoline : Base, module::TransferredMetadata, py::trampoline_self_l
 		}
 		PyGILState_Release(gil);
 	}
+};
+
+/** Python overrides of the info classes' virtual names (callback strategy "ui").
+Standalone, Python owns the object and only `module` is main-thread-only. */
+template <typename Base>
+struct InfoTrampoline : Base, SlotTransfer<Base, InfoTrampoline<Base>>, py::trampoline_self_life_support {
+	using Base::Base;
+	void check() const { SlotTransfer<Base, InfoTrampoline<Base>>::check("using metadata that a module owns"); }
 	std::string getName() override {
 		return overrideOr<std::string>(static_cast<const Base*>(this), "get_name", [this] { return Base::getName(); });
 	}
@@ -87,6 +107,43 @@ struct InfoTrampoline : Base, module::TransferredMetadata, py::trampoline_self_l
 		return overrideOr<std::string>(static_cast<const Base*>(this), "get_description", [this] { return Base::getDescription(); });
 	}
 };
+
+/** Construct `type()` for a slot, as Rack's `new T` does. `argument` names the
+Python parameter in errors. It must be `base` or a Python subclass, and return
+a new instance of exactly that class. The
+constructor may reenter the module, so `recheck` runs before anything else. */
+template <typename Bound>
+py::object constructForSlot(py::handle type, const char* argument, const char* base, const std::function<void()>& recheck) {
+	py::object cls = py::type::of<Bound>();
+	int subclass = PyType_Check(type.ptr()) ? PyObject_IsSubclass(type.ptr(), cls.ptr()) : 0;
+	if (subclass < 0)
+		throw py::error_already_set();
+	if (!subclass)
+		throw py::type_error(std::string(argument) + " must be " + base + " or a subclass of it");
+	py::object instance = type();
+	recheck();
+	if (reinterpret_cast<PyObject*>(Py_TYPE(instance.ptr())) != type.ptr())
+		throw py::type_error(std::string(argument) + "() must return a new instance of exactly " + argument);
+	return instance;
+}
+
+/** Disown a constructed alias for its slot. The flags are checked first. */
+template <typename Base, typename Alias>
+std::unique_ptr<Base> disownForSlot(py::object instance, Alias& alias, const std::shared_ptr<module::Construction>& state) {
+	if (alias.retired)
+		throw runtime::StaleHandle("the class returned an object that a module slot already released");
+	if (alias.inSlot)
+		throw runtime::Ownership("the class returned an object that a module slot already owns");
+	std::unique_ptr<Base> owned;
+	try {
+		owned = instance.cast<std::unique_ptr<Base>>();
+	}
+	catch (const std::exception& e) {
+		throw runtime::Ownership(std::string("this object cannot be transferred to a module (") + e.what() + ")");
+	}
+	alias.enterSlot(state);
+	return owned;
+}
 
 /** Every Python-visible PortInfo/LightInfo is the alias (py::init_alias). */
 template <typename Info>

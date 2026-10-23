@@ -20,6 +20,19 @@ struct Retiring : rack::engine::PortInfo, rackpy::module::TransferredMetadata {
 	}
 };
 
+struct RetiringSwitch : rack::engine::SwitchQuantity, rackpy::module::TransferredMetadata {
+	std::vector<std::string>* log;
+	explicit RetiringSwitch(std::vector<std::string>* log) : log(log) {
+		labels = {"Kept"};
+		randomizeEnabled = false;
+	}
+	bool transferred() const override { return true; }
+	void retire() noexcept override {
+		log->push_back("retired " + name);
+		delete this;
+	}
+};
+
 template <typename Error, typename F>
 void refuses(F action) {
 	bool caught = false;
@@ -205,6 +218,34 @@ int main() {
 		c.seal();
 		c.close();
 		assert(log.size() == 3 && log[2] == "retired Kept linked");
+	}
+	// RP-14B2b6: quantity factories set only the template's fields, then the
+	// Param default; transferred quantities retire like metadata.
+	{
+		std::vector<std::string> log;
+		Construction c;
+		c.config(2, 0, 0, 0);
+		auto& m = c.get();
+		auto* builtin = m.getParamQuantity(0);
+		auto make = [&] { return std::make_unique<RetiringSwitch>(&log); };
+		refuses<std::invalid_argument>([&] { c.configQuantity(0, 1, 1, 1, "", "", 0, 1, 0, 0, {}, make); });
+		refuses<std::runtime_error>([&] {
+			c.configQuantity(0, 0, 1, 0, "", "", 0, 1, 0, 0, {}, []() -> std::unique_ptr<rack::engine::ParamQuantity> {
+				throw std::runtime_error("factory failed");
+			});
+		});
+		assert(m.getParamQuantity(0) == builtin && log.empty());
+		c.configQuantity(0, 0, 1, 0, "Button", "", 0, 1, 0, 2, {}, make);
+		auto* button = static_cast<RetiringSwitch*>(m.getParamQuantity(0));
+		assert(button->labels == std::vector<std::string>{"Kept"} && !button->randomizeEnabled && button->snapEnabled);
+		c.configQuantity(1, -1, 1, 0.5f, "Switch", "", 0, 1, 0, 1, {"A", "B"}, make);
+		auto* sw = static_cast<RetiringSwitch*>(m.getParamQuantity(1));
+		assert((sw->labels == std::vector<std::string>{"A", "B"}) && !sw->randomizeEnabled && m.params[1].value == 0.5f);
+		c.configQuantity(0, 0, 1, 0, "Plain", "", 0, 1, 0);
+		assert((log == std::vector<std::string>{"retired Button"}));
+		c.seal();
+		c.close();
+		assert(log.size() == 2 && log[1] == "retired Switch");
 	}
 	// Native deletion of standalone metadata can race main-thread module
 	// cleanup. detach completes before the actual SDK field ceases to exist.

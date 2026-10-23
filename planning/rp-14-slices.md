@@ -203,6 +203,29 @@ insertion, quantity factories, engine-owned smoothing and RP-22 laboratory
 semantics remain on B2b. This child does not close B2b/B2/B/14 or the
 implementation phase.
 
+**RP-14B2b6 — transferred parameter quantity class factories**
+(`tk-rackpy-14b2b6-transferred-parameter-quantity-cla-5ebbcc`). Exact scope: the
+`configParam/configSwitch/configButton<type>` method templates and
+`getParamQuantity(int)`. A `quantity_type` argument names a `ParamQuantity`
+(switch/button: `SwitchQuantity`) class or Python subclass. Rack's arguments are
+validated first; RackPy then constructs the class inside the constructor
+callback with the B2b5 exact-type, ownership and reentrancy checks, transfers it
+into the slot, sets exactly the fields Rack's templates set and the Param
+default. Getters return the same object; replacement, close, GC, worker drop and
+rollback retire it, including its owned labels alias. Python callers keep the
+main-thread, live-context and unregistered-smoothing rules; Rack callers without
+the GIL get native mixed behaviour that never throws and contained UI overrides.
+Built-in switch/button configuration also stops resetting fields Rack's
+templates leave alone. Validate native `configParam/Switch/Button<Custom>`
+differential and replacement, actual-host startup/live-UI suites, wrong
+classes/constructors, validation before construction, reentrancy, wrong
+thread/context, overrides closing their module, Rack-thread mixed reads and
+no-GIL UI dispatch through test hooks, and 1,000 replacements/owner churns with
+the transferred count back to baseline. The raw `paramQuantities` vector, the
+ParamQuantity/SwitchQuantity records (RP-22 mixed overrides, engine smoothing),
+JSON (RP-15) and smoothing ownership remain open. This child does not close
+B2b/B2/B/14 or the implementation phase.
+
 ## RackPy 14C: native lifecycle events and identity adapters
 
 **Witan slug:** `tk-rackpy-14c-native-lifecycle-events-and-identity--929845`
