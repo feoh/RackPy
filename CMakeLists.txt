@@ -92,6 +92,12 @@ if(RACKPY_BUILD_TESTS)
   target_link_libraries(rackpy_module_tests PRIVATE rackpy_sdk_program)
   add_test(NAME module_construction COMMAND rackpy_module_tests)
 
+  add_executable(rackpy_widget_tests native/tests/test_widget_tree.cpp ${RACKPY_RUNTIME_CORE})
+  set_target_properties(rackpy_widget_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_include_directories(rackpy_widget_tests PRIVATE native/include)
+  target_link_libraries(rackpy_widget_tests PRIVATE rackpy_sdk_program)
+  add_test(NAME widget_tree COMMAND rackpy_widget_tests)
+
   # Rack's own results for the family 1 bindings; tests/values compares rackpy.raw against them inside Rack.
   add_executable(rackpy_values_reference native/tests/values_reference.cpp)
   set_target_properties(rackpy_values_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)

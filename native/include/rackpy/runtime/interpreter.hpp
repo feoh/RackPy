@@ -34,6 +34,12 @@ registries and the like). finalize() runs them, newest first, with the GIL held,
 that no native object still holds Python references. Main thread. */
 void onFinalize(std::function<void()> detach);
 
+/** Native UI cleanup only: no engine/audio callers. Functions must not throw.
+UI steps reclaim detached objects whose last handle died on another thread;
+context-closing hooks run after Python workers stop and before EventState dies. */
+void onUiStep(std::function<void()> action);
+void onContextClosing(std::function<void()> action);
+
 /** How finalize() ended, for tests: "finalized", "refused" or "not started". */
 std::string finalizeOutcome();
 

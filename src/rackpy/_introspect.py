@@ -14,7 +14,16 @@ import _rackpy_host
 
 import rackpy
 
-MODULES = ("rackpy", "rackpy.errors", "rackpy.runtime", "rackpy.raw", "rackpy.math", "rackpy.types", "rackpy.engine")
+MODULES = (
+    "rackpy",
+    "rackpy.errors",
+    "rackpy.runtime",
+    "rackpy.raw",
+    "rackpy.math",
+    "rackpy.types",
+    "rackpy.engine",
+    "rackpy.widget",
+)
 # Protocol methods a binding can map a C++ operator or lifetime to; recorded when a class defines them itself.
 DUNDERS = frozenset(
     {
