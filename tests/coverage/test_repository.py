@@ -105,16 +105,31 @@ def test_metadata_class_factories_complete_only_templates_and_getters(symbol: st
     assert any("test_transferred_metadata.py" in t for t in record["tests"])
 
 
-def test_builtin_quantity_adapters_do_not_complete_full_mappings() -> None:
-    records = [r for r in bm.load_json(bm.MANIFEST)["entries"] if "RP-14B2a partial" in (r["notes"] or "")]
-    # The quantity templates and getParamQuantity (RP-14B2b6) and the
-    # paramQuantities vector (RP-14B2b7) left this set.
-    assert len(records) == 41
+def test_quantity_records_left_open_name_their_responsible_tasks() -> None:
+    records = [
+        r
+        for r in bm.load_json(bm.MANIFEST)["entries"]
+        if r["id"].split(":", 1)[1].startswith(("rack::engine::ParamQuantity", "rack::engine::SwitchQuantity"))
+        and "Json(" not in r["id"]
+        and r["status"] != "implemented"
+    ]
+    # RP-14B2b8: only the mixed value/range virtuals (RP-22 laboratory) and the
+    # deprecated smoothing methods (RP-14C engine ownership) stay open.
+    assert {r["id"].rsplit("::", 1)[1] for r in records} == {
+        "getDefaultValue()",
+        "getMaxValue()",
+        "getMinValue()",
+        "getValue()",
+        "setValue(float)",
+        "getSmoothValue()",
+        "setSmoothValue(float)",
+    }
     for record in records:
         assert record["status"] == "planned" and record["python"] is None
-        assert record["notes"].startswith("Responsible task: RP-14B2b")
-        assert "RP-22" in record["notes"] and "unregistered targets are rejected" in record["notes"]
-        assert record["tests"] and record["docs"]
+        assert record["notes"].startswith(("Responsible task: RP-22", "Responsible task: RP-14C"))
+        assert "RP-14B2b8" in record["notes"] and "RP-15" in record["notes"]
+        if record["callback"] == "mixed":
+            assert record["notes"].startswith("Responsible task: RP-22") and "policy 11" in record["notes"]
     # JSON is not part of the adapter slice and remains assigned to RP-15.
     for record in bm.load_json(bm.MANIFEST)["entries"]:
         if "ParamQuantity::" in record["id"] and "Json(" in record["id"]:

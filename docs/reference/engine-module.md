@@ -193,10 +193,10 @@ override that closes its own module leaves its object stale: the rest of that
 call raises `StaleHandleError`. Rack's C++ API gives no protection against a
 callback deleting its own module, so do not do that in a callback Rack makes.
 
-The three templates and `get_param_quantity` are `implemented`. The raw
-`paramQuantities` vector stays `planned`, and the ParamQuantity and
-SwitchQuantity records stay `planned` too: their mixed overrides belong to
-RP-22 and their smoothing to engine ownership (RP-14C/RP-16).
+The three templates and `get_param_quantity` are `implemented`, and so is
+the raw `paramQuantities` vector ([raw module vectors](#raw-module-vectors)).
+For the ParamQuantity and SwitchQuantity records themselves, see
+[what stays open](#quantity-records-that-stay-open).
 
 (standalone-quantities)=
 ## Standalone quantities and weak module attachment
@@ -218,9 +218,8 @@ UI context and a valid parameter ID; invalid IDs are rejected before Rack's
 unchecked vector access. Unattached values retain Rack's null-module no-op/zero
 behavior. Smoothing writes to an attached quantity are refused because these
 objects are not registered with Engine; use `set_immediate_value()` where the
-immediate semantics are intended. Engine-owned smoothing and raw module-vector
-insertion remain unimplemented. The complete quantity manifest records remain
-`planned`, not complete mappings.
+immediate semantics are intended. Engine-owned smoothing remains
+unimplemented ([what stays open](#quantity-records-that-stay-open)).
 
 Rack's null-module semantics are important: these quantities do **not** store a
 value. `get_value()` and `get_immediate_value()` return zero, and native setters,
@@ -378,12 +377,30 @@ and no Python callback runs on the audio thread.
 
 The snippet intentionally uses metadata only so it also runs before Rack's
 engine exists. Value/display behavior is tested separately on the live UI
-against a native C++ reference in the actual Rack process. These are partial
-adapters: full template/class factories, standalone and Python-overridable
-quantities, raw identity/vector mutation and JSON (RP-15) remain unimplemented.
-Their exact manifest records stay `planned` or `unreviewed`; adapters do not
-count as completed callback/template mappings. Mixed value/range virtuals remain
-native in production; RP-22 owns explicit laboratory semantics.
+against a native C++ reference in the actual Rack process. Built-in views have
+no Python virtuals; for Python overrides, configure the slot with a
+[quantity class factory](#quantity-class-factories).
+
+### Quantity records that stay open
+
+The ParamQuantity and SwitchQuantity fields, UI virtuals (`get_label`,
+`get_unit`, the display methods, `get_description`), `reset`, `randomize`,
+`get_immediate_value`, `set_immediate_value`, `get_param` and both classes are
+`implemented` (RP-14B2b8): Python objects, slot-owned objects and built-in
+views give them their full semantics, including Python overrides of the UI
+virtuals. Seven records stay `planned`, each with its responsible task:
+
+- `get_value`, `set_value`, `get_min_value`, `get_max_value` and
+  `get_default_value` are *mixed*: Rack calls them from the engine thread as
+  well. Their native production path is complete, and a subclass that
+  overrides one is refused when it is defined. A Python override needs the
+  non-real-time callback laboratory (RP-22), which the coverage contract
+  requires for these methods.
+- Smoothing (`set_value` with `smooth_enabled`, and the deprecated
+  `set_smooth_value`/`get_smooth_value`) needs an engine-owned module. Rack
+  cancels smoothing when it removes a module from its engine, so enabling it
+  for registered modules is RP-14C with RP-16; unregistered modules refuse it.
+- Apart from those seven, JSON (`to_json`, `from_json`) is RP-15.
 
 ## Raw module vectors
 

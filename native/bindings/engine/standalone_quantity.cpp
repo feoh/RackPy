@@ -188,6 +188,18 @@ void bindStandaloneQuantities(py::module_ engine) {
 		.def("get_immediate_value", [](Q& q) { return standalone(q, [](auto& a) { return a.immediate(); }); })
 		.def("set_immediate_value", [](Q& q, float value) { standalone(q, [value](auto& a) { a.immediate(value); }); }, py::arg("value"))
 		.def("get_description", [](Q& q) { return q.getDescription(); })
+		// ParamQuantity's own overrides of Quantity's UI virtuals, bound on this
+		// class so the mapping names the SDK declaration; dispatch reaches a
+		// Python override or ParamQuantity's implementation.
+		.def("get_label", [](Q& q) { return q.getLabel(); })
+		.def("get_unit", [](Q& q) { return q.getUnit(); })
+		.def("get_display_precision", [](Q& q) { return q.getDisplayPrecision(); })
+		.def("get_display_value", [](Q& q) { return q.getDisplayValue(); })
+		.def("set_display_value", [](Q& q, float value) { q.setDisplayValue(value); }, py::arg("display_value"))
+		.def("get_display_value_string", [](Q& q) { return q.getDisplayValueString(); })
+		.def("set_display_value_string", [](Q& q, std::string s) { q.setDisplayValueString(std::move(s)); }, py::arg("s"))
+		.def("reset", [](Q& q) { q.reset(); })
+		.def("randomize", [](Q& q) { q.randomize(); })
 		.def("set_smooth_value", [](Q& q, float value) {
 			guard(q);
 			deprecated("set_smooth_value is deprecated in Rack; use set_value");
@@ -220,6 +232,8 @@ void bindStandaloneQuantities(py::module_ engine) {
 	py::classh<S, Q, StandaloneQuantity<S>>(engine, "SwitchQuantity",
 		"rack::engine::SwitchQuantity: mutable labels, weak module link, UI-safe overrides; transferable to a module slot.")
 		.def(py::init_alias<>())
+		.def("get_display_value_string", [](S& q) { return q.getDisplayValueString(); })
+		.def("set_display_value_string", [](S& q, std::string s) { q.setDisplayValueString(std::move(s)); }, py::arg("s"))
 		.def_property("labels", [](py::object self) {
 			guard(self.cast<S&>());
 			return ownedSwitchLabels(self);

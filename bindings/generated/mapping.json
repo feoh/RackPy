@@ -253,6 +253,118 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.engine.ParamQuantity.default_value",
+      "id": "field:rack::engine::ParamQuantity::defaultValue",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.default_value",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.description",
+      "id": "field:rack::engine::ParamQuantity::description",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.description",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.display_base",
+      "id": "field:rack::engine::ParamQuantity::displayBase",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.display_base",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.display_multiplier",
+      "id": "field:rack::engine::ParamQuantity::displayMultiplier",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.display_multiplier",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.display_offset",
+      "id": "field:rack::engine::ParamQuantity::displayOffset",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.display_offset",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.display_precision",
+      "id": "field:rack::engine::ParamQuantity::displayPrecision",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.display_precision",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.max_value",
+      "id": "field:rack::engine::ParamQuantity::maxValue",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.max_value",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.min_value",
+      "id": "field:rack::engine::ParamQuantity::minValue",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.min_value",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.module",
+      "id": "field:rack::engine::ParamQuantity::module",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.module",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.name",
+      "id": "field:rack::engine::ParamQuantity::name",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.name",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.param_id",
+      "id": "field:rack::engine::ParamQuantity::paramId",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.param_id",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.randomize_enabled",
+      "id": "field:rack::engine::ParamQuantity::randomizeEnabled",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.randomize_enabled",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.reset_enabled",
+      "id": "field:rack::engine::ParamQuantity::resetEnabled",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.reset_enabled",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.smooth_enabled",
+      "id": "field:rack::engine::ParamQuantity::smoothEnabled",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.smooth_enabled",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.snap_enabled",
+      "id": "field:rack::engine::ParamQuantity::snapEnabled",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.snap_enabled",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.unit",
+      "id": "field:rack::engine::ParamQuantity::unit",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamQuantity.unit",
+      "status": "implemented"
+    },
+    {
       "facade": null,
       "id": "field:rack::engine::Port::active",
       "kind": "attribute",
@@ -320,6 +432,13 @@
       "id": "field:rack::engine::PortInfo::type",
       "kind": "attribute",
       "raw": "rackpy.raw.engine.PortInfo.type",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.SwitchQuantity.labels",
+      "id": "field:rack::engine::SwitchQuantity::labels",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.SwitchQuantity.labels",
       "status": "implemented"
     },
     {
@@ -1303,6 +1422,97 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.engine.ParamQuantity.get_description",
+      "id": "method:rack::engine::ParamQuantity::getDescription()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.ParamQuantity.get_description",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.get_display_precision",
+      "id": "method:rack::engine::ParamQuantity::getDisplayPrecision()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.ParamQuantity.get_display_precision",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.get_display_value",
+      "id": "method:rack::engine::ParamQuantity::getDisplayValue()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.ParamQuantity.get_display_value",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.get_display_value_string",
+      "id": "method:rack::engine::ParamQuantity::getDisplayValueString()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.ParamQuantity.get_display_value_string",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.get_immediate_value",
+      "id": "method:rack::engine::ParamQuantity::getImmediateValue()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.ParamQuantity.get_immediate_value",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.get_label",
+      "id": "method:rack::engine::ParamQuantity::getLabel()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.ParamQuantity.get_label",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.get_param",
+      "id": "method:rack::engine::ParamQuantity::getParam()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.ParamQuantity.get_param",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.get_unit",
+      "id": "method:rack::engine::ParamQuantity::getUnit()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.ParamQuantity.get_unit",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.randomize",
+      "id": "method:rack::engine::ParamQuantity::randomize()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.ParamQuantity.randomize",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.reset",
+      "id": "method:rack::engine::ParamQuantity::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.ParamQuantity.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.set_display_value",
+      "id": "method:rack::engine::ParamQuantity::setDisplayValue(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.ParamQuantity.set_display_value",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.set_display_value_string",
+      "id": "method:rack::engine::ParamQuantity::setDisplayValueString(std::string)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.ParamQuantity.set_display_value_string",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.ParamQuantity.set_immediate_value",
+      "id": "method:rack::engine::ParamQuantity::setImmediateValue(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.ParamQuantity.set_immediate_value",
+      "status": "implemented"
+    },
+    {
       "facade": null,
       "id": "method:rack::engine::Port::clearVoltages()",
       "kind": "method",
@@ -1440,6 +1650,20 @@
       "id": "method:rack::engine::PortInfo::getName()",
       "kind": "method",
       "raw": "rackpy.raw.engine.PortInfo.get_name",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.SwitchQuantity.get_display_value_string",
+      "id": "method:rack::engine::SwitchQuantity::getDisplayValueString()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.SwitchQuantity.get_display_value_string",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.SwitchQuantity.set_display_value_string",
+      "id": "method:rack::engine::SwitchQuantity::setDisplayValueString(std::string)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.SwitchQuantity.set_display_value_string",
       "status": "implemented"
     },
     {
@@ -1961,6 +2185,13 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.engine.ParamQuantity",
+      "id": "record:rack::engine::ParamQuantity",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.ParamQuantity",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.engine.Port",
       "id": "record:rack::engine::Port",
       "kind": "class",
@@ -1972,6 +2203,13 @@
       "id": "record:rack::engine::PortInfo",
       "kind": "class",
       "raw": "rackpy.raw.engine.PortInfo",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.SwitchQuantity",
+      "id": "record:rack::engine::SwitchQuantity",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.SwitchQuantity",
       "status": "implemented"
     },
     {
@@ -2136,6 +2374,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "078fdd696aed70de",
+  "inputs": "5c389f2353376169",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

@@ -246,6 +246,18 @@ rollback and 1,000 edit/owner churns. `bypassRoutes` stays RP-14C; JSON RP-15;
 smoothing ownership and RP-22 laboratory semantics remain on B2b. This child
 does not close B2b/B2/B/14 or the implementation phase.
 
+**RP-14B2b8 — reconcile ParamQuantity and SwitchQuantity records**
+(`tk-rackpy-14b2b8-reconcile-paramquantity-and-switch-7b7350`). Promote the 34
+records whose semantics B2a–B2b7 now provide (fields, labels, UI and
+ui-exclusive virtuals, immediate values, `getParam`, both records), binding
+ParamQuantity's and SwitchQuantity's own UI overrides on their classes. Keep
+seven planned with explicit owners: the mixed value/range virtuals to RP-22
+(native path done; coverage policy 11 needs the laboratory path) and
+smoothing (`setValue` with smoothing, deprecated `get/setSmoothValue`) to
+RP-14C with RP-16, since Rack's `Engine::removeModule` cancels smoothing for
+registered modules. JSON stays RP-15. Closing this child lets RP-14B2b close;
+B2, B and RP-14 keep their own acceptance reviews.
+
 ## RackPy 14C: native lifecycle events and identity adapters
 
 **Witan slug:** `tk-rackpy-14c-native-lifecycle-events-and-identity--929845`

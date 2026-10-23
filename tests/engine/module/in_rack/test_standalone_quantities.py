@@ -111,16 +111,22 @@ def test_ui_virtuals_base_calls_and_errors(quantity_class: type[ParamQuantity]) 
 
         cls = type("Custom", (quantity_class,), {name: answer})
         q = cls()
-        base = ParamQuantity if name == "get_description" else Quantity
-        assert getattr(base, name)(q, *args) == result
-        assert calls == [args]
+        # Quantity's descriptor, ParamQuantity's own binding of the SDK override
+        # and, for display strings, SwitchQuantity's: all dispatch to Python.
+        bases: list[type] = [ParamQuantity] if name == "get_description" else [Quantity, ParamQuantity]
+        if quantity_class is SwitchQuantity and "display_value_string" in name:
+            bases.append(SwitchQuantity)
+        for base in bases:
+            assert getattr(base, name)(q, *args) == result
+        assert calls == [args] * len(bases)
 
         def fail(self: object, *values: object) -> object:
             raise ValueError("callback failure")
 
         cls = type("Failing", (quantity_class,), {name: fail})
-        with pytest.raises(ValueError, match="callback failure"):
-            getattr(base, name)(cls(), *args)
+        for base in bases:
+            with pytest.raises(ValueError, match="callback failure"):
+                getattr(base, name)(cls(), *args)
 
     class Labeled(quantity_class):  # type: ignore[misc, valid-type]
         def get_label(self) -> str:
