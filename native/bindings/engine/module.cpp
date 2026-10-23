@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// RP-14A/B1: scoped construction, components and built-in metadata views.
-// No Module virtual calls dispatch to Python. The sole Python call happens
-// synchronously during construction on the main thread, before publication.
+// RP-14A/B1/B2b5: scoped construction, components, built-in metadata views
+// and metadata class factories. No Module virtual calls dispatch to Python.
+// Python runs only synchronously during construction on the main thread,
+// before publication: the constructor callback and class-factory constructors.
 #include "module.hpp"
 #include "components.hpp"
+#include "metadata.hpp"
 #include "quantity.hpp"
 
 #include <pybind11/stl.h>
@@ -53,6 +55,8 @@ template <typename Info>
 py::object infoView(const ModuleRef& ref, Info* ptr, const std::shared_ptr<runtime::ObjectToken>& token) {
 	if (!ptr)
 		return py::none();
+	if (py::object transferred = transferredObject(ptr))
+		return transferred;
 	return runtime::identity(ptr, token->generation, [&] { return py::cast(InfoView<Info>{ptr, token, ref.state}); });
 }
 
@@ -123,6 +127,57 @@ struct Components {
 		return component(r, kind, i);
 	}
 };
+
+/** Rack's `new TInfo` for configInput/configOutput/configLight<TInfo>, with a
+Python class. The constructor may reenter the module, so the construction phase
+and the slot ID are checked again before anything is transferred. */
+template <typename Info>
+std::unique_ptr<Info> makeTransferred(const ModuleRef& ref, py::handle type, const char* base, int id,
+	size_t (*slots)(module::Module&)) {
+	py::object cls = py::type::of<Info>();
+	int subclass = PyType_Check(type.ptr()) ? PyObject_IsSubclass(type.ptr(), cls.ptr()) : 0;
+	if (subclass < 0)
+		throw py::error_already_set();
+	if (!subclass)
+		throw py::type_error(std::string("info_type must be ") + base + " or a subclass of it");
+	py::object instance = type();
+	ref.state->requireConstruction();
+	module::Construction::index(id, slots(ref.get()));
+	if (reinterpret_cast<PyObject*>(Py_TYPE(instance.ptr())) != type.ptr())
+		throw py::type_error("info_type() must return a new instance of exactly info_type");
+	auto& alias = infoAlias(instance.cast<Info&>());
+	if (alias.retired)
+		throw runtime::StaleHandle("info_type() returned metadata that a module slot already released");
+	if (alias.inSlot)
+		throw runtime::Ownership("info_type() returned metadata that a module slot already owns");
+	std::unique_ptr<Info> owned;
+	try {
+		owned = instance.cast<std::unique_ptr<Info>>();
+	}
+	catch (const std::exception& e) {
+		throw runtime::Ownership(std::string("this metadata cannot be transferred to a module (") + e.what() + ")");
+	}
+	// Committed: nothing below throws. The slot supersedes a standalone link.
+	alias.detachLink();
+	alias.moduleState = ref.state;
+	alias.inSlot = true;
+	runtime::noteTransferred();
+	return owned;
+}
+
+size_t inputSlots(module::Module& m) { return m.inputInfos.size(); }
+size_t outputSlots(module::Module& m) { return m.outputInfos.size(); }
+size_t lightSlots(module::Module& m) { return m.lightInfos.size(); }
+
+py::object configPort(const ModuleRef& r, int i, std::string name, py::object type, bool input) {
+	if (type.is_none())
+		r.state->configPortInfo(i, std::move(name), input);
+	else
+		r.state->configPortInfo(i, std::move(name), input, [&] {
+			return makeTransferred<rack::engine::PortInfo>(r, type, "PortInfo", i, input ? inputSlots : outputSlots);
+		});
+	return component(r, input ? Kind::InputInfo : Kind::OutputInfo, i);
+}
 
 py::object create(py::object configure) {
 	runtime::requireMainThread("creating a RackPy module");
@@ -195,19 +250,23 @@ void bindModule(py::module_ engine) {
 			r.state->configQuantity(i, 0.f, 1.f, 0.f, std::move(name), "", 0.f, 1.f, 0.f, 2);
 			return component(r, Kind::ParamQuantity, i);
 		}, py::arg("param_id"), py::arg("name") = "")
-		.def("config_input", [](const ModuleRef& r, int i, std::string name) {
-			r.state->configPortInfo(i, std::move(name), true);
-			return component(r, Kind::InputInfo, i);
-		}, py::arg("port_id"), py::arg("name") = "",
-			"Configure built-in PortInfo only. Class-factory template semantics are not implemented yet.")
-		.def("config_output", [](const ModuleRef& r, int i, std::string name) {
-			r.state->configPortInfo(i, std::move(name), false);
-			return component(r, Kind::OutputInfo, i);
-		}, py::arg("port_id"), py::arg("name") = "")
-		.def("config_light", [](const ModuleRef& r, int i, std::string name) {
-			r.state->configLightInfo(i, std::move(name));
+		.def("config_input", [](const ModuleRef& r, int i, std::string name, py::object type) {
+			return configPort(r, i, std::move(name), std::move(type), true);
+		}, py::arg("port_id"), py::arg("name") = "", py::arg("info_type") = py::none(),
+			"Rack's configInput<TPortInfo>. With info_type, construct that PortInfo class and transfer it "
+			"into the slot; without, configure a built-in PortInfo and return its checked view.")
+		.def("config_output", [](const ModuleRef& r, int i, std::string name, py::object type) {
+			return configPort(r, i, std::move(name), std::move(type), false);
+		}, py::arg("port_id"), py::arg("name") = "", py::arg("info_type") = py::none())
+		.def("config_light", [](const ModuleRef& r, int i, std::string name, py::object type) {
+			if (type.is_none())
+				r.state->configLightInfo(i, std::move(name));
+			else
+				r.state->configLightInfo(i, std::move(name), [&] {
+					return makeTransferred<rack::engine::LightInfo>(r, type, "LightInfo", i, lightSlots);
+				});
 			return component(r, Kind::LightInfo, i);
-		}, py::arg("light_id"), py::arg("name") = "")
+		}, py::arg("light_id"), py::arg("name") = "", py::arg("info_type") = py::none())
 		.def("config_bypass", [](const ModuleRef& r, int i, int o) { r.state->configBypass(i, o); },
 			py::arg("input_id"), py::arg("output_id"))
 		.def_property_readonly("bypass_routes", [](const ModuleRef& r) {

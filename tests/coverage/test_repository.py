@@ -79,6 +79,19 @@ def test_every_module_gap_retains_a_responsible_task() -> None:
         "field:rack::engine::Module::inputInfos",
         "field:rack::engine::Module::outputInfos",
         "field:rack::engine::Module::lightInfos",
+    ],
+)
+def test_builtin_metadata_adapters_do_not_complete_raw_vector_semantics(symbol: str) -> None:
+    record = next(r for r in bm.load_json(bm.MANIFEST)["entries"] if r["id"] == symbol)
+    assert record["status"] == "planned"
+    assert record["python"] is None
+    assert "RP-14B1" in record["notes"] and "RP-14B2" in record["notes"]
+    assert record["tests"] and record["docs"]
+
+
+@pytest.mark.parametrize(
+    "symbol",
+    [
         "method:rack::engine::Module::getInputInfo(int)",
         "method:rack::engine::Module::getOutputInfo(int)",
         "method:rack::engine::Module::getLightInfo(int)",
@@ -87,12 +100,15 @@ def test_every_module_gap_retains_a_responsible_task() -> None:
         "method_template:rack::engine::Module::configLight<type>(int, std::string)",
     ],
 )
-def test_builtin_metadata_adapters_do_not_complete_raw_or_template_semantics(symbol: str) -> None:
+def test_metadata_class_factories_complete_only_templates_and_getters(symbol: str) -> None:
     record = next(r for r in bm.load_json(bm.MANIFEST)["entries"] if r["id"] == symbol)
-    assert record["status"] == "planned"
-    assert record["python"] is None
-    assert "RP-14B1" in record["notes"] and "RP-14B2" in record["notes"]
-    assert record["tests"] and record["docs"]
+    assert record["status"] == "implemented" and record["python"]["raw"].startswith("rackpy.raw.engine.Module.")
+    assert record["notes"].startswith("RP-14B2b5") and "macOS/Windows unvalidated" in record["notes"]
+    # Templates transfer Python classes; raw vectors and Rack-owned models stay open.
+    assert (
+        "info_type" in record["notes"] and "RP-16" in record["notes"]
+    ) or "Raw vector fields stay planned" in record["notes"]
+    assert any("test_transferred_metadata.py" in t for t in record["tests"])
 
 
 def test_builtin_quantity_adapters_do_not_complete_full_mappings() -> None:

@@ -100,12 +100,16 @@ Module closure, garbage collection, or failed construction clears both the
 actual native pointer and the Python property to `None`. The standalone metadata
 itself remains usable. Native teardown does not call Python; metadata destruction
 on a worker synchronizes only its standalone backreference cleanup. This is not
-an audio-path adapter or engine ownership transfer. Complete metadata class
-factories and mutable raw module collections remain RP-14B2b work.
+an audio-path adapter or engine ownership transfer. Mutable raw module
+collections remain RP-14B2b work.
 
-Module-owned built-in metadata is currently accessed through distinct,
-lifetime-checked `PortInfoView` / `LightInfoView` adapters, not these standalone
-classes; see [Module metadata](engine-module.md#built-in-port-and-light-metadata).
+Module-owned built-in metadata is accessed through distinct, lifetime-checked
+`PortInfoView` / `LightInfoView` adapters, not these classes; see
+[Module metadata](engine-module.md#built-in-port-and-light-metadata). A module
+can own one of these classes, or your subclass, through a class factory
+(`config_input(..., info_type=...)`); see
+[metadata class factories](engine-module.md#metadata-class-factories). `alive`
+is `False` once that slot has released the object; until then it is `True`.
 
 (components-deprecated)=
 ## Deprecated and unstable members

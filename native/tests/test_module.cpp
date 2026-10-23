@@ -8,6 +8,18 @@
 using rackpy::module::Construction;
 using namespace rackpy::runtime;
 
+/** Stands in for Python-created metadata: retiring hands it back, not delete. */
+struct Retiring : rack::engine::PortInfo, rackpy::module::TransferredMetadata {
+	std::vector<std::string>* log;
+	bool inSlot = true;
+	explicit Retiring(std::vector<std::string>* log) : log(log) {}
+	bool transferred() const override { return inSlot; }
+	void retire() noexcept override {
+		log->push_back("retired " + name + (module ? " linked" : ""));
+		delete this;
+	}
+};
+
 template <typename Error, typename F>
 void refuses(F action) {
 	bool caught = false;
@@ -158,6 +170,41 @@ int main() {
 		assert(c.get().backreferences.size() == 1);
 		c.abort();
 		assert(port.module == nullptr);
+	}
+	// RP-14B2b5: transferred metadata retires on replacement and on module
+	// deletion, before Rack's base destructor would delete the slot.
+	{
+		std::vector<std::string> log;
+		Construction c;
+		c.config(0, 1, 1, 1);
+		auto& m = c.get();
+		auto token = m.inputInfoTokens[0];
+		auto* builtin = m.getInputInfo(0);
+		// A failing factory (as a raising Python constructor) changes nothing.
+		refuses<std::runtime_error>([&] {
+			c.configPortInfo(0, "Never", true, []() -> std::unique_ptr<rack::engine::PortInfo> {
+				throw std::runtime_error("factory failed");
+			});
+		});
+		assert(m.getInputInfo(0) == builtin && token->alive());
+		c.configPortInfo(0, "First", true, [&] { return std::make_unique<Retiring>(&log); });
+		assert(!token->alive() && log.empty());
+		auto* first = m.getInputInfo(0);
+		assert(first->module == &m && first->portId == 0 && first->type == rack::engine::Port::INPUT);
+		c.configPortInfo(0, "Second", true, [&] { return std::make_unique<Retiring>(&log); });
+		assert((log == std::vector<std::string>{"retired First linked"}));
+		c.configPortInfo(0, "Plain", true);
+		assert(log.size() == 2 && log[1] == "retired Second linked");
+		c.configPortInfo(0, "Kept", false, [&] { return std::make_unique<Retiring>(&log); });
+		c.configLightInfo(0, "Light");
+		// An object a slot no longer claims is native metadata: delete it.
+		auto* released = new Retiring(&log);
+		released->inSlot = false;
+		assert(rackpy::module::transferredIn(static_cast<rack::engine::PortInfo*>(released)) == nullptr);
+		delete released;
+		c.seal();
+		c.close();
+		assert(log.size() == 3 && log[2] == "retired Kept linked");
 	}
 	// Native deletion of standalone metadata can race main-thread module
 	// cleanup. detach completes before the actual SDK field ceases to exist.

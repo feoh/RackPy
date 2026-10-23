@@ -11,6 +11,7 @@
 // current or the previous engine block. Python never runs on the engine
 // thread, and nothing here is called from it.
 #include "components.hpp"
+#include "metadata.hpp"
 #include "module.hpp"
 
 #include <pybind11/native_enum.h>
@@ -102,31 +103,14 @@ std::string portRepr(const PortRef& r, const char* cls) {
 		values::floatRepr(p.getVoltage(0)) + (r.owned() ? ", owned" : "") + ")";
 }
 
-/** Python overrides of the info classes' virtual names (callback strategy "ui"). */
-template <typename Base>
-struct InfoTrampoline : Base, py::trampoline_self_life_support {
-	using Base::Base;
-	std::weak_ptr<module::Construction> moduleState;
-	std::shared_ptr<module::ModuleBackreference> moduleLink;
-	~InfoTrampoline() override {
-		if (moduleLink)
-			moduleLink->detach();
-	}
-	std::string getName() override {
-		return overrideOr<std::string>(static_cast<const Base*>(this), "get_name", [this] { return Base::getName(); });
-	}
-	std::string getDescription() override {
-		return overrideOr<std::string>(static_cast<const Base*>(this), "get_description", [this] { return Base::getDescription(); });
-	}
-};
-
-/** All Python-owned metadata uses the alias, even without Python overrides,
+/** All Python-created metadata uses the alias, even without Python overrides,
 so its weak backreference state has the same native lifetime as the SDK field.
-Factory ownership transfer is deliberately not implemented by this helper. */
+A transferred object's owner is tracked by moduleState, without a link. */
 template <typename Info>
 py::object infoModule(Info& info) {
-	runtime::requireMainThread("reading standalone metadata.module");
-	auto& alias = dynamic_cast<InfoTrampoline<Info>&>(info);
+	runtime::requireMainThread("reading metadata.module");
+	auto& alias = infoAlias(info);
+	alias.check();
 	if (!info.module)
 		return py::none();
 	auto state = alias.moduleState.lock();
@@ -135,15 +119,25 @@ py::object infoModule(Info& info) {
 	return moduleObject(state);
 }
 
+template <typename Info, typename T>
+void infoField(py::classh<Info, InfoTrampoline<Info>>& cls, const char* name, T Info::*member) {
+	cls.def_property(name, [member](Info& info) { infoAlias(info).check(); return info.*member; },
+		[member](Info& info, T value) { infoAlias(info).check(); info.*member = std::move(value); });
+}
+
+template <typename Info, typename R>
+void infoMethod(py::classh<Info, InfoTrampoline<Info>>& cls, const char* name, R (Info::*method)(), const char* doc = "") {
+	cls.def(name, [method](Info& info) { infoAlias(info).check(); return (info.*method)(); }, doc);
+}
+
 template <typename Info>
 void setInfoModule(Info& info, py::object value) {
-	runtime::requireMainThread("writing standalone metadata.module");
-	auto& alias = dynamic_cast<InfoTrampoline<Info>&>(info);
+	runtime::requireMainThread("writing metadata.module");
+	auto& alias = infoAlias(info);
+	alias.check();
 	if (value.is_none()) {
 		info.module = nullptr;
-		if (alias.moduleLink)
-			alias.moduleLink->detach();
-		alias.moduleLink.reset();
+		alias.detachLink();
 		alias.moduleState.reset();
 		return;
 	}
@@ -154,8 +148,7 @@ void setInfoModule(Info& info, py::object value) {
 	auto link = target.trackBackreference(&info.module);
 	// No throwing work after registration: failed conversion/allocation keeps
 	// the old SDK pointer, subscription and identity intact.
-	if (alias.moduleLink)
-		alias.moduleLink->detach();
+	alias.detachLink();
 	alias.moduleState = ref.state;
 	alias.moduleLink = std::move(link);
 	info.module = &target;
@@ -341,24 +334,30 @@ void bindComponents(py::module_ m) {
 		.def("__repr__", [](const OutputRef& r) { return portRepr(r, "Output"); });
 
 	// --- PortInfo and LightInfo -------------------------------------------------------
-	py::classh<PortInfo, InfoTrampoline<PortInfo>>(m, "PortInfo", "rack::engine::PortInfo: a port's name and description.")
-		.def(py::init_alias<>())
+	auto portInfo = py::classh<PortInfo, InfoTrampoline<PortInfo>>(m, "PortInfo",
+		"rack::engine::PortInfo: a port's name and description. A class factory may transfer it into a module slot.");
+	portInfo.def(py::init_alias<>())
 		.def_property("module", &infoModule<PortInfo>, &setInfoModule<PortInfo>)
-		.def_readwrite("type", &PortInfo::type)
-		.def_readwrite("port_id", &PortInfo::portId)
-		.def_readwrite("name", &PortInfo::name)
-		.def_readwrite("description", &PortInfo::description)
-		.def("get_name", &PortInfo::getName)
-		.def("get_full_name", &PortInfo::getFullName, "get_name() with \" input\" or \" output\" appended.")
-		.def("get_description", &PortInfo::getDescription);
-	py::classh<LightInfo, InfoTrampoline<LightInfo>>(m, "LightInfo", "rack::engine::LightInfo: a light's name and description.")
-		.def(py::init_alias<>())
+		.def_property_readonly("alive", [](PortInfo& info) { return !infoAlias(info).retired; },
+			"False once the module slot that owned this object replaced it or was deleted.");
+	infoField(portInfo, "type", &PortInfo::type);
+	infoField(portInfo, "port_id", &PortInfo::portId);
+	infoField(portInfo, "name", &PortInfo::name);
+	infoField(portInfo, "description", &PortInfo::description);
+	infoMethod(portInfo, "get_name", &PortInfo::getName);
+	infoMethod(portInfo, "get_full_name", &PortInfo::getFullName, "get_name() with \" input\" or \" output\" appended.");
+	infoMethod(portInfo, "get_description", &PortInfo::getDescription);
+	auto lightInfo = py::classh<LightInfo, InfoTrampoline<LightInfo>>(m, "LightInfo",
+		"rack::engine::LightInfo: a light's name and description. A class factory may transfer it into a module slot.");
+	lightInfo.def(py::init_alias<>())
 		.def_property("module", &infoModule<LightInfo>, &setInfoModule<LightInfo>)
-		.def_readwrite("light_id", &LightInfo::lightId)
-		.def_readwrite("name", &LightInfo::name)
-		.def_readwrite("description", &LightInfo::description)
-		.def("get_name", &LightInfo::getName)
-		.def("get_description", &LightInfo::getDescription);
+		.def_property_readonly("alive", [](LightInfo& info) { return !infoAlias(info).retired; },
+			"False once the module slot that owned this object replaced it or was deleted.");
+	infoField(lightInfo, "light_id", &LightInfo::lightId);
+	infoField(lightInfo, "name", &LightInfo::name);
+	infoField(lightInfo, "description", &LightInfo::description);
+	infoMethod(lightInfo, "get_name", &LightInfo::getName);
+	infoMethod(lightInfo, "get_description", &LightInfo::getDescription);
 }
 
 }  // namespace bindings

@@ -36,6 +36,32 @@ private:
 	rack::engine::Module** target;
 };
 
+/** Metadata that Python constructed and a module slot now owns (RP-14B2b5).
+Retiring hands it back to its Python object instead of deleting it, so a
+retained reference raises StaleHandle rather than touching freed memory. The
+implementation takes the GIL; slots retire on the thread deleting the module. */
+struct TransferredMetadata {
+	virtual ~TransferredMetadata() = default;
+	virtual bool transferred() const = 0;
+	virtual void retire() noexcept = 0;
+};
+
+/** The transferred object in a slot, or null for native-created metadata. */
+template <typename Info>
+TransferredMetadata* transferredIn(Info* info) {
+	auto* t = dynamic_cast<TransferredMetadata*>(info);
+	return t && t->transferred() ? t : nullptr;
+}
+
+/** Release a slot's previous metadata, as Rack's delete-then-new helpers do. */
+template <typename Info>
+void dispose(Info* info) {
+	if (auto* t = transferredIn(info))
+		t->retire();
+	else
+		delete info;
+}
+
 struct Module : rack::engine::Module {
 	std::shared_ptr<runtime::ObjectToken> token = std::make_shared<runtime::ObjectToken>(nullptr);
 	// One generation per metadata slot. Replacement must invalidate retained
@@ -61,6 +87,20 @@ struct Module : rack::engine::Module {
 		for (auto* slots : {&paramQuantityTokens, &inputInfoTokens, &outputInfoTokens, &lightInfoTokens})
 			for (auto& slot : *slots)
 				slot->invalidate();
+		// Rack's base destructor deletes every slot. Take transferred metadata
+		// out first; retiring may run Python finalizers, so empty the slot before.
+		retireTransferred(inputInfos);
+		retireTransferred(outputInfos);
+		retireTransferred(lightInfos);
+	}
+	template <typename Info>
+	static void retireTransferred(std::vector<Info*>& infos) {
+		for (auto& info : infos) {
+			if (auto* t = transferredIn(info)) {
+				info = nullptr;
+				t->retire();
+			}
+		}
 	}
 	static Tokens tokens(size_t size) {
 		Tokens result;
@@ -116,43 +156,55 @@ struct Construction {
 	}
 	/** Unlike Rack's delete-then-new helpers, prepare before retiring the old
 	metadata. Failed allocation/string preparation leaves the old slot valid.
-	These are built-in adapters, not the complete class-factory templates. */
+	`make` may run Python (a class factory) that reenters this construction, so
+	it must recheck the phase and ID before it transfers anything; nothing
+	after it throws. */
 	template <typename Info, typename Prepare, typename Make>
 	void replaceInfoWith(int id, std::vector<Info*>& infos, Module::Tokens& tokens, Prepare prepare, Make make) {
 		requireConstruction();
 		index(id, infos.size());
-		auto next = make();
 		auto generation = std::make_shared<runtime::ObjectToken>(nullptr);
+		auto next = make();
 		prepare(*next);
 		tokens[id]->invalidate();
 		Info* previous = infos[id];
 		infos[id] = next.release();
 		tokens[id] = std::move(generation);
-		delete previous;
+		dispose(previous);
 	}
 	template <typename Info, typename Prepare>
 	void replaceInfo(int id, std::vector<Info*>& infos, Module::Tokens& tokens, Prepare prepare) {
 		replaceInfoWith(id, infos, tokens, prepare, [] { return std::make_unique<Info>(); });
 	}
-	void configPortInfo(int id, std::string name, bool input) {
+	/** Rack's configInput/configOutput<TPortInfo>: `make` returns the new
+	TPortInfo, then the same fields as Rack's template are set on it. */
+	template <typename Make>
+	void configPortInfo(int id, std::string name, bool input, Make make) {
 		requireConstruction();
 		Module& m = get();
-		replaceInfo(id, input ? m.inputInfos : m.outputInfos, input ? m.inputInfoTokens : m.outputInfoTokens,
+		replaceInfoWith(id, input ? m.inputInfos : m.outputInfos, input ? m.inputInfoTokens : m.outputInfoTokens,
 			[&](rack::engine::PortInfo& info) {
 				info.module = &m;
 				info.type = input ? rack::engine::Port::INPUT : rack::engine::Port::OUTPUT;
 				info.portId = id;
 				info.name = std::move(name);
-			});
+			}, make);
 	}
-	void configLightInfo(int id, std::string name) {
+	void configPortInfo(int id, std::string name, bool input) {
+		configPortInfo(id, std::move(name), input, [] { return std::make_unique<rack::engine::PortInfo>(); });
+	}
+	template <typename Make>
+	void configLightInfo(int id, std::string name, Make make) {
 		requireConstruction();
 		Module& m = get();
-		replaceInfo(id, m.lightInfos, m.lightInfoTokens, [&](rack::engine::LightInfo& info) {
+		replaceInfoWith(id, m.lightInfos, m.lightInfoTokens, [&](rack::engine::LightInfo& info) {
 			info.module = &m;
 			info.lightId = id;
 			info.name = std::move(name);
-		});
+		}, make);
+	}
+	void configLightInfo(int id, std::string name) {
+		configLightInfo(id, std::move(name), [] { return std::make_unique<rack::engine::LightInfo>(); });
 	}
 	/** Built-in quantities only: no Python virtuals in the native module.
 	Prepare all strings/labels before committing a slot or its Param default. */

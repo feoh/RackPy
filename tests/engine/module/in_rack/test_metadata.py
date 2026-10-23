@@ -80,9 +80,9 @@ def test_null_slots_indices_phase_and_argument_errors() -> None:
                     method(i)
         before = m.get_input_info(0)
         with pytest.raises(TypeError):
-            m.config_input(0, object())  # type: ignore[arg-type]
+            m.config_input(0, object())  # type: ignore[call-overload]
         with pytest.raises(TypeError):
-            m.config_input(0, info_class=PortInfo)  # type: ignore[call-arg]
+            m.config_input(0, info_class=PortInfo)  # type: ignore[call-overload]
         assert m.get_input_info(0) is before and before.alive
         # A failed conversion didn't delete or change the existing metadata.
         assert before.name == ""

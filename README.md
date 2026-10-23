@@ -9,7 +9,8 @@ not as an external remote-control service.
 > **Early development — partial bindings, not a usable instrument toolkit.**
 > The Linux development plugin embeds Python and exposes common values, engine
 > components, scoped module construction, built-in port/light/quantity metadata
-> adapters, unattached standalone quantities with UI-safe overrides, and
+> adapters, port/light metadata class factories for Python subclasses,
+> standalone quantities with UI-safe overrides, and
 > [detached native widget trees](docs/reference/widget-trees.md) (no UI subclass
 > callbacks or scene integration yet).
 > See the [coverage report](docs/reference/coverage.md)

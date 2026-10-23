@@ -180,6 +180,29 @@ Update strict types, runnable snippet, human docs and mapping evidence; run
 relevant hooks/native/host/introspection/coverage/docs checks and commit with a
 checkpoint. This child does not close B2b/B2/B/14 or the implementation phase.
 
+**RP-14B2b5 — transferred port and light metadata class factories**
+(`tk-rackpy-14b2b5-transferred-port-and-light-metadat-b11611`). Exact scope: the
+`configInput/configOutput/configLight<type>(int, std::string)` method templates
+and `getInputInfo/getOutputInfo/getLightInfo(int)`. An `info_type` argument names
+a `PortInfo`/`LightInfo` class or Python subclass; RackPy constructs it with no
+arguments on the main thread inside the constructor callback, as Rack's
+`new TInfo` does, requires a new instance of exactly that class, rechecks the
+phase and ID after the reentrant constructor, transfers native ownership into
+the slot (counted pybind11 disown) and sets the fields Rack's template sets.
+Getters and fixed collections return the same Python object. Replacement,
+constructor rollback and module close/GC reclaim and retire it: `alive` is
+false and every bound access raises `StaleHandleError`. Transferred objects are
+main-thread-only; `get_name`/`get_description` overrides keep `ui` semantics,
+with errors contained when Rack calls without the GIL. `info_type=None` keeps
+the RP-14B1 views. Validate a native `configInput<CustomInfo>` differential and
+replacement, actual-host startup/live-UI suites, wrong classes/constructors,
+foreign/owned/released `__new__` results, reentrant configuration, wrong
+thread/phase, rollback atomicity and 1,000 replacements/owner churns with the
+transferred count back to baseline. Raw metadata vector mutation and null
+insertion, quantity factories, engine-owned smoothing and RP-22 laboratory
+semantics remain on B2b. This child does not close B2b/B2/B/14 or the
+implementation phase.
+
 ## RackPy 14C: native lifecycle events and identity adapters
 
 **Witan slug:** `tk-rackpy-14c-native-lifecycle-events-and-identity--929845`

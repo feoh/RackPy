@@ -12,10 +12,14 @@
 - ``rackpy-surface``: a table of SDK declarations for one family, generated
   from upstream/api-surface.json and labelled as not yet bound.
 - Images must have alt text.
+- Built-in types in signatures (``type[P]``) link as built-ins, not to a
+  same-named field such as ``PortInfo.type``.
 """
 
 from __future__ import annotations
 
+import builtins
+import inspect
 import json
 import os
 import re
@@ -28,6 +32,7 @@ from typing import Any, ClassVar
 
 from docutils import nodes
 from docutils.parsers.rst import directives
+from sphinx import addnodes
 from sphinx.application import Sphinx
 from sphinx.util import logging
 from sphinx.util.docutils import SphinxDirective
@@ -388,9 +393,23 @@ def check_doctree(app: Sphinx, doctree: nodes.document) -> None:
             logger.warning("image %s has no alt text", image.get("uri"), location=image, type="rackpy", subtype="a11y")
 
 
+def unscope_builtin_annotations(app: Sphinx, doctree: nodes.document) -> None:
+    """Sphinx marks every annotation reference "refspecific" (even when false), which
+    makes the Python domain fuzzy-match ``type`` against any ``*.type`` attribute.
+    Without the flag, a built-in name falls through to Sphinx's own built-in handling."""
+    for ref in doctree.findall(addnodes.pending_xref):
+        if (
+            ref.get("refdomain") == "py"
+            and ref.attributes.get("refspecific") is False
+            and inspect.isclass(getattr(builtins, str(ref.get("reftarget")), None))
+        ):
+            del ref["refspecific"]
+
+
 def setup(app: Sphinx) -> dict[str, Any]:
     app.connect("source-read", on_source_read)
     app.connect("doctree-read", check_doctree)
+    app.connect("doctree-read", unscope_builtin_annotations)
     app.add_directive("rackpy-example", RackPyExample)
     app.add_directive("rackpy-conceptual", RackPyConceptual)
     app.add_directive("rackpy-surface", RackPySurface)

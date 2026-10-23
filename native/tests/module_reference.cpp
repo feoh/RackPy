@@ -4,6 +4,15 @@
 
 #include <cstdio>
 
+// RP-14B2b5: class factories construct the subclass, then set Rack's fields.
+static int deletedInfos = 0;
+template <typename Base>
+struct CustomInfo : Base {
+	CustomInfo() { this->description = "From constructor"; }
+	~CustomInfo() override { deletedInfos++; }
+	std::string getName() override { return "Custom " + this->name; }
+};
+
 int main() {
 	json_t* root = json_object();
 	json_t* cases = json_array();
@@ -87,6 +96,33 @@ int main() {
 				input->module == &m, output->module == &m, light->module == &m,
 				input->type == rack::engine::Port::INPUT, output->type == rack::engine::Port::OUTPUT));
 		}
+	}
+	{
+		using rack::engine::LightInfo;
+		using rack::engine::PortInfo;
+		json_t* factories = json_array();
+		json_object_set_new(root, "factories", factories);
+		rack::engine::Module m;
+		m.config(0, 1, 1, 1);
+		auto* input = m.configInput<CustomInfo<PortInfo>>(0, "Pitch");
+		auto* output = m.configOutput<CustomInfo<PortInfo>>(0, "Out");
+		auto* light = m.configLight<CustomInfo<LightInfo>>(0, "Gate");
+		for (PortInfo* port : {static_cast<PortInfo*>(input), static_cast<PortInfo*>(output)}) {
+			json_array_append_new(factories, json_pack("[sssibbb]", port->getName().c_str(),
+				port->getDescription().c_str(), port->name.c_str(), port->portId,
+				port->type == rack::engine::Port::INPUT, port->module == &m,
+				port == (port == input ? m.inputInfos[0] : m.outputInfos[0])));
+		}
+		json_array_append_new(factories, json_pack("[sssibbb]", light->getName().c_str(),
+			light->getDescription().c_str(), light->name.c_str(), light->lightId, false,
+			light->module == &m, light == m.lightInfos[0]));
+		// Replacing a slot deletes the previous object; a built-in replaces it too.
+		auto* again = m.configInput<CustomInfo<PortInfo>>(0, "Again");
+		json_t* replaced = json_pack("[ibs]", deletedInfos, m.inputInfos[0] == again, again->getName().c_str());
+		m.configInput(0, "Plain");
+		json_array_append_new(replaced, json_integer(deletedInfos));
+		json_array_append_new(replaced, json_string(m.inputInfos[0]->getName().c_str()));
+		json_object_set_new(root, "factory_replacement", replaced);
 	}
 	json_t* bypass = json_array();
 	json_object_set_new(root, "bypass", bypass);

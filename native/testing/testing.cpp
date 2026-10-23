@@ -315,6 +315,28 @@ void define(py::module_ m) {
 		}
 		return last;
 	});
+	m.def("metadata_as_rack", [](const bindings::ModuleRef& r, const std::string& kind, int i) {
+		// As a port or light tooltip would: the module's own slot, on the main
+		// thread without the GIL, so Python overrides go through callPython.
+		auto& m = r.get();
+		auto& infos = kind == "input" ? m.inputInfos : m.outputInfos;
+		std::string name, description;
+		if (kind == "light") {
+			rack::engine::LightInfo* info = m.lightInfos.at(i);
+			if (!info)
+				throw std::invalid_argument("this light has no metadata");
+			py::gil_scoped_release release;
+			name = info->getName();
+			description = info->getDescription();
+		}
+		else {
+			rack::engine::PortInfo* info = infos.at(i);
+			py::gil_scoped_release release;
+			name = info->getFullName();
+			description = info->getDescription();
+		}
+		return py::make_tuple(name, description);
+	});
 	m.def("finalize_outcome", &finalizeOutcome);
 
 	// Drop the hooks' own callback references when the plugin is destroyed (but not the deliberate leaks).

@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Owned native modules, configured in a scoped construction callback (RP-14A).
 
-Available inside Rack only. This is the construction/component-access slice:
-built-in port/light metadata adapters are available, but model registration,
-parameter metadata, metadata class factories and lifecycle adapters are still planned.
+Available inside Rack only. Built-in port/light/quantity metadata adapters and
+port/light metadata class factories are available, but model registration,
+quantity class factories and lifecycle adapters are still planned.
 The callback passed to :meth:`rackpy.raw.engine.Module.create` is construction code, not DSP.
 """
 

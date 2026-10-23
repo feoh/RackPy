@@ -3,9 +3,10 @@
 **Implemented slices: RP-14A, built-in port/light metadata adapters (RP-14B1),
 checked built-in quantities (RP-14B2a), and borrowed quantity helpers / mutable
 switch-label views (RP-14B2b1), standalone metadata backreferences (RP-14B2b2),
-and unattached standalone quantities (RP-14B2b3), Linux x86_64 inside Rack Free 2.6.6.**
-This is not a registerable instrument yet. Full quantity/metadata class factories
-and engine-owned smoothing (RP-14B2b), native lifecycle
+unattached and attached standalone quantities (RP-14B2b3/b4), and port/light
+metadata class factories (RP-14B2b5), Linux x86_64 inside Rack Free 2.6.6.**
+This is not a registerable instrument yet. Quantity class factories, raw
+metadata collections and engine-owned smoothing (RP-14B2b), native lifecycle
 adapters (RP-14C), plugin/model factories (RP-16), DSP (RP-17), the Python callback
 laboratory (RP-22), and expanders (RP-23) remain planned. See the
 [coverage report](coverage.md) for declaration-level status.
@@ -96,16 +97,60 @@ retaining `view.module` does, just like retaining the original module handle.
 ```{rackpy-example} module_metadata.py
 ```
 
-**Deliberately partial:** borrowed adapters are distinct from standalone,
-subclassable `PortInfo` / `LightInfo`. These helpers do not yet accept a class
-argument or transfer Python subclasses into native ownership. Arbitrary
-identity-field/module-pointer mutation on these borrowed adapters and raw vector
-mutation are also absent. Standalone metadata backreferences are documented in
-[Engine components](engine-components.md#portinfo-and-lightinfo). RP-14B2 retains these obligations,
-along with full ParamQuantity/SwitchQuantity and their mixed-thread virtuals.
-Accordingly the template, getter and raw-field manifest records remain
-`planned`: built-in adapters alone are not complete public semantics. No
-production callback dispatches to Python in this slice.
+Borrowed adapters are distinct from standalone, subclassable `PortInfo` /
+`LightInfo`. To put one of those classes into a slot, pass it as `info_type`
+([metadata class factories](#metadata-class-factories)). Arbitrary
+identity-field/module-pointer mutation on the borrowed adapters and raw vector
+mutation are absent, so the `inputInfos`, `outputInfos` and `lightInfos` field
+records remain `planned` (RP-14B2b). Standalone metadata backreferences are
+documented in [Engine components](engine-components.md#portinfo-and-lightinfo).
+
+## Metadata class factories
+
+Rack's `configInput<TPortInfo>`, `configOutput<TPortInfo>` and
+`configLight<TLightInfo>` construct a metadata object of the given class and
+put it in the slot. In Python, pass the class as `info_type`:
+`config_input(port_id, name="", info_type=None)`, and the same for
+`config_output` and `config_light`. `info_type` must be `PortInfo` (or
+`LightInfo` for lights) or a Python subclass; anything else raises `TypeError`.
+Without `info_type` the built-in view described above is used.
+
+RackPy calls `info_type()` with no arguments, on the main thread inside the
+constructor callback, as Rack's `new TPortInfo` would. Your `__init__` may set
+any field; then RackPy sets `module`, `type`, `port_id` (or `light_id`) and
+`name` exactly as Rack's template does, so a description set in `__init__`
+survives. The call returns that same Python object, and `get_input_info`,
+`input_infos` and the other getters return it again: the identity is preserved,
+with its class and attributes. An override of `get_name` or `get_description`
+is what Rack's UI shows. When Rack calls it without Python holding the GIL, a
+raised exception is contained and Rack's own answer is used instead.
+
+```{rackpy-example} metadata_factories.py
+```
+
+**Ownership.** The slot owns the object from then on and keeps its Python
+half alive. Its fields and methods are main-thread only, like a built-in view
+(`ThreadError` elsewhere); a standalone object keeps its any-thread fields.
+When the slot replaces it, or the module is closed, collected or its
+constructor fails, the object goes back to Python, `alive` becomes `False` and
+every field or method raises `StaleHandleError`, like a pointer Rack deleted.
+The Python object itself lives as long as you reference it. Avoid storing the
+module itself on the metadata object: a slot keeps its object alive, so that
+reference would keep the module alive in a cycle Python cannot see.
+
+**Errors are atomic.** The constructor runs before anything changes: if it
+raises, or returns something other than a new instance of exactly `info_type`
+(a `__new__` that returns another object), the slot keeps its old metadata.
+An object a slot already owns raises `OwnershipError`; one a slot has released
+raises `StaleHandleError`. The constructor may reenter the module, for example
+to configure the same slot; RackPy checks the construction phase and the ID
+again afterwards, and the outer call's object then replaces the inner one.
+
+These six records (the three templates and `get_input_info`,
+`get_output_info`, `get_light_info`) are `implemented`. Quantity class factories
+(`config_param` and its relatives with a `ParamQuantity` subclass) are not:
+quantities have value/range virtuals that Rack's engine threads call, so they
+need native production semantics first (RP-14B2b, RP-22).
 
 (standalone-quantities)=
 ## Standalone quantities and weak module attachment
@@ -305,9 +350,10 @@ its original exception propagates and even escaped module/component handles
 are invalidated immediately. No half-constructed module can be published.
 
 Construction, configuration, component access and explicit close require
-Rack's main thread; Python worker threads get `ThreadError`. The native module
-owns only native data, so destruction of a final Python handle on another Python
-thread does not run Python callbacks inside the Rack module's destructor.
+Rack's main thread; Python worker threads get `ThreadError`. Dropping a final
+Python handle on another Python thread destroys the module there, with the GIL.
+Without class-factory metadata that runs no Python. Transferred metadata goes
+back to its Python object on that thread, so a finalizer of yours may run there.
 This is not yet the Rack-owned model-transfer/deletion path (RP-14C/RP-16).
 
 ## Bypass configuration
@@ -333,7 +379,11 @@ exercise 1,000 construction/deletion cycles, retained views, failed and nested
 constructors, wrong-thread access, checked indices and native differential
 fixtures. Metadata tests additionally exercise 1,000 replacements, 1,000 owner
 collections, slot-specific invalidation, null slots, backreference identity and
-native-reference names/descriptions/IDs/types. The native test injects a
+native-reference names/descriptions/IDs/types. Class-factory tests replay a
+native `configInput<CustomInfo>` fixture, including replacement, and cover
+1,000 replacements and owner collections with the transferred-object count
+back to its baseline, rollback, reentrant constructors, wrong classes and
+threads, and Rack-side overrides without the GIL. The native test injects a
 preparation exception to verify replacement rollback. Quantity tests also cover
 1,000 slot replacements and 1,000 owner collections, stale getters/setters,
 thread/context rejection, validation rollback, native display/label/value
