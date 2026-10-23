@@ -1,0 +1,181 @@
+# Subclassable widgets and events
+
+`rackpy.raw.widget.Widget` is Rack's `rack::widget::Widget`, and Python can
+subclass it. Rack calls the subclass's overrides (`step`, drawing, event
+handlers and the coordinate queries) on its UI thread. The typed bases
+`TransparentWidget`, `OpaqueWidget`, `ZoomWidget`, `TransformWidget`,
+`SvgWidget`, `FramebufferWidget` and `OpenGlWidget` are Rack's own classes
+too, with their fields and methods. This page is about these classes;
+[detached widget trees](widget-trees.md) covers the older native-only
+`WidgetNode` adapter.
+
+**Partial, Linux x86_64 inside Rack Free 2.6.6.** Every record these classes
+touch stays **planned** in the [coverage report](coverage.md): module browser
+previews, module removal, window recreation, `EventState`, the templated
+lookups (`getAncestorOfType`, `getFirstDescendantOfType`) and NanoVG drawing
+(RP-27) are not mapped yet. The names below are the raw layer; there is no
+`rackpy.widget` facade for them yet.
+
+## Creating and owning widgets
+
+A widget can only be created on Rack's main thread once Rack's UI context is
+live, so never during plugin start-up (`ContextError` there). A new widget
+belongs to Python. Each widget has exactly one native owner:
+
+- `parent.add_child(child)` hands `child` to `parent`, as do
+  `add_child_bottom`, `add_child_above` and `add_child_below`. Rack's parent
+  now deletes it. The Python object stays alive, with the same identity, for
+  as long as the native widget does, even if Python drops every reference to
+  it: `parent.children[0] is child`.
+- `parent.remove_child(child)` and `child.remove_from_parent()` give it back
+  to Python.
+- `close()` deletes a detached widget and its subtree. Closing a widget that
+  has a parent raises `OwnershipError`; remove it first.
+- When Rack deletes a widget (its parent is closed or cleared, or a parent's
+  `step()` honours `request_delete()`), the Python object stays, but
+  `alive` becomes `False` and every other access raises `StaleHandleError`.
+- Adding a widget that already has a parent, to itself or to one of its
+  descendants raises `OwnershipError` and changes nothing.
+- A class may have only one of these native bases (`TypeError` otherwise);
+  ordinary Python mixins are fine.
+
+Widgets that RackPy did not create, such as Rack's scene, appear as
+`HostWidget`: a checked, nonowning handle with `alive`, `parent` and
+`get_box()`. It can be passed where Rack takes a widget pointer (an ancestor,
+an event target) but never owned or deleted.
+
+All access is main-thread only (`ThreadError`), and widgets of another
+context are refused. When Rack's context closes, RackPy deletes every widget
+it still manages and their handles become stale. If a worker thread drops the
+last reference to a widget, deletion waits for the UI thread.
+
+## Overrides that Rack calls
+
+Rack calls an override instead of its own implementation; call `super()` to
+get Rack's behaviour as well:
+
+| Override | Rack calls it |
+| --- | --- |
+| `step()` | every frame, for widgets in the scene |
+| `draw(args)`, `draw_layer(args, layer)` | when drawing, see [drawing](#drawing) |
+| `draw_vg(graphics)` | after `draw(args)`: Rack's deprecated `draw(NVGcontext*)` |
+| `draw_framebuffer()` | `FramebufferWidget` and `OpenGlWidget` only, while rendering |
+| `on_hover(event)` … `on_context_destroy(event)` | for each of Rack's 31 widget events |
+| `get_children_bounding_box()`, `get_visible_children_bounding_box()` | layout queries |
+| `get_relative_offset(value, ancestor)`, `get_relative_zoom(ancestor)`, `get_viewport(rect)` | coordinate queries |
+
+The methods of the RackPy classes themselves, which is what `super()`
+reaches, run **Rack's** implementation for that class. That is also how to
+deliver an event yourself: on a plain `FramebufferWidget`,
+`frame.on_button(event)` dispatches the click to its children by position,
+as Rack would.
+
+Exceptions never reach Rack. RackPy logs them, and then:
+
+- for `step`, drawing and event handlers, Rack carries on without running its
+  own implementation again (it is not replayed after a failed `super()` call);
+- for the queries that return a value, Rack uses its own result.
+
+While Rack is inside one of these calls, changing the tree (`add_child`,
+`remove_child`, `clear_children`, `close`) raises `OwnershipError`, because
+Rack may be iterating the very list being changed. Call `request_delete()`
+instead, or change the tree afterwards. Stepping another widget from inside a
+callback is refused for the same reason; only the current widget's
+`super().step()` is allowed.
+
+## Events
+
+Event records mirror Rack's: `Widget.HoverEvent` (also
+`rackpy.raw.widget.HoverEvent`) derives from `BaseEvent` and
+`PositionBaseEvent`, `Widget.DragHoverEvent` from `DragBaseEvent`, and so on,
+with Rack's fields in snake case (`mouse_delta`, `scroll_delta`, `key_name`,
+`clip_box`).
+
+A record you create, such as `HoverEvent(pos=Vec(3, 4), context=EventContext())`,
+is yours and writable. A record Rack passes to a handler is read-only
+(`TypeError` on assignment) and **expires when the handler returns**: keeping
+it and using it later raises `StaleHandleError`. Field reads are copies, so
+values you keep stay valid.
+
+`EventContext` carries the state that propagation shares: `propagating`,
+`consumed` and `target`. `BaseEvent.consume(widget)`, `stop_propagating()`,
+`set_target()`, `get_target()` and `is_consumed()` are Rack's; without a
+context they do nothing, as in Rack. A target that Rack later deletes raises
+`StaleHandleError` instead of dangling. `PathDropEvent.paths` is a list of
+strings; `HoverKeyEvent.is_key_command(key, mods)` is Rack's check.
+
+## Drawing
+
+Rack draws a widget by calling `draw(args)` with a `DrawArgs` record:
+`args.vg` is an opaque `GraphicsContext`, `args.fb` the target `Framebuffer`
+or `None`, and `args.clip_box` the visible part in the widget's own
+coordinates. Both handles expire with the call. NanoVG drawing functions are
+not bound yet (RP-27); within a draw call you can draw an `Svg`
+(`svg.draw(args.vg)`), call `super().draw(args)` to draw the children, or call
+`self.draw_child(child, args, layer)` as Rack's `drawChild` does.
+
+`FramebufferWidget.render()` is Rack's off-screen rendering and calls the
+children's `draw` overrides synchronously, so it also works outside Rack's
+frame loop. It refuses to nest inside a draw call (`OwnershipError`), an
+`oversample` that is not finite and positive (`ValueError`), and sizes beyond
+Rack's integer range. `get_framebuffer()` returns a checked handle that
+becomes stale when the widget re-renders, deletes its framebuffer, or Rack's
+graphics context goes away; `get_image_handle()` is Rack's NanoVG image ID
+(-1 before rendering), not an address.
+
+When Rack destroys its graphics context (the window closes), RackPy deletes
+the framebuffers of every widget it manages, even if a Python
+`on_context_destroy` override did not call `super()`. On a new graphics
+context they are marked dirty so that they render again; Rack Free never
+recreates its window, so that path is untested.
+
+## Typed bases
+
+- `TransparentWidget` ignores position events (hover, button, key and text
+  while hovered, scroll, drag hover, path drops): neither it nor its children
+  see them. `OpaqueWidget` delivers them to its children, stops their
+  propagation and consumes them itself unless a child did.
+- `ZoomWidget` scales its children: `zoom` is the raw field, `set_zoom()` is
+  Rack's setter, and positions and offsets go through the zoom.
+- `TransformWidget.transform` is a live, checked view of Rack's six-float
+  matrix (`copy()` returns a tuple); `identity()`, `translate()`, `scale()`
+  and `rotate(angle, origin)` are Rack's.
+- `SvgWidget.svg` is the raw field: assigning it does not resize the widget,
+  while `set_svg()` and `wrap()` do. `SVGWidget` and `set_svg_legacy()` are
+  Rack's deprecated spellings. `rackpy.raw.window.Svg` loads SVGs
+  (`load_string`, `load_file`, `Svg.load`); the rest of the window API is RP-27.
+- `FramebufferWidget` has Rack's `dirty`, `bypassed`, `oversample`,
+  `dirty_on_subpixel_change` and a checked `viewport_margin` view.
+  `OpenGlWidget` derives from it.
+
+## Adding widgets to Rack's scene
+
+`widget.attach_to_scene()` appends the widget to Rack's scene, which then
+owns it, so it takes part in Rack's frame loop (stepping, drawing, input)
+like Rack's own widgets. `remove_from_parent()` gives it back. A widget
+still in the scene when the window closes receives Rack's `ContextDestroy`
+event, then RackPy deletes it with the rest of its managed widgets. The tests
+check attachment, detachment and that teardown, not frame-loop delivery.
+
+## Runnable UI exercise
+
+This listing defines a subclass and a function; call the function from
+Rack's UI thread, **not** at import time. The actual-host widget suite calls
+it from a RuntimeProbe UI step.
+
+```{rackpy-example} widget_subclass.py
+:caption: A Python widget receiving a click and drawing in Rack
+```
+
+## Validation boundary
+
+`tests/widget/test_tree.py` runs the `tests/widget/in_rack` suite in actual
+Rack Free's live UI under Xvfb: ownership transfer and identity for every
+base, subclass peers kept alive by Rack, error containment, refused
+mutations, worker release, event propagation and consumption, expiring and
+read-only callback records, every event handler's base implementation, the
+typed bases' fields, SVG and framebuffer lifetimes, Python drawing driven by
+`FramebufferWidget.render()`, scene attachment, and a scene widget receiving
+the real window teardown. It does not cover the module browser, module
+removal, window recreation, input from a real mouse or keyboard, macOS or
+Windows.

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "tree.hpp"
 #include "../../widget/geometry.hpp"
+#include "managed.hpp"
+#include "events.hpp"
+#include "variants.hpp"
 
 #include "rackpy/runtime/interpreter.hpp"
 #include "rackpy/runtime/python.hpp"
@@ -31,7 +34,7 @@ rack::math::Vec vecValue(py::handle value) {
 	return value.cast<rack::math::Vec>();
 }
 
-void bindGeometryViews(py::module_ mod) {
+void bindGeometryViews(py::module_ mod, py::module_ math) {
 	py::class_<VecView>(mod, "WidgetVecView", py::is_final(),
 		"Checked write-through Widget box vector; copy() returns an independent Vec.")
 		.def_property("x", [](const VecView& v) { return v.get().x; },
@@ -80,6 +83,45 @@ void bindGeometryViews(py::module_ mod) {
 		.def("copy", [](const BoxView& v) { return rack::math::Rect(v.get()); })
 		.def("__copy__", [](const BoxView& v) { return rack::math::Rect(v.get()); })
 		.def("__deepcopy__", [](const BoxView& v, py::dict) { return rack::math::Rect(v.get()); }, py::arg("memo"));
+
+	// Value-taking SDK APIs get checked snapshots, never references to borrowed
+	// native fields. Numeric operations preserve Rack's value behavior while
+	// in-place vector operators remain write-through.
+	auto vec = py::reinterpret_borrow<py::class_<VecView>>(mod.attr("WidgetVecView"));
+	auto box = py::reinterpret_borrow<py::class_<BoxView>>(mod.attr("WidgetBoxView"));
+	for (const char* name : {"neg", "plus", "minus", "mult", "div", "dot", "arg", "norm", "normalize", "square", "area", "rotate",
+		"flip", "min", "max", "abs", "round", "floor", "ceil", "equals", "is_zero", "is_finite", "clamp", "clamp_safe", "crossfade", "is_equal",
+		"__pos__", "__neg__", "__mul__", "__rmul__", "__truediv__", "__eq__", "__ne__", "__repr__", "__iter__", "__len__"}) {
+		vec.def(name, [name](const VecView& view, py::args args, py::kwargs kwargs) {
+			return py::cast(rack::math::Vec(view.get())).attr(name)(*args, **kwargs);
+		});
+	}
+	for (const char* name : {"__imul__", "__itruediv__"}) {
+		vec.def(name, [name](py::object self, py::object other) {
+			auto value = rack::math::Vec(self.cast<const VecView&>().get());
+			auto result = py::cast(value).attr(name)(other);
+			if (result.is(py::reinterpret_borrow<py::object>(Py_NotImplemented))) return result;
+			self.cast<const VecView&>().get() = result.cast<rack::math::Vec>();
+			return self;
+		});
+	}
+	for (const char* name : {"contains", "intersects", "equals", "get_left", "get_right", "get_top", "get_bottom", "get_width", "get_height",
+		"get_center", "get_top_left", "get_top_right", "get_bottom_left", "get_bottom_right", "clamp", "nudge", "expand", "intersect",
+		"zero_pos", "grow", "shrink", "interpolate", "is_containing", "is_intersecting", "is_equal", "__eq__", "__ne__", "__repr__"}) {
+		box.def(name, [name](const BoxView& view, py::args args, py::kwargs kwargs) {
+			return py::cast(rack::math::Rect(view.get())).attr(name)(*args, **kwargs);
+		});
+	}
+	for (const char* name : {"left", "right", "top", "bottom", "width", "height", "center"})
+		box.def_property_readonly(name, [name](const BoxView& view) { return py::cast(rack::math::Rect(view.get())).attr(name); });
+	vec.attr("__hash__") = py::none();
+	box.attr("__hash__") = py::none();
+	auto mathVec = py::reinterpret_borrow<py::class_<rack::math::Vec>>(math.attr("Vec"));
+	auto mathRect = py::reinterpret_borrow<py::class_<rack::math::Rect>>(math.attr("Rect"));
+	mathVec.def(py::init([](const VecView& view) { return rack::math::Vec(view.get()); }));
+	mathRect.def(py::init([](const BoxView& view) { return rack::math::Rect(view.get()); }));
+	py::implicitly_convertible<VecView, rack::math::Vec>();
+	py::implicitly_convertible<BoxView, rack::math::Rect>();
 }
 
 std::shared_ptr<widget::Manager> manager() {
@@ -128,7 +170,10 @@ void bindWidgetTrees(py::module_ raw) {
 		return held ? held->roots.size() : size_t(0);
 	});
 #endif
-	bindGeometryViews(mod);
+	widgets::bindWidgetEvents(mod);
+	bindGeometryViews(mod, raw.attr("math").cast<py::module_>());
+	widgets::bindManagedWidgets(mod);
+	widgets::bindVariants(raw, mod);
 	py::class_<Handle, std::shared_ptr<Handle>>(mod, "WidgetNode", py::is_final(),
 		"A detached native base Widget with checked tree ownership and geometry. No Python subclass callbacks or scene insertion.")
 		.def_static("create", [] { return object(manager()->create()); })

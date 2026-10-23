@@ -4,6 +4,8 @@
 #include "rackpy/runtime/interpreter.hpp"
 
 #include <cstdio>
+#include <limits>
+#include <memory>
 #include <vector>
 
 #include "rackpy/runtime/diagnostics.hpp"
@@ -21,6 +23,8 @@ bool shutdownBegun = false;
 std::string outcome = "not started";
 std::vector<std::function<void()>> detachers;
 std::vector<std::function<void()>> uiCleanups, contextCleanups;
+std::vector<std::function<void()>> graphicsDestroyHooks, graphicsCreateHooks;
+bool sentinelInstalled = false;
 
 void runCleanups(const std::vector<std::function<void()>>& hooks) noexcept {
 	for (const auto& hook : hooks) {
@@ -95,7 +99,32 @@ bool bootstrapHook(const char* name) {
 	}
 }
 
-/** A widget in the bound context's scene whose teardown is the earliest signal Rack gives a plugin. */
+/** First in the child list, so last in reverse graphics-event delivery and
+first in scene destruction. This is deliberately separate from the last-step
+sentinel: Python cleanup must not run before the other widgets' graphics events. */
+struct GraphicsAnchor : rack::widget::Widget {
+	void onContextCreate(const ContextCreateEvent& e) override {
+		Widget::onContextCreate(e);
+		if (!shutdownBegun)
+			runCleanups(graphicsCreateHooks);
+	}
+	void onContextDestroy(const ContextDestroyEvent& e) override {
+		Widget::onContextDestroy(e);
+		if (!shutdownBegun)
+			runCleanups(graphicsDestroyHooks);
+		auto* ctx = rack::contextGet();
+		// Graphics destruction also occurs during a window/context recreation.
+		// Only an actual close starts the Context shutdown protocol.
+		if (ctx && ctx->window && ctx->window->win && glfwWindowShouldClose(ctx->window->win))
+			beginContextShutdown("window closing");
+	}
+	~GraphicsAnchor() override {
+		if (sentinelInstalled)
+			beginContextShutdown("scene deletion");
+	}
+};
+
+/** Last-step maintenance, without owning the graphics lifetime boundary. */
 struct Sentinel : rack::widget::Widget {
 	void step() override {
 		Widget::step();
@@ -105,12 +134,10 @@ struct Sentinel : rack::widget::Widget {
 		if (pendingReleases())
 			callPython("deferred releases", [] {});
 	}
-	void onContextDestroy(const ContextDestroyEvent& e) override {
-		beginContextShutdown("window closing");  // windowed: the window is deleted first
-		Widget::onContextDestroy(e);
-	}
 	~Sentinel() override {
-		beginContextShutdown("scene deletion");  // headless: the scene is deleted before the engine
+		if (sentinelInstalled)
+			beginContextShutdown("scene deletion fallback");
+		sentinelInstalled = false;
 	}
 };
 
@@ -144,10 +171,28 @@ int start(RackPyHostInit* args) {
 
 std::shared_ptr<ContextToken> bindCurrentContext() {
 	rack::Context* context = rack::contextGet();
-	bool wasBound = binding().current() != nullptr;
 	std::shared_ptr<ContextToken> token = binding().observe(context);
-	if (token && !wasBound && context->scene)
-		context->scene->addChild(new Sentinel);
+	if (token && !sentinelInstalled && context->scene) {
+		auto anchor = std::make_unique<GraphicsAnchor>();
+		auto sentinel = std::make_unique<Sentinel>();
+		const float inf = std::numeric_limits<float>::infinity();
+		anchor->box.size = sentinel->box.size = rack::math::Vec(inf, inf);
+		try {
+			context->scene->addChildBottom(anchor.get());
+			context->scene->addChild(sentinel.get());
+		}
+		catch (...) {
+			// Allocation failure can follow Widget's parent assignment. Both
+			// nodes have no children/overrides and need no EventState callbacks.
+			context->scene->children.remove(anchor.get());
+			context->scene->children.remove(sentinel.get());
+			anchor->parent = sentinel->parent = nullptr;
+			throw;
+		}
+		anchor.release();
+		sentinel.release();
+		sentinelInstalled = true;
+	}
 	return token;
 }
 
@@ -162,6 +207,8 @@ void beginContextShutdown(const char* source) {
 	runCleanups(contextCleanups);
 	contextCleanups.clear();
 	uiCleanups.clear();
+	graphicsDestroyHooks.clear();
+	graphicsCreateHooks.clear();
 	// Step 3: in-flight engine calls from Python finish; later ones raise StaleHandleError.
 	binding().close();
 	INFO("RackPy context closed; handles to it are now stale");
@@ -225,6 +272,14 @@ void onUiStep(std::function<void()> action) {
 void onContextClosing(std::function<void()> action) {
 	requireMainThread("registering context cleanup");
 	contextCleanups.push_back(std::move(action));
+}
+void onGraphicsContextDestroy(std::function<void()> action) {
+	requireMainThread("registering graphics cleanup");
+	graphicsDestroyHooks.push_back(std::move(action));
+}
+void onGraphicsContextCreate(std::function<void()> action) {
+	requireMainThread("registering graphics creation");
+	graphicsCreateHooks.push_back(std::move(action));
 }
 
 std::string finalizeOutcome() {

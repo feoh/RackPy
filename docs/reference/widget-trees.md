@@ -5,12 +5,13 @@ RP-25A supplies **WidgetNode**, a checked adapter around native base
 `rackpy.raw.widget`, inside Rack's **live UI context** only. Creation during
 plugin startup raises `ContextError`: Rack has not created its event state yet.
 
-This is groundwork, **not** the complete Widget binding. It cannot be
-subclassed, inserted into Rack's scene or module browser, or used for drawing.
-Python virtual callbacks, events, ZoomWidget/TransformWidget variants, resources,
-remaining mutable raw fields and class factories remain RP-25/RP-27 obligations. All touched SDK entries
-remain **planned** in the [coverage report](coverage.md); safe adapters do not
-count as complete public mappings.
+This is groundwork, **not** the complete Widget binding: a `WidgetNode`
+cannot be subclassed, put in Rack's scene or used for drawing. For Python
+subclasses, events, drawing, the typed bases and scene attachment, use
+`rackpy.raw.widget.Widget`, described in
+[subclassable widgets and events](widgets.md). All touched SDK entries remain
+**planned** in the [coverage report](coverage.md); safe adapters do not count
+as complete public mappings.
 
 ## One native owner
 

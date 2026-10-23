@@ -36,6 +36,8 @@ nitpick_ignore_regex = [
     ("py:class", r"(collections\.abc|typing|types|array|pathlib)\.\w+"),
     # PEP 695 type parameters (def f[T](...)) are not documented objects.
     ("py:class", r"[A-Z]"),
+    # The stub-only alias that lets Widget.BaseEvent name the module-level BaseEvent (rackpy/raw/widget.pyi).
+    ("py:class", r"_BaseEvent"),
     # Private implementation modules; their public names are documented where rackpy.raw re-exports them.
     ("py:class", r"rackpy\.raw\._\w+\.\w+"),
 ]

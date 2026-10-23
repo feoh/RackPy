@@ -36,6 +36,10 @@ from rackpy.raw import macros as macros  # noqa: E402
 
 __all__.append("macros")
 
+from rackpy._widget_events import register as _register_widget_events  # noqa: E402
+
+_register_widget_events(_rackpy_host.raw.widget)
+
 # Rack also calls these Quantity methods on its engine thread (Core MIDI-Map, ADR 003), where Python
 # never runs, so they have no Python path. A subclass that defines one would silently never be called.
 _ENGINE_THREAD_METHODS = ("get_value", "set_value", "get_min_value", "get_max_value", "get_default_value")

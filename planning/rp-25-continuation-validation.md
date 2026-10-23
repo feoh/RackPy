@@ -67,3 +67,42 @@ scoped event propagation, module-browser/null-preview/scene insertion or graphic
 window recreation was established. The parent contract remains open; the next
 major work is full Widget subclass/scoped-event ownership and containment, plus
 remaining raw field/container and variant semantics.
+
+## Checkpoint: subclassable widgets, typed bases and scoped events
+
+Date: 2026-10-23. The continuation branch was rebased onto local `main` at
+`74d2c9e` (RP-15B) first; only `planning/witan.json` and generated files
+conflicted, and every rebased commit passes `bin/generate_bindings.py check`
+and `bin/planning-check` (`git rebase --exec`). GCC 16.2.1, uv 0.9.18, the
+checksum-verified Rack SDK and Rack Free 2.6.6, bundled CPython 3.14.9 and
+pybind11 3.1.0. Host runs serialized with `flock /tmp/rackpy-host-tests.lock`.
+
+| Command | Result |
+| --- | --- |
+| `bin/rackpy-dev build --werror --test-hooks --build-dir build/dev` | compiled; 4/4 CTests passed |
+| `uv run pytest -m "not dist and not inventory" -q -p no:randomly` | 179 passed, 31 deselected, 266 s, all host and GUI tests included |
+| `uv run pytest -m inventory -q` | 29 passed |
+| `uv run pytest -m unit -q` | 70 passed |
+| `prek run --all-files`, `bin/rackpy-dev typecheck` | all hooks and strict mypy pass |
+| `uv run sphinx-build -W --keep-going -n -b html docs <tmp>` | passes; one reviewed `nitpick_ignore` for the stub-only `_BaseEvent` alias |
+| `bin/generate_bindings.py check`, `bin/planning-check`, `git diff --check` | pass |
+
+The live-UI suite now includes `test_drawing.py` (Python `draw`, `draw_vg`,
+`draw_layer`, `draw_child` and `draw_framebuffer` driven by Rack's
+`FramebufferWidget.render()`, expiring draw records, refused mutation and
+nested render, contained draw errors, and the docs snippet) and
+`test_scene.py` (scene attachment and detachment, and a scene widget that
+receives Rack's real `ContextDestroy` from the Window destructor before
+RackPy's shutdown sweep deletes it, checked by the `scene-widget-teardown-ok`
+marker). Their outcomes were confirmed individually, not only through the
+outer test's all-passed assertion.
+
+The earlier "all-host timeout" was the 180-second tool limit, not a hang: the
+same suite completes in 266 s. No Rack or Xvfb process was left running.
+
+229 manifest records are **planned**, none implemented or verified.
+
+Not run or not established: the `dist` tests, sanitizers, macOS, Windows,
+remote CI, frame-loop delivery to scene widgets (tests run inside one UI
+step), real mouse/keyboard input, module browser previews, module removal,
+and window recreation. No performance claim.

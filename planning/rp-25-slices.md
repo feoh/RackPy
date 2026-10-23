@@ -117,12 +117,37 @@ show that detached trees are not automatically scene-stepped. Local validation,
 failed attempts, cleanup and remaining gates are recorded in
 [continuation validation](rp-25-continuation-validation.md).
 
+## RP-25 continuation: subclassable widgets, typed bases and scoped events
+
+Executed under the existing RP-25 parent claim. `rackpy.raw.widget.Widget` is
+Rack's Widget with a pybind11 trampoline, so Python subclasses receive `step`,
+drawing (`draw`, `draw_layer`, the deprecated `draw(NVGcontext*)` as
+`draw_vg`, `draw_framebuffer`), all 31 event handlers and the coordinate
+queries. Errors are contained; void callbacks are not replayed and value
+queries fall back to Rack. Ownership is single: Python while detached,
+the native parent after a transfer, with Rack's ownership keeping the Python
+peer alive and its deletion invalidating it. Tree mutation is refused during
+callbacks. The seven typed bases (Transparent, Opaque, Zoom, Transform, Svg,
+Framebuffer, OpenGl) are bound with their fields; `rackpy.raw.window.Svg` is a
+partial window slice that SvgWidget needs (the rest of window is RP-27).
+Event records keep Rack's prototype hierarchy: owned when created, read-only
+and expiring when Rack passes them. Graphics resources die before Rack's GL
+context, through a scene anchor that separates graphics teardown from context
+shutdown. `attach_to_scene()` hands a widget to Rack's scene.
+
+229 manifest records move to (or stay) **planned**, none implemented: the
+module browser, module removal, window recreation, `EventState`, templated
+lookups and key-name functions remain. Tests run in actual Rack's live UI,
+including Python drawing driven by `FramebufferWidget.render()` and a
+scene-attached widget receiving the real window teardown. Evidence:
+[continuation validation](rp-25-continuation-validation.md).
+
 ## Remaining RP-25 acceptance
 
-The original parent retains complete class-factory/subclass and lifecycle
-semantics, remaining raw field/container mutations and box view interoperability,
-traversal/typed ancestor/descendant lookup, transforms/zoom variants, base class variants,
-callback-scoped events and propagation/consumption, exception containment,
-module-browser/null-preview/scene attachment and window-recreation teardown.
+The original parent retains the module browser and null-module previews,
+module removal, window recreation (Rack Free never recreates its window; only
+teardown is observed), `EventState`, the typed ancestor/descendant lookups,
+the `recurseEvent` templates, the key-name functions and the raw
+`children` list as a mutable container.
 Resource/drawing integration belongs with RP-27, not silently omitted from
 Widget semantics. Detached native tests do not prove any of those gates.

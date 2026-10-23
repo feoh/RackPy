@@ -2,6 +2,20 @@
   "entries": [
     {
       "facade": null,
+      "id": "alias:rack::widget::SVGWidget",
+      "kind": "alias",
+      "raw": "rackpy.raw.widget.SVGWidget",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::widget::Widget::BaseEvent",
+      "kind": "alias",
+      "raw": "rackpy.raw.widget.Widget.BaseEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
       "id": "class_template:rack::DeferWrapper<type>",
       "kind": "class",
       "raw": "rackpy.raw.DeferWrapper",
@@ -86,6 +100,34 @@
     },
     {
       "facade": null,
+      "id": "constructor:rack::widget::FramebufferWidget::FramebufferWidget()",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.FramebufferWidget",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::widget::SvgWidget::SvgWidget()",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.SvgWidget",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::widget::TransformWidget::TransformWidget()",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.TransformWidget",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::widget::Widget::PathDropEvent::PathDropEvent(const std::vector<std::string> &)",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.PathDropEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
       "id": "destructor:rack::DeferWrapper::~DeferWrapper<F>()",
       "kind": "method",
       "raw": "rackpy.raw.DeferWrapper.__exit__",
@@ -118,6 +160,20 @@
       "kind": "class",
       "raw": "rackpy.raw.engine.PortInfo",
       "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::widget::FramebufferWidget::~FramebufferWidget()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.FramebufferWidget.close",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::widget::Widget::~Widget()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.close",
+      "status": "planned"
     },
     {
       "facade": null,
@@ -533,24 +589,297 @@
       "status": "implemented"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.box",
+      "facade": null,
+      "id": "field:rack::widget::BaseEvent::context",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.BaseEvent.context",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::EventContext::consumed",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.EventContext.consumed",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::EventContext::propagating",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.EventContext.propagating",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::EventContext::target",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.EventContext.target",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::FramebufferWidget::bypassed",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.FramebufferWidget.bypassed",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::FramebufferWidget::dirty",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.FramebufferWidget.dirty",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::FramebufferWidget::dirtyOnSubpixelChange",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.FramebufferWidget.dirty_on_subpixel_change",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::FramebufferWidget::oversample",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.FramebufferWidget.oversample",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::FramebufferWidget::viewportMargin",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.FramebufferWidget.viewport_margin",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::SvgWidget::svg",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.SvgWidget.svg",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::TransformWidget::transform",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.TransformWidget.transform",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::ButtonEvent::action",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.ButtonEvent.action",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::ButtonEvent::button",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.ButtonEvent.button",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::ButtonEvent::mods",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.ButtonEvent.mods",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::ContextCreateEvent::vg",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.ContextCreateEvent.vg",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::ContextDestroyEvent::vg",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.ContextDestroyEvent.vg",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::DragBaseEvent::button",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.DragBaseEvent.button",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::DragDropEvent::origin",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.DragDropEvent.origin",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::DragEnterEvent::origin",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.DragEnterEvent.origin",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::DragHoverEvent::mouseDelta",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.DragHoverEvent.mouse_delta",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::DragHoverEvent::origin",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.DragHoverEvent.origin",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::DragLeaveEvent::origin",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.DragLeaveEvent.origin",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::DragMoveEvent::mouseDelta",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.DragMoveEvent.mouse_delta",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::DrawArgs::clipBox",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.DrawArgs.clip_box",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::DrawArgs::fb",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.DrawArgs.fb",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::DrawArgs::vg",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.DrawArgs.vg",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::HoverEvent::mouseDelta",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.HoverEvent.mouse_delta",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::HoverScrollEvent::scrollDelta",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.HoverScrollEvent.scroll_delta",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::KeyBaseEvent::action",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.KeyBaseEvent.action",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::KeyBaseEvent::key",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.KeyBaseEvent.key",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::KeyBaseEvent::keyName",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.KeyBaseEvent.key_name",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::KeyBaseEvent::mods",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.KeyBaseEvent.mods",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::KeyBaseEvent::scancode",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.KeyBaseEvent.scancode",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::PathDropEvent::paths",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.PathDropEvent.paths",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::PositionBaseEvent::pos",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.PositionBaseEvent.pos",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::TextBaseEvent::codepoint",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.TextBaseEvent.codepoint",
+      "status": "planned"
+    },
+    {
+      "facade": null,
       "id": "field:rack::widget::Widget::box",
-      "kind": "attribute",
-      "raw": "rackpy.raw.widget.WidgetNode.box",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.box",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.requested_delete",
+      "facade": null,
+      "id": "field:rack::widget::Widget::children",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.children",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::Widget::parent",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.parent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
       "id": "field:rack::widget::Widget::requestedDelete",
-      "kind": "attribute",
-      "raw": "rackpy.raw.widget.WidgetNode.requested_delete",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.requested_delete",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.visible",
+      "facade": null,
       "id": "field:rack::widget::Widget::visible",
-      "kind": "attribute",
-      "raw": "rackpy.raw.widget.WidgetNode.visible",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.visible",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::ZoomWidget::zoom",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.ZoomWidget.zoom",
       "status": "planned"
     },
     {
@@ -2262,115 +2591,927 @@
       "status": "implemented"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.add_child_above",
+      "facade": null,
+      "id": "method:rack::widget::BaseEvent::consume(rack::widget::Widget *) const",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.BaseEvent.consume",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::BaseEvent::getTarget() const",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.BaseEvent.get_target",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::BaseEvent::isConsumed() const",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.BaseEvent.is_consumed",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::BaseEvent::isPropagating() const",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.BaseEvent.is_propagating",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::BaseEvent::setTarget(rack::widget::Widget *) const",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.BaseEvent.set_target",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::BaseEvent::stopPropagating() const",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.BaseEvent.stop_propagating",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::BaseEvent::unconsume() const",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.BaseEvent.unconsume",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::FramebufferWidget::deleteFramebuffer()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.FramebufferWidget.delete_framebuffer",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::FramebufferWidget::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.FramebufferWidget.draw",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::FramebufferWidget::drawFramebuffer()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.FramebufferWidget.draw_framebuffer",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::FramebufferWidget::getFramebuffer()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.FramebufferWidget.get_framebuffer",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::FramebufferWidget::getFramebufferSize()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.FramebufferWidget.get_framebuffer_size",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::FramebufferWidget::getImageHandle()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.FramebufferWidget.get_image_handle",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::FramebufferWidget::onContextCreate(const rack::widget::Widget::ContextCreateEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.FramebufferWidget.on_context_create",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::FramebufferWidget::onContextDestroy(const rack::widget::Widget::ContextDestroyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.FramebufferWidget.on_context_destroy",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::FramebufferWidget::onDirty(const rack::widget::Widget::DirtyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.FramebufferWidget.on_dirty",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::FramebufferWidget::render(rack::math::Vec, rack::math::Vec, rack::math::Rect)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.FramebufferWidget.render",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::FramebufferWidget::setDirty(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.FramebufferWidget.set_dirty",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::FramebufferWidget::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.FramebufferWidget.step",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::OpaqueWidget::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.OpaqueWidget.on_button",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::OpaqueWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.OpaqueWidget.on_drag_hover",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::OpaqueWidget::onHover(const rack::widget::Widget::HoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.OpaqueWidget.on_hover",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::OpaqueWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.OpaqueWidget.on_hover_key",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::OpaqueWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.OpaqueWidget.on_hover_scroll",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::OpaqueWidget::onHoverText(const rack::widget::Widget::HoverTextEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.OpaqueWidget.on_hover_text",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::OpaqueWidget::onPathDrop(const rack::widget::Widget::PathDropEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.OpaqueWidget.on_path_drop",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::OpenGlWidget::drawFramebuffer()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.OpenGlWidget.draw_framebuffer",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::OpenGlWidget::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.OpenGlWidget.step",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::SvgWidget::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.SvgWidget.draw",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::SvgWidget::setSVG(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.SvgWidget.set_svg_legacy",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::SvgWidget::setSvg(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.SvgWidget.set_svg",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::SvgWidget::wrap()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.SvgWidget.wrap",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::TransformWidget::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.TransformWidget.draw",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::TransformWidget::drawLayer(const rack::widget::Widget::DrawArgs &, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.TransformWidget.draw_layer",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::TransformWidget::identity()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.TransformWidget.identity",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::TransformWidget::rotate(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.TransformWidget.rotate",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::TransformWidget::rotate(float, rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.TransformWidget.rotate",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::TransformWidget::scale(rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.TransformWidget.scale",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::TransformWidget::translate(rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.TransformWidget.translate",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::TransparentWidget::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.TransparentWidget.on_button",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::TransparentWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.TransparentWidget.on_drag_hover",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::TransparentWidget::onHover(const rack::widget::Widget::HoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.TransparentWidget.on_hover",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::TransparentWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.TransparentWidget.on_hover_key",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::TransparentWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.TransparentWidget.on_hover_scroll",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::TransparentWidget::onHoverText(const rack::widget::Widget::HoverTextEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.TransparentWidget.on_hover_text",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::TransparentWidget::onPathDrop(const rack::widget::Widget::PathDropEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.TransparentWidget.on_path_drop",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::KeyBaseEvent::isKeyCommand(int, int) const",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.KeyBaseEvent.is_key_command",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::addChild(rack::widget::Widget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.add_child",
+      "status": "planned"
+    },
+    {
+      "facade": null,
       "id": "method:rack::widget::Widget::addChildAbove(rack::widget::Widget *, rack::widget::Widget *)",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.add_child_above",
+      "raw": "rackpy.raw.widget.Widget.add_child_above",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.add_child_below",
+      "facade": null,
       "id": "method:rack::widget::Widget::addChildBelow(rack::widget::Widget *, rack::widget::Widget *)",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.add_child_below",
+      "raw": "rackpy.raw.widget.Widget.add_child_below",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.get_absolute_offset",
+      "facade": null,
+      "id": "method:rack::widget::Widget::addChildBottom(rack::widget::Widget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.add_child_bottom",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::clearChildren()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.clear_children",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::draw(NVGcontext *)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.draw_vg",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.draw",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::drawChild(rack::widget::Widget *, const rack::widget::Widget::DrawArgs &, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.draw_child",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::drawLayer(const rack::widget::Widget::DrawArgs &, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.draw_layer",
+      "status": "planned"
+    },
+    {
+      "facade": null,
       "id": "method:rack::widget::Widget::getAbsoluteOffset(rack::math::Vec)",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.get_absolute_offset",
+      "raw": "rackpy.raw.widget.Widget.get_absolute_offset",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.get_absolute_zoom",
+      "facade": null,
       "id": "method:rack::widget::Widget::getAbsoluteZoom()",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.get_absolute_zoom",
+      "raw": "rackpy.raw.widget.Widget.get_absolute_zoom",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.get_position",
+      "facade": null,
+      "id": "method:rack::widget::Widget::getBox()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.get_box",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::getChildrenBoundingBox()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.get_children_bounding_box",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::getParent()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.get_parent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
       "id": "method:rack::widget::Widget::getPosition()",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.get_position",
+      "raw": "rackpy.raw.widget.Widget.get_position",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.get_relative_offset",
+      "facade": null,
       "id": "method:rack::widget::Widget::getRelativeOffset(rack::math::Vec, rack::widget::Widget *)",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.get_relative_offset",
+      "raw": "rackpy.raw.widget.Widget.get_relative_offset",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.get_relative_zoom",
+      "facade": null,
       "id": "method:rack::widget::Widget::getRelativeZoom(rack::widget::Widget *)",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.get_relative_zoom",
+      "raw": "rackpy.raw.widget.Widget.get_relative_zoom",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.get_size",
+      "facade": null,
       "id": "method:rack::widget::Widget::getSize()",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.get_size",
+      "raw": "rackpy.raw.widget.Widget.get_size",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.get_viewport",
+      "facade": null,
       "id": "method:rack::widget::Widget::getViewport(rack::math::Rect)",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.get_viewport",
+      "raw": "rackpy.raw.widget.Widget.get_viewport",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.hide",
+      "facade": null,
+      "id": "method:rack::widget::Widget::getVisibleChildrenBoundingBox()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.get_visible_children_bounding_box",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::hasChild(rack::widget::Widget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.has_child",
+      "status": "planned"
+    },
+    {
+      "facade": null,
       "id": "method:rack::widget::Widget::hide()",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.hide",
+      "raw": "rackpy.raw.widget.Widget.hide",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.is_descendant_of",
+      "facade": null,
       "id": "method:rack::widget::Widget::isDescendantOf(rack::widget::Widget *)",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.is_descendant_of",
+      "raw": "rackpy.raw.widget.Widget.is_descendant_of",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.request_delete",
+      "facade": null,
+      "id": "method:rack::widget::Widget::isVisible()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.is_visible",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onAction(const rack::widget::Widget::ActionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_action",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onAdd(const rack::widget::Widget::AddEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_add",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_button",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onChange(const rack::widget::Widget::ChangeEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_change",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onContextCreate(const rack::widget::Widget::ContextCreateEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_context_create",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onContextDestroy(const rack::widget::Widget::ContextDestroyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_context_destroy",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onDeselect(const rack::widget::Widget::DeselectEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_deselect",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onDirty(const rack::widget::Widget::DirtyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_dirty",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onDoubleClick(const rack::widget::Widget::DoubleClickEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_double_click",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onDragDrop(const rack::widget::Widget::DragDropEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_drag_drop",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onDragEnd(const rack::widget::Widget::DragEndEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_drag_end",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onDragEnter(const rack::widget::Widget::DragEnterEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_drag_enter",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onDragHover(const rack::widget::Widget::DragHoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_drag_hover",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onDragLeave(const rack::widget::Widget::DragLeaveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_drag_leave",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onDragMove(const rack::widget::Widget::DragMoveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_drag_move",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onDragStart(const rack::widget::Widget::DragStartEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_drag_start",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onEnter(const rack::widget::Widget::EnterEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_enter",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onHide(const rack::widget::Widget::HideEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_hide",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onHover(const rack::widget::Widget::HoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_hover",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_hover_key",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_hover_scroll",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onHoverText(const rack::widget::Widget::HoverTextEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_hover_text",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onLeave(const rack::widget::Widget::LeaveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_leave",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onPathDrop(const rack::widget::Widget::PathDropEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_path_drop",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onRemove(const rack::widget::Widget::RemoveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_remove",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onReposition(const rack::widget::Widget::RepositionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_reposition",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onResize(const rack::widget::Widget::ResizeEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_resize",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onSelect(const rack::widget::Widget::SelectEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_select",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onSelectKey(const rack::widget::Widget::SelectKeyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_select_key",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onSelectText(const rack::widget::Widget::SelectTextEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_select_text",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::onShow(const rack::widget::Widget::ShowEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.on_show",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::Widget::removeChild(rack::widget::Widget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.remove_child",
+      "status": "planned"
+    },
+    {
+      "facade": null,
       "id": "method:rack::widget::Widget::requestDelete()",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.request_delete",
+      "raw": "rackpy.raw.widget.Widget.request_delete",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.set_position",
+      "facade": null,
+      "id": "method:rack::widget::Widget::setBox(rack::math::Rect)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.set_box",
+      "status": "planned"
+    },
+    {
+      "facade": null,
       "id": "method:rack::widget::Widget::setPosition(rack::math::Vec)",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.set_position",
+      "raw": "rackpy.raw.widget.Widget.set_position",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.set_size",
+      "facade": null,
       "id": "method:rack::widget::Widget::setSize(rack::math::Vec)",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.set_size",
+      "raw": "rackpy.raw.widget.Widget.set_size",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.show",
+      "facade": null,
+      "id": "method:rack::widget::Widget::setVisible(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.set_visible",
+      "status": "planned"
+    },
+    {
+      "facade": null,
       "id": "method:rack::widget::Widget::show()",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.show",
+      "raw": "rackpy.raw.widget.Widget.show",
       "status": "planned"
     },
     {
-      "facade": "rackpy.widget.WidgetNode.step",
+      "facade": null,
       "id": "method:rack::widget::Widget::step()",
       "kind": "method",
-      "raw": "rackpy.raw.widget.WidgetNode.step",
+      "raw": "rackpy.raw.widget.Widget.step",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::ZoomWidget::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.ZoomWidget.draw",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::ZoomWidget::drawLayer(const rack::widget::Widget::DrawArgs &, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.ZoomWidget.draw_layer",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::ZoomWidget::getRelativeOffset(rack::math::Vec, rack::widget::Widget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.ZoomWidget.get_relative_offset",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::ZoomWidget::getRelativeZoom(rack::widget::Widget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.ZoomWidget.get_relative_zoom",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::ZoomWidget::getViewport(rack::math::Rect)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.ZoomWidget.get_viewport",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::ZoomWidget::getZoom()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.ZoomWidget.get_zoom",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::ZoomWidget::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.ZoomWidget.on_button",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::ZoomWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.ZoomWidget.on_drag_hover",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::ZoomWidget::onHover(const rack::widget::Widget::HoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.ZoomWidget.on_hover",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::ZoomWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.ZoomWidget.on_hover_key",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::ZoomWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.ZoomWidget.on_hover_scroll",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::ZoomWidget::onHoverText(const rack::widget::Widget::HoverTextEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.ZoomWidget.on_hover_text",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::ZoomWidget::onPathDrop(const rack::widget::Widget::PathDropEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.ZoomWidget.on_path_drop",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::ZoomWidget::setZoom(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.ZoomWidget.set_zoom",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Svg::draw(NVGcontext *)",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Svg.draw",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Svg::getNumPaths()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Svg.get_num_paths",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Svg::getNumPoints()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Svg.get_num_points",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Svg::getNumShapes()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Svg.get_num_shapes",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Svg::getSize()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Svg.get_size",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Svg::load(const std::string &)",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.window.Svg.load",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Svg::loadFile(const std::string &)",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Svg.load_file",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Svg::loadString(const std::string &)",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Svg.load_string",
       "status": "planned"
     },
     {
@@ -2599,6 +3740,335 @@
     },
     {
       "facade": null,
+      "id": "record:rack::widget::BaseEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.BaseEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::EventContext",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.EventContext",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::FramebufferWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.FramebufferWidget",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::OpaqueWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.OpaqueWidget",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::OpenGlWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.OpenGlWidget",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::SvgWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.SvgWidget",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::TransformWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.TransformWidget",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::TransparentWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.TransparentWidget",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::ActionEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.ActionEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::AddEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.AddEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::ButtonEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.ButtonEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::ChangeEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.ChangeEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::ContextCreateEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.ContextCreateEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::ContextDestroyEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.ContextDestroyEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::DeselectEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.DeselectEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::DirtyEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.DirtyEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::DoubleClickEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.DoubleClickEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::DragBaseEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.DragBaseEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::DragDropEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.DragDropEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::DragEndEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.DragEndEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::DragEnterEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.DragEnterEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::DragHoverEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.DragHoverEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::DragLeaveEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.DragLeaveEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::DragMoveEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.DragMoveEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::DragStartEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.DragStartEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::DrawArgs",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.DrawArgs",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::EnterEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.EnterEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::HideEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.HideEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::HoverEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.HoverEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::HoverKeyEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.HoverKeyEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::HoverScrollEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.HoverScrollEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::HoverTextEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.HoverTextEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::KeyBaseEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.KeyBaseEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::LeaveEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.LeaveEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::PathDropEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.PathDropEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::PositionBaseEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.PositionBaseEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::RemoveEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.RemoveEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::RepositionEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.RepositionEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::ResizeEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.ResizeEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::SelectEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.SelectEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::SelectKeyEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.SelectKeyEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::SelectTextEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.SelectTextEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::ShowEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.ShowEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::Widget::TextBaseEvent",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget.TextBaseEvent",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::ZoomWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.ZoomWidget",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::window::Svg",
+      "kind": "class",
+      "raw": "rackpy.raw.window.Svg",
+      "status": "planned"
+    },
+    {
+      "facade": null,
       "id": "variable:rack::API_URL",
       "kind": "constant",
       "raw": "rackpy.raw.API_URL",
@@ -2745,6 +4215,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "8966821d2be10409",
+  "inputs": "b3a977404050cd0c",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }
