@@ -52,6 +52,38 @@ def test_tree_identity_transfer_and_order(root: WidgetNode) -> None:
             node.get_box()
 
 
+def test_checked_sibling_insertion_order_and_errors(root: WidgetNode) -> None:
+    a, b, above, below, outsider = (WidgetNode.create() for _ in range(5))
+    root.add_child(a)
+    root.add_child(b)
+    root.add_child_above(above, a)
+    root.add_child_below(below, b)
+    children = root.children
+    assert children.index(a) + 1 == children.index(above)
+    assert children.index(below) + 1 == children.index(b)
+    assert a.parent is b.parent is above.parent is below.parent is root
+    with pytest.raises(OwnershipError):
+        root.add_child_above(outsider, outsider)
+    with pytest.raises(OwnershipError):
+        root.add_child_below(above, b)  # already attached child
+    other = WidgetNode.create()
+    with pytest.raises(OwnershipError):
+        root.add_child_above(outsider, other)  # sibling is not a direct child
+    with pytest.raises(TypeError):
+        root.add_child_below(outsider, None)  # type: ignore[arg-type]
+    with pytest.raises(ContextError):
+        _rackpy_host._testing.with_foreign_context(lambda: root.add_child_above(outsider, a))
+    stale = WidgetNode.create()
+    root.add_child(stale)
+    root.remove_child(stale)
+    stale.close()
+    with pytest.raises(StaleHandleError):
+        root.add_child_below(outsider, stale)
+    assert outsider.parent is None and root.children == children
+    outsider.close()
+    other.close()
+
+
 def test_invalid_mutations_are_atomic(root: WidgetNode) -> None:
     child, orphan = WidgetNode.create(), WidgetNode.create()
     root.add_child(child)

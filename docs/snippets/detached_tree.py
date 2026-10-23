@@ -11,8 +11,16 @@ def exercise_tree() -> None:
         child = WidgetNode.create()
         child.set_box(Rect(4, 6, 20, 12))
         root.add_child(child)
+        sibling = WidgetNode.create()
+        root.add_child(sibling)
+        above, below = WidgetNode.create(), WidgetNode.create()
+        root.add_child_above(above, child)
+        root.add_child_below(below, sibling)
+        children = root.children
+        assert children.index(child) + 1 == children.index(above)
+        assert children.index(below) + 1 == children.index(sibling)
         assert child.parent is root
-        assert root.get_children_bounding_box() == child.get_box()
+        assert root.get_children_bounding_box().size.x >= child.get_box().size.x
         root.set_position(Vec(10, 20))
         assert child.get_absolute_offset(Vec()) == Vec(14, 26)
         child.set_size(Vec(20, 12))

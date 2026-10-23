@@ -52,6 +52,24 @@ host, coverage/introspection and docs checks. The RP-25 parent and implementatio
 phase remain open. Local evidence is recorded in
 [RP-25B validation](rp-25b-validation.md).
 
+## RP-25C: safe Widget sibling insertion
+
+**Witan:** `tk-rackpy-25c-safe-widget-sibling-insertion-b4de86`.
+
+Implements the exact `Widget::addChildAbove` and `Widget::addChildBelow`
+records on the checked `WidgetNode` base adapter. A child must be detached, a
+sibling must be a direct child of the same parent, and all handles must belong
+to the same live context. Invalid tree operations are rejected before Rack
+assertions; insertion allocation failure must roll back Rack's early parent
+assignment without changing native ownership or order. These two mappings stay
+`planned` because class/subclass/event semantics remain incomplete. Validate
+SDK child order and allocation rollback natively, then actual-host wrong-context,
+stale/invalid sibling, cycle, duplicate, worker/thread and live UI behavior.
+Update stubs/docs/snippet/manifest/generated report and mapping; run relevant
+hooks, typecheck, native/host/introspection/coverage/docs and commit with a
+checkpoint. This child and RP-25 parent do not complete the implementation
+phase.
+
 ## Remaining RP-25 acceptance
 
 The original parent retains complete class-factory/subclass and lifecycle

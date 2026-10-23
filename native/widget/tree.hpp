@@ -109,6 +109,29 @@ struct Manager : std::enable_shared_from_this<Manager> {
 		}
 		roots.erase(c.token->generation);
 	}
+	void addRelative(const Handle& parent, const Handle& child, const Handle& sibling, bool above) {
+		auto& p = parent.get();
+		auto& c = child.get();
+		auto& s = sibling.get();
+		if (parent.manager.get() != this || child.manager.get() != this || sibling.manager.get() != this)
+			throw runtime::WrongContext("widgets belong to different contexts");
+		if (c.parent || &c == &p || p.isDescendantOf(&c))
+			throw runtime::Ownership("child must be detached and cannot be its own ancestor");
+		if (s.parent != &p)
+			throw runtime::Ownership("sibling must be a direct child of the target parent");
+		try {
+			if (above)
+				p.addChildAbove(&c, &s);
+			else
+				p.addChildBelow(&c, &s);
+		}
+		catch (...) {
+			// Rack can publish parent before allocating its child-list entry.
+			c.parent = nullptr;
+			throw;
+		}
+		roots.erase(c.token->generation);
+	}
 	void remove(const Handle& parent, const Handle& child) {
 		auto& p = parent.get();
 		auto& c = child.get();

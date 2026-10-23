@@ -18,7 +18,11 @@ count as complete public mappings.
 - `parent.add_child(child)` transfers native ownership to the parent. The
   Python child handle remains usable, with the same identity, but does **not**
   keep the parent alive. `add_child_bottom` inserts at the front of Rack's
-  child list; `add_child` appends.
+  child list; `add_child` appends. In Rack's child-list order,
+  `add_child_above(child, sibling)` inserts immediately after the sibling and
+  `add_child_below(child, sibling)` immediately before it. The sibling must be
+  a direct child of the receiver; the new child must be detached. These calls
+  never silently reparent it.
 - `remove_child(child)` requires a direct child and transfers ownership back
   to the adapter. The child, its descendants, and their existing handles stay
   alive; it can be added to another parent. Implicit reparenting is refused.

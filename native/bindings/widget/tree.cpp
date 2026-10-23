@@ -84,6 +84,12 @@ void bindWidgetTrees(py::module_ raw) {
 		}, "Snapshot of checked handles; does not keep their parent or native storage alive.")
 		.def("add_child", [](const Handle& h, const Handle& c) { h.manager->add(h, c); }, py::arg("child"))
 		.def("add_child_bottom", [](const Handle& h, const Handle& c) { h.manager->add(h, c, true); }, py::arg("child"))
+		.def("add_child_above", [](const Handle& h, const Handle& c, const Handle& s) {
+			h.manager->addRelative(h, c, s, true);
+		}, py::arg("child"), py::arg("sibling"))
+		.def("add_child_below", [](const Handle& h, const Handle& c, const Handle& s) {
+			h.manager->addRelative(h, c, s, false);
+		}, py::arg("child"), py::arg("sibling"))
 		.def("remove_child", [](const Handle& h, const Handle& c) { h.manager->remove(h, c); }, py::arg("child"))
 		.def("clear_children", [](const Handle& h) { h.get().clearChildren(); })
 		.def("has_child", [](const Handle& h, const Handle& c) { return h.get().hasChild(&c.get()); }, py::arg("child"))

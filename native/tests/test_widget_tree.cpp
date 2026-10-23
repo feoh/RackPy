@@ -128,6 +128,53 @@ int main() {
 	nativeChild.removeChild(&nativeGrandchild);
 	manager->close(*geometryParent);
 
+	// Sibling insertion order and ownership are compared with ordinary SDK Widgets.
+	rack::widget::Widget nativeOrder;
+	auto* nativeA = new rack::widget::Widget;
+	auto* nativeB = new rack::widget::Widget;
+	auto* nativeAbove = new rack::widget::Widget;
+	auto* nativeBelow = new rack::widget::Widget;
+	nativeOrder.addChild(nativeA);
+	nativeOrder.addChild(nativeB);
+	nativeOrder.addChildAbove(nativeAbove, nativeA);
+	nativeOrder.addChildBelow(nativeBelow, nativeB);
+	auto orderParent = manager->create();
+	auto orderA = manager->create();
+	auto orderB = manager->create();
+	auto orderAbove = manager->create();
+	auto orderBelow = manager->create();
+	manager->add(*orderParent, *orderA);
+	manager->add(*orderParent, *orderB);
+	manager->addRelative(*orderParent, *orderAbove, *orderA, true);
+	manager->addRelative(*orderParent, *orderBelow, *orderB, false);
+	auto nativeIt = nativeOrder.children.begin();
+	for (auto* node : orderParent->get().children) {
+		assert(nativeIt != nativeOrder.children.end());
+		if (node == orderA->ptr) assert(*nativeIt == nativeA);
+		else if (node == orderB->ptr) assert(*nativeIt == nativeB);
+		else if (node == orderAbove->ptr) assert(*nativeIt == nativeAbove);
+		else if (node == orderBelow->ptr) assert(*nativeIt == nativeBelow);
+		else assert(false);
+		++nativeIt;
+	}
+	assert(nativeIt == nativeOrder.children.end());
+	auto failedParent = manager->create();
+	auto failedSibling = manager->create();
+	auto failedChild = manager->create();
+	manager->add(*failedParent, *failedSibling);
+	auto rootCount = manager->roots.size();
+	failAllocation.store(true);
+	bool relativeFailed = false;
+	try { manager->addRelative(*failedParent, *failedChild, *failedSibling, true); }
+	catch (const std::bad_alloc&) { relativeFailed = true; }
+	assert(relativeFailed && !failAllocation.load());
+	assert(failedChild->get().parent == nullptr && manager->roots.size() == rootCount);
+	assert(failedParent->get().children.size() == 1 && failedParent->get().children.front() == failedSibling->ptr);
+	manager->addRelative(*failedParent, *failedChild, *failedSibling, false);
+	manager->close(*orderParent);
+	manager->close(*failedParent);
+	nativeOrder.clearChildren();
+
 	// A worker dropping the last owning handle only flags collection. Native
 	// children remain alive until a main-thread drain, then become stale.
 	std::thread worker([held = std::move(r)]() mutable { held.reset(); });
