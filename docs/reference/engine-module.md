@@ -108,16 +108,28 @@ Accordingly the template, getter and raw-field manifest records remain
 production callback dispatches to Python in this slice.
 
 (standalone-quantities)=
-## Unattached standalone quantities
+## Standalone quantities and weak module attachment
 
 `rackpy.engine.ParamQuantity` and `SwitchQuantity` are aliases of the corresponding
 `rackpy.raw.engine` classes. They construct real, Python-owned SDK objects and
 inherit `rackpy.raw.Quantity`; a SwitchQuantity also inherits ParamQuantity.
-They are **unattached**, not a replacement for `Module.config_param` or an
-installable parameter factory. `module` is currently read-only and always `None`;
-`get_param()` returns `None`. Module attachment, ownership transfer, raw vector
-insertion and engine-owned smoothing remain RP-14B2b work. These partial mappings
-stay `planned` in the manifest, including their record entries.
+They are **not** installed in `Module` slots and are not replacements for
+`Module.config_param` or an installable parameter factory. Their mutable
+`module` field is a weak backreference: assigning a live RackPy `Module` preserves
+identity but neither retains that module nor transfers quantity ownership. Assign
+`None` to detach. When the module closes, construction rolls back or becomes
+unreachable, RackPy clears the native pointer and the quantity reads `None`.
+`get_param()` follows Rack's raw semantics and returns the matching borrowed Param,
+or `None` for a null module or invalid `param_id`.
+
+Attached value/display/helper/reset/randomize operations require a live bound Rack
+UI context and a valid parameter ID; invalid IDs are rejected before Rack's
+unchecked vector access. Unattached values retain Rack's null-module no-op/zero
+behavior. Smoothing writes to an attached quantity are refused because these
+objects are not registered with Engine; use `set_immediate_value()` where the
+immediate semantics are intended. Engine-owned smoothing, factory transfer and
+raw module-vector insertion remain unimplemented. The complete quantity manifest
+records remain `planned`, not complete mappings.
 
 Rack's null-module semantics are important: these quantities do **not** store a
 value. `get_value()` and `get_immediate_value()` return zero, and native setters,
@@ -145,7 +157,10 @@ explicit laboratory semantics. These standalone aliases are UI-only and are
 never installed in a Module or visited by the production engine.
 
 All native access, construction and field operations require Rack's main thread.
-Python code in an override is ordinary user code, not a sandbox or an audio
+Assigning a closed module or a non-Module value fails without changing an existing
+backreference. Closing or collecting a module clears the native pointer without
+keeping Python work on its teardown path; a quantity does not keep the module
+alive. Python code in an override is ordinary user code, not a sandbox or an audio
 callback. Inherited helper methods and direct base-class calls use the same
 native guards. Deprecated smooth-value methods emit `DeprecationWarning`.
 JSON methods remain RP-15 and are not exposed here.

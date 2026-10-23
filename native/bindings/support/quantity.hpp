@@ -29,45 +29,48 @@ struct UnguardedQuantity { static void check() {} };
 template <typename Base, typename Guard = UnguardedQuantity>
 struct QuantityTrampoline : Base, py::trampoline_self_life_support {
 	using Base::Base;
+	// Standalone attached quantities additionally guard engine-dependent UI
+	// calls. The default preserves Quantity/ValueQuantity's existing domain.
+	virtual void checkAccess(bool = false) const { Guard::check(); }
 	float getDisplayValue() override {
-		Guard::check();
+		checkAccess(true);
 		return overrideOr<float>(static_cast<const Base*>(this), "get_display_value", [this] { return Base::getDisplayValue(); });
 	}
 	void setDisplayValue(float v) override {
-		Guard::check();
+		checkAccess(true);
 		overrideOrVoid(static_cast<const Base*>(this), "set_display_value", [this, v] { Base::setDisplayValue(v); }, v);
 	}
 	int getDisplayPrecision() override {
-		Guard::check();
+		checkAccess();
 		return overrideOr<int>(static_cast<const Base*>(this), "get_display_precision", [this] { return Base::getDisplayPrecision(); });
 	}
 	std::string getDisplayValueString() override {
-		Guard::check();
+		checkAccess(true);
 		return overrideOr<std::string>(static_cast<const Base*>(this), "get_display_value_string", [this] { return Base::getDisplayValueString(); });
 	}
 	void setDisplayValueString(std::string s) override {
-		Guard::check();
+		checkAccess(true);
 		overrideOrVoid(static_cast<const Base*>(this), "set_display_value_string", [this, s] { Base::setDisplayValueString(s); }, s);
 	}
 	std::string getLabel() override {
-		Guard::check();
+		checkAccess();
 		return overrideOr<std::string>(static_cast<const Base*>(this), "get_label", [this] { return Base::getLabel(); });
 	}
 	std::string getUnit() override {
-		Guard::check();
+		checkAccess();
 		return overrideOr<std::string>(static_cast<const Base*>(this), "get_unit", [this] { return Base::getUnit(); });
 	}
 	std::string getString() override {
-		Guard::check();
+		checkAccess(true);
 		return overrideOr<std::string>(static_cast<const Base*>(this), "get_string", [this] { return Base::getString(); });
 	}
 	void reset() override {
-		Guard::check();
+		checkAccess(true);
 		ExclusiveBudget budget("Quantity.reset");
 		overrideOrVoid(static_cast<const Base*>(this), "reset", [this] { Base::reset(); });
 	}
 	void randomize() override {
-		Guard::check();
+		checkAccess(true);
 		ExclusiveBudget budget("Quantity.randomize");
 		overrideOrVoid(static_cast<const Base*>(this), "randomize", [this] { Base::randomize(); });
 	}

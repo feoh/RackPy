@@ -46,8 +46,9 @@ def test_unattached_native_defaults_and_noops(quantity_class: type[ParamQuantity
     assert q.is_min() and not q.is_max() and q.get_scaled_value() == 0
     owner = Module.create()
     try:
-        with pytest.raises(AttributeError):
-            q.module = owner  # type: ignore[misc, assignment]
+        q.module = owner
+        assert q.module is owner and q.get_param() is None
+        q.module = None
     finally:
         owner.close()
 

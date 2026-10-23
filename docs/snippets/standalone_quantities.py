@@ -2,6 +2,7 @@
 # rackpy-example: runs-in=rack
 from rackpy.engine import ParamQuantity, SwitchQuantity
 from rackpy.raw import Quantity
+from rackpy.raw.engine import Module
 
 
 class Captioned(ParamQuantity):
@@ -18,6 +19,17 @@ quantity.unit = " V"
 assert quantity.module is None and quantity.get_param() is None
 quantity.set_value(0.75)  # Rack's null-module setter is a no-op, not value storage.
 assert quantity.get_value() == 0
+
+# A weak attachment gives Rack's getParam/value semantics without transferring
+# this quantity into the module's engine-owned metadata slots.
+module = Module.create(lambda m: m.config(1, 0, 0))
+quantity.module = module
+quantity.param_id = 0
+assert quantity.module is module and quantity.get_param() is module.params[0]
+# Attached value/display methods are only valid with a live bound Rack UI context.
+quantity.module = None
+module.close()
+assert quantity.get_param() is None
 assert Quantity.get_label(quantity) == "Pitch (preview)"  # native virtual dispatch
 assert quantity.get_description().startswith("An unattached")
 

@@ -161,6 +161,25 @@ are not implemented. B2b waits for this child too; all remaining original B2b
 and parent obligations remain intact. This does not complete the implementation
 phase.
 
+**RP-14B2b4 — lifetime-safe attached standalone quantities**
+(`tk-rackpy-14b2b4-lifetime-safe-attached-standalone--e02465`). Complete the
+nullable mutable weak `ParamQuantity`/`SwitchQuantity.module` field and mutable
+`param_id`; preserve SDK `get_param` identity and null-on-invalid-ID semantics.
+Guard attached native immediate/value/display/helper/reset/randomize calls with
+checked IDs and a live Rack UI context. UI-safe overrides and base/error paths
+remain available. Reuse synchronized native backreference registration to clear
+the SDK module pointer on close, GC and constructor rollback without retaining a
+Module. Standalone quantity deletion on another thread detaches safely. Refuse
+smoothing-target writes for unregistered quantities; do not transfer into Module
+slots or register with the engine. Keep all 41 non-JSON quantity manifest entries
+`planned`: full factories/raw module collections/engine smoothing stay on B2b,
+mixed callbacks on RP-22, JSON on RP-15. Validate actual-host differential
+behavior, invalid IDs/null results, wrong thread/context/type/closed assignment,
+reassignment, rollback, owner GC, callback reentry/errors and 1,000 churns.
+Update strict types, runnable snippet, human docs and mapping evidence; run
+relevant hooks/native/host/introspection/coverage/docs checks and commit with a
+checkpoint. This child does not close B2b/B2/B/14 or the implementation phase.
+
 ## RackPy 14C: native lifecycle events and identity adapters
 
 **Witan slug:** `tk-rackpy-14c-native-lifecycle-events-and-identity--929845`
