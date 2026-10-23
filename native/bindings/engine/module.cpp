@@ -54,7 +54,7 @@ std::shared_ptr<module::Construction> lockOwner(const std::weak_ptr<module::Cons
 
 namespace {
 
-enum class Kind { Param, Input, Output, Light, ParamQuantity, InputInfo, OutputInfo, LightInfo };
+enum class Kind { Param, Input, Output, Light, ParamQuantity, InputInfo, OutputInfo, LightInfo, BypassRoute };
 
 /** A metadata view never owns the Module or the underlying metadata. Its
 slot generation dies on replacement, independently of the Module lifetime. */
@@ -115,6 +115,7 @@ int count(const ModuleRef& ref, Kind kind) {
 		case Kind::OutputInfo: return static_cast<int>(m.outputInfos.size());
 		case Kind::Light: return m.getNumLights();
 		case Kind::LightInfo: return static_cast<int>(m.lightInfos.size());
+		case Kind::BypassRoute: return static_cast<int>(m.bypassRoutes.size());
 	}
 	throw std::logic_error("unknown component kind");
 }
@@ -131,6 +132,7 @@ py::object component(const ModuleRef& ref, Kind kind, int i) {
 		case Kind::InputInfo: return infoView(ref, m.getInputInfo(i), m.inputInfoTokens[i]);
 		case Kind::OutputInfo: return infoView(ref, m.getOutputInfo(i), m.outputInfoTokens[i]);
 		case Kind::LightInfo: return infoView(ref, m.getLightInfo(i), m.lightInfoTokens[i]);
+		case Kind::BypassRoute: return py::cast(m.bypassRoutes[i], py::return_value_policy::copy);  // a value
 	}
 	throw std::logic_error("unknown component kind");
 }
@@ -193,6 +195,12 @@ struct SlotVector {
 	}
 };
 
+rack::engine::Module::BypassRoute routeValue(py::handle value) {
+	if (!py::isinstance<rack::engine::Module::BypassRoute>(value))
+		throw py::type_error("a module's bypass routes take Module.BypassRoute values");
+	return value.cast<rack::engine::Module::BypassRoute>();
+}
+
 /** Raw vector assignment of a Python-created PortInfo/LightInfo, or None.
 Unlike a class factory it sets no fields; the seal checks them. */
 template <typename Info>
@@ -225,11 +233,16 @@ void editVector(const ModuleRef& ref, Kind kind, F edit) {
 		case Kind::LightInfo:
 			return edit(SlotVector<rack::engine::LightInfo>{m.lightInfos, m.lightInfoTokens,
 				[&ref](py::handle v) { return takeInfo<rack::engine::LightInfo>(ref, v); }});
+		case Kind::BypassRoute:
+			return edit(ValueVector<rack::engine::Module::BypassRoute>{m.bypassRoutes, m.routesToken, &routeValue});
 	}
 }
 
-bool metadataKind(Kind kind) {
-	return kind == Kind::ParamQuantity || kind == Kind::InputInfo || kind == Kind::OutputInfo || kind == Kind::LightInfo;
+/** Edits only inside the constructor callback: owning metadata slots, and the
+bypass routes Rack's engine reads in processBypass. */
+bool constructorOnly(Kind kind) {
+	return kind == Kind::ParamQuantity || kind == Kind::InputInfo || kind == Kind::OutputInfo || kind == Kind::LightInfo ||
+		kind == Kind::BypassRoute;
 }
 
 /** Collections do not keep a module alive. Individual component views have
@@ -257,7 +270,7 @@ struct Components {
 	other edit, and any metadata slot assignment, only during construction. */
 	void set(long i, py::handle value) const {
 		ModuleRef r = ref();
-		if (metadataKind(kind))
+		if (constructorOnly(kind))
 			r.state->requireRawEdit();
 		size_t at = module::Construction::editIndex(i, count(r, kind));
 		editVector(r, kind, [&](auto vector) { vector.set(at, value); });
@@ -582,12 +595,9 @@ void bindModule(py::module_ engine) {
 		.def("config_bypass", [](const ModuleRef& r, int i, int o) { r.state->configBypass(i, o); },
 			py::arg("input_id"), py::arg("output_id"))
 		.def_property_readonly("bypass_routes", [](const ModuleRef& r) {
-			py::tuple result(r.get().bypassRoutes.size());
-			size_t i = 0;
-			for (const auto& route : r.get().bypassRoutes)
-				result[i++] = py::cast(route, py::return_value_policy::copy);
-			return result;
-		}, "Copied route values, not a mutable alias of Rack's vector.");
+			r.get();
+			return Components{r.state, Kind::BypassRoute};
+		}, "Rack's bypass routes: reading gives copies; inside the constructor callback the collection takes raw edits.");
 
 	struct Group { Kind kind; const char* field; const char* count; const char* get; };
 	for (const auto& g : std::vector<Group>{

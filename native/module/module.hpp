@@ -119,6 +119,8 @@ struct Module : rack::engine::Module {
 	std::shared_ptr<runtime::ObjectToken> inputsToken = std::make_shared<runtime::ObjectToken>(nullptr);
 	std::shared_ptr<runtime::ObjectToken> outputsToken = std::make_shared<runtime::ObjectToken>(nullptr);
 	std::shared_ptr<runtime::ObjectToken> lightsToken = std::make_shared<runtime::ObjectToken>(nullptr);
+	// Bypass routes are copied out, never borrowed; edits renew this for uniformity.
+	std::shared_ptr<runtime::ObjectToken> routesToken = std::make_shared<runtime::ObjectToken>(nullptr);
 	// One generation per metadata slot. Replacement must invalidate retained
 	// views even while the module (and its component token) is still alive.
 	using Tokens = std::vector<std::shared_ptr<runtime::ObjectToken>>;

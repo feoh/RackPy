@@ -104,11 +104,13 @@ def test_invalid_counts_and_ids_are_checked_before_rack() -> None:
     assert (route.input_id, route.output_id) == (-1, -1)
     route.input_id, route.output_id = 1, 0
     assert (route.input_id, route.output_id) == (1, 0)
-    snapshot = m.bypass_routes
-    snapshot[0].output_id = 99
-    assert m.bypass_routes[0].output_id == 1  # explicit copy, cannot corrupt routing
+    copied = m.bypass_routes[0]
+    copied.output_id = 99
+    assert m.bypass_routes[0].output_id == 1  # reading copies: it cannot corrupt routing
+    with pytest.raises(OwnershipError, match="constructor"):
+        m.bypass_routes[0] = copied  # route edits are constructor-only (RP-14C4)
     m.close()
-    assert snapshot[0].output_id == 99  # value survives
+    assert copied.output_id == 99  # value survives
     with pytest.raises(TypeError, match="callable"):
         Module.create(123)  # type: ignore[call-overload]
 

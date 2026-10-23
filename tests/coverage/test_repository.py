@@ -67,9 +67,10 @@ def test_every_module_gap_retains_a_responsible_task() -> None:
     for record in records:
         assert record["status"] in {"planned", "unreviewed"}
         assert record["notes"].startswith("Responsible task: RP-"), record["id"]
-    # Copied route snapshots do not claim the public bypassRoutes vector is mapped (RP-14C).
+    # Every public Module vector is mapped (RP-14B2b7, RP-14C4).
     incomplete = {r["id"].rsplit("::", 1)[-1] for r in records}
-    assert "bypassRoutes" in incomplete
+    vectors = {"params", "inputs", "outputs", "lights", "bypassRoutes", "paramQuantities", "inputInfos", "outputInfos"}
+    assert not vectors & incomplete
 
 
 @pytest.mark.parametrize(

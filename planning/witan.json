@@ -26,6 +26,7 @@
     "RP-14C1": "tk-rackpy-14c1-module-identity-bypass-query-and-dep-6e3021",
     "RP-14C2": "tk-rackpy-14c2-engine-ownership-rack-side-deletion--15472f",
     "RP-14C3": "tk-rackpy-14c3-native-lifecycle-event-adapters-and--be0036",
+    "RP-14C4": "tk-rackpy-14c4-constructor-scoped-bypass-routes-and-3eab37",
     "RP-25A": "tk-rackpy-25a-checked-detached-native-widget-tree-o-79a09d"
   },
   "tasks": {

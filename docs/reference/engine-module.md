@@ -56,9 +56,10 @@ is never stored in the native module, and no audio path invokes it.
 `module.id` is Rack's engine ID: `-1` until an engine assigns one (Rack keeps
 IDs below 2^53 so they survive JSON, but any 64-bit integer is accepted, as in
 C++). It can be assigned only inside the constructor callback; `get_id()` is
-Rack's getter. `is_bypassed()` is Rack's query, and is `False` until a Rack
-engine owns and bypasses the module, which these modules cannot be yet. Both
-need the main thread. The `model` field and `get_model()` wait for model
+Rack's getter. `is_bypassed()` is Rack's query, and is `False` until Rack's
+engine owns and bypasses the module ([engine ownership](#engine-ownership);
+nothing public hands a module to the engine before RP-16). Both need the main
+thread. The `model` field and `get_model()` wait for model
 handles (RP-16). Engine ownership, its deletion path and lifecycle events are
 the rest of RP-14C.
 
@@ -565,11 +566,23 @@ voltages; the test-hooks build compares it against a standalone C++ reference
 for 0, 1 and 16 channels. It is not yet a public Python callback mapping.
 
 `Module.BypassRoute()` is an independent value with mutable `input_id` and
-`output_id`, initially -1. `module.bypass_routes` returns a tuple of copied
-route values. Changing those copies cannot corrupt native routing. Since this
-does not map arbitrary mutation of the public C++ `bypassRoutes` vector, that
-field stays `planned` for RP-14C. Never confuse a snapshot with a write-through
-route editor.
+`output_id`, initially -1. `module.bypass_routes` is a checked collection of
+Rack's route vector whose items are **copies**: changing a copy cannot corrupt
+routing. Inside the constructor callback, after `config`, it takes Rack's raw
+vector edits like the other [raw module vectors](#raw-module-vectors): item
+assignment of a `BypassRoute`, `del`, `insert`, `append`, `clear` and
+`resize` (new routes are `(-1, -1)`). A raw edit can create a second route to
+the same output, as C++ can; `config_bypass` still refuses that, as Rack's
+`configBypass` asserts. The seal rejects routes outside the port vectors, and
+after it route edits raise `OwnershipError`, because Rack's engine reads the
+routes while it processes a bypassed module.
+
+When Rack's engine owns the module and bypasses it, Rack calls
+`processBypass` instead of `process`: each route copies its input's channels
+and voltages to its output. The live-UI tests drive this through cables in
+the real engine with 0, 1 and 16 channels and compare the output with Rack's
+own `processBypass` on a plain module (RP-14C4). Enabling the module again
+clears its outputs, as Rack does.
 
 ## Remaining proof gates
 

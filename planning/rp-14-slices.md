@@ -302,3 +302,10 @@ refuse engine re-entry from Python run inside. Python drains snapshots
 directly on a sealed Python-owned module. Event records are implemented; the
 `on*` records stay planned for Python overrides (RP-16 module classes for UI
 events, RP-22 for driver events).
+
+**RP-14C4 — constructor-scoped bypass routes and engine bypass routing**
+(`tk-rackpy-14c4-constructor-scoped-bypass-routes-and-3eab37`). Exact scope:
+`Module::bypassRoutes`, under the owner's constructor-scoped raw-vector
+decision: reads are copies, raw edits only in the constructor callback after
+`config`, the seal rejects out-of-range routes, and real-engine bypass routing
+through cables with 0, 1 and 16 channels matches Rack's `processBypass`.

@@ -404,3 +404,37 @@ def test_one_thousand_raw_edits_and_owner_churns() -> None:
     gc.collect()
     assert not owners
     assert _rackpy_host.transferred_objects() == baseline
+
+
+def test_bypass_routes_take_constructor_scoped_raw_edits() -> None:
+    def configure(m: Module) -> None:
+        m.config_bypass(0, 0)
+        routes = m.bypass_routes
+        route = Module.BypassRoute()
+        route.input_id, route.output_id = 1, 0
+        routes.append(route)  # a duplicate output route: possible in C++, unlike configBypass
+        routes.insert(0, routes[1])
+        assert [(r.input_id, r.output_id) for r in routes] == [(1, 0), (0, 0), (1, 0)]
+        del routes[-1]
+        routes[1] = route
+        with pytest.raises(TypeError, match="BypassRoute values"):
+            routes[0] = (0, 0)  # type: ignore[assignment]
+        routes.resize(3)  # default routes are (-1, -1): the seal would refuse them
+        assert [(r.input_id, r.output_id) for r in routes][2] == (-1, -1)
+        routes.resize(2)
+
+    m = build(configure, (0, 2, 1, 0))
+    try:
+        assert [(r.input_id, r.output_id) for r in m.bypass_routes] == [(1, 0), (1, 0)]
+        late: list[Callable[[], object]] = [lambda: m.bypass_routes.append(Module.BypassRoute()), m.bypass_routes.clear]
+        for edit in late:
+            with pytest.raises(OwnershipError, match="constructor"):
+                edit()
+    finally:
+        m.close()
+
+    def bad_route(m: Module) -> None:
+        m.bypass_routes.append(Module.BypassRoute())
+
+    with pytest.raises(ValueError, match="bypass route outside"):
+        build(bad_route, (0, 1, 1, 0))
