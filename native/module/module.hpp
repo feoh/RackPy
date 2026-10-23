@@ -53,6 +53,8 @@ struct TransferredMetadata {
 	/** A raw vector edit drops the pointer without deleting the object: it
 	becomes an ordinary Python-owned object again (RP-14B2b7). */
 	virtual void release() noexcept = 0;
+	/** Its Python object (a PyObject*), for the owner's garbage-collector traversal. */
+	virtual void* pythonObject() const noexcept = 0;
 };
 
 /** The transferred object in a slot, or null for native-created metadata. */
@@ -73,6 +75,17 @@ void dispose(Info* info) {
 
 struct Construction;
 
+/** Python's custom state for one module (RP-15A): Rack's dataToJson and
+dataFromJson call these synchronously. The implementation lives with the
+bindings; this interface keeps the module Python-free. */
+struct DataHandlers {
+	virtual ~DataHandlers() = default;
+	/** A new reference, or null for "no data". Never throws. */
+	virtual json_t* toJson() noexcept = 0;
+	/** `data` is borrowed. Never throws. */
+	virtual void fromJson(json_t* data) noexcept = 0;
+};
+
 /** A pointer a raw vector edit removes. Native-created metadata has no other
 owner, so it is deleted; its views are invalidated by their slot token. */
 template <typename Info>
@@ -92,6 +105,10 @@ struct Module : rack::engine::Module {
 	std::weak_ptr<Construction> construction;
 	// Events Rack dispatched, for Python to read later on the main thread.
 	LifecycleRing lifecycle;
+	// Set inside the constructor callback (Module.set_data_handlers); may be null.
+	std::unique_ptr<DataHandlers> dataHandlers;
+	json_t* dataToJson() override;
+	void dataFromJson(json_t* rootJ) override;
 
 	// Native lifecycle adapters (lifecycle.cpp, Python-free): Rack's behaviour,
 	// then a snapshot. No Module virtual dispatches to Python.

@@ -7,7 +7,9 @@
 #include "components.hpp"
 #include "metadata.hpp"
 #include "quantity.hpp"
+#include "../support/hooks.hpp"
 #include "../support/overrides.hpp"
+#include "rackpy/runtime/json.hpp"
 #include "../values/values.hpp"
 
 #include <pybind11/stl.h>
@@ -401,6 +403,99 @@ void dispatch(const ModuleRef& r, F handler) {
 	handler(m);
 }
 
+/** Python callables for Rack's dataToJson/dataFromJson (owner decision 2026-10-23). */
+struct PyDataHandlers : module::DataHandlers {
+	runtime::PyRef toJsonFn, fromJsonFn;
+	json_t* toJson() noexcept override {
+		json_t* result = nullptr;
+		if (toJsonFn)
+			runPythonHook("Module.data_to_json", [&] {
+				py::object value = toJsonFn.get()();
+				if (!value.is_none())
+					result = runtime::toJson(value);
+			});
+		return result;
+	}
+	void fromJson(json_t* data) noexcept override {
+		if (fromJsonFn)
+			runPythonHook("Module.data_from_json", [&] { fromJsonFn.get()(runtime::fromJson(data)); });
+	}
+};
+
+using JsonPtr = std::unique_ptr<json_t, decltype(&json_decref)>;
+
+/** Module JSON needs a sealed module (Rack's code assumes the seal's invariants). */
+module::Module& sealedModule(const ModuleRef& r) {
+	module::Module& m = r.get();
+	if (r.state->constructing)
+		throw runtime::Ownership("module JSON is available only after the constructor callback returns");
+	return m;
+}
+
+std::shared_ptr<runtime::ContextToken> liveContext(const char* what) {
+	auto context = runtime::binding().current();
+	if (!context || rack::contextGet() != context->context || !context->context->engine)
+		throw runtime::WrongContext(std::string(what) + " needs Rack's live bound UI context");
+	return context;
+}
+
+/** Rack's Module JSON from Python. For a Python-owned module the call runs
+here with the GIL, so a handler's or override's error reaches the caller.
+For one Rack's engine owns, `viaEngine` takes the engine lock as Rack does,
+with the GIL released; Python inside is then contained, as on a real save. */
+template <typename Direct, typename ViaEngine>
+auto moduleJson(const ModuleRef& r, const char* what, bool needsEngine, Direct direct, ViaEngine viaEngine) {
+	module::Module& m = sealedModule(r);
+	if (m.engineOwned.load(std::memory_order_acquire)) {
+		runtime::refuseEngineReentry(what);
+		auto context = liveContext(what);
+		py::gil_scoped_release release;
+		runtime::EngineLease lease(*context);
+		return viaEngine(m);
+	}
+	if (needsEngine)
+		liveContext(what);
+	ErrorCapture capture;
+	auto result = direct(m);
+	capture.rethrow();
+	return result;
+}
+
+/** A Python-owned module's handle owns, through native code, its data handlers
+and its slots' transferred Python objects: report those edges to Python's
+garbage collector, so cycles back to the handle (a handler closure, a
+subclass attribute) are collected. A module Rack owns is not the handle's:
+nothing is reported, and nothing is cleared. */
+int traverseModule(PyObject* self, visitproc visit, void* arg) {
+	Py_VISIT(Py_TYPE(self));
+	auto& ref = py::cast<ModuleRef&>(py::handle(self));
+	if (!ref.state || !ref.state->object)
+		return 0;
+	module::Module& m = *ref.state->object;
+	if (auto* handlers = dynamic_cast<PyDataHandlers*>(m.dataHandlers.get())) {
+		Py_VISIT(handlers->toJsonFn.borrowed());
+		Py_VISIT(handlers->fromJsonFn.borrowed());
+	}
+	for (auto* q : m.paramQuantities)
+		if (auto* t = module::transferredIn(q))
+			Py_VISIT(static_cast<PyObject*>(t->pythonObject()));
+	for (auto* infos : {&m.inputInfos, &m.outputInfos})
+		for (auto* info : *infos)
+			if (auto* t = module::transferredIn(info))
+				Py_VISIT(static_cast<PyObject*>(t->pythonObject()));
+	for (auto* info : m.lightInfos)
+		if (auto* t = module::transferredIn(info))
+			Py_VISIT(static_cast<PyObject*>(t->pythonObject()));
+	return 0;
+}
+
+int clearModule(PyObject* self) {
+	auto& ref = py::cast<ModuleRef&>(py::handle(self));
+	if (ref.state && ref.state->object)
+		ref.state->object->dataHandlers.reset();  // slot objects clear their own references
+	return 0;
+}
+
 template <typename Event>
 void bindEvent(py::class_<ModuleRef>& cls, const char* name, const char* doc) {
 	py::class_<Event>(cls, name, doc).def(py::init<>()).def("__repr__", [name](const Event&) {
@@ -449,8 +544,12 @@ void bindModule(py::module_ engine) {
 			return items.attr("__iter__")();
 		});
 
-	auto cls = py::class_<ModuleRef>(engine, "Module",
-		"An owned native Rack module, built with Module.create(configure). Not yet registerable as a plugin model.");
+	auto cls = py::class_<ModuleRef>(engine, "Module", py::custom_type_setup([](PyHeapTypeObject* heap) {
+		auto* type = &heap->ht_type;
+		type->tp_flags |= Py_TPFLAGS_HAVE_GC;
+		type->tp_traverse = traverseModule;
+		type->tp_clear = clearModule;
+	}), "An owned native Rack module, built with Module.create(configure). Not yet registerable as a plugin model.");
 	py::class_<rack::engine::Module::BypassRoute>(cls, "BypassRoute", "A route value; module.bypass_routes returns copies.")
 		.def(py::init<>())
 		.def_readwrite("input_id", &rack::engine::Module::BypassRoute::inputId)
@@ -527,6 +626,81 @@ void bindModule(py::module_ engine) {
 			});
 		});
 	}
+
+	// --- JSON (RP-15A) ---------------------------------------------------------
+	cls.def("set_data_handlers", [](const ModuleRef& r, py::object toJson, py::object fromJson) {
+		r.state->requireConstruction();
+		for (const py::object& f : {toJson, fromJson})
+			if (!f.is_none() && !PyCallable_Check(f.ptr()))
+				throw py::type_error("data handlers must be callable or None");
+		std::unique_ptr<PyDataHandlers> handlers;
+		if (!toJson.is_none() || !fromJson.is_none()) {
+			handlers = std::make_unique<PyDataHandlers>();
+			if (!toJson.is_none())
+				handlers->toJsonFn = runtime::PyRef(toJson);
+			if (!fromJson.is_none())
+				handlers->fromJsonFn = runtime::PyRef(fromJson);
+		}
+		r.get().dataHandlers = std::move(handlers);
+	}, py::arg("to_json") = py::none(), py::arg("from_json") = py::none(),
+		"Rack's dataToJson/dataFromJson for this module: to_json() returns JSON-compatible data or None (no data); "
+		"from_json(data) receives it. Constructor-only.")
+		.def("to_json", [](const ModuleRef& r) {
+			module::Module& m = sealedModule(r);
+			if (!m.model)
+				throw runtime::Ownership("Rack's Module::toJson names the module's model, and this module has none yet (RP-16)");
+			json_t* json = moduleJson(r, "Module.to_json", true, [](module::Module& m) { return m.toJson(); },
+				[](module::Module& m) { return APP->engine->moduleToJson(&m); });
+			JsonPtr owner(json, json_decref);
+			return runtime::fromJson(json);
+		}, "Rack's Module::toJson: id, plugin, model, version, params, bypass, expanders and data.")
+		.def("from_json", [](const ModuleRef& r, py::handle data) {
+			module::Module& m = sealedModule(r);
+			if (!m.model)
+				throw runtime::Ownership("Rack's Module::fromJson checks the module's model, and this module has none yet (RP-16)");
+			JsonPtr json(runtime::toJson(data), json_decref);
+			moduleJson(r, "Module.from_json", true, [&](module::Module& m) { m.fromJson(json.get()); return 0; },
+				[&](module::Module& m) { APP->engine->moduleFromJson(&m, json.get()); return 0; });
+		}, py::arg("data"))
+		.def("params_to_json", [](const ModuleRef& r) {
+			auto native = [](module::Module& m) { return m.paramsToJson(); };
+			json_t* json = moduleJson(r, "Module.params_to_json", true, native, native);
+			JsonPtr owner(json, json_decref);
+			return runtime::fromJson(json);
+		})
+		.def("params_from_json", [](const ModuleRef& r, py::handle data) {
+			JsonPtr json(runtime::toJson(data), json_decref);
+			auto native = [&](module::Module& m) { m.paramsFromJson(json.get()); return 0; };
+			moduleJson(r, "Module.params_from_json", true, native, native);
+		}, py::arg("data"))
+		.def("data_to_json", [](const ModuleRef& r) {
+			auto native = [](module::Module& m) { return m.dataToJson(); };
+			json_t* json = moduleJson(r, "Module.data_to_json", false, native, native);
+			JsonPtr owner(json, json_decref);
+			return runtime::fromJson(json);
+		}, "The module's custom data, as Rack saves it: None for none.")
+		.def("data_from_json", [](const ModuleRef& r, py::handle data) {
+			JsonPtr json(runtime::toJson(data), json_decref);
+			auto native = [&](module::Module& m) { m.dataFromJson(json.get()); return 0; };
+			moduleJson(r, "Module.data_from_json", false, native, native);
+		}, py::arg("data"));
+
+	// --- Patch storage (RP-15B) -------------------------------------------------
+	auto storage = [](const ModuleRef& r, bool create) {
+		module::Module& m = sealedModule(r);
+		liveContext("patch storage");
+		// Rack raises its own Exception for a module without an engine ID.
+		py::gil_scoped_release release;  // createDirectories is blocking filesystem work
+		return create ? m.createPatchStorageDirectory() : m.getPatchStorageDirectory();
+	};
+	cls.def("get_patch_storage_directory", [storage](const ModuleRef& r) { return storage(r, false); },
+		"Rack's per-module directory in the patch's autosave folder; needs an engine ID.")
+		.def("create_patch_storage_directory", [storage](const ModuleRef& r) { return storage(r, true); },
+			"Create (if needed) and return Rack's patch storage directory. Rack, not RackPy, removes it.")
+		.def("patch_storage", [storage](const ModuleRef& r, bool create) {
+			std::string path = storage(r, create);
+			return py::module_::import("pathlib").attr("Path")(path);
+		}, py::arg("create") = true, "The patch storage directory as a pathlib.Path, created unless create=False.");
 
 	cls.def_static("create", &create, py::arg("configure") = py::none())
 		.def_static("create", &createConfigured, py::arg("num_params"), py::arg("num_inputs"), py::arg("num_outputs"),

@@ -40,6 +40,12 @@ context-closing hooks run after Python workers stop and before EventState dies. 
 void onUiStep(std::function<void()> action);
 void onContextClosing(std::function<void()> action);
 
+/** Graphics lifetime is shorter than Context lifetime: an embedded host can
+recreate its window. Hooks run after scene event delivery while the old/new
+window context is still current, without treating recreation as shutdown. */
+void onGraphicsContextDestroy(std::function<void()> action);
+void onGraphicsContextCreate(std::function<void()> action);
+
 /** How finalize() ended, for tests: "finalized", "refused" or "not started". */
 std::string finalizeOutcome();
 

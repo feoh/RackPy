@@ -5,7 +5,9 @@
 #include "components.hpp"
 #include "metadata.hpp"
 #include "rackpy/runtime/python.hpp"
+#include "../support/hooks.hpp"
 #include "../support/quantity.hpp"
+#include "rackpy/runtime/json.hpp"
 
 #include <pybind11/stl.h>
 
@@ -97,6 +99,29 @@ struct StandaloneQuantity : QuantityTrampoline<Base, StandaloneGuard>, SlotTrans
 	std::string getDescription() override {
 		guard();
 		return overrideOr<std::string>(static_cast<const Base*>(this), "get_description", [this] { return Base::getDescription(); });
+	}
+	// JSON (RP-15A): Rack's paramsToJson calls toJson for every quantity (ui-shared).
+	// A Python override's dict becomes the JSON; if it fails, Rack's answer is used.
+	json_t* toJson() override {
+		checkAccess(true);
+		json_t* result = nullptr;
+		runPythonHook("ParamQuantity.to_json", [&] {
+			if (py::function f = py::get_override(static_cast<const Base*>(this), "to_json"))
+				result = runtime::toJson(f());
+		});
+		return result ? result : Base::toJson();
+	}
+	void fromJson(json_t* rootJ) override {
+		checkAccess(true);
+		bool handled = false;
+		runPythonHook("ParamQuantity.from_json", [&] {
+			if (py::function f = py::get_override(static_cast<const Base*>(this), "from_json")) {
+				f(runtime::fromJson(rootJ));
+				handled = true;
+			}
+		});
+		if (!handled)
+			Base::fromJson(rootJ);
 	}
 };
 
@@ -199,6 +224,18 @@ void bindStandaloneQuantities(py::module_ engine) {
 		.def("get_display_value_string", [](Q& q) { return q.getDisplayValueString(); })
 		.def("set_display_value_string", [](Q& q, std::string s) { q.setDisplayValueString(std::move(s)); }, py::arg("s"))
 		.def("reset", [](Q& q) { q.reset(); })
+		.def("to_json", [](Q& q) {
+			ErrorCapture capture;
+			std::unique_ptr<json_t, decltype(&json_decref)> json(q.toJson(), json_decref);
+			capture.rethrow();
+			return runtime::fromJson(json.get());
+		}, "Rack's ParamQuantity::toJson, or a Python override's dict. Needs Rack's live bound UI context when attached.")
+		.def("from_json", [](Q& q, py::handle data) {
+			std::unique_ptr<json_t, decltype(&json_decref)> json(runtime::toJson(data), json_decref);
+			ErrorCapture capture;
+			q.fromJson(json.get());
+			capture.rethrow();
+		}, py::arg("data"))
 		.def("randomize", [](Q& q) { q.randomize(); })
 		.def("set_smooth_value", [](Q& q, float value) {
 			guard(q);

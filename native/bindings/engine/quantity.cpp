@@ -8,6 +8,7 @@
 #include <limits>
 #include <optional>
 
+#include "rackpy/runtime/json.hpp"
 #include "rackpy/runtime/python.hpp"
 
 namespace rackpy {
@@ -225,6 +226,15 @@ void bindQuantityViews(py::module_ engine) {
 		})
 		.def("set_display_value_string", [](const QuantityView& v, std::string s) { withEngine(v, [&s](Q& q) { q.setDisplayValueString(s); }); }, py::arg("s"))
 		.def("reset", [](const QuantityView& v) { withEngine(v, [](Q& q) { q.reset(); }); })
+		.def("to_json", [](const QuantityView& v) {
+			json_t* json = withEngine(v, [](Q& q) { return q.toJson(); });
+			std::unique_ptr<json_t, decltype(&json_decref)> owner(json, json_decref);
+			return runtime::fromJson(json);
+		})
+		.def("from_json", [](const QuantityView& v, py::handle data) {
+			std::unique_ptr<json_t, decltype(&json_decref)> json(runtime::toJson(data), json_decref);
+			withEngine(v, [&](Q& q) { q.fromJson(json.get()); });
+		}, py::arg("data"))
 		.def("randomize", [](const QuantityView& v) { withEngine(v, [](Q& q) { q.randomize(); }); })
 		.def("set_smooth_value", [](const QuantityView& v, float x) {
 			v.get();

@@ -24,6 +24,7 @@ def test_widget_live_ui(make_hooks_bundle: Callable[[], Path], rack_host: Path, 
         make_hooks_bundle(), rack_host, tmp_path, SUITE, args=["-k", "not startup_only"], during_ui=True
     )
     assert result.run.lines("detached-widget-cleanup-ok"), result.summary()
+    assert result.run.lines("scene-widget-teardown-ok"), result.summary()
     assert not result.run.lines("UI cleanup failed"), result.summary()
     assert result.exit == 0, result.summary()
     assert result.outcomes() and set(result.outcomes().values()) == {"passed"}, result.summary()

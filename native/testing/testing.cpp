@@ -5,6 +5,7 @@
 
 #include "../bindings/engine/components.hpp"
 #include "../bindings/engine/module.hpp"
+#include "../bindings/widget/managed.hpp"
 #include "../tests/quantity_reference.hpp"
 #include "rackpy/runtime/json.hpp"
 
@@ -274,6 +275,82 @@ void define(py::module_ m) {
 		owned->transferred = true;
 		noteTransferred();
 		pm.widget->addChild(owned.release());  // Rack's widget tree owns it now
+	});
+	// RP-25: Rack-owned parents for managed Python widgets, built as Rack builds them.
+	m.def("add_probe_module", [] {
+		// As the module browser adds a module: Module, engine, ModuleWidget, rack.
+		requireMainThread("add_probe_module");
+		refuseEngineReentry("add_probe_module");
+		std::shared_ptr<ContextToken> ctx = liveContext();
+		ProbeModule* pm = static_cast<ProbeModule*>(model->createModule());
+		{
+			py::gil_scoped_release release;
+			EngineLease lease(*ctx);
+			APP->engine->addModule(pm);
+		}
+		APP->scene->rack->addModuleAtMouse(model->createModuleWidget(pm));
+		return ProbeModule::handleFor(pm);
+	});
+	m.def("module_widget_add_child", [](const ModuleHandle& h, py::object child) {
+		requireMainThread("module_widget_add_child");
+		ProbeModule& pm = live(h);
+		if (!pm.widget)
+			throw Ownership("this module has no widget to attach to");
+		widgets::transferToHost(*pm.widget, child);
+	});
+	m.def("remove_probe_module", [](const ModuleHandle& h) {
+		// As ModuleWidget::removeAction, without history: the rack lets go, then
+		// ~ModuleWidget deletes its children before the engine removes the module.
+		requireMainThread("remove_probe_module");
+		refuseEngineReentry("remove_probe_module");
+		std::shared_ptr<ContextToken> ctx = liveContext();
+		ProbeWidget* mw = live(h).widget;
+		if (!mw)
+			throw Ownership("this module has no widget to remove");
+		if (mw == driver)
+			throw Ownership("the module running the tests cannot remove itself");
+		// Cable removal and module deletion take the engine lock: release the GIL.
+		py::gil_scoped_release release;
+		EngineLease lease(*ctx);
+		APP->scene->rack->removeModule(mw);
+		delete mw;
+	});
+	m.def("render_browser_preview", [](py::object child) {
+		// As the module browser's ModelBox::createPreview, then the ModelBox's
+		// deletion: a null-module ModuleWidget in a zoomed framebuffer, stepped once.
+		requireMainThread("render_browser_preview");
+		liveContext();
+		std::unique_ptr<rack::widget::Widget> preview(new rack::widget::TransparentWidget);
+		auto* zoom = new rack::widget::ZoomWidget;
+		preview->addChild(zoom);
+		auto* fb = new rack::widget::FramebufferWidget;
+		if (APP->window->pixelRatio < 2.0)
+			fb->oversample = 2.0;
+		zoom->addChild(fb);
+		auto* container = new rack::widget::Widget;
+		fb->addChild(container);
+		rack::app::ModuleWidget* mw = model->createModuleWidget(nullptr);
+		container->addChild(mw);
+		container->box.size = mw->box.size;
+		// The browser draws fb through the ZoomWidget; render() directly needs fb's own clip box.
+		fb->box.size = mw->box.size;
+		widgets::transferToHost(*mw, child);
+		mw->step();
+		zoom->setZoom(0.5f);
+		fb->render();
+	});
+	m.def("recreate_graphics_context", [] {
+		// As a host that recreates its window, which Rack Free never does: Rack's
+		// own ContextDestroy and ContextCreate events, through the whole scene.
+		requireMainThread("recreate_graphics_context");
+		liveContext();
+		NVGcontext* vg = APP->window->vg;
+		rack::widget::Widget::ContextDestroyEvent destroyed;
+		destroyed.vg = vg;
+		APP->scene->onContextDestroy(destroyed);
+		rack::widget::Widget::ContextCreateEvent created;
+		created.vg = vg;
+		APP->scene->onContextCreate(created);
 	});
 	m.def("with_foreign_context", [](py::function f) {
 		std::shared_ptr<ContextToken> refused = binding().observe(foreignContext());

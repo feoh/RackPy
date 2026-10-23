@@ -5,7 +5,7 @@
 #include <new>
 #include <thread>
 
-#include "../widget/tree.hpp"
+#include "../widget/geometry.hpp"
 
 // Fail the actual SDK child-list allocation, including its early parent
 // assignment. Replacement allocators are confined to this test executable.
@@ -86,6 +86,147 @@ int main() {
 	d->get().setVisible(false);
 	second->setVisible(false);
 	assert(r->get().getVisibleChildrenBoundingBox() == native.getVisibleChildrenBoundingBox());
+
+	// Compare geometry, event-triggering setters and coordinate/viewport
+	// operations directly with ordinary Rack SDK Widgets.
+	rack::widget::Widget nativeParent, nativeChild, nativeGrandchild;
+	nativeParent.setPosition(rack::math::Vec(10, 20));
+	nativeParent.setSize(rack::math::Vec(100, 80));
+	nativeChild.setPosition(rack::math::Vec(5, 6));
+	nativeChild.setSize(rack::math::Vec(20, 15));
+	nativeGrandchild.setPosition(rack::math::Vec(2, 3));
+	nativeGrandchild.setSize(rack::math::Vec(4, 5));
+	nativeParent.addChild(&nativeChild);
+	nativeChild.addChild(&nativeGrandchild);
+	auto geometryParent = manager->create();
+	auto geometryChild = manager->create();
+	auto geometryGrandchild = manager->create();
+	geometryParent->get().setPosition(rack::math::Vec(10, 20));
+	geometryParent->get().setSize(rack::math::Vec(100, 80));
+	geometryChild->get().setPosition(rack::math::Vec(5, 6));
+	geometryChild->get().setSize(rack::math::Vec(20, 15));
+	geometryGrandchild->get().setPosition(rack::math::Vec(2, 3));
+	geometryGrandchild->get().setSize(rack::math::Vec(4, 5));
+	manager->add(*geometryParent, *geometryChild);
+	manager->add(*geometryChild, *geometryGrandchild);
+	auto& geometry = geometryGrandchild->get();
+	assert(geometry.getPosition() == nativeGrandchild.getPosition());
+	assert(geometry.getSize() == nativeGrandchild.getSize());
+	assert(geometry.isDescendantOf(&geometryParent->get()) == nativeGrandchild.isDescendantOf(&nativeParent));
+	assert(geometry.getAbsoluteOffset(rack::math::Vec(1, 2)) == nativeGrandchild.getAbsoluteOffset(rack::math::Vec(1, 2)));
+	assert(geometry.getRelativeOffset(rack::math::Vec(1, 2), &geometryChild->get()) ==
+		nativeGrandchild.getRelativeOffset(rack::math::Vec(1, 2), &nativeChild));
+	assert(geometry.getRelativeZoom(&geometryParent->get()) == nativeGrandchild.getRelativeZoom(&nativeParent));
+	assert(geometry.getViewport(rack::math::Rect::inf()) == nativeGrandchild.getViewport(rack::math::Rect::inf()));
+	geometry.hide();
+	nativeGrandchild.hide();
+	assert(!geometry.isVisible() && geometry.isVisible() == nativeGrandchild.isVisible());
+	geometry.show();
+	nativeGrandchild.show();
+	assert(geometry.isVisible() && geometry.isVisible() == nativeGrandchild.isVisible());
+	nativeParent.removeChild(&nativeChild);
+	nativeChild.removeChild(&nativeGrandchild);
+	manager->close(*geometryParent);
+
+	// Sibling insertion order and ownership are compared with ordinary SDK Widgets.
+	rack::widget::Widget nativeOrder;
+	auto* nativeA = new rack::widget::Widget;
+	auto* nativeB = new rack::widget::Widget;
+	auto* nativeAbove = new rack::widget::Widget;
+	auto* nativeBelow = new rack::widget::Widget;
+	nativeOrder.addChild(nativeA);
+	nativeOrder.addChild(nativeB);
+	nativeOrder.addChildAbove(nativeAbove, nativeA);
+	nativeOrder.addChildBelow(nativeBelow, nativeB);
+	auto orderParent = manager->create();
+	auto orderA = manager->create();
+	auto orderB = manager->create();
+	auto orderAbove = manager->create();
+	auto orderBelow = manager->create();
+	manager->add(*orderParent, *orderA);
+	manager->add(*orderParent, *orderB);
+	manager->addRelative(*orderParent, *orderAbove, *orderA, true);
+	manager->addRelative(*orderParent, *orderBelow, *orderB, false);
+	auto nativeIt = nativeOrder.children.begin();
+	for (auto* node : orderParent->get().children) {
+		assert(nativeIt != nativeOrder.children.end());
+		if (node == orderA->ptr) assert(*nativeIt == nativeA);
+		else if (node == orderB->ptr) assert(*nativeIt == nativeB);
+		else if (node == orderAbove->ptr) assert(*nativeIt == nativeAbove);
+		else if (node == orderBelow->ptr) assert(*nativeIt == nativeBelow);
+		else assert(false);
+		++nativeIt;
+	}
+	assert(nativeIt == nativeOrder.children.end());
+	auto failedParent = manager->create();
+	auto failedSibling = manager->create();
+	auto failedChild = manager->create();
+	manager->add(*failedParent, *failedSibling);
+	auto rootCount = manager->roots.size();
+	failAllocation.store(true);
+	bool relativeFailed = false;
+	try { manager->addRelative(*failedParent, *failedChild, *failedSibling, true); }
+	catch (const std::bad_alloc&) { relativeFailed = true; }
+	assert(relativeFailed && !failAllocation.load());
+	assert(failedChild->get().parent == nullptr && manager->roots.size() == rootCount);
+	assert(failedParent->get().children.size() == 1 && failedParent->get().children.front() == failedSibling->ptr);
+	manager->addRelative(*failedParent, *failedChild, *failedSibling, false);
+	manager->close(*orderParent);
+	manager->close(*failedParent);
+	nativeOrder.clearChildren();
+
+	// Field locators recheck on every access, alias replacement storage, and
+	// do not retain the wrapper which keeps an independently rooted Node alive.
+	auto fieldParent = manager->create();
+	auto fieldChild = manager->create();
+	manager->add(*fieldParent, *fieldChild);
+	widget::BoxView fieldBox{*fieldChild};
+	widget::VecView fieldPos{*fieldChild, false};
+	fieldBox.get() = rack::math::Rect(1, 2, 3, 4);
+	fieldPos.get().x = 9;
+	assert(fieldChild->get().box == rack::math::Rect(9, 2, 3, 4));
+	fieldChild->get().setBox(rack::math::Rect(5, 6, 7, 8));
+	assert(fieldPos.get() == rack::math::Vec(5, 6));
+	fieldChild.reset();
+	assert(fieldPos.get() == rack::math::Vec(5, 6));
+	manager->close(*fieldParent);
+	bool staleField = false;
+	try { fieldBox.get(); }
+	catch (const runtime::StaleHandle&) { staleField = true; }
+	assert(staleField);
+	auto fieldRoot = manager->create();
+	widget::BoxView unownedBox{*fieldRoot};
+	fieldRoot.reset();
+	staleField = false;
+	try { unownedBox.get(); }
+	catch (const runtime::StaleHandle&) { staleField = true; }
+	assert(staleField);
+
+	// Rack's base step deletes requested direct children before recursion,
+	// including hidden branches, and invalidates every descendant locator.
+	auto stepRoot = manager->create();
+	auto stepParent = manager->create();
+	auto stepChild = manager->create();
+	manager->add(*stepRoot, *stepParent);
+	manager->add(*stepParent, *stepChild);
+	widget::BoxView stepBox{*stepChild};
+	stepParent->get().hide();
+	stepChild->get().requestDelete();
+	assert(stepChild->get().requestedDelete);
+	stepRoot->get().step();
+	assert(stepParent->get().children.empty() && !stepChild->token->alive());
+	staleField = false;
+	try { stepBox.get(); }
+	catch (const runtime::StaleHandle&) { staleField = true; }
+	assert(staleField);
+	stepParent->get().requestDelete();
+	stepParent->get().requestedDelete = false;
+	stepRoot->get().step();
+	assert(stepParent->token->alive());
+	stepRoot->get().requestDelete();
+	stepRoot->get().step();
+	assert(stepRoot->token->alive());
+	manager->close(*stepRoot);
 
 	// A worker dropping the last owning handle only flags collection. Native
 	// children remain alive until a main-thread drain, then become stale.

@@ -151,9 +151,10 @@ half alive. Its fields and methods are main-thread only, like a built-in view
 When the slot replaces it, or the module is closed, collected or its
 constructor fails, the object goes back to Python, `alive` becomes `False` and
 every field or method raises `StaleHandleError`, like a pointer Rack deleted.
-The Python object itself lives as long as you reference it. Avoid storing the
-module itself on the metadata object: a slot keeps its object alive, so that
-reference would keep the module alive in a cycle Python cannot see.
+The Python object itself lives as long as you reference it. It may refer back
+to its module: a slot keeps its object alive, but the module's handle reports
+that edge to Python's garbage collector (RP-15A), so the cycle is collected
+once nothing else refers to it.
 
 **Errors are atomic.** The constructor runs before anything changes: if it
 raises, or returns something other than a new instance of exactly `info_type`
@@ -507,6 +508,25 @@ will use; until then only the test hooks hand a module to the engine.
   to Python retired, taking the GIL for that alone. `close()` is then a no-op.
 - Smoothing writes are allowed, and smooth as in Rack: `get_value` returns the
   target at once and the engine moves the Param towards it.
+
+## Module JSON
+
+Rack's serialization methods are bound with Rack's behaviour (RP-15A):
+`to_json()`/`from_json(data)` (the whole module; they need a registered model,
+RP-16), `params_to_json()`/`params_from_json(data)` (Rack's live bound UI
+context), and `data_to_json()`/`data_from_json(data)`, which reach the
+handlers set in the constructor callback with
+`set_data_handlers(to_json=..., from_json=...)`. A `ParamQuantity` subclass may
+override `to_json`/`from_json`; Rack's `paramsToJson` reaches the override.
+Values cross as ordinary Python data under the runtime's JSON policy, never as
+a shared `json_t`. A module's handle also reports its handlers and its slots'
+transferred objects to Python's garbage collector, so closures and subclass
+attributes that refer back to the module do not leak. Rules, threads and error
+handling are explained in [save and restore a module's state](../how-to/state.md).
+Patch storage directories (`get_patch_storage_directory`,
+`create_patch_storage_directory` and the `pathlib` facade `patch_storage()`)
+follow Rack's rules (RP-15B): an engine ID is required, and RackPy never
+deletes them.
 
 ## Lifecycle events
 

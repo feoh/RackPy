@@ -114,6 +114,20 @@ void Module::onUnsetMaster(const UnsetMasterEvent& e) {
 	lifecycle.push(recordOf(LifecycleKind::UnsetMaster));
 }
 
+// Custom state: Rack saves under the shared lock (audio runs on), loads under
+// the exclusive one. Without handlers, Rack's defaults: no data, nothing to load.
+json_t* Module::dataToJson() {
+	return dataHandlers ? dataHandlers->toJson() : rack::engine::Module::dataToJson();
+}
+
+void Module::dataFromJson(json_t* rootJ) {
+	runtime::ExclusiveScope exclusive;
+	if (dataHandlers)
+		dataHandlers->fromJson(rootJ);
+	else
+		rack::engine::Module::dataFromJson(rootJ);
+}
+
 // Shared lock: audio keeps running.
 void Module::onSave(const SaveEvent& e) {
 	rack::engine::Module::onSave(e);
