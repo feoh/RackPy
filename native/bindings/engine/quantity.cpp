@@ -68,7 +68,7 @@ auto withEngine(const QuantityView& view, F action) -> decltype(action(view.get(
 void requireUnsmoothed(rack::engine::ParamQuantity& q) {
 	// An unregistered module cannot be left in Rack's global smoothing slot:
 	// Engine would retain a raw pointer after the owned Module is deleted.
-	if (q.smoothEnabled)
+	if (q.smoothEnabled && !module::smoothingAllowed(q.module))
 		throw runtime::Ownership("smoothing targets require engine-owned modules; use set_immediate_value for this unregistered module");
 }
 

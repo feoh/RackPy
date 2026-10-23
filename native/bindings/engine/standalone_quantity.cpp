@@ -62,7 +62,7 @@ struct StandaloneQuantity : QuantityTrampoline<Base, StandaloneGuard>, SlotTrans
 		checkAccess(true);
 		// Rack cannot reach an unregistered module's slot, so a Rack caller
 		// here implies an engine-owned module (RP-16), where smoothing is safe.
-		if (!this->rackCaller() && this->module && this->smoothEnabled)
+		if (!this->rackCaller() && this->module && this->smoothEnabled && !module::smoothingAllowed(this->module))
 			throw runtime::Ownership("smoothing targets require engine-owned modules; use set_immediate_value");
 		Base::setValue(value);
 	}

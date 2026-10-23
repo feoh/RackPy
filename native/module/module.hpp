@@ -68,6 +68,16 @@ void dispose(Info* info) {
 		delete info;
 }
 
+/** Whether a quantity of this module may be a smoothing target. Rack's Engine
+keeps a raw pointer to its target and clears it only in removeModule
+(Engine.cpp:815), so only an engine-owned module qualifies; Python's calls
+refuse smoothing otherwise. No RackPy module is engine-registered yet: RP-14C
+with RP-16 makes this true for registered modules, here and nowhere else. */
+inline bool smoothingAllowed(const rack::engine::Module* module) {
+	(void) module;
+	return false;
+}
+
 /** A pointer a raw vector edit removes. Native-created metadata has no other
 owner, so it is deleted; its views are invalidated by their slot token. */
 template <typename Info>
