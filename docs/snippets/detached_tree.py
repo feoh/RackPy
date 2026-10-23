@@ -27,8 +27,10 @@ def exercise_tree() -> None:
         assert child.get_size() == Vec(20, 12)
         child.hide()
         assert not child.is_visible()
-        child.show()
+        child.visible = True  # raw field write; unlike show(), emits no event
         assert child.is_visible()
+        child.show()
+        assert child.visible
 
         root.remove_child(child)  # child owns an independent native root again
         assert child.parent is None
