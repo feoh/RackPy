@@ -22,6 +22,7 @@ struct Retiring : rack::engine::PortInfo, rackpy::module::TransferredMetadata {
 		log->push_back("released " + name);
 		delete this;
 	}
+	void* pythonObject() const noexcept override { return nullptr; }
 };
 
 struct RetiringSwitch : rack::engine::SwitchQuantity, rackpy::module::TransferredMetadata {
@@ -39,6 +40,7 @@ struct RetiringSwitch : rack::engine::SwitchQuantity, rackpy::module::Transferre
 		log->push_back("released " + name);
 		delete this;
 	}
+	void* pythonObject() const noexcept override { return nullptr; }
 };
 
 template <typename Error, typename F>

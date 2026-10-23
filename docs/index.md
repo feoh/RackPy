@@ -5,11 +5,11 @@
 :::{admonition} Development status
 :class: important
 
-RackPy is in **early development**. A build skeleton loads into Rack Free on
-Linux x86_64 and starts and stops an embedded Python interpreter, but **no
-Rack API is bound yet**, the plugin registers no modules, and there is **no
-release** to install. Pages describing the API are design proposals, labelled
-as such.
+RackPy is in **early development**. A Linux x86_64 development build loads
+into Rack Free and binds part of the Rack API (values, engine components and
+module construction; see the [coverage report](reference/coverage.md)), but
+the plugin registers no modules yet and there is **no release** to install.
+Pages describing unbuilt APIs are design proposals, labelled as such.
 :::
 
 RackPy will let you write Rack plugins in idiomatic Python, running inside
@@ -35,14 +35,14 @@ public plugin API, proved symbol by symbol; see the
   [decision records](decisions/index.md). [The embedded runtime](runtime.md)
   explains what already works: start-up, threads, handles, shutdown and errors.
 - **What will be covered?** The [SDK reference](reference/index.md) lists every
-  declaration RackPy must bind, and which are bound (none yet).
+  declaration RackPy must bind, and which are bound so far.
 - **Examples?** None are written yet; the [example plan](examples.md) lists the
   features each one must demonstrate.
 - **Writing these docs?** See the [documentation conventions](contributing-docs.md).
 
-Tutorials, how-to guides and troubleshooting pages will follow the
-[documentation plan](documentation.md) once there is an API to teach. Until
-then they do not exist, rather than exist as placeholders.
+Tutorials and troubleshooting pages will follow the
+[documentation plan](documentation.md) once there is an API to teach. The first
+how-to guide covers [saving a module's state](how-to/state.md).
 
 ```{toctree}
 :caption: Start here
@@ -59,6 +59,14 @@ examples
 :hidden:
 
 runtime
+```
+
+```{toctree}
+:caption: How-to guides
+:maxdepth: 1
+:hidden:
+
+how-to/state
 ```
 
 ```{toctree}

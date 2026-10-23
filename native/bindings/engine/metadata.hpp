@@ -42,6 +42,7 @@ struct SlotTransfer : module::TransferredMetadata {
 			moduleLink->detach();
 	}
 	bool transferred() const override { return inSlot; }
+	void* pythonObject() const noexcept override { return static_cast<const Alias*>(this)->v_h.inst; }
 	/** Rack calls a slot's virtuals without the GIL, possibly off the main
 	thread: those calls get native semantics and must never throw. */
 	bool rackCaller() const { return inSlot && !PyGILState_Check(); }

@@ -89,6 +89,8 @@ public:
 	/** A new reference to the object. Needs the GIL. */
 	py::object get() const;
 	explicit operator bool() const { return ptr != nullptr; }
+	/** The object without a new reference, for a GC traverse function only. */
+	PyObject* borrowed() const { return ptr; }
 	void reset();
 
 private:

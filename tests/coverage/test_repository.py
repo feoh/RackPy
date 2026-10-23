@@ -129,10 +129,10 @@ def test_quantity_records_left_open_name_their_responsible_tasks() -> None:
         assert "RP-14B2b8" in record["notes"] and "RP-15" in record["notes"]
         if record["callback"] == "mixed":
             assert record["notes"].startswith("Responsible task: RP-22") and "policy 11" in record["notes"]
-    # JSON is not part of the adapter slice and remains assigned to RP-15.
+    # Quantity JSON is mapped by RP-15A.
     for record in bm.load_json(bm.MANIFEST)["entries"]:
         if "ParamQuantity::" in record["id"] and "Json(" in record["id"]:
-            assert record["status"] == "unreviewed" and "RP-15" in record["notes"]
+            assert record["status"] == "implemented" and record["notes"].startswith("RP-15A")
 
 
 @pytest.mark.parametrize(

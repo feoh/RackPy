@@ -6,6 +6,7 @@ constructed module with Module::fromJson. Configuration is not saved: the
 constructor rebuilds it. Python JSON overrides (dataToJson and friends) are RP-15.
 """
 
+import _rackpy_host
 from _rackpy_host import _testing as HOOKS
 
 from rackpy.raw.engine import Module, ParamQuantity, Port, PortInfo
@@ -62,3 +63,63 @@ def test_module_survives_rack_save_and_reload() -> None:
     finally:
         HOOKS.engine_bypass(reloaded, False)
         HOOKS.engine_delete(reloaded)
+
+
+def test_rack_saves_and_loads_custom_data_and_quantity_overrides() -> None:
+    loaded: list[object] = []
+
+    class Tagged(ParamQuantity):
+        def to_json(self) -> dict[str, object]:
+            return {"value": self.get_value(), "tag": "kept"}
+
+    def build(m: Module) -> None:
+        m.config(1, 0, 0, 0)
+        m.config_param(0, 0, 10, 4, quantity_type=Tagged)
+        m.set_data_handlers(to_json=lambda: {"mode": "warm"}, from_json=loaded.append)
+
+    saved = Module.create(build)
+    HOOKS.engine_adopt(saved)
+    data = saved.to_json()  # through Rack's Engine::moduleToJson, as a save is
+    assert data == HOOKS.engine_module_to_json(saved)
+    HOOKS.engine_delete(saved)
+    assert data["data"] == {"mode": "warm"}
+    assert data["params"] == [{"value": 4, "tag": "kept", "id": 0}]
+
+    reloaded = Module.create(build)
+    HOOKS.engine_adopt(reloaded)
+    try:
+        reloaded.from_json(data)
+        assert loaded == [{"mode": "warm"}]
+        # Rack calls dataFromJson only when "data" is present; JSON null passes as None.
+        reloaded.from_json({**data, "data": None})
+        del data["data"]
+        reloaded.from_json(data)
+        assert loaded == [{"mode": "warm"}, None]
+    finally:
+        HOOKS.engine_delete(reloaded)
+
+
+def test_handler_errors_during_rack_save_and_load_are_contained() -> None:
+    def fail() -> object:
+        raise RuntimeError("save handler failed")
+
+    def fail_load(data: object) -> None:
+        raise RuntimeError("load handler failed")
+
+    def build(m: Module) -> None:
+        m.config(1, 0, 0, 0)
+        m.config_param(0, 0, 10, 4)
+        m.set_data_handlers(to_json=fail, from_json=fail_load)
+
+    m = Module.create(build)
+    HOOKS.engine_adopt(m)
+    try:
+        raised = _rackpy_host.dispatch_stats()["raised"]
+        data = HOOKS.engine_module_to_json(m)
+        assert "data" not in data and data["params"] == [{"value": 4, "id": 0}]
+        data["params"][0]["value"] = 9
+        HOOKS.engine_module_from_json(m, {**data, "data": {"any": 1}})
+        assert m.params[0].value == 9  # the rest of Rack's load happened
+        assert _rackpy_host.dispatch_stats()["raised"] == raised + 2
+    finally:
+        HOOKS.engine_delete(m)
