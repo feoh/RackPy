@@ -326,6 +326,12 @@ void retire(const std::shared_ptr<State>& s) noexcept {
 	}
 }
 
+void transferToHost(W& parent, py::object child) {
+	auto s = state(child);
+	checked(s);
+	transferTo(parent, s->token->context, child, 0);
+}
+
 W& geometrySetter(py::handle self) {
 	auto s = state(self);
 	checkTraversal(s);
@@ -362,8 +368,7 @@ void bindManagedWidgets(py::module_ mod) {
         .def("attach_to_scene", [](py::object self) {
             auto s = state(self);
             checked(s);
-            auto* context = s->token->context->context;
-            transferTo(*context->scene, s->token->context, self, 0);
+            transferToHost(*s->token->context->context->scene, self);
         })
 		.def("remove_child", &remove)
 		.def_property_readonly("children", [](py::object self) {

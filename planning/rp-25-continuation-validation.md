@@ -106,3 +106,30 @@ Not run or not established: the `dist` tests, sanitizers, macOS, Windows,
 remote CI, frame-loop delivery to scene widgets (tests run inside one UI
 step), real mouse/keyboard input, module browser previews, module removal,
 and window recreation. No performance claim.
+
+## Checkpoint: module removal, browser previews and graphics recreation
+
+Same environment and date. Four test-only RuntimeProbe hooks follow Rack's
+code (`add_probe_module`, `remove_probe_module`, `render_browser_preview`,
+`recreate_graphics_context`); `tests/widget/in_rack/test_scene.py` uses them.
+
+| Command | Result |
+| --- | --- |
+| `bin/rackpy-dev build --werror --test-hooks --build-dir build/dev` | compiled; 4/4 CTests passed |
+| `uv run pytest -m "not dist and not inventory" -q -p no:randomly` | 179 passed, 31 deselected, 264 s |
+| `uv run pytest -m inventory -q` | 29 passed |
+| `prek run --all-files`, `bin/rackpy-dev typecheck` | pass |
+| `uv run sphinx-build -W --keep-going -n -b html docs <tmp>` | passes |
+| `bin/generate_bindings.py check`, `bin/planning-check`, `git diff --check` | pass |
+
+The three new in-Rack tests' outcomes were confirmed individually. A first
+run failed honestly and was fixed: the start-up run could not import the
+hooks module (the production bundle has none), and the window-teardown
+marker was missing because the simulated recreation also reaches the
+scene-attached teardown probe; its check now requires the real teardown to be
+the last, unpaired destroy.
+
+These hooks exist only in test-hooks builds. They are not the real module
+browser window, a user deleting a module, or a host that recreates its
+window. An actual-host smoke with Python module widgets waits for RP-16 and
+RP-28.

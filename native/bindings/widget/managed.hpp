@@ -71,6 +71,8 @@ void checkMutation();
 void checkTraversal(const std::shared_ptr<State>& owner);
 void checkStep(const std::shared_ptr<State>& owner);
 void bindManagedWidgets(py::module_ mod);
+/** Hand a managed Python widget to a Rack-owned parent (the scene, a module widget). */
+void transferToHost(W& parent, py::object child);
 
 struct UiDelete {
 	std::shared_ptr<State> owner;

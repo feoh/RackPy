@@ -142,12 +142,27 @@ including Python drawing driven by `FramebufferWidget.render()` and a
 scene-attached widget receiving the real window teardown. Evidence:
 [continuation validation](rp-25-continuation-validation.md).
 
+## RP-25 continuation: module removal, browser previews and recreation
+
+RuntimeProbe test hooks follow Rack's own code: `add_probe_module` as the
+browser adds a module, `remove_probe_module` as `ModuleWidget::removeAction`
+(GIL released, engine lease held), `render_browser_preview` as
+`ModelBox::createPreview` and its deletion, and `recreate_graphics_context`
+as a host that recreates its window (Rack's two context events through the
+scene). Python children of a deleted module widget get one Remove event
+while the parent exists and are then invalidated; a child of a null-module
+preview is stepped, drawn and deleted; managed framebuffers are freed and
+redrawn across a recreation even when an override skips `super()`. These are
+hooks in the test-hooks build, not the real browser window or a recreating
+host, which the acceptance's actual-host smoke still needs once Python module
+widgets exist (RP-16, RP-28).
+
 ## Remaining RP-25 acceptance
 
-The original parent retains the module browser and null-module previews,
-module removal, window recreation (Rack Free never recreates its window; only
-teardown is observed), `EventState`, the typed ancestor/descendant lookups,
-the `recurseEvent` templates, the key-name functions and the raw
-`children` list as a mutable container.
+The original parent retains an actual-host smoke of the real module browser
+and module deletion with Python module widgets (after RP-16/RP-28),
+`EventState`, the typed ancestor/descendant lookups, the `recurseEvent`
+templates, the key-name functions and the raw `children` list as a mutable
+container.
 Resource/drawing integration belongs with RP-27, not silently omitted from
 Widget semantics. Detached native tests do not prove any of those gates.

@@ -10,10 +10,9 @@ too, with their fields and methods. This page is about these classes;
 `WidgetNode` adapter.
 
 **Partial, Linux x86_64 inside Rack Free 2.6.6.** Every record these classes
-touch stays **planned** in the [coverage report](coverage.md): module browser
-previews, module removal, window recreation, `EventState`, the templated
-lookups (`getAncestorOfType`, `getFirstDescendantOfType`) and NanoVG drawing
-(RP-27) are not mapped yet. The names below are the raw layer; there is no
+touch stays **planned** in the [coverage report](coverage.md): `EventState`,
+the templated lookups (`getAncestorOfType`, `getFirstDescendantOfType`), the
+key-name functions and NanoVG drawing (RP-27) are not mapped yet. The names below are the raw layer; there is no
 `rackpy.widget` facade for them yet.
 
 ## Creating and owning widgets
@@ -125,9 +124,11 @@ graphics context goes away; `get_image_handle()` is Rack's NanoVG image ID
 
 When Rack destroys its graphics context (the window closes), RackPy deletes
 the framebuffers of every widget it manages, even if a Python
-`on_context_destroy` override did not call `super()`. On a new graphics
-context they are marked dirty so that they render again; Rack Free never
-recreates its window, so that path is untested.
+`on_context_destroy` override did not call `super()`, and their
+`get_framebuffer()` handles become stale. On a new graphics context they are
+marked dirty so that they render again. Rack Free never recreates its window:
+the tests check recreation by sending Rack's own two events through the
+scene, as a host that recreates its window would.
 
 ## Typed bases
 
@@ -157,6 +158,21 @@ still in the scene when the window closes receives Rack's `ContextDestroy`
 event, then RackPy deletes it with the rest of its managed widgets. The tests
 check attachment, detachment and that teardown, not frame-loop delivery.
 
+## Inside module widgets and browser previews
+
+A Python widget can also belong to a module's panel widget (`ModuleWidget`).
+Module widgets cannot be written in Python yet (RP-16 and RP-28), so the
+tests use RackPy's test-only RuntimeProbe module to show what Rack does:
+
+- **Deleting a module.** Rack removes the module widget from the rack and
+  deletes it, without the GIL. The Python child gets one `on_remove` while its
+  parent still exists, then Rack deletes it and its handle goes stale. Only
+  after that does the engine remove the module.
+- **Browser previews.** The module browser builds each preview from a
+  `ModuleWidget` with no module, in a zoomed `FramebufferWidget`; it steps it
+  once, renders it, and deletes it with the preview. A Python child is stepped
+  and drawn there like anywhere else, so it must not assume a module exists.
+
 ## Runnable UI exercise
 
 This listing defines a subclass and a function; call the function from
@@ -175,7 +191,8 @@ base, subclass peers kept alive by Rack, error containment, refused
 mutations, worker release, event propagation and consumption, expiring and
 read-only callback records, every event handler's base implementation, the
 typed bases' fields, SVG and framebuffer lifetimes, Python drawing driven by
-`FramebufferWidget.render()`, scene attachment, and a scene widget receiving
-the real window teardown. It does not cover the module browser, module
-removal, window recreation, input from a real mouse or keyboard, macOS or
-Windows.
+`FramebufferWidget.render()`, scene attachment, a scene widget receiving the
+real window teardown, module deletion and a null-module browser preview
+(through test hooks that follow Rack's code), and a simulated graphics
+context recreation. It does not cover Rack's actual browser window, input from
+a real mouse or keyboard, frame-loop delivery, macOS or Windows.
