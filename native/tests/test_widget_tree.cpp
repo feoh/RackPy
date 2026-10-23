@@ -87,6 +87,47 @@ int main() {
 	second->setVisible(false);
 	assert(r->get().getVisibleChildrenBoundingBox() == native.getVisibleChildrenBoundingBox());
 
+	// Compare geometry, event-triggering setters and coordinate/viewport
+	// operations directly with ordinary Rack SDK Widgets.
+	rack::widget::Widget nativeParent, nativeChild, nativeGrandchild;
+	nativeParent.setPosition(rack::math::Vec(10, 20));
+	nativeParent.setSize(rack::math::Vec(100, 80));
+	nativeChild.setPosition(rack::math::Vec(5, 6));
+	nativeChild.setSize(rack::math::Vec(20, 15));
+	nativeGrandchild.setPosition(rack::math::Vec(2, 3));
+	nativeGrandchild.setSize(rack::math::Vec(4, 5));
+	nativeParent.addChild(&nativeChild);
+	nativeChild.addChild(&nativeGrandchild);
+	auto geometryParent = manager->create();
+	auto geometryChild = manager->create();
+	auto geometryGrandchild = manager->create();
+	geometryParent->get().setPosition(rack::math::Vec(10, 20));
+	geometryParent->get().setSize(rack::math::Vec(100, 80));
+	geometryChild->get().setPosition(rack::math::Vec(5, 6));
+	geometryChild->get().setSize(rack::math::Vec(20, 15));
+	geometryGrandchild->get().setPosition(rack::math::Vec(2, 3));
+	geometryGrandchild->get().setSize(rack::math::Vec(4, 5));
+	manager->add(*geometryParent, *geometryChild);
+	manager->add(*geometryChild, *geometryGrandchild);
+	auto& geometry = geometryGrandchild->get();
+	assert(geometry.getPosition() == nativeGrandchild.getPosition());
+	assert(geometry.getSize() == nativeGrandchild.getSize());
+	assert(geometry.isDescendantOf(&geometryParent->get()) == nativeGrandchild.isDescendantOf(&nativeParent));
+	assert(geometry.getAbsoluteOffset(rack::math::Vec(1, 2)) == nativeGrandchild.getAbsoluteOffset(rack::math::Vec(1, 2)));
+	assert(geometry.getRelativeOffset(rack::math::Vec(1, 2), &geometryChild->get()) ==
+		nativeGrandchild.getRelativeOffset(rack::math::Vec(1, 2), &nativeChild));
+	assert(geometry.getRelativeZoom(&geometryParent->get()) == nativeGrandchild.getRelativeZoom(&nativeParent));
+	assert(geometry.getViewport(rack::math::Rect::inf()) == nativeGrandchild.getViewport(rack::math::Rect::inf()));
+	geometry.hide();
+	nativeGrandchild.hide();
+	assert(!geometry.isVisible() && geometry.isVisible() == nativeGrandchild.isVisible());
+	geometry.show();
+	nativeGrandchild.show();
+	assert(geometry.isVisible() && geometry.isVisible() == nativeGrandchild.isVisible());
+	nativeParent.removeChild(&nativeChild);
+	nativeChild.removeChild(&nativeGrandchild);
+	manager->close(*geometryParent);
+
 	// A worker dropping the last owning handle only flags collection. Native
 	// children remain alive until a main-thread drain, then become stale.
 	std::thread worker([held = std::move(r)]() mutable { held.reset(); });

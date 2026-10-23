@@ -7,8 +7,8 @@ plugin startup raises `ContextError`: Rack has not created its event state yet.
 
 This is groundwork, **not** the complete Widget binding. It cannot be
 subclassed, inserted into Rack's scene or module browser, or used for drawing.
-Python virtual callbacks, events, transforms, resources, mutable raw fields
-and class factories remain RP-25/RP-27 obligations. All touched SDK entries
+Python virtual callbacks, events, ZoomWidget/TransformWidget variants, resources,
+mutable raw fields and class factories remain RP-25/RP-27 obligations. All touched SDK entries
 remain **planned** in the [coverage report](coverage.md); safe adapters do not
 count as complete public mappings.
 
@@ -53,8 +53,21 @@ remain alive.
 Call `set_box(rect)` to apply a layout change. `is_visible()` and
 `set_visible(bool)` use Rack's native visibility methods.
 `get_children_bounding_box()` and `get_visible_children_bounding_box()`
-use Rack's SDK implementation, including its empty-tree infinities.
-There are no Python lifecycle overrides in this adapter.
+use Rack's SDK implementation, including its empty-tree infinities. Position and
+size methods use Rack's setters, so real changes trigger its reposition/resize
+events. `show()`/`hide()` likewise use Rack's visibility setter. `is_descendant_of`
+checks parent ancestry (not direct-child membership).
+
+`get_relative_offset(position, ancestor)` and
+`get_relative_zoom(ancestor)` preserve Rack's coordinate-space semantics;
+pass `None` explicitly for the root/world coordinate system (the raw SDK pointer
+parameters do not have Python-default arguments). A non-null ancestor must be a live
+WidgetNode in the same Rack context. The base adapter uses Rack's base Widget,
+so zoom remains 1 unless a future subclass adapter explicitly supports ZoomWidget.
+`get_absolute_offset()` and `get_absolute_zoom()` are Rack's convenience forms.
+`get_viewport(rect=...)` defaults to Rack's infinite rectangle and returns the
+portion clipped by the widget and its ancestors. These calls are checked main-
+thread native operations; no Python lifecycle overrides are provided here.
 
 ## Runnable UI exercise
 

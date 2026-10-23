@@ -33,6 +33,25 @@ coverage/docs. Leave commit and durable checkpoint.
 Local checks and explicit skipped gates are recorded in
 [RP-25A validation](rp-25a-validation.md).
 
+## RP-25B: checked Widget geometry and spatial queries
+
+**Witan:** `tk-rackpy-25b-checked-widget-geometry-and-spatial-q-8df27f`.
+
+Depends on RP-25A and implements the 12 exact `rack::widget::Widget` method
+records for position/size getters and setters, `hide`/`show`, ancestry,
+absolute/relative offset and zoom, and viewport clipping. The raw surface uses
+`WidgetNode`; optional ancestor pointers are nullable, context-checked live
+handles, never integer addresses. SDK default infinite-viewport behavior is
+preserved. This is only the base Widget implementation: no ZoomWidget subclass,
+TransformWidget, mutable raw fields, event dispatch or Python callbacks. These
+records remain `planned` pending complete Widget semantics. Test SDK differential
+behavior and actual Rack UI thread/context, geometry changes, relative and world
+coordinates, viewport clipping, null/stale/foreign ancestors, visibility and
+wrong-thread failures. Update manifest/stubs/docs/snippet and run hooks, native,
+host, coverage/introspection and docs checks. The RP-25 parent and implementation
+phase remain open. Local evidence is recorded in
+[RP-25B validation](rp-25b-validation.md).
+
 ## Remaining RP-25 acceptance
 
 The original parent retains complete class-factory/subclass and lifecycle

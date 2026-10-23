@@ -36,6 +36,18 @@ py::object object(const std::shared_ptr<Handle>& h) {
 	return runtime::identity(h->ptr, h->token->generation, [&] { return py::cast(h); });
 }
 
+rack::widget::Widget* relativeTo(const Handle& owner, py::object other) {
+	if (other.is_none())
+		return nullptr;
+	if (!py::isinstance<Handle>(other))
+		throw py::type_error("ancestor must be a WidgetNode or None");
+	auto& ancestor = other.cast<const Handle&>();
+	auto& node = ancestor.get();
+	if (owner.manager.get() != ancestor.manager.get())
+		throw runtime::WrongContext("widgets belong to different contexts");
+	return &node;
+}
+
 }  // namespace
 
 void bindWidgetTrees(py::module_ raw) {
@@ -48,7 +60,7 @@ void bindWidgetTrees(py::module_ raw) {
 	});
 #endif
 	py::class_<Handle, std::shared_ptr<Handle>>(mod, "WidgetNode", py::is_final(),
-		"A detached native base Widget with checked tree ownership. No Python subclass callbacks or scene insertion.")
+		"A detached native base Widget with checked tree ownership and geometry. No Python subclass callbacks or scene insertion.")
 		.def_static("create", [] { return object(manager()->create()); })
 		.def_property_readonly("alive", [](const Handle& h) {
 			runtime::requireMainThread("checking widget lifetime");
@@ -80,7 +92,26 @@ void bindWidgetTrees(py::module_ raw) {
 		.def("is_visible", [](const Handle& h) { return h.get().isVisible(); })
 		.def("set_visible", [](const Handle& h, bool visible) { h.get().setVisible(visible); }, py::arg("visible"))
 		.def("get_children_bounding_box", [](const Handle& h) { return h.get().getChildrenBoundingBox(); })
-		.def("get_visible_children_bounding_box", [](const Handle& h) { return h.get().getVisibleChildrenBoundingBox(); });
+		.def("get_visible_children_bounding_box", [](const Handle& h) { return h.get().getVisibleChildrenBoundingBox(); })
+		.def("get_position", [](const Handle& h) { return h.get().getPosition(); })
+		.def("set_position", [](const Handle& h, rack::math::Vec pos) { h.get().setPosition(pos); }, py::arg("position"))
+		.def("get_size", [](const Handle& h) { return h.get().getSize(); })
+		.def("set_size", [](const Handle& h, rack::math::Vec size) { h.get().setSize(size); }, py::arg("size"))
+		.def("hide", [](const Handle& h) { h.get().hide(); })
+		.def("show", [](const Handle& h) { h.get().show(); })
+		.def("is_descendant_of", [](const Handle& h, py::object ancestor) {
+			return h.get().isDescendantOf(relativeTo(h, std::move(ancestor)));
+		}, py::arg("ancestor"))
+		.def("get_absolute_offset", [](const Handle& h, rack::math::Vec v) { return h.get().getAbsoluteOffset(v); }, py::arg("position"))
+		.def("get_relative_offset", [](const Handle& h, rack::math::Vec v, py::object ancestor) {
+			return h.get().getRelativeOffset(v, relativeTo(h, std::move(ancestor)));
+		}, py::arg("position"), py::arg("ancestor"))
+		.def("get_absolute_zoom", [](const Handle& h) { return h.get().getAbsoluteZoom(); })
+		.def("get_relative_zoom", [](const Handle& h, py::object ancestor) {
+			return h.get().getRelativeZoom(relativeTo(h, std::move(ancestor)));
+		}, py::arg("ancestor"))
+		.def("get_viewport", [](const Handle& h, rack::math::Rect rect) { return h.get().getViewport(rect); },
+			py::arg("rect") = rack::math::Rect::inf());
 }
 
 }  // namespace bindings

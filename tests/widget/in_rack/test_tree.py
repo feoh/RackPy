@@ -12,7 +12,7 @@ import pytest
 import rackpy._bootstrap
 import rackpy.raw.widget
 from rackpy.errors import ContextError, OwnershipError, StaleHandleError, ThreadError
-from rackpy.raw.math import Rect
+from rackpy.raw.math import Rect, Vec
 from rackpy.widget import WidgetNode
 
 
@@ -91,6 +91,50 @@ def test_snapshot_box_copy_and_layout(root: WidgetNode) -> None:
     assert a.get_box().pos.x == 2
     root.clear_children()
     assert not snapshot[0].alive
+
+
+def test_geometry_visibility_and_coordinate_queries(root: WidgetNode) -> None:
+    parent, child = (WidgetNode.create() for _ in range(2))
+    root.set_position(Vec(10, 20))
+    root.set_size(Vec(100, 80))
+    parent.set_position(Vec(5, 6))
+    parent.set_size(Vec(20, 15))
+    child.set_position(Vec(2, 3))
+    child.set_size(Vec(4, 5))
+    root.add_child(parent)
+    parent.add_child(child)
+    assert parent.get_position() == Vec(5, 6) and parent.get_size() == Vec(20, 15)
+    assert child.is_descendant_of(parent) and child.is_descendant_of(root)
+    assert parent.is_descendant_of(None) is False
+    assert child.get_relative_offset(Vec(1, 2), parent) == Vec(3, 5)
+    assert child.get_relative_offset(Vec(1, 2), root) == Vec(8, 11)
+    assert child.get_absolute_offset(Vec(1, 2)) == Vec(18, 31)
+    assert child.get_relative_offset(Vec(1, 2), None) == child.get_absolute_offset(Vec(1, 2))
+    assert child.get_relative_zoom(parent) == child.get_absolute_zoom() == 1
+    assert child.get_relative_zoom(None) == 1
+    assert child.get_viewport() == child.get_viewport(Rect.inf())
+    visible_clip = child.get_viewport(Rect(0, 0, 100, 100))
+    assert visible_clip.size.x >= 0 and visible_clip.size.y >= 0
+    child.hide()
+    assert not child.is_visible()
+    child.show()
+    assert child.is_visible()
+    parent.set_position(Vec(6, 7))
+    parent.set_size(Vec(30, 25))
+    assert parent.get_box() == Rect(6, 7, 30, 25)
+    with pytest.raises(TypeError):
+        child.get_relative_offset(Vec(), object())  # type: ignore[arg-type]
+    detached = WidgetNode.create()
+    assert child.get_relative_zoom(detached) == 1
+    detached.close()
+    with pytest.raises(ContextError):
+        _rackpy_host._testing.with_foreign_context(lambda: child.get_relative_offset(Vec(), root))
+    stale = WidgetNode.create()
+    parent.add_child(stale)
+    parent.remove_child(stale)
+    stale.close()
+    with pytest.raises(StaleHandleError):
+        child.is_descendant_of(stale)
 
 
 def test_wrong_context_and_readonly_ownership(root: WidgetNode) -> None:
