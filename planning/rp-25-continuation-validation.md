@@ -133,3 +133,22 @@ These hooks exist only in test-hooks builds. They are not the real module
 browser window, a user deleting a module, or a host that recreates its
 window. An actual-host smoke with Python module widgets waits for RP-16 and
 RP-28.
+
+## Checkpoint: member templates and key names
+
+Same environment and date. `tests/widget/in_rack/test_templates.py` covers
+the lookups (Python subclasses, SDK bases, nearest ancestor, depth-first
+order, Rack-owned scene ancestors, bad class arguments), both recursion
+templates (order, propagation stop on consume, visibility and position
+filtering, coordinates, refused mutation, mismatched handlers) and the key
+names at start-up and in the live UI; outcomes were confirmed individually.
+
+| Command | Result |
+| --- | --- |
+| `bin/rackpy-dev build --werror --test-hooks --build-dir build/dev` | 4/4 CTests passed |
+| `uv run pytest -m "not dist and not inventory" -q -p no:randomly` | 179 passed, 31 deselected, 264 s |
+| `uv run pytest -m inventory -q` | 29 passed |
+| `prek run --all-files`, `bin/rackpy-dev typecheck`, `sphinx-build -W -n` | pass |
+| `bin/generate_bindings.py check`, `bin/planning-check`, `git diff --check` | pass |
+
+235 widget-family and window records are planned; none implemented.

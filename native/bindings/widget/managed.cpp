@@ -326,6 +326,8 @@ void retire(const std::shared_ptr<State>& s) noexcept {
 	}
 }
 
+bool managedWidget(W* w) { return nativeStates.count(w) != 0; }
+
 void transferToHost(W& parent, py::object child) {
 	auto s = state(child);
 	checked(s);

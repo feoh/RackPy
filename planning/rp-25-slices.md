@@ -157,12 +157,22 @@ hooks in the test-hooks build, not the real browser window or a recreating
 host, which the acceptance's actual-host smoke still needs once Python module
 widgets exist (RP-16, RP-28).
 
+## RP-25 continuation: member templates and key names
+
+`getAncestorOfType<T>` and `getFirstDescendantOfType<T>` take a class:
+the bound SDK classes match by `dynamic_cast`, so Rack-owned widgets can match
+(returned as `HostWidget`), and Python subclasses by `isinstance` on managed
+widgets. `recurseEvent` and `recursePositionEvent` take the handler that the
+C++ member pointer names and dispatch it virtually to each child, with
+Rack's order, propagation and position filtering; tree mutation is refused
+while they iterate. `getKeyName` and `getKeyCommandName` need only the main
+thread. Six records, all planned.
+
 ## Remaining RP-25 acceptance
 
 The original parent retains an actual-host smoke of the real module browser
 and module deletion with Python module widgets (after RP-16/RP-28),
-`EventState`, the typed ancestor/descendant lookups, the `recurseEvent`
-templates, the key-name functions and the raw `children` list as a mutable
-container.
+`EventState` (Rack's input dispatcher; it may belong with RP-26's
+keyboard/mouse work) and the raw `children` list as a mutable container.
 Resource/drawing integration belongs with RP-27, not silently omitted from
 Widget semantics. Detached native tests do not prove any of those gates.

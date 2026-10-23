@@ -174,6 +174,7 @@ void bindWidgetTrees(py::module_ raw) {
 	bindGeometryViews(mod, raw.attr("math").cast<py::module_>());
 	widgets::bindManagedWidgets(mod);
 	widgets::bindVariants(raw, mod);
+	widgets::bindTemplates(mod);
 	py::class_<Handle, std::shared_ptr<Handle>>(mod, "WidgetNode", py::is_final(),
 		"A detached native base Widget with checked tree ownership and geometry. No Python subclass callbacks or scene insertion.")
 		.def_static("create", [] { return object(manager()->create()); })

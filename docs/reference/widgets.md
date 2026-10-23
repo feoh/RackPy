@@ -10,9 +10,8 @@ too, with their fields and methods. This page is about these classes;
 `WidgetNode` adapter.
 
 **Partial, Linux x86_64 inside Rack Free 2.6.6.** Every record these classes
-touch stays **planned** in the [coverage report](coverage.md): `EventState`,
-the templated lookups (`getAncestorOfType`, `getFirstDescendantOfType`), the
-key-name functions and NanoVG drawing (RP-27) are not mapped yet. The names below are the raw layer; there is no
+touch stays **planned** in the [coverage report](coverage.md). Rack's input
+dispatcher `EventState` and NanoVG drawing (RP-27) are not mapped yet. The names below are the raw layer; there is no
 `rackpy.widget` facade for them yet.
 
 ## Creating and owning widgets
@@ -103,6 +102,30 @@ context they do nothing, as in Rack. A target that Rack later deletes raises
 `StaleHandleError` instead of dangling. `PathDropEvent.paths` is a list of
 strings; `HoverKeyEvent.is_key_command(key, mods)` is Rack's check.
 
+### Finding widgets and forwarding events
+
+Rack's member templates take a class where C++ takes a type argument:
+
+- `get_ancestor_of_type(cls)` and `get_first_descendant_of_type(cls)` are
+  `getAncestorOfType<T>()` and `getFirstDescendantOfType<T>()`: the nearest
+  ancestor, or the first descendant depth-first in child order, that is a
+  `cls`, else `None`. `cls` is one of the classes on this page or a Python
+  subclass of one. The classes on this page match Rack's own widgets too (Rack's
+  scene is an `OpaqueWidget`), which come back as `HostWidget`; a Python
+  subclass only matches widgets with that Python class.
+- `recurse_event(method, event)` and `recurse_position_event(method, event)`
+  are Rack's `recurseEvent` and `recursePositionEvent`, for a container that
+  dispatches an event to its children itself. `method` is the handler, such as
+  `Widget.on_hover`, and is called on each child, topmost first, while the
+  event propagates, so the children's overrides run. The position form skips
+  invisible children and those whose box does not contain `event.pos`, and
+  passes the position in the child's coordinates. A handler that does not
+  match the event raises `TypeError`, where C++ would not compile.
+
+`get_key_name(key)` and `get_key_command_name(key, mods)` are Rack's display
+names for GLFW key codes (`"A"`, `"Ctrl+Shift+A"`, empty for control codes),
+in Rack's language. They need only the main thread, not a window.
+
 ## Drawing
 
 Rack draws a widget by calling `draw(args)` with a `DrawArgs` record:
@@ -186,13 +209,15 @@ it from a RuntimeProbe UI step.
 ## Validation boundary
 
 `tests/widget/test_tree.py` runs the `tests/widget/in_rack` suite in actual
-Rack Free's live UI under Xvfb: ownership transfer and identity for every
-base, subclass peers kept alive by Rack, error containment, refused
+Rack Free's live UI under Xvfb. It covers ownership transfer and identity for
+every base, subclass peers kept alive by Rack, error containment, refused
 mutations, worker release, event propagation and consumption, expiring and
 read-only callback records, every event handler's base implementation, the
-typed bases' fields, SVG and framebuffer lifetimes, Python drawing driven by
-`FramebufferWidget.render()`, scene attachment, a scene widget receiving the
-real window teardown, module deletion and a null-module browser preview
-(through test hooks that follow Rack's code), and a simulated graphics
-context recreation. It does not cover Rack's actual browser window, input from
-a real mouse or keyboard, frame-loop delivery, macOS or Windows.
+typed bases' fields, SVG and framebuffer lifetimes, and Python drawing driven
+by `FramebufferWidget.render()`. It also covers scene attachment, a scene
+widget receiving the real window teardown, module deletion and a null-module
+browser preview (through test hooks that follow Rack's code), a simulated
+graphics context recreation, the typed lookups (including Rack-owned
+ancestors), both event recursion templates and the key names. It does not
+cover Rack's actual browser window, input from a real mouse or keyboard,
+frame-loop delivery, macOS or Windows.
