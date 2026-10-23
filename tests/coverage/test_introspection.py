@@ -50,6 +50,7 @@ def test_introspection_comes_from_the_running_package(artifact: Path) -> None:
     assert objects["rackpy.raw.engine.LightInfo.module"]["kind"] == "property"
     assert objects["rackpy.raw.engine.PortInfo.alive"]["kind"] == "property"
     assert objects["rackpy.raw.engine.ParamQuantity.alive"]["kind"] == "property"
+    assert objects["rackpy.raw.engine.Module.id"]["kind"] == "property"
     assert objects["rackpy.engine.Module.config_light"]["kind"] == "function"
     assert objects["rackpy.raw.engine.PortInfoView.module"]["kind"] == "property"
     assert objects["rackpy.raw.engine.LightInfoView"]["kind"] == "class"

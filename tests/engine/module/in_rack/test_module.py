@@ -110,7 +110,7 @@ def test_invalid_counts_and_ids_are_checked_before_rack() -> None:
     m.close()
     assert snapshot[0].output_id == 99  # value survives
     with pytest.raises(TypeError, match="callable"):
-        Module.create(123)  # type: ignore[arg-type]
+        Module.create(123)  # type: ignore[call-overload]
 
 
 def test_close_invalidates_all_retained_views() -> None:

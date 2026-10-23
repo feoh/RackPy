@@ -12,5 +12,7 @@ module = Module.create(wire)
 try:
     module.params[0].value = 0.5
     assert module.get_param(0) is module.params[0]
+    # No engine owns this module: no ID yet, and never bypassed.
+    assert module.id == -1 and not module.is_bypassed()
 finally:
     module.close()

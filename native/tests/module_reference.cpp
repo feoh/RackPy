@@ -5,6 +5,10 @@
 #include <cstdio>
 #include <type_traits>
 
+#define RACKPY_REFERENCE_DEPRECATED(...) \
+	_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"") __VA_ARGS__; \
+	_Pragma("GCC diagnostic pop")
+
 // RP-14B2b5: class factories construct the subclass, then set Rack's fields.
 static int deletedInfos = 0;
 template <typename Base>
@@ -205,6 +209,18 @@ int main() {
 			"names", m.inputInfos[0]->getName().c_str(), m.outputInfos[0]->getName().c_str(),
 			m.paramQuantities[2]->getLabel().c_str(), "params", m.params[0].value, m.params[1].value, m.params[2].value,
 			"null_lights", m.lightInfos[0] == nullptr, m.lightInfos[1] == nullptr, m.lightInfos[2] == nullptr));
+	}
+	// RP-14C1: identity and bypass defaults, and the deprecated counting constructor.
+	{
+		rack::engine::Module plain;
+		RACKPY_REFERENCE_DEPRECATED(rack::engine::Module counted(2, 3, 4, 5));
+		RACKPY_REFERENCE_DEPRECATED(rack::engine::Module noLights(1, 1, 1));
+		plain.id = 9007199254740991;  // 2^53 - 1, the largest ID JSON keeps exactly
+		json_object_set_new(root, "identity", json_pack("{s:I,s:I,s:b,s:[iiii],s:[iiii],s:b}",
+			"default_id", (json_int_t) counted.getId(), "assigned_id", (json_int_t) plain.getId(), "bypassed", counted.isBypassed(),
+			"counted", counted.getNumParams(), counted.getNumInputs(), counted.getNumOutputs(), counted.getNumLights(),
+			"no_lights", noLights.getNumParams(), noLights.getNumInputs(), noLights.getNumOutputs(), noLights.getNumLights(),
+			"model", counted.getModel() == nullptr));
 	}
 	json_t* bypass = json_array();
 	json_object_set_new(root, "bypass", bypass);

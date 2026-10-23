@@ -263,3 +263,18 @@ B2, B and RP-14 keep their own acceptance reviews.
 **Witan slug:** `tk-rackpy-14c-native-lifecycle-events-and-identity--929845`
 
 Remaining RP-14 lifecycle/identity slice; inherits full RP-14 contract/comments and AGENTS validation. Implement Module identity/model handle/IDs (coordinate RP-16), isBypassed and production native adapters for onAdd/onRemove/onBypass/onUnBypass/onPortChange/onReset/onRandomize/onSampleRateChange/onSave/onSetMaster/onUnsetMaster plus deprecated overloads and immutable event snapshots. Preserve exact Rack superclass behavior (RandomizeEvent, not ResetEvent), synchronous native handlers, bounded lock-free snapshot observation on UI; never Python, refcount, allocation/destruction, locks, logging or IO in driver/production audio paths. Mark semantic Python engine/driver callback access as planned RP-22 laboratory, not completed by observation. Integrate actual Rack engine ownership with constructor state seal and deletion invalidation; browser preview None; test lifecycle exceptions, engine reentry refusal, queue overflow, sample-rate/master driver-side dispatch, reset/randomize/bypass and multichannel routes against native fixture, save/reload ordering (RP-15). Native/actual-host validation incl. audio-path guard, strict types, manifest/docs, full relevant hooks and commit. Parent RP-14 closes only when all original acceptance checks are evidenced.
+
+### RP-14C subdivisions
+
+RP-14C is additionally blocked by its children; all original C acceptance
+criteria remain on the parent.
+
+**RP-14C1 — module identity, bypass query and deprecated constructor**
+(`tk-rackpy-14c1-module-identity-bypass-query-and-dep-6e3021`). Exact scope:
+`Module::id`, `getId()`, `isBypassed()` and the deprecated
+`Module(int, int, int, int)` constructor. `id` is Rack's int64 (-1 until an
+engine assigns one), writable only in the constructor callback; `is_bypassed()`
+is False until an engine owns the module; the deprecated constructor is a
+warning `Module.create` overload that configures first. `model`/`getModel()`
+move to RP-16 (Model handles); `~Module`, engine ownership and lifecycle events
+stay on later 14C children.

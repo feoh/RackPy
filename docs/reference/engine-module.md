@@ -31,8 +31,12 @@ closes the module; it cannot be reused even if the callback catches the error.
 
 The factory seals the module before returning it. Late configuration raises
 `OwnershipError`. Nested factories have independent construction scopes.
-`Module.create()` without a callback returns a sealed, empty module. The
-deprecated four-count C++ constructor is not mapped yet.
+`Module.create()` without a callback returns a sealed, empty module. Rack's
+deprecated counting constructor `Module(numParams, numInputs, numOutputs,
+numLights)` is the overload `Module.create(num_params, num_inputs,
+num_outputs, num_lights=0, configure=None)`: it emits `DeprecationWarning`,
+calls `config` first and then the optional callback, in the same transaction
+(so the callback cannot call `config` again).
 
 Here is a runnable construction-only example. The documentation snippet tests
 run this exact file inside Rack:
@@ -44,6 +48,17 @@ This does not add the module to Rack's engine or install a DSP callback. A Pytho
 subclass or an attribute named `process` is **not** a DSP implementation.
 There is no Module virtual trampoline in this slice. The construction callback
 is never stored in the native module, and no audio path invokes it.
+
+## Identity and bypass state
+
+`module.id` is Rack's engine ID: `-1` until an engine assigns one (Rack keeps
+IDs below 2^53 so they survive JSON, but any 64-bit integer is accepted, as in
+C++). It can be assigned only inside the constructor callback; `get_id()` is
+Rack's getter. `is_bypassed()` is Rack's query, and is `False` until a Rack
+engine owns and bypasses the module, which these modules cannot be yet. Both
+need the main thread. The `model` field and `get_model()` wait for model
+handles (RP-16). Engine ownership, its deletion path and lifecycle events are
+the rest of RP-14C.
 
 ## Component access
 

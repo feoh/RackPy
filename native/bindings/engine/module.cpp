@@ -7,6 +7,7 @@
 #include "components.hpp"
 #include "metadata.hpp"
 #include "quantity.hpp"
+#include "../support/overrides.hpp"
 
 #include <pybind11/stl.h>
 
@@ -307,13 +308,18 @@ py::object configPort(const ModuleRef& r, int i, std::string name, py::object ty
 	return component(r, input ? Kind::InputInfo : Kind::OutputInfo, i);
 }
 
-py::object create(py::object configure) {
+struct Counts { int params, inputs, outputs, lights; };
+
+py::object construct(py::object configure, const Counts* counts) {
 	runtime::requireMainThread("creating a RackPy module");
 	if (!configure.is_none() && !PyCallable_Check(configure.ptr()))
 		throw py::type_error("configure must be callable or None");
 	auto state = std::make_shared<module::Construction>();
 	py::object result = moduleObject(state);
 	try {
+		// The deprecated counting constructor configures first, as Rack's does.
+		if (counts)
+			state->config(counts->params, counts->inputs, counts->outputs, counts->lights);
 		if (!configure.is_none())
 			configure(result);
 		state->seal();
@@ -323,6 +329,17 @@ py::object create(py::object configure) {
 		throw;
 	}
 	return result;
+}
+
+py::object create(py::object configure) {
+	return construct(std::move(configure), nullptr);
+}
+
+py::object createConfigured(int params, int inputs, int outputs, int lights, py::object configure) {
+	runtime::requireMainThread("creating a RackPy module");
+	deprecated("Module(numParams, numInputs, numOutputs, numLights) is deprecated in Rack; call config() in the constructor callback");
+	Counts counts{params, inputs, outputs, lights};
+	return construct(std::move(configure), &counts);
 }
 
 }  // namespace
@@ -376,6 +393,16 @@ void bindModule(py::module_ engine) {
 		.def_readwrite("output_id", &rack::engine::Module::BypassRoute::outputId);
 
 	cls.def_static("create", &create, py::arg("configure") = py::none())
+		.def_static("create", &createConfigured, py::arg("num_params"), py::arg("num_inputs"), py::arg("num_outputs"),
+			py::arg("num_lights") = 0, py::arg("configure") = py::none(),
+			"Rack's deprecated counting constructor: config() first, then the optional callback. Warns.")
+		.def_property("id", [](const ModuleRef& r) { return r.get().id; }, [](const ModuleRef& r, int64_t id) {
+			r.state->requireConstruction();
+			r.get().id = id;
+		}, "Rack's engine ID: -1 until an engine assigns one. Assignable only inside the constructor callback.")
+		.def("get_id", [](const ModuleRef& r) { return r.get().getId(); })
+		.def("is_bypassed", [](const ModuleRef& r) { return r.get().isBypassed(); },
+			"Whether Rack's engine bypasses the module; always False before an engine owns it.")
 		.def("close", [](const ModuleRef& r) { r.state->close(); },
 			"Delete the owned native module, invalidating all component views. Idempotent.")
 		.def_property_readonly("alive", [](const ModuleRef& r) { return r.state->object != nullptr; })
