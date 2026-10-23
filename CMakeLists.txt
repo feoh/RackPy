@@ -54,7 +54,7 @@ list(FILTER RACKPY_BINDING_ADAPTERS EXCLUDE REGEX "/native/bindings/generated/")
 # rackpy_host.so: embeds CPython; exports only rackpy_host_init and rackpy_host_destroy.
 add_library(rackpy_host MODULE native/host/host.cpp native/host/host_module.cpp
   ${RACKPY_RUNTIME_CORE} native/runtime/python.cpp native/runtime/interpreter.cpp native/runtime/json.cpp
-  native/bindings/generated/registry.cpp ${RACKPY_BINDING_ADAPTERS})
+  native/bindings/generated/registry.cpp ${RACKPY_BINDING_ADAPTERS} native/module/lifecycle.cpp)
 if(RACKPY_TEST_HOOKS)
   target_sources(rackpy_host PRIVATE native/testing/testing.cpp)
   target_compile_definitions(rackpy_host PRIVATE RACKPY_TEST_HOOKS)
@@ -86,7 +86,7 @@ if(RACKPY_BUILD_TESTS)
   target_link_libraries(rackpy_runtime_tests PRIVATE rackpy_sdk_program)
   add_test(NAME runtime_core COMMAND rackpy_runtime_tests)
 
-  add_executable(rackpy_module_tests native/tests/test_module.cpp ${RACKPY_RUNTIME_CORE})
+  add_executable(rackpy_module_tests native/tests/test_module.cpp native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE})
   set_target_properties(rackpy_module_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_include_directories(rackpy_module_tests PRIVATE native/include)
   target_link_libraries(rackpy_module_tests PRIVATE rackpy_sdk_program)

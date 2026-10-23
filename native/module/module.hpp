@@ -12,7 +12,9 @@
 #include <string>
 #include <vector>
 
+#include "lifecycle.hpp"
 #include "rackpy/runtime/context.hpp"
+#include "rackpy/runtime/threads.hpp"
 
 namespace rackpy {
 namespace module {
@@ -88,6 +90,28 @@ struct Module : rack::engine::Module {
 	std::atomic<bool> engineOwned{false};
 	// The Python handles' shared state, while any handle lives (see handleState).
 	std::weak_ptr<Construction> construction;
+	// Events Rack dispatched, for Python to read later on the main thread.
+	LifecycleRing lifecycle;
+
+	// Native lifecycle adapters (lifecycle.cpp, Python-free): Rack's behaviour,
+	// then a snapshot. No Module virtual dispatches to Python.
+	void onAdd(const AddEvent& e) override;
+	void onRemove(const RemoveEvent& e) override;
+	void onBypass(const BypassEvent& e) override;
+	void onUnBypass(const UnBypassEvent& e) override;
+	void onPortChange(const PortChangeEvent& e) override;
+	void onReset(const ResetEvent& e) override;
+	void onRandomize(const RandomizeEvent& e) override;
+	void onSampleRateChange(const SampleRateChangeEvent& e) override;
+	void onSave(const SaveEvent& e) override;
+	void onSetMaster(const SetMasterEvent& e) override;
+	void onUnsetMaster(const UnsetMasterEvent& e) override;
+	// Keep the deprecated no-argument events visible next to the overrides.
+	using rack::engine::Module::onAdd;
+	using rack::engine::Module::onRemove;
+	using rack::engine::Module::onReset;
+	using rack::engine::Module::onRandomize;
+	using rack::engine::Module::onSampleRateChange;
 	// Component views point into a vector's storage, so each component vector
 	// has its own generation: a structural edit (RP-14B2b7) invalidates only
 	// the views of that vector, like C++ iterator invalidation.

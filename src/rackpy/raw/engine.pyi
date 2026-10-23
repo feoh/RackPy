@@ -265,6 +265,88 @@ class Module:
         output_id: int
         def __init__(self) -> None: ...
 
+    # Rack's event records (RP-14C3): plain values.
+    class AddEvent:
+        def __init__(self) -> None: ...
+
+    class RemoveEvent:
+        def __init__(self) -> None: ...
+
+    class BypassEvent:
+        def __init__(self) -> None: ...
+
+    class UnBypassEvent:
+        def __init__(self) -> None: ...
+
+    class ResetEvent:
+        def __init__(self) -> None: ...
+
+    class RandomizeEvent:
+        def __init__(self) -> None: ...
+
+    class SaveEvent:
+        def __init__(self) -> None: ...
+
+    class SetMasterEvent:
+        def __init__(self) -> None: ...
+
+    class UnsetMasterEvent:
+        def __init__(self) -> None: ...
+
+    class PortChangeEvent:
+        connecting: bool
+        type: Port.Type
+        port_id: int
+        def __init__(self, connecting: bool = False, type: Port.Type = ..., port_id: int = 0) -> None: ...
+
+    class SampleRateChangeEvent:
+        sample_rate: float
+        sample_time: float
+        def __init__(self, sample_rate: float = 44100.0, sample_time: float = ...) -> None: ...
+
+    type LifecycleEvent = (
+        AddEvent
+        | RemoveEvent
+        | BypassEvent
+        | UnBypassEvent
+        | PortChangeEvent
+        | ResetEvent
+        | RandomizeEvent
+        | SampleRateChangeEvent
+        | SaveEvent
+        | SetMasterEvent
+        | UnsetMasterEvent
+    )
+    def lifecycle_events(self) -> list[tuple[int, Module.LifecycleEvent]]: ...
+    @property
+    def dropped_lifecycle_events(self) -> int: ...
+    # Direct dispatch of Rack's handlers; Python-owned, sealed modules only.
+    @overload
+    def on_add(self, e: AddEvent) -> None: ...
+    @overload
+    def on_add(self) -> None: ...  # deprecated in Rack
+    @overload
+    def on_remove(self, e: RemoveEvent) -> None: ...
+    @overload
+    def on_remove(self) -> None: ...  # deprecated in Rack
+    def on_bypass(self, e: BypassEvent) -> None: ...
+    def on_un_bypass(self, e: UnBypassEvent) -> None: ...
+    def on_port_change(self, e: PortChangeEvent) -> None: ...
+    @overload
+    def on_reset(self, e: ResetEvent) -> None: ...
+    @overload
+    def on_reset(self) -> None: ...  # deprecated in Rack
+    @overload
+    def on_randomize(self, e: RandomizeEvent) -> None: ...
+    @overload
+    def on_randomize(self) -> None: ...  # deprecated in Rack
+    @overload
+    def on_sample_rate_change(self, e: SampleRateChangeEvent) -> None: ...
+    @overload
+    def on_sample_rate_change(self) -> None: ...  # deprecated in Rack
+    def on_save(self, e: SaveEvent) -> None: ...
+    def on_set_master(self, e: SetMasterEvent) -> None: ...
+    def on_unset_master(self, e: UnsetMasterEvent) -> None: ...
     @overload
     @staticmethod
     def create(configure: Callable[[Module], object] | None = None) -> Module: ...

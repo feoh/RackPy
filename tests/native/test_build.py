@@ -36,6 +36,17 @@ def test_build_has_no_warnings_and_passes_ctest(dev_build: Path) -> None:
     assert (dev_build / "rackpy_host.so").is_file()
 
 
+def test_module_lifecycle_adapters_reference_no_python(dev_build: Path) -> None:
+    # RP-14C3: Rack may dispatch sample-rate and master events on an audio
+    # driver thread, so the native adapters' object must not touch CPython.
+    objects = list(dev_build.glob("CMakeFiles/rackpy_host.dir/native/module/lifecycle.cpp.o"))
+    assert len(objects) == 1, objects
+    proc = subprocess.run(
+        [str(BIN / "rackpy-dev"), "audio-symbols", str(objects[0])], capture_output=True, text=True, check=False
+    )
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+
+
 def test_bundle_has_the_expected_dynamic_shape(make_bundle: Callable[[], Path]) -> None:
     plugin = make_bundle()
     proc = subprocess.run(

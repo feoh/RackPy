@@ -372,20 +372,26 @@ void define(py::module_ m) {
 		}
 		return m->id;
 	});
-	m.def("engine_delete", [](const bindings::ModuleRef& r) {
+	m.def("engine_delete", [](const bindings::ModuleRef& r, py::object removed) {
 		// As ModuleWidget::setModule(NULL): remove from the engine, then delete.
+		// `removed` runs in between, while the module still exists.
 		requireMainThread("engine_delete");
 		refuseEngineReentry("engine_delete");
 		std::shared_ptr<ContextToken> ctx = liveContext();
 		module::Module& m = r.get();
 		if (!m.engineOwned)
 			throw Ownership("Rack's engine does not own this module");
+		{
+			py::gil_scoped_release release;
+			EngineLease lease(*ctx);
+			APP->engine->removeModule(&m);
+		}
+		if (!removed.is_none())
+			removed();
 		// Rack deletes on the main thread without the GIL; so do we.
 		py::gil_scoped_release release;
-		EngineLease lease(*ctx);
-		APP->engine->removeModule(&m);
 		delete &m;
-	});
+	}, py::arg("module"), py::arg("removed") = py::none());
 	m.def("engine_handle", [](int64_t id) -> py::object {
 		// Rack hands out Module pointers (ModuleWidget, getModule): find the handle again.
 		requireMainThread("engine_handle");
@@ -418,6 +424,91 @@ void define(py::module_ m) {
 		py::gil_scoped_release release;
 		EngineLease lease(*ctx);
 		APP->engine->resetModule(&m);
+	});
+	// RP-14C3: the engine operations that dispatch lifecycle events.
+	auto engineCall = [](const char* what, auto action) {
+		requireMainThread(what);
+		refuseEngineReentry(what);
+		std::shared_ptr<ContextToken> ctx = liveContext();
+		py::gil_scoped_release release;
+		EngineLease lease(*ctx);
+		return action();
+	};
+	auto owned = [](const bindings::ModuleRef& r) -> module::Module& {
+		module::Module& m = r.get();
+		if (!m.engineOwned)
+			throw Ownership("Rack's engine does not own this module");
+		return m;
+	};
+	m.def("engine_randomize", [engineCall, owned](const bindings::ModuleRef& r) {
+		module::Module& mod = owned(r);
+		engineCall("engine_randomize", [&] { APP->engine->randomizeModule(&mod); });
+	});
+	m.def("engine_bypass", [engineCall, owned](const bindings::ModuleRef& r, bool bypassed) {
+		module::Module& mod = owned(r);
+		engineCall("engine_bypass", [&] { APP->engine->bypassModule(&mod, bypassed); });
+	});
+	m.def("engine_sample_rate", [engineCall] {
+		return engineCall("engine_sample_rate", [] { return APP->engine->getSampleRate(); });
+	});
+	m.def("engine_set_sample_rate", [engineCall](float rate) {
+		engineCall("engine_set_sample_rate", [&] { APP->engine->setSuggestedSampleRate(rate); });
+	});
+	m.def("engine_set_master", [engineCall, owned](py::object module) {
+		module::Module* mod = module.is_none() ? nullptr : &owned(module.cast<const bindings::ModuleRef&>());
+		engineCall("engine_set_master", [&] { APP->engine->setMasterModule(mod); });
+	});
+	m.def("engine_prepare_save", [engineCall] { engineCall("engine_prepare_save", [] { APP->engine->prepareSave(); }); });
+	m.def("engine_connect", [engineCall, owned](const bindings::ModuleRef& out, int outId, const bindings::ModuleRef& in, int inId) {
+		auto* cable = new rack::engine::Cable;
+		cable->outputModule = &owned(out);
+		cable->outputId = module::Construction::index(outId, cable->outputModule->outputs.size());
+		cable->inputModule = &owned(in);
+		cable->inputId = module::Construction::index(inId, cable->inputModule->inputs.size());
+		engineCall("engine_connect", [&] { APP->engine->addCable(cable); });
+		return cable->id;
+	});
+	m.def("engine_disconnect", [engineCall](int64_t id) {
+		engineCall("engine_disconnect", [&] {
+			rack::engine::Cable* cable = APP->engine->getCable(id);
+			if (!cable)
+				throw std::invalid_argument("no such cable");
+			APP->engine->removeCable(cable);
+			delete cable;
+		});
+	});
+	m.def("seed_random", [](uint64_t a, uint64_t b) {
+		requireMainThread("seed_random");
+		rack::random::local().seed(a, b);
+	});
+	// Rack's own superclass behaviour on a plain rack::engine::Module, for the
+	// lifecycle adapters to match: reset after edits, then a seeded randomize.
+	m.def("superclass_reference", [engineCall](uint64_t seed) {
+		// A final, empty subclass: Rack's behaviour, and nothing for GCC to
+		// speculatively devirtualize the deletion into.
+		struct Plain final : rack::engine::Module {};
+		auto* plain = new Plain;
+		plain->config(4, 0, 0, 0);
+		plain->configParam(0, 0.f, 10.f, 2.f);
+		plain->configSwitch(1, 0.f, 3.f, 1.f, "Mode", {"A", "B", "C", "D"});
+		plain->configButton(2);
+		plain->configParam(3, -5.f, 5.f, 0.f)->randomizeEnabled = false;
+		std::vector<float> reset, randomized;
+		engineCall("superclass_reference", [&] {
+			APP->engine->addModule(plain);
+			for (auto& p : plain->params)
+				p.setValue(1.f);
+			APP->engine->resetModule(plain);
+			for (auto& p : plain->params)
+				reset.push_back(p.getValue());
+			rack::random::local().seed(seed, 0);
+			APP->engine->randomizeModule(plain);
+			for (auto& p : plain->params)
+				randomized.push_back(p.getValue());
+			APP->engine->removeModule(plain);
+			delete plain;
+		});
+		return py::make_tuple(reset, randomized);
 	});
 	m.def("finalize_outcome", &finalizeOutcome);
 

@@ -290,3 +290,15 @@ transferred metadata. Rack can hand the module out again after every handle
 went. `module::smoothingAllowed` is true exactly for engine-owned modules. No
 public API adds modules to the engine before RP-16/RP-24; test hooks play
 Rack's part, with a test-only Model for autosave.
+
+**RP-14C3 — native lifecycle event adapters and snapshots**
+(`tk-rackpy-14c3-native-lifecycle-event-adapters-and--be0036`). Exact scope:
+the eleven `Module` event records and the native adapters of the eleven
+lifecycle events plus their deprecated no-argument forms. Each adapter runs
+Rack's behaviour, then records a snapshot in a bounded lock-free ring in a
+Python-free translation unit (audio-symbol checked); exclusive-lock events
+refuse engine re-entry from Python run inside. Python drains snapshots
+(`lifecycle_events()`, drop-and-count overflow) and may call a handler
+directly on a sealed Python-owned module. Event records are implemented; the
+`on*` records stay planned for Python overrides (RP-16 module classes for UI
+events, RP-22 for driver events).

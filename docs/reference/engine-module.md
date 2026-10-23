@@ -507,6 +507,55 @@ will use; until then only the test hooks hand a module to the engine.
 - Smoothing writes are allowed, and smooth as in Rack: `get_value` returns the
   target at once and the engine moves the Param towards it.
 
+## Lifecycle events
+
+Rack tells a module about its life through events: `onAdd` and `onRemove`
+(engine membership), `onBypass`/`onUnBypass`, `onPortChange` (a cable connected
+or disconnected), `onReset` and `onRandomize` (user commands),
+`onSampleRateChange`, `onSave`, and `onSetMaster`/`onUnsetMaster` (which
+module drives the engine). RackPy's modules handle all eleven natively
+(RP-14C3): Rack's own behaviour runs first (resetting or randomizing the
+parameters through their quantities, and calling Rack's deprecated
+no-argument events), then RackPy records the event. No Python runs in these
+handlers apart from what Rack's behaviour itself calls, such as a quantity
+subclass's `reset` override, and that Python cannot take Rack's engine lock
+(`EngineLockError`): the engine is locked exclusively for every event except
+`onSave`.
+
+```{rackpy-example} lifecycle_events.py
+```
+
+**Observing events.** `module.lifecycle_events()` returns the events since
+the last call, oldest first, as `(sequence, event)` pairs, where `event` is a
+copy of Rack's own record: `Module.AddEvent`, `Module.PortChangeEvent` (with
+`connecting`, `type` and `port_id`), `Module.SampleRateChangeEvent` (with
+`sample_rate` and `sample_time`) and so on. This is RackPy's API, not Rack's:
+Rack may dispatch the sample-rate and master events on an audio driver thread,
+so recording takes no lock, allocates nothing and never calls Python, and
+Python reads the records later on the main thread. The queue holds 64 events;
+when it is full, a new event is dropped and counted in
+`dropped_lifecycle_events`. Sequence numbers count dropped events too, so a gap
+shows a loss.
+
+**Calling a handler.** `module.on_reset(Module.ResetEvent())` and its
+siblings call the module's handler directly, as C++ plugin code may call
+`Module::onReset(e)`. The module must be sealed and Python-owned, and Rack's
+live bound UI context is required, because Rack's behaviour writes parameters
+through the engine; the handler then runs exactly as when Rack dispatches it.
+For a module Rack's engine owns, Rack dispatches the events, under its engine
+lock, and direct calls raise `OwnershipError`. The deprecated no-argument forms
+(`on_reset()`, `on_add()`, `on_remove()`, `on_randomize()`,
+`on_sample_rate_change()`) warn and call Rack's empty deprecated handler,
+which records nothing.
+
+Python cannot override these handlers yet: RackPy modules are not Python
+subclasses. Observing snapshots is not the same semantics as a synchronous
+Python handler, so the `on*` records stay `planned`: Python module classes
+(RP-16) are to bring overrides of the UI-thread events (everything but the
+sample-rate and master events, which Rack may run on an audio driver thread),
+and the non-real-time callback laboratory (RP-22) synchronous Python for those
+driver events. The event records themselves are `implemented`.
+
 ## Bypass configuration
 
 `config_bypass(input_id, output_id)` validates both port IDs and refuses a

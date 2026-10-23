@@ -8,9 +8,11 @@
 #include "metadata.hpp"
 #include "quantity.hpp"
 #include "../support/overrides.hpp"
+#include "../values/values.hpp"
 
 #include <pybind11/stl.h>
 
+#include <array>
 #include <functional>
 #include <vector>
 
@@ -345,6 +347,54 @@ py::object createConfigured(int params, int inputs, int outputs, int lights, py:
 
 }  // namespace
 
+using M = rack::engine::Module;
+
+/** A Rack event as Python reads it: a copied value of Rack's own record. */
+py::object eventObject(const module::LifecycleRecord& r) {
+	using K = module::LifecycleKind;
+	switch (r.kind) {
+		case K::Add: return py::cast(M::AddEvent{});
+		case K::Remove: return py::cast(M::RemoveEvent{});
+		case K::Bypass: return py::cast(M::BypassEvent{});
+		case K::UnBypass: return py::cast(M::UnBypassEvent{});
+		case K::PortChange: return py::cast(M::PortChangeEvent{r.connecting, r.portType, r.portId});
+		case K::Reset: return py::cast(M::ResetEvent{});
+		case K::Randomize: return py::cast(M::RandomizeEvent{});
+		case K::SampleRateChange: return py::cast(M::SampleRateChangeEvent{r.sampleRate, r.sampleTime});
+		case K::Save: return py::cast(M::SaveEvent{});
+		case K::SetMaster: return py::cast(M::SetMasterEvent{});
+		case K::UnsetMaster: return py::cast(M::UnsetMasterEvent{});
+	}
+	throw std::logic_error("unknown lifecycle event");
+}
+
+/** Python calls a module's event handler directly, as C++ plugin code may:
+Rack's behaviour runs on the main thread in the live bound context, without
+the GIL, exactly as when Rack dispatches it. Rack dispatches the events of a
+module its engine owns itself, under its engine lock. */
+template <typename F>
+void dispatch(const ModuleRef& r, F handler) {
+	module::Module& m = r.get();
+	if (r.state->constructing)
+		throw runtime::Ownership("module events can be dispatched only after the constructor callback returns");
+	if (m.engineOwned.load(std::memory_order_acquire))
+		throw runtime::Ownership("Rack's engine dispatches the events of a module it owns");
+	runtime::refuseEngineReentry("dispatching a module event");
+	auto context = runtime::binding().current();
+	if (!context || rack::contextGet() != context->context || !context->context->engine)
+		throw runtime::WrongContext("module events need Rack's live bound UI context");
+	py::gil_scoped_release release;
+	runtime::EngineLease lease(*context);
+	handler(m);
+}
+
+template <typename Event>
+void bindEvent(py::class_<ModuleRef>& cls, const char* name, const char* doc) {
+	py::class_<Event>(cls, name, doc).def(py::init<>()).def("__repr__", [name](const Event&) {
+		return std::string("Module.") + name + "()";
+	});
+}
+
 void bindModule(py::module_ engine) {
 	bindQuantityViews(engine);
 	bindStandaloneQuantities(engine);
@@ -392,6 +442,78 @@ void bindModule(py::module_ engine) {
 		.def(py::init<>())
 		.def_readwrite("input_id", &rack::engine::Module::BypassRoute::inputId)
 		.def_readwrite("output_id", &rack::engine::Module::BypassRoute::outputId);
+
+	// --- Lifecycle events (RP-14C3) --------------------------------------------
+	bindEvent<M::AddEvent>(cls, "AddEvent", "Rack added the module to its engine.");
+	bindEvent<M::RemoveEvent>(cls, "RemoveEvent", "Rack is removing the module from its engine.");
+	bindEvent<M::BypassEvent>(cls, "BypassEvent", "Rack bypassed the module.");
+	bindEvent<M::UnBypassEvent>(cls, "UnBypassEvent", "Rack enabled the module again.");
+	bindEvent<M::ResetEvent>(cls, "ResetEvent", "The user initialized the module.");
+	bindEvent<M::RandomizeEvent>(cls, "RandomizeEvent", "The user randomized the module.");
+	bindEvent<M::SaveEvent>(cls, "SaveEvent", "The user is saving the patch.");
+	bindEvent<M::SetMasterEvent>(cls, "SetMasterEvent", "The module became the engine's master.");
+	bindEvent<M::UnsetMasterEvent>(cls, "UnsetMasterEvent", "The module stopped being the engine's master.");
+	py::class_<M::PortChangeEvent>(cls, "PortChangeEvent", "A cable connected to or disconnected from a port.")
+		.def(py::init([](bool connecting, rack::engine::Port::Type type, int portId) {
+			return M::PortChangeEvent{connecting, type, portId};
+		}), py::arg("connecting") = false, py::arg("type") = rack::engine::Port::INPUT, py::arg("port_id") = 0)
+		.def_readwrite("connecting", &M::PortChangeEvent::connecting)
+		.def_readwrite("type", &M::PortChangeEvent::type)
+		.def_readwrite("port_id", &M::PortChangeEvent::portId)
+		.def("__repr__", [](const M::PortChangeEvent& e) {
+			return std::string("Module.PortChangeEvent(connecting=") + (e.connecting ? "True" : "False") + ", type=" +
+				(e.type == rack::engine::Port::INPUT ? "INPUT" : "OUTPUT") + ", port_id=" + std::to_string(e.portId) + ")";
+		});
+	py::class_<M::SampleRateChangeEvent>(cls, "SampleRateChangeEvent", "The engine's sample rate changed, or the module was added.")
+		.def(py::init([](float rate, float time) { return M::SampleRateChangeEvent{rate, time}; }),
+			py::arg("sample_rate") = 44100.f, py::arg("sample_time") = 1.f / 44100.f)
+		.def_readwrite("sample_rate", &M::SampleRateChangeEvent::sampleRate)
+		.def_readwrite("sample_time", &M::SampleRateChangeEvent::sampleTime)
+		.def("__repr__", [](const M::SampleRateChangeEvent& e) {
+			return "Module.SampleRateChangeEvent(sample_rate=" + values::floatRepr(e.sampleRate) + ", sample_time=" +
+				values::floatRepr(e.sampleTime) + ")";
+		});
+
+	cls.def("lifecycle_events", [](const ModuleRef& r) {
+		module::Module& m = r.get();
+		std::array<module::LifecycleRecord, module::LifecycleRing::CAPACITY> records;
+		size_t n = m.lifecycle.drain(records.data(), records.size());
+		py::list out;
+		for (size_t i = 0; i < n; i++)
+			out.append(py::make_tuple(records[i].sequence, eventObject(records[i])));
+		return out;
+	}, "RackPy's observation of Rack's events: (sequence, event) pairs since the last call, oldest first. "
+		"Not a Rack API. A full queue drops new events; see dropped_lifecycle_events.")
+		.def_property_readonly("dropped_lifecycle_events", [](const ModuleRef& r) { return r.get().lifecycle.dropped(); },
+			"How many events the bounded queue dropped since the module was created.");
+
+	cls.def("on_add", [](const ModuleRef& r, const M::AddEvent& e) { dispatch(r, [&](module::Module& m) { m.onAdd(e); }); }, py::arg("e"))
+		.def("on_remove", [](const ModuleRef& r, const M::RemoveEvent& e) { dispatch(r, [&](module::Module& m) { m.onRemove(e); }); }, py::arg("e"))
+		.def("on_bypass", [](const ModuleRef& r, const M::BypassEvent& e) { dispatch(r, [&](module::Module& m) { m.onBypass(e); }); }, py::arg("e"))
+		.def("on_un_bypass", [](const ModuleRef& r, const M::UnBypassEvent& e) { dispatch(r, [&](module::Module& m) { m.onUnBypass(e); }); }, py::arg("e"))
+		.def("on_port_change", [](const ModuleRef& r, const M::PortChangeEvent& e) { dispatch(r, [&](module::Module& m) { m.onPortChange(e); }); }, py::arg("e"))
+		.def("on_reset", [](const ModuleRef& r, const M::ResetEvent& e) { dispatch(r, [&](module::Module& m) { m.onReset(e); }); }, py::arg("e"))
+		.def("on_randomize", [](const ModuleRef& r, const M::RandomizeEvent& e) { dispatch(r, [&](module::Module& m) { m.onRandomize(e); }); }, py::arg("e"))
+		.def("on_sample_rate_change", [](const ModuleRef& r, const M::SampleRateChangeEvent& e) {
+			dispatch(r, [&](module::Module& m) { m.onSampleRateChange(e); });
+		}, py::arg("e"))
+		.def("on_save", [](const ModuleRef& r, const M::SaveEvent& e) { dispatch(r, [&](module::Module& m) { m.onSave(e); }); }, py::arg("e"))
+		.def("on_set_master", [](const ModuleRef& r, const M::SetMasterEvent& e) { dispatch(r, [&](module::Module& m) { m.onSetMaster(e); }); }, py::arg("e"))
+		.def("on_unset_master", [](const ModuleRef& r, const M::UnsetMasterEvent& e) { dispatch(r, [&](module::Module& m) { m.onUnsetMaster(e); }); }, py::arg("e"));
+	// Rack's deprecated no-argument events: empty in Rack, called by the default handlers.
+	for (const char* name : {"on_add", "on_remove", "on_reset", "on_randomize", "on_sample_rate_change"}) {
+		std::string pyName = name;
+		cls.def(name, [pyName](const ModuleRef& r) {
+			deprecated(("Module." + pyName + "() without an event is deprecated in Rack; pass the event").c_str());
+			dispatch(r, [&](module::Module& m) {
+				if (pyName == "on_add") m.onAdd();
+				else if (pyName == "on_remove") m.onRemove();
+				else if (pyName == "on_reset") m.onReset();
+				else if (pyName == "on_randomize") m.onRandomize();
+				else m.onSampleRateChange();
+			});
+		});
+	}
 
 	cls.def_static("create", &create, py::arg("configure") = py::none())
 		.def_static("create", &createConfigured, py::arg("num_params"), py::arg("num_inputs"), py::arg("num_outputs"),

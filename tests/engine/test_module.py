@@ -30,7 +30,14 @@ def test_modules_in_production_host(
         rack_host,
         tmp_path,
         SUITE,
-        args=["--rackpy-reference", str(module_reference), "--ignore", str(SUITE / "test_engine_ownership.py")],
+        args=[
+            "--rackpy-reference",
+            str(module_reference),
+            "--ignore",
+            str(SUITE / "test_engine_ownership.py"),
+            "--ignore",
+            str(SUITE / "test_engine_lifecycle.py"),
+        ],
     )
     assert result.exit == 0, result.summary()
     skipped = {n for n, o in result.outcomes().items() if o == "skipped"}
