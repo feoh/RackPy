@@ -113,20 +113,18 @@ def test_quantity_records_left_open_name_their_responsible_tasks() -> None:
         and "Json(" not in r["id"]
         and r["status"] != "implemented"
     ]
-    # RP-14B2b8: only the mixed value/range virtuals (RP-22 laboratory) and the
-    # deprecated smoothing methods (RP-14C engine ownership) stay open.
+    # RP-14B2b8/RP-14C2: only the mixed value/range virtuals stay open, for
+    # RP-22's laboratory path (smoothing works once the engine owns a module).
     assert {r["id"].rsplit("::", 1)[1] for r in records} == {
         "getDefaultValue()",
         "getMaxValue()",
         "getMinValue()",
         "getValue()",
         "setValue(float)",
-        "getSmoothValue()",
-        "setSmoothValue(float)",
     }
     for record in records:
         assert record["status"] == "planned" and record["python"] is None
-        assert record["notes"].startswith(("Responsible task: RP-22", "Responsible task: RP-14C"))
+        assert record["notes"].startswith("Responsible task: RP-22")
         assert "RP-14B2b8" in record["notes"] and "RP-15" in record["notes"]
         if record["callback"] == "mixed":
             assert record["notes"].startswith("Responsible task: RP-22") and "policy 11" in record["notes"]

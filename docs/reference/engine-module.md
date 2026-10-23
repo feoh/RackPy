@@ -5,9 +5,11 @@ checked built-in quantities (RP-14B2a), and borrowed quantity helpers / mutable
 switch-label views (RP-14B2b1), standalone metadata backreferences (RP-14B2b2),
 unattached and attached standalone quantities (RP-14B2b3/b4), and port/light
 and parameter-quantity class factories (RP-14B2b5/b6), and constructor-scoped
-raw module vectors (RP-14B2b7), Linux x86_64 inside Rack Free 2.6.6.** This is
-not a registerable instrument yet. Engine-owned smoothing (RP-14B2b), native lifecycle
-adapters (RP-14C), plugin/model factories (RP-16), DSP (RP-17), the Python callback
+raw module vectors (RP-14B2b7), module identity (RP-14C1) and engine ownership
+with engine smoothing (RP-14C2), Linux x86_64 inside Rack Free 2.6.6.** This is
+not a registerable instrument yet: nothing public hands a module to Rack's
+engine before RP-16. Native lifecycle event adapters (the rest of RP-14C),
+plugin/model factories (RP-16), DSP (RP-17), the Python callback
 laboratory (RP-22), and expanders (RP-23) remain planned. See the
 [coverage report](coverage.md) for declaration-level status.
 
@@ -190,7 +192,8 @@ becomes `False` and every member raises `StaleHandleError` once the slot
 releases the object, including a retained `labels` alias. Calls from Python
 keep the rules of [attached quantities](#standalone-quantities):
 value and display methods need Rack's live bound UI context, and smoothing
-writes are refused because the module is not registered with Rack's engine.
+writes are refused until Rack's engine owns the module
+([engine ownership](#engine-ownership)).
 
 **Calls from Rack.** A slot quantity is the one place in this API that Rack
 itself may call from another thread: Core's MIDI-Map reads and writes mapped
@@ -231,10 +234,9 @@ or `None` for a null module or invalid `param_id`.
 Attached value/display/helper/reset/randomize operations require a live bound Rack
 UI context and a valid parameter ID; invalid IDs are rejected before Rack's
 unchecked vector access. Unattached values retain Rack's null-module no-op/zero
-behavior. Smoothing writes to an attached quantity are refused because these
-objects are not registered with Engine; use `set_immediate_value()` where the
-immediate semantics are intended. Engine-owned smoothing remains
-unimplemented ([what stays open](#quantity-records-that-stay-open)).
+behavior. Smoothing writes to an attached quantity are refused unless Rack's
+engine owns its module ([engine ownership](#engine-ownership)); use
+`set_immediate_value()` where the immediate semantics are intended.
 
 Rack's null-module semantics are important: these quantities do **not** store a
 value. `get_value()` and `get_immediate_value()` return zero, and native setters,
@@ -376,16 +378,16 @@ before Rack's float-to-int conversion. `reset()` / `randomize()` are direct
 quantity operations: the enable flags govern *module-level* reset/randomize,
 not these direct calls.
 
-**Smoothing is not implemented for these unregistered modules.** Setting
-`smooth_enabled=True` is metadata only. `set_value` (and its deprecated alias),
-`set_min`, `set_max`, `toggle`, `move_value`, `set_scaled_value` and
-`move_scaled_value` then raise `OwnershipError` before changing any target.
-The helpers must not bypass this guard by indirectly calling native `setValue`.
-`set_immediate_value` and display writes remain
-available. Rack's smoothing slot retains a raw module pointer, so starting a
-smoothing target here could outlive its owner. Full engine-owned smoothing and
-lifecycle cleanup remain RP-14B2b/RP-14C/RP-16. No target is queued implicitly,
-and no Python callback runs on the audio thread.
+**Smoothing needs Rack's engine to own the module.** Rack's smoothing slot
+keeps a raw module pointer, which Rack clears only when it removes the module
+from its engine, so for a module Python owns, `smooth_enabled=True` is metadata
+only: `set_value` (and its deprecated alias), `set_min`, `set_max`, `toggle`,
+`move_value`, `set_scaled_value` and `move_scaled_value` then raise
+`OwnershipError` before changing any target. The helpers cannot bypass this
+guard by indirectly calling native `setValue`. `set_immediate_value` and
+display writes remain available. Once Rack's engine owns the module, the same
+calls smooth as in Rack ([engine ownership](#engine-ownership)). No target is
+queued implicitly, and no Python callback runs on the audio thread.
 
 ```{rackpy-example} module_quantities.py
 ```
@@ -403,7 +405,7 @@ The ParamQuantity and SwitchQuantity fields, UI virtuals (`get_label`,
 `get_immediate_value`, `set_immediate_value`, `get_param` and both classes are
 `implemented` (RP-14B2b8): Python objects, slot-owned objects and built-in
 views give them their full semantics, including Python overrides of the UI
-virtuals. Seven records stay `planned`, each with its responsible task:
+virtuals. Five records stay `planned`, with their responsible task:
 
 - `get_value`, `set_value`, `get_min_value`, `get_max_value` and
   `get_default_value` are *mixed*: Rack calls them from the engine thread as
@@ -411,11 +413,10 @@ virtuals. Seven records stay `planned`, each with its responsible task:
   overrides one is refused when it is defined. A Python override needs the
   non-real-time callback laboratory (RP-22), which the coverage contract
   requires for these methods.
-- Smoothing (`set_value` with `smooth_enabled`, and the deprecated
-  `set_smooth_value`/`get_smooth_value`) needs an engine-owned module. Rack
-  cancels smoothing when it removes a module from its engine, so enabling it
-  for registered modules is RP-14C with RP-16; unregistered modules refuse it.
-- Apart from those seven, JSON (`to_json`, `from_json`) is RP-15.
+- JSON (`to_json`, `from_json`) is RP-15.
+
+Smoothing, including the deprecated `set_smooth_value`/`get_smooth_value`,
+works once Rack's engine owns the module (RP-14C2) and is refused before.
 
 ## Raw module vectors
 
@@ -484,7 +485,27 @@ Rack's main thread; Python worker threads get `ThreadError`. Dropping a final
 Python handle on another Python thread destroys the module there, with the GIL.
 Without class-factory metadata that runs no Python. Transferred metadata goes
 back to its Python object on that thread, so a finalizer of yours may run there.
-This is not yet the Rack-owned model-transfer/deletion path (RP-14C/RP-16).
+A module Rack's engine owns is deleted by Rack instead; see below.
+
+## Engine ownership
+
+In Rack, a module belongs to the engine once Rack adds it: Rack removes it
+from the engine and deletes it when its module widget goes, or at shutdown.
+RackPy implements Rack's side of that (RP-14C2), which RP-16's model factory
+will use; until then only the test hooks hand a module to the engine.
+
+- Only a sealed module can go to the engine. Its `id` is then the one the
+  engine assigned, and every handle and view stays valid, with the same
+  identity.
+- `close()` raises `OwnershipError`: Rack deletes it. Dropping every Python
+  handle does not delete it either, and Rack can hand it out again (as a
+  module widget does), giving the same kind of handle.
+- When Rack deletes it, on its main thread without the GIL and after removing
+  it from the engine, every handle, view and collection raises
+  `StaleHandleError` (`alive` is `False`), and transferred metadata goes back
+  to Python retired, taking the GIL for that alone. `close()` is then a no-op.
+- Smoothing writes are allowed, and smooth as in Rack: `get_value` returns the
+  target at once and the engine moves the Param towards it.
 
 ## Bypass configuration
 

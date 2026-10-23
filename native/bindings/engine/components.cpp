@@ -114,7 +114,7 @@ py::object infoModule(Info& info) {
 	if (!info.module)
 		return py::none();
 	auto state = alias.moduleState.lock();
-	if (!state || !state->object || state->object.get() != info.module)
+	if (!state || state->current() != info.module)
 		throw runtime::StaleHandle("standalone metadata has an untracked module pointer");
 	return moduleObject(state);
 }

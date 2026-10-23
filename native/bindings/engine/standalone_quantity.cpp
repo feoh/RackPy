@@ -44,7 +44,7 @@ struct StandaloneQuantity : QuantityTrampoline<Base, StandaloneGuard>, SlotTrans
 		if (!this->module)
 			return {};
 		auto held = this->moduleState.lock();
-		if (!held || !held->object || held->object.get() != this->module)
+		if (!held || held->current() != this->module)
 			throw runtime::StaleHandle("parameter quantity has an untracked module pointer");
 		return held;
 	}
@@ -142,7 +142,7 @@ void setQuantityModule(Q& q, py::object value) {
 			alias.moduleLink->detach();
 		alias.moduleLink = std::move(link);
 		alias.moduleState = state;
-		q.module = state ? state->object.get() : nullptr;
+		q.module = state ? state->current() : nullptr;
 	});
 }
 

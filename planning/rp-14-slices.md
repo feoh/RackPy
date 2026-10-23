@@ -278,3 +278,15 @@ is False until an engine owns the module; the deprecated constructor is a
 warning `Module.create` overload that configures first. `model`/`getModel()`
 move to RP-16 (Model handles); `~Module`, engine ownership and lifecycle events
 stay on later 14C children.
+
+**RP-14C2 — engine ownership, Rack-side deletion and engine smoothing**
+(`tk-rackpy-14c2-engine-ownership-rack-side-deletion--15472f`). Exact scope:
+`~Module` plus the deprecated `ParamQuantity::setSmoothValue/getSmoothValue`
+(setValue's smoothing half). A sealed module can be released to Rack's engine:
+its handles borrow it through its token and keep their identity, `close()`
+and GC no longer delete it, and Rack deletes it after `Engine::removeModule` on
+the main thread without the GIL, invalidating every token and retiring
+transferred metadata. Rack can hand the module out again after every handle
+went. `module::smoothingAllowed` is true exactly for engine-owned modules. No
+public API adds modules to the engine before RP-16/RP-24; test hooks play
+Rack's part, with a test-only Model for autosave.

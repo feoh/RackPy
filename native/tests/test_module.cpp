@@ -302,6 +302,41 @@ int main() {
 		refuses<std::out_of_range>([&] { Construction::editIndex(3, 3); });
 		c.close();
 	}
+	// RP-14C2: release to Rack's engine; Rack deletes; handles go stale.
+	{
+		auto c = std::make_shared<Construction>();
+		c->object->construction = c;
+		c->config(1, 0, 0, 0);
+		refuses<Ownership>([&] { c->releaseToRack(); });  // still constructing
+		c->seal();
+		assert(!rackpy::module::smoothingAllowed(c->object.get()));
+		auto* m = c->releaseToRack();
+		assert(!c->object && c->current() == m && rackpy::module::smoothingAllowed(m));
+		refuses<Ownership>([&] { c->releaseToRack(); });
+		refuses<Ownership>([&] { c->close(); });
+		assert(rackpy::module::Construction::handleState(*m) == c);
+		auto token = m->token;
+		delete m;  // as Rack does, after Engine::removeModule
+		assert(!token->alive() && c->current() == nullptr);
+		refuses<StaleHandle>([&] { c->get(); });
+		c->close();  // a no-op once Rack has deleted it
+	}
+	{
+		// Every handle gone: Rack's pointer yields a fresh handle state.
+		auto c = std::make_shared<Construction>();
+		c->object->construction = c;
+		c->seal();
+		auto* m = c->releaseToRack();
+		c.reset();
+		auto again = rackpy::module::Construction::handleState(*m);
+		assert(again->current() == m && !again->constructing && again->rackOwned == m);
+		assert(rackpy::module::Construction::handleState(*m) == again);
+		delete m;
+		assert(again->current() == nullptr);
+		Construction owned;
+		owned.seal();
+		refuses<Ownership>([&] { rackpy::module::Construction::handleState(*owned.object); });
+	}
 	// Native deletion of standalone metadata can race main-thread module
 	// cleanup. detach completes before the actual SDK field ceases to exist.
 	for (int i = 0; i < 100; ++i) {

@@ -24,8 +24,13 @@ def module_reference(dev_build: Path, tmp_path_factory: pytest.TempPathFactory) 
 def test_modules_in_production_host(
     make_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path, module_reference: Path
 ) -> None:
+    # Engine ownership needs the test hooks and a live engine: the UI run covers it.
     result = run_pytest_in_rack(
-        make_bundle(), rack_host, tmp_path, SUITE, args=["--rackpy-reference", str(module_reference)]
+        make_bundle(),
+        rack_host,
+        tmp_path,
+        SUITE,
+        args=["--rackpy-reference", str(module_reference), "--ignore", str(SUITE / "test_engine_ownership.py")],
     )
     assert result.exit == 0, result.summary()
     skipped = {n for n, o in result.outcomes().items() if o == "skipped"}

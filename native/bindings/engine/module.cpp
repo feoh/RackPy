@@ -315,6 +315,7 @@ py::object construct(py::object configure, const Counts* counts) {
 	if (!configure.is_none() && !PyCallable_Check(configure.ptr()))
 		throw py::type_error("configure must be callable or None");
 	auto state = std::make_shared<module::Construction>();
+	state->object->construction = state;
 	py::object result = moduleObject(state);
 	try {
 		// The deprecated counting constructor configures first, as Rack's does.
@@ -405,7 +406,7 @@ void bindModule(py::module_ engine) {
 			"Whether Rack's engine bypasses the module; always False before an engine owns it.")
 		.def("close", [](const ModuleRef& r) { r.state->close(); },
 			"Delete the owned native module, invalidating all component views. Idempotent.")
-		.def_property_readonly("alive", [](const ModuleRef& r) { return r.state->object != nullptr; })
+		.def_property_readonly("alive", [](const ModuleRef& r) { return r.state->current() != nullptr; })
 		.def("config", [](const ModuleRef& r, int p, int i, int o, int l) { r.state->config(p, i, o, l); },
 			py::arg("num_params"), py::arg("num_inputs"), py::arg("num_outputs"), py::arg("num_lights") = 0)
 		.def("config_param", [](const ModuleRef& r, int i, float min, float max, float def, std::string name,

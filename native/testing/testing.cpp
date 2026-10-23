@@ -357,6 +357,68 @@ void define(py::module_ m) {
 		}
 		return last;
 	});
+	// RP-14C2: Rack's side of engine ownership, until RP-16's Model::createModule.
+	m.def("engine_adopt", [](const bindings::ModuleRef& r) {
+		requireMainThread("engine_adopt");
+		refuseEngineReentry("engine_adopt");
+		std::shared_ptr<ContextToken> ctx = liveContext();
+		module::Module* m = r.state->releaseToRack();
+		// Test-only model, so that Rack can serialize (autosave) the module.
+		m->model = model;
+		{
+			py::gil_scoped_release release;
+			EngineLease lease(*ctx);
+			APP->engine->addModule(m);
+		}
+		return m->id;
+	});
+	m.def("engine_delete", [](const bindings::ModuleRef& r) {
+		// As ModuleWidget::setModule(NULL): remove from the engine, then delete.
+		requireMainThread("engine_delete");
+		refuseEngineReentry("engine_delete");
+		std::shared_ptr<ContextToken> ctx = liveContext();
+		module::Module& m = r.get();
+		if (!m.engineOwned)
+			throw Ownership("Rack's engine does not own this module");
+		// Rack deletes on the main thread without the GIL; so do we.
+		py::gil_scoped_release release;
+		EngineLease lease(*ctx);
+		APP->engine->removeModule(&m);
+		delete &m;
+	});
+	m.def("engine_handle", [](int64_t id) -> py::object {
+		// Rack hands out Module pointers (ModuleWidget, getModule): find the handle again.
+		requireMainThread("engine_handle");
+		std::shared_ptr<ContextToken> ctx = liveContext();
+		rack::engine::Module* found = nullptr;
+		{
+			py::gil_scoped_release release;
+			EngineLease lease(*ctx);
+			found = APP->engine->getModule(id);
+		}
+		auto* m = dynamic_cast<module::Module*>(found);
+		if (!m)
+			return py::none();
+		return bindings::moduleObject(module::Construction::handleState(*m));
+	});
+	m.def("engine_has_module", [](int64_t id) {
+		requireMainThread("engine_has_module");
+		std::shared_ptr<ContextToken> ctx = liveContext();
+		py::gil_scoped_release release;
+		EngineLease lease(*ctx);
+		return APP->engine->getModule(id) != nullptr;
+	});
+	m.def("engine_reset", [](const bindings::ModuleRef& r) {
+		requireMainThread("engine_reset");
+		refuseEngineReentry("engine_reset");
+		std::shared_ptr<ContextToken> ctx = liveContext();
+		module::Module& m = r.get();
+		if (!m.engineOwned)
+			throw Ownership("Rack's engine does not own this module");
+		py::gil_scoped_release release;
+		EngineLease lease(*ctx);
+		APP->engine->resetModule(&m);
+	});
 	m.def("finalize_outcome", &finalizeOutcome);
 
 	// Drop the hooks' own callback references when the plugin is destroyed (but not the deliberate leaks).

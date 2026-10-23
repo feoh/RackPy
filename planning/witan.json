@@ -24,6 +24,7 @@
     "RP-14B2b7": "tk-rackpy-14b2b7-constructor-scoped-raw-module-vect-f0af27",
     "RP-14B2b8": "tk-rackpy-14b2b8-reconcile-paramquantity-and-switch-7b7350",
     "RP-14C1": "tk-rackpy-14c1-module-identity-bypass-query-and-dep-6e3021",
+    "RP-14C2": "tk-rackpy-14c2-engine-ownership-rack-side-deletion--15472f",
     "RP-25A": "tk-rackpy-25a-checked-detached-native-widget-tree-o-79a09d"
   },
   "tasks": {

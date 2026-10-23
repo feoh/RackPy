@@ -93,8 +93,8 @@ struct SlotTransfer : module::TransferredMetadata {
 		if (self->module && !moduleLink) {
 			try {
 				auto state = moduleState.lock();
-				if (state && state->object && state->object.get() == self->module)
-					moduleLink = state->object->trackBackreference(&self->module);
+				if (state && state->current() && state->current() == self->module)
+					moduleLink = state->current()->trackBackreference(&self->module);
 				else
 					self->module = nullptr;
 			}

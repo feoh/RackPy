@@ -5,6 +5,7 @@
 #include <rack.hpp>
 
 #include <algorithm>
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
@@ -68,15 +69,7 @@ void dispose(Info* info) {
 		delete info;
 }
 
-/** Whether a quantity of this module may be a smoothing target. Rack's Engine
-keeps a raw pointer to its target and clears it only in removeModule
-(Engine.cpp:815), so only an engine-owned module qualifies; Python's calls
-refuse smoothing otherwise. No RackPy module is engine-registered yet: RP-14C
-with RP-16 makes this true for registered modules, here and nowhere else. */
-inline bool smoothingAllowed(const rack::engine::Module* module) {
-	(void) module;
-	return false;
-}
+struct Construction;
 
 /** A pointer a raw vector edit removes. Native-created metadata has no other
 owner, so it is deleted; its views are invalidated by their slot token. */
@@ -90,6 +83,11 @@ void releaseFromSlot(Info* info) {
 
 struct Module : rack::engine::Module {
 	std::shared_ptr<runtime::ObjectToken> token = std::make_shared<runtime::ObjectToken>(nullptr);
+	// Set once Rack's engine owns the module (RP-14C2); never cleared: Rack
+	// deletes an engine-owned module only after Engine::removeModule.
+	std::atomic<bool> engineOwned{false};
+	// The Python handles' shared state, while any handle lives (see handleState).
+	std::weak_ptr<Construction> construction;
 	// Component views point into a vector's storage, so each component vector
 	// has its own generation: a structural edit (RP-14B2b7) invalidates only
 	// the views of that vector, like C++ iterator invalidation.
@@ -147,18 +145,73 @@ struct Module : rack::engine::Module {
 	}
 };
 
+/** Whether a quantity of this module may be a smoothing target. Rack's Engine
+keeps a raw pointer to its target and clears it only in removeModule
+(Engine.cpp:815), so only a module Rack's engine owns qualifies; Python's calls
+refuse smoothing otherwise. */
+inline bool smoothingAllowed(const rack::engine::Module* module) {
+	auto* m = dynamic_cast<const Module*>(module);
+	return m && m->engineOwned.load(std::memory_order_acquire);
+}
+
 /** Shared by Python handles, not by component views. The factory alone seals
-construction. A failed constructor closes even escaped handles immediately. */
+construction. A failed constructor closes even escaped handles immediately.
+After releaseToRack() Rack's engine owns the module: the handles borrow it
+through its token, and Rack deletes it (RP-14C2). */
 struct Construction {
 	std::unique_ptr<Module> object = std::make_unique<Module>();
+	Module* rackOwned = nullptr;
+	std::shared_ptr<runtime::ObjectToken> rackToken;
 	bool constructing = true;
 	bool configured = false;
 
+	Construction() = default;
+	/** Handles for a module Rack's engine already owns, after its earlier
+	handles were all dropped. Main thread. */
+	static std::shared_ptr<Construction> handleState(Module& m) {
+		runtime::requireMainThread("finding a RackPy module");
+		if (auto existing = m.construction.lock())
+			return existing;
+		if (!m.engineOwned.load(std::memory_order_acquire) || !m.token->alive())
+			throw runtime::Ownership("only a module Rack's engine owns can be found again");
+		auto state = std::make_shared<Construction>();
+		state->object.reset();
+		state->rackOwned = &m;
+		state->rackToken = m.token;
+		state->constructing = false;
+		state->configured = true;
+		m.construction = state;
+		return state;
+	}
+
+	/** The live module, whoever owns it, or null. Main thread for anything but a liveness test. */
+	Module* current() const {
+		if (object)
+			return object.get();
+		if (rackOwned && rackToken->alive())
+			return rackOwned;
+		return nullptr;
+	}
 	Module& get() const {
 		runtime::requireMainThread("using a RackPy module");
+		if (Module* m = current())
+			return *m;
+		if (rackOwned)
+			throw runtime::StaleHandle("Rack has deleted this module");
+		throw runtime::StaleHandle("this module has been closed or its constructor failed");
+	}
+	/** Hand a sealed module to Rack's engine, which deletes it after
+	Engine::removeModule. The caller adds it to the engine next. */
+	Module* releaseToRack() {
+		Module& m = get();
+		if (constructing)
+			throw runtime::Ownership("a module can go to Rack's engine only after its constructor callback returns");
 		if (!object)
-			throw runtime::StaleHandle("this module has been closed or its constructor failed");
-		return *object;
+			throw runtime::Ownership("Rack's engine already owns this module");
+		rackToken = m.token;
+		rackOwned = object.release();
+		rackOwned->engineOwned.store(true, std::memory_order_release);
+		return rackOwned;
 	}
 	void requireConstruction() const {
 		get();
@@ -423,6 +476,8 @@ struct Construction {
 		runtime::requireMainThread("closing a RackPy module");
 		if (constructing && object)
 			throw runtime::Ownership("cannot close a module during its constructor callback");
+		if (current() && !object)
+			throw runtime::Ownership("Rack's engine owns this module, and Rack deletes it");
 		object.reset();
 	}
 	void abort() { object.reset(); }
