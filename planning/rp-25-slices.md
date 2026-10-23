@@ -172,7 +172,9 @@ thread. Six records, all planned.
 
 The original parent retains an actual-host smoke of the real module browser
 and module deletion with Python module widgets (after RP-16/RP-28),
-`EventState` (Rack's input dispatcher; it may belong with RP-26's
-keyboard/mouse work) and the raw `children` list as a mutable container.
+and the raw `children` list as a mutable container. `EventState` (32
+records) moved to RP-26 on 2026-10-23: it is Rack's input dispatcher, and
+binding it needs a checked Context accessor and invalidation of its widget
+pointers, which fit RP-26's keyboard, mouse, drag and focus work.
 Resource/drawing integration belongs with RP-27, not silently omitted from
 Widget semantics. Detached native tests do not prove any of those gates.

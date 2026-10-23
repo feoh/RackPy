@@ -11,7 +11,7 @@ too, with their fields and methods. This page is about these classes;
 
 **Partial, Linux x86_64 inside Rack Free 2.6.6.** Every record these classes
 touch stays **planned** in the [coverage report](coverage.md). Rack's input
-dispatcher `EventState` and NanoVG drawing (RP-27) are not mapped yet. The names below are the raw layer; there is no
+dispatcher `EventState` (RP-26) and NanoVG drawing (RP-27) are not mapped yet. The names below are the raw layer; there is no
 `rackpy.widget` facade for them yet.
 
 ## Creating and owning widgets
