@@ -39,6 +39,8 @@ def test_modules_in_production_host(
             str(SUITE / "test_engine_lifecycle.py"),
             "--ignore",
             str(SUITE / "test_engine_bypass.py"),
+            "--ignore",
+            str(SUITE / "test_engine_save_reload.py"),
         ],
     )
     assert result.exit == 0, result.summary()

@@ -167,3 +167,27 @@ def test_python_inside_an_exclusive_event_cannot_lock_the_engine() -> None:
         assert _rackpy_host.dispatch_stats()["raised"] == raised
     finally:
         HOOKS.engine_delete(m)
+
+
+def test_a_raising_override_inside_an_event_is_contained() -> None:
+    class Failing(ParamQuantity):
+        def reset(self) -> None:
+            raise ValueError("reset override failed")
+
+    def configure(m: Module) -> None:
+        m.config(2, 0, 0, 0)
+        m.config_param(0, 0, 1, 1, quantity_type=Failing)
+        m.config_param(1, 0, 1, 1)
+
+    m = adopted(configure)
+    try:
+        for p in m.params:
+            p.value = 0
+        raised = _rackpy_host.dispatch_stats()["raised"]
+        HOOKS.engine_reset(m)  # Rack's thread sees no exception
+        assert _rackpy_host.dispatch_stats()["raised"] == raised + 1
+        # Rack's answer replaces the failed override; the rest of the reset happens.
+        assert [p.value for p in m.params] == [1, 1]
+        assert kinds(m.lifecycle_events())[-1] == "ResetEvent"
+    finally:
+        HOOKS.engine_delete(m)

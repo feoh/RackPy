@@ -477,6 +477,20 @@ void define(py::module_ m) {
 			delete cable;
 		});
 	});
+	// Rack's own save and reload of one module (Module::toJson/fromJson), for
+	// the RP-14 check that configuration and state survive. Python JSON
+	// overrides are RP-15.
+	m.def("engine_module_to_json", [engineCall, owned](const bindings::ModuleRef& r) {
+		module::Module& mod = owned(r);
+		json_t* json = engineCall("engine_module_to_json", [&] { return APP->engine->moduleToJson(&mod); });
+		std::unique_ptr<json_t, decltype(&json_decref)> owner(json, json_decref);
+		return fromJson(json);
+	});
+	m.def("engine_module_from_json", [engineCall, owned](const bindings::ModuleRef& r, py::handle data) {
+		module::Module& mod = owned(r);
+		std::unique_ptr<json_t, decltype(&json_decref)> json(toJson(data), json_decref);
+		engineCall("engine_module_from_json", [&] { APP->engine->moduleFromJson(&mod, json.get()); });
+	});
 	m.def("seed_random", [](uint64_t a, uint64_t b) {
 		requireMainThread("seed_random");
 		rack::random::local().seed(a, b);

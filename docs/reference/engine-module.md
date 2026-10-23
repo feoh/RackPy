@@ -606,10 +606,22 @@ comparisons, reset/randomize and unsafe smoothing rejection. Borrowed-helper
 and label tests add native differential helper replay and edited label lookup,
 mutable alias/snapshot behavior, 1,000 alias replacements and owner collections,
 conversion failure atomicity, degenerate scaling and indirect smoothing refusal.
-The bypass dispatch hook
-is test-only and runs off the engine.
+The offline bypass dispatch hook is test-only.
 
-Rack model registration, browser previews, native lifecycle/reset/randomize/
-sample-rate adapters, save/reload, engine ownership transfer and instrumented
-production audio-path gates are **not** established by those tests. They remain
-on RP-14B/C and the later tasks. macOS and Windows have not been run.
+With the test hooks playing Rack's part, the live-UI suite also has Rack's
+engine own modules: adoption and Rack-side deletion (1,000 times), engine
+smoothing, every lifecycle event Rack dispatches (add, remove, bypass, sample
+rate, master, save, cable port changes, and a seeded reset and randomize equal
+to a plain Rack module's), a raising override contained inside an event,
+engine-lock refusal inside exclusive events, bypass routing through cables
+with 0, 1 and 16 channels, and Rack's own save and reload of a configured
+module, which restores parameter values and bypass while the constructor
+rebuilds scales, labels and routes. The lifecycle adapters' object references
+no CPython (`bin/rackpy-dev audio-symbols`).
+
+Not established: Rack model registration and browser previews (a module
+widget's `module` is `None` there; RP-16), Python overrides of the lifecycle
+events (RP-16, RP-22), Python JSON (RP-15), and an audio driver thread actually
+dispatching sample-rate or master events: the tests use no audio device, so
+that path is known from Rack's source and the Python-free object only. macOS
+and Windows have not been run.
