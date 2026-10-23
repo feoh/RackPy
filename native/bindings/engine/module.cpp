@@ -685,6 +685,23 @@ void bindModule(py::module_ engine) {
 			moduleJson(r, "Module.data_from_json", false, native, native);
 		}, py::arg("data"));
 
+	// --- Patch storage (RP-15B) -------------------------------------------------
+	auto storage = [](const ModuleRef& r, bool create) {
+		module::Module& m = sealedModule(r);
+		liveContext("patch storage");
+		// Rack raises its own Exception for a module without an engine ID.
+		py::gil_scoped_release release;  // createDirectories is blocking filesystem work
+		return create ? m.createPatchStorageDirectory() : m.getPatchStorageDirectory();
+	};
+	cls.def("get_patch_storage_directory", [storage](const ModuleRef& r) { return storage(r, false); },
+		"Rack's per-module directory in the patch's autosave folder; needs an engine ID.")
+		.def("create_patch_storage_directory", [storage](const ModuleRef& r) { return storage(r, true); },
+			"Create (if needed) and return Rack's patch storage directory. Rack, not RackPy, removes it.")
+		.def("patch_storage", [storage](const ModuleRef& r, bool create) {
+			std::string path = storage(r, create);
+			return py::module_::import("pathlib").attr("Path")(path);
+		}, py::arg("create") = true, "The patch storage directory as a pathlib.Path, created unless create=False.");
+
 	cls.def_static("create", &create, py::arg("configure") = py::none())
 		.def_static("create", &createConfigured, py::arg("num_params"), py::arg("num_inputs"), py::arg("num_outputs"),
 			py::arg("num_lights") = 0, py::arg("configure") = py::none(),

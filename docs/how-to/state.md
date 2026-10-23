@@ -1,9 +1,8 @@
 # Save and restore a module's state
 
-**Implemented (RP-15A), Linux x86_64 inside Rack Free 2.6.6.** Patch storage
-directories, plugin-wide settings and a full `.vcv` save, reopen, autosave and
-undo round trip are later RP-15 work; modules cannot be registered as models
-yet (RP-16).
+**Implemented (RP-15A, RP-15B), Linux x86_64 inside Rack Free 2.6.6.**
+Plugin-wide settings and a full `.vcv` save, reopen, autosave and undo round
+trip are later RP-15 work; modules cannot be registered as models yet (RP-16).
 
 Rack saves a module as JSON: its parameters, whether it is bypassed, and
 whatever *custom data* the module adds. RackPy keeps Rack's split:
@@ -64,3 +63,26 @@ model, so they need a registered model (RP-16). For a module Rack's engine
 owns, these go through the engine's locks exactly as a save or load does, and
 Python inside them is then contained as in Rack. All of these need a sealed
 module and the main thread.
+
+## Files next to the patch
+
+Some state does not fit in JSON: samples, wavetables, large buffers. Rack gives
+each module a *patch storage directory* inside the patch's autosave folder.
+`module.patch_storage()` returns it as a `pathlib.Path`, creating it first
+(`create=False` only computes it); `get_patch_storage_directory()` and
+`create_patch_storage_directory()` are Rack's methods, returning strings.
+
+The directory is named after the module's engine ID, so it exists only once
+Rack's engine has added the module: before that, Rack raises its own
+exception (`rackpy.raw.Exception`), which also means never inside the
+constructor callback. Rack's advice applies: load files when the module is
+added and write them when the patch is saved, never from audio processing.
+These calls do filesystem work, so they need the main thread and Rack's live
+context.
+
+```{rackpy-example} patch_storage.py
+```
+
+RackPy never deletes this directory. Rack removes storage of deleted modules
+when the user saves the patch; until then *undo* can bring a deleted module
+back with its files, so do not delete them yourself when a module is removed.

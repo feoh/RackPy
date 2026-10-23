@@ -523,8 +523,10 @@ a shared `json_t`. A module's handle also reports its handlers and its slots'
 transferred objects to Python's garbage collector, so closures and subclass
 attributes that refer back to the module do not leak. Rules, threads and error
 handling are explained in [save and restore a module's state](../how-to/state.md).
-Patch storage directories (`getPatchStorageDirectory`,
-`createPatchStorageDirectory`) are later RP-15 work.
+Patch storage directories (`get_patch_storage_directory`,
+`create_patch_storage_directory` and the `pathlib` facade `patch_storage()`)
+follow Rack's rules (RP-15B): an engine ID is required, and RackPy never
+deletes them.
 
 ## Lifecycle events
 

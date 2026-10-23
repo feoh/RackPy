@@ -24,3 +24,11 @@ engine-owned modules go through the engine's locks. The runtime JSON policy
 applies. The module handle reports handlers and transferred slot objects to
 Python's garbage collector. Patch storage, plugin settings and the `.vcv`,
 autosave and undo integration stay on later RP-15 children.
+
+**RP-15B — patch storage directories**
+(`tk-rackpy-15b-patch-storage-directories-268c1b`). Exact scope:
+`Module::getPatchStorageDirectory()` and `createPatchStorageDirectory()`.
+Raw methods return Rack's path strings; `Module.patch_storage(create=True)`
+returns a `pathlib.Path`. An engine ID is required (Rack's own exception
+otherwise), as are the main thread and Rack's live context; nothing deletes
+storage, which Rack garbage-collects on save so that undo can restore it.
