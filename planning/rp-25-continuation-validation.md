@@ -1,0 +1,69 @@
+# RP-25 continuation validation (Linux x86_64)
+
+This checkpoint continues the existing RP-25 parent after RP-25A–D. It does
+**not** complete RP-25, any full Widget mapping, or the implementation phase.
+
+## Change boundary
+
+- `058bede`: checked raw `WidgetNode.box` assignment and live nested box/vector
+  field views. Every access rechecks native lifetime, context and UI thread.
+  Views survive attached-wrapper collection but do not retain native ownership.
+  `get_box()` stays a copy; explicit view `copy()` gives ordinary Rect/Vec values.
+- Follow-up: direct `requested_delete` bool, `request_delete()` and native-base
+  `step()`. Pending/cancelled requests preserve Rack semantics, hidden branches
+  still step, deleted descendants invalidate retained handles/geometry views,
+  and remove/re-add preserves a pending request. Real Context shutdown also
+  invalidates retained geometry views.
+
+All four exact manifest entries stay **planned**. In particular, views do not
+implement every Rect/Vec operation or implicit conversion, and native `step()`
+is not a Python override mapping. No callback, scene, browser, drawing, or
+window-recreation coverage is implied.
+
+## Passing local checks
+
+Run from `/tmp/rackpy-rp25-continuation`, against the checksum-verified pinned
+Rack SDK/Free host and pinned CPython/pybind11 inputs:
+
+- `bin/rackpy-dev build --werror --build-dir build/dev --test-hooks`: compiled
+  native plugin and all **4 CTests** passed, including widget aliasing,
+  replacement, collection, deletion and invalidation checks.
+- `uv run pytest -q tests/widget/test_tree.py tests/coverage/test_introspection.py`:
+  **5 outer host tests passed**. The widget suite runs inside actual Rack's
+  live UI under Xvfb, executes the docs snippet, checks stale/foreign/worker
+  access, and checks retained native roots/views at real host shutdown.
+- `uv run pytest -q -m 'not dist and not inventory and not gui and not host'`:
+  **93 passed, 107 deselected** when run without a concurrent Sphinx build.
+  This includes the **61 unit tests**, native and docs regression tests.
+- `prek run --all-files`, then `uv run mypy`: all hooks and strict typing pass.
+- `bin/planning-check`, `bin/generate_bindings.py check`, and `git diff --check`:
+  pass without reducing or promoting the coverage denominator.
+- `uv run sphinx-build -W --keep-going -n -b html docs build/docs/html`:
+  passes with warnings as errors.
+
+## Incomplete/failed attempts and cleanup
+
+The all-host `uv run pytest -q -m 'not dist and not inventory'` attempt hit its
+180-second tool timeout during the deliberate unsafe-worker deadlock probe.
+It is **not** a full-suite pass. The orphaned Rack, xvfb-run and Xvfb processes
+from that attempt were terminated and checked absent. No harness change is
+included here.
+
+An initial broader regression run collided with a simultaneous Sphinx command:
+AutoAPI's shared generated source directory was removed while the other build
+was using it. That attempt had 91 passes and 2 docs failures. Re-running the
+same regression command serially passed all 93 tests. Do not run two Sphinx
+builds against this worktree concurrently.
+
+Temporary docs logs were outside git and removed after recording results.
+The existing continuation worktree is retained as the local implementation
+checkpoint, rather than removed with its unpushed commits.
+
+## Gates not established
+
+No full distribution build, sanitizers, macOS, Windows, full all-host suite,
+performance measurement, Python Widget subclass/callback exception handling,
+scoped event propagation, module-browser/null-preview/scene insertion or graphics
+window recreation was established. The parent contract remains open; the next
+major work is full Widget subclass/scoped-event ownership and containment, plus
+remaining raw field/container and variant semantics.

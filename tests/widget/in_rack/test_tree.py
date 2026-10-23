@@ -108,6 +108,71 @@ def test_invalid_mutations_are_atomic(root: WidgetNode) -> None:
         root.add_child(orphan)
 
 
+def test_native_step_deletes_requested_children_and_invalidates_views(root: WidgetNode) -> None:
+    child, grandchild, keep = (WidgetNode.create() for _ in range(3))
+    root.add_child(child)
+    root.add_child(keep)
+    child.add_child(grandchild)
+    box, vector = grandchild.box, child.box.pos
+    assert not bool(child.requested_delete)
+    child.request_delete()
+    assert bool(child.requested_delete)
+    assert bool(child.alive) and bool(grandchild.alive) and list(root.children) == [child, keep]
+    root.step()
+    assert list(root.children) == [keep]
+    assert not bool(child.alive) and not bool(grandchild.alive)
+    for action in (box.copy, vector.copy, child.request_delete, child.step, lambda: child.requested_delete):
+        with pytest.raises(StaleHandleError):
+            action()
+    root.request_delete()
+    root.step()  # only a parent processes a widget's own request
+    assert root.alive and bool(root.requested_delete)
+    root.requested_delete = False
+    keep.request_delete()
+    keep.requested_delete = False  # raw field can cancel the pending request
+    root.step()
+    assert bool(keep.alive) and list(root.children) == [keep]
+    keep.requested_delete = True
+    root.step()
+    assert list(root.children) == [] and not bool(keep.alive)
+
+
+def test_step_recurses_hidden_trees_and_preserves_pending_request_on_remove(root: WidgetNode) -> None:
+    parent, child = WidgetNode.create(), WidgetNode.create()
+    root.add_child(parent)
+    parent.add_child(child)
+    parent.hide()
+    child.request_delete()
+    root.step()  # visibility only controls drawing, not stepping
+    assert parent.alive and list(parent.children) == [] and not child.alive
+    replacement = WidgetNode.create()
+    parent.add_child(replacement)
+    replacement.request_delete()
+    parent.remove_child(replacement)
+    root.step()
+    assert bool(replacement.alive) and bool(replacement.requested_delete)
+    root.add_child(replacement)
+    root.step()
+    assert list(root.children) == [parent] and not bool(replacement.alive)
+    with pytest.raises(ContextError):
+        _rackpy_host._testing.with_foreign_context(root.step)
+    with pytest.raises(ContextError):
+        _rackpy_host._testing.with_foreign_context(root.request_delete)
+    errors: list[BaseException] = []
+
+    def use() -> None:
+        for action in (root.step, root.request_delete, lambda: setattr(root, "requested_delete", True)):
+            try:
+                action()
+            except BaseException as exc:
+                errors.append(exc)
+
+    thread = threading.Thread(target=use)
+    thread.start()
+    thread.join()
+    assert len(errors) == 3 and all(isinstance(exc, ThreadError) for exc in errors)
+
+
 def test_snapshot_box_copy_and_layout(root: WidgetNode) -> None:
     a, b = WidgetNode.create(), WidgetNode.create()
     a.set_box(Rect(2, 3, 4, 5))
@@ -142,6 +207,8 @@ def test_raw_box_live_aliases_and_value_copies(root: WidgetNode) -> None:
     box.pos = box.size
     root.box = box  # aliasing assignment copies before writing
     assert pos.copy() == size.copy() == Vec(2, 38)
+    assert pos + Vec(1, 2) == Vec(3, 40)
+    assert size - pos == Vec()
     root.set_box(Rect(4, 5, 6, 7))
     assert box.copy() == Rect(4, 5, 6, 7)
     assert pos.copy() == Vec(4, 5)
@@ -338,11 +405,15 @@ def test_cleanup_of_retained_tree_at_actual_host_shutdown(root: WidgetNode) -> N
     retained = WidgetNode.create()
     child = WidgetNode.create()
     retained.add_child(child)
+    retained_box, retained_pos = child.box, child.box.pos
     original_stop = rackpy._bootstrap.stop
 
     def stop() -> None:
         original_stop()
         assert not retained.alive and not child.alive
+        for action in (retained_box.copy, retained_pos.copy):
+            with pytest.raises((StaleHandleError, ContextError)):
+                action()
         count = rackpy.raw.widget._native_root_count
         assert count() == 0
         _rackpy_host.log_info("detached-widget-cleanup-ok")
@@ -353,11 +424,15 @@ def test_cleanup_of_retained_tree_at_actual_host_shutdown(root: WidgetNode) -> N
 def test_final_adapter_cannot_hide_python_overrides() -> None:
     with pytest.raises(TypeError):
         type("Unsafe", (WidgetNode,), {"step": lambda self: None})
+    for view_type in (rackpy.raw.widget.WidgetBoxView, rackpy.raw.widget.WidgetVecView):
+        with pytest.raises(TypeError):
+            view_type()
 
 
 def test_introspection_and_runnable_snippet(root: WidgetNode) -> None:
     objects = snapshot()["objects"]
-    assert "rackpy.raw.widget.WidgetNode.add_child" in objects
+    for member in ("add_child", "box", "step", "request_delete", "requested_delete"):
+        assert f"rackpy.raw.widget.WidgetNode.{member}" in objects
     assert "rackpy.widget.WidgetNode" in objects
     path = Path(__file__).resolve().parents[3] / "docs" / "snippets" / "detached_tree.py"
     scope: dict[str, Any] = {}

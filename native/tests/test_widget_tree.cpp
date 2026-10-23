@@ -202,6 +202,32 @@ int main() {
 	catch (const runtime::StaleHandle&) { staleField = true; }
 	assert(staleField);
 
+	// Rack's base step deletes requested direct children before recursion,
+	// including hidden branches, and invalidates every descendant locator.
+	auto stepRoot = manager->create();
+	auto stepParent = manager->create();
+	auto stepChild = manager->create();
+	manager->add(*stepRoot, *stepParent);
+	manager->add(*stepParent, *stepChild);
+	widget::BoxView stepBox{*stepChild};
+	stepParent->get().hide();
+	stepChild->get().requestDelete();
+	assert(stepChild->get().requestedDelete);
+	stepRoot->get().step();
+	assert(stepParent->get().children.empty() && !stepChild->token->alive());
+	staleField = false;
+	try { stepBox.get(); }
+	catch (const runtime::StaleHandle&) { staleField = true; }
+	assert(staleField);
+	stepParent->get().requestDelete();
+	stepParent->get().requestedDelete = false;
+	stepRoot->get().step();
+	assert(stepParent->token->alive());
+	stepRoot->get().requestDelete();
+	stepRoot->get().step();
+	assert(stepRoot->token->alive());
+	manager->close(*stepRoot);
+
 	// A worker dropping the last owning handle only flags collection. Native
 	// children remain alive until a main-thread drain, then become stale.
 	std::thread worker([held = std::move(r)]() mutable { held.reset(); });

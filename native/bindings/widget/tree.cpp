@@ -164,6 +164,11 @@ void bindWidgetTrees(py::module_ raw) {
 		}, py::arg("child"), py::arg("sibling"))
 		.def("remove_child", [](const Handle& h, const Handle& c) { h.manager->remove(h, c); }, py::arg("child"))
 		.def("clear_children", [](const Handle& h) { h.get().clearChildren(); })
+		.def("request_delete", [](const Handle& h) { h.get().requestDelete(); })
+		.def_property("requested_delete", [](const Handle& h) { return h.get().requestedDelete; },
+			[](const Handle& h, bool requested) { h.get().requestedDelete = requested; })
+		.def("step", [](const Handle& h) { h.get().step(); },
+			"Run the native base Widget step on this detached tree; no Python overrides.")
 		.def("has_child", [](const Handle& h, const Handle& c) { return h.get().hasChild(&c.get()); }, py::arg("child"))
 		.def_property("box", [](const Handle& h) { h.get(); return BoxView{h}; },
 			[](const Handle& h, py::object value) { auto copy = rectValue(value); h.get().box = copy; })

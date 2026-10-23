@@ -39,6 +39,25 @@ count as complete public mappings.
   then raise `StaleHandleError`. Explicit `close()` is preferable when timing
   matters. This includes final handle release on a Python-created worker.
 
+### Deferred native deletion and stepping
+
+`child.request_delete()` calls Rack's `requestDelete()`, setting the raw
+`requested_delete` bool. It does **not** immediately close the handle. During
+`parent.step()`, Rack deletes flagged direct children (and their subtrees),
+invalidating all retained handles and geometry views. For other children it
+recurses, including invisible ones. A detached root's own flag does not delete
+it when its own `step()` runs: only its parent can consume that flag. Use
+`close()` for deterministic detached-root destruction.
+
+`requested_delete` is also a checked read/write raw field. Assigning `False`
+cancels a pending request. Removing a child from its parent does not clear its
+flag; adding it to another parent lets that parent's next step delete it.
+Detached trees are **not** scene-registered and do not advance automatically;
+call `step()` explicitly from the UI thread when needed. This adapter calls
+only the native base Widget implementation. Python `step` overrides, scoped
+Remove events and callback error containment are still unimplemented; these
+records remain **planned**, not complete virtual-method coverage.
+
 Every native access, including lifetime queries, is main-thread-only
 (`ThreadError` otherwise); context-bound operations reject a different or
 closed context. On context shutdown, after Python's closing hooks stop its

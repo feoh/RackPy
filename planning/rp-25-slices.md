@@ -101,6 +101,22 @@ attached-wrapper collection, root collection, copy/deepcopy and the executable
 snippet. Stubs, exact manifest evidence/generated coverage and human docs are
 updated with this checkpoint; no full Widget or phase completion is claimed.
 
+## RP-25 continuation: native stepping and deferred deletion
+
+Executed under the existing RP-25 parent claim. Adds checked `request_delete()`,
+raw `requested_delete` read/write, and explicit native-base `step()` calls. The
+parent step deletes flagged children, invalidates subtree handles/field views,
+and recurses through hidden trees. A detached root's own request does not
+self-delete; remove/re-add preserves the flag; direct cancellation preserves
+ownership. No Python callbacks are added. All three exact mappings stay
+`planned` because full virtual/subclass/scoped-event semantics remain open.
+Native and actual-host tests cover pending/cancelled requests, recursion,
+transferred requests, stale views, wrong context/thread, plus retained geometry
+view invalidation during real Context shutdown. Docs/snippet and strict stubs
+show that detached trees are not automatically scene-stepped. Local validation,
+failed attempts, cleanup and remaining gates are recorded in
+[continuation validation](rp-25-continuation-validation.md).
+
 ## Remaining RP-25 acceptance
 
 The original parent retains complete class-factory/subclass and lifecycle

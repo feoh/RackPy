@@ -42,5 +42,8 @@ def exercise_tree() -> None:
         assert child.parent is None
         child.close()
         assert not child.alive
+        above.request_delete()  # stays live until its parent's native step
+        root.step()
+        assert not above.alive
     finally:
         root.close()
