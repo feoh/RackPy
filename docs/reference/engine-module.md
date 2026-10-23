@@ -4,9 +4,9 @@
 checked built-in quantities (RP-14B2a), and borrowed quantity helpers / mutable
 switch-label views (RP-14B2b1), standalone metadata backreferences (RP-14B2b2),
 unattached and attached standalone quantities (RP-14B2b3/b4), and port/light
-and parameter-quantity class factories (RP-14B2b5/b6), Linux x86_64 inside
-Rack Free 2.6.6.** This is not a registerable instrument yet. Raw metadata
-collections and engine-owned smoothing (RP-14B2b), native lifecycle
+and parameter-quantity class factories (RP-14B2b5/b6), and constructor-scoped
+raw module vectors (RP-14B2b7), Linux x86_64 inside Rack Free 2.6.6.** This is
+not a registerable instrument yet. Engine-owned smoothing (RP-14B2b), native lifecycle
 adapters (RP-14C), plugin/model factories (RP-16), DSP (RP-17), the Python callback
 laboratory (RP-22), and expanders (RP-23) remain planned. See the
 [coverage report](coverage.md) for declaration-level status.
@@ -52,16 +52,13 @@ is never stored in the native module, and no audio path invokes it.
 Getter IDs must satisfy `0 <= index < count`; invalid IDs raise `IndexError`
 instead of accessing an unchecked C++ vector.
 
-`params`, `inputs`, `outputs` and `lights` are fixed-size checked views.
-They support length, iteration and integer indexing (including Python's
-negative indices). They do not support resizing, slicing, replacement or
-named lookup. Setting a component's value writes through to the actual Rack
-component. Repeated lookups of a live component preserve Python identity.
-Iteration snapshots the component *handles*, not their changing values.
-
-A checked, non-resizable view does not expose every operation of C++'s public
-mutable vector fields. Those four manifest records therefore remain
-`planned`, not completed mappings. Named lookup remains planned.
+`params`, `inputs`, `outputs` and `lights` are checked views of Rack's
+vectors. They support length, iteration and integer indexing (including
+Python's negative indices); slicing and named lookup are not supported. Setting
+a component's value writes through to the actual Rack component. Repeated
+lookups of a live component preserve Python identity. Iteration snapshots the
+component *handles*, not their changing values. During construction they also
+take Rack's raw vector edits ([raw module vectors](#raw-module-vectors)).
 For port channel and buffer rules, see [Engine components](engine-components.md).
 
 (module-metadata)=
@@ -75,13 +72,16 @@ IDs must be nonnegative and below the corresponding component count.
 `get_input_info(index)`, `get_output_info(index)` and `get_light_info(index)`
 return the same live adapters. Rack initializes input/output metadata in
 `config`; light slots are `None` until explicitly configured. `input_infos`,
-`output_infos` and `light_infos` are fixed-size `Components` collections with
-negative indexing and iteration, not replaceable or resizable raw vectors.
+`output_infos` and `light_infos` are `Components` collections with negative
+indexing and iteration; during construction they take
+[raw vector edits](#raw-module-vectors).
 
 The adapters expose mutable `name` and `description`, `get_name()` and
 `get_description()`. A port also has `get_full_name()` (Rack appends " input"
-or " output"), read-only `type` and `port_id`; a light has read-only `light_id`.
-The read-only `module` property returns the original owning Python handle.
+or " output"), `type` and `port_id`; a light has `light_id`. `module` returns
+the owning Python handle (or `None`). These identity fields can be assigned
+only during construction, and `module` only the owning module or `None`;
+the seal checks that they match the slot.
 All native metadata access requires the main thread, including null-slot
 lookups. `alive` is a liveness query and may be read from any thread.
 
@@ -99,11 +99,10 @@ retaining `view.module` does, just like retaining the original module handle.
 
 Borrowed adapters are distinct from standalone, subclassable `PortInfo` /
 `LightInfo`. To put one of those classes into a slot, pass it as `info_type`
-([metadata class factories](#metadata-class-factories)). Arbitrary
-identity-field/module-pointer mutation on the borrowed adapters and raw vector
-mutation are absent, so the `inputInfos`, `outputInfos` and `lightInfos` field
-records remain `planned` (RP-14B2b). Standalone metadata backreferences are
-documented in [Engine components](engine-components.md#portinfo-and-lightinfo).
+([metadata class factories](#metadata-class-factories)) or assign it to the
+slot ([raw module vectors](#raw-module-vectors)). Standalone metadata
+backreferences are documented in
+[Engine components](engine-components.md#portinfo-and-lightinfo).
 
 ## Metadata class factories
 
@@ -302,8 +301,9 @@ Quantity views expose these native scalar/text fields for reading and writing:
 `reset_enabled`, `randomize_enabled`, `smooth_enabled`, and `snap_enabled`.
 Direct field assignments, like C++, do not reset the Param or revalidate the
 whole range. Keep the metadata coherent; use the checked construction helpers
-for initial configuration. `param_id` and `module` are read-only. `get_param()`
-returns the same checked Param as the owning module. `alive` remains a
+for initial configuration. `param_id` and `module` can be assigned only during
+construction (`module` only the owner or `None`). `get_param()` returns the
+same checked Param as the owning module, or `None` for an ID out of range. `alive` remains a
 thread-independent liveness query. All other access requires the main thread.
 Replacement, failed construction, close and owner collection invalidate views;
 retaining a view does not keep the module alive.
@@ -384,6 +384,55 @@ quantities, raw identity/vector mutation and JSON (RP-15) remain unimplemented.
 Their exact manifest records stay `planned` or `unreviewed`; adapters do not
 count as completed callback/template mappings. Mixed value/range virtuals remain
 native in production; RP-22 owns explicit laboratory semantics.
+
+## Raw module vectors
+
+Rack's `Module` has eight public vectors: `params`, `inputs`, `outputs`,
+`lights`, and the owning pointer vectors `paramQuantities`, `inputInfos`,
+`outputInfos` and `lightInfos`. A plugin's C++ constructor may edit them after
+`config`. RackPy maps that **inside the constructor callback**, after `config`:
+item assignment, `del`, `insert`, `append`, `clear` and `resize(n)` on the
+matching collection. Negative indices count from the end, `insert` clamps its
+position like `list.insert`, and other out-of-range indices raise `IndexError`.
+
+- **Component vectors** hold values. Assigning a `Param`, `Input`, `Output` or
+  `Light` copies it into the slot, like C++ assignment; the source stays
+  independent. `resize` adds default components. A structural edit (anything
+  but item assignment) invalidates every view of *that* vector: Rack's vector
+  may have moved its storage, as with C++ iterators. Views of the other vectors
+  stay valid.
+- **Metadata vectors** hold owning pointers. Assign a `ParamQuantity` (or
+  `SwitchQuantity`), `PortInfo` or `LightInfo` you created, or `None` for a null
+  slot. The module takes ownership, exactly as `inputInfos[i] = info` does in
+  C++: no field is changed, so set `module`, the ID and the port type yourself.
+  `resize` adds null slots. Built-in views, objects another slot owns and
+  objects a slot has released are refused.
+- **Removal releases.** When a raw edit removes a pointer (assignment over it,
+  `del`, `clear`, shrinking), Rack would not delete the object. A Python object
+  comes back to you, still usable; if its `module` points at this module the
+  link is tracked, so deleting the module later sets it to `None`. Built-in
+  metadata has no other owner, so it is deleted and its views become stale.
+  Replacement by a `config_*` helper and module deletion still delete, as in Rack.
+
+```{rackpy-example} raw_vectors.py
+```
+
+**The seal checks what Rack relies on.** When the constructor callback
+returns, Rack's own code (saving, reset, randomize, tooltips, the cable menu)
+assumes invariants it never checks. RackPy checks them and fails the
+construction with `ValueError` otherwise: each component vector matches its
+metadata vector in size; every parameter has a quantity and every port has
+metadata (light slots may be `None`); every object's `module` is this module and
+its ID (and port type) matches its slot; every bypass route is inside the port
+vectors.
+
+**After the seal** only item assignment to the component vectors remains:
+slot assignment and structural edits raise `OwnershipError`, and so do writes
+to the identity fields (`module`, the IDs and the port type) of any metadata a
+slot owns. Rack's engine and UI index with those values unchecked.
+Every edit requires the main thread, and none is allowed before `config`.
+These eight records are `implemented` with this contract; `bypassRoutes` is
+RP-14C.
 
 ## Ownership and failure
 

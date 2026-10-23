@@ -18,6 +18,10 @@ struct Retiring : rack::engine::PortInfo, rackpy::module::TransferredMetadata {
 		log->push_back("retired " + name + (module ? " linked" : ""));
 		delete this;
 	}
+	void release() noexcept override {
+		log->push_back("released " + name);
+		delete this;
+	}
 };
 
 struct RetiringSwitch : rack::engine::SwitchQuantity, rackpy::module::TransferredMetadata {
@@ -29,6 +33,10 @@ struct RetiringSwitch : rack::engine::SwitchQuantity, rackpy::module::Transferre
 	bool transferred() const override { return true; }
 	void retire() noexcept override {
 		log->push_back("retired " + name);
+		delete this;
+	}
+	void release() noexcept override {
+		log->push_back("released " + name);
 		delete this;
 	}
 };
@@ -246,6 +254,53 @@ int main() {
 		c.seal();
 		c.close();
 		assert(log.size() == 2 && log[1] == "retired Switch");
+	}
+	// RP-14B2b7: raw slot edits release (not retire) transferred objects, keep
+	// generations in step, and the seal enforces what Rack relies on.
+	{
+		std::vector<std::string> log;
+		Construction c;
+		auto& m = c.get();
+		refuses<Ownership>([&] { c.requireRawEdit(); });
+		c.config(0, 2, 0, 0);
+		auto make = [&](int id, const char* name) -> rack::engine::PortInfo* {
+			auto* info = new Retiring(&log);
+			info->module = &m;
+			info->portId = id;
+			info->type = rack::engine::Port::INPUT;
+			info->name = name;
+			return info;
+		};
+		auto old = m.inputInfoTokens[0];
+		Construction::setSlot(m.inputInfos, m.inputInfoTokens, 0, make(0, "A"), std::make_shared<ObjectToken>(nullptr));
+		assert(!old->alive() && log.empty());
+		Construction::setSlot(m.inputInfos, m.inputInfoTokens, 0, make(0, "B"), std::make_shared<ObjectToken>(nullptr));
+		assert((log == std::vector<std::string>{"released A"}));
+		Construction::reserveSlots(m.inputInfos, m.inputInfoTokens, 3);
+		Construction::insertSlot(m.inputInfos, m.inputInfoTokens, 2, make(2, "C"), std::make_shared<ObjectToken>(nullptr));
+		assert(m.inputInfos.size() == 3 && m.inputInfoTokens.size() == 3);
+		m.inputs.emplace_back();
+		c.validate();
+		auto shifted = m.inputInfoTokens[1];
+		Construction::eraseSlot(m.inputInfos, m.inputInfoTokens, 0);
+		assert(log.back() == "released B" && shifted->alive() && m.inputInfoTokens[0] == shifted);
+		m.inputs.pop_back();
+		refuses<std::invalid_argument>([&] { c.validate(); });  // port metadata 0 has port_id 1
+		m.inputInfos[0]->portId = 0;
+		m.inputInfos[1]->portId = 1;
+		c.validate();
+		Construction::reserveSlots(m.inputInfos, m.inputInfoTokens, 3);
+		Construction::resizeSlots(m.inputInfos, m.inputInfoTokens, 3, rackpy::module::Module::tokens(1));
+		m.inputs.emplace_back();
+		refuses<std::invalid_argument>([&] { c.validate(); });  // input 2 has no metadata
+		Construction::resizeSlots(m.inputInfos, m.inputInfoTokens, 1, {});
+		assert(log.back() == "released C" && m.inputInfoTokens.size() == 1);
+		m.inputs.resize(1);
+		c.seal();
+		refuses<Ownership>([&] { c.requireRawEdit(); });
+		assert(Construction::editIndex(-1, 3) == 2 && Construction::insertIndex(-10, 3) == 0 && Construction::insertIndex(10, 3) == 3);
+		refuses<std::out_of_range>([&] { Construction::editIndex(3, 3); });
+		c.close();
 	}
 	// Native deletion of standalone metadata can race main-thread module
 	// cleanup. detach completes before the actual SDK field ceases to exist.

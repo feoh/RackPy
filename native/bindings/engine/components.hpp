@@ -63,6 +63,14 @@ py::object borrowOutput(rack::engine::Output* port, std::shared_ptr<runtime::Obj
 py::object borrowParam(rack::engine::Param* param, std::shared_ptr<runtime::ObjectToken> owner);
 py::object borrowLight(rack::engine::Light* light, std::shared_ptr<runtime::ObjectToken> owner);
 
+/** A Python component's value, for a raw module vector element (C++ copy
+assignment; RP-14B2b7). TypeError for another component class, StaleHandle
+for a view of a deleted component. Needs the GIL. */
+rack::engine::Param paramValue(py::handle value);
+rack::engine::Input inputValue(py::handle value);
+rack::engine::Output outputValue(py::handle value);
+rack::engine::Light lightValue(py::handle value);
+
 void bindComponents(py::module_ engine);
 
 }  // namespace bindings

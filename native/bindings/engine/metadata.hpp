@@ -29,8 +29,11 @@ it back: the Python object survives while referenced, but every bound access
 raises StaleHandle. */
 template <typename Base, typename Alias>
 struct SlotTransfer : module::TransferredMetadata {
+	// What the `module` field points at (with a link when Python set it), and
+	// separately the module whose slot owns the object.
 	std::weak_ptr<module::Construction> moduleState;
 	std::shared_ptr<module::ModuleBackreference> moduleLink;
+	std::weak_ptr<module::Construction> slotOwner;
 	bool inSlot = false;
 	bool retired = false;
 
@@ -54,12 +57,67 @@ struct SlotTransfer : module::TransferredMetadata {
 			moduleLink->detach();
 		moduleLink.reset();
 	}
-	/** Committed transfer into `state`'s slot: nothing here throws. */
-	void enterSlot(const std::shared_ptr<module::Construction>& state) {
-		detachLink();
-		moduleState = state;
+	/** Committed transfer into `state`'s slot: nothing here throws. A class
+	factory then points `module` at the owner, so a link to another module
+	must go; a raw vector assignment leaves the field exactly as it was. */
+	void enterSlot(const std::shared_ptr<module::Construction>& state, bool factory) {
+		if (factory) {
+			detachLink();
+			moduleState = state;
+		}
+		slotOwner = state;
 		inSlot = true;
 		runtime::noteTransferred();
+	}
+	/** Identity fields (module, IDs, port type) of a slot's object are frozen
+	once its module is sealed: Rack's engine and UI index with them unchecked. */
+	void requireIdentityEdit() const {
+		if (!inSlot)
+			return;
+		auto owner = slotOwner.lock();
+		if (owner && !owner->constructing)
+			throw runtime::Ownership("a module's metadata identity (module, IDs, port type) can change only during construction");
+	}
+	/** Raw vector removal: Python owns the object again and it stays usable.
+	Its module pointer is kept, as in C++, but tracked, so deleting the module
+	later clears it instead of leaving it dangling. */
+	void release() noexcept override {
+		if (!runtime::interpreterAlive()) {
+			runtime::diagnose(runtime::DiagnosticCode::ShutdownLeak, "transferred metadata outlived Python");
+			return;
+		}
+		PyGILState_STATE gil = PyGILState_Ensure();
+		Base* self = static_cast<Alias*>(this);
+		inSlot = false;
+		slotOwner.reset();
+		if (self->module && !moduleLink) {
+			try {
+				auto state = moduleState.lock();
+				if (state && state->object && state->object.get() == self->module)
+					moduleLink = state->object->trackBackreference(&self->module);
+				else
+					self->module = nullptr;
+			}
+			catch (...) {
+				self->module = nullptr;  // cannot track it: never leave it dangling
+			}
+		}
+		runtime::noteTransferredDeleted();
+		reclaim(self);
+		PyGILState_Release(gil);
+	}
+	static void reclaim(Base* self) noexcept {
+		try {
+			// The slot's ownership returns to the existing Python object. Its
+			// last reference may go here and run Python finalizers: the slot is
+			// already empty and the object's flags already say so.
+			py::object owner = py::cast(std::unique_ptr<Base>(self));
+		}
+		catch (...) {
+			// A failed reclaim leaves the unique_ptr owning, which deleted the
+			// object; pybind11's self-life support released the Python half.
+			runtime::diagnose(runtime::DiagnosticCode::CallbackRaised, "reclaiming transferred metadata failed");
+		}
 	}
 	/** Hand native ownership back to the Python object (pybind11 reclaim).
 	Runs on the thread deleting the module or replacing the slot, normally the
@@ -75,21 +133,12 @@ struct SlotTransfer : module::TransferredMetadata {
 		Base* self = static_cast<Alias*>(this);
 		inSlot = false;
 		retired = true;
+		slotOwner.reset();
 		self->module = nullptr;
 		moduleState.reset();
 		detachLink();
 		runtime::noteTransferredDeleted();
-		try {
-			// The slot's ownership returns to the existing Python object. Its
-			// last reference may go here and run Python finalizers: the slot is
-			// already empty and this object is already retired.
-			py::object owner = py::cast(std::unique_ptr<Base>(self));
-		}
-		catch (...) {
-			// A failed reclaim leaves the unique_ptr owning, which deleted the
-			// object; pybind11's self-life support released the Python half.
-			runtime::diagnose(runtime::DiagnosticCode::CallbackRaised, "reclaiming transferred metadata failed");
-		}
+		reclaim(self);
 		PyGILState_Release(gil);
 	}
 };
@@ -127,9 +176,11 @@ py::object constructForSlot(py::handle type, const char* argument, const char* b
 	return instance;
 }
 
-/** Disown a constructed alias for its slot. The flags are checked first. */
+/** Disown a Python-created alias for a slot. The flags are checked first.
+`factory` is false for a raw vector assignment, which sets no fields. */
 template <typename Base, typename Alias>
-std::unique_ptr<Base> disownForSlot(py::object instance, Alias& alias, const std::shared_ptr<module::Construction>& state) {
+std::unique_ptr<Base> disownForSlot(py::object instance, Alias& alias, const std::shared_ptr<module::Construction>& state,
+	bool factory = true) {
 	if (alias.retired)
 		throw runtime::StaleHandle("the class returned an object that a module slot already released");
 	if (alias.inSlot)
@@ -141,7 +192,7 @@ std::unique_ptr<Base> disownForSlot(py::object instance, Alias& alias, const std
 	catch (const std::exception& e) {
 		throw runtime::Ownership(std::string("this object cannot be transferred to a module (") + e.what() + ")");
 	}
-	alias.enterSlot(state);
+	alias.enterSlot(state, factory);
 	return owned;
 }
 

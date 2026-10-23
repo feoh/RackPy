@@ -10,6 +10,7 @@
 
 #include <pybind11/stl.h>
 
+#include <functional>
 #include <vector>
 
 #include "rackpy/runtime/python.hpp"
@@ -20,6 +21,32 @@ namespace bindings {
 py::object moduleObject(const std::shared_ptr<module::Construction>& state) {
 	auto& m = state->get();
 	return runtime::identity(&m, m.token->generation, [&] { return py::cast(ModuleRef{state}); });
+}
+
+py::object ownModuleField(rack::engine::Module* field, const std::shared_ptr<module::Construction>& state) {
+	if (!field)
+		return py::none();
+	if (field != &state->get())
+		throw runtime::StaleHandle("module metadata has an untracked module pointer");
+	return moduleObject(state);
+}
+
+void setOwnModuleField(rack::engine::Module*& field, py::handle value, const std::shared_ptr<module::Construction>& state) {
+	state->requireConstruction();
+	if (value.is_none()) {
+		field = nullptr;
+		return;
+	}
+	if (!py::isinstance<ModuleRef>(value) || value.cast<const ModuleRef&>().state != state)
+		throw py::value_error("a module's own metadata can point only at that module, or None");
+	field = &state->get();
+}
+
+std::shared_ptr<module::Construction> lockOwner(const std::weak_ptr<module::Construction>& state) {
+	auto held = state.lock();
+	if (!held)
+		throw runtime::StaleHandle("this metadata belonged to a deleted module");
+	return held;
 }
 
 namespace {
@@ -40,11 +67,7 @@ struct InfoView {
 		return *ptr;
 	}
 	py::object owner() const {
-		get();
-		auto held = state.lock();
-		if (!held)
-			throw runtime::StaleHandle("this metadata belonged to a deleted module");
-		return moduleObject(held);
+		return ownModuleField(get().module, lockOwner(state));
 	}
 };
 
@@ -65,7 +88,9 @@ auto bindInfoView(py::module_ engine, const char* name) {
 	using View = InfoView<Info>;
 	return py::class_<View>(engine, name, "Checked built-in metadata; not a standalone metadata class or a Python virtual trampoline.")
 		.def_property_readonly("alive", [](const View& v) { return v.token->alive(); })
-		.def_property_readonly("module", &View::owner)
+		.def_property("module", &View::owner, [](const View& v, py::handle value) {
+			setOwnModuleField(v.get().module, value, lockOwner(v.state));
+		}, "The owning module or None; assignable only during construction, to those two values.")
 		.def_property("name", [](const View& v) { return v.get().name; },
 			[](const View& v, std::string name) { v.get().name = std::move(name); })
 		.def_property("description", [](const View& v) { return v.get().description; },
@@ -74,17 +99,19 @@ auto bindInfoView(py::module_ engine, const char* name) {
 		.def("get_description", [](const View& v) { return v.get().getDescription(); });
 }
 
+/** Each vector's own size: during construction a raw edit may leave a
+component vector and its metadata vector different lengths until the seal. */
 int count(const ModuleRef& ref, Kind kind) {
 	module::Module& m = ref.get();
 	switch (kind) {
-		case Kind::Param:
-		case Kind::ParamQuantity: return m.getNumParams();
-		case Kind::Input:
-		case Kind::InputInfo: return m.getNumInputs();
-		case Kind::Output:
-		case Kind::OutputInfo: return m.getNumOutputs();
-		case Kind::Light:
-		case Kind::LightInfo: return m.getNumLights();
+		case Kind::Param: return m.getNumParams();
+		case Kind::ParamQuantity: return static_cast<int>(m.paramQuantities.size());
+		case Kind::Input: return m.getNumInputs();
+		case Kind::InputInfo: return static_cast<int>(m.inputInfos.size());
+		case Kind::Output: return m.getNumOutputs();
+		case Kind::OutputInfo: return static_cast<int>(m.outputInfos.size());
+		case Kind::Light: return m.getNumLights();
+		case Kind::LightInfo: return static_cast<int>(m.lightInfos.size());
 	}
 	throw std::logic_error("unknown component kind");
 }
@@ -93,11 +120,11 @@ py::object component(const ModuleRef& ref, Kind kind, int i) {
 	module::Module& m = ref.get();
 	module::Construction::index(i, count(ref, kind));
 	switch (kind) {
-		case Kind::Param: return borrowParam(&m.getParam(i), m.token);
+		case Kind::Param: return borrowParam(&m.getParam(i), m.paramsToken);
 		case Kind::ParamQuantity: return quantityView(ref, i);
-		case Kind::Input: return borrowInput(&m.getInput(i), m.token);
-		case Kind::Output: return borrowOutput(&m.getOutput(i), m.token);
-		case Kind::Light: return borrowLight(&m.getLight(i), m.token);
+		case Kind::Input: return borrowInput(&m.getInput(i), m.inputsToken);
+		case Kind::Output: return borrowOutput(&m.getOutput(i), m.outputsToken);
+		case Kind::Light: return borrowLight(&m.getLight(i), m.lightsToken);
 		case Kind::InputInfo: return infoView(ref, m.getInputInfo(i), m.inputInfoTokens[i]);
 		case Kind::OutputInfo: return infoView(ref, m.getOutputInfo(i), m.outputInfoTokens[i]);
 		case Kind::LightInfo: return infoView(ref, m.getLightInfo(i), m.lightInfoTokens[i]);
@@ -105,8 +132,105 @@ py::object component(const ModuleRef& ref, Kind kind, int i) {
 	throw std::logic_error("unknown component kind");
 }
 
+/** Rack's raw vector edits (RP-14B2b7), by element type. Component vectors
+hold values; a structural edit renews the vector's token, so every borrowed
+view of that vector goes stale, like C++ iterator invalidation. Metadata
+vectors hold owning pointers with one generation per slot. */
+template <typename T>
+struct ValueVector {
+	std::vector<T>& values;
+	std::shared_ptr<runtime::ObjectToken>& token;
+	T (*convert)(py::handle);
+
+	void set(size_t i, py::handle value) { values[i] = convert(value); }
+	// std::vector's strong guarantee: a failed (reallocating) insert or
+	// resize changes nothing, so the old views stay valid until we renew.
+	void insert(size_t i, py::handle value) {
+		T copy = convert(value);
+		auto next = std::make_shared<runtime::ObjectToken>(nullptr);
+		values.insert(values.begin() + i, copy);
+		module::Construction::renew(token, std::move(next));
+	}
+	void erase(size_t i) {
+		auto next = std::make_shared<runtime::ObjectToken>(nullptr);
+		values.erase(values.begin() + i);
+		module::Construction::renew(token, std::move(next));
+	}
+	void resize(size_t n) {
+		if (n == values.size())
+			return;
+		auto next = std::make_shared<runtime::ObjectToken>(nullptr);
+		values.resize(n);
+		module::Construction::renew(token, std::move(next));
+	}
+};
+
+template <typename Info>
+struct SlotVector {
+	std::vector<Info*>& infos;
+	module::Module::Tokens& tokens;
+	std::function<std::unique_ptr<Info>(py::handle)> take;  // None -> null
+
+	void set(size_t i, py::handle value) {
+		auto generation = std::make_shared<runtime::ObjectToken>(nullptr);
+		auto next = take(value);  // commits a transfer: nothing below throws
+		module::Construction::setSlot(infos, tokens, i, next.release(), std::move(generation));
+	}
+	void insert(size_t i, py::handle value) {
+		module::Construction::reserveSlots(infos, tokens, infos.size() + 1);
+		auto generation = std::make_shared<runtime::ObjectToken>(nullptr);
+		auto next = take(value);
+		module::Construction::insertSlot(infos, tokens, i, next.release(), std::move(generation));
+	}
+	void erase(size_t i) { module::Construction::eraseSlot(infos, tokens, i); }
+	void resize(size_t n) {
+		auto added = module::Module::tokens(n > infos.size() ? n - infos.size() : 0);
+		module::Construction::reserveSlots(infos, tokens, n);
+		module::Construction::resizeSlots(infos, tokens, n, std::move(added));
+	}
+};
+
+/** Raw vector assignment of a Python-created PortInfo/LightInfo, or None.
+Unlike a class factory it sets no fields; the seal checks them. */
+template <typename Info>
+std::unique_ptr<Info> takeInfo(const ModuleRef& ref, py::handle value) {
+	if (value.is_none())
+		return nullptr;
+	if (!py::isinstance<Info>(value))
+		throw py::type_error("a module's metadata vector takes a " + std::string(py::str(py::type::of<Info>().attr("__name__"))) +
+			" you created, or None");
+	return disownForSlot<Info>(py::reinterpret_borrow<py::object>(value), infoAlias(value.cast<Info&>()), ref.state, false);
+}
+
+template <typename F>
+void editVector(const ModuleRef& ref, Kind kind, F edit) {
+	module::Module& m = ref.get();
+	switch (kind) {
+		case Kind::Param: return edit(ValueVector<rack::engine::Param>{m.params, m.paramsToken, &paramValue});
+		case Kind::Input: return edit(ValueVector<rack::engine::Input>{m.inputs, m.inputsToken, &inputValue});
+		case Kind::Output: return edit(ValueVector<rack::engine::Output>{m.outputs, m.outputsToken, &outputValue});
+		case Kind::Light: return edit(ValueVector<rack::engine::Light>{m.lights, m.lightsToken, &lightValue});
+		case Kind::ParamQuantity:
+			return edit(SlotVector<rack::engine::ParamQuantity>{m.paramQuantities, m.paramQuantityTokens,
+				[&ref](py::handle v) { return takeQuantity(ref, v); }});
+		case Kind::InputInfo:
+			return edit(SlotVector<rack::engine::PortInfo>{m.inputInfos, m.inputInfoTokens,
+				[&ref](py::handle v) { return takeInfo<rack::engine::PortInfo>(ref, v); }});
+		case Kind::OutputInfo:
+			return edit(SlotVector<rack::engine::PortInfo>{m.outputInfos, m.outputInfoTokens,
+				[&ref](py::handle v) { return takeInfo<rack::engine::PortInfo>(ref, v); }});
+		case Kind::LightInfo:
+			return edit(SlotVector<rack::engine::LightInfo>{m.lightInfos, m.lightInfoTokens,
+				[&ref](py::handle v) { return takeInfo<rack::engine::LightInfo>(ref, v); }});
+	}
+}
+
+bool metadataKind(Kind kind) {
+	return kind == Kind::ParamQuantity || kind == Kind::InputInfo || kind == Kind::OutputInfo || kind == Kind::LightInfo;
+}
+
 /** Collections do not keep a module alive. Individual component views have
-the module's ObjectToken (RP-13), not its owning Construction. */
+their vector's ObjectToken, not the module's owning Construction. */
 struct Components {
 	std::weak_ptr<module::Construction> state;
 	Kind kind;
@@ -125,6 +249,34 @@ struct Components {
 		if (i < 0)
 			i += count(r, kind);
 		return component(r, kind, i);
+	}
+	/** Element writes to a component vector are allowed after the seal; every
+	other edit, and any metadata slot assignment, only during construction. */
+	void set(long i, py::handle value) const {
+		ModuleRef r = ref();
+		if (metadataKind(kind))
+			r.state->requireRawEdit();
+		size_t at = module::Construction::editIndex(i, count(r, kind));
+		editVector(r, kind, [&](auto vector) { vector.set(at, value); });
+	}
+	void erase(long i) const {
+		ModuleRef r = ref();
+		r.state->requireRawEdit();
+		size_t at = module::Construction::editIndex(i, count(r, kind));
+		editVector(r, kind, [&](auto vector) { vector.erase(at); });
+	}
+	void insert(long i, py::handle value) const {
+		ModuleRef r = ref();
+		r.state->requireRawEdit();
+		size_t at = module::Construction::insertIndex(i, count(r, kind));
+		editVector(r, kind, [&](auto vector) { vector.insert(at, value); });
+	}
+	void resize(long n) const {
+		ModuleRef r = ref();
+		r.state->requireRawEdit();
+		if (n < 0)
+			throw std::invalid_argument("a module vector cannot have a negative size");
+		editVector(r, kind, [&](auto vector) { vector.resize(static_cast<size_t>(n)); });
 	}
 };
 
@@ -179,14 +331,35 @@ void bindModule(py::module_ engine) {
 	bindQuantityViews(engine);
 	bindStandaloneQuantities(engine);
 	bindInfoView<rack::engine::PortInfo>(engine, "PortInfoView")
-		.def_property_readonly("port_id", [](const PortInfoView& v) { return v.get().portId; })
-		.def_property_readonly("type", [](const PortInfoView& v) { return v.get().type; })
+		.def_property("port_id", [](const PortInfoView& v) { return v.get().portId; }, [](const PortInfoView& v, int id) {
+			v.get();
+			lockOwner(v.state)->requireConstruction();
+			v.get().portId = id;
+		})
+		.def_property("type", [](const PortInfoView& v) { return v.get().type; }, [](const PortInfoView& v, rack::engine::Port::Type type) {
+			v.get();
+			lockOwner(v.state)->requireConstruction();
+			v.get().type = type;
+		})
 		.def("get_full_name", [](const PortInfoView& v) { return v.get().getFullName(); });
 	bindInfoView<rack::engine::LightInfo>(engine, "LightInfoView")
-		.def_property_readonly("light_id", [](const LightInfoView& v) { return v.get().lightId; });
-	py::class_<Components>(engine, "Components", "A checked, fixed-size view; it does not keep its module alive.")
+		.def_property("light_id", [](const LightInfoView& v) { return v.get().lightId; }, [](const LightInfoView& v, int id) {
+			v.get();
+			lockOwner(v.state)->requireConstruction();
+			v.get().lightId = id;
+		});
+	py::class_<Components>(engine, "Components",
+		"A checked view of one of a module's vectors; it does not keep its module alive. During construction "
+		"it supports Rack's raw vector edits; afterwards only element writes to component vectors.")
 		.def("__len__", &Components::size)
 		.def("__getitem__", &Components::item)
+		.def("__setitem__", &Components::set, py::arg("index"), py::arg("value"))
+		.def("__delitem__", &Components::erase, py::arg("index"))
+		.def("insert", &Components::insert, py::arg("index"), py::arg("value"))
+		.def("append", [](const Components& c, py::handle value) { c.insert(c.size(), value); }, py::arg("value"))
+		.def("clear", [](const Components& c) { c.resize(0); })
+		.def("resize", &Components::resize, py::arg("size"),
+			"Rack's vector resize: new component elements are default values, new metadata slots are None.")
 		.def("__iter__", [](const Components& c) {
 			int n = c.size();
 			py::tuple items(n);

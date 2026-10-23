@@ -127,6 +127,7 @@ py::object quantityModule(Q& q) {
 void setQuantityModule(Q& q, py::object value) {
 	standalone(q, [&](auto& alias) {
 		alias.guard();
+		alias.requireIdentityEdit();
 		std::shared_ptr<module::Construction> state;
 		std::shared_ptr<module::ModuleBackreference> link;
 		if (!value.is_none()) {
@@ -151,6 +152,15 @@ void guardQuantity(Q& q) {
 	guard(q);
 }
 
+std::unique_ptr<Q> takeQuantity(const ModuleRef& ref, py::handle value) {
+	if (value.is_none())
+		return nullptr;
+	if (!py::isinstance<Q>(value))
+		throw py::type_error("a module's quantity vector takes a ParamQuantity you created, or None");
+	auto instance = py::reinterpret_borrow<py::object>(value);
+	return standalone(instance.cast<Q&>(), [&](auto& alias) { return disownForSlot<Q>(instance, alias, ref.state, false); });
+}
+
 std::unique_ptr<Q> makeTransferredQuantity(const ModuleRef& ref, py::handle type, bool switchOnly, int id) {
 	auto recheck = [&] {
 		ref.state->requireConstruction();
@@ -172,7 +182,7 @@ void bindStandaloneQuantities(py::module_ engine) {
 			return standalone(q, [&](auto& alias) -> py::object {
 				auto state = alias.owner();
 				auto* param = q.getParam();  // SDK returns null for invalid IDs.
-				return param ? borrowParam(param, state->get().token) : py::none();
+				return param ? borrowParam(param, state->get().paramsToken) : py::none();
 			});
 		})
 		.def("get_immediate_value", [](Q& q) { return standalone(q, [](auto& a) { return a.immediate(); }); })
@@ -188,7 +198,10 @@ void bindStandaloneQuantities(py::module_ engine) {
 			deprecated("get_smooth_value is deprecated in Rack; use get_value");
 			return q.getValue();
 		});
-	field(cls, "param_id", &Q::paramId);
+	cls.def_property("param_id", [](Q& q) { guard(q); return q.paramId; }, [](Q& q, int id) {
+		standalone(q, [](auto& alias) { alias.guard(); alias.requireIdentityEdit(); });
+		q.paramId = id;
+	});
 	field(cls, "min_value", &Q::minValue);
 	field(cls, "max_value", &Q::maxValue);
 	field(cls, "default_value", &Q::defaultValue);

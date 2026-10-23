@@ -125,6 +125,17 @@ void infoField(py::classh<Info, InfoTrampoline<Info>>& cls, const char* name, T 
 		[member](Info& info, T value) { infoAlias(info).check(); info.*member = std::move(value); });
 }
 
+/** module, type and the IDs: frozen once a slot owning the object is sealed. */
+template <typename Info, typename T>
+void identityField(py::classh<Info, InfoTrampoline<Info>>& cls, const char* name, T Info::*member) {
+	cls.def_property(name, [member](Info& info) { infoAlias(info).check(); return info.*member; },
+		[member](Info& info, T value) {
+			infoAlias(info).check();
+			infoAlias(info).requireIdentityEdit();
+			info.*member = std::move(value);
+		});
+}
+
 template <typename Info, typename R>
 void infoMethod(py::classh<Info, InfoTrampoline<Info>>& cls, const char* name, R (Info::*method)(), const char* doc = "") {
 	cls.def(name, [method](Info& info) { infoAlias(info).check(); return (info.*method)(); }, doc);
@@ -135,6 +146,7 @@ void setInfoModule(Info& info, py::object value) {
 	runtime::requireMainThread("writing metadata.module");
 	auto& alias = infoAlias(info);
 	alias.check();
+	alias.requireIdentityEdit();
 	if (value.is_none()) {
 		info.module = nullptr;
 		alias.detachLink();
@@ -171,6 +183,22 @@ py::object borrowParam(Param* param, std::shared_ptr<runtime::ObjectToken> owner
 py::object borrowLight(Light* light, std::shared_ptr<runtime::ObjectToken> owner) {
 	return borrow<LightRef>(light, std::move(owner), "light");
 }
+
+namespace {
+
+template <typename Ref, typename T>
+T valueOf(py::handle value, const char* expected) {
+	if (!py::isinstance<Ref>(value))
+		throw py::type_error(std::string("a module's vector of ") + expected + "s takes " + expected + " values");
+	return static_cast<const T&>(value.cast<const Ref&>().get());
+}
+
+}  // namespace
+
+Param paramValue(py::handle value) { return valueOf<ParamRef, Param>(value, "Param"); }
+Input inputValue(py::handle value) { return valueOf<InputRef, Input>(value, "Input"); }
+Output outputValue(py::handle value) { return valueOf<OutputRef, Output>(value, "Output"); }
+Light lightValue(py::handle value) { return valueOf<LightRef, Light>(value, "Light"); }
 
 void bindComponents(py::module_ m) {
 	m.attr("PORT_MAX_CHANNELS") = PORT_MAX_CHANNELS;
@@ -340,8 +368,8 @@ void bindComponents(py::module_ m) {
 		.def_property("module", &infoModule<PortInfo>, &setInfoModule<PortInfo>)
 		.def_property_readonly("alive", [](PortInfo& info) { return !infoAlias(info).retired; },
 			"False once the module slot that owned this object replaced it or was deleted.");
-	infoField(portInfo, "type", &PortInfo::type);
-	infoField(portInfo, "port_id", &PortInfo::portId);
+	identityField(portInfo, "type", &PortInfo::type);
+	identityField(portInfo, "port_id", &PortInfo::portId);
 	infoField(portInfo, "name", &PortInfo::name);
 	infoField(portInfo, "description", &PortInfo::description);
 	infoMethod(portInfo, "get_name", &PortInfo::getName);
@@ -353,7 +381,7 @@ void bindComponents(py::module_ m) {
 		.def_property("module", &infoModule<LightInfo>, &setInfoModule<LightInfo>)
 		.def_property_readonly("alive", [](LightInfo& info) { return !infoAlias(info).retired; },
 			"False once the module slot that owned this object replaced it or was deleted.");
-	infoField(lightInfo, "light_id", &LightInfo::lightId);
+	identityField(lightInfo, "light_id", &LightInfo::lightId);
 	infoField(lightInfo, "name", &LightInfo::name);
 	infoField(lightInfo, "description", &LightInfo::description);
 	infoMethod(lightInfo, "get_name", &LightInfo::getName);

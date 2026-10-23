@@ -97,17 +97,20 @@ def test_null_slots_indices_phase_and_argument_errors() -> None:
         for i in (-2, 1):
             with pytest.raises(IndexError):
                 _ = group[i]
-        with pytest.raises(TypeError):
-            group[0] = group[0]  # type: ignore[index]
+        # Raw slot assignment is constructor-only (RP-14B2b7).
+        with pytest.raises(OwnershipError, match="constructor"):
+            group[0] = group[0]  # type: ignore[assignment]
     for info_getter in (m.get_input_info, m.get_output_info, m.get_light_info):
         for i in (-1, 2):
             with pytest.raises(IndexError):
                 info_getter(i)
     assert m.get_light_info(1) is None
     inp = m.get_input_info(0)
+    # Identity fields are editable only during construction (RP-14B2b7).
     for name, value in (("port_id", 2), ("type", Port.Type.OUTPUT), ("module", None)):
-        with pytest.raises(AttributeError):
+        with pytest.raises(OwnershipError, match="constructor"):
             setattr(inp, name, value)
+    assert inp.port_id == 0 and inp.type == Port.Type.INPUT and inp.module is m
     m.close()
 
 

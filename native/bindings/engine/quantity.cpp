@@ -21,12 +21,7 @@ rack::engine::ParamQuantity& QuantityView::get() const {
 }
 
 py::object QuantityView::owner() const {
-	get();
-	auto held = state.lock();
-	if (!held)
-		throw runtime::StaleHandle("this quantity belonged to a deleted module");
-	auto& m = held->get();
-	return runtime::identity(&m, m.token->generation, [&] { return py::cast(ModuleRef{held}); });
+	return ownModuleField(get().module, lockOwner(state));
 }
 
 py::object quantityView(const ModuleRef& ref, int id) {
@@ -56,6 +51,10 @@ auto withEngine(const QuantityView& view, F action) -> decltype(action(view.get(
 	auto owner = view.state.lock();
 	if (!owner)
 		throw runtime::StaleHandle("this quantity belonged to a deleted module");
+	// Rack's engine indexes params with paramId unchecked; during construction
+	// a raw edit may leave it out of range.
+	if (q.module)
+		module::Construction::index(q.paramId, q.module->params.size());
 	auto context = runtime::binding().current();
 	if (!context || rack::contextGet() != context->context)
 		throw runtime::WrongContext("quantity value/display methods require Rack's live bound UI context");
@@ -167,14 +166,21 @@ void bindQuantityViews(py::module_ engine) {
 	auto cls = py::class_<QuantityView>(engine, "ParamQuantityView",
 		"Checked built-in module quantity; not a standalone Quantity or Python virtual trampoline.");
 	cls.def_property_readonly("alive", [](const QuantityView& v) { return v.token->alive(); })
-		.def_property_readonly("module", &QuantityView::owner)
-		.def_property_readonly("param_id", [](const QuantityView& v) { return v.get().paramId; })
-		.def("get_param", [](const QuantityView& v) {
+		.def_property("module", &QuantityView::owner, [](const QuantityView& v, py::handle value) {
+			setOwnModuleField(v.get().module, value, lockOwner(v.state));
+		}, "The owning module or None; assignable only during construction, to those two values.")
+		.def_property("param_id", [](const QuantityView& v) { return v.get().paramId; }, [](const QuantityView& v, int id) {
+			v.get();
+			lockOwner(v.state)->requireConstruction();
+			v.get().paramId = id;
+		})
+		.def("get_param", [](const QuantityView& v) -> py::object {
 			auto& q = v.get();
 			auto owner = v.state.lock();
 			if (!owner)
 				throw runtime::StaleHandle("this quantity belonged to a deleted module");
-			return borrowParam(q.getParam(), owner->get().token);
+			auto* param = q.getParam();  // null for an ID a raw edit left out of range
+			return param ? borrowParam(param, owner->get().paramsToken) : py::none();
 		})
 		.def("get_min_value", [](const QuantityView& v) { return v.get().getMinValue(); })
 		.def("get_max_value", [](const QuantityView& v) { return v.get().getMaxValue(); })

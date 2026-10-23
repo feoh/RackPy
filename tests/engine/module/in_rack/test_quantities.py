@@ -271,11 +271,13 @@ def test_quantity_validation_and_replacement_rollback() -> None:
         with pytest.raises(IndexError):
             _ = m.param_quantities[i]
     q = m.param_quantities[0]
+    # Identity fields and raw slots are editable only during construction (RP-14B2b7).
     for name, value in (("module", None), ("param_id", -1)):
-        with pytest.raises(AttributeError):
+        with pytest.raises(OwnershipError, match="constructor"):
             setattr(q, name, value)
-    with pytest.raises(TypeError):
-        m.param_quantities[0] = q  # type: ignore[index]
+    assert q.module is m and q.param_id == 0
+    with pytest.raises(OwnershipError, match="constructor"):
+        m.param_quantities[0] = q  # type: ignore[assignment]
     m.close()
 
 

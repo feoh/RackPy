@@ -174,6 +174,38 @@ int main() {
 		json_array_append_new(replaced, json_real(m.params[0].value));
 		json_object_set_new(root, "quantity_replacement", replaced);
 	}
+	// RP-14B2b7: raw vector edits a plugin constructor might make after config.
+	{
+		using rack::engine::Port;
+		using rack::engine::PortInfo;
+		rack::engine::Module m;
+		m.config(2, 2, 1, 1);
+		m.params.push_back(rack::engine::Param());
+		m.paramQuantities.push_back(nullptr);
+		m.configParam(2, 0.f, 5.f, 1.f, "Added");
+		m.inputs.erase(m.inputs.begin());
+		delete m.inputInfos[0];
+		m.inputInfos.erase(m.inputInfos.begin());
+		m.inputInfos[0]->portId = 0;  // the shifted metadata keeps its old ID until fixed
+		m.lights.resize(3);
+		m.lightInfos.resize(3);
+		auto* info = new PortInfo;
+		info->module = &m;
+		info->type = Port::OUTPUT;
+		info->portId = 0;
+		info->name = "Raw";
+		delete m.outputInfos[0];
+		m.outputInfos[0] = info;
+		m.params[0].value = 0.25f;
+		m.params[1] = m.params[0];
+		json_t* sizes = json_pack("[iiiiiiii]", (int) m.params.size(), (int) m.paramQuantities.size(), (int) m.inputs.size(),
+			(int) m.inputInfos.size(), (int) m.outputs.size(), (int) m.outputInfos.size(), (int) m.lights.size(),
+			(int) m.lightInfos.size());
+		json_object_set_new(root, "raw_vectors", json_pack("{s:o,s:[sss],s:[fff],s:[bbb]}", "sizes", sizes,
+			"names", m.inputInfos[0]->getName().c_str(), m.outputInfos[0]->getName().c_str(),
+			m.paramQuantities[2]->getLabel().c_str(), "params", m.params[0].value, m.params[1].value, m.params[2].value,
+			"null_lights", m.lightInfos[0] == nullptr, m.lightInfos[1] == nullptr, m.lightInfos[2] == nullptr));
+	}
 	json_t* bypass = json_array();
 	json_object_set_new(root, "bypass", bypass);
 	for (int channels : {0, 1, rack::engine::PORT_MAX_CHANNELS}) {

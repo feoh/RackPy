@@ -8,6 +8,8 @@
 #include <memory>
 #include <mutex>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "rackpy/runtime/context.hpp"
 
@@ -43,7 +45,11 @@ implementation takes the GIL; slots retire on the thread deleting the module. */
 struct TransferredMetadata {
 	virtual ~TransferredMetadata() = default;
 	virtual bool transferred() const = 0;
+	/** The slot deletes it, as Rack's delete-then-new helpers and ~Module do. */
 	virtual void retire() noexcept = 0;
+	/** A raw vector edit drops the pointer without deleting the object: it
+	becomes an ordinary Python-owned object again (RP-14B2b7). */
+	virtual void release() noexcept = 0;
 };
 
 /** The transferred object in a slot, or null for native-created metadata. */
@@ -62,8 +68,25 @@ void dispose(Info* info) {
 		delete info;
 }
 
+/** A pointer a raw vector edit removes. Native-created metadata has no other
+owner, so it is deleted; its views are invalidated by their slot token. */
+template <typename Info>
+void releaseFromSlot(Info* info) {
+	if (auto* t = transferredIn(info))
+		t->release();
+	else
+		delete info;
+}
+
 struct Module : rack::engine::Module {
 	std::shared_ptr<runtime::ObjectToken> token = std::make_shared<runtime::ObjectToken>(nullptr);
+	// Component views point into a vector's storage, so each component vector
+	// has its own generation: a structural edit (RP-14B2b7) invalidates only
+	// the views of that vector, like C++ iterator invalidation.
+	std::shared_ptr<runtime::ObjectToken> paramsToken = std::make_shared<runtime::ObjectToken>(nullptr);
+	std::shared_ptr<runtime::ObjectToken> inputsToken = std::make_shared<runtime::ObjectToken>(nullptr);
+	std::shared_ptr<runtime::ObjectToken> outputsToken = std::make_shared<runtime::ObjectToken>(nullptr);
+	std::shared_ptr<runtime::ObjectToken> lightsToken = std::make_shared<runtime::ObjectToken>(nullptr);
 	// One generation per metadata slot. Replacement must invalidate retained
 	// views even while the module (and its component token) is still alive.
 	using Tokens = std::vector<std::shared_ptr<runtime::ObjectToken>>;
@@ -84,6 +107,8 @@ struct Module : rack::engine::Module {
 			if (auto link = weak.lock())
 				link->clear();
 		token->invalidate();
+		for (auto* vector : {&paramsToken, &inputsToken, &outputsToken, &lightsToken})
+			(*vector)->invalidate();
 		for (auto* slots : {&paramQuantityTokens, &inputInfoTokens, &outputInfoTokens, &lightInfoTokens})
 			for (auto& slot : *slots)
 				slot->invalidate();
@@ -224,7 +249,7 @@ struct Construction {
 		float base, float multiplier, float offset, int kind, std::vector<std::string> labels, Make make) {
 		requireConstruction();
 		Module& m = get();
-		index(id, m.paramQuantities.size());
+		index(id, std::min(m.params.size(), m.paramQuantities.size()));
 		if (!std::isfinite(min) || !std::isfinite(max) || !(min < max) || !std::isfinite(def) || def < min || def > max)
 			throw std::invalid_argument("quantity bounds must be finite and increasing, with default inside the range");
 		if (!std::isfinite(base) || !std::isfinite(multiplier) || !std::isfinite(offset) || base == 1.f || base == -1.f)
@@ -268,8 +293,120 @@ struct Construction {
 		}
 		m.configBypass(input, output);
 	}
+	// --- Raw vector edits (RP-14B2b7): constructor-only, after config. --------
+	// Callers prepare everything that can throw (generations, capacity, the
+	// Python object's transfer) before calling these, which then cannot throw.
+
+	void requireRawEdit() const {
+		requireConstruction();
+		if (!configured)
+			throw runtime::Ownership("call Module.config before editing the module's vectors");
+	}
+	/** Validate an index for an edit, Python-style: negative counts from the end. */
+	static size_t editIndex(long i, size_t size) {
+		if (i < 0)
+			i += static_cast<long>(size);
+		if (i < 0 || static_cast<size_t>(i) >= size)
+			throw std::out_of_range("module vector index out of range");
+		return static_cast<size_t>(i);
+	}
+	/** An insertion position, clamped like list.insert. */
+	static size_t insertIndex(long i, size_t size) {
+		if (i < 0)
+			i += static_cast<long>(size);
+		return static_cast<size_t>(std::max(0L, std::min(i, static_cast<long>(size))));
+	}
+	template <typename Info>
+	static void setSlot(std::vector<Info*>& infos, Module::Tokens& tokens, size_t i, Info* next,
+		std::shared_ptr<runtime::ObjectToken> generation) noexcept {
+		tokens[i]->invalidate();
+		Info* previous = infos[i];
+		infos[i] = next;
+		tokens[i] = std::move(generation);
+		releaseFromSlot(previous);
+	}
+	/** Capacity first: with it, insert() cannot reallocate or throw. */
+	template <typename Info>
+	static void reserveSlots(std::vector<Info*>& infos, Module::Tokens& tokens, size_t size) {
+		infos.reserve(size);
+		tokens.reserve(size);
+	}
+	template <typename Info>
+	static void insertSlot(std::vector<Info*>& infos, Module::Tokens& tokens, size_t i, Info* next,
+		std::shared_ptr<runtime::ObjectToken> generation) noexcept {
+		infos.insert(infos.begin() + i, next);
+		tokens.insert(tokens.begin() + i, std::move(generation));
+	}
+	template <typename Info>
+	static void eraseSlot(std::vector<Info*>& infos, Module::Tokens& tokens, size_t i) noexcept {
+		tokens[i]->invalidate();
+		Info* previous = infos[i];
+		infos.erase(infos.begin() + i);
+		tokens.erase(tokens.begin() + i);
+		releaseFromSlot(previous);
+	}
+	/** Shrink releases the tail; growth appends null slots, with `added` generations. */
+	template <typename Info>
+	static void resizeSlots(std::vector<Info*>& infos, Module::Tokens& tokens, size_t size, Module::Tokens added) noexcept {
+		while (infos.size() > size)
+			eraseSlot(infos, tokens, infos.size() - 1);
+		for (auto& generation : added) {
+			infos.push_back(nullptr);
+			tokens.push_back(std::move(generation));
+		}
+	}
+	/** After a structural edit of a component vector, its old views die. */
+	static void renew(std::shared_ptr<runtime::ObjectToken>& vectorToken, std::shared_ptr<runtime::ObjectToken> next) noexcept {
+		vectorToken->invalidate();
+		vectorToken = std::move(next);
+	}
+
+	/** Rack's code relies on these invariants without checking them: matching
+	component/metadata sizes, a quantity for every parameter and metadata for
+	every port (dereferenced by save, reset and tooltips), each object's module
+	and ID matching its slot, and bypass routes inside the port vectors. */
+	[[noreturn]] static void fail(const std::string& what) {
+		throw std::invalid_argument("module construction left " + what);
+	}
+	void validate() const {
+		Module& m = *object;
+		if (m.params.size() != m.paramQuantities.size())
+			fail(std::to_string(m.params.size()) + " params but " + std::to_string(m.paramQuantities.size()) + " parameter quantities");
+		if (m.inputs.size() != m.inputInfos.size() || m.outputs.size() != m.outputInfos.size())
+			fail("a port vector and its metadata vector with different sizes");
+		if (m.lights.size() != m.lightInfos.size())
+			fail(std::to_string(m.lights.size()) + " lights but " + std::to_string(m.lightInfos.size()) + " light metadata slots");
+		for (size_t i = 0; i < m.paramQuantities.size(); i++) {
+			auto* q = m.paramQuantities[i];
+			if (!q)
+				fail("parameter " + std::to_string(i) + " without a quantity");
+			if (q->module != &m || q->paramId != static_cast<int>(i))
+				fail("parameter quantity " + std::to_string(i) + " not set to this module and param_id " + std::to_string(i));
+		}
+		for (auto* infos : {&m.inputInfos, &m.outputInfos}) {
+			auto type = infos == &m.inputInfos ? rack::engine::Port::INPUT : rack::engine::Port::OUTPUT;
+			for (size_t i = 0; i < infos->size(); i++) {
+				auto* info = (*infos)[i];
+				if (!info)
+					fail(std::string(type == rack::engine::Port::INPUT ? "input " : "output ") + std::to_string(i) + " without metadata");
+				if (info->module != &m || info->portId != static_cast<int>(i) || info->type != type)
+					fail("port metadata " + std::to_string(i) + " not set to this module, its port_id and its type");
+			}
+		}
+		for (size_t i = 0; i < m.lightInfos.size(); i++) {
+			auto* info = m.lightInfos[i];
+			if (info && (info->module != &m || info->lightId != static_cast<int>(i)))
+				fail("light metadata " + std::to_string(i) + " not set to this module and light_id " + std::to_string(i));
+		}
+		for (const auto& route : m.bypassRoutes) {
+			if (route.inputId < 0 || static_cast<size_t>(route.inputId) >= m.inputs.size() || route.outputId < 0 ||
+				static_cast<size_t>(route.outputId) >= m.outputs.size())
+				fail("a bypass route outside the port vectors");
+		}
+	}
 	void seal() {
 		get();  // also rejects a caught native construction failure
+		validate();
 		constructing = false;
 	}
 	void close() {

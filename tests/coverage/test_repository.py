@@ -67,26 +67,20 @@ def test_every_module_gap_retains_a_responsible_task() -> None:
     for record in records:
         assert record["status"] in {"planned", "unreviewed"}
         assert record["notes"].startswith("Responsible task: RP-"), record["id"]
-    # These safe adapters do not claim the public mutable vectors are fully mapped.
-    vectors = {"params", "inputs", "outputs", "lights", "bypassRoutes"}
+    # Copied route snapshots do not claim the public bypassRoutes vector is mapped (RP-14C).
     incomplete = {r["id"].rsplit("::", 1)[-1] for r in records}
-    assert vectors <= incomplete
+    assert "bypassRoutes" in incomplete
 
 
 @pytest.mark.parametrize(
-    "symbol",
-    [
-        "field:rack::engine::Module::inputInfos",
-        "field:rack::engine::Module::outputInfos",
-        "field:rack::engine::Module::lightInfos",
-    ],
+    "field", ["params", "inputs", "outputs", "lights", "paramQuantities", "inputInfos", "outputInfos", "lightInfos"]
 )
-def test_builtin_metadata_adapters_do_not_complete_raw_vector_semantics(symbol: str) -> None:
-    record = next(r for r in bm.load_json(bm.MANIFEST)["entries"] if r["id"] == symbol)
-    assert record["status"] == "planned"
-    assert record["python"] is None
-    assert "RP-14B1" in record["notes"] and "RP-14B2" in record["notes"]
-    assert record["tests"] and record["docs"]
+def test_raw_module_vectors_follow_the_constructor_scoped_contract(field: str) -> None:
+    record = next(r for r in bm.load_json(bm.MANIFEST)["entries"] if r["id"] == "field:rack::engine::Module::" + field)
+    assert record["status"] == "implemented" and record["python"]["kind"] == "property"
+    assert record["notes"].startswith("RP-14B2b7") and "owner decision 2026-10-23" in record["notes"]
+    assert "After the seal" in record["notes"] and "macOS/Windows unvalidated" in record["notes"]
+    assert all("test_raw_vectors.py" in t for t in record["tests"])
 
 
 @pytest.mark.parametrize(
@@ -113,8 +107,9 @@ def test_metadata_class_factories_complete_only_templates_and_getters(symbol: st
 
 def test_builtin_quantity_adapters_do_not_complete_full_mappings() -> None:
     records = [r for r in bm.load_json(bm.MANIFEST)["entries"] if "RP-14B2a partial" in (r["notes"] or "")]
-    # The three quantity templates and getParamQuantity left this set in RP-14B2b6.
-    assert len(records) == 42
+    # The quantity templates and getParamQuantity (RP-14B2b6) and the
+    # paramQuantities vector (RP-14B2b7) left this set.
+    assert len(records) == 41
     for record in records:
         assert record["status"] == "planned" and record["python"] is None
         assert record["notes"].startswith("Responsible task: RP-14B2b")

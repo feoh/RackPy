@@ -226,6 +226,26 @@ ParamQuantity/SwitchQuantity records (RP-22 mixed overrides, engine smoothing),
 JSON (RP-15) and smoothing ownership remain open. This child does not close
 B2b/B2/B/14 or the implementation phase.
 
+**RP-14B2b7 — constructor-scoped raw module vectors**
+(`tk-rackpy-14b2b7-constructor-scoped-raw-module-vect-f0af27`). Owner decision
+2026-10-23: constructor-scoped full mutation. Exact scope: the `params`,
+`inputs`, `outputs`, `lights`, `paramQuantities`, `inputInfos`, `outputInfos`
+and `lightInfos` fields. Inside the constructor callback after `config`, the
+collections take Rack's raw vector edits (item assignment, `del`, `insert`,
+`append`, `clear`, `resize`), with per-slot generations kept in step; metadata
+slots take a Python-created object or `None` without setting fields; raw
+removal releases transferred objects (usable, tracked module link) and deletes
+native-created metadata; a structural edit of a component vector invalidates
+only that vector's views. Identity fields are constructor-only. The seal
+validates sizes, non-null quantities and port metadata, each slot's module,
+ID and port type, and bypass routes, failing construction otherwise. After the
+seal only component item assignment remains. Validate a native raw-edit
+differential, seal rejections, transfer/release semantics, copy semantics and
+per-vector invalidation, constructor-only and thread rules, identity freezing,
+rollback and 1,000 edit/owner churns. `bypassRoutes` stays RP-14C; JSON RP-15;
+smoothing ownership and RP-22 laboratory semantics remain on B2b. This child
+does not close B2b/B2/B/14 or the implementation phase.
+
 ## RackPy 14C: native lifecycle events and identity adapters
 
 **Witan slug:** `tk-rackpy-14c-native-lifecycle-events-and-identity--929845`

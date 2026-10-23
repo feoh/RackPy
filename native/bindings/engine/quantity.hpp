@@ -22,6 +22,8 @@ pybind11::object ownedSwitchLabels(pybind11::object owner);
 or button slot needs a SwitchQuantity class. */
 std::unique_ptr<rack::engine::ParamQuantity> makeTransferredQuantity(const ModuleRef& ref, pybind11::handle type,
 	bool switchOnly, int id);
+/** RP-14B2b7: a raw paramQuantities assignment of a Python-created quantity, or None (null). */
+std::unique_ptr<rack::engine::ParamQuantity> takeQuantity(const ModuleRef& ref, pybind11::handle value);
 /** Check a Python-created quantity's thread, slot ownership and liveness. */
 void guardQuantity(rack::engine::ParamQuantity& q);
 
