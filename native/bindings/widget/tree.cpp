@@ -69,6 +69,8 @@ void bindWidgetTrees(py::module_ raw) {
 			h.manager->drain();
 			return h.token->alive();
 		})
+		.def_property("visible", [](const Handle& h) { return h.get().visible; },
+			[](const Handle& h, bool visible) { h.get().visible = visible; })
 		.def("close", [](const Handle& h) { h.manager->close(h); })
 		.def_property_readonly("parent", [](const Handle& h) -> py::object {
 			auto* p = h.get().parent;

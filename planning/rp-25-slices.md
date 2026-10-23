@@ -70,6 +70,18 @@ hooks, typecheck, native/host/introspection/coverage/docs and commit with a
 checkpoint. This child and RP-25 parent do not complete the implementation
 phase.
 
+## RP-25D: raw Widget visibility field
+
+**Witan:** `tk-rackpy-25d-raw-widget-visibility-field-8a2f6e`.
+
+Adds the public `Widget::visible` bool as a checked read/write property. The
+adapter writes the field directly (no `setVisible`, `show`, or `hide`) to retain
+its raw semantics, including bypassing Show/Hide events. Keep this mapping
+planned while full Widget subclass/lifecycle semantics remain incomplete. Test
+read/write and interplay with the event-triggering visibility methods on an
+actual Rack UI thread; document the behavioral distinction. Do not expose
+`requestedDelete` as a raw field. No project phase completion.
+
 ## Remaining RP-25 acceptance
 
 The original parent retains complete class-factory/subclass and lifecycle

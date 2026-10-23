@@ -8,7 +8,7 @@ plugin startup raises `ContextError`: Rack has not created its event state yet.
 This is groundwork, **not** the complete Widget binding. It cannot be
 subclassed, inserted into Rack's scene or module browser, or used for drawing.
 Python virtual callbacks, events, ZoomWidget/TransformWidget variants, resources,
-mutable raw fields and class factories remain RP-25/RP-27 obligations. All touched SDK entries
+remaining mutable raw fields and class factories remain RP-25/RP-27 obligations. All touched SDK entries
 remain **planned** in the [coverage report](coverage.md); safe adapters do not
 count as complete public mappings.
 
@@ -59,8 +59,11 @@ Call `set_box(rect)` to apply a layout change. `is_visible()` and
 `get_children_bounding_box()` and `get_visible_children_bounding_box()`
 use Rack's SDK implementation, including its empty-tree infinities. Position and
 size methods use Rack's setters, so real changes trigger its reposition/resize
-events. `show()`/`hide()` likewise use Rack's visibility setter. `is_descendant_of`
-checks parent ancestry (not direct-child membership).
+events. `show()`/`hide()` likewise use Rack's visibility setter. The writable
+`visible` property directly reads/writes Rack's public bool field and intentionally
+bypasses `setVisible()` and its Show/Hide events; prefer `set_visible()` or
+`show()`/`hide()` for event-triggering changes. `is_descendant_of` checks parent
+ancestry (not direct-child membership).
 
 `get_relative_offset(position, ancestor)` and
 `get_relative_zoom(ancestor)` preserve Rack's coordinate-space semantics;

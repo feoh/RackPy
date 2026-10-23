@@ -151,6 +151,12 @@ def test_geometry_visibility_and_coordinate_queries(root: WidgetNode) -> None:
     assert not child.is_visible()
     child.show()
     assert child.is_visible()
+    assert child.visible is True
+    child.visible = False
+    assert child.visible is False
+    assert not child.is_visible()
+    child.set_visible(True)
+    assert child.is_visible()
     parent.set_position(Vec(6, 7))
     parent.set_size(Vec(30, 25))
     assert parent.get_box() == Rect(6, 7, 30, 25)
