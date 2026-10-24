@@ -21,7 +21,7 @@ except ImportError as e:
     ) from e
 
 # The host ABI this package was written for. It must equal the host's RACKPY_HOST_ABI.
-HOST_ABI = 1
+HOST_ABI = 2
 
 
 def start(plugin_dir: str, entry: str) -> None:

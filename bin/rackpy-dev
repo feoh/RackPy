@@ -40,9 +40,14 @@ TOOLCHAIN_FILE = REPO / "cmake" / "toolchains" / "rack-lin-x64.cmake"
 DEFAULT_CACHE = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "rackpy" / "build-inputs"
 DEFAULT_BUILD = REPO / "build" / "dev"
 SLUG = "RackPy"
-HOST_EXPORTS = {"rackpy_host_init", "rackpy_host_destroy"}
+HOST_EXPORTS = {
+    "rackpy_host_init",
+    "rackpy_host_destroy",
+    "rackpy_host_settings_to_json",
+    "rackpy_host_settings_from_json",
+}
 LINKER_SYMBOLS = {"__bss_start", "_edata", "_end"}
-LOADER_EXPORTS = {"init", "destroy"}
+LOADER_EXPORTS = {"init", "destroy", "settingsToJson", "settingsFromJson"}
 
 app = cyclopts.App(help=__doc__)
 CacheOpt = Annotated[Path, cyclopts.Parameter(help="Download cache outside git.")]

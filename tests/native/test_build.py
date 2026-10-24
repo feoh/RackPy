@@ -55,7 +55,12 @@ def test_bundle_has_the_expected_dynamic_shape(make_bundle: Callable[[], Path]) 
     assert proc.returncode == 0, proc.stdout + proc.stderr
     report = json.loads(proc.stdout[proc.stdout.index("{") :])
     assert report["plugin.so"]["python_references"] == []
-    assert sorted(report["rackpy_host.so"]["exports"]) == ["rackpy_host_destroy", "rackpy_host_init"]
+    assert sorted(report["rackpy_host.so"]["exports"]) == [
+        "rackpy_host_destroy",
+        "rackpy_host_init",
+        "rackpy_host_settings_from_json",
+        "rackpy_host_settings_to_json",
+    ]
     assert "libpython3.14.so.1.0" in report["rackpy_host.so"]["needed"]
     layout = {p.relative_to(plugin).as_posix() for p in plugin.rglob("*") if "python/" not in p.as_posix()}
     expected = {"plugin.so", "rackpy_host.so", "plugin.json", "rackpy-loader.json", "LICENSE", "NOTICE"}

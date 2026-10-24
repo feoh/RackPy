@@ -113,7 +113,7 @@ def run_rack(
     return RackRun(returncode, log.read_text(errors="replace") if log.exists() else "")
 
 
-def run_rack_windowed(rack: Path, user: Path, *, timeout: float = 120) -> RackRun:
+def run_rack_windowed(rack: Path, user: Path, *, timeout: float = 120, patch: Path | None = None) -> RackRun:
     """Run Rack with a window on a virtual X display until it exits by itself (the test closes the window).
 
     Needs xvfb-run. Rack renders with Mesa's software renderer and nothing
@@ -124,6 +124,8 @@ def run_rack_windowed(rack: Path, user: Path, *, timeout: float = 120) -> RackRu
     environ = {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}
     (user / "autosave").mkdir(parents=True, exist_ok=True)
     cmd = ["xvfb-run", "-a", "-s", "-screen 0 1600x1000x24", str(rack / "Rack"), "-u", str(user)]
+    if patch is not None:
+        cmd.append(str(patch))  # Rack opens it as File > Open does, instead of the autosave
     proc = subprocess.Popen(
         cmd,
         cwd=rack,

@@ -8,6 +8,7 @@
 #include "../bindings/widget/managed.hpp"
 #include "../tests/quantity_reference.hpp"
 #include "../plugin/model.hpp"
+#include "../bindings/plugin.hpp"
 #include "rackpy/runtime/json.hpp"
 
 #include <pybind11/stl.h>
@@ -497,6 +498,33 @@ void define(py::module_ m) {
 		bool hasModule = mw->module != nullptr;
 		return py::make_tuple(mw->box.size.x, mw->box.size.y, labels, hasModule, mw->model == found);
 	}, py::arg("plugin_slug"), py::arg("model_slug"));
+	m.def("press_key", [](int key, int mods) {
+		// A key press and release through Rack's own input dispatcher, as GLFW delivers them.
+		requireMainThread("press_key");
+		refuseEngineReentry("press_key");
+		liveContext();
+		rack::math::Vec pos = APP->scene->box.size.div(2);
+		py::gil_scoped_release release;
+		APP->event->handleKey(pos, key, 0, GLFW_PRESS, mods);
+		APP->event->handleKey(pos, key, 0, GLFW_RELEASE, mods);
+	}, py::arg("key"), py::arg("mods") = 0);
+	// RP-15D: the plugin settings hooks exactly as Rack's loader calls them.
+	m.def("settings_to_json_as_rack", []() -> py::object {
+		json_t* json;
+		{
+			py::gil_scoped_release release;
+			json = rackpy::bindings::settingsToJson();
+		}
+		if (!json)
+			return py::none();
+		std::unique_ptr<json_t, decltype(&json_decref)> owner(json, json_decref);
+		return py::make_tuple(fromJson(json));
+	}, "None when Rack would get NULL, else a 1-tuple with the JSON Rack would store.");
+	m.def("settings_from_json_as_rack", [](py::handle value) {
+		std::unique_ptr<json_t, decltype(&json_decref)> json(toJson(value), json_decref);
+		py::gil_scoped_release release;
+		rackpy::bindings::settingsFromJson(json.get());
+	});
 	m.def("module_model", [](int64_t id) -> py::object {
 		requireMainThread("module_model");
 		std::shared_ptr<ContextToken> ctx = liveContext();

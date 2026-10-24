@@ -1,5 +1,5 @@
 {
-  "abi": 1,
+  "abi": @RACKPY_HOST_ABI@,
   "host": "rackpy_host.so",
   "libpython": "@RACKPY_LIBPYTHON@",
   "stdlib_marker": "@RACKPY_STDLIB_MARKER@",

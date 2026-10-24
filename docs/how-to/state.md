@@ -1,8 +1,8 @@
 # Save and restore a module's state
 
-**Implemented (RP-15A, RP-15B, RP-15C), Linux x86_64 inside Rack Free 2.6.6.**
-Plugin-wide settings and a full `.vcv` save, reopen, autosave and undo round
-trip are later RP-15 work; modules cannot be registered as models yet (RP-16).
+**Implemented (RP-15A to RP-15D), Linux x86_64 inside Rack Free 2.6.6.**
+Tested through Rack's own File > Save to a `.vcv`, its reopen, the autosave
+and undo of a deleted module, with modules of [registered models](plugins.md).
 
 Rack saves a module as JSON: its parameters, whether it is bypassed, and
 whatever *custom data* the module adds. RackPy keeps Rack's split:
@@ -102,3 +102,24 @@ directory and returns the path anyway, and so does the raw method;
 RackPy never deletes this directory. Rack removes storage of deleted modules
 when the user saves the patch; until then *undo* can bring a deleted module
 back with its files, so do not delete them yourself when a module is removed.
+When the patch is saved to a `.vcv`, Rack packs the storage into it, and
+opening the `.vcv` unpacks it again.
+
+## Plugin-wide settings
+
+Some state belongs to the plugin, not to one module in one patch: a default
+theme, the last folder used. Rack keeps it in its `settings.json`, under the
+plugin's slug. Set the handlers from the entry module:
+
+```{rackpy-example} plugin_settings.py
+```
+
+Rack calls `from_json(data)` once, right after the plugin initializes, and
+only if `settings.json` has an entry for the plugin; that is why the
+handlers belong in the entry module. It calls `to_json()` whenever it saves
+its settings: periodically, and as it exits, when every handle to a Rack
+object is already stale. Both run on Rack's main thread. If `to_json`
+returns `None` or raises, or returns something JSON cannot hold, Rack keeps
+the settings it stored before; errors are logged and recorded in
+`rackpy.runtime.diagnostics()`. Users can edit `settings.json`, so validate
+what `from_json` receives, as above.

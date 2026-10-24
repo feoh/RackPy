@@ -57,7 +57,7 @@ class FakeHost(types.ModuleType):
 
 @pytest.fixture
 def fake_host(monkeypatch: pytest.MonkeyPatch) -> Iterator[FakeHost]:
-    host = FakeHost(abi=1)
+    host = FakeHost(abi=2)
     monkeypatch.setitem(sys.modules, "_rackpy_host", host)
     monkeypatch.delitem(sys.modules, "rackpy._bootstrap", raising=False)
     yield host
@@ -73,9 +73,9 @@ def test_start_logs_runtime_facts(fake_host: FakeHost) -> None:
 
 
 def test_start_refuses_a_host_with_another_abi(fake_host: FakeHost) -> None:
-    fake_host.HOST_ABI = 2
+    fake_host.HOST_ABI = 3
     bootstrap = importlib.import_module("rackpy._bootstrap")
-    with pytest.raises(RuntimeError, match="needs host ABI 1, but the host provides 2"):
+    with pytest.raises(RuntimeError, match="needs host ABI 2, but the host provides 3"):
         bootstrap.start("/plugins/RackPy/", "")
     assert not fake_host.lines
 

@@ -61,3 +61,22 @@ extern "C" __attribute__((visibility("default"))) void rackpy_host_destroy() {
 		WARN("RackPy: unexpected C++ exception in host destroy");
 	}
 }
+
+extern "C" __attribute__((visibility("default"))) void* rackpy_host_settings_to_json() {
+	try {
+		return rackpy::bindings::settingsToJson();
+	}
+	catch (...) {
+		WARN("RackPy: unexpected C++ exception in settingsToJson");
+		return nullptr;
+	}
+}
+
+extern "C" __attribute__((visibility("default"))) void rackpy_host_settings_from_json(void* json) {
+	try {
+		rackpy::bindings::settingsFromJson(static_cast<json_t*>(json));
+	}
+	catch (...) {
+		WARN("RackPy: unexpected C++ exception in settingsFromJson");
+	}
+}

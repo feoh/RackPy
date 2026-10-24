@@ -105,7 +105,11 @@ plugin as `plugin_instance()`, then adds the models it registered.
 `destroy()` runs the callbacks registered with `on_destroy(callback)`
 (`rackpy.plugin.on_destroy`), most recent first on the main thread, with
 errors logged, then releases the models' Python factories before Python
-stops. `settingsToJson` and `settingsFromJson` are RP-15D.
+stops. `settingsToJson` and `settingsFromJson` call the handlers set with
+`set_settings_handlers(to_json=None, from_json=None)`
+(`rackpy.plugin.Plugin.set_settings_handlers`); see
+[plugin-wide settings](../how-to/state.md#plugin-wide-settings). The loader
+forwards all four hooks to the host library (host ABI 2).
 
 Everything here is main-thread only (`ThreadError`) except the pure string
 functions `is_slug_valid`, `normalize_slug`, `asset.system` and `asset.user`,

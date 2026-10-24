@@ -19,6 +19,8 @@ Plugin* pluginInstance;
 namespace {
 
 void* hostHandle = nullptr;
+RackPyHostSettingsToJsonFn hostSettingsToJson = nullptr;
+RackPyHostSettingsFromJsonFn hostSettingsFromJson = nullptr;
 
 void refuse(const std::string& why) {
 	WARN("RackPy refused to start: %s", why.c_str());
@@ -75,6 +77,8 @@ void loadHost(Plugin* p) {
 		return;
 	}
 	hostHandle = handle;
+	hostSettingsToJson = (RackPyHostSettingsToJsonFn) dlsym(handle, RACKPY_HOST_SETTINGS_TO_JSON_SYMBOL);
+	hostSettingsFromJson = (RackPyHostSettingsFromJsonFn) dlsym(handle, RACKPY_HOST_SETTINGS_FROM_JSON_SYMBOL);
 	INFO("RackPy host %s ready", cfg.host.c_str());
 }
 
@@ -98,7 +102,21 @@ extern "C" void destroy() {
 		return;
 	auto hostDestroy = (RackPyHostDestroyFn) dlsym(hostHandle, RACKPY_HOST_DESTROY_SYMBOL);
 	hostHandle = nullptr;
+	hostSettingsToJson = nullptr;
+	hostSettingsFromJson = nullptr;
 	if (hostDestroy)
 		hostDestroy();
 	// RTLD_NODELETE keeps the host and libpython mapped after Rack dlcloses this plugin.
+}
+
+// Plugin-wide settings (RP-15D). Rack stores what settingsToJson returns in
+// settings.json; NULL leaves the stored value as it is. Without a running
+// host there is nothing to save or load.
+extern "C" json_t* settingsToJson() {
+	return hostSettingsToJson ? static_cast<json_t*>(hostSettingsToJson()) : nullptr;
+}
+
+extern "C" void settingsFromJson(json_t* rootJ) {
+	if (hostSettingsFromJson)
+		hostSettingsFromJson(rootJ);
 }

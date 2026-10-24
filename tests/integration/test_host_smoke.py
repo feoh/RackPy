@@ -113,10 +113,10 @@ def test_missing_runtime_is_refused_with_a_reason(rack_host: Path, bundle: Path,
 def test_bad_loader_configuration_is_refused(rack_host: Path, bundle: Path, tmp_path: Path) -> None:
     plugin = stage_plugin(bundle, tmp_path)
     config = json.loads((plugin / "rackpy-loader.json").read_text())
-    (plugin / "rackpy-loader.json").write_text(json.dumps({**config, "abi": 2}))
+    (plugin / "rackpy-loader.json").write_text(json.dumps({**config, "abi": config["abi"] + 1}))
     run = run_rack(rack_host, tmp_path, settle=0.3)
     assert_clean_exit(run)
-    assert run.lines('"abi" must be 1'), run.tail()
+    assert run.lines(f'"abi" must be {config["abi"]}'), run.tail()
     assert not run.lines("RackPy interpreter started")
 
 

@@ -80,6 +80,22 @@ class Plugin:
         self.raw.add_model(model)
         return model
 
+    def set_settings_handlers(
+        self,
+        *,
+        to_json: Callable[[], Any] | None = None,
+        from_json: Callable[[Any], object] | None = None,
+    ) -> None:
+        """Save plugin-wide settings in Rack's ``settings.json``, under this plugin's slug.
+
+        Rack calls ``to_json()`` whenever it saves its settings, including as
+        it exits; returning ``None`` keeps what is stored. It calls
+        ``from_json(data)`` once, right after the plugin initializes, if
+        anything is stored, so set the handlers from the entry module. Errors
+        are logged and contained. Validate ``data``: users can edit the file.
+        """
+        _raw.set_settings_handlers(to_json=to_json, from_json=from_json)
+
 
 def on_destroy(callback: Callable[[], None]) -> Callable[[], None]:
     """Run ``callback`` when Rack calls the plugin's ``destroy()``, as it exits.

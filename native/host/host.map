@@ -6,6 +6,8 @@
   global:
     rackpy_host_init;
     rackpy_host_destroy;
+    rackpy_host_settings_to_json;
+    rackpy_host_settings_from_json;
   local:
     *;
 };

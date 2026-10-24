@@ -99,3 +99,6 @@ plugins: PluginList
 pluginsPath: str
 
 def on_destroy[F: Callable[[], object]](callback: F) -> F: ...
+def set_settings_handlers(
+    to_json: Callable[[], Any] | None = None, from_json: Callable[[Any], object] | None = None
+) -> None: ...

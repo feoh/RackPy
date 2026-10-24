@@ -62,6 +62,9 @@ struct LibraryHandle {
 	const void* handle;
 };
 
+// Plugin-wide settings handlers (RP-15D).
+runtime::PyRef settingsToJsonFn, settingsFromJsonFn;
+
 // rackpy.plugin.on_destroy callbacks, run from destroy() (RP-16B).
 std::vector<runtime::PyRef> destroyCallbacks;
 
@@ -455,6 +458,18 @@ void bind_plugin(py::module_ raw) {
 		"Run callback when Rack calls the plugin's destroy(), as it exits: on the main thread, newest first, after "
 		"every handle to a Rack object has gone stale. Errors are logged. Returns callback (a decorator).");
 
+	mod.def("set_settings_handlers", [](py::object toJson, py::object fromJson) {
+		runtime::requireMainThread("setting plugin settings handlers");
+		for (py::handle f : {toJson, fromJson})
+			if (!f.is_none() && !PyCallable_Check(f.ptr()))
+				throw py::type_error("settings handlers must be callable or None");
+		settingsToJsonFn = toJson.is_none() ? runtime::PyRef() : runtime::PyRef(toJson);
+		settingsFromJsonFn = fromJson.is_none() ? runtime::PyRef() : runtime::PyRef(fromJson);
+	}, py::arg("to_json") = py::none(), py::arg("from_json") = py::none(),
+		"Rack's settingsToJson/settingsFromJson for this plugin: to_json() returns JSON-compatible data for "
+		"settings.json (None keeps what is stored); from_json(data) receives it once, right after initialization, "
+		"if settings.json has any. Set both from the entry module.");
+
 	py::module_ asset = raw.def_submodule("asset", "rack::asset: paths to Rack's, the user's and a plugin's files (RP-16B).");
 	asset.def("system", &rack::asset::system, py::arg("filename") = "", "A path in Rack's read-only system folder.");
 	asset.def("user", &rack::asset::user, py::arg("filename") = "", "A path in Rack's readable and writable user folder.");
@@ -470,6 +485,27 @@ void bind_plugin(py::module_ raw) {
 	runtime::onFinalize([] {
 		runDestroyCallbacks();
 		plugin::releaseFactories();
+		settingsToJsonFn.reset();
+		settingsFromJsonFn.reset();
+	});
+}
+
+json_t* settingsToJson() noexcept {
+	json_t* result = nullptr;
+	runtime::callPython("plugin settings to_json", [&] {
+		if (!settingsToJsonFn)
+			return;
+		py::object value = settingsToJsonFn.get()();
+		if (!value.is_none())
+			result = runtime::toJson(value);
+	});
+	return result;
+}
+
+void settingsFromJson(json_t* json) noexcept {
+	runtime::callPython("plugin settings from_json", [&] {
+		if (settingsFromJsonFn)
+			settingsFromJsonFn.get()(runtime::fromJson(json));
 	});
 }
 

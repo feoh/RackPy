@@ -16,7 +16,7 @@ pytestmark = pytest.mark.unit
 
 
 class FakeHost(types.ModuleType):
-    HOST_ABI = 1
+    HOST_ABI = 2
     BINDING = "pybind11 3.1.0"
     DIAGNOSTIC_CAPACITY = 256
     TEST_HOOKS = False

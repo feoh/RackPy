@@ -64,3 +64,19 @@ whose factories run the Python constructor. Split to **RP-15D**
 (`tk-rackpy-15d-plugin-wide-settings-and-real-vcv-sta-b0c7cf`), which waits
 for RP-16 and blocks RP-34; RP-16 does not wait for it, so there is no
 dependency cycle. RP-15 itself closes once RP-15C does, as its step 5 allows.
+
+**RP-15D — plugin-wide settings and real .vcv state round trips**
+(`tk-rackpy-15d-plugin-wide-settings-and-real-vcv-sta-b0c7cf`). The loader
+exports `settingsToJson` and `settingsFromJson` and forwards them to the
+host (host ABI 2, which `rackpy-loader.json` now takes from the header). The
+host calls the handlers from `rackpy.raw.plugin.set_settings_handlers`
+(facade `rackpy.plugin.Plugin.set_settings_handlers`), contained. `None`,
+errors and values that JSON cannot hold give Rack NULL, which keeps the
+stored settings. In actual Rack, a module of a registered model gets a
+parameter, custom data and a patch-storage file. The test deletes it and
+undoes the deletion, with its files kept, then presses Ctrl+S through
+Rack's input dispatcher, so Rack's own patch manager writes the `.vcv`
+archive. The next launch opens that `.vcv` with the autosave folder deleted
+and restores all three. `settings.json` holds the plugin's settings after
+each exit, and the second launch receives them. Evidence:
+[RP-15D validation](rp-15d-validation.md).

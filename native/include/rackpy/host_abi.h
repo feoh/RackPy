@@ -10,7 +10,7 @@ extern "C" {
 #endif
 
 /** Bumped whenever RackPyHostInit or the exported functions change. */
-#define RACKPY_HOST_ABI 1
+#define RACKPY_HOST_ABI 2
 
 typedef struct RackPyHostInit {
 	int abi;  // RACKPY_HOST_ABI as the loader was built
@@ -26,9 +26,16 @@ typedef struct RackPyHostInit {
 /** Returns 0 on success. On failure fills `error`, and the loader calls rackpy_host_destroy(). */
 typedef int (*RackPyHostInitFn)(RackPyHostInit* args);
 typedef void (*RackPyHostDestroyFn)(void);
+/** Rack's settingsToJson/settingsFromJson hooks (ABI 2), forwarded by the loader.
+The json_t is libRack's jansson value, which both DSOs share: a new reference
+or NULL from to_json; a borrowed one for from_json. */
+typedef void* (*RackPyHostSettingsToJsonFn)(void);
+typedef void (*RackPyHostSettingsFromJsonFn)(void* json);
 
 #define RACKPY_HOST_INIT_SYMBOL "rackpy_host_init"
 #define RACKPY_HOST_DESTROY_SYMBOL "rackpy_host_destroy"
+#define RACKPY_HOST_SETTINGS_TO_JSON_SYMBOL "rackpy_host_settings_to_json"
+#define RACKPY_HOST_SETTINGS_FROM_JSON_SYMBOL "rackpy_host_settings_from_json"
 
 #ifdef __cplusplus
 }
