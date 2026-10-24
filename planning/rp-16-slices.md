@@ -49,10 +49,14 @@ is the owner-approved class facade: one instance per module, `configure()`,
 `to_json()` and `from_json()`, installed through the same constructor
 callback and `set_data_handlers`. 15 more records are implemented.
 
-**Still on the parent (proposed reassignments need the owner):**
-`Model::createModule` and `Model::createModuleWidget` as Python calls, and
-Python module widgets for `createModel`'s `TModuleWidget`, belong with
-`ModuleWidget` and `RackWidget` in RP-28; `Model::appendContextMenu` needs
-`ui::Menu` (RP-26); `Plugin::fromJson` and `Plugin::modulesFromJson` are
-Rack's plugin loader (the second deletes models not in the JSON), so they
-need a decision before binding; plugin settings are RP-15D.
+## RP-16 closure (2026-10-24)
+
+Owner decisions 2026-10-24: the remaining records move to the tasks that own
+their types. Python-callable `Model::createModule` and
+`Model::createModuleWidget`, and Python module widgets for `createModel`'s
+`TModuleWidget` (so `createModel` stays planned), go to RP-28;
+`Model::appendContextMenu` goes to RP-26. `Plugin::fromJson` is bound for
+this plugin while it initializes, with the fields restored if Rack raises;
+`Plugin::modulesFromJson` is bound the same way as a check against the staged
+models, because Rack runs the real one after initialization. Plugin settings
+are RP-15D, which RP-16's closure unblocks.

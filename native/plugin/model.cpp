@@ -177,10 +177,8 @@ std::string joined(const std::set<std::string>& names) {
 
 }  // namespace
 
-std::string commit(rack::plugin::Plugin* plugin, const std::string& manifestPath) {
-	open = false;
-	std::vector<std::string> listed;
-	std::string problem = manifestSlugs(manifestPath, listed);
+std::string matchModules(rack::plugin::Plugin* plugin, const std::vector<std::string>& listed, const std::string& source) {
+	std::string problem;
 	std::set<std::string> manifest(listed.begin(), listed.end());
 	std::set<std::string> registered;
 	for (auto* model : plugin->models)
@@ -190,20 +188,29 @@ std::string commit(rack::plugin::Plugin* plugin, const std::string& manifestPath
 			problem = "model slug \"" + model->slug + "\" is registered twice";
 	}
 	if (problem.empty() && manifest.size() != listed.size())
-		problem = manifestPath + " lists a module slug more than once";
+		problem = source + " lists a module slug more than once";
 	if (problem.empty() && manifest != registered) {
 		std::set<std::string> missing, extra;
 		std::set_difference(manifest.begin(), manifest.end(), registered.begin(), registered.end(),
 			std::inserter(missing, missing.end()));
 		std::set_difference(registered.begin(), registered.end(), manifest.begin(), manifest.end(),
 			std::inserter(extra, extra.end()));
-		problem = "the entry module's models do not match plugin.json's \"modules\"";
+		problem = "the entry module's models do not match " + source;
 		if (!missing.empty())
 			problem += "; listed but not added: " + joined(missing);
 		if (!extra.empty())
 			problem += "; added but not listed: " + joined(extra);
 		problem += ". Rack rejects a plugin unless they match exactly.";
 	}
+	return problem;
+}
+
+std::string commit(rack::plugin::Plugin* plugin, const std::string& manifestPath) {
+	open = false;
+	std::vector<std::string> listed;
+	std::string problem = manifestSlugs(manifestPath, listed);
+	if (problem.empty())
+		problem = matchModules(plugin, listed, "plugin.json's \"modules\"");
 	if (!problem.empty()) {
 		for (auto& model : pending)
 			if (model->factory)

@@ -173,3 +173,27 @@ def test_a_missing_dependency_is_named(make_bundle: Callable[[], Path], rack_hos
     (failed,) = run.lines("RackPy host initialization failed (3)")
     assert "imports 'rp16_not_shipped', which is not in the plugin's pythonpath" in failed
     assert run.lines("No module named 'rp16_not_shipped'")
+
+
+def test_rack_loader_methods_while_the_plugin_initializes(
+    make_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path
+) -> None:
+    stage_entry(make_bundle(), tmp_path, "rp16_loader", {}, ["PyAlpha"])
+    run = run_rack(rack_host, tmp_path)
+    assert_clean_exit(run)
+    (line,) = run.lines("rp16-loader ")
+    report = json.loads(line.split("rp16-loader ", 1)[1])
+    assert report == {
+        "rename": "ok",
+        "slug": "ValueError",
+        "abi": "Exception",  # Rack's own check; the fields it had already set are restored
+        "types": "TypeError",
+        "fields": ["RackPy renamed", "from Python", "2.0.0", "RackPy"],
+        "modules_match": "ok",
+        "modules_missing": "ValueError",
+        "modules_extra": "ValueError",
+        "modules_nameless": "ValueError",
+        "modules_type": "TypeError",
+        "exception_type": "Exception",
+    }
+    assert run.lines("Loaded plugin RackPy")

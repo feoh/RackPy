@@ -262,6 +262,18 @@ def test_module_class_builds_modules_and_owns_their_state() -> None:
         rackpy.plugin.plugin.add_model("NotAModuleClass", int)  # type: ignore[arg-type]
 
 
+def test_loader_methods_are_refused_after_initialization() -> None:
+    this = rp.plugin_instance()
+    with pytest.raises(OwnershipError, match="only while this plugin initializes"):
+        this.from_json({"name": "Late"})
+    with pytest.raises(OwnershipError, match="only while this plugin initializes"):
+        this.modules_from_json([])
+    core = rp.get_plugin("Core")
+    assert core is not None
+    with pytest.raises(OwnershipError, match="only this plugin"):
+        core.from_json({"name": "x"})
+
+
 def test_on_destroy_is_a_decorator() -> None:
     def cleanup() -> None:
         pass

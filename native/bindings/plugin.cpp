@@ -180,6 +180,80 @@ void addModel(const PluginHandle& h, ModelHandle& m) {
 	}
 }
 
+
+/** Plugin::fromJson and modulesFromJson belong to Rack's plugin loader, so
+Python may call them only for this plugin while it initializes (owner
+decision 2026-10-24). */
+RackPlugin& initializingPlugin(const PluginHandle& h, const char* what) {
+	RackPlugin& p = checked(h);
+	if (&p != plugin::instance())
+		throw runtime::Ownership(std::string(what) + " is Rack's plugin loader: only this plugin may call it");
+	if (!plugin::registrationOpen())
+		throw runtime::Ownership(std::string(what) + " is Rack's plugin loader: only while this plugin initializes");
+	return p;
+}
+
+void requireStrings(const py::dict& json, std::initializer_list<const char*> keys, const char* what) {
+	for (const char* key : keys)
+		if (json.contains(key) && !py::isinstance<py::str>(json[key]))
+			throw py::type_error(std::string(what) + ": \"" + key + "\" must be a str");
+}
+
+void pluginFromJson(const PluginHandle& h, py::handle data) {
+	RackPlugin& p = initializingPlugin(h, "Plugin.from_json");
+	if (!PyDict_Check(data.ptr()))
+		throw py::type_error("Plugin.from_json takes a dict, as plugin.json");
+	auto json = py::reinterpret_borrow<py::dict>(data);
+	requireStrings(json, {"slug", "version", "name", "brand", "description", "author", "license", "authorEmail",
+		"pluginUrl", "authorUrl", "manualUrl", "sourceUrl", "donateUrl", "changelogUrl"}, "Plugin.from_json");
+	if (json.contains("slug") && json["slug"].cast<std::string>() != p.slug)
+		throw py::value_error("Plugin.from_json cannot change the plugin's slug: Rack has already registered it");
+	// Rack's fromJson sets fields one by one and may throw part-way: restore them if it does.
+	std::vector<std::string RackPlugin::*> fields = {&RackPlugin::slug, &RackPlugin::version, &RackPlugin::name,
+		&RackPlugin::brand, &RackPlugin::description, &RackPlugin::author, &RackPlugin::license,
+		&RackPlugin::authorEmail, &RackPlugin::pluginUrl, &RackPlugin::authorUrl, &RackPlugin::manualUrl,
+		&RackPlugin::sourceUrl, &RackPlugin::donateUrl, &RackPlugin::changelogUrl};
+	std::vector<std::string> saved;
+	for (auto field : fields)
+		saved.push_back(p.*field);
+	std::unique_ptr<json_t, decltype(&json_decref)> rootJ(runtime::toJson(data), json_decref);
+	try {
+		p.fromJson(rootJ.get());
+	}
+	catch (...) {
+		for (size_t i = 0; i < fields.size(); i++)
+			p.*fields[i] = saved[i];
+		throw;
+	}
+}
+
+void modulesFromJson(const PluginHandle& h, py::handle data) {
+	RackPlugin& p = initializingPlugin(h, "Plugin.modules_from_json");
+	if (!PyList_Check(data.ptr()) && !PyTuple_Check(data.ptr()))
+		throw py::type_error("Plugin.modules_from_json takes a list, as plugin.json's \"modules\"");
+	std::vector<std::string> listed;
+	size_t index = 0;
+	for (py::handle entry : data) {
+		if (!PyDict_Check(entry.ptr()))
+			throw py::type_error("Plugin.modules_from_json: every module entry must be a dict");
+		auto json = py::reinterpret_borrow<py::dict>(entry);
+		if (!json.contains("slug"))
+			throw py::value_error("Plugin.modules_from_json: module entry #" + std::to_string(index) + " has no slug");
+		requireStrings(json, {"slug"}, "Plugin.modules_from_json");
+		checkModelJson(entry);
+		std::string name = json.contains("name") ? json["name"].cast<std::string>() : "";
+		std::string slug = json["slug"].cast<std::string>();
+		if (!rack::plugin::isSlugValid(slug))
+			throw py::value_error("Plugin.modules_from_json: module slug \"" + slug + "\" is invalid");
+		if (name.empty())
+			throw py::value_error("Plugin.modules_from_json: module " + slug + " has no name");
+		listed.push_back(slug);
+		index++;
+	}
+	std::string problem = plugin::matchModules(&p, listed, "these \"modules\"");
+	if (!problem.empty())
+		throw py::value_error(problem);
+}
 }  // namespace
 
 void bind_plugin(py::module_ raw) {
@@ -234,7 +308,13 @@ void bind_plugin(py::module_ raw) {
 						return modelObject(m.get());
 			return modelObject(p.getModel(slug));
 		}, py::arg("slug"), "The model with this slug, or None.")
-		.def("get_brand", [](const PluginHandle& h) { return checked(h).getBrand(); });
+		.def("get_brand", [](const PluginHandle& h) { return checked(h).getBrand(); })
+		.def("from_json", &pluginFromJson, py::arg("data"),
+			"Rack's Plugin::fromJson (plugin.json's plugin fields), for this plugin while it initializes. The slug "
+			"cannot change; on Rack's Exception the fields are restored.")
+		.def("modules_from_json", &modulesFromJson, py::arg("data"),
+			"Rack's Plugin::modulesFromJson, which Rack runs after initialization: here a check that these "
+			"\"modules\" entries match the models added so far (ValueError otherwise). Nothing changes.");
 
 	auto model = py::class_<ModelHandle>(mod, "Model", py::is_final(),
 		"A Rack model (rack::plugin::Model). Make one with create_model(); Rack owns it once it is added.");

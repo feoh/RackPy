@@ -58,6 +58,9 @@ registration (std::logic_error). Takes `model` only on success. */
 void stage(std::unique_ptr<Model>& model);
 /** The staged models, in registration order. */
 const std::vector<std::unique_ptr<Model>>& staged();
+/** Why `listed` (module slugs, from `source`) does not match `plugin`'s
+natively added models plus the staged ones, or an empty string. */
+std::string matchModules(rack::plugin::Plugin* plugin, const std::vector<std::string>& listed, const std::string& source);
 /** Check `plugin`'s natively added models plus the staged ones against the
 plugin.json at `manifestPath`, then add the staged ones. Closes registration.
 Returns an empty string on success, or why nothing was added. */

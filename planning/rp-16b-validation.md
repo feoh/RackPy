@@ -46,3 +46,28 @@ No Rack or Xvfb processes were left behind.
 
 macOS (where `bundlePath` is set), Windows, the distributable build and
 sanitizers are not covered, nor anything still listed on the RP-16 parent.
+
+## RP-16 closure: loader methods and reassignments
+
+`Plugin.from_json` and `Plugin.modules_from_json` are bound for this plugin
+while it initializes (owner decision 2026-10-24). A startup run shows:
+
+- `from_json` renames the plugin;
+- it refuses a slug change (`ValueError`) and a non-string field (`TypeError`);
+- when Rack's own version check raises, the fields are restored;
+- `modules_from_json` accepts entries that match the added models, and
+  refuses missing, extra, nameless and non-list entries;
+- the plugin still loads afterwards.
+
+After initialization both methods raise `OwnershipError`, for this plugin
+and for Core.
+
+`createModel` goes back to planned until RP-28 maps `TModuleWidget`.
+`createModule` and `createModuleWidget` move to RP-28, and
+`appendContextMenu` to RP-26.
+
+| Command | Result |
+| --- | --- |
+| `uv run pytest -q tests/plugin` | 9 passed (15 in-Rack tests inside) |
+| `uv run pytest -q -m 'not dist and not inventory'` | 188 passed, 31 deselected (294 s) |
+| `prek run --all-files`, `sphinx-build -W` | pass |

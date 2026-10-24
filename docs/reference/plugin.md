@@ -27,6 +27,19 @@ which is part of Rack. `models` is a tuple snapshot; `get_model(slug)` and
 models are added to Rack when initialization ends, all or none
 ([plugin.json](../how-to/plugins.md#pluginjson-lists-the-same-models)).
 
+(plugin-loader)=
+## Rack's loader methods
+
+`Plugin.from_json(data)` and `Plugin.modules_from_json(entries)` are Rack's
+`Plugin::fromJson` and `Plugin::modulesFromJson`, which Rack's plugin loader
+calls with `plugin.json`. RackPy allows them only for this plugin while it
+initializes (`OwnershipError` otherwise). `from_json` sets the plugin fields
+it finds, refuses to change the slug, and restores everything if Rack raises
+(for example for a version that is not Rack 2's). `modules_from_json` does
+not reorder or delete anything: Rack runs the real one after initialization,
+so here it checks, with Rack's rules, that the entries match the models
+added so far, and raises `ValueError` otherwise.
+
 (plugin-models)=
 ## Models
 
@@ -35,7 +48,9 @@ models are added to Rack when initialization ends, all or none
 Module.create's constructor callback, whenever it creates the model's module,
 with errors contained (a [placeholder](../how-to/plugins.md#when-a-module-factory-fails)
 replaces the module). `hp` sizes the plain panel each module gets until
-Python module widgets exist (RP-28). The new `Model` belongs to Python until
+Python module widgets exist (RP-28); until then the `TModuleWidget` half of
+the template is unmapped, so the coverage report lists `createModel` as
+planned. The new `Model` belongs to Python until
 `add_model`.
 
 A `Model` has Rack's fields. `slug` can change only before the model is
