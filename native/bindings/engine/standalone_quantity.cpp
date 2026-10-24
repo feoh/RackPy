@@ -102,12 +102,19 @@ struct StandaloneQuantity : QuantityTrampoline<Base, StandaloneGuard>, SlotTrans
 	}
 	// JSON (RP-15A): Rack's paramsToJson calls toJson for every quantity (ui-shared).
 	// A Python override's dict becomes the JSON; if it fails, Rack's answer is used.
+	// Only a dict (RP-15C): paramsToJson adds the parameter's "id" to the object,
+	// and paramsFromJson finds the value by it.
 	json_t* toJson() override {
 		checkAccess(true);
 		json_t* result = nullptr;
 		runPythonHook("ParamQuantity.to_json", [&] {
-			if (py::function f = py::get_override(static_cast<const Base*>(this), "to_json"))
-				result = runtime::toJson(f());
+			if (py::function f = py::get_override(static_cast<const Base*>(this), "to_json")) {
+				py::object value = f();
+				if (!PyDict_Check(value.ptr()))
+					throw py::type_error(std::string("ParamQuantity.to_json must return a dict (Rack adds the parameter's "
+						"\"id\" to it), not ") + Py_TYPE(value.ptr())->tp_name);
+				result = runtime::toJson(value);
+			}
 		});
 		return result ? result : Base::toJson();
 	}
