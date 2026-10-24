@@ -7,6 +7,7 @@
 #include "../bindings/engine/module.hpp"
 #include "../bindings/widget/managed.hpp"
 #include "../tests/quantity_reference.hpp"
+#include "../plugin/model.hpp"
 #include "rackpy/runtime/json.hpp"
 
 #include <pybind11/stl.h>
@@ -437,6 +438,80 @@ void define(py::module_ m) {
 		requireMainThread("close_window");
 		APP->window->close();
 	});
+	// RP-16A: what Rack itself does with a registered model, so tests drive
+	// Python models through Rack's own code paths.
+	auto findModel = [](const std::string& pluginSlug, const std::string& modelSlug) {
+		rack::plugin::Model* found = rack::plugin::getModel(pluginSlug, modelSlug);
+		if (!found)
+			throw std::invalid_argument("no model " + pluginSlug + "/" + modelSlug);
+		return found;
+	};
+	m.def("browser_add_module", [findModel](const std::string& pluginSlug, const std::string& modelSlug) {
+		// As Browser's chooseModel: Module, engine, ModuleWidget, rack, an undoable ModuleAdd.
+		requireMainThread("browser_add_module");
+		refuseEngineReentry("browser_add_module");
+		std::shared_ptr<ContextToken> ctx = liveContext();
+		rack::plugin::Model* found = findModel(pluginSlug, modelSlug);
+		rack::engine::Module* module = found->createModule();
+		{
+			py::gil_scoped_release release;
+			EngineLease lease(*ctx);
+			APP->engine->addModule(module);
+		}
+		rack::app::ModuleWidget* mw = found->createModuleWidget(module);
+		APP->scene->rack->addModuleAtMouse(mw);
+		auto* add = new rack::history::ModuleAdd;
+		add->name = "add module";
+		add->setModule(mw);
+		APP->history->push(add);
+		return module->id;
+	}, py::arg("plugin_slug"), py::arg("model_slug"));
+	m.def("remove_module_widget", [](int64_t id) {
+		// As the module's context menu "Delete": ModuleWidget::removeAction, undoable.
+		requireMainThread("remove_module_widget");
+		refuseEngineReentry("remove_module_widget");
+		liveContext();
+		rack::app::ModuleWidget* mw = APP->scene->rack->getModule(id);
+		if (!mw)
+			throw std::invalid_argument("no module widget with that ID");
+		py::gil_scoped_release release;
+		mw->removeAction();
+	});
+	m.def("history_undo", [] {
+		requireMainThread("history_undo");
+		refuseEngineReentry("history_undo");
+		liveContext();
+		py::gil_scoped_release release;
+		APP->history->undo();
+	});
+	m.def("model_preview", [findModel](const std::string& pluginSlug, const std::string& modelSlug) {
+		// As the browser's ModelBox preview: a module widget without a module, drawn, then deleted.
+		requireMainThread("model_preview");
+		liveContext();
+		rack::plugin::Model* found = findModel(pluginSlug, modelSlug);
+		std::unique_ptr<rack::app::ModuleWidget> mw(found->createModuleWidget(nullptr));
+		std::vector<std::string> labels;
+		for (auto* child : mw->children)
+			if (auto* label = dynamic_cast<rack::ui::Label*>(child))
+				labels.push_back(label->text);
+		bool hasModule = mw->module != nullptr;
+		return py::make_tuple(mw->box.size.x, mw->box.size.y, labels, hasModule, mw->model == found);
+	}, py::arg("plugin_slug"), py::arg("model_slug"));
+	m.def("module_model", [](int64_t id) -> py::object {
+		requireMainThread("module_model");
+		std::shared_ptr<ContextToken> ctx = liveContext();
+		py::gil_scoped_release release;
+		EngineLease lease(*ctx);
+		rack::engine::Module* module = APP->engine->getModule(id);
+		if (!module) {
+			py::gil_scoped_acquire gil;
+			return py::none();
+		}
+		bool placeholder = dynamic_cast<rackpy::plugin::PlaceholderModule*>(module) != nullptr;
+		std::string slug = module->model ? module->model->slug : "";
+		py::gil_scoped_acquire gil;
+		return py::make_tuple(slug, placeholder);
+	}, py::arg("module_id"));
 	m.def("leak_reference", [](py::object o) {
 		if (!leaked)
 			leaked = new std::vector<PyRef>();

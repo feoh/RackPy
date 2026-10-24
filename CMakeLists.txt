@@ -54,7 +54,8 @@ list(FILTER RACKPY_BINDING_ADAPTERS EXCLUDE REGEX "/native/bindings/generated/")
 # rackpy_host.so: embeds CPython; exports only rackpy_host_init and rackpy_host_destroy.
 add_library(rackpy_host MODULE native/host/host.cpp native/host/host_module.cpp
   ${RACKPY_RUNTIME_CORE} native/runtime/python.cpp native/runtime/interpreter.cpp native/runtime/json.cpp
-  native/bindings/generated/registry.cpp ${RACKPY_BINDING_ADAPTERS} native/module/lifecycle.cpp)
+  native/bindings/generated/registry.cpp ${RACKPY_BINDING_ADAPTERS} native/module/lifecycle.cpp
+  native/plugin/model.cpp)
 if(RACKPY_TEST_HOOKS)
   target_sources(rackpy_host PRIVATE native/testing/testing.cpp)
   target_compile_definitions(rackpy_host PRIVATE RACKPY_TEST_HOOKS)

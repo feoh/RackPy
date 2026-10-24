@@ -44,16 +44,25 @@ def shown_snippets() -> set[str]:
     return {name for page in DOCS.rglob("*.md") for name in SHOWN.findall(page.read_text())}
 
 
-def run_in_rack(snippet: Path, bundle: Path, rack: Path, user: Path) -> str:
-    """Run a snippet inside Rack through the plugin's entry module; return its standard output."""
-    stage_plugin(
+def run_in_rack(snippet: Path, bundle: Path, rack: Path, user: Path, modules: tuple[str, ...] = ()) -> str:
+    """Run a snippet inside Rack through the plugin's entry module; return its standard output.
+
+    `modules` are the model slugs the snippet adds, which plugin.json must list.
+    """
+    plugin = stage_plugin(
         bundle,
         user,
         entry="rackpy_snippet",
         files={"pythonpath/rackpy_snippet.py": f"SNIPPET = {str(snippet)!r}\n{RUNNER}"},
     )
+    if modules:
+        manifest = json.loads((plugin / "plugin.json").read_text())
+        manifest["modules"] += [{"slug": m, "name": m, "tags": []} for m in modules]
+        (plugin / "plugin.json").write_text(json.dumps(manifest))
     run = run_rack(rack, user, settle=0.3)
     assert_clean_exit(run)
+    if modules:
+        assert run.lines("Loaded plugin RackPy"), run.tail()  # its models matched plugin.json
     lines = run.lines("snippet-result ")
     assert len(lines) == 1, run.tail()
     result = json.loads(lines[0].split("snippet-result ", 1)[1])
@@ -93,6 +102,9 @@ def test_malformed_snippet_headers_are_rejected(tmp_path: Path) -> None:
     bad.write_text("# rackpy-example: runs-in=python output=missing.out\n")
     with pytest.raises(ValueError, match=re.escape("missing.out does not exist")):
         rackpy_docs.read_snippet(bad)
+    bad.write_text("# rackpy-example: runs-in=python modules=PyOne\n")
+    with pytest.raises(ValueError, match="modules= needs runs-in=rack"):
+        rackpy_docs.read_snippet(bad)
 
 
 def test_python_snippets_print_their_expected_output() -> None:
@@ -111,7 +123,7 @@ def test_rack_snippets_print_their_expected_output(
     ran = 0
     for snippet in map(rackpy_docs.read_snippet, SNIPPETS):
         if snippet.runs_in == "rack":
-            out = run_in_rack(snippet.path, make_bundle(), rack_host, tmp_path / snippet.path.stem)
+            out = run_in_rack(snippet.path, make_bundle(), rack_host, tmp_path / snippet.path.stem, snippet.modules)
             if snippet.expected is not None:
                 assert out == snippet.expected, f"{snippet.path.name} printed:\n{out}"
             ran += 1

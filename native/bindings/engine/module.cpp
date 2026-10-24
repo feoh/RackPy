@@ -362,6 +362,13 @@ py::object createConfigured(int params, int inputs, int outputs, int lights, py:
 
 }  // namespace
 
+rack::engine::Module* createForRack(py::object configure, rack::plugin::Model& model) {
+	py::object handle = create(std::move(configure));
+	const ModuleRef& r = handle.cast<const ModuleRef&>();
+	r.get().model = &model;
+	return r.state->releaseToRack();
+}
+
 using M = rack::engine::Module;
 
 /** A Rack event as Python reads it: a copied value of Rack's own record. */

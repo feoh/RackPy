@@ -13,10 +13,12 @@ not as an external remote-control service.
 > standalone quantities with UI-safe overrides, module JSON state and patch
 > storage, and [subclassable widgets](docs/reference/widgets.md) with typed
 > bases and scoped events (no NanoVG drawing API, input dispatcher or
-> component library yet).
+> component library yet). A trusted entry module can
+> [register models](docs/how-to/plugins.md) that Rack creates, saves and reloads,
+> though they have plain panels and process no audio yet.
 > See the [coverage report](docs/reference/coverage.md)
-> for exact gaps. Production builds register no models; plugin/model factories,
-> DSP, lifecycle adapters and the planned instrument examples are not complete.
+> for exact gaps. Python module widgets, DSP, lifecycle adapters and the
+> planned instrument examples are not complete.
 > There is no published installable runtime bundle. Broader API designs remain proposals.
 
 ## What we are building

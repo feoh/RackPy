@@ -590,6 +590,181 @@
     },
     {
       "facade": null,
+      "id": "field:rack::plugin::Model::description",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Model.description",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Model::hidden",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Model.hidden",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Model::manualUrl",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Model.manual_url",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Model::modularGridUrl",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Model.modular_grid_url",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Model::name",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Model.name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Model::plugin",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Model.plugin",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Model::slug",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Model.slug",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Model::tagIds",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Model.tag_ids",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::author",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.author",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::authorEmail",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.author_email",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::authorUrl",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.author_url",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::brand",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.brand",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::changelogUrl",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.changelog_url",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::description",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.description",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::donateUrl",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.donate_url",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::license",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.license",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::manualUrl",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.manual_url",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::models",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.models",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::modifiedTimestamp",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.modified_timestamp",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::name",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::path",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.path",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::pluginUrl",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.plugin_url",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::slug",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.slug",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::sourceUrl",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.source_url",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::plugin::Plugin::version",
+      "kind": "property",
+      "raw": "rackpy.raw.plugin.Plugin.version",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::widget::BaseEvent::context",
       "kind": "property",
       "raw": "rackpy.raw.widget.BaseEvent.context",
@@ -1290,6 +1465,55 @@
     },
     {
       "facade": null,
+      "id": "function:rack::plugin::getModel(const std::string &, const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.plugin.get_model",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::plugin::getModelFallback(const std::string &, const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.plugin.get_model_fallback",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::plugin::getPlugin(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.plugin.get_plugin",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::plugin::getPluginFallback(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.plugin.get_plugin_fallback",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::plugin::isSlugValid(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.plugin.is_slug_valid",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::plugin::modelFromJson(json_t *)",
+      "kind": "function",
+      "raw": "rackpy.raw.plugin.model_from_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::plugin::normalizeSlug(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.plugin.normalize_slug",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "function:rack::widget::getKeyCommandName(int, int)",
       "kind": "function",
       "raw": "rackpy.raw.widget.get_key_command_name",
@@ -1321,6 +1545,13 @@
       "id": "function_template:rack::construct<type>()",
       "kind": "function",
       "raw": "rackpy.raw.construct",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.plugin.Plugin.add_model",
+      "id": "function_template:rack::createModel<type, type>(std::string)",
+      "kind": "factory",
+      "raw": "rackpy.raw.plugin.create_model",
       "status": "implemented"
     },
     {
@@ -2606,6 +2837,69 @@
     },
     {
       "facade": null,
+      "id": "method:rack::plugin::Model::getFactoryPresetDirectory()",
+      "kind": "method",
+      "raw": "rackpy.raw.plugin.Model.get_factory_preset_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::plugin::Model::getFullName()",
+      "kind": "method",
+      "raw": "rackpy.raw.plugin.Model.get_full_name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::plugin::Model::getManualUrl()",
+      "kind": "method",
+      "raw": "rackpy.raw.plugin.Model.get_manual_url",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::plugin::Model::getUserPresetDirectory()",
+      "kind": "method",
+      "raw": "rackpy.raw.plugin.Model.get_user_preset_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::plugin::Model::isFavorite()",
+      "kind": "method",
+      "raw": "rackpy.raw.plugin.Model.is_favorite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::plugin::Model::setFavorite(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.plugin.Model.set_favorite",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.plugin.Plugin.add_model",
+      "id": "method:rack::plugin::Plugin::addModel(rack::plugin::Model *)",
+      "kind": "method",
+      "raw": "rackpy.raw.plugin.Plugin.add_model",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::plugin::Plugin::getBrand()",
+      "kind": "method",
+      "raw": "rackpy.raw.plugin.Plugin.get_brand",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::plugin::Plugin::getModel(const std::string &)",
+      "kind": "method",
+      "raw": "rackpy.raw.plugin.Plugin.get_model",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::widget::BaseEvent::consume(rack::widget::Widget *) const",
       "kind": "method",
       "raw": "rackpy.raw.widget.BaseEvent.consume",
@@ -3781,6 +4075,20 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.plugin.Model",
+      "id": "record:rack::plugin::Model",
+      "kind": "class",
+      "raw": "rackpy.raw.plugin.Model",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.plugin.Plugin",
+      "id": "record:rack::plugin::Plugin",
+      "kind": "class",
+      "raw": "rackpy.raw.plugin.Plugin",
+      "status": "implemented"
+    },
+    {
       "facade": null,
       "id": "record:rack::widget::BaseEvent",
       "kind": "class",
@@ -4257,6 +4565,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "c1e157d09ea45671",
+  "inputs": "5303846c86c5b2f0",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

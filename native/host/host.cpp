@@ -7,7 +7,10 @@
 #include <rack.hpp>
 
 #include <cstdio>
+#include <string>
 
+#include "../bindings/plugin.hpp"
+#include "../plugin/model.hpp"
 #include "rackpy/runtime/interpreter.hpp"
 #include "rackpy/host_abi.h"
 
@@ -21,11 +24,26 @@ extern "C" __attribute__((visibility("default"))) int rackpy_host_init(RackPyHos
 			std::snprintf(args->error, args->error_size, "loader ABI %d does not match host ABI %d", args->abi, RACKPY_HOST_ABI);
 			return 1;
 		}
+		auto* plugin = static_cast<rack::plugin::Plugin*>(args->plugin);
+		// The entry module adds its models while it is imported (RP-16A).
+		rackpy::plugin::setInstance(plugin);
+		rackpy::plugin::openRegistration();
 		int rc = rackpy::runtime::start(args);
 #ifdef RACKPY_TEST_HOOKS
 		if (rc == 0)
-			rackpy::testing::registerModels(static_cast<rack::plugin::Plugin*>(args->plugin));
+			rackpy::testing::registerModels(plugin);
 #endif
+		if (rc != 0)
+			rackpy::bindings::discardModels();
+		else {
+			// Rack rejects a plugin whose models differ from plugin.json, after init and
+			// without calling destroy(): check first, and add none on a mismatch.
+			std::string problem = rackpy::bindings::commitModels(plugin, rack::system::join(args->plugin_dir, "plugin.json"));
+			if (!problem.empty()) {
+				std::snprintf(args->error, args->error_size, "%s", problem.c_str());
+				rc = 4;
+			}
+		}
 		return rc;
 	}
 	catch (...) {
