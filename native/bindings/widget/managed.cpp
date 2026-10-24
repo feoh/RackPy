@@ -3,6 +3,7 @@
 #include "behavior.hpp"
 #include "../../widget/geometry.hpp"
 #include <pybind11/stl.h>
+#include <iterator>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
@@ -340,7 +341,72 @@ W& geometrySetter(py::handle self) {
 	return checked(s);
 }
 
+/** Rack's Widget::children as a checked, live, read-only sequence (owner
+decision 2026-10-24). Every access resolves the parent again, so the view sees
+later additions and removals and raises once the parent is gone; it does not
+keep the native parent alive. Changes go through add_child and its siblings,
+which keep each child's single owner. */
+struct ChildrenView {
+	std::shared_ptr<State> owner;
+	W& parent() const {
+		W& w = checked(owner);  // a deleted parent is stale, even if it was deleted while clearing
+		checkTraversal(owner);
+		return w;
+	}
+	py::tuple snapshot() const {
+		auto& w = parent();
+		py::tuple result(w.children.size());
+		size_t i = 0;
+		for (auto* child : w.children) result[i++] = wrapper(child);
+		return result;
+	}
+};
+
+void bindChildrenView(py::module_ mod) {
+	auto cls = py::class_<ChildrenView>(mod, "WidgetChildren", py::is_final(),
+		"Rack's Widget::children: a live, read-only, checked sequence. Iteration walks the children present when it "
+		"starts; change the list with add_child, remove_child and the other ownership methods.")
+		.def("__len__", [](const ChildrenView& v) { return v.parent().children.size(); })
+		.def("__bool__", [](const ChildrenView& v) { return !v.parent().children.empty(); })
+		.def("__getitem__", [](const ChildrenView& v, py::ssize_t index) {
+			auto& children = v.parent().children;
+			auto size = (py::ssize_t) children.size();
+			if (index < 0) index += size;
+			if (index < 0 || index >= size) throw py::index_error("Widget child index out of range");
+			return wrapper(*std::next(children.begin(), index));
+		}, py::arg("index"))
+		.def("__getitem__", [](const ChildrenView& v, py::slice slice) { return py::object(v.snapshot()[slice]); }, py::arg("index"))
+		.def("__iter__", [](const ChildrenView& v) { return py::iter(v.snapshot()); })
+		.def("__reversed__", [](const ChildrenView& v) {
+			return py::module_::import("builtins").attr("reversed")(v.snapshot());
+		})
+		.def("__contains__", [](const ChildrenView& v, py::handle value) {
+			for (auto* child : v.parent().children)
+				if (wrapper(child).is(value)) return true;
+			return false;
+		}, py::arg("value"))
+		.def("index", [](const ChildrenView& v, py::object value) { return v.snapshot().attr("index")(value); },
+			py::arg("value"))
+		.def("count", [](const ChildrenView& v, py::object value) { return v.snapshot().attr("count")(value); },
+			py::arg("value"))
+		.def("__eq__", [](const ChildrenView& v, py::object other) -> py::object {
+			if (py::isinstance<ChildrenView>(other))
+				return py::bool_(v.snapshot().equal(other.cast<const ChildrenView&>().snapshot()));
+			if (py::isinstance<py::tuple>(other))
+				return py::bool_(v.snapshot().equal(other));
+			return py::reinterpret_borrow<py::object>(Py_NotImplemented);
+		}, py::is_operator())
+		.def("copy", [](const ChildrenView& v) { return v.snapshot(); }, "The children now, as a tuple.")
+		.def("__copy__", [](const ChildrenView& v) { return v.snapshot(); })
+		.def("__repr__", [](const ChildrenView& v) {
+			return "WidgetChildren(" + py::repr(v.snapshot()).cast<std::string>() + ")";
+		});
+	cls.attr("__hash__") = py::none();
+	py::module_::import("collections.abc").attr("Sequence").attr("register")(cls);
+}
+
 void bindManagedWidgets(py::module_ mod) {
+	bindChildrenView(mod);
 	py::class_<ExternalWidget>(mod, "HostWidget", py::is_final(),
 		"Nonowning, checked host Widget identity; cannot transfer or destroy Rack-owned nodes.")
 		.def_property_readonly("alive", [](const ExternalWidget& ref) {
@@ -374,14 +440,10 @@ void bindManagedWidgets(py::module_ mod) {
         })
 		.def("remove_child", &remove)
 		.def_property_readonly("children", [](py::object self) {
-			auto s = state(self);
-			checkTraversal(s);
-			auto& w = checked(s);
-			py::tuple result(w.children.size());
-			size_t i = 0;
-			for (auto* child : w.children) result[i++] = wrapper(child);
-			return result;
-		})
+			ChildrenView view{state(self)};
+			view.parent();
+			return view;
+		}, "Rack's children: a live, read-only WidgetChildren view; copy() takes a tuple snapshot.")
 		.def_property_readonly("parent", [](py::object self) { return wrapper(checked(state(self)).parent); })
 		.def("clear_children", [](py::object self) {
 			checkMutation();
