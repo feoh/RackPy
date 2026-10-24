@@ -41,6 +41,8 @@ def test_modules_in_production_host(
             str(SUITE / "test_engine_bypass.py"),
             "--ignore",
             str(SUITE / "test_engine_save_reload.py"),
+            "--ignore",
+            str(SUITE / "test_engine_json_boundary.py"),
         ],
     )
     assert result.exit == 0, result.summary()

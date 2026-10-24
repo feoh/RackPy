@@ -84,6 +84,25 @@ def test_engine_owned_storage_lives_in_the_autosave_folder() -> None:
     assert (path / "sample.txt").read_text() == "kept"
 
 
+def test_the_facade_reports_what_rack_ignores() -> None:
+    if not LIVE or HOOKS is None:
+        return
+    m = Module.create(lambda m: m.config(0, 0, 0))
+    HOOKS.engine_adopt(m)
+    path = m.patch_storage(create=False)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("a file where the directory should be")
+        # Rack's createPatchStorageDirectory ignores the failure and returns the path.
+        assert m.create_patch_storage_directory() == str(path)
+        with pytest.raises(OSError, match="could not create the patch storage directory"):
+            m.patch_storage()
+        assert path.read_text() == "a file where the directory should be"
+    finally:
+        path.unlink(missing_ok=True)
+        HOOKS.engine_delete(m)
+
+
 def test_runnable_snippet() -> None:
     snippet = pathlib.Path(__file__).resolve().parents[4] / "docs" / "snippets" / "patch_storage.py"
     scope: dict[str, Any] = {}

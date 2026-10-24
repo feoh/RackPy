@@ -13,7 +13,6 @@ def test_values_round_trip() -> None:
     value = {"a": [1, 2.5, "s", None, True, False, {"b": []}], "unicode": "Ünïcødé ✓", "": -(2**63)}
     assert round_trip(value) == value
     assert round_trip((1, 2)) == [1, 2]  # tuples become arrays
-    assert round_trip("nul\x00inside") == "nul\x00inside"
     assert round_trip(2**63 - 1) == 2**63 - 1
 
 
@@ -33,6 +32,8 @@ def test_keys_types_and_depth_are_checked() -> None:
         round_trip({1: "x"})
     with pytest.raises(ValueError, match="NUL"):
         round_trip({"a\x00b": 1})
+    with pytest.raises(ValueError, match="NUL"):
+        round_trip(["nul\x00inside"])  # Rack loads JSON without JSON_ALLOW_NUL (RP-15C)
     with pytest.raises(TypeError, match="cannot become JSON"):
         round_trip({"x": {1, 2}})
     deep: list[object] = []

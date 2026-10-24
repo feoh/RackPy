@@ -13,7 +13,10 @@
 
 #include <algorithm>
 #include <memory>
+#include <mutex>
+#include <optional>
 #include <thread>
+#include <unordered_set>
 #include <vector>
 
 #include "rackpy/runtime/context.hpp"
@@ -32,6 +35,77 @@ using namespace rackpy::runtime;
 namespace {
 
 struct ProbeWidget;
+
+/** Reference counts of every node that has one (not jansson's null/true/false singletons), preorder. */
+void collectRefcounts(json_t* json, std::vector<size_t>& out) {
+	if (!json || json_is_null(json) || json_is_boolean(json))
+		return;
+	out.push_back(size_t(json->refcount));
+	size_t index;
+	const char* key;
+	json_t* item;
+	if (json_is_array(json)) {
+		json_array_foreach(json, index, item) {
+			collectRefcounts(item, out);
+		}
+	}
+	else if (json_is_object(json)) {
+		json_object_foreach(json, key, item) {
+			collectRefcounts(item, out);
+		}
+	}
+}
+
+std::vector<size_t> refcounts(json_t* json) {
+	std::vector<size_t> out;
+	collectRefcounts(json, out);
+	return out;
+}
+
+/** While alive, counts the jansson blocks one thread allocates and frees. */
+struct JsonAllocationProbe {
+	static inline std::mutex mutex;
+	static inline std::unordered_set<void*> blocks;
+	static inline std::thread::id thread;
+	static inline json_malloc_t previousMalloc = nullptr;
+	static inline json_free_t previousFree = nullptr;
+	static inline bool active = false;
+
+	static void* countingMalloc(size_t size) {
+		void* block = previousMalloc(size);
+		if (block && std::this_thread::get_id() == thread) {
+			std::lock_guard<std::mutex> lock(mutex);
+			blocks.insert(block);
+		}
+		return block;
+	}
+	static void countingFree(void* block) {
+		if (block) {
+			std::lock_guard<std::mutex> lock(mutex);
+			blocks.erase(block);
+		}
+		previousFree(block);
+	}
+
+	JsonAllocationProbe() {
+		if (active)
+			throw std::logic_error("json_allocations cannot be nested");
+		active = true;
+		json_get_alloc_funcs(&previousMalloc, &previousFree);
+		thread = std::this_thread::get_id();
+		blocks.clear();
+		json_set_alloc_funcs(countingMalloc, countingFree);
+	}
+	~JsonAllocationProbe() {
+		// Blocks counted here and freed later go back to the allocator that made them.
+		json_set_alloc_funcs(previousMalloc, previousFree);
+		active = false;
+	}
+	size_t live() {
+		std::lock_guard<std::mutex> lock(mutex);
+		return blocks.size();
+	}
+};
 
 rack::plugin::Model* model = nullptr;
 PyRef stepCallback;
@@ -567,6 +641,70 @@ void define(py::module_ m) {
 		module::Module& mod = owned(r);
 		std::unique_ptr<json_t, decltype(&json_decref)> json(toJson(data), json_decref);
 		engineCall("engine_module_from_json", [&] { APP->engine->moduleFromJson(&mod, json.get()); });
+	});
+	// RP-15C: a module's JSON as text, the way Rack writes a patch (json_dumpf
+	// with JSON_INDENT(2)) and reads one (json_loadf with no flags), so tests
+	// reach the boundary with JSON that Python's own values cannot express.
+	m.def("engine_module_to_json_text", [engineCall, owned](const bindings::ModuleRef& r) {
+		module::Module& mod = owned(r);
+		json_t* json = engineCall("engine_module_to_json_text", [&] { return APP->engine->moduleToJson(&mod); });
+		std::unique_ptr<json_t, decltype(&json_decref)> owner(json, json_decref);
+		char* text = json_dumps(json, JSON_INDENT(2));
+		if (!text)
+			throw std::runtime_error("jansson could not write the module's JSON");
+		std::string result(text);
+		json_malloc_t unusedMalloc;
+		json_free_t free;
+		json_get_alloc_funcs(&unusedMalloc, &free);  // json_dumps allocates with jansson's allocator
+		free(text);
+		return result;
+	});
+	m.def("rack_parses_json_text", [](const std::string& text) {
+		json_error_t error;
+		std::unique_ptr<json_t, decltype(&json_decref)> json(json_loadb(text.data(), text.size(), 0, &error), json_decref);
+		return py::make_tuple(json != nullptr, std::string(error.text));
+	});
+	m.def("engine_module_from_json_text", [engineCall, owned](const bindings::ModuleRef& r, const std::string& text,
+		std::optional<py::bytes> invalidUtf8Data) {
+		module::Module& mod = owned(r);
+		json_error_t error;
+		std::unique_ptr<json_t, decltype(&json_decref)> json(json_loadb(text.data(), text.size(), 0, &error), json_decref);
+		if (!json)
+			throw py::value_error(std::string("Rack would refuse this patch: ") + error.text);
+		if (invalidUtf8Data) {
+			// Bytes jansson's loader would refuse, as a buggy C++ plugin's json_string_nocheck could produce.
+			std::string bytes = *invalidUtf8Data;
+			json_object_set_new(json.get(), "data", json_stringn_nocheck(bytes.data(), bytes.size()));
+		}
+		engineCall("engine_module_from_json_text", [&] { APP->engine->moduleFromJson(&mod, json.get()); });
+	}, py::arg("module"), py::arg("text"), py::arg("invalid_utf8_data") = py::none());
+	// RP-15C: jansson's references. json_refcounts converts a value and reports
+	// every non-singleton node's reference count, preorder; json_borrowed_refcounts
+	// parses text, converts the borrowed tree to Python and reports the counts
+	// before and after.
+	m.def("json_refcounts", [](py::handle value) {
+		std::unique_ptr<json_t, decltype(&json_decref)> json(toJson(value), json_decref);
+		return refcounts(json.get());
+	});
+	m.def("json_borrowed_refcounts", [](const std::string& text) {
+		json_error_t error;
+		std::unique_ptr<json_t, decltype(&json_decref)> json(json_loadb(text.data(), text.size(), 0, &error), json_decref);
+		if (!json)
+			throw py::value_error(error.text);
+		std::vector<size_t> before = refcounts(json.get());
+		py::object value = fromJson(json.get());
+		return py::make_tuple(before, refcounts(json.get()), value);
+	});
+	// RP-15C: how many jansson blocks the main thread allocated while `f` ran
+	// and had not freed when it returned. The counting allocator wraps the one
+	// installed (json_set_alloc_funcs); blocks other threads allocate, and
+	// blocks from before, are not counted.
+	m.def("leak_json_integer", [] { (void) json_integer(1); });  // the probe's positive control
+	m.def("json_allocations", [](py::function f) {
+		requireMainThread("json_allocations");
+		JsonAllocationProbe probe;
+		f();
+		return probe.live();
 	});
 	m.def("seed_random", [](uint64_t a, uint64_t b) {
 		requireMainThread("seed_random");
