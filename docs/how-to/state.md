@@ -1,6 +1,6 @@
 # Save and restore a module's state
 
-**Implemented (RP-15A, RP-15B), Linux x86_64 inside Rack Free 2.6.6.**
+**Implemented (RP-15A, RP-15B, RP-15C), Linux x86_64 inside Rack Free 2.6.6.**
 Plugin-wide settings and a full `.vcv` save, reopen, autosave and undo round
 trip are later RP-15 work; modules cannot be registered as models yet (RP-16).
 
@@ -32,8 +32,12 @@ it may not call anything that takes Rack's engine lock (`EngineLockError`).
   Rack does not call it; if the patch has JSON `null`, it receives `None`.
 - RackPy refuses what JSON cannot hold: NaN and infinity (`ValueError`),
   integers beyond 64 bits (`OverflowError`), non-`str` keys (`TypeError`),
-  invalid Unicode (`UnicodeError`) and nesting deeper than 64 levels
-  (`ValueError`).
+  invalid Unicode (`UnicodeError`), nesting deeper than 64 levels
+  (`ValueError`) and NUL characters in strings or keys (`ValueError`): Rack
+  writes NUL as `\u0000` but refuses it when it loads, which would make the
+  whole patch impossible to open.
+- A `ParamQuantity.to_json` override returns a `dict`: Rack adds the
+  parameter's `"id"` to it (`TypeError` otherwise).
 
 ## Errors
 
@@ -45,13 +49,21 @@ saves no data, and a failed `from_json` leaves the rest of the load (the
 parameters, bypass) intact. A failed `ParamQuantity.to_json` override falls
 back to Rack's own JSON for that parameter.
 
-## Untrusted patches
+## Untrusted patches and schema versions
 
 A patch file is data from whoever made it. Validate what `from_json` receives
 and ignore what you do not understand, as `load()` above does: unknown fields,
-wrong types, values from a future version of your module. RackPy never
+wrong types, values from a future version of your module. Save a schema
+version with your data, as `save()` does, so that a later release can migrate
+old patches and recognize newer ones instead of guessing. RackPy never
 executes code from a patch and never unpickles anything; do not add a handler
 that does.
+
+A patch can also hold JSON that Python's values never produce, such as data
+nested deeper than RackPy's 64 levels (jansson reads up to 2048) or, from a
+buggy C++ plugin, strings that are not UTF-8. RackPy cannot convert those, so
+`from_json` is not called; as with a handler's own error, the failure is
+recorded in `rackpy.runtime.diagnostics()` and the rest of the load goes on.
 
 ## Calling Rack's JSON yourself
 
@@ -78,7 +90,11 @@ exception (`rackpy.raw.Exception`), which also means never inside the
 constructor callback. Rack's advice applies: load files when the module is
 added and write them when the patch is saved, never from audio processing.
 These calls do filesystem work, so they need the main thread and Rack's live
-context.
+context. Rack's `createPatchStorageDirectory` ignores a failure to create the
+directory and returns the path anyway, and so does the raw method;
+`patch_storage()` raises `OSError` instead. Files you look for may be absent
+(a new module, a patch from elsewhere), so check before reading, as
+`load_table()` does.
 
 ```{rackpy-example} patch_storage.py
 ```

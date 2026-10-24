@@ -2,6 +2,7 @@
 #include "rackpy/runtime/json.hpp"
 
 #include <cmath>
+#include <cstring>
 #include <memory>
 #include <string>
 
@@ -85,6 +86,10 @@ json_t* toJsonAt(py::handle value, int depth) {
 		const char* data = PyUnicode_AsUTF8AndSize(value.ptr(), &size);
 		if (!data)
 			throw py::error_already_set();
+		// jansson writes NUL as \u0000, which Rack's loaders (no JSON_ALLOW_NUL) refuse,
+		// failing the whole patch, preset or clipboard paste.
+		if (std::memchr(data, '\0', (size_t) size))
+			throw py::value_error("JSON strings cannot contain NUL characters: Rack could not load them back");
 		return checked(json_stringn(data, (size_t) size), "this string");
 	}
 	if (PyList_Check(value.ptr()) || PyTuple_Check(value.ptr())) {
