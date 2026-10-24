@@ -57,8 +57,10 @@ live on `rackpy.engine.Module` and `ParamQuantity`, and the JSON type is
 `rackpy.types.JSON`; there is no separate `native/state/`, `rackpy.state` or
 `tests/state/`, whose content these already hold.
 
-**Still on the parent, needing RP-16:** plugin-wide settings callbacks
+**Remaining, needing RP-16:** plugin-wide settings callbacks
 (`settingsToJson`/`settingsFromJson`) and a real `.vcv` save, reopen,
 autosave and undo round trip of Python modules, which need registered models
-whose factories run the Python constructor. Split to RP-15D, which RP-16
-does not wait for, so there is no dependency cycle.
+whose factories run the Python constructor. Split to **RP-15D**
+(`tk-rackpy-15d-plugin-wide-settings-and-real-vcv-sta-b0c7cf`), which waits
+for RP-16 and blocks RP-34; RP-16 does not wait for it, so there is no
+dependency cycle. RP-15 itself closes once RP-15C does, as its step 5 allows.
