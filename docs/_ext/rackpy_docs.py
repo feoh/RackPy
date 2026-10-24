@@ -196,6 +196,7 @@ class Snippet:
     path: Path
     runs_in: str
     output: Path | None
+    modules: tuple[str, ...] = ()  # model slugs the test plugin.json lists (runs-in=rack only)
 
     @property
     def expected(self) -> str | None:
@@ -215,7 +216,10 @@ def read_snippet(path: Path) -> Snippet:
     output = path.parent / fields["output"] if "output" in fields else None
     if output and not output.is_file():
         raise ValueError(f"{path.name}: expected-output file {output.name} does not exist")
-    return Snippet(path, runs_in, output)
+    modules = tuple(m for m in fields.get("modules", "").split(",") if m)
+    if modules and runs_in != "rack":
+        raise ValueError(f"{path.name}: modules= needs runs-in=rack")
+    return Snippet(path, runs_in, output, modules)
 
 
 def displayed_code(snippet: Snippet) -> str:

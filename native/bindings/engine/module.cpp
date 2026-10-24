@@ -362,6 +362,13 @@ py::object createConfigured(int params, int inputs, int outputs, int lights, py:
 
 }  // namespace
 
+rack::engine::Module* createForRack(py::object configure, rack::plugin::Model& model) {
+	py::object handle = create(std::move(configure));
+	const ModuleRef& r = handle.cast<const ModuleRef&>();
+	r.get().model = &model;
+	return r.state->releaseToRack();
+}
+
 using M = rack::engine::Module;
 
 /** A Rack event as Python reads it: a copied value of Rack's own record. */
@@ -699,8 +706,21 @@ void bindModule(py::module_ engine) {
 			"Create (if needed) and return Rack's patch storage directory. Rack, not RackPy, removes it.")
 		.def("patch_storage", [storage](const ModuleRef& r, bool create) {
 			std::string path = storage(r, create);
+			if (create) {
+				// Rack's createDirectories ignores failure (RP-15C); the facade does not.
+				bool exists;
+				{
+					py::gil_scoped_release release;
+					exists = rack::system::isDirectory(path);
+				}
+				if (!exists) {
+					PyErr_Format(PyExc_OSError, "Rack could not create the patch storage directory %s", path.c_str());
+					throw py::error_already_set();
+				}
+			}
 			return py::module_::import("pathlib").attr("Path")(path);
-		}, py::arg("create") = true, "The patch storage directory as a pathlib.Path, created unless create=False.");
+		}, py::arg("create") = true,
+			"The patch storage directory as a pathlib.Path, created unless create=False; OSError if it cannot be.");
 
 	cls.def_static("create", &create, py::arg("configure") = py::none())
 		.def_static("create", &createConfigured, py::arg("num_params"), py::arg("num_inputs"), py::arg("num_outputs"),

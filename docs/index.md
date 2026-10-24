@@ -41,8 +41,9 @@ public plugin API, proved symbol by symbol; see the
 - **Writing these docs?** See the [documentation conventions](contributing-docs.md).
 
 Tutorials and troubleshooting pages will follow the
-[documentation plan](documentation.md) once there is an API to teach. The first
-how-to guide covers [saving a module's state](how-to/state.md).
+[documentation plan](documentation.md) once there is an API to teach. The
+how-to guides cover [registering models](how-to/plugins.md) and
+[saving a module's state](how-to/state.md).
 
 ```{toctree}
 :caption: Start here
@@ -66,6 +67,7 @@ runtime
 :maxdepth: 1
 :hidden:
 
+how-to/plugins
 how-to/state
 ```
 

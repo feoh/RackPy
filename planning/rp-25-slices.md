@@ -168,13 +168,18 @@ Rack's order, propagation and position filtering; tree mutation is refused
 while they iterate. `getKeyName` and `getKeyCommandName` need only the main
 thread. Six records, all planned.
 
-## Remaining RP-25 acceptance
+## RP-25 closure (2026-10-24)
 
-The original parent retains an actual-host smoke of the real module browser
-and module deletion with Python module widgets (after RP-16/RP-28),
-and the raw `children` list as a mutable container. `EventState` (32
-records) moved to RP-26 on 2026-10-23: it is Rack's input dispatcher, and
-binding it needs a checked Context accessor and invalidation of its widget
-pointers, which fit RP-26's keyboard, mouse, drag and focus work.
-Resource/drawing integration belongs with RP-27, not silently omitted from
-Widget semantics. Detached native tests do not prove any of those gates.
+Owner decisions 2026-10-24: the RuntimeProbe-hook smoke (module removal,
+null-module preview, graphics recreation) is accepted for RP-25, and the
+actual-host smoke of Rack's real module browser and module deletion with
+Python module widgets moves to RP-28; raw `Widget.children` maps as a checked,
+live, read-only `WidgetChildren` sequence, with mutation only through Rack's
+ownership methods. `EventState` (32 records) moved to RP-26 on 2026-10-23.
+
+The 235 records RP-25 kept planned for those gates are now **implemented**,
+and family 4 (`native/bindings/widgets.cpp`) and family 5
+(`native/bindings/window.cpp`, the SvgWidget slice only) are bound through
+the generated registry instead of a direct call. The detached `WidgetNode`
+adapter keeps its tuple snapshot. Resource/drawing integration belongs with
+RP-27. Evidence: [continuation validation](rp-25-continuation-validation.md).

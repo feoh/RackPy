@@ -9,10 +9,14 @@ too, with their fields and methods. This page is about these classes;
 [detached widget trees](widget-trees.md) covers the older native-only
 `WidgetNode` adapter.
 
-**Partial, Linux x86_64 inside Rack Free 2.6.6.** Every record these classes
-touch stays **planned** in the [coverage report](coverage.md). Rack's input
-dispatcher `EventState` (RP-26) and NanoVG drawing (RP-27) are not mapped yet. The names below are the raw layer; there is no
-`rackpy.widget` facade for them yet.
+**Implemented, Linux x86_64 inside Rack Free 2.6.6 (RP-25).** The records
+these classes touch are **implemented** in the [coverage report](coverage.md).
+Rack's input dispatcher `EventState` (RP-26), NanoVG drawing and the rest of
+`rack::window` (RP-27) are not mapped yet. Module removal and null-module
+browser previews are tested through test hooks that follow Rack's code; a
+smoke test in Rack's real module browser with Python module widgets waits for
+RP-28. The names below are the raw layer; there is no `rackpy.widget` facade
+for them yet.
 
 ## Creating and owning widgets
 
@@ -27,6 +31,14 @@ belongs to Python. Each widget has exactly one native owner:
   it: `parent.children[0] is child`.
 - `parent.remove_child(child)` and `child.remove_from_parent()` give it back
   to Python.
+- `parent.children` is Rack's child list as a live, read-only sequence
+  (`WidgetChildren`): `len()`, indexing, slicing, `in`, `index()` and
+  `count()` see the list as it is now, it compares equal to a tuple of the
+  same children, and `copy()` takes a tuple snapshot. Iterating walks the
+  children present when the loop starts. It has no `append` or `remove`:
+  change the list with the methods above, which keep each child's single
+  owner. Once the parent is deleted the view raises `StaleHandleError`; it
+  does not keep the parent alive.
 - `close()` deletes a detached widget and its subtree. Closing a widget that
   has a parent raises `OwnershipError`; remove it first.
 - When Rack deletes a widget (its parent is closed or cleared, or a parent's

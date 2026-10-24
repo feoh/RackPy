@@ -37,7 +37,7 @@ def test_every_variant_subclass_round_trip_and_native_step(name: str) -> None:
     root, child = w.Widget(), child_type()
     try:
         root.add_child(child)
-        assert root.children[0] is child and child.parent is root
+        assert root.children.index(child) == 0 and child.parent is root
         root.step()
         assert calls == [1]
         root.remove_child(child)

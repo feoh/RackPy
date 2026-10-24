@@ -9,6 +9,7 @@ This is a specification and task graph, not a completed implementation.
 - [Witan slugs and project-recovery state](witan.json)
 - [RP-14 bounded implementation slices](rp-14-slices.md) (supplements the original graph)
 - [RP-15 bounded implementation slices](rp-15-slices.md) (supplements the original graph)
+- [RP-16 bounded implementation slices](rp-16-slices.md) (supplements the original graph)
 - [RP-25 bounded implementation slices](rp-25-slices.md) (supplements the original graph)
 
 Witan is authoritative for live task status, ownership, comments and blockers.

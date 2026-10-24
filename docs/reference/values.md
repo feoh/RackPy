@@ -199,7 +199,13 @@ policy (`native/runtime/json.cpp`), described by `rackpy.types.JSON`:
   `bool`, `int`, `float`, `str`, `list` and `dict`; tuples are accepted as arrays.
 - Integers must fit jansson's 64-bit `json_int_t` (`OverflowError` otherwise).
 - NaN and infinities raise `ValueError`: JSON cannot represent them.
-- Object keys must be `str` without NUL characters (`TypeError`, `ValueError`).
+- Object keys must be `str` (`TypeError`). Neither keys nor strings may
+  contain NUL characters (`ValueError`): jansson writes NUL as `\u0000`, but
+  Rack loads patches, presets and the clipboard without `JSON_ALLOW_NUL`, so it
+  would refuse the whole file (RP-15C).
+- From `json_t`, strings that are not valid UTF-8 raise `UnicodeDecodeError`.
+  jansson's own loader refuses them; only a plugin's `json_string_nocheck`
+  can make one.
 - Anything nested more than 64 levels deep, which includes a list that
   contains itself, raises `ValueError`.
 
