@@ -9,9 +9,9 @@ This is groundwork, **not** the complete Widget binding: a `WidgetNode`
 cannot be subclassed, put in Rack's scene or used for drawing. For Python
 subclasses, events, drawing, the typed bases and scene attachment, use
 `rackpy.raw.widget.Widget`, described in
-[subclassable widgets and events](widgets.md). All touched SDK entries remain
-**planned** in the [coverage report](coverage.md); safe adapters do not count
-as complete public mappings.
+[subclassable widgets and events](widgets.md). The SDK records are mapped
+through `rackpy.raw.widget.Widget`; this adapter shares them but, as a safe
+adapter, does not count toward their coverage.
 
 ## One native owner
 
@@ -56,8 +56,8 @@ flag; adding it to another parent lets that parent's next step delete it.
 Detached trees are **not** scene-registered and do not advance automatically;
 call `step()` explicitly from the UI thread when needed. This adapter calls
 only the native base Widget implementation. Python `step` overrides, scoped
-Remove events and callback error containment are still unimplemented; these
-records remain **planned**, not complete virtual-method coverage.
+Remove events and callback error containment are not part of this adapter;
+`rackpy.raw.widget.Widget` provides them.
 
 Every native access, including lifetime queries, is main-thread-only
 (`ThreadError` otherwise); context-bound operations reject a different or
@@ -86,9 +86,9 @@ field semantics, `box` is a checked write-through `WidgetBoxView`:
 - `box.copy()` returns an independent `Rect`, and `box.pos.copy()` an independent
   `Vec`. `copy.copy()` and `copy.deepcopy()` also take checked snapshots. The
   views are **not** Rect/Vec subclasses: use these snapshots for other math
-  operations or arguments to existing value-taking APIs. Other Rect/Vec methods
-  and implicit conversions are not yet mapped on the views; the box record stays
-  **planned**, not completed coverage.
+  operations or arguments to existing value-taking APIs. The views also
+  forward Rect/Vec's read-only methods to a snapshot and convert implicitly
+  where Rack takes a `Rect` or `Vec`.
 
 Direct field writes bypass `setBox()` and therefore do **not** generate
 Reposition/Resize events. Use `set_box()`, `set_position()`, and `set_size()` when

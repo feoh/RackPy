@@ -2,8 +2,8 @@
 """Rack's engine objects, as one tidy import. Available inside Rack only.
 
 Ports, parameters and lights (:mod:`rackpy.engine.components`), plus scoped
-module construction (:mod:`rackpy.engine.module`). Model registration, lifecycle
-adapters, cables and engine operations remain planned.
+module construction (:mod:`rackpy.engine.module`). Models are registered with
+:mod:`rackpy.plugin`; cables and engine operations remain planned.
 """
 
 from rackpy.engine.components import PORT_MAX_CHANNELS, Input, Light, LightInfo, Output, Param, Port, PortInfo

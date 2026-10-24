@@ -7,6 +7,10 @@
 // - Integers outside json_int_t (long long) raise OverflowError.
 // - NaN and infinities raise ValueError: JSON cannot represent them.
 // - Object keys must be str (TypeError otherwise); other types raise TypeError.
+// - Strings and keys cannot contain NUL (ValueError): Rack loads JSON without
+//   JSON_ALLOW_NUL, so a saved "\u0000" would make the whole patch unloadable.
+// - From json_t, strings that are not valid UTF-8 (only json_string_nocheck can
+//   make them) raise UnicodeDecodeError.
 // - Nesting deeper than JSON_MAX_DEPTH raises ValueError, which also stops
 //   reference cycles.
 // Needs the GIL. Converts, never shares: Python never holds a json_t.

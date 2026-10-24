@@ -13,4 +13,7 @@ from rackpy.raw.nanovg import NVGcolor as Color
 __all__ = ["JSON", "Color", "ValueQuantity"]
 
 type JSON = bool | int | float | str | list[JSON] | tuple[JSON, ...] | dict[str, JSON] | None
-"""A value that converts to and from Rack's json_t: no NaN or infinity, str keys, at most 64 levels deep."""
+"""A value that converts to and from Rack's json_t.
+
+No NaN or infinity, str keys, no NUL characters, at most 64 levels deep.
+"""

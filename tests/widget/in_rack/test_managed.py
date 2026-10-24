@@ -4,6 +4,7 @@
 import gc
 import threading
 import weakref
+from collections.abc import Sequence
 
 import pytest
 
@@ -32,6 +33,7 @@ def test_managed_subclass_native_step_and_transfer() -> None:
         root.step()
         assert calls == [1, 1]
         recovered = root.children[0]
+        assert isinstance(recovered, Child)
         root.remove_child(recovered)
         assert recovered.parent is None
         root.add_child(recovered)
@@ -118,5 +120,74 @@ def test_managed_ownership_failures() -> None:
             child.close()
         with pytest.raises(OwnershipError):
             root.add_child(child)
+    finally:
+        root.close()
+
+
+def test_children_is_a_live_read_only_view() -> None:
+    root, a, b, c = Widget(), Widget(), Widget(), Widget()
+    try:
+        view = root.children
+        assert isinstance(view, Sequence) and len(view) == 0 and not view and view == ()
+        root.add_child(a)
+        root.add_child(b)
+        assert len(view) == 2 and view and view == (a, b) and view == root.children
+        assert view[0] is a and view[-1] is b and view[0:1] == (a,) and view[::-1] == (b, a)
+        assert list(reversed(view)) == [b, a] and view.index(b) == 1 and view.count(a) == 1
+        assert a in view and c not in view and None not in view
+        with pytest.raises(IndexError):
+            view[2]
+        with pytest.raises(ValueError):
+            view.index(c)
+        snapshot = view.copy()
+        iterator = iter(view)  # walks the children present when iteration starts
+        root.add_child_bottom(c)
+        assert snapshot == (a, b) and list(iterator) == [a, b] and view == (c, a, b)
+        assert view != [c, a, b] and repr(view).startswith("WidgetChildren(")
+        with pytest.raises(TypeError):
+            hash(view)
+        with pytest.raises(TypeError):
+            view[0] = a  # type: ignore[index]
+        for edit in ("append", "insert", "remove", "pop", "clear", "sort"):
+            assert not hasattr(view, edit)  # changes go through add_child and remove_child
+        root.remove_child(a)
+        assert view == (c, b) and a.parent is None
+    finally:
+        root.close()
+        a.close()
+    with pytest.raises(StaleHandleError):
+        len(view)
+    with pytest.raises(StaleHandleError):
+        list(view)
+
+
+def test_children_view_does_not_keep_its_parent_alive() -> None:
+    parent, child = Widget(), Widget()
+    parent.add_child(child)
+    view = parent.children
+    marker = weakref.ref(parent)
+    del parent
+    gc.collect()
+    assert marker() is None and not child.alive
+    with pytest.raises(StaleHandleError):
+        view[0]
+
+
+def test_children_view_main_thread_rule() -> None:
+    root = Widget()
+    view = root.children
+    errors: list[BaseException] = []
+
+    def worker() -> None:
+        try:
+            len(view)
+        except BaseException as error:
+            errors.append(error)
+
+    try:
+        thread = threading.Thread(target=worker)
+        thread.start()
+        thread.join()
+        assert len(errors) == 1 and isinstance(errors[0], ThreadError)
     finally:
         root.close()

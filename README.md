@@ -10,12 +10,15 @@ not as an external remote-control service.
 > The Linux development plugin embeds Python and exposes common values, engine
 > components, scoped module construction, built-in port/light/quantity metadata
 > adapters, port/light/quantity class factories for Python subclasses,
-> standalone quantities with UI-safe overrides, and
-> [detached native widget trees](docs/reference/widget-trees.md) (no UI subclass
-> callbacks or scene integration yet).
+> standalone quantities with UI-safe overrides, module JSON state and patch
+> storage, and [subclassable widgets](docs/reference/widgets.md) with typed
+> bases and scoped events (no NanoVG drawing API, input dispatcher or
+> component library yet). A trusted entry module can
+> [register models](docs/how-to/plugins.md) that Rack creates, saves and reloads,
+> though they have plain panels and process no audio yet.
 > See the [coverage report](docs/reference/coverage.md)
-> for exact gaps. Production builds register no models; plugin/model factories,
-> DSP, lifecycle adapters and the planned instrument examples are not complete.
+> for exact gaps. Python module widgets, DSP, lifecycle adapters and the
+> planned instrument examples are not complete.
 > There is no published installable runtime bundle. Broader API designs remain proposals.
 
 ## What we are building
