@@ -2,6 +2,7 @@
 # Stub for rackpy.raw (src/rackpy/raw/__init__.py assembles it from the native module).
 from rackpy.raw import _arch as _arch
 from rackpy.raw import _types as _types
+from rackpy.raw import asset as asset
 from rackpy.raw import color as color
 from rackpy.raw import engine as engine
 from rackpy.raw import literals as literals

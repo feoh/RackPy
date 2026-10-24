@@ -106,6 +106,9 @@ def test_plugin_and_model_main_thread_rule() -> None:
         rp.plugin_instance,
         lambda: rp.get_model("RackPy", "RuntimeProbe"),
         lambda: rp.create_model("Worker", lambda m: None),
+        lambda: len(rp.plugins),
+        lambda: rp.on_destroy(lambda: None),
+        lambda: raw.asset.plugin(this),
     ]
     errors: list[BaseException] = []
 
@@ -122,7 +125,147 @@ def test_plugin_and_model_main_thread_rule() -> None:
     assert len(errors) == len(actions) and all(isinstance(e, ThreadError) for e in errors)
 
 
+def test_a_detached_model_dies_with_its_handle() -> None:
+    import gc
+    import weakref
+
+    class Factory:
+        def __call__(self, module: Module) -> None:
+            pass
+
+    factory = Factory()
+    marker = weakref.ref(factory)
+    model = rp.create_model("Dropped", factory)
+    del factory
+    gc.collect()
+    assert marker() is not None  # the model holds its factory
+    del model
+    gc.collect()
+    assert marker() is None  # deleting the model released it
+
+
+def test_pure_slug_and_asset_functions_work_on_any_thread() -> None:
+    results: list[object] = []
+    thread = threading.Thread(
+        target=lambda: results.extend([rp.is_slug_valid("a"), rp.normalize_slug("a b"), raw.asset.system("x")])
+    )
+    thread.start()
+    thread.join()
+    assert results[:2] == [True, "ab"] and str(results[2]).endswith("/x")
+
+
 def test_factory_signature_matches_module_create() -> None:
     seen: list[Module] = []
     model = rp.create_model("Signature", seen.append)
     assert model.alive and seen == []  # nothing runs until Rack creates a module
+
+
+def test_assets_are_rack_paths() -> None:
+    from pathlib import Path
+
+    import rackpy.assets
+    from rackpy.raw import asset
+
+    this = rp.plugin_instance()
+    assert asset.plugin(this, "res/x.json") == this.path + "/res/x.json" and asset.plugin(this) == this.path + "/"
+    assert asset.system("res") == asset.systemDir + "/res" and Path(asset.systemDir).is_dir()
+    assert asset.user("autosave") == asset.userDir + "/autosave" and Path(asset.userDir).is_dir()
+    assert isinstance(asset.oldUserDir, str) and asset.bundlePath == ""  # bundlePath is set on macOS only
+    assert rackpy.assets.plugin("res/x.json") == Path(this.path) / "res" / "x.json"
+    assert rackpy.assets.system() == Path(asset.systemDir) and rackpy.assets.user("a") == Path(asset.userDir) / "a"
+
+
+def test_plugins_list_path_and_library_handles() -> None:
+    from pathlib import Path
+
+    this = rp.plugin_instance()
+    plugins = rp.plugins
+    assert len(plugins) >= 2 and this in plugins and plugins[0].slug == "Core"  # Rack loads Core first
+    assert list(plugins) == list(plugins[:]) and plugins[-1] is plugins[len(plugins) - 1]
+    assert rp.get_plugin("Core") in plugins and "Core" not in plugins  # type: ignore[comparison-overlap]
+    with pytest.raises(IndexError):
+        plugins[len(plugins)]
+    assert Path(rp.pluginsPath).is_dir() and this.path.startswith(rp.pluginsPath)
+    handle = this.handle
+    assert handle is not None and handle is this.handle and isinstance(handle, rp.LibraryHandle)
+    assert plugins[0].handle is None  # Core is part of Rack, not a library
+    for attribute in ("__int__", "__index__", "address"):
+        assert not hasattr(handle, attribute)
+
+
+def test_model_from_json_takes_a_manifest_entry() -> None:
+    probe = rp.get_model("RackPy", "RuntimeProbe")
+    assert probe is not None
+    saved = (probe.name, probe.description, probe.tag_ids, probe.hidden)
+    try:
+        entry = {"name": "Probe from JSON", "description": "d", "tags": ["Utility", "nonsense"], "hidden": True}
+        probe.from_json(entry)
+        assert (probe.name, probe.description, probe.hidden) == ("Probe from JSON", "d", True)
+        assert len(probe.tag_ids) == 1  # Rack drops unknown tags
+        for bad in ({"name": 3}, {"tags": "Utility"}, {"tags": [1]}, {"hidden": "yes"}, ["not", "a", "dict"]):
+            with pytest.raises(TypeError):
+                probe.from_json(bad)  # type: ignore[arg-type]
+        with pytest.raises(raw.Exception, match="has no name"):
+            probe.from_json({"name": ""})
+    finally:
+        probe.name, probe.description, probe.tag_ids, probe.hidden = saved
+    core = rp.get_plugin("Core")
+    assert core is not None
+    with pytest.raises(OwnershipError, match="read-only"):
+        core.models[0].from_json({"name": "x"})
+    with pytest.raises(OwnershipError, match="add the model to a plugin first"):
+        rp.create_model("Detached", lambda m: None).from_json({"name": "x"})
+
+
+def test_module_class_builds_modules_and_owns_their_state() -> None:
+    import gc
+    import weakref
+    from typing import Any
+
+    from rackpy.plugin import ModuleClass
+
+    instances: list[weakref.ref[ModuleClass]] = []
+
+    class Notes(ModuleClass):
+        def configure(self) -> None:
+            self.module.config(1, 0, 0, 0)
+            self.module.config_param(0, 0, 1, 0.5, "Mix")
+            self.text = ""
+            instances.append(weakref.ref(self))
+
+        def to_json(self) -> Any:
+            return {"text": self.text}
+
+        def from_json(self, data: Any) -> None:
+            if isinstance(data, dict) and isinstance(data.get("text"), str):
+                self.text = data["text"]
+
+    m = Module.create(Notes.factory())
+    try:
+        assert m.get_num_params() == 1 and m.data_to_json() == {"text": ""}
+        m.data_from_json({"text": "kept"})
+        assert m.data_to_json() == {"text": "kept"}
+        gc.collect()
+        assert instances[0]() is not None  # the module keeps its instance
+    finally:
+        m.close()
+    del m
+    gc.collect()
+    assert instances[0]() is None
+
+    plain = Module.create(ModuleClass.factory())
+    try:
+        assert plain.data_to_json() is None  # the defaults save nothing, as Rack's do
+    finally:
+        plain.close()
+    with pytest.raises(TypeError, match="ModuleClass"):
+        rackpy.plugin.plugin.add_model("NotAModuleClass", int)  # type: ignore[arg-type]
+
+
+def test_on_destroy_is_a_decorator() -> None:
+    def cleanup() -> None:
+        pass
+
+    assert rackpy.plugin.on_destroy(cleanup) is cleanup
+    with pytest.raises(TypeError):
+        rp.on_destroy(42)  # type: ignore[type-var]

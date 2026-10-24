@@ -34,9 +34,25 @@ exit autosave and the reload at the next launch, the preview, a factory that
 fails on reload, and refused registrations. Evidence:
 [RP-16A validation](rp-16a-validation.md).
 
-**Still on the parent:** Python module widgets (`createModuleWidget` with a
-Python `ModuleWidget`, which belongs to RP-28), the Module class facade,
-trusted-script locations and import diagnostics (missing scripts and
-dependencies, version behaviour), asset lookup (`rack::asset`), the
-`init`/`destroy` C ABI records, `Plugin::handle`, `plugins`/`pluginsPath`,
-`Model::appendContextMenu` (menus, RP-26), and plugin settings (RP-15D).
+**RP-16B — assets, plugin hooks, entry diagnostics and the Module class facade**
+(`tk-rackpy-16b-assets-plugin-hooks-entry-diagnostics-5f4827`).
+`rackpy.raw.asset` (`system`, `user`, `plugin` and Rack's four directory
+variables) with the `rackpy.assets` pathlib facade; the `init`/`destroy` C
+hooks (`init` imports the entry module and commits its models, `destroy`
+runs `on_destroy` callbacks newest first before factories are released);
+`plugins` as a live read-only `PluginList`, `pluginsPath`, `Plugin.handle`
+as an opaque `LibraryHandle`, `Model.from_json` for this plugin's models
+(type-checked first: Rack dereferences the strings it reads), and the two
+destructors' observable semantics. A missing entry module or a missing
+dependency is named in Rack's log with the traceback. `rackpy.plugin.ModuleClass`
+is the owner-approved class facade: one instance per module, `configure()`,
+`to_json()` and `from_json()`, installed through the same constructor
+callback and `set_data_handlers`. 15 more records are implemented.
+
+**Still on the parent (proposed reassignments need the owner):**
+`Model::createModule` and `Model::createModuleWidget` as Python calls, and
+Python module widgets for `createModel`'s `TModuleWidget`, belong with
+`ModuleWidget` and `RackWidget` in RP-28; `Model::appendContextMenu` needs
+`ui::Menu` (RP-26); `Plugin::fromJson` and `Plugin::modulesFromJson` are
+Rack's plugin loader (the second deletes models not in the JSON), so they
+need a decision before binding; plugin settings are RP-15D.

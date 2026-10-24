@@ -10,7 +10,7 @@ import _rackpy_host
 from _rackpy_host import _testing
 
 from rackpy.engine import Module
-from rackpy.plugin import plugin
+from rackpy.plugin import ModuleClass, plugin
 
 CONFIG: dict[str, Any] = json.loads((Path(__file__).resolve().parent / "rp16_config.json").read_text())
 RESULT: dict[str, Any] = {"created": []}
@@ -45,9 +45,25 @@ def broken(m: Module) -> None:
     RESULT["created"].append("PyBroken")
 
 
+class Classy(ModuleClass):
+    def configure(self) -> None:
+        self.module.config(1, 0, 0, 0)
+        self.module.config_param(0, 0, 1, 0, "Depth")
+        self.words: list[str] = []
+        RESULT["created"].append("PyClassy")
+
+    def to_json(self) -> Any:
+        return {"words": self.words}
+
+    def from_json(self, data: Any) -> None:
+        if isinstance(data, dict) and isinstance(data.get("words"), list):
+            self.words = [w for w in data["words"] if isinstance(w, str)]
+
+
 plugin.add_model("PyAlpha", alpha, hp=6)
 plugin.add_model("PyBeta", beta)
 plugin.add_model("PyBroken", broken)
+plugin.add_model("PyClassy", Classy)
 RESULT["staged"] = [model.slug for model in plugin.raw.models]
 
 
@@ -58,7 +74,7 @@ def handle(module_id: int) -> Module:
 
 
 def first(ids: dict[str, int]) -> None:
-    for slug in ("PyAlpha", "PyBeta", "PyBroken"):
+    for slug in ("PyAlpha", "PyBeta", "PyBroken", "PyClassy"):
         ids[slug] = _testing.browser_add_module("RackPy", slug)
     # Keep each handle while using its component views: a collection does not keep its module's handle alive.
     alpha_module, beta_module, broken_module = (handle(ids[s]) for s in ("PyAlpha", "PyBeta", "PyBroken"))
@@ -66,6 +82,8 @@ def first(ids: dict[str, int]) -> None:
     alpha_module.data_from_json({"schema": 1, "notes": ["hello", "λ"]})
     beta_module.params[0].value = -0.25
     broken_module.params[0].value = 0.75
+    classy_module = handle(ids["PyClassy"])
+    classy_module.data_from_json({"words": ["one", 2, "three"]})
     RESULT["preview"] = _testing.model_preview("RackPy", "PyAlpha")
     RESULT["models"] = {slug: _testing.module_model(i) for slug, i in ids.items()}
     _testing.remove_module_widget(ids["PyBeta"])  # the module menu's Delete, undoable
@@ -82,6 +100,8 @@ def second(ids: dict[str, int]) -> None:
     beta_module = handle(ids["PyBeta"])
     RESULT["beta"] = beta_module.params[0].value
     RESULT["broken"] = _testing.module_model(ids["PyBroken"])
+    classy_module = handle(ids["PyClassy"])
+    RESULT["classy"] = classy_module.data_to_json()
     RESULT["diagnosed"] = any(
         "rp16-intentional-factory-error" in message for *_, message in _rackpy_host.diagnostics(0)
     )

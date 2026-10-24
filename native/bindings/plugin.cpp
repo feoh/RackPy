@@ -54,6 +54,48 @@ struct ModelHandle {
 	std::shared_ptr<Detached> detached;
 };
 
+/** rack::plugin::plugins, read live. Rack appends to it while it loads plugins. */
+struct PluginList {};
+
+/** Plugin::handle, the plugin library's handle: identity and null checks only, never an address. */
+struct LibraryHandle {
+	const void* handle;
+};
+
+// rackpy.plugin.on_destroy callbacks, run from destroy() (RP-16B).
+std::vector<runtime::PyRef> destroyCallbacks;
+
+void runDestroyCallbacks() {
+	while (!destroyCallbacks.empty()) {
+		runtime::PyRef callback = std::move(destroyCallbacks.back());
+		destroyCallbacks.pop_back();
+		runtime::callPython("plugin destroy callback", [&] { callback.get()(); });
+	}
+}
+
+/** Rack's Model::fromJson assumes a well-formed plugin.json entry: a string
+where it reads one. Check the JSON first, so a Python caller gets TypeError
+rather than Rack dereferencing a null string. */
+void checkModelJson(py::handle data) {
+	if (!PyDict_Check(data.ptr()))
+		throw py::type_error("Model.from_json takes a dict, as one of plugin.json's \"modules\" entries");
+	auto json = py::reinterpret_borrow<py::dict>(data);
+	for (const char* key : {"name", "description", "manualUrl", "modularGridUrl"})
+		if (json.contains(key) && !py::isinstance<py::str>(json[key]))
+			throw py::type_error(std::string("Model.from_json: \"") + key + "\" must be a str");
+	if (json.contains("tags")) {
+		py::object tags = json["tags"];
+		if (!py::isinstance<py::list>(tags) && !py::isinstance<py::tuple>(tags))
+			throw py::type_error("Model.from_json: \"tags\" must be a list of str");
+		for (py::handle tag : tags)
+			if (!py::isinstance<py::str>(tag))
+				throw py::type_error("Model.from_json: \"tags\" must be a list of str");
+	}
+	for (const char* key : {"hidden", "disabled"})
+		if (json.contains(key) && !py::isinstance<py::bool_>(json[key]))
+			throw py::type_error(std::string("Model.from_json: \"") + key + "\" must be a bool");
+}
+
 bool pluginAlive(const RackPlugin* p) {
 	if (p && p == plugin::instance())
 		return true;
@@ -165,6 +207,12 @@ void bind_plugin(py::module_ raw) {
 		.def_property_readonly("changelog_url", [](const PluginHandle& h) { return checked(h).changelogUrl; })
 		.def_property_readonly("path", [](const PluginHandle& h) { return checked(h).path; })
 		.def_property_readonly("modified_timestamp", [](const PluginHandle& h) { return checked(h).modifiedTimestamp; })
+		.def_property_readonly("handle", [](const PluginHandle& h) -> py::object {
+			const void* handle = checked(h).handle;
+			if (!handle)
+				return py::none();  // Core, which Rack does not load from a library
+			return runtime::identity(handle, 0, [&] { return py::cast(LibraryHandle{handle}); });
+		}, "The plugin library's handle: opaque, compared by identity; None for Core.")
 		.def_property_readonly("models", [](const PluginHandle& h) {
 			RackPlugin& p = checked(h);
 			py::list out;
@@ -218,7 +266,16 @@ void bind_plugin(py::module_ raw) {
 		.def("get_manual_url", [](const ModelHandle& h) { return addedModel(h, "get_manual_url").getManualUrl(); })
 		.def("is_favorite", [](const ModelHandle& h) { return addedModel(h, "is_favorite").isFavorite(); })
 		.def("set_favorite", [](const ModelHandle& h, bool favorite) { addedModel(h, "set_favorite").setFavorite(favorite); },
-			py::arg("favorite"));
+			py::arg("favorite"))
+		.def("from_json", [](const ModelHandle& h, py::handle data) {
+			checkModelJson(data);
+			RackModel& m = addedModel(h, "from_json");
+			ownModel(h, "from_json");
+			std::unique_ptr<json_t, decltype(&json_decref)> json(runtime::toJson(data), json_decref);
+			m.fromJson(json.get());
+		}, py::arg("data"),
+			"Rack's Model::fromJson: name, description, tags, URLs and hidden from a plugin.json \"modules\" entry. "
+			"This plugin's models only; Rack's Exception if the name ends up empty.");
 
 	mod.def("create_model", [](std::string slug, py::object moduleFactory, int hp) {
 		runtime::requireMainThread("creating a Rack model");
@@ -267,7 +324,73 @@ void bind_plugin(py::module_ raw) {
 		return modelObject(rack::plugin::modelFromJson(json.get()));
 	}, py::arg("module_json"), "The model a module's JSON names; Rack's Exception if it is not loaded.");
 
-	runtime::onFinalize([] { plugin::releaseFactories(); });
+	py::class_<LibraryHandle>(mod, "LibraryHandle", py::is_final(),
+		"A plugin library's handle (Plugin::handle). Opaque: identity only, never an address.");
+
+	py::class_<PluginList>(mod, "PluginList", py::is_final(),
+		"rack::plugin::plugins: the loaded plugins, read live and read-only. Rack adds to it while it loads plugins.")
+		.def("__len__", [](const PluginList&) {
+			runtime::requireMainThread("listing Rack's plugins");
+			return rack::plugin::plugins.size();
+		})
+		.def("__getitem__", [](const PluginList&, py::ssize_t index) {
+			runtime::requireMainThread("listing Rack's plugins");
+			auto size = (py::ssize_t) rack::plugin::plugins.size();
+			if (index < 0)
+				index += size;
+			if (index < 0 || index >= size)
+				throw py::index_error("plugin index out of range");
+			return pluginObject(rack::plugin::plugins[(size_t) index]);
+		}, py::arg("index"))
+		.def("__getitem__", [](const PluginList&, py::slice slice) {
+			runtime::requireMainThread("listing Rack's plugins");
+			py::list out;
+			for (auto* p : rack::plugin::plugins)
+				out.append(pluginObject(p));
+			return py::object(py::tuple(out)[slice]);
+		}, py::arg("index"))
+		.def("__iter__", [](const PluginList&) {
+			runtime::requireMainThread("listing Rack's plugins");
+			py::list out;
+			for (auto* p : rack::plugin::plugins)
+				out.append(pluginObject(p));
+			return py::iter(py::tuple(out));
+		}, "Iterates the plugins loaded when iteration starts.")
+		.def("__contains__", [](const PluginList&, py::handle value) {
+			runtime::requireMainThread("listing Rack's plugins");
+			if (!py::isinstance<PluginHandle>(value))
+				return false;
+			auto* p = value.cast<const PluginHandle&>().plugin;
+			return std::find(rack::plugin::plugins.begin(), rack::plugin::plugins.end(), p) != rack::plugin::plugins.end();
+		}, py::arg("value"));
+	py::module_::import("collections.abc").attr("Sequence").attr("register")(mod.attr("PluginList"));
+	mod.attr("plugins") = py::cast(PluginList{});
+	mod.attr("pluginsPath") = py::str(rack::plugin::pluginsPath);
+
+	mod.def("on_destroy", [](py::function callback) {
+		runtime::requireMainThread("registering a destroy callback");
+		destroyCallbacks.emplace_back(callback);
+		return callback;
+	}, py::arg("callback"),
+		"Run callback when Rack calls the plugin's destroy(), as it exits: on the main thread, newest first, after "
+		"every handle to a Rack object has gone stale. Errors are logged. Returns callback (a decorator).");
+
+	py::module_ asset = raw.def_submodule("asset", "rack::asset: paths to Rack's, the user's and a plugin's files (RP-16B).");
+	asset.def("system", &rack::asset::system, py::arg("filename") = "", "A path in Rack's read-only system folder.");
+	asset.def("user", &rack::asset::user, py::arg("filename") = "", "A path in Rack's readable and writable user folder.");
+	asset.def("plugin", [](const PluginHandle& h, const std::string& filename) {
+		return rack::asset::plugin(&checked(h), filename);
+	}, py::arg("plugin"), py::arg("filename") = "", "A path in a plugin's read-only folder.");
+	// Rack sets these before it loads plugins ("set these before calling init()"); they are fixed afterwards.
+	asset.attr("systemDir") = py::str(rack::asset::systemDir);
+	asset.attr("userDir") = py::str(rack::asset::userDir);
+	asset.attr("oldUserDir") = py::str(rack::asset::oldUserDir);
+	asset.attr("bundlePath") = py::str(rack::asset::bundlePath);
+
+	runtime::onFinalize([] {
+		runDestroyCallbacks();
+		plugin::releaseFactories();
+	});
 }
 
 void discardModels() {

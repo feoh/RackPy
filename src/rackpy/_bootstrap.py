@@ -9,6 +9,7 @@ finalizing the interpreter.
 
 import importlib
 import sys
+import traceback
 
 from rackpy import __version__
 
@@ -34,7 +35,25 @@ def start(plugin_dir: str, entry: str) -> None:
         f"Rack {_rackpy_host.rack_version()}, plugin {plugin_dir}"
     )
     if entry:
+        _import_entry(plugin_dir, entry)
+
+
+def _import_entry(plugin_dir: str, entry: str) -> None:
+    """Import the trusted entry module; log the traceback and name what is missing if that fails."""
+    try:
         importlib.import_module(entry)
+    except BaseException as error:
+        _rackpy_host.log_warning(f"RackPy entry module {entry!r} failed:\n{traceback.format_exc().rstrip()}")
+        if isinstance(error, ModuleNotFoundError) and error.name:
+            if entry == error.name or entry.startswith(error.name + "."):
+                raise ImportError(
+                    f"entry module {entry!r} (named in rackpy-loader.json) is not in {plugin_dir}/pythonpath"
+                ) from error
+            raise ImportError(
+                f"entry module {entry!r} imports {error.name!r}, which is not in the plugin's pythonpath: "
+                "RackPy uses only the plugin's own files and Python's standard library"
+            ) from error
+        raise
 
 
 def context_closing() -> None:

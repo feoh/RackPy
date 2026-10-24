@@ -1,6 +1,6 @@
 # Register models
 
-**Implemented (RP-16A), Linux x86_64 inside Rack Free 2.6.6.** Python module
+**Implemented (RP-16A, RP-16B), Linux x86_64 inside Rack Free 2.6.6.** Python module
 widgets are not available yet (RP-28), so every model gets a plain panel, and
 modules do not process audio yet (RP-17). Plugin settings are RP-15D.
 
@@ -12,13 +12,20 @@ models while Rack loads the plugin:
 ```{rackpy-example} register_models.py
 ```
 
-`plugin.add_model(slug, module, hp=...)` takes the model's slug and its
-*module factory*: the same constructor callback you give `Module.create`
-([module construction](../reference/engine-module.md)). Rack calls it every
-time it creates one of the model's modules, on its main thread: when you add
-the module from the browser, when a patch loads, when you undo a deletion or
-duplicate a module. Configure the module there and set its
-[state handlers](state.md); do not start threads or touch files.
+`plugin.add_model(slug, module, hp=...)` takes the model's slug and how to
+build its modules, either way shown above:
+
+- a *module factory*, the same constructor callback you give `Module.create`
+  ([module construction](../reference/engine-module.md)): configure the module
+  there and set its [state handlers](state.md);
+- a `ModuleClass` subclass: Rack's module gets one instance, which
+  `configure()` sets up through `self.module`, and whose `to_json()` and
+  `from_json()` are the module's state handlers. The instance lives exactly
+  as long as Rack's module, so keep per-module Python state on it.
+
+Rack builds a module every time it needs one, on its main thread: when you
+add it from the browser, when a patch loads, when you undo a deletion or
+duplicate a module. Do not start threads or touch files there.
 
 ## plugin.json lists the same models
 
@@ -45,6 +52,15 @@ Models can be added only during that import. `add_model` raises
 (`rackpy.raw.plugin.is_slug_valid`: letters, digits, `-` and `_`) or already
 added, and `TypeError` for a factory that is not callable.
 
+## When the entry module fails
+
+Rack's log (`log.txt` in the Rack user folder) gets the traceback and a
+line saying what failed, `RackPy host initialization failed (3): ...`. An
+entry module that does not exist is named as such, and so is a module it
+imports that the plugin does not ship: RackPy runs only the plugin's own
+files (`pythonpath/`) and Python's standard library, never packages
+installed elsewhere on the computer.
+
 ## When a module factory fails
 
 Rack expects a module every time it asks for one and cannot handle a failure,
@@ -54,6 +70,20 @@ Rack's log and `rackpy.runtime.diagnostics()`, and Rack gets a
 "(failed)". It keeps everything the patch saved for that module and writes it
 back unchanged, so saving the patch does not lose the module's state. Fix
 the script and reload the patch to get the real module back.
+
+## Files and shutdown
+
+`rackpy.assets.plugin("res/table.json")` is a file in the plugin's own
+folder, `rackpy.assets.system(...)` one in Rack's, both read-only, and
+`rackpy.assets.user(...)` one in Rack's user folder, which you may write. They
+return `pathlib.Path`. Files that belong to one module in one patch go in its
+[patch storage](state.md#files-next-to-the-patch) instead.
+
+When Rack exits it first closes its context, which runs
+`rackpy.runtime.on_context_closing` callbacks while Rack's objects still
+work, and later calls the plugin's `destroy()`, which runs
+`rackpy.plugin.on_destroy` callbacks. By then every handle is stale, so use
+`on_destroy` for Python-only cleanup.
 
 ## Threads and lifetime
 
