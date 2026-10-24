@@ -47,8 +47,10 @@ def test_every_record_is_accounted_for() -> None:
     assert "planned" not in bm.BOUND | bm.FINAL  # tracking a gap never completes it
     bound = [r for r in manifest["entries"] if r["status"] in bm.BOUND]
     families = {bm.family_of(inputs.inventory, inputs.index[r["id"]]) for r in bound}
-    assert families <= {"1 common/value", "2 engine"}, (
-        "only families 1 (RP-12) and 2 (RP-13 components / RP-14A construction) are bound so far"
+    allowed = {"1 common/value", "2 engine", "4 widgets/ui/app/componentlibrary", "5 window/rendering/context"}
+    assert families <= allowed, (
+        "only families 1 (RP-12), 2 (RP-13/RP-14/RP-15), 4 (RP-25 widgets) and 5 (RP-25's SvgWidget slice) "
+        "are bound so far"
     )
     counted = [e for e in inputs.index.values() if bm.counted(e)]
     assert len(manifest["entries"]) == len(counted) == 3058

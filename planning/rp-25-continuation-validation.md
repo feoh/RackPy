@@ -152,3 +152,32 @@ names at start-up and in the live UI; outcomes were confirmed individually.
 | `bin/generate_bindings.py check`, `bin/planning-check`, `git diff --check` | pass |
 
 235 widget-family and window records are planned; none implemented.
+
+## Closure: live children view and implemented records (2026-10-24)
+
+Worktree `/tmp/rackpy-rp25-children`, branch `rp-25-children` from
+`origin/main` 71f3bd6. Same pinned inputs as above (GCC 16.2.1, uv 0.9.18,
+Rack SDK/Free 2.6.6, CPython 3.14.9, pybind11 3.1.0); host runs serialized
+with `flock /tmp/rackpy-host-tests.lock`. Owner decisions 2026-10-24 are in
+[the slices](rp-25-slices.md#rp-25-closure-2026-10-24).
+
+| Command | Result |
+| --- | --- |
+| `bin/rackpy-dev build --werror --test-hooks --build-dir build/hooks` | builds; 4/4 CTests pass |
+| `uv run pytest -q tests/widget` | 2 passed; the live-UI run reports 53 in-Rack tests passed, including the three new `WidgetChildren` tests |
+| `uv run pytest -q tests/coverage` | 49 passed, including the manifest check against the built package |
+| `uv run pytest -q -m 'not dist and not inventory'` | 179 passed, 31 deselected (264 s) |
+| `uv run pytest -q -m inventory` | 29 passed |
+| `prek run --all-files` (ruff, format, strict mypy, planning, callback matrix, manifest) | pass |
+| `uv run sphinx-build -q -W --keep-going -n -b html docs build/docs/html` | pass |
+| `bin/planning-check`, `bin/generate_bindings.py check`, `git diff --check` | pass |
+
+The first full run failed two coverage tests, and both failures were fixed: the
+FramebufferWidget destructor record named a `close` that the class only
+inherits (now `Widget.close`, with a note), and the repository test still
+allowed only families 1 and 2 to be bound. No Rack or Xvfb processes were
+left behind.
+
+Not established: macOS, Windows, the distributable build, sanitizers, a
+smoke test in Rack's real module browser with Python module widgets (RP-28),
+EventState (RP-26) and NanoVG/window resources (RP-27).
