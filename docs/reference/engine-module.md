@@ -111,6 +111,9 @@ a preparation exception leaves the old metadata intact. Closing the module,
 dropping its last handle, or failing construction invalidates every adapter,
 including retained collections. Views do not keep the module alive; explicitly
 retaining `view.module` does, just like retaining the original module handle.
+Once Rack's engine owns the module, its handles no longer own it, so views
+stay valid while Rack keeps the module, even if the handle they came from is
+gone, and go stale when Rack deletes it.
 
 ```{rackpy-example} module_metadata.py
 ```

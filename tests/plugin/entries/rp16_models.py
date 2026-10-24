@@ -76,7 +76,6 @@ def handle(module_id: int) -> Module:
 def first(ids: dict[str, int]) -> None:
     for slug in ("PyAlpha", "PyBeta", "PyBroken", "PyClassy"):
         ids[slug] = _testing.browser_add_module("RackPy", slug)
-    # Keep each handle while using its component views: a collection does not keep its module's handle alive.
     alpha_module, beta_module, broken_module = (handle(ids[s]) for s in ("PyAlpha", "PyBeta", "PyBroken"))
     alpha_module.params[0].value = 7.5
     alpha_module.data_from_json({"schema": 1, "notes": ["hello", "λ"]})

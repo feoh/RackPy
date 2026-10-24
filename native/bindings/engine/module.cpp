@@ -54,6 +54,13 @@ std::shared_ptr<module::Construction> lockOwner(const std::weak_ptr<module::Cons
 	return held;
 }
 
+std::shared_ptr<module::Construction> lockOwner(const OwnerState& state) {
+	auto held = state.lock();
+	if (!held)
+		throw runtime::StaleHandle("this metadata belonged to a deleted module");
+	return held;
+}
+
 namespace {
 
 enum class Kind { Param, Input, Output, Light, ParamQuantity, InputInfo, OutputInfo, LightInfo, BypassRoute };
@@ -64,7 +71,7 @@ template <typename Info>
 struct InfoView {
 	Info* ptr;
 	std::shared_ptr<runtime::ObjectToken> token;
-	std::weak_ptr<module::Construction> state;
+	OwnerState state;
 	Info& get() const {
 		runtime::requireMainThread("using module metadata");
 		if (!token->alive())
@@ -250,7 +257,7 @@ bool constructorOnly(Kind kind) {
 /** Collections do not keep a module alive. Individual component views have
 their vector's ObjectToken, not the module's owning Construction. */
 struct Components {
-	std::weak_ptr<module::Construction> state;
+	OwnerState state;
 	Kind kind;
 	ModuleRef ref() const {
 		runtime::requireMainThread("using a module component collection");

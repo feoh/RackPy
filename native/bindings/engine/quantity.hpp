@@ -8,7 +8,7 @@ namespace bindings {
 struct QuantityView {
 	rack::engine::ParamQuantity* ptr;
 	std::shared_ptr<runtime::ObjectToken> token;
-	std::weak_ptr<module::Construction> state;
+	OwnerState state;
 	rack::engine::ParamQuantity& get() const;
 	pybind11::object owner() const;
 };

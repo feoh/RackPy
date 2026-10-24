@@ -201,3 +201,45 @@ def test_one_thousand_adoptions_and_rack_deletions() -> None:
     del m
     gc.collect()
     assert not owners and _rackpy_host.transferred_objects() == baseline
+
+
+def test_views_from_a_temporary_handle_follow_an_engine_owned_module() -> None:
+    """A view outlives the handle it came from while Rack keeps the module (bug tk-rackpy-component-collections-...)."""
+
+    def configure(m: Module) -> None:
+        m.config(1, 1, 0, 0)
+        m.config_param(0, 0, 10, 2, "Level")
+        m.config_input(0, "In")
+
+    module = Module.create(configure)
+    module_id = HOOKS.engine_adopt(module)
+    del module
+    gc.collect()
+
+    def handle() -> Module:
+        found = HOOKS.engine_handle(module_id)
+        assert found is not None
+        return found
+
+    try:
+        params, info, quantity = handle().params, handle().get_input_info(0), handle().get_param_quantity(0)
+        gc.collect()  # every handle above is gone; Rack still owns the module
+        params[0].value = 7
+        handle().params[0].value += 1
+        assert params[0].value == 8 and len(params) == 1
+        assert info is not None and info.name == "In" and info.module is not None
+        assert quantity is not None and quantity.get_param() is not None and quantity.get_value() == 8
+    finally:
+        HOOKS.engine_delete(handle(), None)
+    gc.collect()
+    for stale in (lambda: params[0], lambda: info.name, quantity.get_param):
+        with pytest.raises(StaleHandleError):
+            stale()
+
+
+def test_views_of_a_python_owned_module_still_die_with_it() -> None:
+    module = Module.create(lambda m: m.config(1, 0, 0, 0))
+    params = module.params
+    module.close()
+    with pytest.raises(StaleHandleError):
+        len(params)
