@@ -109,7 +109,17 @@ KernelHandle createKernel(const KernelType& type, py::kwargs kwargs) {
 	handle.owned = std::make_unique<dsp::Hosted>();
 	handle.owned->type = &type;
 	handle.owned->values = values;
-	handle.owned->kernel = type.create(values);  // std::invalid_argument -> ValueError
+	// A kernel library's create() runs its own code, with its own copy of the C++ runtime: turn
+	// whatever it throws into ValueError here rather than relying on matching exception types.
+	try {
+		handle.owned->kernel = type.create(values);
+	}
+	catch (const std::exception& e) {
+		throw py::value_error(e.what());
+	}
+	catch (...) {
+		throw py::value_error(type.name + " refused these fields");
+	}
 	if (!handle.owned->kernel)
 		throw py::value_error(type.name + " created no kernel");
 	handle.hosted = handle.owned.get();

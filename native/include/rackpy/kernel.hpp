@@ -18,7 +18,7 @@
 
 namespace rackpy {
 
-/** Bumped whenever Kernel, KernelType or Field change incompatibly. */
+/** Bumped whenever Kernel, KernelType, Field or KernelRegistrar change incompatibly. */
 constexpr int KERNEL_ABI = 1;
 
 /** One kernel instance, owned by one module.
@@ -69,4 +69,26 @@ struct KernelType {
 	std::function<std::unique_ptr<Kernel>(const std::vector<double>& values)> create;
 };
 
+/** What a kernel library's registration function adds its types to. */
+struct KernelRegistrar {
+	/** Add a type. Its name is short ("Fold"); Python sees it as "namespace.Fold". */
+	virtual void add(KernelType type) = 0;
+
+protected:
+	~KernelRegistrar() = default;
+};
+
 }  // namespace rackpy
+
+/** Defines a kernel library's entry points (RP-17B). Build the library with
+the Rack SDK's flags, list it in the plugin's rackpy-loader.json "kernels",
+and RackPy loads it before the entry module runs:
+
+	RACKPY_KERNEL_LIBRARY("myplugin", registrar) {
+		registrar.add(rackpy::KernelType{"Fold", "...", {...}, {...}, create});
+	}
+*/
+#define RACKPY_KERNEL_LIBRARY(NAMESPACE, REGISTRAR) \
+	extern "C" __attribute__((visibility("default"))) int rackpy_kernel_abi() { return rackpy::KERNEL_ABI; } \
+	extern "C" __attribute__((visibility("default"))) const char* rackpy_kernel_namespace() { return NAMESPACE; } \
+	extern "C" __attribute__((visibility("default"))) void rackpy_register_kernels(rackpy::KernelRegistrar& REGISTRAR)

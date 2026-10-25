@@ -8,15 +8,43 @@
 
 #include <cstdio>
 #include <string>
+#include <vector>
 
 #include "../bindings/plugin.hpp"
 #include "../plugin/model.hpp"
+#include "../dsp/runtime/runtime.hpp"
 #include "rackpy/runtime/interpreter.hpp"
 #include "rackpy/host_abi.h"
 
 #ifdef RACKPY_TEST_HOOKS
 #include "testing.hpp"
 #endif
+
+namespace {
+
+/** rackpy-loader.json's "kernels": library paths relative to the plugin folder. */
+std::vector<std::string> kernelLibraries(const std::string& pluginDir) {
+	std::vector<std::string> out;
+	json_error_t error;
+	json_t* rootJ = json_load_file(rack::system::join(pluginDir, "rackpy-loader.json").c_str(), 0, &error);
+	if (!rootJ)
+		return out;  // the loader already read and checked it
+	json_t* kernelsJ = json_object_get(rootJ, "kernels");
+	if (kernelsJ && !json_is_array(kernelsJ))
+		WARN("RackPy: rackpy-loader.json \"kernels\" must be a list of paths; ignoring it");
+	size_t i;
+	json_t* entryJ;
+	json_array_foreach(kernelsJ, i, entryJ) {
+		if (json_is_string(entryJ))
+			out.push_back(json_string_value(entryJ));
+		else
+			WARN("RackPy: rackpy-loader.json \"kernels\" entry #%d is not a path; ignoring it", (int) i);
+	}
+	json_decref(rootJ);
+	return out;
+}
+
+}  // namespace
 
 extern "C" __attribute__((visibility("default"))) int rackpy_host_init(RackPyHostInit* args) {
 	try {
@@ -28,6 +56,8 @@ extern "C" __attribute__((visibility("default"))) int rackpy_host_init(RackPyHos
 		// The entry module adds its models while it is imported (RP-16A).
 		rackpy::plugin::setInstance(plugin);
 		rackpy::plugin::openRegistration();
+		// Kernel libraries first, so the entry module can use their types (RP-17B).
+		rackpy::dsp::loadKernelLibraries(args->plugin_dir, kernelLibraries(args->plugin_dir));
 		int rc = rackpy::runtime::start(args);
 #ifdef RACKPY_TEST_HOOKS
 		if (rc == 0)

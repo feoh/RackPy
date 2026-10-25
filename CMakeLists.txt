@@ -57,7 +57,7 @@ list(FILTER RACKPY_BINDING_ADAPTERS EXCLUDE REGEX "/native/bindings/generated/")
 add_library(rackpy_host MODULE native/host/host.cpp native/host/host_module.cpp
   ${RACKPY_RUNTIME_CORE} native/runtime/python.cpp native/runtime/interpreter.cpp native/runtime/json.cpp
   native/bindings/generated/registry.cpp ${RACKPY_BINDING_ADAPTERS} native/module/lifecycle.cpp
-  native/plugin/model.cpp ${RACKPY_DSP_RUNTIME})
+  native/plugin/model.cpp ${RACKPY_DSP_RUNTIME} native/dsp/runtime/libraries.cpp)
 if(RACKPY_TEST_HOOKS)
   target_sources(rackpy_host PRIVATE native/testing/testing.cpp)
   target_compile_definitions(rackpy_host PRIVATE RACKPY_TEST_HOOKS)
@@ -112,6 +112,32 @@ if(RACKPY_BUILD_TESTS)
   set_target_properties(rackpy_kernel_guard PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_include_directories(rackpy_kernel_guard PRIVATE native/include)
   target_link_libraries(rackpy_kernel_guard PRIVATE rackpy_sdk_program)
+
+  # RackPy's kernel path against plain C++ modules, per frame (timing only; not a CTest).
+  add_executable(rackpy_kernel_bench native/tests/kernel_bench.cpp native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE}
+    ${RACKPY_DSP_RUNTIME})
+  set_target_properties(rackpy_kernel_bench PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_include_directories(rackpy_kernel_bench PRIVATE native/include)
+  target_link_libraries(rackpy_kernel_bench PRIVATE rackpy_sdk_program)
+
+  # Kernel libraries for tests/dsp (RP-17B): the example, and ones RackPy must refuse.
+  set(_rackpy_kernel_libraries example:fold.cpp:NONE wrong_abi:broken.cpp:VARIANT_WRONG_ABI
+    throws:broken.cpp:VARIANT_THROWS duplicate:broken.cpp:VARIANT_DUPLICATE reserved:broken.cpp:VARIANT_RESERVED
+    bad_name:broken.cpp:VARIANT_BAD_NAME)
+  foreach(_entry IN LISTS _rackpy_kernel_libraries)
+    string(REPLACE ":" ";" _parts "${_entry}")
+    list(GET _parts 0 _name)
+    list(GET _parts 1 _source)
+    list(GET _parts 2 _variant)
+    add_library(rackpy_kernels_${_name} MODULE tests/dsp/kernel_library/${_source})
+    set_target_properties(rackpy_kernels_${_name} PROPERTIES PREFIX "" OUTPUT_NAME kernels_${_name}
+      CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF CXX_VISIBILITY_PRESET hidden)
+    target_include_directories(rackpy_kernels_${_name} PRIVATE native/include)
+    target_link_libraries(rackpy_kernels_${_name} PRIVATE rackpy_sdk_plugin)
+    if(NOT _variant STREQUAL "NONE")
+      target_compile_definitions(rackpy_kernels_${_name} PRIVATE ${_variant})
+    endif()
+  endforeach()
 
   add_executable(rackpy_widget_tests native/tests/test_widget_tree.cpp ${RACKPY_RUNTIME_CORE})
   set_target_properties(rackpy_widget_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)

@@ -1,8 +1,8 @@
 # Process audio
 
-**Implemented (RP-17A), Linux x86_64 inside Rack Free 2.6.6.** Two built-in
-kernel types so far; kernel libraries of your own are RP-17B, and DSP building
-blocks (filters, oscillators, MinBLEP, ...) come with RP-18 to RP-21.
+**Implemented (RP-17A, RP-17B), Linux x86_64 inside Rack Free 2.6.6.** Two
+built-in kernel types and kernels you write in C++; DSP building blocks
+(filters, oscillators, MinBLEP, ...) for Python come with RP-18 to RP-21.
 
 Rack calls every module's `process()` once per sample, tens of thousands of
 times a second, on its engine thread. Python is far too slow and too
@@ -56,9 +56,72 @@ kernel reports a failure, RackPy silences the module's outputs, records a
 `kernel_failed` diagnostic (`rackpy.runtime.diagnostics()`), and stops calling
 it; `module.kernel_failed` is then `True` until Initialize or `set_kernel`.
 
+## What it costs
+
+On the planning machine (not controlled hardware; the raw data and
+environment are in `benchmarks/rp17-kernel-overhead.json`), RackPy's kernel
+path costs **0.64 ns per frame** on top of the same DSP written as a plain
+C++ module for a sine oscillator (+7.6%), and 0.80 ns for a one-multiply
+gain. That is within the budgets frozen in
+[ADR 004](../decisions/004-performance-budgets.md) (at most 1.5 ns, and 10%
+for kernels at least as costly as a sine). The built-in kernels do more than
+that reference (polyphony, an optional parameter), which adds about 1.5 ns
+per frame on these workloads.
+
 ## Threads
 
 Create kernels, call `set_kernel` and `set` on Rack's main thread
 (`ThreadError` otherwise). The engine thread only runs the kernel. A test in
 RackPy's suite runs the kernel path under an allocation and lock detector
 and requires zero heap, lock, write or GIL calls on it.
+
+## Write a kernel in C++
+
+When the built-in kernels are not enough, write your own in C++ and ship it
+in your plugin as a **kernel library**. RackPy loads the libraries listed in
+`rackpy-loader.json` before your entry module runs:
+
+```json
+"kernels": ["kernels/kernels_example.so"]
+```
+
+A library includes RackPy's `rackpy/kernel.hpp` (from RackPy's
+`native/include`) after `<rack.hpp>`, implements `rackpy::Kernel`, and
+registers its types with `RACKPY_KERNEL_LIBRARY`. This wavefolder is the
+example RackPy's tests build and run in Rack:
+
+```{literalinclude} ../../tests/dsp/kernel_library/fold.cpp
+:language: c++
+```
+
+Python then uses it like a built-in type, under the library's namespace:
+`rackpy.dsp.kernel.load("example.Fold")` returns the type, and
+`module.set_kernel(Fold(input=0, output=0, limit=5))` gives a module the
+kernel (RackPy's test `tests/dsp/in_rack_libraries/test_libraries.py` does
+exactly this inside Rack).
+
+Build it as you would a Rack plugin: with the Rack SDK's compiler flags
+(`-fPIC -O3 -march=nehalem -funsafe-math-optimizations` and the rest of
+`compile.mk`), `-I` the SDK's `include` and `dep/include` and RackPy's
+`native/include`, linked as a shared library against `-lRack` with
+`-static-libstdc++ -static-libgcc`, as for any plugin. RackPy's own build does
+exactly that for the example (`rackpy_kernels_example` in `CMakeLists.txt`).
+
+The rules:
+
+- `process`, `reset`, `sampleRateChange` and `setControl` run where audio
+  is produced: no allocation, locks, IO, logging or exceptions (they are
+  `noexcept`). Allocate in the constructor. Return `false` from `process` to
+  fail, as described above.
+- The constructor runs on the main thread when Python creates the kernel. If
+  it throws, Python gets `ValueError` with your message.
+- Names are identifiers. Python sees `namespace.Name`. `rackpy` and names
+  starting with `rackpy_` are reserved.
+- A library loads all or nothing. If it cannot be loaded, was built for
+  another kernel ABI (`rackpy::KERNEL_ABI`), throws while registering,
+  repeats a type name, uses a reserved namespace or a bad name, or its path
+  leaves the plugin folder, Rack's log says `RackPy skipped kernel library
+  ...` with the reason, none of its types appear, and the other libraries
+  still load.
+- Libraries stay loaded until Rack exits. They are trusted code from your
+  plugin, like your Python.

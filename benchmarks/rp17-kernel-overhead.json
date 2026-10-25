@@ -1,0 +1,126 @@
+{
+  "note": "RP-17: RackPy's production kernel path (native/tests/kernel_bench.cpp) against plain C++ modules, ns per process() call, one frame per call. same_*: identical DSP inside a kernel (RackPy's fixed cost); builtin_*: RackPy's polyphonic built-in kernels against the mono reference module. Planning machine, not controlled hardware (RP-43 repeats on controlled hardware).",
+  "environment": {
+    "cpu": "Intel(R) Core(TM) i9-14900K",
+    "kernel": "7.2.11-1-cachyos",
+    "compiler": "gcc (GCC) 16.2.1 20260810",
+    "governor": "powersave",
+    "energy_preference": "balance_performance",
+    "load_average_1min": 8.11,
+    "pinned_cores": [
+      4,
+      6,
+      8
+    ],
+    "flags": "-O3 -march=nehalem -funsafe-math-optimizations (the SDK's)"
+  },
+  "command": "for core in 4 6 8; do taskset -c $core build/hooks/rackpy_kernel_bench; done",
+  "runs": [
+    {
+      "core": 4,
+      "frames_per_rep": 512000,
+      "reps": 31,
+      "results": [
+        {
+          "workload": "same_sine",
+          "native_p50_ns": 8.383,
+          "rackpy_p50_ns": 9.022,
+          "overhead_p50_ns": 0.641,
+          "overhead_p99_ns": 0.669
+        },
+        {
+          "workload": "same_gain",
+          "native_p50_ns": 0.786,
+          "rackpy_p50_ns": 1.576,
+          "overhead_p50_ns": 0.787,
+          "overhead_p99_ns": 0.908
+        },
+        {
+          "workload": "builtin_sine",
+          "native_p50_ns": 8.391,
+          "rackpy_p50_ns": 10.545,
+          "overhead_p50_ns": 2.155,
+          "overhead_p99_ns": 2.206
+        },
+        {
+          "workload": "builtin_gain",
+          "native_p50_ns": 0.895,
+          "rackpy_p50_ns": 3.014,
+          "overhead_p50_ns": 2.184,
+          "overhead_p99_ns": 2.303
+        }
+      ]
+    },
+    {
+      "core": 6,
+      "frames_per_rep": 512000,
+      "reps": 31,
+      "results": [
+        {
+          "workload": "same_sine",
+          "native_p50_ns": 8.386,
+          "rackpy_p50_ns": 9.031,
+          "overhead_p50_ns": 0.646,
+          "overhead_p99_ns": 0.693
+        },
+        {
+          "workload": "same_gain",
+          "native_p50_ns": 0.767,
+          "rackpy_p50_ns": 1.594,
+          "overhead_p50_ns": 0.815,
+          "overhead_p99_ns": 0.948
+        },
+        {
+          "workload": "builtin_sine",
+          "native_p50_ns": 8.387,
+          "rackpy_p50_ns": 10.537,
+          "overhead_p50_ns": 2.149,
+          "overhead_p99_ns": 2.251
+        },
+        {
+          "workload": "builtin_gain",
+          "native_p50_ns": 0.895,
+          "rackpy_p50_ns": 3.023,
+          "overhead_p50_ns": 2.184,
+          "overhead_p99_ns": 2.34
+        }
+      ]
+    },
+    {
+      "core": 8,
+      "frames_per_rep": 512000,
+      "reps": 31,
+      "results": [
+        {
+          "workload": "same_sine",
+          "native_p50_ns": 8.389,
+          "rackpy_p50_ns": 9.024,
+          "overhead_p50_ns": 0.636,
+          "overhead_p99_ns": 0.686
+        },
+        {
+          "workload": "same_gain",
+          "native_p50_ns": 0.751,
+          "rackpy_p50_ns": 1.555,
+          "overhead_p50_ns": 0.803,
+          "overhead_p99_ns": 0.881
+        },
+        {
+          "workload": "builtin_sine",
+          "native_p50_ns": 8.385,
+          "rackpy_p50_ns": 10.534,
+          "overhead_p50_ns": 2.148,
+          "overhead_p99_ns": 2.183
+        },
+        {
+          "workload": "builtin_gain",
+          "native_p50_ns": 0.895,
+          "rackpy_p50_ns": 2.971,
+          "overhead_p50_ns": 2.133,
+          "overhead_p99_ns": 2.343
+        }
+      ]
+    }
+  ],
+  "baseline": "benchmarks/baseline.json (RP-07 spike: +0.87 ns sine, +0.88 ns gain)"
+}

@@ -22,54 +22,80 @@ void KernelSlot::silence(rack::engine::Module& module) noexcept {
 		std::fill(std::begin(output.voltages), std::end(output.voltages), 0.f);
 }
 
+void KernelSlot::take(Hosted* next) noexcept {
+	current = next;
+	currentKernel = next ? next->kernel.get() : nullptr;
+	run = next ? Run::START : Run::IDLE;
+	failure.store(false, std::memory_order_release);
+}
+
 void KernelSlot::process(rack::engine::Module& module, const rack::engine::Module::ProcessArgs& args) noexcept {
+	// The common frame: nothing handed over, no controls, a running kernel. Everything else is out of line.
+	if (__builtin_expect(pending.load(std::memory_order_relaxed) != nullptr || controls.maybeNonEmpty() || run != Run::RUNNING, 0)) {
+		slow(module, args);
+		return;
+	}
+	if (__builtin_expect(!currentKernel->process(module, args), 0))
+		fail(module);
+}
+
+void KernelSlot::slow(rack::engine::Module& module, const rack::engine::Module::ProcessArgs& args) noexcept {
 	// Pick up a kernel the main thread handed over, if the old one can be retired.
 	if (pending.load(std::memory_order_acquire) && (!current || retired.size() < RETIRED_CAPACITY)) {
 		if (Hosted* next = pending.exchange(nullptr, std::memory_order_acq_rel)) {
 			if (current)
 				retired.push(current);  // room was checked; only this thread pushes
-			current = next;
-			failure.store(false, std::memory_order_release);
+			take(next);
 		}
 	}
 	Control control;
 	while (controls.pop(control)) {
 		if (control.target == current)
-			current->kernel->setControl(control.slot, control.value);
+			currentKernel->setControl(control.slot, control.value);
 	}
-	if (!current)
-		return;
-	if (!current->started) {
-		current->kernel->sampleRateChange(args.sampleRate, args.sampleTime);
-		current->started = true;
+	switch (run) {
+		case Run::IDLE:
+			return;
+		case Run::FAILED:
+			silence(module);
+			return;
+		case Run::START:
+			currentKernel->sampleRateChange(args.sampleRate, args.sampleTime);
+			current->started = true;
+			run = Run::RUNNING;
+			break;
+		case Run::RUNNING:
+			break;
 	}
-	if (failure.load(std::memory_order_relaxed)) {
-		silence(module);
-		return;
-	}
-	if (!current->kernel->process(module, args)) {
-		failure.store(true, std::memory_order_release);
-		silence(module);
-		// The type's name is fixed after registration: copy it without allocating.
-		char message[runtime::DIAGNOSTIC_MESSAGE_BYTES] = "kernel failed; module silenced: ";
-		size_t at = std::char_traits<char>::length(message);
-		for (const char* c = current->type ? current->type->name.c_str() : "?"; *c && at + 1 < sizeof(message); c++)
-			message[at++] = *c;
-		message[at] = '\0';
-		runtime::diagnose(runtime::DiagnosticCode::KernelFailed, message);
-	}
+	if (!currentKernel->process(module, args))
+		fail(module);
+}
+
+void KernelSlot::fail(rack::engine::Module& module) noexcept {
+	run = Run::FAILED;
+	failure.store(true, std::memory_order_release);
+	silence(module);
+	// The type's name is fixed after registration: copy it without allocating.
+	char message[runtime::DIAGNOSTIC_MESSAGE_BYTES] = "kernel failed; module silenced: ";
+	size_t at = std::char_traits<char>::length(message);
+	for (const char* c = current->type ? current->type->name.c_str() : "?"; *c && at + 1 < sizeof(message); c++)
+		message[at++] = *c;
+	message[at] = '\0';
+	runtime::diagnose(runtime::DiagnosticCode::KernelFailed, message);
 }
 
 void KernelSlot::reset() noexcept {
 	if (current) {
-		current->kernel->reset();
+		currentKernel->reset();
 		failure.store(false, std::memory_order_release);
+		if (run == Run::FAILED)
+			run = current->started ? Run::RUNNING : Run::START;
 	}
 }
 
 void KernelSlot::sampleRateChange(float sampleRate, float sampleTime) noexcept {
 	if (current && current->started)
-		current->kernel->sampleRateChange(sampleRate, sampleTime);
+		currentKernel->sampleRateChange(sampleRate, sampleTime);
 }
 
 void KernelSlot::attach(std::unique_ptr<Hosted> next, bool engineRunsModule) {
@@ -77,8 +103,7 @@ void KernelSlot::attach(std::unique_ptr<Hosted> next, bool engineRunsModule) {
 	latestHosted = next.get();
 	if (!engineRunsModule) {
 		Hosted* old = current;
-		current = next.release();
-		failure.store(false, std::memory_order_release);
+		take(next.release());
 		delete pending.exchange(nullptr);
 		delete old;
 		return;

@@ -41,6 +41,29 @@ Live Witan status is authoritative.
 - **Records.** `Module::process` stays planned: its Python override is
   RP-22's laboratory.
 
-**Still on the parent:** custom kernel libraries (RP-17B, as decided above),
-and native bypass kernels if a module needs custom bypass behaviour. DSP
-algorithms are RP-18 and RP-19; graphs are RP-21.
+**RP-17B — custom C++ kernel libraries loaded from the plugin**
+(`tk-rackpy-17b-custom-c-kernel-libraries-loaded-from-e4e527`):
+
+- **Library ABI.** `RACKPY_KERNEL_LIBRARY(namespace, registrar)` exports the
+  kernel ABI version, the namespace and a registration function that adds
+  `KernelType`s to a `KernelRegistrar`.
+- **Loading.** The host reads `rackpy-loader.json`'s `"kernels"` before the
+  entry module runs. Paths must stay inside the plugin folder, symlinks
+  included. It dlopens each library with `RTLD_LOCAL | RTLD_NODELETE` and
+  registers its types as `namespace.Name`, all or nothing per library.
+- **Refusals.** The host refuses wrong ABIs, reserved namespaces (`rackpy`,
+  `rackpy_*`), bad names and duplicates. It contains exceptions from
+  registration and from a type's `create`, and logs and skips a failing
+  library without affecting the others.
+- **Tests.** An example wavefolder library, built with the SDK plugin flags,
+  runs through Rack's engine. Six broken or invalid libraries are skipped
+  with their reasons.
+- **Hot path.** RP-17's closure also tightened the per-frame path to a
+  single fast check. RackPy's fixed cost is 0.64 ns per frame for a sine
+  (+7.6%), within ADR 004's budget
+  (`benchmarks/rp17-kernel-overhead.json`).
+
+**Still open for RP-17's own acceptance:** nothing beyond the evidence
+above. Native bypass behaviour other than Rack's bypass routes would be a
+new kernel hook if a module needs one. DSP algorithms are RP-18 and RP-19;
+graphs are RP-21.

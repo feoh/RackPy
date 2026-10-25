@@ -42,6 +42,8 @@ struct SpscRing {
 		return true;
 	}
 	size_t size() const { return tail.load(std::memory_order_acquire) - head.load(std::memory_order_acquire); }
+	/** Consumer side: whether anything may be waiting (a cheap check before pop()). */
+	bool maybeNonEmpty() const { return tail.load(std::memory_order_relaxed) != head.load(std::memory_order_relaxed); }
 };
 
 /** A kernel, its type, and the token Python handles check. Created and
@@ -91,13 +93,20 @@ struct KernelSlot {
 	size_t queued() const { return controls.size(); }
 
 private:
-	Hosted* current = nullptr;  // the engine thread's kernel
+	enum class Run : uint8_t { IDLE, START, RUNNING, FAILED };
+	// Engine thread only (or with the engine stopped): the hot path checks these first.
+	Hosted* current = nullptr;
+	Kernel* currentKernel = nullptr;
+	Run run = Run::IDLE;
 	std::atomic<Hosted*> pending{nullptr};  // handed over by the main thread
 	SpscRing<Control, CONTROL_CAPACITY> controls;  // main -> engine
 	SpscRing<Hosted*, RETIRED_CAPACITY> retired;  // engine -> main
 	std::atomic<bool> failure{false};
 	Hosted* latestHosted = nullptr;  // main thread
 	void silence(rack::engine::Module& module) noexcept;
+	void take(Hosted* next) noexcept;
+	void slow(rack::engine::Module& module, const rack::engine::Module::ProcessArgs& args) noexcept;
+	void fail(rack::engine::Module& module) noexcept;
 };
 
 /** The registered kernel types (main thread). */
@@ -106,6 +115,9 @@ const KernelType* findType(const std::string& name);
 std::vector<const KernelType*> types();
 /** RackPy's own kernel types, "rackpy.Gain" and "rackpy.Sine". */
 void registerBuiltins();
+/** The built-ins, then each library (relative to `pluginDir`) in order; a
+library that fails is logged and skipped, with none of its types added. Main thread. */
+void loadKernelLibraries(const std::string& pluginDir, const std::vector<std::string>& libraries);
 
 /** Check `values` (one per field) against `type` and the module's
 configuration: whole-number indices in range, required fields present.
