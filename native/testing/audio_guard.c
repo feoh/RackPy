@@ -3,7 +3,7 @@
 // audio_guard_enter()/audio_guard_leave(), it counts calls that the production
 // audio path must never make: heap allocation and free, mutex locks, write(2)
 // and GIL acquisition. Counting itself uses only atomics and thread-locals.
-// Spike code, not RackPy.
+// Promoted from the RP-07 spike for RP-17A: RackPy tests preload it too.
 #define _GNU_SOURCE
 #include <dlfcn.h>
 #include <pthread.h>

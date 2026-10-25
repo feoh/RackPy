@@ -42,8 +42,9 @@ public plugin API, proved symbol by symbol; see the
 
 Tutorials and troubleshooting pages will follow the
 [documentation plan](documentation.md) once there is an API to teach. The
-how-to guides cover [registering models](how-to/plugins.md) and
-[saving a module's state](how-to/state.md).
+how-to guides cover [registering models](how-to/plugins.md),
+[saving a module's state](how-to/state.md) and
+[processing audio](how-to/dsp.md).
 
 ```{toctree}
 :caption: Start here
@@ -69,6 +70,7 @@ runtime
 
 how-to/plugins
 how-to/state
+how-to/dsp
 ```
 
 ```{toctree}

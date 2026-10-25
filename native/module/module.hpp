@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "lifecycle.hpp"
+#include "../dsp/runtime/runtime.hpp"
 #include "rackpy/runtime/context.hpp"
 #include "rackpy/runtime/threads.hpp"
 
@@ -107,6 +108,9 @@ struct Module : rack::engine::Module {
 	LifecycleRing lifecycle;
 	// Set inside the constructor callback (Module.set_data_handlers); may be null.
 	std::unique_ptr<DataHandlers> dataHandlers;
+	// The native kernel Python chose (RP-17A): the module's production audio path.
+	dsp::KernelSlot kernels;
+	void process(const ProcessArgs& args) override { kernels.process(*this, args); }
 	json_t* dataToJson() override;
 	void dataFromJson(json_t* rootJ) override;
 

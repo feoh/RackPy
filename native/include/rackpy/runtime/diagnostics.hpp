@@ -26,6 +26,8 @@ enum class DiagnosticCode : uint16_t {
 	ShutdownLeak,
 	/** A Python callback that Rack runs with audio stopped exceeded its time budget. */
 	SlowExclusiveCallback,
+	/** A native kernel reported a failure; its module's outputs are silenced (RP-17A). */
+	KernelFailed,
 	/** A test hook; never recorded by production code. */
 	Test,
 };

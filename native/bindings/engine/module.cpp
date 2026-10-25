@@ -4,6 +4,7 @@
 // Python runs only synchronously during construction on the main thread,
 // before publication: the constructor callback and class-factory constructors.
 #include "module.hpp"
+#include "../dsp/kernel.hpp"
 #include "components.hpp"
 #include "metadata.hpp"
 #include "quantity.hpp"
@@ -642,6 +643,16 @@ void bindModule(py::module_ engine) {
 	}
 
 	// --- JSON (RP-15A) ---------------------------------------------------------
+	// Native kernels (RP-17A): the module's production audio path.
+	cls.def("set_kernel", [](const ModuleRef& r, py::handle kernel) { attachKernel(r, kernel); }, py::arg("kernel"),
+		"Make `kernel` this module's audio path: Rack's engine calls it every frame, with no Python. Its wiring is "
+		"checked against the module's configuration. In the constructor callback, or later to replace the "
+		"kernel at the next frame boundary. Main thread.")
+		.def_property_readonly("kernel", &moduleKernel, "The kernel last set, or None.")
+		.def_property_readonly("kernel_failed", [](const ModuleRef& r) {
+			runtime::requireMainThread("reading a module's kernel");
+			return r.get().kernels.failed();
+		}, "True after the kernel reported a failure: the module's outputs are silent until set_kernel or a reset.");
 	cls.def("set_data_handlers", [](const ModuleRef& r, py::object toJson, py::object fromJson) {
 		r.state->requireConstruction();
 		for (const py::object& f : {toJson, fromJson})

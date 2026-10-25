@@ -580,6 +580,14 @@ sample-rate and master events, which Rack may run on an audio driver thread),
 and the non-real-time callback laboratory (RP-22) synchronous Python for those
 driver events. The event records themselves are `implemented`.
 
+## Native kernels
+
+`set_kernel(kernel)`, `kernel` and `kernel_failed` are RackPy's, not Rack's:
+they give a module its production audio path, a native kernel that Rack's
+engine runs from the module's `process()` every frame. See
+[processing audio](../how-to/dsp.md). Rack's `process` itself, as a Python
+override, belongs to the laboratory (RP-22).
+
 ## Bypass configuration
 
 `config_bypass(input_id, output_id)` validates both port IDs and refuses a

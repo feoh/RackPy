@@ -83,6 +83,7 @@ void Module::onPortChange(const PortChangeEvent& e) {
 void Module::onReset(const ResetEvent& e) {
 	runtime::ExclusiveScope exclusive;
 	rack::engine::Module::onReset(e);
+	kernels.reset();
 	lifecycle.push(recordOf(LifecycleKind::Reset));
 }
 
@@ -96,6 +97,7 @@ void Module::onRandomize(const RandomizeEvent& e) {
 void Module::onSampleRateChange(const SampleRateChangeEvent& e) {
 	runtime::ExclusiveScope exclusive;
 	rack::engine::Module::onSampleRateChange(e);
+	kernels.sampleRateChange(e.sampleRate, e.sampleTime);
 	LifecycleRecord record = recordOf(LifecycleKind::SampleRateChange);
 	record.sampleRate = e.sampleRate;
 	record.sampleTime = e.sampleTime;

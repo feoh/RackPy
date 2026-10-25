@@ -126,6 +126,8 @@ Recording one never blocks or allocates, so it is safe on the audio thread.
 | `foreign_context` | a second Rack context asked for Python work and was refused |
 | `release_queue_full` | too many Python objects were dropped on engine threads at once; one leaked |
 | `shutdown_leak` | native objects still held Python objects at shutdown |
+| `slow_exclusive_callback` | Python ran too long in a callback during which Rack's audio is stopped |
+| `kernel_failed` | a native kernel reported a failure; its module's outputs are silenced ([processing audio](how-to/dsp.md)) |
 
 ## When start-up fails
 

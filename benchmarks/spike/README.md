@@ -9,7 +9,7 @@ data is in [../baseline.json](../baseline.json).
 | --- | --- |
 | `src/dsp.hpp` | Shared DSP (sine, 16-voice poly, SIMD poly, gain) and a lock-free SPSC ring |
 | `src/bench.cpp` | Standalone harness linking libRack. `time` (randomized A/B), `equivalence` (bit-exact), `guard` (needs `LD_PRELOAD`) |
-| `src/audio_guard.c` | `LD_PRELOAD` library counting heap, mutex, `write` and GIL calls on marked audio paths |
+| `../../native/testing/audio_guard.c` | `LD_PRELOAD` library (promoted to RackPy test instrumentation in RP-17A) counting heap, mutex, `write` and GIL calls on marked audio paths |
 | `src/bench_lab.cpp` | Python laboratory cost, contention, start-up time and memory |
 | `src/host_bench.cpp`, `plugin.json` | Rack plugin with native and RackPy-shaped modules, for real-host meter and feedback runs |
 

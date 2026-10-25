@@ -6,6 +6,8 @@ import pathlib
 from collections.abc import Callable, Iterator, Sequence
 from typing import Any, overload
 
+from _rackpy_host import dsp as _dsp
+
 from rackpy.raw import Quantity
 
 PORT_MAX_CHANNELS: int
@@ -324,6 +326,12 @@ class Module:
         | SetMasterEvent
         | UnsetMasterEvent
     )
+    # Native kernels (RP-17A): the module's audio path; see rackpy.dsp.kernel.
+    def set_kernel(self, kernel: _dsp.Kernel) -> None: ...
+    @property
+    def kernel(self) -> _dsp.Kernel | None: ...
+    @property
+    def kernel_failed(self) -> bool: ...
     # JSON (RP-15A). JSON values: None, bool, int, float, str, list, tuple, dict.
     def set_data_handlers(
         self,

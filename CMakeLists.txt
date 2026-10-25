@@ -45,6 +45,8 @@ target_link_libraries(rackpy_loader PRIVATE rackpy_sdk_plugin)
 
 # The runtime's native-only parts, shared by the host and the native unit tests.
 set(RACKPY_RUNTIME_CORE native/runtime/threads.cpp native/runtime/diagnostics.cpp native/runtime/context.cpp)
+# The kernel runtime (RP-17A): Python-free, and the production audio path.
+set(RACKPY_DSP_RUNTIME native/dsp/runtime/runtime.cpp native/dsp/runtime/builtin.cpp)
 
 # Rack API bindings: the registry bin/generate_bindings.py generates from bindings/manifest.json,
 # and the hand-written adapters it calls (native/bindings/<family>.cpp).
@@ -55,7 +57,7 @@ list(FILTER RACKPY_BINDING_ADAPTERS EXCLUDE REGEX "/native/bindings/generated/")
 add_library(rackpy_host MODULE native/host/host.cpp native/host/host_module.cpp
   ${RACKPY_RUNTIME_CORE} native/runtime/python.cpp native/runtime/interpreter.cpp native/runtime/json.cpp
   native/bindings/generated/registry.cpp ${RACKPY_BINDING_ADAPTERS} native/module/lifecycle.cpp
-  native/plugin/model.cpp)
+  native/plugin/model.cpp ${RACKPY_DSP_RUNTIME})
 if(RACKPY_TEST_HOOKS)
   target_sources(rackpy_host PRIVATE native/testing/testing.cpp)
   target_compile_definitions(rackpy_host PRIVATE RACKPY_TEST_HOOKS)
@@ -87,11 +89,29 @@ if(RACKPY_BUILD_TESTS)
   target_link_libraries(rackpy_runtime_tests PRIVATE rackpy_sdk_program)
   add_test(NAME runtime_core COMMAND rackpy_runtime_tests)
 
-  add_executable(rackpy_module_tests native/tests/test_module.cpp native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE})
+  add_executable(rackpy_module_tests native/tests/test_module.cpp native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE}
+    ${RACKPY_DSP_RUNTIME})
   set_target_properties(rackpy_module_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_include_directories(rackpy_module_tests PRIVATE native/include)
   target_link_libraries(rackpy_module_tests PRIVATE rackpy_sdk_program)
   add_test(NAME module_construction COMMAND rackpy_module_tests)
+
+  add_executable(rackpy_kernel_tests native/tests/test_kernels.cpp native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE}
+    ${RACKPY_DSP_RUNTIME})
+  set_target_properties(rackpy_kernel_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_include_directories(rackpy_kernel_tests PRIVATE native/include)
+  target_link_libraries(rackpy_kernel_tests PRIVATE rackpy_sdk_program)
+  add_test(NAME kernel_runtime COMMAND rackpy_kernel_tests)
+  # The RP-07 audio-path guard, preloaded by tests/dsp/test_runtime.py around rackpy_kernel_guard.
+  add_library(rackpy_audio_guard MODULE native/testing/audio_guard.c)
+  set_target_properties(rackpy_audio_guard PROPERTIES PREFIX "" OUTPUT_NAME audio_guard C_STANDARD 11)
+  target_link_libraries(rackpy_audio_guard PRIVATE dl)
+  # Runs the kernel path under the RP-07 audio-path guard (tests/dsp/test_runtime.py preloads it).
+  add_executable(rackpy_kernel_guard native/tests/kernel_guard.cpp native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE}
+    ${RACKPY_DSP_RUNTIME})
+  set_target_properties(rackpy_kernel_guard PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_include_directories(rackpy_kernel_guard PRIVATE native/include)
+  target_link_libraries(rackpy_kernel_guard PRIVATE rackpy_sdk_program)
 
   add_executable(rackpy_widget_tests native/tests/test_widget_tree.cpp ${RACKPY_RUNTIME_CORE})
   set_target_properties(rackpy_widget_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)

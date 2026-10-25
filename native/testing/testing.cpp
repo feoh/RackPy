@@ -851,7 +851,40 @@ void define(py::module_ m) {
 	});
 }
 
+namespace {
+
+/** RP-17A test kernel. Outputs: 0 counts frames, 1 is the sample rate in kHz,
+2 counts resets. Fails once `fail_after` frames have run, if it is positive. */
+struct ProbeKernel : rackpy::Kernel {
+	float frames = 0, resets = 0, rate = 0;
+	double failAfter;
+	explicit ProbeKernel(const std::vector<double>& v) : failAfter(v[0]) {}
+	bool process(rack::engine::Module& m, const rack::engine::Module::ProcessArgs&) noexcept override {
+		frames += 1;
+		m.outputs[0].setVoltage(frames);
+		m.outputs[1].setVoltage(rate / 1000.f);
+		m.outputs[2].setVoltage(resets);
+		return !(failAfter > 0 && frames >= failAfter);
+	}
+	void reset() noexcept override { resets += 1; }
+	void sampleRateChange(float sampleRate, float) noexcept override { rate = sampleRate; }
+	void setControl(int slot, double value) noexcept override {
+		if (slot == 0)
+			failAfter = value;
+	}
+};
+
+}  // namespace
+
 void registerModels(rack::plugin::Plugin* plugin) {
+	if (!rackpy::dsp::findType("rackpy_test.Probe"))
+		rackpy::dsp::registerType(rackpy::KernelType{
+			"rackpy_test.Probe",
+			"Test hook: counts frames, reports the sample rate and resets, can fail on purpose.",
+			{{"fail_after", rackpy::Field::NUMBER, 0, false, "fail once this many frames have run (0: never)"}},
+			{"fail_after"},
+			[](const std::vector<double>& v) { return std::make_unique<ProbeKernel>(v); },
+		});
 	model = rack::createModel<ProbeModule, ProbeWidget>("RuntimeProbe");
 	plugin->addModel(model);
 }

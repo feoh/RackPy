@@ -22,7 +22,7 @@ $(BUILD)/bench: src/bench.cpp src/dsp.hpp
 	@mkdir -p $(@D)
 	$(CXX) $(SDK_FLAGS) -o $@ src/bench.cpp $(LINK_RACK)
 
-$(BUILD)/audio_guard.so: src/audio_guard.c
+$(BUILD)/audio_guard.so: ../../native/testing/audio_guard.c
 	@mkdir -p $(@D)
 	$(CC) -O2 -fPIC -shared -Wall -o $@ $< -ldl
 

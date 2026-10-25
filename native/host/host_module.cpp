@@ -15,6 +15,7 @@
 #include "rackpy/host_abi.h"
 #include "rackpy/runtime/threads.hpp"
 #include "registry.hpp"
+#include "../bindings/dsp/kernel.hpp"
 
 #ifdef RACKPY_TEST_HOOKS
 #include "testing.hpp"
@@ -75,6 +76,7 @@ PYBIND11_EMBEDDED_MODULE(_rackpy_host, m) {
 			return out;
 		},
 		py::arg("value"), "Python -> json_t -> Python through the runtime's JSON policy (for tests).");
+	rackpy::bindings::bindKernels(m);  // before rackpy.raw: Module.set_kernel takes a Kernel
 	py::module_ raw = m.def_submodule("raw", "Rack API bindings (rackpy.raw), registered from bindings/manifest.json.");
 	rackpy::bindings::registerAll(raw);
 #ifdef RACKPY_TEST_HOOKS

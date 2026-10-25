@@ -36,6 +36,7 @@ const char* codeName(DiagnosticCode code) {
 		case DiagnosticCode::ReleaseQueueFull: return "release_queue_full";
 		case DiagnosticCode::ShutdownLeak: return "shutdown_leak";
 		case DiagnosticCode::SlowExclusiveCallback: return "slow_exclusive_callback";
+		case DiagnosticCode::KernelFailed: return "kernel_failed";
 		case DiagnosticCode::Test: return "test";
 	}
 	return "unknown";
