@@ -5,6 +5,7 @@
 // before publication: the constructor callback and class-factory constructors.
 #include "module.hpp"
 #include "../dsp/kernel.hpp"
+#include "../plugin.hpp"
 #include "components.hpp"
 #include "metadata.hpp"
 #include "quantity.hpp"
@@ -437,6 +438,42 @@ struct PyDataHandlers : module::DataHandlers {
 	}
 };
 
+/** Python callables for the module's lifecycle events (RP-16C), called after
+Rack's behaviour, on the main thread, contained. Rack's audio is stopped
+during the ui-exclusive ones, so they are timed against ADR 004's 1 ms
+budget. Nothing runs once Rack's context is closing: handles are stale then. */
+struct PyEventHandlers : module::EventHandlers {
+	std::array<runtime::PyRef, 16> handlers;
+	static const char* name(module::LifecycleKind kind) {
+		using K = module::LifecycleKind;
+		switch (kind) {
+			case K::Add: return "Module.on_add";
+			case K::Remove: return "Module.on_remove";
+			case K::Bypass: return "Module.on_bypass";
+			case K::UnBypass: return "Module.on_un_bypass";
+			case K::PortChange: return "Module.on_port_change";
+			case K::Reset: return "Module.on_reset";
+			case K::Randomize: return "Module.on_randomize";
+			case K::Save: return "Module.on_save";
+			default: return "Module event";
+		}
+	}
+	void dispatch(const module::LifecycleRecord& record) noexcept override {
+		const runtime::PyRef& handler = handlers[(size_t) record.kind % handlers.size()];
+		if (!handler || !runtime::binding().current())
+			return;
+		bool exclusive = runtime::insideExclusive();
+		double start = rack::system::getTime();
+		runtime::callPython(name(record.kind), [&] { handler.get()(eventObject(record)); });
+		double elapsed = rack::system::getTime() - start;
+		if (exclusive && elapsed > 0.001) {
+			std::string message = rack::string::f("%s took %.1f ms with Rack's audio stopped (budget 1 ms)",
+				name(record.kind), elapsed * 1000.0);
+			runtime::diagnose(runtime::DiagnosticCode::SlowExclusiveCallback, message.c_str());
+		}
+	}
+};
+
 using JsonPtr = std::unique_ptr<json_t, decltype(&json_decref)>;
 
 /** Module JSON needs a sealed module (Rack's code assumes the seal's invariants). */
@@ -491,6 +528,9 @@ int traverseModule(PyObject* self, visitproc visit, void* arg) {
 		Py_VISIT(handlers->toJsonFn.borrowed());
 		Py_VISIT(handlers->fromJsonFn.borrowed());
 	}
+	if (auto* handlers = dynamic_cast<PyEventHandlers*>(m.eventHandlers.get()))
+		for (const auto& handler : handlers->handlers)
+			Py_VISIT(handler.borrowed());
 	for (auto* q : m.paramQuantities)
 		if (auto* t = module::transferredIn(q))
 			Py_VISIT(static_cast<PyObject*>(t->pythonObject()));
@@ -506,8 +546,10 @@ int traverseModule(PyObject* self, visitproc visit, void* arg) {
 
 int clearModule(PyObject* self) {
 	auto& ref = py::cast<ModuleRef&>(py::handle(self));
-	if (ref.state && ref.state->object)
+	if (ref.state && ref.state->object) {
 		ref.state->object->dataHandlers.reset();  // slot objects clear their own references
+		ref.state->object->eventHandlers.reset();
+	}
 	return 0;
 }
 
@@ -653,6 +695,36 @@ void bindModule(py::module_ engine) {
 			runtime::requireMainThread("reading a module's kernel");
 			return r.get().kernels.failed();
 		}, "True after the kernel reported a failure: the module's outputs are silent until set_kernel or a reset.");
+	cls.def("set_event_handlers", [](const ModuleRef& r, py::kwargs handlers) {
+		r.state->requireConstruction();
+		using K = module::LifecycleKind;
+		static const std::pair<const char*, K> names[] = {{"on_add", K::Add}, {"on_remove", K::Remove},
+			{"on_bypass", K::Bypass}, {"on_un_bypass", K::UnBypass}, {"on_port_change", K::PortChange},
+			{"on_reset", K::Reset}, {"on_randomize", K::Randomize}, {"on_save", K::Save}};
+		auto installed = std::make_unique<PyEventHandlers>();
+		bool any = false;
+		for (auto item : handlers) {
+			std::string key = item.first.cast<std::string>();
+			const auto* found = std::find_if(std::begin(names), std::end(names), [&](const auto& n) { return key == n.first; });
+			if (found == std::end(names))
+				throw py::type_error("set_event_handlers() got an unexpected event " + key +
+					" (on_add, on_remove, on_bypass, on_un_bypass, on_port_change, on_reset, on_randomize, on_save; "
+					"sample-rate and master events run on Rack's audio threads: RP-22)");
+			if (item.second.is_none())
+				continue;
+			if (!PyCallable_Check(item.second.ptr()))
+				throw py::type_error(key + " must be callable or None");
+			installed->handlers[(size_t) found->second] = runtime::PyRef(py::reinterpret_borrow<py::object>(item.second));
+			any = true;
+		}
+		r.get().eventHandlers = any ? std::move(installed) : nullptr;
+	}, "Python handlers for Rack's module events, called with the event after Rack's own behaviour, on the "
+		"main thread, errors contained: on_add, on_remove, on_bypass, on_un_bypass, on_port_change, on_reset, "
+		"on_randomize (Rack's audio stops while these run: keep them under 1 ms) and on_save. Constructor-only; "
+		"replaces earlier handlers.");
+	cls.def_property_readonly("model", [](const ModuleRef& r) { return modelObject(r.get().model); },
+		"Rack's Module::model: the module's rackpy.raw.plugin.Model, or None before Rack creates it from one.")
+		.def("get_model", [](const ModuleRef& r) { return modelObject(r.get().getModel()); });
 	cls.def("set_data_handlers", [](const ModuleRef& r, py::object toJson, py::object fromJson) {
 		r.state->requireConstruction();
 		for (const py::object& f : {toJson, fromJson})

@@ -28,6 +28,9 @@ class Notes(ModuleClass):
         if isinstance(data, dict) and isinstance(data.get("text"), str):
             self.text = data["text"]
 
+    def on_reset(self, event: Any) -> None:  # Initialize, after Rack reset the parameters
+        self.text = ""
+
 
 plugin.add_model("PyControls", controls, hp=4)
 plugin.add_model("PyNotes", Notes, hp=8)

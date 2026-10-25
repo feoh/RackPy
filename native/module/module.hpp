@@ -87,6 +87,15 @@ struct DataHandlers {
 	virtual void fromJson(json_t* data) noexcept = 0;
 };
 
+/** Python's handlers for the module's lifecycle events (RP-16C). Rack's
+adapters call dispatch() after Rack's own behaviour; the implementation
+lives with the bindings and contains every error. */
+struct EventHandlers {
+	virtual ~EventHandlers() = default;
+	/** Never throws. Runs Python only on the main thread; refused elsewhere. */
+	virtual void dispatch(const LifecycleRecord& record) noexcept = 0;
+};
+
 /** A pointer a raw vector edit removes. Native-created metadata has no other
 owner, so it is deleted; its views are invalidated by their slot token. */
 template <typename Info>
@@ -108,6 +117,13 @@ struct Module : rack::engine::Module {
 	LifecycleRing lifecycle;
 	// Set inside the constructor callback (Module.set_data_handlers); may be null.
 	std::unique_ptr<DataHandlers> dataHandlers;
+	// Set inside the constructor callback (Module.set_event_handlers); may be null.
+	std::unique_ptr<EventHandlers> eventHandlers;
+	void handle(const LifecycleRecord& record) {
+		lifecycle.push(record);
+		if (eventHandlers)
+			eventHandlers->dispatch(record);
+	}
 	// The native kernel Python chose (RP-17A): the module's production audio path.
 	dsp::KernelSlot kernels;
 	void process(const ProcessArgs& args) override { kernels.process(*this, args); }

@@ -9,6 +9,7 @@ from typing import Any, overload
 from _rackpy_host import dsp as _dsp
 
 from rackpy.raw import Quantity
+from rackpy.raw import plugin as _plugin
 
 PORT_MAX_CHANNELS: int
 
@@ -326,6 +327,22 @@ class Module:
         | SetMasterEvent
         | UnsetMasterEvent
     )
+    # Lifecycle handlers (RP-16C), constructor-only; called after Rack's behaviour.
+    def set_event_handlers(
+        self,
+        *,
+        on_add: Callable[[Any], object] | None = None,
+        on_remove: Callable[[Any], object] | None = None,
+        on_bypass: Callable[[Any], object] | None = None,
+        on_un_bypass: Callable[[Any], object] | None = None,
+        on_port_change: Callable[[Any], object] | None = None,
+        on_reset: Callable[[Any], object] | None = None,
+        on_randomize: Callable[[Any], object] | None = None,
+        on_save: Callable[[Any], object] | None = None,
+    ) -> None: ...
+    @property
+    def model(self) -> _plugin.Model | None: ...
+    def get_model(self) -> _plugin.Model | None: ...
     # Native kernels (RP-17A): the module's audio path; see rackpy.dsp.kernel.
     def set_kernel(self, kernel: _dsp.Kernel) -> None: ...
     @property

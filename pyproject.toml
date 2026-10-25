@@ -79,6 +79,11 @@ warn_unreachable = true
 testpaths = ["tests"]
 addopts = ["--strict-markers", "--strict-config", "-ra"]
 xfail_strict = true
+# Host runs keep whole Rack bundles and native builds under the base temp
+# directory (several GB per run, often on a RAM-backed /tmp): keep only the
+# failed tests' directories of the latest run.
+tmp_path_retention_count = 1
+tmp_path_retention_policy = "failed"
 markers = [
     "unit: pure Python; no SDK, compiler or Rack needed",
     "native: builds or runs native code against the pinned Rack SDK, outside Rack",

@@ -140,7 +140,7 @@ py::object pluginObject(RackPlugin* p) {
 	return runtime::identity(p, 0, [&] { return py::cast(PluginHandle{p}); });
 }
 
-py::object modelObject(RackModel* m) {
+py::object modelObjectInternal(RackModel* m) {
 	if (!m)
 		return py::none();
 	return runtime::identity(m, 0, [&] { return py::cast(ModelHandle{m, nullptr}); });
@@ -294,10 +294,10 @@ void bind_plugin(py::module_ raw) {
 			RackPlugin& p = checked(h);
 			py::list out;
 			for (auto* m : p.models)
-				out.append(modelObject(m));
+				out.append(modelObjectInternal(m));
 			if (&p == plugin::instance())
 				for (const auto& m : plugin::staged())
-					out.append(modelObject(m.get()));
+					out.append(modelObjectInternal(m.get()));
 			return py::tuple(out);
 		}, "A snapshot of the plugin's models; while this plugin initializes, also the ones its entry module added.")
 		.def("add_model", &addModel, py::arg("model"),
@@ -308,8 +308,8 @@ void bind_plugin(py::module_ raw) {
 			if (&p == plugin::instance())
 				for (const auto& m : plugin::staged())
 					if (m->slug == slug)
-						return modelObject(m.get());
-			return modelObject(p.getModel(slug));
+						return modelObjectInternal(m.get());
+			return modelObjectInternal(p.getModel(slug));
 		}, py::arg("slug"), "The model with this slug, or None.")
 		.def("get_brand", [](const PluginHandle& h) { return checked(h).getBrand(); })
 		.def("from_json", &pluginFromJson, py::arg("data"),
@@ -395,16 +395,16 @@ void bind_plugin(py::module_ raw) {
 	}, py::arg("plugin_slug"), "As get_plugin, also following Rack's renamed-plugin fallbacks.");
 	mod.def("get_model", [](const std::string& pluginSlug, const std::string& modelSlug) {
 		runtime::requireMainThread("finding a Rack model");
-		return modelObject(rack::plugin::getModel(pluginSlug, modelSlug));
+		return modelObjectInternal(rack::plugin::getModel(pluginSlug, modelSlug));
 	}, py::arg("plugin_slug"), py::arg("model_slug"));
 	mod.def("get_model_fallback", [](const std::string& pluginSlug, const std::string& modelSlug) {
 		runtime::requireMainThread("finding a Rack model");
-		return modelObject(rack::plugin::getModelFallback(pluginSlug, modelSlug));
+		return modelObjectInternal(rack::plugin::getModelFallback(pluginSlug, modelSlug));
 	}, py::arg("plugin_slug"), py::arg("model_slug"));
 	mod.def("model_from_json", [](py::handle moduleJson) {
 		runtime::requireMainThread("finding a Rack model");
 		std::unique_ptr<json_t, decltype(&json_decref)> json(runtime::toJson(moduleJson), json_decref);
-		return modelObject(rack::plugin::modelFromJson(json.get()));
+		return modelObjectInternal(rack::plugin::modelFromJson(json.get()));
 	}, py::arg("module_json"), "The model a module's JSON names; Rack's Exception if it is not loaded.");
 
 	py::class_<LibraryHandle>(mod, "LibraryHandle", py::is_final(),
@@ -507,6 +507,11 @@ void settingsFromJson(json_t* json) noexcept {
 		if (settingsFromJsonFn)
 			settingsFromJsonFn.get()(runtime::fromJson(json));
 	});
+}
+
+pybind11::object modelObject(RackModel* model) {
+	runtime::requireMainThread("using a Rack model");
+	return modelObjectInternal(model);
 }
 
 void discardModels() {

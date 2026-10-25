@@ -49,25 +49,25 @@ LifecycleRecord recordOf(LifecycleKind kind) {
 void Module::onAdd(const AddEvent& e) {
 	runtime::ExclusiveScope exclusive;
 	rack::engine::Module::onAdd(e);
-	lifecycle.push(recordOf(LifecycleKind::Add));
+	handle(recordOf(LifecycleKind::Add));
 }
 
 void Module::onRemove(const RemoveEvent& e) {
 	runtime::ExclusiveScope exclusive;
 	rack::engine::Module::onRemove(e);
-	lifecycle.push(recordOf(LifecycleKind::Remove));
+	handle(recordOf(LifecycleKind::Remove));
 }
 
 void Module::onBypass(const BypassEvent& e) {
 	runtime::ExclusiveScope exclusive;
 	rack::engine::Module::onBypass(e);
-	lifecycle.push(recordOf(LifecycleKind::Bypass));
+	handle(recordOf(LifecycleKind::Bypass));
 }
 
 void Module::onUnBypass(const UnBypassEvent& e) {
 	runtime::ExclusiveScope exclusive;
 	rack::engine::Module::onUnBypass(e);
-	lifecycle.push(recordOf(LifecycleKind::UnBypass));
+	handle(recordOf(LifecycleKind::UnBypass));
 }
 
 void Module::onPortChange(const PortChangeEvent& e) {
@@ -77,20 +77,20 @@ void Module::onPortChange(const PortChangeEvent& e) {
 	record.connecting = e.connecting;
 	record.portType = e.type;
 	record.portId = e.portId;
-	lifecycle.push(record);
+	handle(record);
 }
 
 void Module::onReset(const ResetEvent& e) {
 	runtime::ExclusiveScope exclusive;
 	rack::engine::Module::onReset(e);
 	kernels.reset();
-	lifecycle.push(recordOf(LifecycleKind::Reset));
+	handle(recordOf(LifecycleKind::Reset));
 }
 
 void Module::onRandomize(const RandomizeEvent& e) {
 	runtime::ExclusiveScope exclusive;
 	rack::engine::Module::onRandomize(e);
-	lifecycle.push(recordOf(LifecycleKind::Randomize));
+	handle(recordOf(LifecycleKind::Randomize));
 }
 
 // Driver events: possibly an audio driver thread, under the exclusive lock.
@@ -133,7 +133,7 @@ void Module::dataFromJson(json_t* rootJ) {
 // Shared lock: audio keeps running.
 void Module::onSave(const SaveEvent& e) {
 	rack::engine::Module::onSave(e);
-	lifecycle.push(recordOf(LifecycleKind::Save));
+	handle(recordOf(LifecycleKind::Save));
 }
 
 }  // namespace module

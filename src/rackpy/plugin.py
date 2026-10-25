@@ -16,6 +16,8 @@ from rackpy.raw.plugin import Model
 
 __all__ = ["Model", "ModuleClass", "Plugin", "on_destroy", "plugin"]
 
+_EVENTS = ("on_add", "on_remove", "on_bypass", "on_un_bypass", "on_port_change", "on_reset", "on_randomize", "on_save")
+
 
 class ModuleClass:
     """A model's module written as a class: one instance per module Rack creates.
@@ -42,15 +44,48 @@ class ModuleClass:
     def from_json(self, data: Any) -> None:
         """Restore the custom data Rack loaded. Validate it: it comes from a patch file."""
 
+    # Rack's module events. Override the ones you need: only overridden ones are
+    # installed, and each runs on Rack's main thread after Rack's own behaviour.
+    # Rack's audio stops while on_add, on_remove, on_bypass, on_un_bypass,
+    # on_port_change, on_reset and on_randomize run: keep them under 1 ms.
+
+    def on_add(self, event: Any) -> None:
+        """Rack's engine added the module."""
+
+    def on_remove(self, event: Any) -> None:
+        """Rack's engine is removing the module; it still exists."""
+
+    def on_bypass(self, event: Any) -> None:
+        """The module was bypassed."""
+
+    def on_un_bypass(self, event: Any) -> None:
+        """The module stopped being bypassed."""
+
+    def on_port_change(self, event: Any) -> None:
+        """A cable was connected to or disconnected from one of the module's ports (``event.connecting``,
+        ``event.type``, ``event.port_id``)."""
+
+    def on_reset(self, event: Any) -> None:
+        """Initialize: Rack has already reset the parameters."""
+
+    def on_randomize(self, event: Any) -> None:
+        """Randomize: Rack has already randomized the parameters."""
+
+    def on_save(self, event: Any) -> None:
+        """The patch is being saved: write patch-storage files here."""
+
     @classmethod
     def factory(cls) -> Callable[[Module], None]:
         """A ``Module.create`` constructor callback that builds the module through this class."""
+        events = [name for name in _EVENTS if getattr(cls, name) is not getattr(ModuleClass, name)]
 
         def build(module: Module) -> None:
             instance = cls(module)
             instance.configure()
             # The native module owns these bound methods, and through them the instance.
             module.set_data_handlers(to_json=instance.to_json, from_json=instance.from_json)
+            if events:
+                module.set_event_handlers(**{name: getattr(instance, name) for name in events})
 
         build.__qualname__ = f"{cls.__qualname__}.factory.<locals>.build"
         return build

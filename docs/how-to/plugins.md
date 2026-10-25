@@ -27,6 +27,25 @@ Rack builds a module every time it needs one, on its main thread: when you
 add it from the browser, when a patch loads, when you undo a deletion or
 duplicate a module. Do not start threads or touch files there.
 
+## Module events
+
+A `ModuleClass` may also override Rack's module events: `on_add`,
+`on_remove`, `on_bypass`, `on_un_bypass`, `on_port_change`, `on_reset`,
+`on_randomize` and `on_save`, each called with Rack's event, as `on_reset`
+above is. A factory function installs the same handlers with
+`module.set_event_handlers(on_reset=..., ...)` in the constructor callback.
+Only the events you handle cost anything.
+
+They run on Rack's main thread after Rack's own behaviour; by the time
+`on_reset` runs, Rack has already reset the parameters. For all but
+`on_save`, Rack has stopped audio while the handler runs, so keep them short:
+RackPy records `slow_exclusive_callback` in `rackpy.runtime.diagnostics()`
+when one takes over 1 ms, and calls that need Rack's engine lock raise
+`EngineLockError` there. Errors are logged and contained. Rack's sample-rate
+and master events can arrive on audio threads, so Python cannot handle them
+(RP-22's laboratory); kernels get the sample rate natively
+([processing audio](dsp.md)).
+
 ## plugin.json lists the same models
 
 Rack reads a plugin's models from two places and rejects the plugin unless

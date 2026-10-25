@@ -580,6 +580,16 @@ sample-rate and master events, which Rack may run on an audio driver thread),
 and the non-real-time callback laboratory (RP-22) synchronous Python for those
 driver events. The event records themselves are `implemented`.
 
+
+**Python handlers (RP-16C).** `set_event_handlers(on_add=..., on_remove=...,
+on_bypass=..., on_un_bypass=..., on_port_change=..., on_reset=...,
+on_randomize=..., on_save=...)`, in the constructor callback only, installs
+Python handlers that the adapters above call after Rack's behaviour and the
+snapshot, on the main thread, with errors contained; `rackpy.plugin.ModuleClass`
+installs the methods a subclass overrides. See
+[module events](../how-to/plugins.md#module-events). `model` and
+`get_model()` are Rack's: the module's `rackpy.raw.plugin.Model`, or `None`
+for a module made directly with `Module.create`.
 ## Native kernels
 
 `set_kernel(kernel)`, `kernel` and `kernel_failed` are RackPy's, not Rack's:

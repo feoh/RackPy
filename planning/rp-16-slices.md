@@ -60,3 +60,22 @@ this plugin while it initializes, with the fields restored if Rack raises;
 `Plugin::modulesFromJson` is bound the same way as a check against the staged
 models, because Rack runs the real one after initialization. Plugin settings
 are RP-15D, which RP-16's closure unblocks.
+
+**RP-16C — Python module lifecycle overrides and Module.model**
+(`tk-rackpy-16c-python-module-lifecycle-overrides-and-aaeb34`). This is a
+follow-up after closure: RP-14C3's notes still assigned these records to
+RP-16 when it closed.
+
+- `Module.set_event_handlers(...)`, constructor-only, and the overridden
+  `ModuleClass` methods handle `on_add`, `on_remove`, `on_bypass`,
+  `on_un_bypass`, `on_port_change`, `on_reset`, `on_randomize` and
+  `on_save`.
+- RackPy's native adapters call them after Rack's behaviour, through a
+  Python-free `EventHandlers` interface, on the main thread with errors
+  contained.
+- Handlers are skipped once the context is closing. A ui-exclusive handler
+  over 1 ms records `slow_exclusive_callback`.
+- `Module.model` and `get_model()` return plugin `Model` handles.
+- 14 records are implemented, including Rack's deprecated no-argument
+  spellings, which the same handler covers.
+- Sample-rate and master events stay with RP-22.

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
+#include <pybind11/pybind11.h>
+
 #include <rack.hpp>
 
 #include <string>
@@ -11,6 +13,9 @@ namespace bindings {
 against plugin.json and add them to `plugin`, or add none. Takes the GIL.
 Returns why nothing was added, or an empty string. */
 std::string commitModels(rack::plugin::Plugin* plugin, const std::string& manifestPath);
+
+/** The Python handle for a Rack model (rackpy.raw.plugin.Model), or None. Main thread, GIL. */
+pybind11::object modelObject(rack::plugin::Model* model);
 
 /** Rack's settingsToJson/settingsFromJson for this plugin (RP-15D): the
 Python settings handlers, contained. A new reference or null (Rack then keeps
