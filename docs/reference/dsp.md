@@ -4,12 +4,14 @@ Rack's `dsp` headers, family 6 of the [SDK surface](surface/dsp.md)
 (**RP-18**, in slices). **Implemented, Linux x86_64 inside Rack Free 2.6.6:**
 `dsp/common.hpp`, `approx.hpp`, `convert.hpp`, `window.hpp` and `ode.hpp`
 (RP-18A), `dsp/digital.hpp` (RP-18B), `dsp/filter.hpp` (RP-18C), and
-`dsp/vumeter.hpp` and `dsp/midi.hpp` (RP-18D), and `dsp/fft.hpp` and
-`dsp/fir.hpp` (RP-19A), as `rackpy.raw.dsp` and the
-{py:mod}`rackpy.dsp.basic`, {py:mod}`rackpy.dsp.digital`,
-{py:mod}`rackpy.dsp.filters`, {py:mod}`rackpy.dsp.midi` and
-{py:mod}`rackpy.dsp.fft` imports (see the [coverage report](coverage.md)).
-MinBLEP, resampling (RP-19B) and the ring buffers (RP-19C) are not bound yet.
+`dsp/vumeter.hpp` and `dsp/midi.hpp` (RP-18D), `dsp/fft.hpp` and
+`dsp/fir.hpp` (RP-19A), and `dsp/minblep.hpp` and `dsp/resampler.hpp`
+(RP-19B), as `rackpy.raw.dsp` and the {py:mod}`rackpy.dsp.basic`,
+{py:mod}`rackpy.dsp.digital`, {py:mod}`rackpy.dsp.filters`,
+{py:mod}`rackpy.dsp.midi`, {py:mod}`rackpy.dsp.fft` and
+{py:mod}`rackpy.dsp.resampling` imports (see the
+[coverage report](coverage.md)). The ring buffers (RP-19C) are not bound
+yet.
 
 Every function runs **Rack's own C++ code**, compiled with the SDK's flags.
 `tests/dsp` replays more than 4,000 cases from a compiled C++ reference
@@ -52,12 +54,17 @@ freely, because C++ instantiates one function per value. RackPy's contract:
 - `MidiGenerator<CHANNELS>` and `MidiParser<MAX_CHANNELS>` are instantiated
   for 1 to 16 channels, Rack's limit for ports and MIDI channels
   ([below](#midi-generator)).
+- `MinBlepGenerator<Z, O, T>` for `Z` and `O` = 4, 8, 16, 32, 64;
+  `Decimator<OVERSAMPLE, QUALITY, T>` and `Upsampler<OVERSAMPLE, QUALITY>`
+  for 2, 4, 8, 16, 32; `SampleRateConverter<MAX_CHANNELS>` for 1 to 16
+  ([below](#minblep)).
 - `Frame<CHANNELS, T>` is plain data, so it is written in Python and takes any
   `CHANNELS` from 1 ([below](#frames)).
 
-**Owner review item:** the `poly*` bound of 32, the `IIRFilter` orders 2 to
-8 and the MIDI processors' 1 to 16 channels are RackPy's choices, recorded in
-the manifest. A full-coverage release
+**Owner review item:** these bounds (the `poly*` 32, the `IIRFilter` orders
+2 to 8, the MIDI processors' and the sample-rate converter's 1 to 16
+channels, and the MinBLEP, decimator and upsampler sizes) are RackPy's
+choices, recorded in the manifest. A full-coverage release
 needs the owner to confirm them, or to choose another contract
 ([release bar](../coverage.md#release-bar)).
 
@@ -466,3 +473,50 @@ copying the C++ object would free the setup twice.
 - RackPy's tests also run every case of the reference under AddressSanitizer
   and UndefinedBehaviorSanitizer (`tests/dsp/test_advanced.py`), with Rack's
   inline code instrumented.
+
+(dsp-minblep)=
+## MinBLEP
+
+`min_blep_impulse(z, o, output)` writes Rack's minimum-phase band-limited
+step, `2 z o` floats rising from 0 to 1. Rack computes it with a `RealFFT` of
+`2 z o` points, so that must be a PFFFT real length of at most 65536
+(`ValueError` otherwise; Rack would crash).
+
+`MinBlepGenerator[z, o]` (or `[z, o, float_4]`; `MinBlepGenerator[16, 32]`
+is named `MinBlepGenerator_16_32_float`) corrects a naive oscillator's
+discontinuities: `insert_discontinuity(p, x)` adds a step of `x` at
+`-1 < p <= 0` frames relative to the current frame (other `p` are ignored,
+as in Rack), and `process()` returns the next correction to add. `buf`
+(the pending output) and `impulse` are live views; `pos` must stay below
+`2 z`, as Rack indexes `buf` with it.
+
+(dsp-resampling)=
+## Resampling
+
+- `SampleRateConverter[channels]` (the 16-channel one is also named
+  `SampleRateConverter_16`) converts interleaved audio between two rates with speexdsp:
+  `set_rates(in_rate, out_rate)`, `set_quality(0 to 10)` and
+  `set_channels(0 to MAX_CHANNELS)`, each rebuilding speexdsp's state (`st`,
+  an opaque handle, false when the rates are equal and Rack only copies).
+  `process(in_, in_stride, in_frames, out, out_stride, out_frames)` reads up
+  to `in_frames` frames and writes up to `out_frames`, with channel `c` of
+  frame `i` at `i * stride + c`, and returns `(frames read, frames written)`,
+  which C++ returns through two `int` pointers. Buffers are float32 and must
+  hold the frames (`ValueError`); strides must be at least `channels`.
+  `process(frames, in_frames, out_frames_list, out_frames)` takes lists of
+  `Frame[MAX_CHANNELS]` objects instead, copied into and out of Rack's
+  contiguous frames.
+- **Fields.** `channels` is read-only: speexdsp indexes its state by channel
+  without bounds checks, so changing it without rebuilding the state would
+  make Rack read and write past its allocation, and `set_channels` above
+  `MAX_CHANNELS` is refused where Rack only asserts. `quality`, `in_rate` and
+  `out_rate` can be assigned, as in C++, without rebuilding the state
+  (`refresh_state()` does); rates must be 1 to 3,072,000.
+- `Decimator[oversample, quality]` (or `[..., float_4]`) downsamples by
+  `oversample` with an `oversample * quality`-tap windowed-sinc filter:
+  `process(in_)` takes `oversample` inputs (a float32 buffer, or a list of
+  float_4) and returns one output. `Upsampler[oversample, quality]` upsamples:
+  `process(in_, out)` writes `oversample` outputs for one input. Both take a
+  `cutoff`, as a ratio of the lower rate's Nyquist frequency (0.9 by default), and keep
+  `in_index` within the range Rack's code keeps it in, as it copies or
+  indexes from there.

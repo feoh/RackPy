@@ -20,6 +20,7 @@ void bind_dsp(pybind11::module_ raw) {
 	dsp_bindings::bindFilter(dsp);
 	dsp_bindings::bindMidi(dsp);
 	dsp_bindings::bindAdvanced(dsp);
+	dsp_bindings::bindResampling(dsp);
 }
 
 }  // namespace bindings

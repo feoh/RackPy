@@ -17,6 +17,7 @@ SECTIONS = {
     "filters": ("rc", "smoothers", "deprecated_smoothers", "iir", "biquad"),
     "midi": ("vumeter", "generator.", "parser."),
     "advanced": ("rfft.", "cfft.", "convolve_naive", "boxcar_lowpass_ir", "convolver"),
+    "resampling": ("min_blep_impulse", "minblep", "src.", "decimator", "upsampler"),
 }
 
 
@@ -61,3 +62,8 @@ def midi_cases(reference: list[dict[str, Any]]) -> list[dict[str, Any]]:
 @pytest.fixture(scope="session")
 def advanced_cases(reference: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [c for c in reference if section(c["fn"]) == "advanced"]
+
+
+@pytest.fixture(scope="session")
+def resampling_cases(reference: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [c for c in reference if section(c["fn"]) == "resampling"]

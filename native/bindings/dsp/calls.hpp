@@ -110,6 +110,15 @@ RACKPY_OUT_OF_LINE void step(T t, T dt, T* x, int len, OdeSystem<T> f, void* con
 RACKPY_OUT_OF_LINE float convolveNaive(const float* in, const float* kernel, int len) { return d::convolveNaive(in, kernel, len); }
 RACKPY_OUT_OF_LINE void boxcarLowpassIR(float* out, int len, float cutoff) { d::boxcarLowpassIR(out, len, cutoff); }
 
+// --- minblep.hpp -----------------------------------------------------------------------
+RACKPY_OUT_OF_LINE void minBlepImpulse(int z, int o, float* output) { d::minBlepImpulse(z, o, output); }
+
+/** new X(args...), out of line: constructors that compute kernels inline (Decimator, Upsampler, ...). */
+template <typename X, typename... Args>
+RACKPY_OUT_OF_LINE X* make(Args... args) {
+	return new X(args...);
+}
+
 // --- Members of Rack's stateful DSP objects (filter.hpp, fft.hpp, ...) ---------------
 /** obj.*M(args...), out of line, one function per member and argument types:
 `member<&TRCFilter<float>::process>(filter, x)`. */

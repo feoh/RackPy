@@ -14,6 +14,7 @@
 
 #include <array>
 #include <cstdlib>
+#include <memory>
 #include <cinttypes>
 #include <complex>
 #include <type_traits>
@@ -919,6 +920,124 @@ void firs() {
 		}
 }
 
+// --- minblep.hpp and resampler.hpp (RP-19B), constructed through calls::make as the bindings are --
+
+void minBleps() {
+	for (auto zo : std::vector<std::pair<int, int>>{{4, 4}, {16, 32}, {8, 16}}) {
+		std::vector<float> out(2 * zo.first * zo.second);
+		calls::minBlepImpulse(zo.first, zo.second, out.data());
+		add("min_blep_impulse", {i(zo.first), i(zo.second)}, floats(out.data(), out.size()));
+	}
+	// A script: positive p inserts a discontinuity of x at p; "step" outputs a sample.
+	std::vector<std::pair<float, float>> script = {{0.f, 1.f}, {-0.5f, -2.f}, {-1.f, 3.f}, {0.5f, 3.f}, {-0.25f, 1.f}, {NAN_, 1.f}, {-1e-3f, 0.5f}};
+	{
+		using G = dsp::MinBlepGenerator<16, 32, float>;
+		std::unique_ptr<G> g(calls::make<G>());
+		std::vector<std::string> ops, out;
+		for (int k = 0; k < 40; k++) {
+			if (k % 5 == 0) {
+				auto [p, x] = script[(k / 5) % script.size()];
+				member<&G::insertDiscontinuity>(*g, p, x);
+				ops.push_back(list({f(p), f(x)}));
+			}
+			else
+				ops.push_back("\"step\"");
+			out.push_back(f(member<&G::process>(*g)));
+		}
+		add("minblep.16.32", {list(ops)}, list({list(out), i(g->pos)}));
+	}
+	{
+		using G = dsp::MinBlepGenerator<8, 8, float_4>;
+		std::unique_ptr<G> g(calls::make<G>());
+		std::vector<std::string> ops, out;
+		for (int k = 0; k < 24; k++) {
+			if (k % 4 == 0) {
+				auto [p, x] = script[(k / 4) % script.size()];
+				float_4 v(x, -x, 2 * x, 0.f);
+				member<&G::insertDiscontinuity>(*g, p, v);
+				ops.push_back(list({f(p), f4(v)}));
+			}
+			else
+				ops.push_back("\"step\"");
+			out.push_back(f4(member<&G::process>(*g)));
+		}
+		add("minblep4.8.8", {list(ops)}, list({list(out), i(g->pos)}));
+	}
+}
+
+template <int N>
+void converter(int inRate, int outRate, int quality, int channels, int frames, int outCapacity) {
+	using S = dsp::SampleRateConverter<N>;
+	std::unique_ptr<S> s(calls::make<S>());
+	member<&S::setChannels>(*s, channels);
+	member<&S::setQuality>(*s, quality);
+	member<&S::setRates>(*s, inRate, outRate);
+	std::vector<std::string> chunks;
+	std::vector<std::string> inputs;
+	for (int chunk = 0; chunk < 3; chunk++) {
+		std::vector<float> in = noise((size_t) frames * N, 1.f);
+		std::vector<float> out((size_t) outCapacity * N, 0.f);
+		int inFrames = frames, outFrames = outCapacity;
+		const float* ip = in.data();
+		member<static_cast<void (S::*)(const float*, int, int*, float*, int, int*)>(&S::process)>(*s, ip, N, &inFrames, out.data(), N,
+			&outFrames);
+		inputs.push_back(floats(in.data(), in.size()));
+		chunks.push_back(list({i(inFrames), i(outFrames), floats(out.data(), out.size())}));
+	}
+	add("src." + std::to_string(N), {i(inRate), i(outRate), i(quality), i(channels), i(frames), i(outCapacity), list(inputs)},
+		list(chunks));
+}
+
+template <int OS, int Q, typename T>
+void decimator() {
+	using D = dsp::Decimator<OS, Q, T>;
+	std::unique_ptr<D> dec(calls::make<D>(0.9f));
+	std::vector<std::string> ins, outs;
+	for (int k = 0; k < 12; k++) {
+		T in[OS];
+		std::vector<std::string> enc4;
+		for (int j = 0; j < OS; j++) {
+			if constexpr (std::is_same<T, float>::value)
+				in[j] = uniform(-1.f, 1.f);
+			else
+				in[j] = float_4(uniform(-1.f, 1.f), uniform(-1.f, 1.f), uniform(-1.f, 1.f), uniform(-1.f, 1.f));
+			enc4.push_back(enc(in[j]));
+		}
+		T* p = in;
+		outs.push_back(enc(member<&D::process>(*dec, p)));
+		ins.push_back(list(enc4));
+	}
+	add(std::string("decimator") + (std::is_same<T, float>::value ? "" : "4") + "." + std::to_string(OS) + "." + std::to_string(Q),
+		{list(ins)}, list({list(outs), floats(dec->kernel, OS * Q), i(dec->inIndex)}));
+}
+
+template <int OS, int Q>
+void upsampler() {
+	using U = dsp::Upsampler<OS, Q>;
+	std::unique_ptr<U> up(calls::make<U>(0.75f));
+	std::vector<std::string> ins, outs;
+	for (int k = 0; k < 12; k++) {
+		float x = uniform(-1.f, 1.f);
+		float out[OS];
+		member<&U::process>(*up, x, (float*) out);
+		ins.push_back(f(x));
+		outs.push_back(floats(out, OS));
+	}
+	add("upsampler." + std::to_string(OS) + "." + std::to_string(Q), {list(ins)}, list({list(outs), i(up->inIndex)}));
+}
+
+void resamplers() {
+	converter<2>(44100, 48000, 4, 2, 64, 80);
+	converter<2>(48000, 44100, 10, 2, 64, 80);
+	converter<2>(48000, 48000, 4, 2, 64, 40);  // equal rates: Rack copies
+	converter<1>(96000, 44100, 0, 1, 100, 50);
+	converter<16>(44100, 88200, 4, 3, 32, 70);  // 3 of 16 channels
+	decimator<4, 8, float>();
+	decimator<8, 16, float_4>();
+	upsampler<4, 8>();
+	upsampler<8, 4>();
+}
+
 }  // namespace
 
 int main() {
@@ -939,6 +1058,8 @@ int main() {
 	midiParsers();
 	ffts();
 	firs();
+	minBleps();
+	resamplers();
 	std::printf("{\"cases\": [\n");
 	for (size_t k = 0; k < cases.size(); k++)
 		std::printf("%s%s\n", cases[k].c_str(), k + 1 < cases.size() ? "," : "");

@@ -34,6 +34,8 @@ def test_dsp_suite_passes_inside_rack(
     outcomes = result.outcomes()
     assert outcomes and set(outcomes.values()) == {"passed"}, result.summary()
     assert len(outcomes) >= 17
+    ran = {name.split("::", 1)[0].rsplit("/", 1)[-1] for name in outcomes}
+    assert ran == {p.name for p in SUITE.glob("test_*.py")}, f"every in-Rack test file reports: {sorted(ran)}"
     # RACKPY_CALL_COST_OUT keeps the timings, with this machine's details (planning/rp-18c-validation.md).
     target = os.environ.get("RACKPY_CALL_COST_OUT")
     if target:

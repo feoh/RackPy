@@ -764,6 +764,13 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.dsp.resampling.Decimator",
+      "id": "class_template:rack::dsp::Decimator<value, value, type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.Decimator",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.dsp.basic.Frame",
       "id": "class_template:rack::dsp::Frame<value, type>",
       "kind": "class",
@@ -789,6 +796,20 @@
       "id": "class_template:rack::dsp::MidiParser<value>",
       "kind": "factory",
       "raw": "rackpy.raw.dsp.MidiParser",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.resampling.MinBlepGenerator",
+      "id": "class_template:rack::dsp::MinBlepGenerator<value, value, type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.MinBlepGenerator",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.resampling.SampleRateConverter",
+      "id": "class_template:rack::dsp::SampleRateConverter<value>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.SampleRateConverter",
       "status": "implemented"
     },
     {
@@ -845,6 +866,13 @@
       "id": "class_template:rack::dsp::TTimer<type>",
       "kind": "factory",
       "raw": "rackpy.raw.dsp.TTimer",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.resampling.Upsampler",
+      "id": "class_template:rack::dsp::Upsampler<value, value>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.Upsampler",
       "status": "implemented"
     },
     {
@@ -1780,6 +1808,13 @@
     },
     {
       "facade": null,
+      "id": "constructor:rack::dsp::Decimator::Decimator<OVERSAMPLE, QUALITY, T>(float)",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.Decimator_16_16_float",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "constructor:rack::dsp::IIRFilter::IIRFilter<B_ORDER, A_ORDER, T>()",
       "kind": "class",
       "raw": "rackpy.raw.dsp.IIRFilter_3_3_float",
@@ -1815,6 +1850,13 @@
     },
     {
       "facade": null,
+      "id": "constructor:rack::dsp::MinBlepGenerator::MinBlepGenerator<Z, O, T>()",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.MinBlepGenerator_16_32_float",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "constructor:rack::dsp::RealFFT::RealFFT(size_t)",
       "kind": "class",
       "raw": "rackpy.raw.dsp.RealFFT",
@@ -1825,6 +1867,13 @@
       "id": "constructor:rack::dsp::RealTimeConvolver::RealTimeConvolver(size_t)",
       "kind": "class",
       "raw": "rackpy.raw.dsp.RealTimeConvolver",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::dsp::SampleRateConverter::SampleRateConverter<MAX_CHANNELS>()",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.SampleRateConverter_16",
       "status": "implemented"
     },
     {
@@ -1846,6 +1895,13 @@
       "id": "constructor:rack::dsp::TSchmittTrigger::TSchmittTrigger<T>()",
       "kind": "class",
       "raw": "rackpy.raw.dsp.TSchmittTrigger_float_4",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::dsp::Upsampler::Upsampler<OVERSAMPLE, QUALITY>(float)",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.Upsampler_16_16",
       "status": "implemented"
     },
     {
@@ -2406,6 +2462,13 @@
       "id": "destructor:rack::dsp::RealTimeConvolver::~RealTimeConvolver()",
       "kind": "class",
       "raw": "rackpy.raw.dsp.RealTimeConvolver",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::dsp::SampleRateConverter::~SampleRateConverter<MAX_CHANNELS>()",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.SampleRateConverter_16",
       "status": "implemented"
     },
     {
@@ -4188,6 +4251,27 @@
     },
     {
       "facade": null,
+      "id": "field:rack::dsp::Decimator::inBuffer",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.Decimator_16_16_float.in_buffer",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::Decimator::inIndex",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.Decimator_16_16_float.in_index",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::Decimator::kernel",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.Decimator_16_16_float.kernel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::dsp::Frame::samples",
       "kind": "property",
       "raw": "rackpy.raw.dsp.Frame.samples",
@@ -4503,6 +4587,27 @@
     },
     {
       "facade": null,
+      "id": "field:rack::dsp::MinBlepGenerator::buf",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MinBlepGenerator_16_32_float.buf",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MinBlepGenerator::impulse",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MinBlepGenerator_16_32_float.impulse",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MinBlepGenerator::pos",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MinBlepGenerator_16_32_float.pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::dsp::PulseGenerator::remaining",
       "kind": "property",
       "raw": "rackpy.raw.dsp.PulseGenerator.remaining",
@@ -4576,6 +4681,41 @@
       "id": "field:rack::dsp::RealTimeConvolver::tmpBlock",
       "kind": "property",
       "raw": "rackpy.raw.dsp.RealTimeConvolver.tmp_block",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::SampleRateConverter::channels",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.SampleRateConverter_16.channels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::SampleRateConverter::inRate",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.SampleRateConverter_16.in_rate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::SampleRateConverter::outRate",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.SampleRateConverter_16.out_rate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::SampleRateConverter::quality",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.SampleRateConverter_16.quality",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::SampleRateConverter::st",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.SampleRateConverter_16.st",
       "status": "implemented"
     },
     {
@@ -4695,6 +4835,27 @@
       "id": "field:rack::dsp::TTimer::time",
       "kind": "property",
       "raw": "rackpy.raw.dsp.TTimer_float_4.time",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::Upsampler::inBuffer",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.Upsampler_16_16.in_buffer",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::Upsampler::inIndex",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.Upsampler_16_16.in_index",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::Upsampler::kernel",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.Upsampler_16_16.kernel",
       "status": "implemented"
     },
     {
@@ -6851,6 +7012,13 @@
       "id": "function:rack::dsp::hannWindow(float *, int)",
       "kind": "function",
       "raw": "rackpy.raw.dsp.hann_window",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.resampling.min_blep_impulse",
+      "id": "function:rack::dsp::minBlepImpulse(int, int, float *)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.min_blep_impulse",
       "status": "implemented"
     },
     {
@@ -12252,6 +12420,20 @@
     },
     {
       "facade": null,
+      "id": "method:rack::dsp::Decimator::process($c2 *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.Decimator_16_16_float.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::Decimator::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.Decimator_16_16_float.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::dsp::IIRFilter::getFrequencyPhase($c2)",
       "kind": "method",
       "raw": "rackpy.raw.dsp.IIRFilter_3_3_float.get_frequency_phase",
@@ -12602,6 +12784,20 @@
     },
     {
       "facade": null,
+      "id": "method:rack::dsp::MinBlepGenerator::insertDiscontinuity(float, $c2)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MinBlepGenerator_16_32_float.insert_discontinuity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MinBlepGenerator::process()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MinBlepGenerator_16_32_float.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::dsp::PulseGenerator::isHigh()",
       "kind": "method",
       "raw": "rackpy.raw.dsp.PulseGenerator.is_high",
@@ -12675,6 +12871,48 @@
       "id": "method:rack::dsp::RealTimeConvolver::setKernel(const float *, size_t)",
       "kind": "method",
       "raw": "rackpy.raw.dsp.RealTimeConvolver.set_kernel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::SampleRateConverter::process(const float *, int, int *, float *, int, int *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.SampleRateConverter_16.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::SampleRateConverter::process(const rack::dsp::Frame<$c0> *, int *, rack::dsp::Frame<$c0> *, int *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.SampleRateConverter_16.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::SampleRateConverter::refreshState()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.SampleRateConverter_16.refresh_state",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::SampleRateConverter::setChannels(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.SampleRateConverter_16.set_channels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::SampleRateConverter::setQuality(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.SampleRateConverter_16.set_quality",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::SampleRateConverter::setRates(int, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.SampleRateConverter_16.set_rates",
       "status": "implemented"
     },
     {
@@ -12941,6 +13179,20 @@
       "id": "method:rack::dsp::TTimer::reset()",
       "kind": "method",
       "raw": "rackpy.raw.dsp.TTimer_float_4.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::Upsampler::process(float, float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.Upsampler_16_16.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::Upsampler::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.Upsampler_16_16.reset",
       "status": "implemented"
     },
     {
@@ -19902,6 +20154,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "86a95ef432c8fd7b",
+  "inputs": "739aad5c967f530d",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

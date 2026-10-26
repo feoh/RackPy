@@ -23,6 +23,8 @@ void bindFilter(py::module_ dsp);
 void bindMidi(py::module_ dsp);
 /** dsp/fft.hpp and dsp/fir.hpp (RP-19A). */
 void bindAdvanced(py::module_ dsp);
+/** dsp/minblep.hpp and dsp/resampler.hpp (RP-19B). */
+void bindResampling(py::module_ dsp);
 
 /** The largest polynomial (coefficient count N) polyDirect/Horner/Estrin<T, N> are instantiated for. */
 constexpr size_t MAX_POLY_COEFFICIENTS = 32;
@@ -38,6 +40,8 @@ constexpr long long MAX_FFT_LENGTH = 65536;
 constexpr long long MAX_CONVOLVER_BLOCK = 32768;
 /** The longest RealTimeConvolver kernel, in samples (its FFTs are allocated with unchecked mallocs). */
 constexpr long long MAX_CONVOLVER_KERNEL = 1LL << 22;
+/** The highest rate SampleRateConverter takes (speexdsp sizes its filter from the rate ratio). */
+constexpr int MAX_SAMPLE_RATE = 768000 * 4;
 
 }  // namespace dsp_bindings
 }  // namespace rackpy
