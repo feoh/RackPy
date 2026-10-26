@@ -412,6 +412,11 @@ py::object eventObject(const module::LifecycleRecord& r) {
 		case K::Save: return py::cast(M::SaveEvent{});
 		case K::SetMaster: return py::cast(M::SetMasterEvent{});
 		case K::UnsetMaster: return py::cast(M::UnsetMasterEvent{});
+		case K::ExpanderChange: {
+			M::ExpanderChangeEvent e;
+			e.side = r.side;
+			return py::cast(e);
+		}
 	}
 	throw std::logic_error("unknown lifecycle event");
 }
@@ -506,6 +511,13 @@ std::shared_ptr<runtime::ContextToken> liveContext(const char* what) {
 	if (!context || rack::contextGet() != context->context || !context->context->engine)
 		throw runtime::WrongContext(std::string(what) + " needs Rack's live bound UI context");
 	return context;
+}
+
+/** Rack's parameter quantities read and write values through Rack's engine
+(APP->engine), so module JSON needs the live context; a laboratory module
+without parameters, which only a Bench runs, does not. */
+bool jsonNeedsRack(const module::Module& m) {
+	return !m.laboratory || !m.paramQuantities.empty();
 }
 
 /** Rack's Module JSON from Python. For a Python-owned module the call runs
@@ -671,6 +683,22 @@ void bindModule(py::module_ engine) {
 				values::floatRepr(e.sampleTime) + ")";
 		});
 
+	py::class_<M::ExpanderChangeEvent>(cls, "ExpanderChangeEvent", "The module next to this one changed: side 0 is left, 1 is right.")
+		.def(py::init([](int side) {
+			if (side != 0 && side != 1)
+				throw std::invalid_argument("side is 0 (left) or 1 (right)");
+			M::ExpanderChangeEvent e;
+			e.side = (uint8_t) side;
+			return e;
+		}), py::arg("side") = 0)
+		.def_property("side", [](const M::ExpanderChangeEvent& e) { return (int) e.side; }, [](M::ExpanderChangeEvent& e, int side) {
+			if (side != 0 && side != 1)
+				throw std::invalid_argument("side is 0 (left) or 1 (right)");
+			e.side = (uint8_t) side;
+		}, "0 for the left expander, 1 for the right.")
+		.def("__repr__", [](const M::ExpanderChangeEvent& e) {
+			return "Module.ExpanderChangeEvent(side=" + std::to_string((int) e.side) + ")";
+		});
 	py::class_<M::ProcessArgs>(cls, "ProcessArgs", "Rack's arguments to process() and processBypass(): a value.")
 		.def(py::init([](float rate, float time, int64_t frame) { return M::ProcessArgs{rate, time, frame}; }),
 			py::arg("sample_rate") = 44100.f, py::arg("sample_time") = 1.f / 44100.f, py::arg("frame") = 0)
@@ -788,19 +816,19 @@ void bindModule(py::module_ engine) {
 		"from_json(data) receives it. Constructor-only.")
 		.def("to_json", [](const ModuleRef& r) {
 			module::Module& m = sealedModule(r);
-			if (!m.model)
+			if (!m.model && !m.laboratory)  // a laboratory module's toJson raises its own error
 				throw runtime::Ownership("Rack's Module::toJson names the module's model, and this module has none yet (RP-16)");
-			json_t* json = moduleJson(r, "Module.to_json", true, [](module::Module& m) { return m.toJson(); },
+			json_t* json = moduleJson(r, "Module.to_json", jsonNeedsRack(m), [](module::Module& m) { return m.toJson(); },
 				[](module::Module& m) { return APP->engine->moduleToJson(&m); });
 			JsonPtr owner(json, json_decref);
 			return runtime::fromJson(json);
 		}, "Rack's Module::toJson: id, plugin, model, version, params, bypass, expanders and data.")
 		.def("from_json", [](const ModuleRef& r, py::handle data) {
 			module::Module& m = sealedModule(r);
-			if (!m.model)
+			if (!m.model && !m.laboratory)
 				throw runtime::Ownership("Rack's Module::fromJson checks the module's model, and this module has none yet (RP-16)");
 			JsonPtr json(runtime::toJson(data), json_decref);
-			moduleJson(r, "Module.from_json", true, [&](module::Module& m) { m.fromJson(json.get()); return 0; },
+			moduleJson(r, "Module.from_json", jsonNeedsRack(m), [&](module::Module& m) { m.fromJson(json.get()); return 0; },
 				[&](module::Module& m) { APP->engine->moduleFromJson(&m, json.get()); return 0; });
 		}, py::arg("data"))
 		.def("params_to_json", [](const ModuleRef& r) {

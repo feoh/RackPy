@@ -162,6 +162,7 @@ struct Module : rack::engine::Module {
 	void onSave(const SaveEvent& e) override;
 	void onSetMaster(const SetMasterEvent& e) override;
 	void onUnsetMaster(const UnsetMasterEvent& e) override;
+	void onExpanderChange(const ExpanderChangeEvent& e) override;
 	// Keep the deprecated no-argument events visible next to the overrides.
 	using rack::engine::Module::onAdd;
 	using rack::engine::Module::onRemove;

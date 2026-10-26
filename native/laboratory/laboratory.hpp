@@ -10,6 +10,9 @@
 
 #include <rack.hpp>
 
+#include <array>
+#include <cstddef>
+
 #include "../module/module.hpp"
 #include "rackpy/runtime/python.hpp"
 
@@ -22,30 +25,87 @@ namespace py = pybind11;
 bool enabled();
 /** Throws runtime::Laboratory unless the laboratory is enabled. */
 void requireEnabled(const char* what);
+/** Throws WrongContext for a module with parameters outside Rack's live bound UI context:
+Rack's ParamQuantity reads and writes values through APP->engine. */
+void requireRackContext(const module::Module& m, const char* what);
 
-/** A laboratory module: a RackPy module whose engine-thread virtuals dispatch to
-Python overrides. Python calls reach it only from a Bench or a `base_*`
-function, with the GIL held on the main thread; an override's error is kept
-for that caller (bindings::ErrorCapture). Without an override, Rack's own
-rack::engine::Module implementation runs, as for a C++ subclass. */
+/** The Module virtuals a laboratory module may override in Python, by name. */
+enum class Override : size_t {
+	Process,
+	ProcessBypass,
+	Step,
+	OnAdd,
+	OnRemove,
+	OnBypass,
+	OnUnBypass,
+	OnPortChange,
+	OnReset,
+	OnRandomize,
+	OnSave,
+	OnSampleRateChange,
+	OnSetMaster,
+	OnUnsetMaster,
+	OnExpanderChange,
+	ModuleToJson,
+	ModuleFromJson,
+	ParamsToJson,
+	ParamsFromJson,
+	DataToJson,
+	DataFromJson,
+	Count,
+};
+
+/** The Python names, in Override order (rackpy.laboratory.ModuleClass's methods). */
+extern const char* const OVERRIDE_NAMES[(size_t) Override::Count];
+
+/** A laboratory module: a RackPy module whose virtuals dispatch to Python
+overrides. Python calls reach it only from a Bench, a `base_*` function or a
+rackpy.raw.engine.Module method, with the GIL held on the main thread; an
+override's error is kept for that caller (bindings::ErrorCapture). Without an
+override, the RackPy module's own implementation runs: Rack's, with RackPy's
+snapshot and data handlers. */
 struct Module : module::Module {
 	Module() : module::Module(true) {}
-	runtime::PyRef processFn, processBypassFn, stepFn;
+	std::array<runtime::PyRef, (size_t) Override::Count> overrides;
+
+	const runtime::PyRef& override(Override o) const { return overrides[(size_t) o]; }
 
 	void process(const ProcessArgs& args) override;
 	void processBypass(const ProcessArgs& args) override;
 	void step() override;
+	void onAdd(const AddEvent& e) override;
+	void onRemove(const RemoveEvent& e) override;
+	void onBypass(const BypassEvent& e) override;
+	void onUnBypass(const UnBypassEvent& e) override;
+	void onPortChange(const PortChangeEvent& e) override;
+	void onReset(const ResetEvent& e) override;
+	void onRandomize(const RandomizeEvent& e) override;
+	void onSave(const SaveEvent& e) override;
+	void onSampleRateChange(const SampleRateChangeEvent& e) override;
+	void onSetMaster(const SetMasterEvent& e) override;
+	void onUnsetMaster(const UnsetMasterEvent& e) override;
+	void onExpanderChange(const ExpanderChangeEvent& e) override;
+	json_t* toJson() override;
+	void fromJson(json_t* rootJ) override;
+	json_t* paramsToJson() override;
+	void paramsFromJson(json_t* rootJ) override;
+	json_t* dataToJson() override;
+	void dataFromJson(json_t* rootJ) override;
+	using module::Module::onAdd;
+	using module::Module::onRemove;
+	using module::Module::onReset;
+	using module::Module::onRandomize;
+	using module::Module::onSampleRateChange;
 
 	/** The Python references it holds, for its handle's garbage-collector traversal. */
 	template <typename Visit>
 	void visit(Visit&& f) const {
-		for (const runtime::PyRef* ref : {&processFn, &processBypassFn, &stepFn})
-			f(ref->borrowed());
+		for (const runtime::PyRef& ref : overrides)
+			f(ref.borrowed());
 	}
 	void clearOverrides() {
-		processFn.reset();
-		processBypassFn.reset();
-		stepFn.reset();
+		for (runtime::PyRef& ref : overrides)
+			ref.reset();
 	}
 };
 

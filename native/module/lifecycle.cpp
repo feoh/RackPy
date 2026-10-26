@@ -116,6 +116,15 @@ void Module::onUnsetMaster(const UnsetMasterEvent& e) {
 	lifecycle.push(recordOf(LifecycleKind::UnsetMaster));
 }
 
+// An engine event: Rack's stepBlock updates expander pointers on the thread
+// stepping the engine, and removeModule on the main thread. Snapshot only.
+void Module::onExpanderChange(const ExpanderChangeEvent& e) {
+	rack::engine::Module::onExpanderChange(e);
+	LifecycleRecord record = recordOf(LifecycleKind::ExpanderChange);
+	record.side = e.side;
+	lifecycle.push(record);
+}
+
 // Custom state: Rack saves under the shared lock (audio runs on), loads under
 // the exclusive one. Without handlers, Rack's defaults: no data, nothing to load.
 json_t* Module::dataToJson() {

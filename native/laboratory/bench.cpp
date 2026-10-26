@@ -4,9 +4,12 @@
 // public API only (src/engine/Engine.cpp at the pinned commit): stepFrame's
 // module order, process or processBypass, cable propagation, expander
 // message flips and the frame counter; addModule, removeModule, addCable,
-// removeCable, bypassModule and setSampleRate with their events. It cannot
-// reproduce engine worker threads, the audio driver thread, master-module
-// timing, parameter smoothing, CPU meters or plug lights (docs/explanation/callbacks.md).
+// removeCable, bypassModule, resetModule, randomizeModule, prepareSave,
+// setSampleRate and setMasterModule with their events, and stepBlock's
+// expander updates (setExpanderModule, which is PRIVATE, rewritten with
+// public fields). It cannot reproduce engine worker threads, the audio driver
+// thread, master-module timing, parameter smoothing, CPU meters or plug
+// lights (docs/explanation/callbacks.md).
 #include <pybind11/stl.h>
 
 #include <algorithm>
@@ -72,6 +75,7 @@ struct Bench {
 	int64_t nextCableId = 0;
 	std::vector<BenchModule> modules;
 	std::vector<BenchCable> cables;  // sorted by input, as Rack's
+	module::Module* master = nullptr;
 
 	explicit Bench(float rate) : sampleRate(rate), sampleTime(1.f / rate) { benches.push_back(this); }
 	~Bench() {
@@ -83,6 +87,7 @@ struct Bench {
 
 	/** Forget every module and cable without events (garbage collection, finalization). */
 	void drop() noexcept {
+		master = nullptr;
 		for (auto& bm : modules)
 			bm.module->onBench = false;
 		cables.clear();
@@ -157,6 +162,22 @@ struct Bench {
 			Busy busy;
 			M::RemoveEvent eRemove;
 			m.onRemove(eRemove);
+			if (master == &m)
+				setMasterNoLock(nullptr);
+			// Rack's removeModule: the other modules' expanders (the module itself included), then its own.
+			for (auto& other : modules) {
+				for (uint8_t side = 0; side < 2; side++) {
+					RackModule::Expander& expander = other.module->getExpander(!side);
+					if (expander.moduleId == m.id)
+						expander.moduleId = -1;
+					if (expander.module == &m)
+						setExpanderModule(*other.module, nullptr, !side);
+				}
+			}
+			for (uint8_t side = 0; side < 2; side++) {
+				m.getExpander(side).moduleId = -1;
+				setExpanderModule(m, nullptr, side);
+			}
 		}
 		auto it = std::find_if(modules.begin(), modules.end(), [&](const BenchModule& b) { return b.module == &m; });
 		py::object handle = std::move(it->handle);
@@ -295,6 +316,98 @@ struct Bench {
 		capture.rethrow();
 	}
 
+	// --- Rack's Engine::setMasterModule, resetModule, randomizeModule, prepareSave ------
+	void setMasterNoLock(module::Module* m) {
+		if (m == master)
+			return;
+		if (master) {
+			M::UnsetMasterEvent e;
+			master->onUnsetMaster(e);
+		}
+		master = m;
+		if (master) {
+			M::SetMasterEvent e;
+			master->onSetMaster(e);
+		}
+	}
+
+	void setMaster(py::object value) {
+		runtime::requireMainThread("using a laboratory Bench");
+		refuseInsideCallback("changing a bench's master module");
+		module::Module* m = value.is_none() ? nullptr : entry(value).module;
+		Busy busy;
+		bindings::ErrorCapture capture;
+		setMasterNoLock(m);
+		capture.rethrow();
+	}
+
+	template <typename Dispatch>
+	void moduleEvent(py::object value, const char* what, Dispatch dispatch) {
+		refuseInsideCallback(what);
+		module::Module& m = *entry(value).module;
+		Busy busy;
+		bindings::ErrorCapture capture;
+		dispatch(m);
+		capture.rethrow();
+	}
+
+	void prepareSave() {
+		runtime::requireMainThread("using a laboratory Bench");
+		refuseInsideCallback("saving a bench");
+		Busy busy;
+		bindings::ErrorCapture capture;
+		for (size_t i = 0; i < modules.size(); i++) {
+			M::SaveEvent e;
+			modules[i].module->onSave(e);
+		}
+		capture.rethrow();
+	}
+
+	// --- Expanders: RackWidget and fromJson set the IDs; stepBlock follows them -------
+	void setExpander(py::object value, int side, py::object neighbour) {
+		refuseInsideCallback("placing a module next to another");
+		if (side != 0 && side != 1)
+			throw std::invalid_argument("side is 0 (left) or 1 (right)");
+		module::Module& m = *entry(value).module;
+		m.getExpander(side).moduleId = neighbour.is_none() ? -1 : entry(neighbour).module->id;
+	}
+
+	py::object expanderModule(py::object value, int side) {
+		if (side != 0 && side != 1)
+			throw std::invalid_argument("side is 0 (left) or 1 (right)");
+		RackModule* other = entry(value).module->getExpander(side).module;
+		BenchModule* bm = find(other);
+		return bm ? bm->handle : py::none();
+	}
+
+	/** Rack's Module::setExpanderModule (PRIVATE): the pointer, and an ExpanderChangeEvent if it changed. */
+	static void setExpanderModule(module::Module& m, RackModule* other, uint8_t side) {
+		RackModule::Expander& expander = m.getExpander(side);
+		if (expander.module != other) {
+			expander.module = other;
+			M::ExpanderChangeEvent e;
+			e.side = side;
+			m.onExpanderChange(e);
+		}
+	}
+
+	/** Engine_updateExpander_NoLock. */
+	void updateExpander(module::Module& m, uint8_t side) {
+		RackModule::Expander& expander = m.getExpander(side);
+		if (expander.moduleId >= 0) {
+			if (!expander.module || expander.module->id != expander.moduleId) {
+				RackModule* found = nullptr;
+				for (const auto& bm : modules)
+					if (bm.module->id == expander.moduleId)
+						found = bm.module;
+				setExpanderModule(m, found, side);
+			}
+		}
+		else if (expander.module) {
+			setExpanderModule(m, nullptr, side);
+		}
+	}
+
 	// --- Rack's Engine::stepBlock and Engine_stepFrame -------------------------------
 	void step(int frames) {
 		requireEnabled("stepping a laboratory Bench");
@@ -303,6 +416,14 @@ struct Bench {
 		if (frames < 1 || frames > (1 << 16))
 			throw std::invalid_argument("frames must be from 1 to 65536");
 		Busy busy;
+		{
+			bindings::ErrorCapture capture;
+			for (size_t i = 0; i < modules.size(); i++) {
+				updateExpander(*modules[i].module, 0);
+				updateExpander(*modules[i].module, 1);
+			}
+			capture.rethrow();
+		}
 		for (int i = 0; i < frames; i++)
 			stepFrame();
 		block++;
@@ -462,7 +583,41 @@ void bindBench(py::module_ lab) {
 					c.inputId));
 			return out;
 		}, "(cable_id, output_module, output_id, input_module, input_id) for each cable, by ID.")
-		.def("clear", &Bench::clear, "Rack's Engine::clear: every cable, then every module, with their events.");
+		.def("clear", &Bench::clear, "Rack's Engine::clear: every cable, then every module, with their events.")
+		.def("set_master_module", &Bench::setMaster, py::arg("module"),
+			"Rack's setMasterModule: UnsetMasterEvent for the old master, SetMasterEvent for the new one (None for none). "
+			"A bench has no audio clock: the master is only a designation.")
+		.def_property_readonly("master_module", [](Bench& b) {
+			BenchModule* bm = b.find(b.master);
+			return bm ? bm->handle : py::none();
+		})
+		.def("reset_module", [](Bench& b, py::object m) {
+			b.moduleEvent(m, "resetting a module on a bench", [](module::Module& mod) {
+				requireRackContext(mod, "Rack's resetModule");
+				M::ResetEvent e;
+				mod.onReset(e);
+			});
+		}, py::arg("module"), "Rack's resetModule: a ResetEvent.")
+		.def("randomize_module", [](Bench& b, py::object m) {
+			b.moduleEvent(m, "randomizing a module on a bench", [](module::Module& mod) {
+				requireRackContext(mod, "Rack's randomizeModule");
+				M::RandomizeEvent e;
+				mod.onRandomize(e);
+			});
+		}, py::arg("module"), "Rack's randomizeModule: a RandomizeEvent.")
+		.def("prepare_save_module", [](Bench& b, py::object m) {
+			b.moduleEvent(m, "saving a bench", [](module::Module& mod) {
+				M::SaveEvent e;
+				mod.onSave(e);
+			});
+		}, py::arg("module"), "Rack's prepareSaveModule: a SaveEvent.")
+		.def("prepare_save", &Bench::prepareSave, "Rack's prepareSave: a SaveEvent for every module, in order.")
+		.def("set_expander", &Bench::setExpander, py::arg("module"), py::arg("side"), py::arg("neighbour"),
+			"Place `neighbour` (a module on this bench, or None) on the module's left (side 0) or right (side 1), as "
+			"Rack's rack does for adjacent module widgets and patch loading do: it sets the expander's module ID. The "
+			"pointer, and an ExpanderChangeEvent, follow at the next step(), as in Rack.")
+		.def("get_expander_module", &Bench::expanderModule, py::arg("module"), py::arg("side"),
+			"The module the expander points at since the last step() (Rack's Expander::module), or None.");
 
 	runtime::onFinalize([] {
 		for (Bench* bench : benches)

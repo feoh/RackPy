@@ -34,7 +34,7 @@ listed as gaps in `docs/explanation/callbacks.md`.
 | Slice | Scope |
 | --- | --- |
 | 22A | Bench, `rackpy.laboratory.enable()`, `process`/`processBypass`/`step` trampolines, `ProcessArgs`, normal-mode refusals (7 records) |
-| 22B | Synchronous laboratory overrides of module events and JSON, the sample-rate, master and expander-change events |
+| 22B | Synchronous laboratory overrides of module events and JSON, the sample-rate, master and expander-change events (7 records, 18 annotated) |
 | 22C | Laboratory `Quantity`/`ParamQuantity` value methods; the RP-12 base-Quantity inconsistency; `midi::OutputDevice::sendMessage` |
 | 22D | Callback inventory (all 434 virtuals), measured laboratory costs, subprocess races, RP-22 closing validation |
 | 22E | `dsp::MidiGenerator::onMessage` laboratory override (after RP-18D) |
@@ -64,5 +64,33 @@ fields. Validation: [rp-22a-validation.md](rp-22a-validation.md).
   `on_unset_master` and `on_expander_change` at class definition, naming
   native kernels and the laboratory.
 
-**RP-22B, 22C, 22D, 22E** are described in their Witan tasks and are
-recorded here as they land.
+**RP-22B — Synchronous laboratory events and JSON**
+(`tk-rackpy-22b-synchronous-laboratory-module-events--23893f`). Records
+moved to `implemented`: `onSampleRateChange` (both overloads),
+`onSetMaster`, `onUnsetMaster`, `onExpanderChange`, `ExpanderChangeEvent`
+and its `side`. The twelve UI-thread event records and the six JSON records
+gain a laboratory override path in their notes. Validation:
+[rp-22b-validation.md](rp-22b-validation.md).
+
+- **Override semantics.** Laboratory event and JSON methods replace Rack's
+  implementation; `super()` runs the RackPy module's own (Rack's behaviour,
+  the lifecycle snapshot, the data handlers). This differs on purpose from
+  `rackpy.plugin.ModuleClass`, whose handlers run after Rack's behaviour.
+- **Names.** Rack's `Module::toJson`/`fromJson` are `module_to_json`/
+  `module_from_json` (as `Engine::moduleToJson` calls them), because
+  `ModuleClass.to_json`/`from_json` already mean the custom-data handlers.
+  The deprecated no-argument events have no separate override; `super()`
+  reaches them (RP-16C's convention).
+- **Bench.** Adds Rack's `setMasterModule`, `resetModule`, `randomizeModule`,
+  `prepareSave(Module)`, removal order (master, then expanders) and
+  `stepBlock`'s expander updates; `set_expander` sets an expander's module
+  ID, as Rack's rack and patch loading do. Rack's `setExpanderModule` is
+  `PRIVATE`, so the bench writes the public `Expander::module` and calls the
+  public `onExpanderChange`.
+- **Production.** RackPy modules now snapshot `onExpanderChange` (lock-free,
+  Python-free), so the bench's event order can be compared with Rack's
+  engine. `ModuleClass.create(model)` names a laboratory module's model for
+  Rack's `toJson`; Rack still never creates or runs it.
+
+**RP-22C, 22D, 22E** are described in their Witan tasks and are recorded
+here as they land.

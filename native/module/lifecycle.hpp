@@ -25,6 +25,7 @@ enum class LifecycleKind : uint8_t {
 	Save,
 	SetMaster,
 	UnsetMaster,
+	ExpanderChange,
 };
 
 /** One event as Rack dispatched it, with the event's own fields copied. */
@@ -36,6 +37,7 @@ struct LifecycleRecord {
 	bool connecting = false;  // PortChange
 	rack::engine::Port::Type portType = rack::engine::Port::INPUT;
 	int portId = 0;
+	uint8_t side = 0;  // ExpanderChange
 };
 
 /** A bounded single-producer, single-consumer ring. Rack's engine lock (or the

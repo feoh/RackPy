@@ -536,9 +536,10 @@ deletes them.
 Rack tells a module about its life through events: `onAdd` and `onRemove`
 (engine membership), `onBypass`/`onUnBypass`, `onPortChange` (a cable connected
 or disconnected), `onReset` and `onRandomize` (user commands),
-`onSampleRateChange`, `onSave`, and `onSetMaster`/`onUnsetMaster` (which
-module drives the engine). RackPy's modules handle all eleven natively
-(RP-14C3): Rack's own behaviour runs first (resetting or randomizing the
+`onSampleRateChange`, `onSave`, `onSetMaster`/`onUnsetMaster` (which
+module drives the engine) and `onExpanderChange` (the module beside it
+changed). RackPy's modules handle all twelve natively
+(RP-14C3; `onExpanderChange` since RP-22B): Rack's own behaviour runs first (resetting or randomizing the
 parameters through their quantities, and calling Rack's deprecated
 no-argument events), then RackPy records the event. No Python runs in these
 handlers apart from what Rack's behaviour itself calls, such as a quantity
@@ -553,9 +554,10 @@ subclass's `reset` override, and that Python cannot take Rack's engine lock
 the last call, oldest first, as `(sequence, event)` pairs, where `event` is a
 copy of Rack's own record: `Module.AddEvent`, `Module.PortChangeEvent` (with
 `connecting`, `type` and `port_id`), `Module.SampleRateChangeEvent` (with
-`sample_rate` and `sample_time`) and so on. This is RackPy's API, not Rack's:
+`sample_rate` and `sample_time`), `Module.ExpanderChangeEvent` (with `side`:
+0 left, 1 right) and so on. This is RackPy's API, not Rack's:
 Rack may dispatch the sample-rate and master events on an audio driver thread,
-so recording takes no lock, allocates nothing and never calls Python, and
+and expander changes on the thread stepping its engine, so recording takes no lock, allocates nothing and never calls Python, and
 Python reads the records later on the main thread. The queue holds 64 events;
 when it is full, a new event is dropped and counted in
 `dropped_lifecycle_events`. Sequence numbers count dropped events too, so a gap
@@ -572,13 +574,10 @@ lock, and direct calls raise `OwnershipError`. The deprecated no-argument forms
 `on_sample_rate_change()`) warn and call Rack's empty deprecated handler,
 which records nothing.
 
-Python cannot override these handlers yet: RackPy modules are not Python
-subclasses. Observing snapshots is not the same semantics as a synchronous
-Python handler, so the `on*` records stay `planned`: Python module classes
-(RP-16) are to bring overrides of the UI-thread events (everything but the
-sample-rate and master events, which Rack may run on an audio driver thread),
-and the non-real-time callback laboratory (RP-22) synchronous Python for those
-driver events. The event records themselves are `implemented`.
+Observing snapshots is not the same semantics as a synchronous Python
+handler. The UI-thread events have Python handlers (below); the sample-rate,
+master and expander events, which Rack may run on its audio threads, have
+Python overrides only in the [laboratory](#laboratory-events-and-json).
 
 
 **Python handlers (RP-16C).** `set_event_handlers(on_add=..., on_remove=...,
@@ -590,6 +589,35 @@ installs the methods a subclass overrides. See
 [module events](../how-to/plugins.md#module-events). `model` and
 `get_model()` are Rack's: the module's `rackpy.raw.plugin.Model`, or `None`
 for a module made directly with `Module.create`.
+
+(laboratory-events-and-json)=
+## Laboratory events and JSON
+
+:::{admonition} Laboratory only
+:class: warning
+
+These overrides run only on a laboratory module, on an offline
+[laboratory bench](../explanation/callbacks.md#the-laboratory-bench), after
+trusted code calls `rackpy.laboratory.enable()`. Rack's engine never runs
+them.
+:::
+
+A `rackpy.laboratory.ModuleClass` may override every event above
+(`on_add`, ..., `on_sample_rate_change`, `on_set_master`, `on_unset_master`,
+`on_expander_change`) and Rack's JSON virtuals: `module_to_json` and
+`module_from_json` (Rack's `Module::toJson` and `fromJson`; named after
+`Engine::moduleToJson`, since `ModuleClass.to_json` is the custom-data
+handler), `params_to_json`, `params_from_json`, `data_to_json` and
+`data_from_json`. Unlike the handlers above, they are true overrides: called
+synchronously where Rack would call them, *instead of* Rack's
+implementation, and `super()` runs it (Rack's behaviour, RackPy's snapshot,
+the data handlers). Rack's own `toJson` calls the Python `params_to_json` and
+`data_to_json`, and `fromJson` the `*_from_json` ones. JSON overrides return
+JSON-compatible data, `None` for Rack's `NULL`. Rack's `toJson` and `fromJson`
+name the module's model: `ModuleClass.create(model)` sets one, which only
+names it. Rack's deprecated no-argument events are reached through `super()`,
+as in RackPy's handlers. Details: [laboratory modules](../explanation/callbacks.md#laboratory-modules).
+
 ## Native kernels
 
 `set_kernel(kernel)`, `kernel` and `kernel_failed` are RackPy's, not Rack's:

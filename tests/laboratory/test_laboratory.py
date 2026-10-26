@@ -15,14 +15,23 @@ from tests.support import linux_x64_only, run_pytest_in_rack
 
 pytestmark = [pytest.mark.host, linux_x64_only()]
 SUITE = Path(__file__).resolve().parent / "in_rack"
-UI_ONLY = ["test_engine_reference.py"]
+
+
+def expect_only(outcomes: dict[str, str], skipped: str) -> None:
+    """Every test passed, except the one that needs the other run's conditions (a Rack context, or none)."""
+    assert outcomes, "no tests ran"
+    assert {n for n, o in outcomes.items() if o != "passed"} == {n for n in outcomes if n.endswith("::" + skipped)}
+    assert outcomes[next(n for n in outcomes if n.endswith("::" + skipped))] == "skipped"
+
+
+UI_ONLY = ["test_engine_reference.py", "test_engine_events.py"]
 
 
 def test_laboratory_in_production_host(make_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path) -> None:
     ignored = [arg for name in UI_ONLY for arg in ("--ignore", str(SUITE / name))]
     result = run_pytest_in_rack(make_bundle(), rack_host, tmp_path, SUITE, args=ignored)
     assert result.exit == 0, result.summary()
-    assert result.outcomes() and set(result.outcomes().values()) == {"passed"}, result.summary()
+    expect_only(result.outcomes(), skipped="test_racks_to_json_calls_python_params_and_data_overrides")
 
 
 @pytest.mark.gui
@@ -32,5 +41,6 @@ def test_laboratory_with_live_rack_context(
     result = run_pytest_in_rack(make_hooks_bundle(), rack_host, tmp_path, SUITE, during_ui=True)
     assert result.exit == 0, result.summary()
     outcomes = result.outcomes()
-    assert any("test_a_bench_reproduces_racks_engine_frame_for_frame" in n for n in outcomes), result.summary()
-    assert outcomes and set(outcomes.values()) == {"passed"}, result.summary()
+    for ui_test in ("test_a_bench_reproduces_racks_engine_frame_for_frame", "test_bench_events_match_racks_engine"):
+        assert any(ui_test in n for n in outcomes), result.summary()
+    expect_only(outcomes, skipped="test_parameter_events_and_json_need_racks_context")

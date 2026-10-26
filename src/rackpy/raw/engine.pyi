@@ -310,6 +310,10 @@ class Module:
     class UnsetMasterEvent:
         def __init__(self) -> None: ...
 
+    class ExpanderChangeEvent:
+        side: int
+        def __init__(self, side: int = 0) -> None: ...
+
     class PortChangeEvent:
         connecting: bool
         type: Port.Type
@@ -340,6 +344,7 @@ class Module:
         | SaveEvent
         | SetMasterEvent
         | UnsetMasterEvent
+        | ExpanderChangeEvent
     )
     # Lifecycle handlers (RP-16C), constructor-only; called after Rack's behaviour.
     def set_event_handlers(
