@@ -154,11 +154,14 @@ def _deprecated_alias(name: str) -> Any:
 
 
 def _refuse_on_message(cls: builtins.type, /, **kwargs: Any) -> None:
-    if "on_message" in vars(cls):
+    if getattr(cls, "_rackpy_laboratory", False):
+        return  # rackpy.laboratory.MidiGenerator[N]: offline only
+    if any("on_message" in vars(base) for base in cls.__mro__):
         raise TypeError(
             f"{cls.__qualname__} defines on_message: Rack calls MidiGenerator::onMessage where a module generates "
             "MIDI, on its engine thread, where Python never runs (ADR 003), so a Python override would never be "
-            "called. RackPy's generator records the messages instead: call take_messages()."
+            "called. RackPy's generator records the messages instead: call take_messages() (or, offline only, "
+            "subclass rackpy.laboratory.MidiGenerator[N])."
         )
 
 

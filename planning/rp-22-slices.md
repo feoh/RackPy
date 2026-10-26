@@ -119,5 +119,34 @@ five base `Quantity` ones and `midi::OutputDevice::sendMessage` keep
   registered with Rack's drivers. Python-made output ports connect to it
   directly, and Rack's `Output::sendMessage` reaches the override.
 
-**RP-22D, 22E** are described in their Witan tasks and are recorded here as
-they land.
+**RP-22E — Laboratory MidiGenerator::onMessage**
+(`tk-rackpy-22e-laboratory-python-override-of-dsp-mid-5172f2`). Record:
+`dsp::MidiGenerator::onMessage` moves to `implemented`. Validation:
+[rp-22e-validation.md](rp-22e-validation.md). The supervisor named
+`native/bindings/dsp/midi.cpp` and `src/rackpy/raw/_dsp.py` as the
+implementation seams; the laboratory facade, stubs, tests and mapping are
+updated with them. A narrow, test-hooks-only Rack-thread probe was also
+approved. `docs/reference/dsp.md` (RP-19's) is not edited here, so the
+explanation page carries the description.
+
+- **Trampoline.** Each `MidiGenerator_N` gets a pybind11 alias whose
+  `onMessage` calls a Python `on_message` override. Ordinary generators
+  keep no `on_message` attribute (an RP-18D test checks it); the laboratory
+  class defines `on_message`, which calls RackPy's recording implementation
+  non-virtually through the private `_on_message`, so `super().on_message`
+  records. Messages passed to Python are owned copies, safe to retain.
+- **Gating.** `rackpy.raw.dsp` still refuses `on_message` in any subclass
+  except `rackpy.laboratory.MidiGenerator[N]` classes, whose instances need
+  `enable()`. A native per-instance mark gates the trampoline too: inherited
+  mixin callbacks, late monkeypatching and a raw-base constructor cannot
+  bypass enablement. Rack never holds these Python-owned generators; a call
+  without the GIL goes through `callPython`, which refuses Rack's threads.
+
+- **Known dispatch divergence.** The shared `overrideOrVoid` helper uses
+  pybind11's same-object/same-name frame check. Reentry through a different
+  native generator method from `on_message` records the nested message,
+  rather than invoking Python again as a C++ override would. This is pinned
+  by a test, not fixed locally; the cross-cutting follow-up is
+  `tk-rackpy-trampolines-suppress-same-object-re-entra-0abce9`.
+
+**RP-22D** is described in its Witan task and is recorded here as it lands.

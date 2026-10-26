@@ -21,6 +21,10 @@ void bindDigital(py::module_ dsp);
 void bindFilter(py::module_ dsp);
 /** dsp/vumeter.hpp and dsp/midi.hpp: VU meters, MidiGenerator and MidiParser (RP-18D). */
 void bindMidi(py::module_ dsp);
+#ifdef RACKPY_TEST_HOOKS
+/** Resolve the bound recorder before releasing the GIL for the Rack-thread refusal probe. */
+rack::dsp::MidiGenerator<16>& midiGenerator16ForTesting(py::handle value);
+#endif
 /** dsp/fft.hpp and dsp/fir.hpp (RP-19A). */
 void bindAdvanced(py::module_ dsp);
 /** dsp/minblep.hpp and dsp/resampler.hpp (RP-19B). */

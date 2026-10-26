@@ -13,8 +13,11 @@ real-time audio. See *Callbacks and the laboratory* in the explanations.
 Trusted code must call :func:`enable` first. Available inside Rack only.
 """
 
+from __future__ import annotations
+
+import functools
 import warnings
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self, cast
 
 try:
     from _rackpy_host import laboratory as _lab
@@ -24,11 +27,14 @@ except ImportError as e:
 from rackpy import plugin as _plugin
 from rackpy import raw as _raw
 from rackpy.engine import Module
+from rackpy.raw import dsp as _dsp
 from rackpy.raw import engine as _engine
+from rackpy.raw import midi as _midi
 from rackpy.raw.plugin import Model
 
 __all__ = [
     "Bench",
+    "MidiGenerator",
     "MidiOutputDevice",
     "ModuleClass",
     "ParamQuantity",
@@ -262,3 +268,58 @@ class SwitchQuantity(_engine.SwitchQuantity):
     def __init__(self) -> None:
         super().__init__()
         _lab.mark_quantity(self)
+
+
+if TYPE_CHECKING:
+
+    class _MidiGenerator(_dsp.MidiGenerator_16):
+        """The laboratory specialization also exposes Rack's override point."""
+
+        def on_message(self, message: _midi.Message) -> None: ...
+
+
+@functools.cache
+def _midi_generator(channels: int) -> type[_MidiGenerator]:
+    base: type[_dsp.MidiGenerator_16] = _dsp.MidiGenerator[channels]
+
+    def __init__(self: _dsp.MidiGenerator_16) -> None:
+        base.__init__(self)
+        base._enable_laboratory(self)
+
+    def on_message(self: _dsp.MidiGenerator_16, message: _midi.Message) -> None:
+        """Rack's onMessage, called with each message the generator makes: RackPy's records it for take_messages()."""
+        base._on_message(self, message)
+
+    doc = (
+        f"rack::dsp::MidiGenerator<{channels}> whose on_message a subclass may override, offline: Rack's generator "
+        "calls it synchronously with each message it generates, and super().on_message(message) records it for "
+        "take_messages(), as RackPy's native implementation does. Creating one needs enable()."
+    )
+    namespace = {
+        "_rackpy_laboratory": True,
+        "__init__": __init__,
+        "on_message": on_message,
+        "__doc__": doc,
+        "__module__": __name__,
+    }
+    return cast("type[_MidiGenerator]", type(f"MidiGenerator_{channels}", (base,), namespace))
+
+
+class _MidiGeneratorTemplate:
+    """``MidiGenerator[N]``, N from 1 to 16: the laboratory class to subclass for a Python ``on_message``."""
+
+    def __getitem__(self, channels: int) -> type[_MidiGenerator]:
+        _dsp.MidiGenerator[channels]  # Rack's range, and its error
+        return _midi_generator(channels)
+
+    def __repr__(self) -> str:
+        return "rackpy.laboratory.MidiGenerator"
+
+
+MidiGenerator = _MidiGeneratorTemplate()
+"""``MidiGenerator[N]``: Rack's ``dsp::MidiGenerator<N>`` whose ``on_message`` a subclass overrides, offline only.
+
+Rack calls ``MidiGenerator::onMessage`` where a module generates MIDI, on its
+engine thread, so outside the laboratory RackPy's generator only records the
+messages (``take_messages()``).
+"""

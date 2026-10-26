@@ -190,3 +190,34 @@ Rack's drivers' devices: `device.connect(output)` points a
 (which applies the port's channel) then calls the override synchronously,
 for example from a laboratory module's `process` on a bench. Deleting the
 device disconnects its ports; a deleted port leaves the device.
+
+## A laboratory MIDI generator
+
+Rack's `dsp::MidiGenerator<N>` turns gates and CV into MIDI and hands each
+message to its virtual `onMessage`, which a module calls from `process` on
+Rack's engine thread. So `rackpy.raw.dsp.MidiGenerator[N]` implements it
+natively, recording the messages for `take_messages()`, and refuses a
+subclass that defines `on_message`. A subclass of
+`rackpy.laboratory.MidiGenerator[N]` (created after `enable()`) may: Rack's
+generator calls the override synchronously, in its own order, with each
+message's bytes and frame; `super().on_message(message)` records it, as the
+native implementation does; an error reaches the caller of the generator
+method that produced the message. Callback messages are owned copies and
+may be retained. A native per-instance mark, set by the laboratory
+constructor only after checking enablement, also gates dispatch; defining
+an inherited callback or monkeypatching a raw generator cannot opt it in.
+These are Python-owned, offline generators, never
+registered with Rack's engine or MIDI drivers. If native code nevertheless
+calls one on a Rack thread, Python is refused (`refused_rack_thread`) and
+the native recorder answers; the test-hooks build probes that fallback.
+As with laboratory quantities, `enable()` gates creation; disabling the
+laboratory is not a revocation of already-created generators.
+
+**Known reentry limitation.** The shared trampoline helper uses pybind11's
+`get_override`, which suppresses dispatch when the current Python frame is
+already that same object's `on_message`. If an override calls another
+native generator method that emits a message on the same generator, that
+nested message goes to the native recorder, not back to Python. This
+**differs from C++ virtual dispatch**; `super().on_message` remains the
+explicit, non-virtual recorder call. Fixing the shared trampoline helper
+is a separate follow-up, not a claim of this slice.

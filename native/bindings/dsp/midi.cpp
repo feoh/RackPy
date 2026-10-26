@@ -9,10 +9,12 @@
 // live in rackpy.raw.dsp._midi.
 //
 // MidiGenerator::onMessage is a virtual Rack calls with each message it
-// generates. Its RP-06 strategy is "engine" (ADR 003), so Python cannot
-// override it; RackPy's generator implements it natively by recording the
-// messages, which take_messages() returns. A Python override is RP-22's
-// laboratory.
+// generates. Its RP-06 strategy is "engine" (ADR 003), so outside the
+// callback laboratory Python cannot override it; RackPy's generator
+// implements it natively by recording the messages, which take_messages()
+// returns. A rackpy.laboratory.MidiGenerator[N] subclass may override
+// on_message (RP-22E): Rack's code calls it synchronously, and super()
+// records (through _on_message), as RackPy's native implementation does.
 //
 // Rack's MidiParser trusts its inputs: an out-of-range channel index, an MPE
 // message on a channel above MAX_CHANNELS, more channels than MAX_CHANNELS, a
@@ -28,6 +30,7 @@
 #include <utility>
 #include <vector>
 
+#include "../../laboratory/laboratory.hpp"
 #include "../simd/simd.hpp"
 #include "../support/overrides.hpp"
 #include "../values/values.hpp"
@@ -99,7 +102,24 @@ void bindVuMeters(py::module_ m) {
 template <int N>
 struct RecordingGenerator : d::MidiGenerator<N> {
 	std::vector<Message> sent;
+	bool laboratoryCallbacks = false;
 	void onMessage(const Message& message) override { sent.push_back(message); }
+};
+
+/** A Python subclass's on_message (rackpy.laboratory.MidiGenerator only: rackpy.raw.dsp
+refuses others at definition). Python reaches the generator only from its own calls; a call
+without the GIL goes through callPython, which never runs Python on Rack's threads. */
+template <int N>
+struct PyRecordingGenerator : RecordingGenerator<N> {
+	using R = RecordingGenerator<N>;
+	void onMessage(const Message& message) override {
+		if (!this->laboratoryCallbacks) {
+			R::onMessage(message);
+			return;
+		}
+		bindings::overrideOrVoid(static_cast<const R*>(this), "on_message", [this, &message] { R::onMessage(message); },
+			Message(message));  // Python may retain it after Rack's stack-local message is gone.
+	}
 };
 
 template <int N>
@@ -107,7 +127,7 @@ py::object bindGenerator(py::module_ scope) {
 	using G = d::MidiGenerator<N>;
 	using R = RecordingGenerator<N>;
 	std::string name = "MidiGenerator_" + std::to_string(N);
-	py::class_<R> cls(scope, name.c_str(), ("rack::dsp::MidiGenerator<" + std::to_string(N) +
+	py::class_<R, PyRecordingGenerator<N>> cls(scope, name.c_str(), ("rack::dsp::MidiGenerator<" + std::to_string(N) +
 		">: turns gates and CV into MIDI messages; take_messages() returns the messages it generated.").c_str());
 	cls.attr("CHANNELS") = N;
 	auto base = [](R& r) -> G& { return r; };
@@ -173,7 +193,15 @@ py::object bindGenerator(py::module_ scope) {
 			std::vector<Message> out;
 			out.swap(r.sent);
 			return out;
-		}, "The messages generated since the last call (Rack's onMessage, implemented natively), oldest first.");
+		}, "The messages generated since the last call (Rack's onMessage, implemented natively), oldest first.")
+		// Not public: an ordinary generator has no on_message (RP-18D). The laboratory's
+		// MidiGenerator[N].on_message calls this as its superclass implementation.
+		.def("_enable_laboratory", [](R& r) {
+			laboratory::requireEnabled("creating a laboratory MIDI generator");
+			r.laboratoryCallbacks = true;
+		})
+		.def("_on_message", [](R& r, const Message& message) { r.R::onMessage(message); }, py::arg("message"),
+			"RackPy's onMessage, non-virtually: records the message for take_messages().");
 	valueCopies(cls);
 	return cls;
 }
@@ -394,6 +422,12 @@ void bindParsers(py::module_ scope, py::dict& specs, py::module_ dsp, std::integ
 }
 
 }  // namespace
+
+#ifdef RACKPY_TEST_HOOKS
+rack::dsp::MidiGenerator<16>& midiGenerator16ForTesting(py::handle value) {
+	return value.cast<RecordingGenerator<16>&>();
+}
+#endif
 
 void bindMidi(py::module_ m) {
 	bindVuMeters(m);

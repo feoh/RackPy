@@ -22,6 +22,7 @@ NEEDS_RACK = [
     "test_racks_to_json_calls_python_params_and_data_overrides",
     "test_racks_module_code_reaches_slot_quantities_python_value_methods",
     "test_rack_threads_never_run_laboratory_python",
+    "test_rack_threads_never_run_midi_generator_python",
     "test_racks_output_reaches_a_python_output_device",
 ]
 NEEDS_NO_RACK = ["test_parameter_events_and_json_need_racks_context"]

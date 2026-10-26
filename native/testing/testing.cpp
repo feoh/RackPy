@@ -3,6 +3,7 @@
 // tests exercise the runtime in Rack. Test hooks only; see testing.hpp.
 #include "testing.hpp"
 
+#include "../bindings/dsp/dsp.hpp"
 #include "../bindings/engine/components.hpp"
 #include "../bindings/engine/module.hpp"
 #include "../bindings/widget/managed.hpp"
@@ -706,6 +707,15 @@ void define(py::module_ m) {
 		}
 		return last;
 	});
+	m.def("midi_generator_16_on_rack_thread", [](py::handle generator, const rack::midi::Message& message) {
+		auto& native = dsp_bindings::midiGenerator16ForTesting(generator);
+		py::gil_scoped_release release;
+		std::thread worker([&] {
+			rack::contextSet(foreignContext());
+			native.onMessage(message);
+		});
+		worker.join();
+	}, py::arg("generator"), py::arg("message"));
 	m.def("metadata_as_rack", [](const bindings::ModuleRef& r, const std::string& kind, int i) {
 		// As a port or light tooltip would: the module's own slot, on the main
 		// thread without the GIL, so Python overrides go through callPython.
