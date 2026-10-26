@@ -118,6 +118,8 @@ void paramMethods(py::classh<T, Options...>& cls) {
 void bindModuleWidget(py::module_ app);
 /** rackpy.raw.componentlibrary's native widgets (components.cpp). */
 void bindComponentLibrary(py::module_ raw);
+/** Rack's scene, rack, scroll widget, cables and plugs as host views, and the LED displays (rack.cpp). */
+void bindRack(py::module_ raw, py::module_ app);
 
 }  // namespace appdetail
 }  // namespace widgets

@@ -681,6 +681,27 @@
     },
     {
       "facade": null,
+      "id": "constructor:rack::app::LedDisplayChoice::LedDisplayChoice()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.LedDisplayChoice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::LedDisplaySeparator::LedDisplaySeparator()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.LedDisplaySeparator",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::LedDisplayTextField::LedDisplayTextField()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.LedDisplayTextField",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "constructor:rack::app::ModuleLightWidget::ModuleLightWidget()",
       "kind": "class",
       "raw": "rackpy.raw.app.ModuleLightWidget",
@@ -1934,6 +1955,13 @@
     },
     {
       "facade": null,
+      "id": "field:rack::Context::scene",
+      "kind": "property",
+      "raw": "rackpy.raw.Context.scene",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::Context::window",
       "kind": "property",
       "raw": "rackpy.raw.Context.window",
@@ -1951,6 +1979,55 @@
       "id": "field:rack::Exception::msg",
       "kind": "attribute",
       "raw": "rackpy.raw.Exception.msg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::CableWidget::color",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostCableWidget.color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::CableWidget::hoveredInputPort",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostCableWidget.hovered_input_port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::CableWidget::hoveredOutputPort",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostCableWidget.hovered_output_port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::CableWidget::inputPlug",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostCableWidget.input_plug",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::CableWidget::inputPort",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostCableWidget.input_port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::CableWidget::outputPlug",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostCableWidget.output_plug",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::CableWidget::outputPort",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostCableWidget.output_port",
       "status": "implemented"
     },
     {
@@ -2014,6 +2091,69 @@
       "id": "field:rack::app::Knob::speed",
       "kind": "property",
       "raw": "rackpy.raw.app.Knob.speed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::LedDisplayChoice::bgColor",
+      "kind": "property",
+      "raw": "rackpy.raw.app.LedDisplayChoice.bg_color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::LedDisplayChoice::color",
+      "kind": "property",
+      "raw": "rackpy.raw.app.LedDisplayChoice.color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::LedDisplayChoice::fontPath",
+      "kind": "property",
+      "raw": "rackpy.raw.app.LedDisplayChoice.font_path",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::LedDisplayChoice::text",
+      "kind": "property",
+      "raw": "rackpy.raw.app.LedDisplayChoice.text",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::LedDisplayChoice::textOffset",
+      "kind": "property",
+      "raw": "rackpy.raw.app.LedDisplayChoice.text_offset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::LedDisplayTextField::bgColor",
+      "kind": "property",
+      "raw": "rackpy.raw.app.LedDisplayTextField.bg_color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::LedDisplayTextField::color",
+      "kind": "property",
+      "raw": "rackpy.raw.app.LedDisplayTextField.color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::LedDisplayTextField::fontPath",
+      "kind": "property",
+      "raw": "rackpy.raw.app.LedDisplayTextField.font_path",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::LedDisplayTextField::textOffset",
+      "kind": "property",
+      "raw": "rackpy.raw.app.LedDisplayTextField.text_offset",
       "status": "implemented"
     },
     {
@@ -2105,6 +2245,62 @@
       "id": "field:rack::app::PortWidget::type",
       "kind": "property",
       "raw": "rackpy.raw.app.PortWidget.type",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::RackScrollWidget::rackWidget",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostRackScrollWidget.rack_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::RackScrollWidget::zoomWidget",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostRackScrollWidget.zoom_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::RackWidget::touchedParam",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostRackWidget.touched_param",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::Scene::browser",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostScene.browser",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::Scene::menuBar",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostScene.menu_bar",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::Scene::mousePos",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostScene.mouse_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::Scene::rack",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostScene.rack",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::Scene::rackScroll",
+      "kind": "property",
+      "raw": "rackpy.raw.app.HostScene.rack_scroll",
       "status": "implemented"
     },
     {
@@ -5000,6 +5196,90 @@
     },
     {
       "facade": null,
+      "id": "method:rack::app::CableWidget::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::drawLayer(const rack::widget::Widget::DrawArgs &, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.draw_layer",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::fromJson(json_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostCableWidget.from_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::getHoveredPort(rack::engine::Port::Type)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostCableWidget.get_hovered_port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::getInputPos()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostCableWidget.get_input_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::getOutputPos()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostCableWidget.get_output_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::getPlug(rack::engine::Port::Type)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostCableWidget.get_plug",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::getPort(rack::engine::Port::Type)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostCableWidget.get_port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::isComplete()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostCableWidget.is_complete",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::mergeJson(json_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostCableWidget.merge_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::updateCable()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostCableWidget.update_cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::app::CircularShadow::draw(const rack::widget::Widget::DrawArgs &)",
       "kind": "method",
       "raw": "rackpy.raw.app.CircularShadow.draw",
@@ -5073,6 +5353,69 @@
       "id": "method:rack::app::Knob::onLeave(const rack::widget::Widget::LeaveEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.app.Knob.on_leave",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::LedDisplay::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.LedDisplay.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::LedDisplay::drawLayer(const rack::widget::Widget::DrawArgs &, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.LedDisplay.draw_layer",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::LedDisplayChoice::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.LedDisplayChoice.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::LedDisplayChoice::drawLayer(const rack::widget::Widget::DrawArgs &, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.LedDisplayChoice.draw_layer",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::LedDisplayChoice::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.LedDisplayChoice.on_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::LedDisplaySeparator::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.LedDisplaySeparator.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::LedDisplayTextField::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.LedDisplayTextField.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::LedDisplayTextField::drawLayer(const rack::widget::Widget::DrawArgs &, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.LedDisplayTextField.draw_layer",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::LedDisplayTextField::getTextPosition(rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.LedDisplayTextField.get_text_position",
       "status": "implemented"
     },
     {
@@ -5672,6 +6015,27 @@
     },
     {
       "facade": null,
+      "id": "method:rack::app::PlugWidget::getCable()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostPlugWidget.get_cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PlugWidget::getType()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostPlugWidget.get_type",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PlugWidget::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::app::PortWidget::appendContextMenu(rack::ui::Menu *)",
       "kind": "method",
       "raw": "rackpy.raw.app.PortWidget.append_context_menu",
@@ -5791,6 +6155,594 @@
     },
     {
       "facade": null,
+      "id": "method:rack::app::RackScrollWidget::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackScrollWidget::getGridOffset()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackScrollWidget.get_grid_offset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackScrollWidget::getZoom()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackScrollWidget.get_zoom",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackScrollWidget::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.on_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackScrollWidget::onHover(const rack::widget::Widget::HoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.on_hover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackScrollWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.on_hover_key",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackScrollWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.on_hover_scroll",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackScrollWidget::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackScrollWidget.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackScrollWidget::setGridOffset(rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackScrollWidget.set_grid_offset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackScrollWidget::setZoom(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackScrollWidget.set_zoom",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackScrollWidget::setZoom(float, rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackScrollWidget.set_zoom",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackScrollWidget::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackScrollWidget::zoomToBound(rack::math::Rect)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackScrollWidget.zoom_to_bound",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackScrollWidget::zoomToModules()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackScrollWidget.zoom_to_modules",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::addModule(rack::app::ModuleWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.add_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::addModuleAtMouse(rack::app::ModuleWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.add_module_at_mouse",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::appendSelectionContextMenu(rack::ui::Menu *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.append_selection_context_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::bypassSelectionAction(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.bypass_selection_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::clear()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.clear",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::clearCables()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.clear_cables",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::clearCablesAction()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.clear_cables_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::clearCablesOnPort(rack::app::PortWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.clear_cables_on_port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::cloneSelectionAction(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.clone_selection_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::copyClipboardSelection()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.copy_clipboard_selection",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::deleteSelectionAction()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.delete_selection_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::deselectAll()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.deselect_all",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::disconnectSelectionAction()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.disconnect_selection_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::fromJson(json_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.from_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getCable(int64_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getCable(rack::app::PortWidget *, rack::app::PortWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getCableContainer()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_cable_container",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getCables()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_cables",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getCablesOnPort(rack::app::PortWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_cables_on_port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getCompleteCables()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_complete_cables",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getCompleteCablesOnPort(rack::app::PortWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_complete_cables_on_port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getIncompleteCable()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_incomplete_cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getIncompleteCables()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_incomplete_cables",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getModule(int64_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getModuleContainer()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_module_container",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getModules()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_modules",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getMousePos()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_mouse_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getNextCableColor()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_next_cable_color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getNextCableColorId()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_next_cable_color_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getPlugContainer()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_plug_container",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getSelected()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_selected",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getTopCable(rack::app::PortWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_top_cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getTopPlug(rack::app::PortWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_top_plug",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getTouchedParam()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_touched_param",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::hasModules()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.has_modules",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::hasSelection()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.has_selection",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::isSelected(rack::app::ModuleWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.is_selected",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::isSelectionBypassed()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.is_selection_bypassed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::loadSelection(std::string)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.load_selection",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::loadSelectionDialog()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.load_selection_dialog",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::mergeJson(json_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.merge_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.on_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::onDragEnd(const rack::widget::Widget::DragEndEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.on_drag_end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.on_drag_hover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::onDragStart(const rack::widget::Widget::DragStartEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.on_drag_start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::onHover(const rack::widget::Widget::HoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.on_hover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.on_hover_key",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::pasteClipboardAction()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.paste_clipboard_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::pasteJsonAction(json_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.paste_json_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::pasteModuleJsonAction(json_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.paste_module_json_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::randomizeSelectionAction()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.randomize_selection_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::removeModule(rack::app::ModuleWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.remove_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::requestModulePos(rack::app::ModuleWidget *, rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.request_module_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::requestSelectionPos(rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.request_selection_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::resetSelectionAction()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.reset_selection_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::saveSelection(std::string)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.save_selection",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::saveSelectionDialog()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.save_selection_dialog",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::select(rack::app::ModuleWidget *, bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.select",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::selectAll()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.select_all",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::selectionToJson(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.selection_to_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::setModulePosForce(rack::app::ModuleWidget *, rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.set_module_pos_force",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::setModulePosNearest(rack::app::ModuleWidget *, rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.set_module_pos_nearest",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::setModulePosSqueeze(rack::app::ModuleWidget *, rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.set_module_pos_squeeze",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::setNextCableColorId(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.set_next_cable_color_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::setSelectionPosNearest(rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.set_selection_pos_nearest",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::setTouchedParam(rack::app::ParamWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.set_touched_param",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::updateModuleOldPositions()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.update_module_old_positions",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::updateSelectionFromRect()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.update_selection_from_rect",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::app::RailWidget::draw(const rack::widget::Widget::DrawArgs &)",
       "kind": "method",
       "raw": "rackpy.raw.app.RailWidget.draw",
@@ -5801,6 +6753,55 @@
       "id": "method:rack::app::RailWidget::step()",
       "kind": "method",
       "raw": "rackpy.raw.app.RailWidget.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Scene::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Scene::getMousePos()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostScene.get_mouse_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Scene::onDragHover(const rack::widget::Widget::DragHoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.on_drag_hover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Scene::onHover(const rack::widget::Widget::HoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.on_hover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Scene::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.on_hover_key",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Scene::onPathDrop(const rack::widget::Widget::PathDropEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.on_path_drop",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Scene::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.HostWidget.step",
       "status": "implemented"
     },
     {
@@ -9144,6 +10145,13 @@
     },
     {
       "facade": null,
+      "id": "record:rack::app::CableWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.app.HostCableWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "record:rack::app::CircularShadow",
       "kind": "class",
       "raw": "rackpy.raw.app.CircularShadow",
@@ -9154,6 +10162,34 @@
       "id": "record:rack::app::Knob",
       "kind": "class",
       "raw": "rackpy.raw.app.Knob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::LedDisplay",
+      "kind": "class",
+      "raw": "rackpy.raw.app.LedDisplay",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::LedDisplayChoice",
+      "kind": "class",
+      "raw": "rackpy.raw.app.LedDisplayChoice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::LedDisplaySeparator",
+      "kind": "class",
+      "raw": "rackpy.raw.app.LedDisplaySeparator",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::LedDisplayTextField",
+      "kind": "class",
+      "raw": "rackpy.raw.app.LedDisplayTextField",
       "status": "implemented"
     },
     {
@@ -9200,6 +10236,13 @@
     },
     {
       "facade": null,
+      "id": "record:rack::app::PlugWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.app.HostPlugWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "record:rack::app::PortWidget",
       "kind": "class",
       "raw": "rackpy.raw.app.PortWidget",
@@ -9207,9 +10250,30 @@
     },
     {
       "facade": null,
+      "id": "record:rack::app::RackScrollWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.app.HostRackScrollWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::RackWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.app.HostRackWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "record:rack::app::RailWidget",
       "kind": "class",
       "raw": "rackpy.raw.app.RailWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::Scene",
+      "kind": "class",
+      "raw": "rackpy.raw.app.HostScene",
       "status": "implemented"
     },
     {
@@ -10830,6 +11894,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "335eee004ccc7a2d",
+  "inputs": "ddb9140870335c1a",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

@@ -22,6 +22,7 @@ from rackpy.errors import OwnershipError
 from rackpy.plugin import plugin
 from rackpy.raw import app
 from rackpy.raw import widget as w
+from rackpy.raw.engine import Port
 from rackpy.raw.math import Rect, Vec
 from rackpy.raw.window import Svg
 
@@ -143,6 +144,7 @@ def phase1() -> Frames:
     RESULT["cable"] = list(_testing.rack_cables())
     gate = b.module
     RESULT["connected"] = gate is not None and gate.inputs[0].is_connected()
+    yield from cable_views(out, inp)
 
     # Rack's Delete, then undo and redo: Rack recreates the widget with the Python factory.
     removes = len(RESULT["removes"])
@@ -184,6 +186,11 @@ def phase1() -> Frames:
     except OwnershipError:
         RESULT["outside_factory"] = "refused"
     RESULT["owner_module"] = owner.module is made
+    # RP-28D: a Python module widget into Rack's rack and out again.
+    rack().add_module_at_mouse(owner)
+    in_rack = [rack().get_module(module_id) is owner, owner.parent is not None]
+    rack().remove_module(owner)
+    RESULT["rack_add_remove"] = [*in_rack, owner.parent is None, owner.alive, _testing.engine_has_module(module_id)]
     owner.close()  # a module widget deletes its module with it
     RESULT["owner_closed"] = _testing.engine_has_module(module_id)
     RESULT["final_cables"] = list(_testing.rack_cables())
@@ -200,6 +207,41 @@ def phase1() -> Frames:
     ]
     _testing.remove_module_widget(blink_id)
     RESULT["final_cables"] = list(_testing.rack_cables())
+
+
+def rack() -> Any:
+    context = raw.context_get()
+    assert context is not None and context.scene is not None
+    return context.scene.rack
+
+
+def cable_views(out: app.PortWidget, inp: app.PortWidget) -> Frames:
+    """RP-28D: the cable Rack made, through its host views."""
+    yield from wait(1)
+    cables = rack().get_complete_cables()
+    cable = cables[0]
+    plug = cable.get_plug(Port.Type.INPUT)
+    found: dict[str, Any] = {
+        "views": [type(cable).__name__, type(plug).__name__],
+        "ports": [cable.input_port is inp, cable.output_port is out, cable.is_complete()],
+        "plug": [plug.get_cable() is cable, plug.get_type() == Port.Type.INPUT, cable.input_plug is plug],
+        "lookups": [
+            rack().get_top_cable(inp) is cable,
+            rack().get_cable(out, inp) is cable,
+            rack().get_cables_on_port(out) == [cable],
+            rack().get_complete_cables_on_port(inp) == [cable],
+            rack().get_top_plug(inp) is plug,
+            cable.get_port(Port.Type.OUTPUT) is out,
+        ],
+        "positions": cable.get_input_pos().is_finite() and cable.get_output_pos().is_finite(),
+        "json": "color" in cable.merge_json({}),
+    }
+    colour = cable.color
+    cable.color = raw.color.from_hex_string("#3060f0")
+    cable.from_json({"color": "#3060f0"})
+    found["color"] = raw.color.to_hex_string(cable.color)
+    cable.color = colour
+    RESULT["cable_views"] = found
 
 
 def voices_alive() -> list[int]:

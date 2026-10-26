@@ -489,7 +489,42 @@ void bindManagedWidgets(py::module_ mod) {
 			checked(s);
 			transferTo(host, s->token->context, child, 0);
 		}, py::arg("child"),
-			"Hand a Python widget to this Rack-owned widget (e.g. a ScrollWidget's container), which then owns it.");
+			"Hand a Python widget to this Rack-owned widget (e.g. a ScrollWidget's container), which then owns it.")
+		.def("step", [](const ExternalWidget& ref) {
+			checkMutation();
+			auto& w = checkedExternal(ref);
+			CallbackGuard guard;
+			w.step();
+		}, "Rack's step for this widget, as its parent's step calls it. Refused inside a widget callback.")
+		.def("draw", [](const ExternalWidget& ref, py::object args) {
+			auto& w = checkedExternal(ref);
+			auto held = drawArgs(args);
+			CallbackGuard guard;
+			w.draw(*static_cast<const W::DrawArgs*>(held->ptr));
+		}, py::arg("args"), "Rack's drawing of this widget, inside a drawing callback (with its DrawArgs).")
+		.def("draw_layer", [](const ExternalWidget& ref, py::object args, int layer) {
+			auto& w = checkedExternal(ref);
+			auto held = drawArgs(args);
+			CallbackGuard guard;
+			w.drawLayer(*static_cast<const W::DrawArgs*>(held->ptr), layer);
+		}, py::arg("args"), py::arg("layer"));
+	// Rack's event handlers of a Rack-owned widget, as Rack's dispatch calls them. Add, Remove and
+	// the graphics context events announce changes only Rack makes, so they are not sent from Python.
+	auto host = mod.attr("HostWidget");
+#define HOST_EVENT(E, method, python) \
+	if (std::string(#python) != "on_add" && std::string(#python) != "on_remove" && \
+		std::string(#python) != "on_context_create" && std::string(#python) != "on_context_destroy") \
+		host.attr(#python) = py::cpp_function([](const ExternalWidget& ref, py::object event) { \
+			checkMutation(); \
+			auto& w = checkedExternal(ref); \
+			auto data = eventData(event); \
+			const auto& e = nativeEvent<W::E>(data, #E); \
+			CallbackGuard guard; \
+			w.method(e); \
+			captureEventTarget(e.context); \
+		}, py::name(#python), py::is_method(host), py::arg("event"), "Rack's handler of this widget. Refused inside a widget callback.");
+	RACKPY_WIDGET_EVENTS(HOST_EVENT)
+#undef HOST_EVENT
 	auto cls = py::classh<W, Widget<W>>(mod, "Widget", py::dynamic_attr(), "Subclassable, context-bound Rack Widget.")
 		.def(py::init([] {
 			auto* w = new Widget<W>();

@@ -4,8 +4,10 @@
 light widgets, their SVG versions, screws, panels and rails.
 **Implemented (RP-28A, RP-28B), Linux x86_64 inside Rack Free 2.6.6**, for
 the records of those headers and of `helpers.hpp`'s widget factories (see
-the [coverage report](coverage.md)). The component library, the rack, the
-scene, cables and displays come with the rest of RP-28.
+the [coverage report](coverage.md)), and for Rack's scene, rack, cables and
+LED displays (RP-28D). The [component library](componentlibrary.md) is its
+own page. Python-made cable widgets and the audio and MIDI displays come
+with the rest of RP-28.
 
 Every class is Rack's own and is a [subclassable widget](widgets.md): create
 it on Rack's main thread once the UI exists, set its fields, add it to a
@@ -225,3 +227,79 @@ sets Rack's fields in Rack's order:
   `get_light()`, such as the [component library](componentlibrary.md)'s
   light sliders and buttons. They set the light's module and first light
   ID too.
+
+(app-rack)=
+## The scene and the rack
+
+Rack makes and owns its `Scene`, `RackScrollWidget` and `RackWidget`, so
+Python reaches them as host views (stale once Rack deletes them):
+
+- `rackpy.raw.context_get().scene` is a `HostScene`. It has `rack`,
+  `rack_scroll`, `menu_bar` and `browser`, `get_mouse_pos()`, and Rack's
+  deprecated `mouse_pos` field.
+- `HostRackScrollWidget` has `get_zoom()` and `set_zoom(zoom, pivot=)`
+  (Rack clamps the zoom to 1/4 to 4), `get_grid_offset()`,
+  `set_grid_offset()`, `reset()`, `zoom_to_modules()` and
+  `zoom_to_bound(rect)`. The bound must be finite with a positive size,
+  because Rack divides by it.
+- `HostRackWidget` covers:
+  - modules: `get_module(id)`, `get_modules()`, and `request_module_pos`,
+    `set_module_pos_nearest`, `set_module_pos_force` and
+    `set_module_pos_squeeze` for a module widget in the rack;
+  - Rack's selection and its actions: `select`, `select_all`,
+    `deselect_all`, `get_selected`, `selection_to_json`, load and save,
+    clipboard, reset, randomize, disconnect, clone, bypass and delete;
+  - patch JSON: `merge_json` and `from_json`. `from_json` refuses modules or
+    cables that already have widgets, because Rack would give them a second
+    owner;
+  - paste: `paste_json_action`, `paste_module_json_action` and
+    `paste_clipboard_action`;
+  - `clear()` and cable clearing;
+  - cable lookups (`get_cables`, `get_cable(id)`,
+    `get_cable(output, input)`, `get_cables_on_port`, `get_top_cable`,
+    `get_top_plug`) and the next cable colour;
+  - `get_touched_param()` and `set_touched_param()`, the param Core's
+    MIDI-Map learns. That param needs a module.
+- `add_module(module_widget)` and `add_module_at_mouse(module_widget)` put a
+  Python module widget, with its model and module, into the rack, which then
+  owns it. `remove_module(module_widget)` takes it out again, disconnecting
+  its cables, and Python owns it once more. A module widget Rack made is
+  deleted with its `remove_action`.
+- Rack 2.6.6's `has_modules()` is inverted: it returns True only for an
+  empty rack, because it returns `children.empty()`.
+
+Calls that take Rack's engine lock release the GIL, and calls that change
+the widget tree are refused inside a widget callback. The dialog methods
+wait for the user.
+
+Every host view can also run Rack's own behaviour: `step()`, `draw(args)`
+and `draw_layer(args, layer)` (inside a drawing callback), and its event
+handlers (`on_hover`, `on_button`, ...) with RackPy's event records. Only
+`on_add`, `on_remove` and the graphics context events are missing, because
+they announce changes only Rack makes.
+
+(app-cables)=
+## Rack's cables
+
+The cables users plug are Rack's `CableWidget`s, which reach Python as
+`HostCableWidget` views:
+
+- `input_port`, `output_port` and the hovered ports, `input_plug` and
+  `output_plug` (`HostPlugWidget`s);
+- `is_complete()`, `get_plug(type)`, `get_port(type)` and
+  `get_hovered_port(type)`, `get_input_pos()` and `get_output_pos()`;
+- the `color`, `merge_json()` and `from_json()`;
+- `update_cable()`, which replaces the engine cable.
+
+A `HostPlugWidget` has `get_cable()` and `get_type()`. Making cable
+widgets from Python, and their engine cables, need RP-24's engine cable
+handles.
+
+(app-led-displays)=
+## LED displays
+
+`LedDisplay`, `LedDisplaySeparator`, `LedDisplayChoice` (`text`,
+`font_path`, `text_offset`, `color`, `bg_color`) and `LedDisplayTextField`
+(a `TextField` with the same appearance fields) are Rack's display widgets,
+which a Python subclass can extend. `font_path` names a font Rack loads each
+frame; with a missing font, no text is drawn.

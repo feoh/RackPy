@@ -629,6 +629,7 @@ void bindApp(py::module_ raw) {
 	variant<app::RailWidget, TW>(mod, "RailWidget");
 
 	appdetail::bindModuleWidget(mod);
+	appdetail::bindRack(raw, mod);
 	appdetail::bindComponentLibrary(raw);
 
 	// Rack's deprecated SVG* typedefs: the same classes, with a warning when used.

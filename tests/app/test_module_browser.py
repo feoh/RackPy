@@ -70,6 +70,10 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     assert one["preview_seen"] and one["preview"] == [True, True]  # the browser's preview: no module
     assert one["added_from_browser"]
     assert one["cable"] == [1, 0, 1] and one["connected"]  # a cable between two Python modules' factory ports
+    views = one["cable_views"]  # RP-28D: Rack's cable through its host views
+    assert views["views"] == ["HostCableWidget", "HostPlugWidget"] and views["ports"] == [True, True, True]
+    assert all(views["plug"]) and all(views["lookups"]) and views["positions"] and views["json"]
+    assert views["color"] == "#3060f0"
     first = one["removed_id"]
     assert one["removed"] == {"removes": [f"module-{first}"], "widget": False, "cables": [0, 0, 0]}
     assert one["undone"] == {"rebuilt": True, "cables": [1, 0, 1]}  # the factory rebuilt it; Rack restored the cable
@@ -78,6 +82,7 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     assert one["preview_call"] == [True, True]
     assert one["second_owner"] == "refused" and one["outside_factory"] == "refused"
     assert one["owner_module"] and one["owner_closed"] is False
+    assert one["rack_add_remove"] == [True, True, True, True, True]  # into the rack and back to Python
     actions = one["actions"]
     assert actions["to_json"] == ["PyVoice", "RackPy"] and actions["from_json"] == 5.0
     assert actions["preset"] == [True, 5.0] and actions["template"] and actions["template_loaded"] == 5.0

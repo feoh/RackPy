@@ -11,7 +11,8 @@ option (2026-10-25).
 | 28A | Controls, ports, lights, SVG widgets, panels and rails; typed host views; widget factories |
 | 28B | `ModuleWidget`; Python module-widget factories (`createModel`'s widget, `Model::createModule`/`createModuleWidget`); ports those widgets create, which cable; the real module-browser smoke gate (RP-25's) |
 | 28C | The component library, including `createLightParam` and its light buttons; themed widgets switching with `preferDarkPanels` (with RP-30) |
-| 28D | Scene, RackWidget, RackScrollWidget, CableWidget, and the LED, audio and MIDI displays |
+| 28D | Scene, RackWidget, RackScrollWidget, Rack's cable and plug widgets, and the LED displays |
+| 28E | Python cable widgets and rack cable edits (with RP-24's engine cables), and the audio and MIDI displays and buttons (with RP-29) |
 
 **RP-28A — app controls, typed host views and widget factory helpers**
 (`tk-rackpy-28a-app-controls-typed-host-views-and-wid-45d11d`). 219 records.
@@ -97,3 +98,33 @@ created after this slice's work had begun, and claimed when it was created.
   file took 181 s to compile; a fresh build is back to 96 s on 32 cores.
 - **Moved.** `AudioButton_*` and `MidiButton_*` go to RP-28D, with the
   displays they derive from.
+
+**RP-28D — scene, rack, scroll, Rack's cables and LED displays**
+(`tk-rackpy-28d-scene-rack-scroll-rack-s-cables-and-l-3d7ead`). 152 records.
+Validation: [rp-28d-validation.md](rp-28d-validation.md).
+
+- **Host views.** Rack makes and owns its Scene, RackScrollWidget and
+  RackWidget, and the cable and plug widgets of the cables users plug, so
+  they are typed host views: `Context.scene` gives a `HostScene`, and so on.
+- **Host dispatch.** Every host view can run Rack's step, drawing (inside a
+  drawing callback) and event handlers. Decision: Add, Remove and the
+  graphics context events are not sent from Python, because they announce
+  structural changes only Rack makes.
+- **RackWidget.** Covered: module lookup and placement, selection and its
+  actions, patch JSON, paste, clipboard, cable queries and clearing, cable
+  colours and the touched param. Decisions:
+  - `from_json` refuses modules and cables that already have widgets.
+  - `add_module` and `remove_module` hand a Python module widget to the
+    rack and back.
+  - The touched param must have a module.
+  - Engine-locking calls release the GIL.
+- **Rack 2.6.6 quirk.** `RackWidget::hasModules` returns
+  `children.empty()`: True only for an empty rack. The binding returns
+  Rack's value and documents it.
+- **LED displays.** LedDisplay, LedDisplaySeparator, LedDisplayChoice and
+  LedDisplayTextField are subclassable.
+- **Moved to RP-28E** (`tk-rackpy-28e-python-cable-widgets-rack-cable-edits-7eedc5`,
+  blocked by RP-24 and RP-29): Python-created cable and plug widgets and
+  their `engine::Cable`, the Add/Remove handlers, `addCable` and
+  `removeCable`, the audio and MIDI displays and buttons. RP-24 also takes
+  `getModuleDragAction` (a history ComplexAction).
