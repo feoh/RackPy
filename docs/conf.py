@@ -33,7 +33,7 @@ nitpicky = True
 suppress_warnings = ["autoapi.python_import_resolution"]
 nitpick_ignore_regex = [
     # The build is offline (no intersphinx): standard-library types in signatures cannot resolve.
-    ("py:class", r"(collections\.abc|typing|types|array|pathlib)\.\w+"),
+    ("py:class", r"(collections\.abc|typing|types|array|pathlib|os)\.\w+"),
     # PEP 695 type parameters (def f[T](...)) are not documented objects.
     ("py:class", r"[A-Z]"),
     # The stub-only alias that lets Widget.BaseEvent name the module-level BaseEvent (rackpy/raw/widget.pyi).

@@ -373,6 +373,13 @@
     },
     {
       "facade": null,
+      "id": "alias:rack::network::CookieMap",
+      "kind": "alias",
+      "raw": "rackpy.raw.network.CookieMap",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "alias:rack::random::Xoroshiro128Plus::result_type",
       "kind": "alias",
       "raw": "rackpy.raw.random.Xoroshiro128Plus.result_type",
@@ -2130,6 +2137,13 @@
     },
     {
       "facade": null,
+      "id": "enum:rack::network::Method",
+      "kind": "enum",
+      "raw": "rackpy.raw.network.Method",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "enum:rack::ui::Label::Alignment",
       "kind": "enum",
       "raw": "rackpy.raw.ui.Label.Alignment",
@@ -2189,6 +2203,34 @@
       "id": "enumerator:rack::logger::Level::WARN_LEVEL",
       "kind": "enum_member",
       "raw": "rackpy.raw.logger.Level.WARN_LEVEL",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::network::Method::METHOD_DELETE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.network.Method.METHOD_DELETE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::network::Method::METHOD_GET",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.network.Method.METHOD_GET",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::network::Method::METHOD_POST",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.network.Method.METHOD_POST",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::network::Method::METHOD_PUT",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.network.Method.METHOD_PUT",
       "status": "implemented"
     },
     {
@@ -5406,6 +5448,34 @@
     },
     {
       "facade": null,
+      "id": "function:rack::network::encodeUrl(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.network.encode_url",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::network::requestDownload(const std::string &, const std::string &, float *, const rack::network::CookieMap &)",
+      "kind": "function",
+      "raw": "rackpy.raw.network.request_download",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::network::requestJson(rack::network::Method, const std::string &, json_t *, const rack::network::CookieMap &)",
+      "kind": "function",
+      "raw": "rackpy.raw.network.request_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::network::urlPath(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.network.url_path",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "function:rack::plugin::getModel(const std::string &, const std::string &)",
       "kind": "function",
       "raw": "rackpy.raw.plugin.get_model",
@@ -5777,6 +5847,307 @@
     },
     {
       "facade": null,
+      "id": "function:rack::system::archiveDirectory(const std::string &, const std::string &, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.archive_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::archiveDirectory(const std::string &, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.archive_directory_to_bytes",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::copy(const std::string &, const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.copy",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::createDirectories(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.create_directories",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::createDirectory(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.create_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::createSymbolicLink(const std::string &, const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.create_symbolic_link",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::exists(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.exists",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getAbsolute(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_absolute",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getCanonical(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_canonical",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getDirectory(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getEntries(const std::string &, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_entries",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getExtension(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_extension",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getFileSize(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_file_size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getFilename(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_filename",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getFpuFlags()",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_fpu_flags",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getLogicalCoreCount()",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_logical_core_count",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getOperatingSystemInfo()",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_operating_system_info",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getStackTrace()",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_stack_trace",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getStem(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_stem",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getTempDirectory()",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_temp_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getThreadTime()",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_thread_time",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getTime()",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_time",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getUnixTime()",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_unix_time",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::getWorkingDirectory()",
+      "kind": "function",
+      "raw": "rackpy.raw.system.get_working_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::isDirectory(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.is_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::isFile(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.is_file",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::join(const std::string &, const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.join",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::openBrowser(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.open_browser",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::openDirectory(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.open_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::readFile(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.read_file",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::readFile(const std::string &, size_t *)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.read_file",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::remove(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.remove",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::removeRecursively(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.remove_recursively",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::rename(const std::string &, const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.rename",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::resetFpuFlags()",
+      "kind": "function",
+      "raw": "rackpy.raw.system.reset_fpu_flags",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::runProcessDetached(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.run_process_detached",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::setFpuFlags(uint32_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.set_fpu_flags",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::setThreadName(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.set_thread_name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::setWorkingDirectory(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.set_working_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::sleep(double)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.sleep",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::unarchiveToDirectory(const std::string &, const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.unarchive_to_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::unarchiveToDirectory(const std::vector<uint8_t> &, const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.unarchive_to_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::system::writeFile(const std::string &, const std::vector<uint8_t> &)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.write_file",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "function:rack::ui::refreshTheme()",
       "kind": "function",
       "raw": "rackpy.raw.ui.refresh_theme",
@@ -6123,6 +6494,13 @@
       "id": "function_template:rack::string::join<type>(const $0 &, std::string)",
       "kind": "function",
       "raw": "rackpy.raw.string.join",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::system::join<type...>(const std::string &, const std::string &, $0...)",
+      "kind": "function",
+      "raw": "rackpy.raw.system.join",
       "status": "implemented"
     },
     {
@@ -15310,6 +15688,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "183da2abb66a8fc8",
+  "inputs": "9be9e04f07572f26",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

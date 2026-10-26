@@ -16,9 +16,11 @@ from rackpy.raw import macros as macros
 from rackpy.raw import math as math
 from rackpy.raw import midi as midi
 from rackpy.raw import nanovg as nanovg
+from rackpy.raw import network as network
 from rackpy.raw import plugin as plugin
 from rackpy.raw import random as random
 from rackpy.raw import string as string
+from rackpy.raw import system as system
 from rackpy.raw import ui as ui
 from rackpy.raw import widget as widget
 from rackpy.raw import window as window

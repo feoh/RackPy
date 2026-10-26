@@ -1,10 +1,11 @@
 # Services
 
-Rack's services: text, random numbers and the log (**RP-30A**), with the
-system, network, settings and synchronization services to follow
-(RP-30B, RP-30C). **Implemented so far, Linux x86_64 inside Rack Free
-2.6.6:** `rackpy.raw.string`, `rackpy.raw.random`, `rackpy.raw.logger` and
-the logging macros (see the [coverage report](coverage.md)).
+Rack's services: text, random numbers and the log (**RP-30A**), files and
+HTTP (**RP-30B**), with settings and synchronization to follow (RP-30C).
+**Implemented so far, Linux x86_64 inside Rack Free 2.6.6:**
+`rackpy.raw.string`, `rackpy.raw.random`, `rackpy.raw.logger`, the logging
+macros, `rackpy.raw.system` and `rackpy.raw.network`, with the
+`rackpy.services` facade (see the [coverage report](coverage.md)).
 
 (services-string)=
 ## Text: `rackpy.raw.string`
@@ -85,3 +86,83 @@ start-up, so later messages still go there.
 Each logs at its level with the Python caller's file, line and function, as
 the macros do with `__FILE__`, `__LINE__` and `__FUNCTION__`. As in Rack,
 `FATAL` does not stop anything.
+
+(services-system)=
+## Files, time and processes: `rackpy.raw.system`
+
+Paths are str or `os.PathLike` and come back as str. Calls that touch the
+disk or sleep release the GIL. They block the calling thread, which never
+runs on Rack's audio path; on the main thread, Rack's window waits.
+
+- **Paths.** `join(path1, path2, *paths)` (Rack's variadic template),
+  `get_directory`, `get_filename`, `get_stem` and `get_extension`,
+  `get_absolute`, and `get_canonical` (the path must exist). Rack 2.6.6
+  follows `std::filesystem`, which differs from some examples in its header:
+  - `join("/a", "")` gives `"/a/"`;
+  - `get_directory("/")` gives `"/"`;
+  - `get_filename("/foo/bar/")` and `get_filename("/")` give `""`;
+  - `get_stem("/foo/.bar")` gives `".bar"`;
+  - `get_extension("/foo/.hidden")` gives `""`, and for `"/foo/.."` gives
+    `"."`.
+
+  RackPy keeps Rack's results.
+- **Files and directories.** `exists`, `is_file`, `is_directory`,
+  `get_file_size`, `get_entries(dir, depth)` (`-1` recurses all the way),
+  `rename`, `copy`, `create_directory`, `create_directories`,
+  `create_symbolic_link`, `remove`, `remove_recursively` (returns a count),
+  `read_file` (bytes) and `write_file`. Most return whether they
+  succeeded; `read_file` and `write_file` raise Rack's `Exception`.
+  `get_working_directory`, `set_working_directory` (the whole process's)
+  and `get_temp_directory`.
+- **Archives.** `archive_directory(archive_path, dir_path, level)` writes a
+  `.tar.zst`, `archive_directory_to_bytes` returns one, and
+  `unarchive_to_directory(archive, dir_path)` unpacks a path or bytes. As
+  Rack documents, a zero-byte file in an archive deletes the existing file.
+  Rack 2.6.6 refuses absolute entry paths but follows `../` entries out of
+  the directory, so unpack only archives you trust;
+  `rackpy.services.system.unarchive` checks the entries first.
+- **Time.** `get_time` (monotonic, for measuring), `get_unix_time`,
+  `get_thread_time` and `sleep(seconds)`.
+- **System.** `get_logical_core_count`, `get_operating_system_info`,
+  `get_stack_trace` and `set_thread_name` (the calling thread's).
+- **FPU flags.** `get_fpu_flags`, `set_fpu_flags` and `reset_fpu_flags`
+  act on the calling thread's floating-point flags; `reset` sets
+  flush-to-zero and denormals-are-zero, as Rack's engine threads run, and
+  Python's own arithmetic on that thread follows them.
+- **Opening things.** `open_browser(url)` and `open_directory(path)` open
+  the desktop's handler without blocking. Rack runs `xdg-open "<string>"`
+  through the shell, so RackPy refuses `"`, `\`, `$` and `` ` ``, which
+  would run shell code. `run_process_detached` is implemented by Rack on
+  Windows only and asserts elsewhere, so RackPy refuses it on Linux and
+  macOS.
+
+(services-network)=
+## HTTP: `rackpy.raw.network`
+
+`request_json(method, url, data, cookies)` requests a JSON API.
+`request_download(url, filename, progress, cookies)` downloads a file, and
+another thread can read its progress (0 to 1) from a `DownloadProgress`
+meanwhile. Both block in curl, which allows 30 seconds to connect and sets
+no overall limit, with the GIL released.
+
+- `request_json` sends `data` as the query for `METHOD_GET` (string values
+  only, as Rack does) or as the JSON body otherwise. It returns the parsed
+  answer, or `None` on any failure: no connection, a malformed URL, or a
+  body that is not JSON.
+- Cookies are a dict (`CookieMap`), and Rack's cookie header ends with `;`.
+- `request_download` returns whether it succeeded; an HTTP error fails.
+- `encode_url(s)` URL-encodes a string, and `url_path(url)` returns a
+  URL's path.
+
+## The facade: `rackpy.services`
+
+- **`rackpy.services.system`.** `read_bytes`, `write_bytes`, `entries`
+  (`pathlib.Path`s), `temp_directory`, `archive` (to a path, or as bytes),
+  `unarchive(source, directory, trust=False)` and `open_url`. Unless trusted,
+  `unarchive` reads the archive with Python's `tarfile` first and raises
+  `ValueError` for an absolute or `../` entry, or a link out of the
+  directory, before Rack writes anything.
+- **`rackpy.services.network`.** `get_json(url, params)`, `post_json`,
+  `put_json` and `delete_json`, plus `download(url, filename, on_progress)`,
+  which runs Rack's download on a worker thread and calls `on_progress`
+  with the fraction on the calling thread. Also `encode_url` and `url_path`.

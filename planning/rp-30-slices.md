@@ -35,3 +35,27 @@ Validation: [rp-30a-validation.md](rp-30a-validation.md).
   Python functions in `rackpy.raw.macros` that pass the caller's frame.
 - **Introspection.** The checker now records `__lt__` and `__call__`
   (operator mappings).
+
+**RP-30B — system and network services**
+(`tk-rackpy-30b-system-and-network-services-2efdfb`). 54 records, plus the
+`rackpy.services` facade (the deliverable package). Validation:
+[rp-30b-validation.md](rp-30b-validation.md).
+
+- **Calls.** Paths are str or `os.PathLike`; blocking calls release the
+  GIL.
+- **Rack 2.6.6 guards.**
+  - `runProcessDetached` asserts off Windows, so it is refused on Linux and
+    macOS.
+  - `openBrowser`/`openDirectory` pass the string to `xdg-open` inside
+    shell double quotes, so `"`, `\`, `$` and `` ` `` are refused.
+  - `unarchiveToDirectory` follows `../` entries (tested); the facade's
+    `unarchive` checks entries with Python 3.14's `tarfile` (Zstandard)
+    first.
+- **Rack 2.6.6 findings.** Several header examples for paths differ from
+  Rack's results (`std::filesystem`): `join("/a", "")`, `getDirectory("/")`,
+  `getFilename("/foo/bar/")` and `getFilename("/")`, `getStem("/foo/.bar")`,
+  and `getExtension` of `"/foo/.."` and `"/foo/.hidden"`. Tests pin Rack's
+  results, and the docs list them. Rack's cookie header ends with `;`.
+- **Network.** `request_json`/`request_download` block in curl (30 s to
+  connect). A `DownloadProgress` lets another thread watch a download, and
+  the facade's `download(on_progress)` uses it.

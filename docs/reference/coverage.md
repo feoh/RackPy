@@ -11,7 +11,7 @@ extracted for that platform yet, which blocks a release there.
 
 | Platform | unreviewed | planned | implemented | verified | unrepresentable | excluded_internal | unknown | absent | not inventoried |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lin-x64 | 748 | 10 | 2187 | 0 | 0 | 111 | 0 | 2 | 0 |
+| lin-x64 | 694 | 10 | 2241 | 0 | 0 | 111 | 0 | 2 | 0 |
 | mac-arm64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3058 |
 | mac-x64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3058 |
 | win-x64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3058 |
@@ -34,5 +34,5 @@ extracted for that platform yet, which blocks a release there.
 | 5 window/rendering/context | 0 | 0 | 73 | 0 | 0 | 12 | 0 | 0 | 0 |
 | 6 dsp/simd | 558 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0 |
 | 7 audio/midi | 1 | 0 | 168 | 0 | 0 | 6 | 0 | 0 | 0 |
-| 8 services | 128 | 0 | 0 | 0 | 0 | 9 | 0 | 0 | 0 |
+| 8 services | 74 | 0 | 54 | 0 | 0 | 9 | 0 | 0 | 0 |
 | 9 history | 0 | 0 | 88 | 0 | 0 | 5 | 0 | 0 | 0 |
