@@ -1,0 +1,291 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""RP-28B test entry module: a Python model with a Python module widget, through Rack's own UI paths.
+
+Phase 1 drives Rack's real module browser, cables, Delete, undo and redo,
+and Model's Python calls; phase 2 reopens the patch Rack saved as it quit.
+A script advances one step per frame from the RuntimeProbe's step().
+"""
+
+import gc
+import importlib
+import json
+import traceback
+from collections.abc import Callable, Generator
+from pathlib import Path
+from typing import Any
+
+from _rackpy_host import _testing
+
+from rackpy import assets, raw
+from rackpy.engine import Module
+from rackpy.errors import OwnershipError
+from rackpy.plugin import plugin
+from rackpy.raw import app
+from rackpy.raw import widget as w
+from rackpy.raw.math import Rect, Vec
+from rackpy.raw.window import Svg
+
+CONFIG: dict[str, Any] = json.loads((Path(__file__).resolve().parent / "rp28b_config.json").read_text())
+RESULT: dict[str, Any] = {"factory": [], "removes": []}
+LEFT, PRESS, RELEASE = 0, 1, 0
+VOICES: dict[int, VoiceWidget] = {}
+PREVIEWS: list[VoiceWidget] = []
+Frames = Generator[None]
+
+
+def voice(m: Module) -> None:
+    m.config(1, 1, 1, 1)
+    m.config_param(0, 0, 10, 5, "Pitch")
+    m.config_input(0, "Gate")
+    m.config_output(0, "Out")
+    m.config_light(0, "Active")
+
+
+class Watch(w.Widget):
+    """A plain Python child that records Rack's RemoveEvent."""
+
+    def __init__(self, tag: str) -> None:
+        super().__init__()
+        self.tag = tag
+        self.box = Rect(Vec(), Vec(4, 4))
+
+    def on_remove(self, event: Any) -> None:
+        RESULT["removes"].append(self.tag)
+        super().on_remove(event)
+
+
+class Jack(app.SvgPort):
+    def __init__(self) -> None:
+        super().__init__()
+        self.set_svg(Svg.load(str(assets.plugin("res/jack.svg"))))
+
+
+class Dial(app.Knob):
+    def __init__(self) -> None:
+        super().__init__()
+        self.box.size = Vec(28, 28)
+
+
+class VoiceWidget(app.ModuleWidget):
+    def __init__(self, module: Module | None) -> None:
+        super().__init__()
+        self.set_module(module)  # as Rack's module widgets do, first
+        RESULT["factory"].append(None if module is None else module.id)
+        self.set_panel(raw.create_panel(str(assets.plugin("res/voice.svg"))))
+        self.add_param(raw.create_param_centered(Dial, Vec(45, 80), module, 0))
+        self.add_output(raw.create_output_centered(Jack, Vec(45, 200), module, 0))
+        self.add_input(raw.create_input_centered(Jack, Vec(45, 260), module, 0))
+        self.add_child(Watch("preview" if module is None else f"module-{module.id}"))
+        if module is None:
+            PREVIEWS.append(self)
+        else:
+            VOICES[module.id] = self
+
+
+plugin.add_model("PyVoice", voice, widget=VoiceWidget)
+module_widget: Any = importlib.import_module("module_widget")  # the documentation's example registers PyBlink
+
+
+def scene_pos(widget: w.Widget) -> Vec:
+    context = raw.context_get()
+    assert context is not None and context.event is not None and context.event.root_widget is not None
+    return widget.get_relative_offset(widget.box.size.div(2), context.event.root_widget)
+
+
+def events() -> w.EventState:
+    context = raw.context_get()
+    assert context is not None and context.event is not None
+    return context.event
+
+
+def wait(frames: int) -> Frames:
+    for _ in range(frames):
+        yield
+
+
+def until(condition: Callable[[], bool], limit: int = 90) -> Generator[None, None, bool]:
+    for _ in range(limit):
+        if condition():
+            return True
+        yield
+    return condition()
+
+
+def drag(start: Vec, end: Vec) -> None:
+    state = events()
+    state.handle_hover(start, Vec())
+    state.handle_button(start, LEFT, PRESS, 0)
+    state.handle_hover(end, end.minus(start))
+    state.handle_button(end, LEFT, RELEASE, 0)
+
+
+def phase1() -> Frames:
+    # Rack's module browser: its ModelBoxes ask the factory for previews, with no module.
+    _testing.show_browser(True)
+    yield from wait(2)
+    for char in "PyVoice":
+        events().handle_text(Vec(5, 5), ord(char))
+    RESULT["preview_seen"] = yield from until(lambda: any(p.alive for p in PREVIEWS))
+    preview = next(p for p in PREVIEWS if p.alive)
+    RESULT["preview"] = [preview.module is None, isinstance(preview.get_panel(), app.SvgPanel)]
+    at = scene_pos(preview)
+    events().handle_hover(at, Vec())
+    events().handle_button(at, LEFT, PRESS, 0)  # Rack's ModelBox: chooseModel adds the module
+    events().handle_button(at, LEFT, RELEASE, 0)
+    RESULT["added_from_browser"] = yield from until(lambda: len(VOICES) >= 1)
+    first = next(iter(VOICES))
+    second = _testing.browser_add_module("RackPy", "PyVoice")
+    yield from wait(3)
+    a, b = VOICES[first], VOICES[second]
+    out, inp = a.get_output(0), b.get_input(0)
+    assert isinstance(out, app.PortWidget) and isinstance(inp, app.PortWidget)
+    drag(scene_pos(out), scene_pos(inp))
+    RESULT["cable"] = list(_testing.rack_cables())
+    gate = b.module
+    RESULT["connected"] = gate is not None and gate.inputs[0].is_connected()
+
+    # Rack's Delete, then undo and redo: Rack recreates the widget with the Python factory.
+    removes = len(RESULT["removes"])
+    RESULT["removed_id"] = first
+    _testing.remove_module_widget(first)
+    RESULT["removed"] = {
+        "removes": RESULT["removes"][removes:],
+        "widget": a.alive,
+        "cables": list(_testing.rack_cables()),
+    }
+    _testing.history_undo()
+    yield from wait(2)
+    RESULT["undone"] = {"rebuilt": first in RESULT["factory"][-3:], "cables": list(_testing.rack_cables())}
+    _testing.history_redo()
+    RESULT["redone"] = list(_testing.rack_cables())
+    _testing.history_undo()
+    yield from wait(2)
+    yield from actions(first)
+    RESULT["ids"] = sorted(voices_alive())
+
+    # Model's Python calls: Python owns what they make.
+    model = raw.plugin.get_model("RackPy", "PyVoice")
+    assert model is not None
+    made = model.create_module()
+    RESULT["create_module"] = [made.model is model, made.alive]
+    shown = model.create_module_widget()
+    RESULT["preview_call"] = [shown.module is None, shown.parent is None]
+    shown.close()
+    module_id = _testing.engine_adopt(made)
+    owner = model.create_module_widget(made)
+    try:
+        model.create_module_widget(made)
+        RESULT["second_owner"] = "allowed"
+    except OwnershipError:
+        RESULT["second_owner"] = "refused"
+    try:
+        app.ModuleWidget().set_module(made)
+        RESULT["outside_factory"] = "allowed"
+    except OwnershipError:
+        RESULT["outside_factory"] = "refused"
+    RESULT["owner_module"] = owner.module is made
+    owner.close()  # a module widget deletes its module with it
+    RESULT["owner_closed"] = _testing.engine_has_module(module_id)
+    RESULT["final_cables"] = list(_testing.rack_cables())
+
+    # The documentation's example, through Rack's own add path.
+    blink_id = _testing.browser_add_module("RackPy", "PyBlink")
+    built = [
+        o for o in gc.get_objects() if isinstance(o, module_widget.BlinkWidget) and o.alive and o.module is not None
+    ]
+    RESULT["blink"] = [
+        len(built) == 1,
+        _testing.module_model(blink_id),
+        built[0].get_output(0) is not None if built else False,
+    ]
+    _testing.remove_module_widget(blink_id)
+    RESULT["final_cables"] = list(_testing.rack_cables())
+
+
+def voices_alive() -> list[int]:
+    return [i for i, mw in VOICES.items() if mw.alive and _testing.engine_has_module(i)]
+
+
+def actions(module_id: int) -> Frames:
+    """ModuleWidget's own actions on a Python module widget in Rack's rack."""
+    mw = VOICES[module_id]
+    module = mw.module
+    assert module is not None
+    found: dict[str, Any] = {}
+    data = mw.to_json()
+    found["to_json"] = [data.get("model"), data.get("plugin")]
+    module.params[0].value = 9.0
+    mw.from_json(data)  # back to the saved value
+    found["from_json"] = module.params[0].value
+    preset = Path(CONFIG["result"]).with_name("voice.vcvm")
+    mw.save(str(preset))
+    module.params[0].value = 1.0
+    mw.load(str(preset))
+    found["preset"] = [preset.is_file(), module.params[0].value]
+    mw.save_template()
+    found["template"] = mw.has_template()
+    module.params[0].value = 2.0
+    mw.load_template()
+    found["template_loaded"] = module.params[0].value
+    mw.clear_template()
+    found["template_cleared"] = not mw.has_template()
+    mw.copy_clipboard()
+    module.params[0].value = 3.0
+    found["paste"] = [mw.paste_clipboard_action(), module.params[0].value]
+    found["paste_json"] = mw.paste_json_action(data)
+    module.params[0].value = 7.0
+    mw.reset_action()
+    found["reset"] = module.params[0].value
+    mw.randomize_action()
+    mw.bypass_action(True)
+    found["bypassed"] = module.is_bypassed()
+    mw.bypass_action(False)
+    before = len(VOICES)
+    mw.clone_action()  # Rack duplicates it with the Python factory, cables included
+    yield from wait(2)
+    found["cloned"] = len(VOICES) == before + 1
+    mw.disconnect_action()
+    found["disconnected"] = list(_testing.rack_cables())
+    _testing.history_undo()
+    found["reconnected"] = list(_testing.rack_cables())
+    mw.create_context_menu()  # Rack's module menu; it closes when the next click lands elsewhere
+    yield from wait(1)
+    events().handle_button(Vec(2, 2), LEFT, PRESS, 0)
+    events().handle_button(Vec(2, 2), LEFT, RELEASE, 0)
+    yield from wait(2)
+    RESULT["actions"] = found
+
+
+def phase2() -> Frames:
+    yield from wait(3)
+    RESULT["reloaded"] = {
+        "rebuilt": sorted(i for i in RESULT["factory"] if i is not None),
+        "cables": list(_testing.rack_cables()),
+    }
+
+
+_running: list[Frames] = []
+
+
+def finish() -> None:
+    Path(CONFIG["result"]).write_text(json.dumps(RESULT))
+    _testing.close_window()
+
+
+def on_step(frame: int, handle: object) -> None:
+    if frame < 3 or RESULT.get("done"):
+        return
+    try:
+        if not _running:
+            _running.append(phase1() if CONFIG["phase"] == 1 else phase2())
+        next(_running[0])
+    except StopIteration:
+        RESULT["done"] = True
+        finish()
+    except BaseException:
+        RESULT["error"] = traceback.format_exc()
+        RESULT["done"] = True
+        finish()
+
+
+_testing.set_step_callback(on_step)

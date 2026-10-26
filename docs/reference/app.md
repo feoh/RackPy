@@ -1,17 +1,82 @@
 # App controls
 
-`rackpy.raw.app` is `rack::app`: Rack's param, port and light widgets, their
-SVG versions, screws, panels and rails. **Implemented (RP-28A), Linux x86_64
-inside Rack Free 2.6.6**, for the records of those headers and of
-`helpers.hpp`'s widget factories (see the [coverage report](coverage.md)).
-Module widgets, the component library, the rack, the scene, cables and
-displays come with the rest of RP-28.
+`rackpy.raw.app` is `rack::app`: module widgets, Rack's param, port and
+light widgets, their SVG versions, screws, panels and rails.
+**Implemented (RP-28A, RP-28B), Linux x86_64 inside Rack Free 2.6.6**, for
+the records of those headers and of `helpers.hpp`'s widget factories (see
+the [coverage report](coverage.md)). The component library, the rack, the
+scene, cables and displays come with the rest of RP-28.
 
 Every class is Rack's own and is a [subclassable widget](widgets.md): create
 it on Rack's main thread once the UI exists, set its fields, add it to a
 parent, and override its drawing and event methods in Python if you need to.
 Calling a method such as `on_drag_move(event)` runs Rack's implementation for
 that class.
+
+(app-module-widgets)=
+## Module widgets
+
+A model's module widget is a Python `ModuleWidget`. Rack asks the model's
+*widget factory* for one whenever it shows the module:
+
+- when it is added from the module browser;
+- when a patch loads;
+- when a deletion is undone or the module is duplicated;
+- for the browser's preview, with no module.
+
+```{rackpy-example} module_widget.py
+```
+
+`add_model(slug, module, widget=...)` takes the factory: a `ModuleWidget`
+subclass, or a function, that Rack calls with the module or `None` (the raw
+form is `create_model(..., widget_factory=)`). As in Rack's C++, the widget
+calls `set_module(module)` first. The widget then *owns* the module: Rack
+deletes the module with it. So `set_module` takes only the module Rack
+passed the factory, once, and nothing replaces or drops it. Rack then sets
+the widget's `model` and takes the widget.
+
+If the factory raises, or returns something that is not a new
+`ModuleWidget` with that module, RackPy logs the error. It leaves the module
+untouched, and Rack gets RackPy's plain panel instead. The ports a factory
+creates take part in cables (see [Ports](#app-ports)).
+
+- `set_panel(panel)` takes a Python widget or a loaded `Svg` (Rack makes the
+  `SvgPanel`). It replaces and deletes the previous panel, and snaps the
+  widget's width to the rack grid. `get_panel()` returns the panel.
+- `add_param`, `add_input` and `add_output` add controls. Rack's checks
+  (port type, a duplicate input or output ID) raise `ValueError`.
+  `get_param(id)`, `get_input(id)`, `get_output(id)`, `get_params()`,
+  `get_ports()`, `get_inputs()` and `get_outputs()` search the widget's
+  descendants.
+- `to_json()`, `from_json(data)`, `save(path)`, `load(path)`,
+  `save_template()`, `load_template()`, `has_template()`, `clear_template()`
+  and `copy_clipboard()` need the widget's module (and model, for
+  templates).
+- `paste_json_action`, `paste_clipboard_action`, `load_action`,
+  `reset_action`, `randomize_action`, `bypass_action`, `clone_action`,
+  `disconnect_action`, `disconnect`, `remove_action` and
+  `create_context_menu` need the widget in Rack's rack. They are Rack's menu
+  actions, with undo steps. `remove_action` deletes the widget (the Python
+  object is stale afterwards) and, like the other actions that change the
+  widget tree, is refused inside a widget callback.
+- `load_dialog`, `save_dialog`, `save_template_dialog` and
+  `clear_template_dialog` open Rack's dialogs and wait for the user.
+- `append_context_menu(menu)` is called by Rack at the end of its module
+  context menu, so a subclass may add items. The menu is closed if the
+  widget dies.
+- `get_grid_position()`, `set_grid_position(pos)`, `get_grid_size()` and
+  `get_grid_box()` are rack grid coordinates.
+- `ModuleWidget(module)` is Rack's deprecated constructor, and warns.
+
+Calls that take Rack's engine lock (the JSON, preset and clipboard calls,
+and the actions) release the GIL while they run. Closing a Python-owned
+module widget deletes its module, as Rack's destructor does.
+
+`Model.create_module()` and `Model.create_module_widget(module=None)` are
+Rack's calls for a RackPy model. Python owns what they make, and a widget
+made for a module owns that module, which must be in Rack's engine and must
+have no other widget. Other plugins' models need RP-24's handles for their
+modules.
 
 (app-controls)=
 ## Params
@@ -59,16 +124,17 @@ open context menu, since Rack's menu items point at the control.
 `port_id`; `get_port()` and `get_port_info()` return the module's port and
 its metadata. `delete_top_cable_action()` and the context menu are Rack's.
 
-A Python port does not take part in cables yet. Its Python drag overrides
-still run, but Rack's cable behaviour does not. Rack keeps two invariants for
-cabled ports:
+A Python port takes part in cables only when its module widget's factory
+created it, and only while it is inside that widget. Rack keeps two
+invariants for cabled ports:
 
 - A port lives inside its module's widget, so removing the widget
   disconnects its cables.
 - The module widget creates its ports itself, because Rack's undo and patch
   loading find ports through the widget and fail if one is missing.
 
-Python module widgets (RP-28B) create ports that cable normally.
+A port added any other way still runs its Python drag overrides, but not
+Rack's cable behaviour.
 
 (app-lights)=
 ## Lights

@@ -43,15 +43,20 @@ added so far, and raises `ValueError` otherwise.
 (plugin-models)=
 ## Models
 
-`create_model(slug, module_factory, *, hp=4)` is Rack's
-`createModel<TModule, TModuleWidget>`: Rack calls `module_factory(module)`,
-Module.create's constructor callback, whenever it creates the model's module,
-with errors contained (a [placeholder](../how-to/plugins.md#when-a-module-factory-fails)
-replaces the module). `hp` sizes the plain panel each module gets until
-Python module widgets exist (RP-28); until then the `TModuleWidget` half of
-the template is unmapped, so the coverage report lists `createModel` as
-planned. The new `Model` belongs to Python until
-`add_model`.
+`create_model(slug, module_factory, *, widget_factory=None, hp=4)` is Rack's
+`createModel<TModule, TModuleWidget>`:
+
+- Rack calls `module_factory(module)`, Module.create's constructor callback,
+  whenever it creates the model's module. Errors are contained: a
+  [placeholder](../how-to/plugins.md#when-a-module-factory-fails) replaces
+  the module.
+- Rack calls `widget_factory(module)` for the module's widget, with `None`
+  for a browser preview ([module widgets](app.md#module-widgets)).
+- Without a widget factory, the module gets RackPy's plain panel, `hp` wide.
+
+The new `Model` belongs to Python until `add_model`.
+`Model.create_module()` and `Model.create_module_widget(module=None)` make a
+module or widget of a RackPy model, which Python then owns.
 
 A `Model` has Rack's fields. `slug` can change only before the model is
 added: Rack and patches look models up by it. `plugin` is its plugin, or

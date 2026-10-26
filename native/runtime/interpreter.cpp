@@ -112,11 +112,9 @@ struct GraphicsAnchor : rack::widget::Widget {
 		Widget::onContextDestroy(e);
 		if (!shutdownBegun)
 			runCleanups(graphicsDestroyHooks);
-		auto* ctx = rack::contextGet();
-		// Graphics destruction also occurs during a window/context recreation.
-		// Only an actual close starts the Context shutdown protocol.
-		if (ctx && ctx->window && ctx->window->win && glfwWindowShouldClose(ctx->window->win))
-			beginContextShutdown("window closing");
+		// The Context shutdown protocol waits for scene deletion (below), even when the window
+		// closes: Rack saves its autosave after deleting the window, and the patch needs the Python
+		// module widgets (positions, cables) and the modules they own.
 	}
 	~GraphicsAnchor() override {
 		if (sentinelInstalled)

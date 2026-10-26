@@ -48,6 +48,11 @@ void bindModule(pybind11::module_ engine);
 then the sealed module, its model set, goes to Rack, which adds it to its engine.
 Main thread, with the GIL; throws what the constructor raises. */
 rack::engine::Module* createForRack(pybind11::object configure, rack::plugin::Model& model);
+/** Model::createModule called from Python (RP-28B): the same module, with its model set, but
+Python-owned (a Module handle), since nobody hands it to Rack's engine. */
+pybind11::object createOwned(pybind11::object configure, rack::plugin::Model& model);
+/** The handle of a RackPy module Rack's engine owns, or None for anything else. Main thread, GIL. */
+pybind11::object engineModuleObject(rack::engine::Module* module);
 
 }  // namespace bindings
 }  // namespace rackpy

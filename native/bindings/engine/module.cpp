@@ -378,6 +378,19 @@ rack::engine::Module* createForRack(py::object configure, rack::plugin::Model& m
 	return r.state->releaseToRack();
 }
 
+py::object createOwned(py::object configure, rack::plugin::Model& model) {
+	py::object handle = create(std::move(configure));
+	handle.cast<const ModuleRef&>().get().model = &model;
+	return handle;
+}
+
+py::object engineModuleObject(rack::engine::Module* module) {
+	auto* m = dynamic_cast<module::Module*>(module);
+	if (!m || !m->engineOwned.load(std::memory_order_acquire) || !m->token->alive())
+		return py::none();
+	return moduleObject(module::Construction::handleState(*m));
+}
+
 using M = rack::engine::Module;
 
 /** A Rack event as Python reads it: a copied value of Rack's own record. */

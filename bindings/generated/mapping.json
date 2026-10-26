@@ -366,6 +366,20 @@
     },
     {
       "facade": null,
+      "id": "constructor:rack::app::ModuleWidget::ModuleWidget()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.ModuleWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::ModuleWidget::ModuleWidget(rack::engine::Module *)",
+      "kind": "class",
+      "raw": "rackpy.raw.app.ModuleWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "constructor:rack::app::ParamWidget::ParamWidget()",
       "kind": "class",
       "raw": "rackpy.raw.app.ParamWidget",
@@ -647,6 +661,13 @@
     {
       "facade": null,
       "id": "destructor:rack::app::ModuleLightWidget::~ModuleLightWidget()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.close",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::app::ModuleWidget::~ModuleWidget()",
       "kind": "method",
       "raw": "rackpy.raw.widget.Widget.close",
       "status": "implemented"
@@ -1034,6 +1055,20 @@
       "id": "field:rack::app::ModuleLightWidget::module",
       "kind": "property",
       "raw": "rackpy.raw.app.ModuleLightWidget.module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::ModuleWidget::model",
+      "kind": "property",
+      "raw": "rackpy.raw.app.ModuleWidget.model",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::ModuleWidget::module",
+      "kind": "property",
+      "raw": "rackpy.raw.app.ModuleWidget.module",
       "status": "implemented"
     },
     {
@@ -3302,7 +3337,7 @@
       "id": "function_template:rack::createModel<type, type>(std::string)",
       "kind": "factory",
       "raw": "rackpy.raw.plugin.create_model",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -4009,6 +4044,391 @@
       "id": "method:rack::app::ModuleLightWidget::step()",
       "kind": "method",
       "raw": "rackpy.raw.app.ModuleLightWidget.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::addInput(rack::app::PortWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.add_input",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::addOutput(rack::app::PortWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.add_output",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::addParam(rack::app::ParamWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.add_param",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::appendContextMenu(rack::ui::Menu *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.append_context_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::bypassAction(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.bypass_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::clearTemplate()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.clear_template",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::clearTemplateDialog()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.clear_template_dialog",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::cloneAction(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.clone_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::copyClipboard()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.copy_clipboard",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::createContextMenu()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.create_context_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::disconnect()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.disconnect",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::disconnectAction()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.disconnect_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::drawLayer(const rack::widget::Widget::DrawArgs &, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.draw_layer",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::fromJson(json_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.from_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::getGridBox()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.get_grid_box",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::getGridPosition()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.get_grid_position",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::getGridSize()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.get_grid_size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::getInput(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.get_input",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::getInputs()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.get_inputs",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::getModel()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.get_model",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::getModule()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.get_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::getOutput(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.get_output",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::getOutputs()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.get_outputs",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::getPanel()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.get_panel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::getParam(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.get_param",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::getParams()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.get_params",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::getPorts()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.get_ports",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::hasTemplate()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.has_template",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::load(std::string)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.load",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::loadAction(std::string)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.load_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::loadDialog()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.load_dialog",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::loadTemplate()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.load_template",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.on_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::onDragEnd(const rack::widget::Widget::DragEndEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.on_drag_end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.on_drag_hover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::onDragMove(const rack::widget::Widget::DragMoveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.on_drag_move",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::onDragStart(const rack::widget::Widget::DragStartEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.on_drag_start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::onHover(const rack::widget::Widget::HoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.on_hover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.on_hover_key",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::pasteClipboardAction()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.paste_clipboard_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::pasteJsonAction(json_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.paste_json_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::randomizeAction()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.randomize_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::removeAction()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.remove_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::resetAction()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.reset_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::save(std::string)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.save",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::saveDialog()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.save_dialog",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::saveTemplate()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.save_template",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::saveTemplateDialog()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.save_template_dialog",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::setGridPosition(rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.set_grid_position",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::setModel(rack::plugin::Model *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.set_model",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::setModule(rack::engine::Module *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.set_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::setPanel(rack::widget::Widget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.set_panel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::setPanel(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.set_panel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleWidget::toJson()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.to_json",
       "status": "implemented"
     },
     {
@@ -5543,6 +5963,20 @@
       "kind": "method",
       "raw": "rackpy.raw.plugin.Model.append_context_menu",
       "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::plugin::Model::createModule()",
+      "kind": "method",
+      "raw": "rackpy.raw.plugin.Model.create_module",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::plugin::Model::createModuleWidget(rack::engine::Module *)",
+      "kind": "method",
+      "raw": "rackpy.raw.plugin.Model.create_module_widget",
+      "status": "planned"
     },
     {
       "facade": null,
@@ -7414,6 +7848,13 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "method_template:rack::app::ModuleWidget::getModule<type>()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.get_module",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.engine.Module.config_button",
       "id": "method_template:rack::engine::Module::configButton<type>(int, std::string)",
       "kind": "method",
@@ -7544,6 +7985,13 @@
       "id": "record:rack::app::ModuleLightWidget",
       "kind": "class",
       "raw": "rackpy.raw.app.ModuleLightWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::ModuleWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.app.ModuleWidget",
       "status": "implemented"
     },
     {
@@ -8590,6 +9038,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "17f6efe44f98678b",
+  "inputs": "cc680d937bfb1810",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

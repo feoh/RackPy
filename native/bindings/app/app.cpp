@@ -19,6 +19,7 @@
 #include "../engine/module.hpp"
 #include "../widget/variants.hpp"
 #include "app.hpp"
+#include "app_internal.hpp"
 
 namespace pybind11 {
 #define RACKPY_APP_ADDRESS(T) \
@@ -59,6 +60,8 @@ namespace widgets {
 namespace {
 
 namespace app = rack::app;
+using appdetail::appendMenu;
+using appdetail::menuArgument;
 using rack::engine::Port;
 using SvgPtr = std::shared_ptr<rack::window::Svg>;
 using OW = rack::widget::OpaqueWidget;
@@ -214,39 +217,6 @@ bool cableSafe(app::PortWidget& port) {
 
 // --- Trampolines ---------------------------------------------------------------------
 
-/** Rack calls appendContextMenu last in createContextMenu, with the menu it built for this control. */
-template <class Base, class Self>
-void appendMenu(Self* self, rack::ui::Menu* menu, app::ParamWidget* touched) {
-	if (!runtime::isMainThread())
-		return;
-	try {
-		control(self->lifetime, touched).menu.set(menu);
-	}
-	catch (...) {
-		runtime::detail::noteRaised("append_context_menu", "could not track the control's context menu");
-	}
-	AppendScope scope(menu);
-	CallbackGuard dispatch;
-	bool answered = false;
-	runtime::callPython("append_context_menu", [&] {
-		checked(self->lifetime);
-		if (auto f = py::get_override(static_cast<const Base*>(self), "append_context_menu")) {
-			CallbackGuard guard;
-			answered = true;
-			f(wrapper(menu));
-		}
-	});
-	if (!answered) {
-		try {
-			CallbackGuard guard;
-			self->Base::appendContextMenu(menu);
-		}
-		catch (...) {
-			runtime::detail::noteRaised("append_context_menu", "native Widget fallback failed");
-		}
-	}
-}
-
 template <class Base>
 struct ParamWidgetT : Widget<Base> {
 	void initParamQuantity() override {
@@ -286,14 +256,6 @@ struct LightWidgetT : Widget<Base> {
 		this->pyDraw("draw_halo", args, [](py::function& f, py::object v) { f(v); }, [this, &args] { Base::drawHalo(args); });
 	}
 };
-
-/** A Rack-made menu argument: a rackpy.raw.ui.Menu, Python's or Rack's. */
-rack::ui::Menu* menuArgument(py::handle value) {
-	auto* menu = dynamic_cast<rack::ui::Menu*>(argument(value));
-	if (!menu)
-		throw py::type_error("expected a rackpy.raw.ui.Menu");
-	return menu;
-}
 
 /** Python port classes: their event base methods keep the cable invariant too. */
 template <class T, class... Options>
@@ -353,6 +315,23 @@ void warnDeprecated(const char* message) {
 struct HostShadow : ExternalWidget {};
 
 }  // namespace
+
+namespace appdetail {
+void trackMenu(const std::shared_ptr<State>& s, rack::ui::Menu* menu, rack::app::ParamWidget* touched) {
+	control(s, touched).menu.set(menu);
+}
+void markFactoryPort(const std::shared_ptr<State>& s) {
+	if (!factoryPorts.insert(s.get()).second)
+		return;
+	s->onDestroyed.push_back([key = s.get()] { factoryPorts.erase(key); });
+}
+rack::ui::Menu* menuArgument(py::handle value) {
+	auto* menu = dynamic_cast<rack::ui::Menu*>(argument(value));
+	if (!menu)
+		throw py::type_error("expected a rackpy.raw.ui.Menu");
+	return menu;
+}
+}  // namespace appdetail
 
 void bindApp(py::module_ raw) {
 	py::module_ mod = raw.def_submodule("app", "rack::app: Rack's controls, ports, lights and panels (RP-28A).");
@@ -703,6 +682,8 @@ void bindApp(py::module_ raw) {
 			native<TPNL>(self).setBackground(drawableSvg(std::move(lightSvg)), drawableSvg(std::move(darkSvg)));
 		}, py::arg("light_svg"), py::arg("dark_svg"), "Shows dark_svg while Rack prefers dark panels, else light_svg.");
 	variant<app::RailWidget, TW>(mod, "RailWidget");
+
+	appdetail::bindModuleWidget(mod);
 
 	// Rack's deprecated SVG* typedefs: the same classes, with a warning when used.
 	static const std::pair<const char*, const char*> aliases[] = {{"SVGKnob", "SvgKnob"}, {"SVGSlider", "SvgSlider"},

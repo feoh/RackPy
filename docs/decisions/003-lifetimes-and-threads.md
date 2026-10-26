@@ -146,9 +146,13 @@ Other facts:
     exists). Python work for any other context is refused until RP-10 adds
     context-generation tokens. Multi-instance hosts are unsupported until then.
 13. **Teardown ordering.** All of these steps are tested:
-    1. RackPy attaches a sentinel widget to the scene. Its `onContextDestroy`
-       (windowed) or its destructor during scene deletion (headless) is the
-       earliest teardown signal, and comes before the engine is deleted.
+    1. RackPy attaches a sentinel widget to the scene. Its destructor during
+       scene deletion is the teardown signal, windowed or headless, and comes
+       before the engine is deleted. *Amended in RP-28B (2026-10-26):* the
+       windowed signal was the sentinel's `onContextDestroy`, but Rack saves
+       its autosave after deleting its window, and the patch needs the Python
+       module widgets (module positions, cables) and the modules they own.
+       The window's `onContextDestroy` still releases graphics resources.
     2. There, RackPy calls Python to stop and join its worker threads.
     3. It then takes its own lease exclusively, so in-flight engine calls from
        Python finish, and marks the context dead. Later calls raise

@@ -16,6 +16,8 @@ std::string commitModels(rack::plugin::Plugin* plugin, const std::string& manife
 
 /** The Python handle for a Rack model (rackpy.raw.plugin.Model), or None. Main thread, GIL. */
 pybind11::object modelObject(rack::plugin::Model* model);
+/** The live Rack model of a rackpy.raw.plugin.Model handle. Main thread, GIL. */
+rack::plugin::Model* modelArgument(pybind11::handle value);
 
 /** Rack's settingsToJson/settingsFromJson for this plugin (RP-15D): the
 Python settings handlers, contained. A new reference or null (Rack then keeps

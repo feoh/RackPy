@@ -33,6 +33,13 @@ struct BlankPanel : rack::widget::Widget {
 	}
 };
 
+void releaseModel(Model& model) noexcept {
+	if (model.factory)
+		model.factory->release();
+	if (model.widgetFactory)
+		model.widgetFactory->release();
+}
+
 // Fields the placeholder's own state decides; everything else comes from the saved JSON.
 bool ownField(const char* key) {
 	for (const char* own : {"id", "plugin", "model", "version", "bypass", "leftModuleId", "rightModuleId"})
@@ -87,6 +94,12 @@ rack::engine::Module* Model::createModule() {
 }
 
 rack::app::ModuleWidget* Model::createModuleWidget(rack::engine::Module* m) {
+	// A placeholder module (its Python factory failed) gets the plain panel below.
+	if (widgetFactory && !dynamic_cast<PlaceholderModule*>(m)) {
+		if (auto* mw = widgetFactory->create(*this, m))
+			return mw;
+		WARN("RackPy: model %s could not create its module widget; using a plain panel", slug.c_str());
+	}
 	// As Rack's createModel: the widget gets the module (or null, for a browser
 	// preview), then the model.
 	auto* mw = new rack::app::ModuleWidget;
@@ -213,8 +226,7 @@ std::string commit(rack::plugin::Plugin* plugin, const std::string& manifestPath
 		problem = matchModules(plugin, listed, "plugin.json's \"modules\"");
 	if (!problem.empty()) {
 		for (auto& model : pending)
-			if (model->factory)
-				model->factory->release();
+			releaseModel(*model);
 		pending.clear();
 		return problem;
 	}
@@ -230,18 +242,15 @@ std::string commit(rack::plugin::Plugin* plugin, const std::string& manifestPath
 void discard() noexcept {
 	open = false;
 	for (auto& model : pending)
-		if (model->factory)
-			model->factory->release();
+		releaseModel(*model);
 	pending.clear();
 }
 
 void releaseFactories() noexcept {
 	for (auto& model : pending)
-		if (model->factory)
-			model->factory->release();
+		releaseModel(*model);
 	for (auto* model : live)
-		if (model->factory)
-			model->factory->release();
+		releaseModel(*model);
 }
 
 }  // namespace plugin

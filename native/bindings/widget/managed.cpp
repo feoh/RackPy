@@ -83,8 +83,8 @@ void close(py::object self) {
 	owned.reset();
 }
 
-void transferTo(W& parent, const std::shared_ptr<runtime::ContextToken>& context,
-    py::object child, int placement, W* sibling = nullptr) {
+void attachChild(W& parent, const std::shared_ptr<runtime::ContextToken>& context, py::object child,
+    const std::function<void(W*)>& attach) {
     checkMutationOf(parent);
     auto c = state(child);
     auto& item = checked(c);
@@ -92,15 +92,10 @@ void transferTo(W& parent, const std::shared_ptr<runtime::ContextToken>& context
         throw runtime::WrongContext("widgets belong to different contexts");
     if (item.parent || &item == &parent || parent.isDescendantOf(&item))
         throw runtime::Ownership("child must be detached and cannot be its own ancestor");
-    if (placement >= 2 && (!sibling || sibling->parent != &parent))
-        throw runtime::Ownership("sibling must be a direct child of this parent");
     Owned owned(c->disown(child), UiDelete{c});
     try {
         CallbackGuard guard;
-        if (placement == 1) parent.addChildBottom(owned.get());
-        else if (placement == 2) parent.addChildAbove(owned.get(), sibling);
-        else if (placement == 3) parent.addChildBelow(owned.get(), sibling);
-        else parent.addChild(owned.get());
+        attach(owned.get());
     }
     catch (...) {
         item.parent = nullptr;
@@ -115,6 +110,17 @@ void transferTo(W& parent, const std::shared_ptr<runtime::ContextToken>& context
     }
 }
 
+void transferTo(W& parent, const std::shared_ptr<runtime::ContextToken>& context,
+    py::object child, int placement, W* sibling = nullptr) {
+    if (placement >= 2 && (!sibling || sibling->parent != &parent))
+        throw runtime::Ownership("sibling must be a direct child of this parent");
+    attachChild(parent, context, child, [&](W* item) {
+        if (placement == 1) parent.addChildBottom(item);
+        else if (placement == 2) parent.addChildAbove(item, sibling);
+        else if (placement == 3) parent.addChildBelow(item, sibling);
+        else parent.addChild(item);
+    });
+}
 void transfer(py::object self, py::object child, int placement, py::object sibling = py::none()) {
     auto p = state(self);
     transferTo(checked(p), p->token->context, child, placement, argument(sibling));
@@ -367,6 +373,29 @@ void retire(const std::shared_ptr<State>& s) noexcept {
 
 bool managedWidget(W* w) { return nativeStates.count(w) != 0; }
 
+void transferWith(W& parent, py::object child, const std::function<void(W*)>& attach) {
+	auto c = state(child);
+	checked(c);
+	attachChild(parent, c->token->context, child, attach);
+}
+W* releaseDetached(py::object child) {
+	runtime::requireMainThread("handing a widget to Rack");
+	auto c = state(child);
+	auto& item = checked(c);
+	if (item.parent)
+		throw runtime::Ownership("the widget must be new, with no parent");
+	Owned owned(c->disown(child), UiDelete{c});
+	W* native = owned.release();
+	if (!c->transferred) {
+		c->transferred = true;
+		runtime::noteTransferred();
+	}
+	return native;
+}
+std::shared_ptr<State> managedState(W* native) noexcept {
+	auto it = nativeStates.find(native);
+	return it == nativeStates.end() ? nullptr : it->second;
+}
 void transferToHost(W& parent, py::object child) {
 	auto s = state(child);
 	checked(s);

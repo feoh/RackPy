@@ -123,6 +123,15 @@ struct AppendScope {
 detached tree or Rack has handed Python a menu to fill. */
 void checkMutationOf(W& parent);
 
+/** Hand a detached Python widget to `parent` through `attach`, which adds it (Rack's
+ModuleWidget::setPanel, say). The same checks and ownership change as add_child. */
+void transferWith(W& parent, py::object child, const std::function<void(W*)>& attach);
+/** Hand a detached Python widget to Rack, which owns it from now on (a widget factory's
+result). Returns the native widget; the caller gives it to Rack at once. */
+W* releaseDetached(py::object child);
+/** The state of a widget RackPy manages, or null. */
+std::shared_ptr<State> managedState(W* native) noexcept;
+
 /** A borrowed Rack-owned widget: rackpy.raw.widget.HostWidget. Typed subclasses (host views)
 reach a known Rack type's public fields; none can transfer or destroy the widget. */
 struct ExternalState {

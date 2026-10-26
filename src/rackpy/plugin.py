@@ -12,6 +12,7 @@ from typing import Any
 
 from rackpy.engine import Module
 from rackpy.raw import plugin as _raw
+from rackpy.raw.app import ModuleWidget
 from rackpy.raw.plugin import Model
 
 __all__ = ["Model", "ModuleClass", "Plugin", "on_destroy", "plugin"]
@@ -99,19 +100,29 @@ class Plugin:
         """Rack's plugin object (:class:`rackpy.raw.plugin.Plugin`)."""
         return _raw.plugin_instance()
 
-    def add_model(self, slug: str, module: Callable[[Module], object] | type[ModuleClass], *, hp: int = 4) -> Model:
-        """Add a model. Rack builds one of its modules whenever it needs one.
+    def add_model(
+        self,
+        slug: str,
+        module: Callable[[Module], object] | type[ModuleClass],
+        *,
+        widget: Callable[[Module | None], ModuleWidget] | None = None,
+        hp: int = 4,
+    ) -> Model:
+        """Add a model. Rack builds one of its modules, and its widget, whenever it needs one.
 
         ``module`` is either ``Module.create``'s constructor callback,
-        ``module(m)``, or a :class:`ModuleClass` subclass. Call this only from
-        the entry module while Rack loads the plugin. Until Python module
-        widgets exist, the module gets a plain panel ``hp`` wide.
+        ``module(m)``, or a :class:`ModuleClass` subclass. ``widget`` is a
+        ``rackpy.raw.app.ModuleWidget`` subclass, or a function, that Rack
+        calls with the module (``None`` for a module browser preview); the
+        widget calls ``self.set_module(module)`` first, as Rack's do. Without
+        ``widget`` the module gets a plain panel ``hp`` wide. Call this only
+        from the entry module while Rack loads the plugin.
         """
         if isinstance(module, type):
             if not issubclass(module, ModuleClass):
                 raise TypeError(f"a module class must subclass rackpy.plugin.ModuleClass, not {module.__name__}")
             module = module.factory()
-        model = _raw.create_model(slug, module, hp=hp)
+        model = _raw.create_model(slug, module, widget_factory=widget, hp=hp)
         self.raw.add_model(model)
         return model
 

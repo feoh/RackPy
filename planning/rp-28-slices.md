@@ -42,3 +42,35 @@ Validation: [rp-28a-validation.md](rp-28a-validation.md).
   their centred versions.
 - **PRIVATE.** The macro has no run-time meaning, so family 0 now has a
   no-op adapter.
+
+**RP-28B — ModuleWidget, Python module widget factories and the module-browser gate**
+(`tk-rackpy-28b-modulewidget-python-module-widget-fac-ddcbde`). 65 records.
+Validation: [rp-28b-validation.md](rp-28b-validation.md).
+
+- **ModuleWidget.** A subclassable Python class with Rack's full API: panel,
+  controls, scans, JSON, presets, templates, clipboard, actions, context menu
+  and grid. Decision: `set_module` takes only the module Rack passes the
+  widget's factory, once. Rack's `setModule` deletes a module it replaces,
+  after `Engine::removeModule`, which assumes the module is in the engine and
+  has no cables. Engine-locking calls release the GIL.
+- **Widget factories.** `create_model(..., widget_factory=)` and
+  `add_model(..., widget=)` follow Rack's `createModel<TModule,
+  TModuleWidget>`: the module, or None for a preview; the module check;
+  `setModel`; then Rack takes the widget. A factory that fails gives the
+  module back untouched (RackPy clears the claimed widgets' pointers), and
+  Rack gets the plain panel. Ports a factory creates take part in cables.
+- **Model calls.** `Model.create_module()` and
+  `Model.create_module_widget()` serve RackPy models, and Python owns the
+  results. Other plugins' models wait for RP-24's foreign module handles, so
+  those two records stay planned.
+- **Shutdown moved (ADR 003 decision 13, amended).** RackPy's windowed
+  shutdown now begins at scene deletion, as headless already did. Rack saves
+  its autosave after deleting its window, and RackPy's teardown at window
+  close had deleted the Python module widgets and the modules they own, so
+  the patch lost them. Graphics still release at the window's
+  ContextDestroy.
+- **Fixed.** The `engine_adopt` test hook no longer overwrites a module's
+  model.
+
+`appendDisconnectActions` takes a `history::ComplexAction`, so it waits for
+the history family (RP-24's history-facing operations).

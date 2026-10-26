@@ -487,6 +487,19 @@ void define(py::module_ m) {
 		if (error != GL_NO_ERROR) throw std::runtime_error("glReadPixels failed: GL error " + std::to_string(error));
 		return py::make_tuple(rgba[0], rgba[1], rgba[2], rgba[3]);
 	});
+	m.def("show_browser", [](bool visible) {
+		// Rack's module browser (Browser.hpp is outside rack.hpp), as View > Module browser shows it.
+		requireMainThread("show_browser");
+		liveContext();
+		APP->scene->browser->setVisible(visible);
+	}, py::arg("visible") = true);
+	m.def("history_redo", [] {
+		requireMainThread("history_redo");
+		refuseEngineReentry("history_redo");
+		liveContext();
+		py::gil_scoped_release release;
+		APP->history->redo();
+	});
 	m.def("touched_param", []() -> py::object {
 		// Rack's RackWidget::touchedParam: the ParamWidget MIDI-Map would learn, or None.
 		requireMainThread("touched_param");
@@ -709,8 +722,9 @@ void define(py::module_ m) {
 		refuseEngineReentry("engine_adopt");
 		std::shared_ptr<ContextToken> ctx = liveContext();
 		module::Module* m = r.state->releaseToRack();
-		// Test-only model, so that Rack can serialize (autosave) the module.
-		m->model = model;
+		// Test-only model for a module that has none, so that Rack can serialize (autosave) it.
+		if (!m->model)
+			m->model = model;
 		{
 			py::gil_scoped_release release;
 			EngineLease lease(*ctx);

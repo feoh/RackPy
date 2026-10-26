@@ -110,7 +110,8 @@ def test_every_check_is_expected(windowed: RackRun) -> None:
 def test_shutdown_runs_in_the_documented_order(windowed: RackRun) -> None:
     log = windowed.log
     order = [
-        "RackPy context shutdown begins (window closing)",
+        "Saving autosave",  # Rack saves the patch, with its Python module widgets, first
+        "RackPy context shutdown begins (scene deletion)",
         "deliberate failure in a closing hook",
         "WORKER polite joined after",
         "RackPy context closed; handles to it are now stale",

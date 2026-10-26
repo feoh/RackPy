@@ -1,8 +1,10 @@
 # Register models
 
-**Implemented (RP-16A, RP-16B), Linux x86_64 inside Rack Free 2.6.6.** Python module
-widgets are not available yet (RP-28), so every model gets a plain panel, and
-modules do not process audio yet (RP-17). Plugin settings are RP-15D.
+**Implemented (RP-16A, RP-16B, RP-28B), Linux x86_64 inside Rack Free
+2.6.6.** A model's widget is a Python module widget
+([below](#give-a-model-a-module-widget)), or RackPy's plain panel without
+one. Modules process audio with [kernels](dsp.md), and plugin settings are
+in [state](state.md).
 
 A Rack plugin offers *models*: the entries in Rack's module browser. Each
 model makes *modules*, the instances in a patch. In a RackPy plugin, the
@@ -26,6 +28,20 @@ build its modules, either way shown above:
 Rack builds a module every time it needs one, on its main thread: when you
 add it from the browser, when a patch loads, when you undo a deletion or
 duplicate a module. Do not start threads or touch files there.
+
+## Give a model a module widget
+
+`add_model`'s `widget=` is the model's module widget: a
+`rackpy.raw.app.ModuleWidget` subclass, or a function, that Rack calls with
+the module, or `None` for its browser's preview. Build the panel and controls
+in it, as a C++ module widget's constructor does:
+
+```{rackpy-example} module_widget.py
+```
+
+Call `self.set_module(module)` first. The widget owns its module from then
+on, and its ports connect cables ([module widgets](../reference/app.md#module-widgets)).
+Without `widget=`, the model gets a plain panel `hp` wide.
 
 ## Module events
 

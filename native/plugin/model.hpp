@@ -22,6 +22,16 @@ struct ModuleFactory {
 	virtual void release() noexcept = 0;
 };
 
+/** Builds one module widget for Rack (RP-28B). The bindings implement it with a Python callable. */
+struct ModuleWidgetFactory {
+	virtual ~ModuleWidgetFactory() = default;
+	/** A new widget for `module` (null for a browser preview), with its model set, or null if
+	the factory failed (already diagnosed; `module` is untouched). Never throws. */
+	virtual rack::app::ModuleWidget* create(rack::plugin::Model& model, rack::engine::Module* module) noexcept = 0;
+	/** Drop every Python reference. Called with the GIL before the interpreter finalizes. */
+	virtual void release() noexcept = 0;
+};
+
 /** Rack gets this when a Python factory fails: Rack asserts that createModule
 returns a module and never catches. It has no components and keeps the
 patch's JSON for the module, writing it back unchanged, so a broken script
@@ -38,6 +48,8 @@ after destroy(), so its destructor must not touch Python: the factory has been
 released by then. */
 struct Model : rack::plugin::Model {
 	std::unique_ptr<ModuleFactory> factory;
+	/** Null: Rack gets RackPy's plain panel. */
+	std::unique_ptr<ModuleWidgetFactory> widgetFactory;
 	int hp = 4;
 	Model();
 	~Model() override;

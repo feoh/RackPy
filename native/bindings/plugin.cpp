@@ -9,6 +9,7 @@
 #include "plugin.hpp"
 #include "../plugin/model.hpp"
 #include "engine/module.hpp"
+#include "app/app.hpp"
 #include "widget/managed.hpp"
 #include "rackpy/runtime/errors.hpp"
 #include "rackpy/runtime/interpreter.hpp"
@@ -351,6 +352,29 @@ void bind_plugin(py::module_ raw) {
 		.def("is_favorite", [](const ModelHandle& h) { return addedModel(h, "is_favorite").isFavorite(); })
 		.def("set_favorite", [](const ModelHandle& h, bool favorite) { addedModel(h, "set_favorite").setFavorite(favorite); },
 			py::arg("favorite"))
+		.def("create_module", [](const ModelHandle& h) {
+			auto* m = dynamic_cast<plugin::Model*>(&checked(h));
+			if (!m)
+				throw py::type_error("create_module() makes modules of RackPy's Python models; modules of other plugins' "
+					"models need handles for foreign modules (RP-24)");
+			auto* factory = dynamic_cast<PyModuleFactory*>(m->factory.get());
+			if (!factory || !factory->fn)
+				throw std::runtime_error("this model's module factory is not available");
+			return createOwned(factory->fn.get(), *m);
+		}, "Rack's Model::createModule for a RackPy model: a new module of it, which Python owns (Rack's own calls "
+			"hand theirs to its engine).")
+		.def("create_module_widget", [](const ModelHandle& h, py::object module) {
+			auto* m = dynamic_cast<plugin::Model*>(&checked(h));
+			if (!m)
+				throw py::type_error("create_module_widget() makes widgets of RackPy's Python models; other plugins' "
+					"models need handles for foreign modules (RP-24)");
+			if (!m->widgetFactory)
+				throw std::invalid_argument("this model has no Python widget factory (add_model's widget=)");
+			return widgets::createModuleWidgetForPython(*m->widgetFactory, *m, module);
+		}, py::arg("module") = py::none(),
+			"Rack's Model::createModuleWidget for a RackPy model with a widget factory: its widget for module (a "
+			"module of this model in Rack's engine, which the widget then owns and deletes with itself) or None (a "
+			"browser preview). Python owns the widget.")
 		.def("append_context_menu", [](const ModelHandle& h, py::object menu, bool inBrowser) {
 			RackModel& m = addedModel(h, "append_context_menu");
 			auto* target = dynamic_cast<rack::ui::Menu*>(widgets::argument(menu));
@@ -370,7 +394,7 @@ void bind_plugin(py::module_ raw) {
 			"Rack's Model::fromJson: name, description, tags, URLs and hidden from a plugin.json \"modules\" entry. "
 			"This plugin's models only; Rack's Exception if the name ends up empty.");
 
-	mod.def("create_model", [](std::string slug, py::object moduleFactory, int hp) {
+	mod.def("create_model", [](std::string slug, py::object moduleFactory, py::object widgetFactory, int hp) {
 		runtime::requireMainThread("creating a Rack model");
 		if (!PyCallable_Check(moduleFactory.ptr()))
 			throw py::type_error("module_factory must be callable: it is Module.create's constructor callback");
@@ -381,14 +405,18 @@ void bind_plugin(py::module_ raw) {
 		auto factory = std::make_unique<PyModuleFactory>();
 		factory->fn = runtime::PyRef(moduleFactory);
 		detached->owned->factory = std::move(factory);
+		if (!widgetFactory.is_none())
+			detached->owned->widgetFactory = widgets::makeWidgetFactory(widgetFactory);
 		detached->owned->slug = std::move(slug);
 		detached->owned->hp = hp;
 		RackModel* m = detached->owned.get();
 		return runtime::identity(m, 0, [&] { return py::cast(ModelHandle{m, detached}); });
-	}, py::arg("slug"), py::arg("module_factory"), py::kw_only(), py::arg("hp") = 4,
+	}, py::arg("slug"), py::arg("module_factory"), py::kw_only(), py::arg("widget_factory") = py::none(),
+		py::arg("hp") = 4,
 		"Rack's createModel<TModule, TModuleWidget>: Rack calls module_factory(module), Module.create's constructor "
-		"callback, whenever it creates the model's module. Until Python module widgets exist (RP-28) the module "
-		"gets a plain panel hp wide.");
+		"callback, whenever it creates the model's module, and widget_factory(module), a rackpy.raw.app.ModuleWidget "
+		"subclass or a function returning one, for its widget (module is None for a browser preview). Without "
+		"widget_factory the module gets RackPy's plain panel, hp wide.");
 	mod.def("plugin_instance", [] {
 		runtime::requireMainThread("using a Rack plugin");
 		return pluginObject(plugin::instance());
@@ -522,6 +550,13 @@ void settingsFromJson(json_t* json) noexcept {
 pybind11::object modelObject(RackModel* model) {
 	runtime::requireMainThread("using a Rack model");
 	return modelObjectInternal(model);
+}
+
+RackModel* modelArgument(pybind11::handle value) {
+	runtime::requireMainThread("using a Rack model");
+	if (!py::isinstance<ModelHandle>(value))
+		throw py::type_error("expected a rackpy.raw.plugin.Model");
+	return &checked(value.cast<const ModelHandle&>());
 }
 
 void discardModels() {
