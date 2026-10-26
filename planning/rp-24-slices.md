@@ -40,3 +40,35 @@ Validation: [rp-24a-validation.md](rp-24a-validation.md).
   pointer.
 - **Deferred.** The four `_NoLock` methods with `caller_holds` locking stay
   unreviewed and move to 24B.
+
+**RP-24B — cables and parameter handles**
+(`tk-rackpy-24b-cables-and-parameter-handles-071b51`). 30 records implemented,
+and `rack::engine::Engine` is now complete. Validation:
+[rp-24b-validation.md](rp-24b-validation.md).
+
+- **Cables.** A Python-made `Cable` owns Rack's struct and holds module
+  handles, not Rack's pointers. An engine cable is found again by its ID,
+  because Rack deletes cables silently.
+- **Cable endpoints.** Rack asserts in `removeModule` that no cable still
+  touches the module, and a module widget's deletion goes through there. So
+  `add_cable` joins only RackPy modules in the engine that no module widget
+  owns (`widgets::moduleHasWidget`). `create_module_widget` is refused for a
+  module that such cables touch, and `remove_cable` for a cable that a cable
+  widget owns. Cables with widgets are RP-28E.
+- **Rack's engine lock from native code.** Rack's public `resetModule` and
+  `prepareSaveModule` lock and then call a module that need not be in the
+  engine. A private native module (`underEngineLock`) therefore runs Rack's
+  calls that need the lock held, such as `Cable::fromJson`, which uses
+  `getModule_NoLock`.
+- **Parameter handles.** Python's handles live in native slots that RackPy
+  keeps while Rack's engine has them. Rack's `Engine::clear` removes every
+  handle silently, and removing one that is gone asserts. A private sentinel
+  handle, mapped to module ID 2\*\*53 (never assigned by Rack), detects the
+  clear. Handles left in the engine are removed at context close.
+- **`_NoLock` methods.** They are bound and allowed only where RackPy knows
+  Rack holds the exclusive lock (`runtime::insideExclusive`).
+- **Rack 2.6.6 quirk.** `updateParamHandle` to the param a handle is already
+  on unmaps it. The binding keeps Rack's behaviour and documents it.
+- **Test hook.** `call_after_ui_step` runs a callable from RackPy's
+  scene-level step, which may clear Rack's rack and delete the RuntimeProbe
+  widget that drives tests.

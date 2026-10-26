@@ -22,6 +22,8 @@ std::unique_ptr<plugin::ModuleWidgetFactory> makeWidgetFactory(pybind11::object 
 /** Model::createModuleWidget called from Python: the factory's widget, Python-owned. */
 pybind11::object createModuleWidgetForPython(plugin::ModuleWidgetFactory& factory, rack::plugin::Model& model,
 	pybind11::object module);
+/** Whether a module widget owns this module: one in Rack's rack, or a Python one that took it. Main thread. */
+bool moduleHasWidget(const rack::engine::Module* module);
 
 }  // namespace widgets
 }  // namespace rackpy

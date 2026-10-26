@@ -1,10 +1,11 @@
 # The engine
 
 `rackpy.raw.engine.Engine` is Rack's `rack::engine::Engine`, reached as
-`Context.engine`. **Implemented (RP-24A), Linux x86_64 inside Rack Free
-2.6.6:** modules, the master module, timing, parameters and the engine's
-JSON. Cables and parameter handles are RP-24B, the history RP-24C (see the
-[coverage report](coverage.md)).
+`Context.engine`. **Implemented (RP-24A, RP-24B), Linux x86_64 inside Rack
+Free 2.6.6:** every public `Engine` method (modules, the master module,
+timing, parameters, cables, parameter handles and the engine's JSON), with
+`Cable` and `ParamHandle` (see the [coverage report](coverage.md)). The
+history is RP-24C.
 
 ```{rackpy-example} engine.py
 ```
@@ -21,9 +22,13 @@ callback that runs while Rack already holds the lock exclusively (a
 deadlocking.
 
 Methods that Rack does not lock (`get_frame`, `get_sample_rate`,
-`get_param_value` and the like) read Rack's values directly. Rack's
-`_NoLock` variants need the caller to hold the lock, which Python never
-does; they are RP-22's.
+`get_param_value` and the like) read Rack's values directly.
+
+Rack's `_NoLock` variants (`get_module_no_lock`, `set_master_module_no_lock`,
+`get_param_handle_no_lock`, `update_param_handle_no_lock`) need the caller
+to hold the lock. Python holds it only inside a callback Rack runs under the
+exclusive lock, which RackPy tracks: there they are the methods to use, and
+anywhere else they raise `EngineLockError`.
 
 (engine-modules)=
 ## Modules
@@ -86,6 +91,67 @@ toward the value as the engine steps, and `get_param_smooth_value` returns the
 target, or the value when nothing is smoothing. Rack indexes parameters
 unchecked, so RackPy checks every ID. Rack keeps the smoothed module's raw
 pointer, so smoothing needs a module in the engine.
+
+(engine-cables)=
+## Cables
+
+A `Cable()` that Python makes holds Rack's struct: `id` (-1 until the engine
+assigns one), `output_module` and `output_id`, `input_module` and
+`input_id`. Its modules are module handles (`Module` or `EngineModule`),
+never Rack's pointers. `to_json()` is Rack's patch JSON for it, and
+`from_json(data)` sets it from patch JSON, finding the modules in Rack's
+engine by ID (Rack's `Exception` becomes `ValueError`).
+
+`get_cable(id)` returns the engine's cable with that ID as a `Cable` that
+finds it again by ID at every use: Rack deletes cables without telling
+anyone (a cable widget its own, `Engine.clear` the rest), and the handle
+then goes stale (`alive` false). Such a cable's fields are read-only.
+`get_cable_ids()`, `get_num_cables()` and `has_cable(cable)` are Rack's.
+
+`add_cable(cable)` gives Rack's engine a cable Python made, and the handle
+then finds it by ID. Rack asserts, as it deletes a module, that no cable in
+the engine still touches it, and a module widget deletes its module. A cable
+with no cable widget to remove it first may therefore join only RackPy
+modules that Python put into the engine itself (`add_module`) and that no
+module widget owns. Giving such a module a widget is refused while the cable
+is there. Port IDs are checked. Cables with widgets, which users see and
+drag, are `RackWidget`'s (RP-28E).
+
+`remove_cable(cable)` takes a cable that no cable widget owns out of the
+engine, and Python owns it again (with its ID). Other handles to it go
+stale.
+
+(engine-param-handles)=
+## Parameter handles
+
+A `ParamHandle` is Rack's weak link to one module's param, as Core's MIDI-Map
+uses: Rack's engine keeps the module pointer up to date, and the param's
+widget shows the mapping's `color` and `text`.
+
+- `ParamHandle()` makes a blank handle (`module_id` -1). `add_param_handle`
+  gives it to Rack's engine, which only takes blank handles.
+  `update_param_handle(handle, module_id, param_id, overwrite=True)` maps it,
+  and `module_id` -1 unmaps it. With `overwrite`, a handle already on that
+  param is unmapped; without, this one is. Rack 2.6.6 also unmaps a handle
+  that is mapped again to the param it is on, because it finds the handle
+  itself there. RackPy checks the param ID when the module exists. While the
+  engine has the handle, its IDs change only this way.
+- `get_param_handle(module_id, param_id)` returns the handle on a param:
+  Python's own, a read-only view of another owner's (a module's), found
+  again by its IDs, or `None`. Passing the module itself is Rack's deprecated
+  form.
+- `module` is the module once it is in the engine, else `None`.
+- `remove_param_handle` takes Python's handle out of the engine.
+
+Rack's engine keeps raw pointers to its handles, so RackPy keeps each handle
+Python added allocated while the engine has it, even if Python drops the
+object. Rack's `Engine.clear` (a new or loaded patch) removes every handle
+without telling its owner, and Rack has no call that says whether it did.
+RackPy detects the clear with a private sentinel handle of its own, mapped
+to a module ID Rack never assigns (2\*\*53) and never returned. After a
+clear, `in_engine` is false and `remove_param_handle` is refused, where
+Rack's own call would fail its assertion. Handles still in the engine when
+Rack's context closes are removed while the engine lives.
 
 (engine-json)=
 ## The engine's JSON

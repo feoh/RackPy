@@ -112,6 +112,8 @@ struct JsonAllocationProbe {
 rack::plugin::Model* model = nullptr;
 PyRef stepCallback;
 PyRef resetCallback;
+std::vector<PyRef> afterUiStep;  // one-shot callables for RackPy's scene-level UI step
+bool afterUiStepHooked = false;
 std::vector<PyRef>* leaked = nullptr;  // deliberately never released
 
 struct ProbeModule : rack::engine::Module {
@@ -255,6 +257,25 @@ void define(py::module_ m) {
 	m.def("set_step_callback", [](py::object f) {
 		requireMainThread("set_step_callback");
 		stepCallback = PyRef(std::move(f));
+	});
+	m.def("call_after_ui_step", [](py::object f) {
+		requireMainThread("call_after_ui_step");
+		afterUiStep.emplace_back(std::move(f));
+		if (afterUiStepHooked)
+			return;
+		afterUiStepHooked = true;
+		// From RackPy's scene-level sentinel, not a module widget: the callable may delete module widgets.
+		onUiStep([] {
+			if (afterUiStep.empty())
+				return;
+			std::vector<PyRef> due;
+			due.swap(afterUiStep);
+			callPython("call_after_ui_step", [&due] {
+				for (auto& f : due)
+					f.get()();
+				due.clear();
+			});
+		});
 	});
 	m.def("set_reset_callback", [](py::object f) {
 		requireMainThread("set_reset_callback");
@@ -954,6 +975,7 @@ void define(py::module_ m) {
 	onFinalize([] {
 		stepCallback.reset();
 		resetCallback.reset();
+		afterUiStep.clear();
 	});
 }
 

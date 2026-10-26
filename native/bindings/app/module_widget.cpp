@@ -15,6 +15,7 @@
 #include <unordered_map>
 
 #include "../../plugin/model.hpp"
+#include "../engine/engine.hpp"
 #include "../engine/module.hpp"
 #include "../plugin.hpp"
 #include "app.hpp"
@@ -440,8 +441,19 @@ py::object createModuleWidgetForPython(plugin::ModuleWidgetFactory& factory, rac
 			throw runtime::Ownership("this module already has its module widget in Rack's rack");
 		if (appdetail::ownedElsewhere(m, nullptr))
 			throw runtime::Ownership("another module widget already owns this module");
+		if (bindings::engineCablesTouch(*m))
+			throw runtime::Ownership("cables Python added to Rack's engine touch this module; Rack would assert when its "
+				"widget deletes it (remove the cables first)");
 	}
 	return appdetail::build(python->fn.get(), model, m);
+}
+
+bool moduleHasWidget(const rack::engine::Module* module) {
+	runtime::requireMainThread("finding a module's widget");
+	if (appdetail::ownedElsewhere(module, nullptr))
+		return true;
+	auto* context = rack::contextGet();
+	return context && context->scene && context->scene->rack && context->scene->rack->getModule(module->id);
 }
 
 }  // namespace widgets

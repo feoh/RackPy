@@ -19,6 +19,7 @@
 #include "../../module/module.hpp"
 #include "../plugin.hpp"
 #include "engine.hpp"
+#include "engine_internal.hpp"
 #include "module.hpp"
 #include "rackpy/runtime/context.hpp"
 #include "rackpy/runtime/errors.hpp"
@@ -35,73 +36,12 @@ using RackModule = rack::engine::Module;
 
 namespace {
 
-/** Context::engine, checked: the bound context's engine, on its main thread. */
-struct EngineHandle {
-	std::shared_ptr<runtime::ContextToken> token;
-	Engine& get() const {
-		runtime::requireMainThread("using Rack's engine");
-		if (!token->alive())
-			throw runtime::StaleHandle("Rack's context has closed");
-		runtime::checkContext(*token);
-		if (!token->context->engine)
-			throw runtime::StaleHandle("Rack's engine has been deleted");
-		return *token->context->engine;
-	}
+/** A module Rack's engine never holds, for running native code under the engine lock. */
+struct LockRunner : RackModule {
+	const std::function<void()>* f = nullptr;
+	void onReset(const ResetEvent&) override { (*f)(); }
+	void onSave(const SaveEvent&) override { (*f)(); }
 };
-
-/** A module in Rack's engine that RackPy did not create: found again by its ID at every use. */
-struct EngineModule {
-	std::shared_ptr<runtime::ContextToken> token;
-	int64_t id;
-	RackModule* find() const {
-		runtime::requireMainThread("using an engine module");
-		if (!token->alive() || !token->context->engine)
-			return nullptr;
-		runtime::refuseEngineReentry("finding an engine module");
-		py::gil_scoped_release release;
-		runtime::EngineLease lease(*token);
-		return token->context->engine->getModule(id);
-	}
-	RackModule& get() const {
-		RackModule* m = find();
-		if (!m)
-			throw runtime::StaleHandle("module " + std::to_string(id) + " is no longer in Rack's engine");
-		return *m;
-	}
-};
-
-/** A Python module argument: a RackPy Module handle or an EngineModule. */
-RackModule& moduleArgument(py::handle value) {
-	if (py::isinstance<ModuleRef>(value))
-		return value.cast<const ModuleRef&>().get();
-	if (py::isinstance<EngineModule>(value))
-		return value.cast<const EngineModule&>().get();
-	throw py::type_error("expected a rackpy.raw.engine.Module or EngineModule");
-}
-
-/** Runs a locking engine call: refused inside an exclusive engine callback, then without the GIL. */
-template <class F>
-auto locked(const EngineHandle& h, const char* what, F f) {
-	Engine& engine = h.get();
-	runtime::refuseEngineReentry(what);
-	py::gil_scoped_release release;
-	runtime::EngineLease lease(*h.token);
-	return f(engine);
-}
-
-/** A module argument that must be in Rack's engine. */
-RackModule& engineModule(const EngineHandle& h, py::handle value) {
-	RackModule& m = moduleArgument(value);
-	if (!locked(h, "checking a module", [&m](Engine& e) { return e.hasModule(&m); }))
-		throw runtime::Ownership("the module is not in Rack's engine");
-	return m;
-}
-
-void requireParam(RackModule& m, int paramId) {
-	if (paramId < 0 || static_cast<size_t>(paramId) >= m.params.size())
-		throw std::invalid_argument("param ID " + std::to_string(paramId) + " is out of range for this module (" +
-			std::to_string(m.params.size()) + ")");
-}
 
 /** Clearing or loading the engine deletes its modules and cables, so Rack clears its rack first. */
 void requireEmptyRack(const EngineHandle& h, const char* what) {
@@ -112,6 +52,17 @@ void requireEmptyRack(const EngineHandle& h, const char* what) {
 }
 
 }  // namespace
+
+void underEngineLock(Engine& engine, bool exclusive, const std::function<void()>& f) {
+	runtime::requireMainThread("taking Rack's engine lock");
+	static LockRunner runner;  // main thread only
+	runner.f = &f;
+	if (exclusive)
+		engine.resetModule(&runner);  // Rack: exclusive lock, then onReset; the module need not be in the engine
+	else
+		engine.prepareSaveModule(&runner);  // Rack: shared lock, then onSave
+	runner.f = nullptr;
+}
 
 py::object engineModuleHandle(RackModule* module) {
 	if (!module)
@@ -143,9 +94,10 @@ void bindEngine(py::module_ engine) {
 		.def("__hash__", [](const EngineModule& m) { return py::hash(py::int_(m.id)); })
 		.def("__repr__", [](const EngineModule& m) { return "<EngineModule " + std::to_string(m.id) + ">"; });
 
-	py::class_<EngineHandle>(engine, "Engine", py::is_final(),
+	py::class_<EngineHandle> cls(engine, "Engine", py::is_final(),
 		"Rack's engine (Context.engine): modules, cables, parameters and timing. Main thread; calls that take Rack's "
-		"engine lock release the GIL.")
+		"engine lock release the GIL.");
+	cls
 		.def_property_readonly("alive", [](const EngineHandle& h) { return h.token->alive() && h.token->context->engine; })
 		// Modules
 		.def("clear", [](const EngineHandle& h) {
@@ -211,6 +163,11 @@ void bindEngine(py::module_ engine) {
 				: &moduleArgument(module);
 			return m && locked(h, "has_module", [m](Engine& e) { return e.hasModule(m); });
 		}, py::arg("module"))
+		.def("get_module_no_lock", [](const EngineHandle& h, int64_t id) {
+			Engine& engine = h.get();
+			requireLockHeld("get_module_no_lock");
+			return engineModuleHandle(engine.getModule_NoLock(id));
+		}, py::arg("module_id"), "Rack's getModule_NoLock: only inside a callback Rack runs under the exclusive lock.")
 		.def("get_module", [](const EngineHandle& h, int64_t id) {
 			RackModule* m = locked(h, "get_module", [id](Engine& e) { return e.getModule(id); });
 			return engineModuleHandle(m);
@@ -249,6 +206,22 @@ void bindEngine(py::module_ engine) {
 			RackModule* m = module.is_none() ? nullptr : &engineModule(h, module);
 			locked(h, "set_master_module", [m](Engine& e) { e.setMasterModule(m); });
 		}, py::arg("module"), "Rack's: the module whose audio clock steps the engine, or None for Rack's own thread.")
+		.def("set_master_module_no_lock", [](const EngineHandle& h, py::object module) {
+			Engine& engine = h.get();
+			requireLockHeld("set_master_module_no_lock");
+			RackModule* m = nullptr;
+			if (py::isinstance<EngineModule>(module)) {
+				m = engine.getModule_NoLock(module.cast<const EngineModule&>().id);
+				if (!m)
+					throw runtime::StaleHandle("the module is no longer in Rack's engine");
+			}
+			else if (!module.is_none()) {
+				m = &moduleArgument(module);  // a RackPy module: no lock needed to resolve it
+				if (engine.getModule_NoLock(m->id) != m)
+					throw runtime::Ownership("the module is not in Rack's engine");
+			}
+			engine.setMasterModule_NoLock(m);
+		}, py::arg("module"), "Rack's setMasterModule_NoLock: only inside a callback Rack runs under the exclusive lock.")
 		.def("get_master_module", [](const EngineHandle& h) { return engineModuleHandle(h.get().getMasterModule()); })
 		.def("step_block", [](const EngineHandle& h, int frames) {
 			if (frames < 1 || frames > (1 << 16))
@@ -316,6 +289,8 @@ void bindEngine(py::module_ engine) {
 			locked(h, "from_json", [&](Engine& e) { e.fromJson(json.get()); });
 		}, py::arg("data"), "Rack's: clears the engine, then creates the patch's modules and cables. Refused while Rack's "
 			"rack has widgets.");
+	bindCables(engine, cls);
+	bindParamHandles(engine, cls);
 }
 
 py::object engineObject(const std::shared_ptr<runtime::ContextToken>& token) {

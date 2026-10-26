@@ -2662,6 +2662,41 @@
     },
     {
       "facade": null,
+      "id": "field:rack::engine::Cable::id",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.Cable.id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::Cable::inputId",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.Cable.input_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::Cable::inputModule",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.Cable.input_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::Cable::outputId",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.Cable.output_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::Cable::outputModule",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.Cable.output_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::engine::Light::value",
       "kind": "attribute",
       "raw": "rackpy.raw.engine.Light.value",
@@ -2826,6 +2861,41 @@
       "id": "field:rack::engine::Param::value",
       "kind": "attribute",
       "raw": "rackpy.raw.engine.Param.value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::ParamHandle::color",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamHandle.color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::ParamHandle::module",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamHandle.module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::ParamHandle::moduleId",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamHandle.module_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::ParamHandle::paramId",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamHandle.param_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::engine::ParamHandle::text",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.ParamHandle.text",
       "status": "implemented"
     },
     {
@@ -7135,9 +7205,37 @@
     },
     {
       "facade": null,
+      "id": "method:rack::engine::Cable::fromJson(json_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Cable.from_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Cable::toJson()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Cable.to_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::addCable(rack::engine::Cable *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.add_cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::engine::Engine::addModule(rack::engine::Module *)",
       "kind": "method",
       "raw": "rackpy.raw.engine.Engine.add_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::addParamHandle(rack::engine::ParamHandle *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.add_param_handle",
       "status": "implemented"
     },
     {
@@ -7198,6 +7296,27 @@
     },
     {
       "facade": null,
+      "id": "method:rack::engine::Engine::getCable(int64_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getCableIds()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_cable_ids",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getCableIds(int64_t *, size_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_cable_ids",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::engine::Engine::getFrame()",
       "kind": "method",
       "raw": "rackpy.raw.engine.Engine.get_frame",
@@ -7247,9 +7366,44 @@
     },
     {
       "facade": null,
+      "id": "method:rack::engine::Engine::getModule_NoLock(int64_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_module_no_lock",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getNumCables()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_num_cables",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::engine::Engine::getNumModules()",
       "kind": "method",
       "raw": "rackpy.raw.engine.Engine.get_num_modules",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getParamHandle(int64_t, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_param_handle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getParamHandle(rack::engine::Module *, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_param_handle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getParamHandle_NoLock(int64_t, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_param_handle_no_lock",
       "status": "implemented"
     },
     {
@@ -7278,6 +7432,13 @@
       "id": "method:rack::engine::Engine::getSampleTime()",
       "kind": "method",
       "raw": "rackpy.raw.engine.Engine.get_sample_time",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::hasCable(rack::engine::Cable *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.has_cable",
       "status": "implemented"
     },
     {
@@ -7324,9 +7485,23 @@
     },
     {
       "facade": null,
+      "id": "method:rack::engine::Engine::removeCable(rack::engine::Cable *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.remove_cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::engine::Engine::removeModule(rack::engine::Module *)",
       "kind": "method",
       "raw": "rackpy.raw.engine.Engine.remove_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::removeParamHandle(rack::engine::ParamHandle *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.remove_param_handle",
       "status": "implemented"
     },
     {
@@ -7341,6 +7516,13 @@
       "id": "method:rack::engine::Engine::setMasterModule(rack::engine::Module *)",
       "kind": "method",
       "raw": "rackpy.raw.engine.Engine.set_master_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::setMasterModule_NoLock(rack::engine::Module *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.set_master_module_no_lock",
       "status": "implemented"
     },
     {
@@ -7376,6 +7558,20 @@
       "id": "method:rack::engine::Engine::toJson()",
       "kind": "method",
       "raw": "rackpy.raw.engine.Engine.to_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::updateParamHandle(rack::engine::ParamHandle *, int64_t, int, bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.update_param_handle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::updateParamHandle_NoLock(rack::engine::ParamHandle *, int64_t, int, bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.update_param_handle_no_lock",
       "status": "implemented"
     },
     {
@@ -11146,10 +11342,17 @@
     },
     {
       "facade": null,
+      "id": "record:rack::engine::Cable",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.Cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "record:rack::engine::Engine",
       "kind": "class",
       "raw": "rackpy.raw.engine.Engine",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": "rackpy.engine.Input",
@@ -11275,6 +11478,13 @@
       "id": "record:rack::engine::Param",
       "kind": "class",
       "raw": "rackpy.raw.engine.Param",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::engine::ParamHandle",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.ParamHandle",
       "status": "implemented"
     },
     {
@@ -12160,6 +12370,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "a8882abd237f6dfb",
+  "inputs": "05e2d74f9dac7a58",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }
