@@ -55,3 +55,21 @@ records. Validation: [rp-18a-validation.md](rp-18a-validation.md).
   Python.
 - **Frame.** Python (`src/rackpy/raw/_dsp.py`): `Frame[16]`,
   `Frame[4, float_4]`, buffer protocol in Rack's layout.
+
+**RP-18B — DSP triggers, pulse generator, timers and clock divider**
+(`tk-rackpy-18b-dsp-triggers-pulse-generator-timers-a-f72dae`). 57 records.
+Validation: [rp-18b-validation.md](rp-18b-validation.md).
+
+- **Objects.** Native classes holding Rack's structs: `BooleanTrigger`,
+  `SchmittTrigger` (Rack's `TSchmittTrigger<float>` specialization),
+  `PulseGenerator`, `Timer`, `ClockDivider`, with Rack's enums nested.
+- **Templates.** `TSchmittTrigger` and `TTimer` are subscriptable;
+  `[float]` and `[()]` give Rack's alias types, `[float_4]` the vector
+  instantiations, which also have names (`TSchmittTrigger_float_4`,
+  `TTimer_float_4`) so the manifest and stubs can refer to them. Vector
+  fields are live views.
+- **Deprecated union fields.** `state` (a `bool` in a union with `s`) warns,
+  reads true unless `s` is `LOW` and writes through `s`, avoiding the
+  undefined read of an invalid bool.
+- **Out-of-line wrappers.** Not needed: these are comparisons, single
+  additions and bit operations.

@@ -201,7 +201,8 @@ for _method in STEPPERS:
     CALLS[f"ode4.{_method}.oscillator"] = ode4(_method)
 
 
-def test_every_reference_case_matches_rack(reference: list[dict[str, Any]]) -> None:
+def test_every_reference_case_matches_rack(basic_cases: list[dict[str, Any]]) -> None:
+    reference = basic_cases
     mismatches: list[str] = []
     seen: Counter[str] = Counter()
     skipped = 0

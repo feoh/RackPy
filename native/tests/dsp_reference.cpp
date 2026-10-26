@@ -335,6 +335,105 @@ void ode() {
 	}
 }
 
+
+// --- digital.hpp: every object starts fresh and runs a whole stream ----------------------
+
+std::string b(bool x) {
+	return x ? "true" : "false";
+}
+
+void digital() {
+	std::vector<bool> bools;
+	for (int k = 0; k < 64; k++)
+		bools.push_back(next() & 1);
+	std::vector<std::string> args, processed, events;
+	dsp::BooleanTrigger bt, bte;
+	for (bool v : bools) {
+		args.push_back(b(v));
+		bool r = bt.process(opaque(v));
+		processed.push_back(list({b(r), i(bt.s)}));
+		int e = bte.processEvent(opaque(v));
+		events.push_back(list({i(e), i(bte.s)}));
+	}
+	add("boolean_trigger.process", {list(args)}, list(processed));
+	add("boolean_trigger.process_event", {list(args)}, list(events));
+
+	std::vector<float> inputs = {0.f, 0.5f, 1.f, 1.f, 0.f, -1.f, 2.f, NAN_, 0.5f, 1.5f, -0.f, 1.f, 0.1f, 2.f, INF, -INF};
+	for (int k = 0; k < 48; k++)
+		inputs.push_back(uniform(-0.5f, 2.5f));
+	for (auto thresholds : std::vector<std::pair<float, float>>{{0.f, 1.f}, {0.1f, 2.f}, {1.f, 0.f}}) {
+		std::vector<std::string> in, out, ev;
+		dsp::SchmittTrigger st, ste;
+		for (float x : inputs) {
+			in.push_back(f(x));
+			bool r = st.process(opaque(x), thresholds.first, thresholds.second);
+			out.push_back(list({b(r), i(st.s)}));
+			int e = ste.processEvent(opaque(x), thresholds.first, thresholds.second);
+			ev.push_back(list({i(e), i(ste.s)}));
+		}
+		add("schmitt.process", {list(in), f(thresholds.first), f(thresholds.second)}, list(out));
+		add("schmitt.process_event", {list(in), f(thresholds.first), f(thresholds.second)}, list(ev));
+	}
+	{
+		std::vector<std::string> in, out;
+		dsp::TSchmittTrigger<float_4> st;
+		for (size_t k = 0; k + 4 <= inputs.size(); k += 2) {
+			float_4 x(inputs[k], inputs[k + 1], inputs[k + 2], inputs[k + 3]);
+			in.push_back(f4(x));
+			float_4 r = st.process(opaque(x), 0.1f, 1.5f);
+			out.push_back(list({f4(r), f4(st.state), f4(st.isHigh())}));
+		}
+		add("schmitt4.process", {list(in), f(0.1f), f(1.5f)}, list(out));
+	}
+
+	// Pulse generator: a script of triggers (positive) and steps (negative: -dt).
+	std::vector<float> script = {1e-3f, -2e-4f, -2e-4f, 5e-4f, -4e-4f, -4e-4f, -4e-4f, 2e-3f, -1e-3f, 1e-4f, -1.5e-3f, -1e-3f, 0.f,
+		-1e-4f};
+	std::vector<std::string> ops, results;
+	dsp::PulseGenerator pg;
+	for (float op : script) {
+		ops.push_back(f(op));
+		if (op >= 0.f) {
+			pg.trigger(opaque(op));
+			results.push_back(list({b(pg.isHigh()), f(pg.remaining)}));
+		}
+		else {
+			bool r = pg.process(opaque(-op));
+			results.push_back(list({b(r), f(pg.remaining)}));
+		}
+	}
+	add("pulse.script", {list(ops)}, list(results));
+	dsp::PulseGenerator pd;
+	pd.trigger();
+	add("pulse.default_trigger", {}, f(pd.remaining));
+
+	std::vector<std::string> deltas, times;
+	dsp::Timer timer;
+	dsp::TTimer<float_4> timer4;
+	std::vector<std::string> deltas4, times4;
+	for (int k = 0; k < 32; k++) {
+		float dt = k == 16 ? -0.5f : uniform(0.f, 0.1f);
+		deltas.push_back(f(dt));
+		times.push_back(list({f(timer.process(opaque(dt))), f(timer.getTime())}));
+		float_4 d4(dt, 2 * dt, -dt, 1e-3f);
+		deltas4.push_back(f4(d4));
+		times4.push_back(list({f4(timer4.process(opaque(d4))), f4(timer4.getTime())}));
+	}
+	add("timer.process", {list(deltas)}, list(times));
+	add("timer4.process", {list(deltas4)}, list(times4));
+
+	for (uint32_t division : {1u, 3u, 0u, 5u, 4294967295u}) {
+		dsp::ClockDivider cd;
+		cd.setDivision(opaque(division));
+		std::vector<std::string> ticks;
+		for (int k = 0; k < 12; k++) {
+			bool r = cd.process();
+			ticks.push_back(list({b(r), i(cd.getClock())}));
+		}
+		add("clock_divider.process", {i(division)}, list(ticks));
+	}
+}
+
 }  // namespace
 
 int main() {
@@ -346,6 +445,7 @@ int main() {
 	conversions();
 	windows();
 	ode();
+	digital();
 	std::printf("{\"cases\": [\n");
 	for (size_t k = 0; k < cases.size(); k++)
 		std::printf("%s%s\n", cases[k].c_str(), k + 1 < cases.size() ? "," : "");

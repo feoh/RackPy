@@ -30,4 +30,4 @@ def test_dsp_suite_passes_inside_rack(
     assert result.exit == 0, result.summary()
     outcomes = result.outcomes()
     assert outcomes and set(outcomes.values()) == {"passed"}, result.summary()
-    assert len(outcomes) >= 9
+    assert len(outcomes) >= 17

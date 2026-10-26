@@ -15,6 +15,8 @@ namespace py = pybind11;
 
 /** dsp/common.hpp, approx.hpp, convert.hpp, window.hpp and ode.hpp (RP-18A). */
 void bindBasic(py::module_ dsp);
+/** dsp/digital.hpp: triggers, pulse generator, timers and clock divider (RP-18B). */
+void bindDigital(py::module_ dsp);
 
 /** The largest polynomial (coefficient count N) polyDirect/Horner/Estrin<T, N> are instantiated for. */
 constexpr size_t MAX_POLY_COEFFICIENTS = 32;

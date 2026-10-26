@@ -134,6 +134,20 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.dsp.digital.SchmittTrigger",
+      "id": "alias:rack::dsp::SchmittTrigger",
+      "kind": "alias",
+      "raw": "rackpy.raw.dsp.SchmittTrigger",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.digital.Timer",
+      "id": "alias:rack::dsp::Timer",
+      "kind": "alias",
+      "raw": "rackpy.raw.dsp.Timer",
+      "status": "implemented"
+    },
+    {
       "facade": null,
       "id": "alias:rack::event::Action",
       "kind": "alias",
@@ -705,6 +719,20 @@
       "id": "class_template:rack::dsp::Frame<value, type>",
       "kind": "class",
       "raw": "rackpy.raw.dsp.Frame",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.digital.TSchmittTrigger",
+      "id": "class_template:rack::dsp::TSchmittTrigger<type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.TSchmittTrigger",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.digital.TTimer",
+      "id": "class_template:rack::dsp::TTimer<type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.TTimer",
       "status": "implemented"
     },
     {
@@ -1646,6 +1674,13 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "constructor:rack::dsp::TSchmittTrigger::TSchmittTrigger<T>()",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.TSchmittTrigger_float_4",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.engine.Module.create",
       "id": "constructor:rack::engine::Module::Module()",
       "kind": "factory",
@@ -2347,6 +2382,34 @@
     },
     {
       "facade": null,
+      "id": "enum:rack::dsp::BooleanTrigger::Event",
+      "kind": "enum",
+      "raw": "rackpy.raw.dsp.BooleanTrigger.Event",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enum:rack::dsp::BooleanTrigger::State",
+      "kind": "enum",
+      "raw": "rackpy.raw.dsp.BooleanTrigger.State",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enum:rack::dsp::TSchmittTrigger<float>::Event",
+      "kind": "enum",
+      "raw": "rackpy.raw.dsp.SchmittTrigger.Event",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enum:rack::dsp::TSchmittTrigger<float>::State",
+      "kind": "enum",
+      "raw": "rackpy.raw.dsp.SchmittTrigger.State",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "enum:rack::engine::Port::Type",
       "kind": "enum",
       "raw": "rackpy.raw.engine.Port.Type",
@@ -2399,6 +2462,90 @@
       "id": "enum:rack::ui::SequentialLayout::Orientation",
       "kind": "enum",
       "raw": "rackpy.raw.ui.SequentialLayout.Orientation",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::BooleanTrigger::Event::NONE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BooleanTrigger.Event.NONE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::BooleanTrigger::Event::TRIGGERED",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BooleanTrigger.Event.TRIGGERED",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::BooleanTrigger::Event::UNTRIGGERED",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BooleanTrigger.Event.UNTRIGGERED",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::BooleanTrigger::State::HIGH",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BooleanTrigger.State.HIGH",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::BooleanTrigger::State::LOW",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BooleanTrigger.State.LOW",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::BooleanTrigger::State::UNINITIALIZED",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BooleanTrigger.State.UNINITIALIZED",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TSchmittTrigger<float>::Event::NONE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.SchmittTrigger.Event.NONE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TSchmittTrigger<float>::Event::TRIGGERED",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.SchmittTrigger.Event.TRIGGERED",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TSchmittTrigger<float>::Event::UNTRIGGERED",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.SchmittTrigger.Event.UNTRIGGERED",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TSchmittTrigger<float>::State::HIGH",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.SchmittTrigger.State.HIGH",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TSchmittTrigger<float>::State::LOW",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.SchmittTrigger.State.LOW",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TSchmittTrigger<float>::State::UNINITIALIZED",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.SchmittTrigger.State.UNINITIALIZED",
       "status": "implemented"
     },
     {
@@ -3628,6 +3775,34 @@
     },
     {
       "facade": null,
+      "id": "field:rack::dsp::BooleanTrigger::s",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.BooleanTrigger.s",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::BooleanTrigger::state",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.BooleanTrigger.state",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::ClockDivider::clock",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.ClockDivider.clock",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::ClockDivider::division",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.ClockDivider.division",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::dsp::Frame::samples",
       "kind": "property",
       "raw": "rackpy.raw.dsp.Frame.samples",
@@ -3638,6 +3813,41 @@
       "id": "field:rack::dsp::Int24::i",
       "kind": "property",
       "raw": "rackpy.raw.dsp.Int24.i",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::PulseGenerator::remaining",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.PulseGenerator.remaining",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TSchmittTrigger::state",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.TSchmittTrigger_float_4.state",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TSchmittTrigger<float>::s",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.SchmittTrigger.s",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TSchmittTrigger<float>::state",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.SchmittTrigger.state",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TTimer::time",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.TTimer_float_4.time",
       "status": "implemented"
     },
     {
@@ -11027,6 +11237,167 @@
     },
     {
       "facade": null,
+      "id": "method:rack::dsp::BooleanTrigger::isHigh()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.BooleanTrigger.is_high",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::BooleanTrigger::process(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.BooleanTrigger.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::BooleanTrigger::processEvent(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.BooleanTrigger.process_event",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::BooleanTrigger::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.BooleanTrigger.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::ClockDivider::getClock()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ClockDivider.get_clock",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::ClockDivider::getDivision()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ClockDivider.get_division",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::ClockDivider::process()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ClockDivider.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::ClockDivider::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ClockDivider.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::ClockDivider::setDivision(uint32_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ClockDivider.set_division",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::PulseGenerator::isHigh()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.PulseGenerator.is_high",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::PulseGenerator::process(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.PulseGenerator.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::PulseGenerator::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.PulseGenerator.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::PulseGenerator::trigger(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.PulseGenerator.trigger",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TSchmittTrigger::isHigh()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.TSchmittTrigger_float_4.is_high",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TSchmittTrigger::process($c0, $c0, $c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.TSchmittTrigger_float_4.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TSchmittTrigger::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.TSchmittTrigger_float_4.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TSchmittTrigger<float>::isHigh()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.SchmittTrigger.is_high",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TSchmittTrigger<float>::process(float, float, float)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.SchmittTrigger.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TSchmittTrigger<float>::processEvent(float, float, float)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.SchmittTrigger.process_event",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TSchmittTrigger<float>::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.SchmittTrigger.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TTimer::getTime()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.TTimer_float_4.get_time",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TTimer::process($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.TTimer_float_4.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TTimer::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.TTimer_float_4.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::engine::Cable::fromJson(json_t *)",
       "kind": "method",
       "raw": "rackpy.raw.engine.Cable.from_json",
@@ -16213,10 +16584,31 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.dsp.digital.BooleanTrigger",
+      "id": "record:rack::dsp::BooleanTrigger",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.BooleanTrigger",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.digital.ClockDivider",
+      "id": "record:rack::dsp::ClockDivider",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.ClockDivider",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.dsp.basic.Int24",
       "id": "record:rack::dsp::Int24",
       "kind": "class",
       "raw": "rackpy.raw.dsp.Int24",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.digital.PulseGenerator",
+      "id": "record:rack::dsp::PulseGenerator",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.PulseGenerator",
       "status": "implemented"
     },
     {
@@ -17130,6 +17522,13 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.dsp.digital.SchmittTrigger",
+      "id": "specialization:rack::dsp::TSchmittTrigger<float>",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.SchmittTrigger",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.simd.float_4",
       "id": "specialization:rack::simd::Vector<float, 4>",
       "kind": "class",
@@ -17858,6 +18257,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "ec39d8a87a9dc708",
+  "inputs": "0a2a63a71c4dafdc",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

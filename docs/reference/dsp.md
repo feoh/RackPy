@@ -1,12 +1,13 @@
 # DSP building blocks
 
 Rack's `dsp` headers, family 6 of the [SDK surface](surface/dsp.md)
-(**RP-18**, in slices). **Implemented, Linux x86_64 inside Rack Free 2.6.6
-(RP-18A):** `dsp/common.hpp`, `approx.hpp`, `convert.hpp`, `window.hpp` and
-`ode.hpp`, as `rackpy.raw.dsp` and the {py:mod}`rackpy.dsp.basic` import (see
-the [coverage report](coverage.md)). Triggers and timers (RP-18B), filters
-(RP-18C), VU meters and the MIDI processors (RP-18D), and FFT, resampling,
-FIR, MinBLEP and ring buffers (RP-19) are not bound yet.
+(**RP-18**, in slices). **Implemented, Linux x86_64 inside Rack Free 2.6.6:**
+`dsp/common.hpp`, `approx.hpp`, `convert.hpp`, `window.hpp` and `ode.hpp`
+(RP-18A), and `dsp/digital.hpp` (RP-18B), as `rackpy.raw.dsp` and the
+{py:mod}`rackpy.dsp.basic` and {py:mod}`rackpy.dsp.digital` imports (see the
+[coverage report](coverage.md)). Filters (RP-18C), VU meters and the MIDI
+processors (RP-18D), and FFT, resampling, FIR, MinBLEP and ring buffers
+(RP-19) are not bound yet.
 
 Every function runs **Rack's own C++ code**, compiled with the SDK's flags.
 `tests/dsp` replays more than 4,000 cases from a compiled C++ reference
@@ -176,3 +177,56 @@ to get a frame whose samples start at zero (C++ leaves them uninitialized).
 - `Frame` itself is not instantiable; `CHANNELS` must be at least 1 and `T`
   must be `float` or `float_4`. A specialization's `CHANNELS` and `type` are
   its template arguments.
+
+(dsp-triggers)=
+## Triggers
+
+These are Rack's stateful objects. Each Python object holds Rack's C++ struct,
+and its methods run Rack's code; like any Python value, use one from one
+thread at a time. `copy.copy` copies the state; the objects are unhashable.
+
+- `BooleanTrigger` detects a bool turning true. `process(in_)` returns
+  whether it did; `process_event(in_)` returns a `BooleanTrigger.Event`:
+  `TRIGGERED`, `UNTRIGGERED` (when it turns false) or `NONE`. `s` is the
+  `BooleanTrigger.State` (`LOW`, `HIGH`, `UNINITIALIZED`), `is_high()` and
+  `reset()` are Rack's. A new or reset trigger is `UNINITIALIZED`, so a first
+  true input does not trigger.
+- `SchmittTrigger` is Rack's `TSchmittTrigger<float>` specialization:
+  `process(in_, low_threshold=0, high_threshold=1)` returns true when the
+  input rises from `LOW` to at least the high threshold, and the state falls
+  at or below the low one. `process_event` and `s` are as for
+  `BooleanTrigger`, with its own `State` and `Event` enums. NaN reaches
+  neither threshold, so it changes nothing.
+- `TSchmittTrigger[float_4]` (also named `TSchmittTrigger_float_4`) is Rack's
+  generic template for vectors: `process` returns a mask of the lanes that
+  rose, and `state` is the state mask, a live view. Rack resets it to a full
+  mask (every lane `HIGH`), unlike the float specialization.
+- `TSchmittTrigger` is the template itself: `TSchmittTrigger[float]` and
+  `TSchmittTrigger[()]` are `SchmittTrigger` (Rack's alias for
+  `TSchmittTrigger<>`); other arguments raise `TypeError`.
+- **Deprecated.** Rack's `bool state` member of both float triggers is a union
+  with `s`. `state` emits `DeprecationWarning`; it reads true unless `s` is
+  `LOW`, which is what the union's byte means (reading the C++ bool while `s`
+  is `UNINITIALIZED` would be undefined), and assigning it sets `HIGH` or
+  `LOW`.
+
+(dsp-pulse)=
+## Pulse generator
+
+`PulseGenerator` holds `HIGH` for a duration: `trigger(duration=1e-3)`
+starts a pulse unless the current one lasts longer, `process(delta_time)`
+advances it and returns whether it was `HIGH` before the step, `is_high()`
+reads it, `reset()` ends it, and `remaining` is the time left.
+
+(dsp-timers)=
+## Timers and the clock divider
+
+- `Timer` (`TTimer<float>`) accumulates `process(delta_time)` and returns the
+  time since `reset()`; `get_time()` and `time` read it. `TTimer[float_4]`
+  (`TTimer_float_4`) keeps four, with `time` a live view. `TTimer` is the
+  template, as for `TSchmittTrigger`.
+- `ClockDivider.process()` counts calls and returns true, resetting the count,
+  every `division` calls (`set_division`, `get_division`, `get_clock`,
+  `reset`, and the `clock` and `division` fields). Both are `uint32_t`: values
+  outside raise `OverflowError`, and the count wraps as unsigned arithmetic
+  does. A division of 0 or 1 returns true every call.
