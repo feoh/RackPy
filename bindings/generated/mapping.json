@@ -2,6 +2,13 @@
   "entries": [
     {
       "facade": null,
+      "id": "alias:rack::ui::ScrollBar",
+      "kind": "alias",
+      "raw": "rackpy.raw.ui.ScrollBar",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "alias:rack::widget::SVGWidget",
       "kind": "alias",
       "raw": "rackpy.raw.widget.SVGWidget",
@@ -100,6 +107,90 @@
     },
     {
       "facade": null,
+      "id": "constructor:rack::ui::Button::Button()",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.Button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::ui::Label::Label()",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.Label",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::ui::Menu::Menu()",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.Menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::ui::MenuEntry::MenuEntry()",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.MenuEntry",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::ui::MenuOverlay::MenuOverlay()",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.MenuOverlay",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::ui::MenuSeparator::MenuSeparator()",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.MenuSeparator",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::ui::PasswordField::PasswordField()",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.PasswordField",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::ui::ProgressBar::ProgressBar()",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.ProgressBar",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::ui::ScrollWidget::ScrollWidget()",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.ScrollWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::ui::Scrollbar::Scrollbar()",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.Scrollbar",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::ui::Slider::Slider()",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.Slider",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::ui::TextField::TextField()",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.TextField",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "constructor:rack::widget::FramebufferWidget::FramebufferWidget()",
       "kind": "class",
       "raw": "rackpy.raw.widget.FramebufferWidget",
@@ -177,6 +268,27 @@
     },
     {
       "facade": null,
+      "id": "destructor:rack::ui::Menu::~Menu()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.close",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::ui::ScrollWidget::~ScrollWidget()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.close",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::ui::Scrollbar::~Scrollbar()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.close",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "destructor:rack::widget::FramebufferWidget::~FramebufferWidget()",
       "kind": "method",
       "raw": "rackpy.raw.widget.Widget.close",
@@ -198,6 +310,27 @@
     },
     {
       "facade": null,
+      "id": "enum:rack::ui::Label::Alignment",
+      "kind": "enum",
+      "raw": "rackpy.raw.ui.Label.Alignment",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enum:rack::ui::SequentialLayout::Alignment",
+      "kind": "enum",
+      "raw": "rackpy.raw.ui.SequentialLayout.Alignment",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enum:rack::ui::SequentialLayout::Orientation",
+      "kind": "enum",
+      "raw": "rackpy.raw.ui.SequentialLayout.Orientation",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "enumerator:rack::engine::Port::Type::INPUT",
       "kind": "enum_member",
       "raw": "rackpy.raw.engine.Port.Type.INPUT",
@@ -208,6 +341,83 @@
       "id": "enumerator:rack::engine::Port::Type::OUTPUT",
       "kind": "enum_member",
       "raw": "rackpy.raw.engine.Port.Type.OUTPUT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::ui::Label::Alignment::CENTER_ALIGNMENT",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.ui.Label.Alignment.CENTER_ALIGNMENT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::ui::Label::Alignment::LEFT_ALIGNMENT",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.ui.Label.Alignment.LEFT_ALIGNMENT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::ui::Label::Alignment::RIGHT_ALIGNMENT",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.ui.Label.Alignment.RIGHT_ALIGNMENT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::ui::SequentialLayout::Alignment::BOTTOM_ALIGNMENT",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.ui.SequentialLayout.Alignment.BOTTOM_ALIGNMENT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::ui::SequentialLayout::Alignment::CENTER_ALIGNMENT",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.ui.SequentialLayout.Alignment.CENTER_ALIGNMENT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::ui::SequentialLayout::Alignment::LEFT_ALIGNMENT",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.ui.SequentialLayout.Alignment.LEFT_ALIGNMENT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::ui::SequentialLayout::Alignment::MIDDLE_ALIGNMENT",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.ui.SequentialLayout.Alignment.MIDDLE_ALIGNMENT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::ui::SequentialLayout::Alignment::RIGHT_ALIGNMENT",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.ui.SequentialLayout.Alignment.RIGHT_ALIGNMENT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::ui::SequentialLayout::Alignment::TOP_ALIGNMENT",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.ui.SequentialLayout.Alignment.TOP_ALIGNMENT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::ui::SequentialLayout::Orientation::HORIZONTAL_ORIENTATION",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.ui.SequentialLayout.Orientation.HORIZONTAL_ORIENTATION",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::ui::SequentialLayout::Orientation::VERTICAL_ORIENTATION",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.ui.SequentialLayout.Orientation.VERTICAL_ORIENTATION",
       "status": "implemented"
     },
     {
@@ -789,6 +999,286 @@
       "id": "field:rack::plugin::Plugin::version",
       "kind": "property",
       "raw": "rackpy.raw.plugin.Plugin.version",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::Button::quantity",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.Button.quantity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::Button::text",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.Button.text",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::ColorDotMenuItem::color",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.ColorDotMenuItem.color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::Label::alignment",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.Label.alignment",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::Label::color",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.Label.color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::Label::fontSize",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.Label.font_size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::Label::lineHeight",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.Label.line_height",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::Label::text",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.Label.text",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::Menu::activeEntry",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.Menu.active_entry",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::Menu::childMenu",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.Menu.child_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::Menu::cornerFlags",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.Menu.corner_flags",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::Menu::parentMenu",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.Menu.parent_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::MenuItem::disabled",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.MenuItem.disabled",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::MenuItem::rightText",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.MenuItem.right_text",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::MenuItem::text",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.MenuItem.text",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::MenuLabel::text",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.MenuLabel.text",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::MenuOverlay::bgColor",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.MenuOverlay.bg_color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::ProgressBar::quantity",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.ProgressBar.quantity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::ScrollWidget::container",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.ScrollWidget.container",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::ScrollWidget::containerBox",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.ScrollWidget.container_box",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::ScrollWidget::hideScrollbars",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.ScrollWidget.hide_scrollbars",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::ScrollWidget::horizontalScrollbar",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.ScrollWidget.horizontal_scrollbar",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::ScrollWidget::offset",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.ScrollWidget.offset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::ScrollWidget::verticalScrollbar",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.ScrollWidget.vertical_scrollbar",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::Scrollbar::vertical",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.Scrollbar.vertical",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::SequentialLayout::alignment",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.SequentialLayout.alignment",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::SequentialLayout::margin",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.SequentialLayout.margin",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::SequentialLayout::orientation",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.SequentialLayout.orientation",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::SequentialLayout::spacing",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.SequentialLayout.spacing",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::SequentialLayout::wrap",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.SequentialLayout.wrap",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::Slider::quantity",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.Slider.quantity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::TextField::cursor",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.TextField.cursor",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::TextField::multiline",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.TextField.multiline",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::TextField::nextField",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.TextField.next_field",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::TextField::password",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.TextField.password",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::TextField::placeholder",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.TextField.placeholder",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::TextField::prevField",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.TextField.prev_field",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::TextField::selection",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.TextField.selection",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::TextField::text",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.TextField.text",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::ui::Tooltip::text",
+      "kind": "property",
+      "raw": "rackpy.raw.ui.Tooltip.text",
       "status": "implemented"
     },
     {
@@ -1577,6 +2067,20 @@
     },
     {
       "facade": null,
+      "id": "function:rack::ui::refreshTheme()",
+      "kind": "function",
+      "raw": "rackpy.raw.ui.refresh_theme",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::ui::setTheme(NVGcolor, NVGcolor)",
+      "kind": "function",
+      "raw": "rackpy.raw.ui.set_theme",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "function:rack::widget::getKeyCommandName(int, int)",
       "kind": "function",
       "raw": "rackpy.raw.widget.get_key_command_name",
@@ -1724,6 +2228,20 @@
     },
     {
       "facade": null,
+      "id": "macro:CHECKMARK",
+      "kind": "function",
+      "raw": "rackpy.raw.ui.CHECKMARK",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:CHECKMARK_STRING",
+      "kind": "constant",
+      "raw": "rackpy.raw.ui.CHECKMARK_STRING",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "macro:CONCAT",
       "kind": "no_runtime_meaning",
       "raw": null,
@@ -1769,6 +2287,13 @@
       "id": "macro:RECT_ARGS",
       "kind": "function",
       "raw": "rackpy.raw.macros.RECT_ARGS",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:RIGHT_ARROW",
+      "kind": "constant",
+      "raw": "rackpy.raw.ui.RIGHT_ARROW",
       "status": "implemented"
     },
     {
@@ -3089,6 +3614,566 @@
     },
     {
       "facade": null,
+      "id": "method:rack::ui::Button::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Button.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Button::onDragDrop(const rack::widget::Widget::DragDropEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Button.on_drag_drop",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Button::onDragEnd(const rack::widget::Widget::DragEndEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Button.on_drag_end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Button::onDragStart(const rack::widget::Widget::DragStartEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Button.on_drag_start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ChoiceButton::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ChoiceButton.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ColorDotMenuItem::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ColorDotMenuItem.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ColorDotMenuItem::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ColorDotMenuItem.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Label::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Label.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::List::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.List.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Menu::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Menu.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Menu::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Menu.on_hover_scroll",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Menu::setChildMenu(rack::ui::Menu *)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Menu.set_child_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Menu::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Menu.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuItem::createChildMenu()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuItem.create_child_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuItem::doAction(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuItem.do_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuItem::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuItem.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuItem::onAction(const rack::widget::Widget::ActionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuItem.on_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuItem::onDragDrop(const rack::widget::Widget::DragDropEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuItem.on_drag_drop",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuItem::onEnter(const rack::widget::Widget::EnterEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuItem.on_enter",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuItem::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuItem.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuLabel::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuLabel.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuLabel::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuLabel.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuOverlay::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuOverlay.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuOverlay::onAction(const rack::widget::Widget::ActionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuOverlay.on_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuOverlay::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuOverlay.on_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuOverlay::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuOverlay.on_hover_key",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuOverlay::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuOverlay.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::MenuSeparator::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.MenuSeparator.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::OptionButton::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.OptionButton.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ProgressBar::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ProgressBar.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::RadioButton::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.RadioButton.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::RadioButton::onDragDrop(const rack::widget::Widget::DragDropEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.RadioButton.on_drag_drop",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::RadioButton::onDragEnd(const rack::widget::Widget::DragEndEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.RadioButton.on_drag_end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::RadioButton::onDragStart(const rack::widget::Widget::DragStartEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.RadioButton.on_drag_start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ScrollWidget::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ScrollWidget.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ScrollWidget::getContainerOffsetBound()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ScrollWidget.get_container_offset_bound",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ScrollWidget::getHandleOffset()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ScrollWidget.get_handle_offset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ScrollWidget::getHandleSize()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ScrollWidget.get_handle_size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ScrollWidget::getScrollOffset()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ScrollWidget.get_scroll_offset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ScrollWidget::isScrolling()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ScrollWidget.is_scrolling",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ScrollWidget::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ScrollWidget.on_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ScrollWidget::onDragMove(const rack::widget::Widget::DragMoveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ScrollWidget.on_drag_move",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ScrollWidget::onDragStart(const rack::widget::Widget::DragStartEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ScrollWidget.on_drag_start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ScrollWidget::onHover(const rack::widget::Widget::HoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ScrollWidget.on_hover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ScrollWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ScrollWidget.on_hover_key",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ScrollWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ScrollWidget.on_hover_scroll",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ScrollWidget::scrollTo(rack::math::Rect)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ScrollWidget.scroll_to",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::ScrollWidget::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.ScrollWidget.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Scrollbar::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Scrollbar.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Scrollbar::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Scrollbar.on_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Scrollbar::onDragEnd(const rack::widget::Widget::DragEndEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Scrollbar.on_drag_end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Scrollbar::onDragMove(const rack::widget::Widget::DragMoveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Scrollbar.on_drag_move",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Scrollbar::onDragStart(const rack::widget::Widget::DragStartEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Scrollbar.on_drag_start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::SequentialLayout::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.SequentialLayout.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Slider::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Slider.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Slider::onDoubleClick(const rack::widget::Widget::DoubleClickEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Slider.on_double_click",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Slider::onDragEnd(const rack::widget::Widget::DragEndEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Slider.on_drag_end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Slider::onDragMove(const rack::widget::Widget::DragMoveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Slider.on_drag_move",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Slider::onDragStart(const rack::widget::Widget::DragStartEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Slider.on_drag_start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::copyClipboard()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.copy_clipboard",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::createContextMenu()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.create_context_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::cursorToLineEnd()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.cursor_to_line_end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::cursorToLineStart()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.cursor_to_line_start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::cursorToNextWord()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.cursor_to_next_word",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::cursorToPrevWord()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.cursor_to_prev_word",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::cutClipboard()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.cut_clipboard",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::getSelectedText()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.get_selected_text",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::getText()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.get_text",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::getTextPosition(rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.get_text_position",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::insertText(std::string)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.insert_text",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.on_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::onDragHover(const rack::widget::Widget::DragHoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.on_drag_hover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::onSelectKey(const rack::widget::Widget::SelectKeyEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.on_select_key",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::onSelectText(const rack::widget::Widget::SelectTextEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.on_select_text",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::pasteClipboard()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.paste_clipboard",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::selectAll()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.select_all",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::TextField::setText(std::string)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.TextField.set_text",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Tooltip::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Tooltip.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::ui::Tooltip::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.ui.Tooltip.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::widget::BaseEvent::consume(rack::widget::Widget *) const",
       "kind": "method",
       "raw": "rackpy.raw.widget.BaseEvent.consume",
@@ -4279,6 +5364,160 @@
     },
     {
       "facade": null,
+      "id": "record:rack::ui::Button",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.Button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::ChoiceButton",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.ChoiceButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::ColorDotMenuItem",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.ColorDotMenuItem",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::Label",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.Label",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::List",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.List",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::Menu",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.Menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::MenuEntry",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.MenuEntry",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::MenuItem",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.MenuItem",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::MenuLabel",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.MenuLabel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::MenuOverlay",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.MenuOverlay",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::MenuSeparator",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.MenuSeparator",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::OptionButton",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.OptionButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::PasswordField",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.PasswordField",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::ProgressBar",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.ProgressBar",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::RadioButton",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.RadioButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::ScrollWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.ScrollWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::Scrollbar",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.Scrollbar",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::SequentialLayout",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.SequentialLayout",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::Slider",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.Slider",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::TextField",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.TextField",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::Tooltip",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.Tooltip",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::ui::TooltipOverlay",
+      "kind": "class",
+      "raw": "rackpy.raw.ui.TooltipOverlay",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "record:rack::widget::BaseEvent",
       "kind": "class",
       "raw": "rackpy.raw.widget.BaseEvent",
@@ -4796,6 +6035,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "b1817f400731a70b",
+  "inputs": "0df221a1f9821b87",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

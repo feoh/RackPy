@@ -3,12 +3,14 @@
 // becomes rackpy.raw.widget; the bindings are in native/bindings/widget/. They
 // also bind the slice of rack::window that SvgWidget needs (rackpy.raw.window.Svg).
 #include "widget/tree.hpp"
+#include "ui/ui.hpp"
 
 namespace rackpy {
 namespace bindings {
 
 void bind_widgets(pybind11::module_ raw) {
 	bindWidgetTrees(raw);
+	widgets::bindUi(raw);
 }
 
 }  // namespace bindings

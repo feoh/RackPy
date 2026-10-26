@@ -4,11 +4,11 @@
 #include "behavior.hpp"
 
 namespace rackpy { namespace widgets {
-template<class Base, class Parent = W>
+template<class Base, class Parent = W, class Alias = Widget<Base>>
 auto variant(py::module_ mod, const char* name) {
-	auto cls = py::classh<Base, Parent, Widget<Base>>(mod, name);
+	auto cls = py::classh<Base, Parent, Alias>(mod, name);
 	cls.def(py::init([] {
-		auto* value = new Widget<Base>();
+		auto* value = new Alias();
 		return std::unique_ptr<Base, UiDelete>(value, UiDelete{value->lifetime});
 	}));
 	bindBehavior(cls);

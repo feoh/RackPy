@@ -45,6 +45,20 @@ struct State {
 	bool pythonOwned = true;
 	std::function<py::object()> reclaim;
 	std::function<W*(py::handle)> disown;
+	// Python objects a not-owned pointer field of this widget refers to
+	// (ui::Button::quantity, ...), kept alive until the widget is deleted.
+	std::vector<std::pair<std::string, runtime::PyRef>> references;
+	// Run when this widget is deleted: clear other widgets' pointer fields to it.
+	std::vector<std::function<void()>> onDestroyed;
+	void keep(const std::string& field, py::object value) {
+		for (auto& ref : references)
+			if (ref.first == field) {
+				ref.second = value.is_none() ? runtime::PyRef() : runtime::PyRef(value);
+				return;
+			}
+		if (!value.is_none())
+			references.emplace_back(field, runtime::PyRef(value));
+	}
 };
 struct DrawGuard {
 	std::shared_ptr<State> state;
@@ -90,6 +104,15 @@ struct CallbackGuard {
 	explicit CallbackGuard(const State* allowedStep = nullptr);
 	~CallbackGuard();
 };
+/** Inside a factory callback (MenuItem::createChildMenu, RP-26A) Python may
+build and change detached trees it owns, though Rack is dispatching an
+event: only trees Rack cannot be iterating. */
+struct FactoryScope {
+	FactoryScope();
+	~FactoryScope();
+};
+/** Refuse a change to `parent`'s children during a callback, unless a factory is building a detached tree. */
+void checkMutationOf(W& parent);
 
 struct Managed {
 	std::shared_ptr<State> lifetime;

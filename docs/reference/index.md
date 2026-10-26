@@ -24,6 +24,7 @@ engine-components
 engine-module
 plugin
 widgets
+ui
 widget-trees
 ```
 

@@ -16,6 +16,7 @@ std::unordered_map<PyObject*, std::shared_ptr<State>> pythonStates;
 std::mutex pendingMutex;
 std::vector<std::shared_ptr<State>> pending;
 int callbackDepth = 0;
+int factoryDepth = 0;
 int drawingDepth = 0;
 const State* allowedStep = nullptr;
 bool initialized = false;
@@ -78,7 +79,7 @@ void close(py::object self) {
 
 void transferTo(W& parent, const std::shared_ptr<runtime::ContextToken>& context,
     py::object child, int placement, W* sibling = nullptr) {
-    checkMutation();
+    checkMutationOf(parent);
     auto c = state(child);
     auto& item = checked(c);
     if (context != c->token->context)
@@ -208,6 +209,23 @@ void checkMutation() {
 	if (callbackDepth)
 		throw runtime::Ownership("synchronous tree mutation during a Widget callback is unsafe; request deletion instead");
 }
+FactoryScope::FactoryScope() { ++factoryDepth; }
+FactoryScope::~FactoryScope() { --factoryDepth; }
+void checkMutationOf(W& parent) {
+	runtime::requireMainThread("changing Widget ownership");
+	if (!callbackDepth)
+		return;
+	if (factoryDepth) {
+		// A tree Python owns outright is not attached anywhere Rack could be iterating.
+		W* root = &parent;
+		while (root->parent)
+			root = root->parent;
+		auto it = nativeStates.find(root);
+		if (it != nativeStates.end() && it->second->pythonOwned)
+			return;
+	}
+	throw runtime::Ownership("synchronous tree mutation during a Widget callback is unsafe; request deletion instead");
+}
 
 std::shared_ptr<State> createState(W* native, const void* peer, const std::type_info& type) {
 	runtime::requireMainThread("constructing a Widget");
@@ -305,6 +323,12 @@ Target target(W* native) {
 }
 void destroyed(const std::shared_ptr<State>& s) noexcept {
 	if (!s) return;
+	for (auto& watcher : s->onDestroyed) {
+		try { watcher(); }
+		catch (...) {}
+	}
+	s->onDestroyed.clear();
+	s->references.clear();  // PyRef releases safely without the GIL
 	s->token->invalidate();
 	nativeStates.erase(s->native);
 	s->native = nullptr;
@@ -414,7 +438,14 @@ void bindManagedWidgets(py::module_ mod) {
 			return ref.owner->context->alive() && ref.owner->weak.get() != nullptr;
 		})
 		.def("get_box", [](const ExternalWidget& ref) { return checkedExternal(ref).getBox(); })
-		.def_property_readonly("parent", [](const ExternalWidget& ref) { return wrapper(checkedExternal(ref).parent); });
+		.def_property_readonly("parent", [](const ExternalWidget& ref) { return wrapper(checkedExternal(ref).parent); })
+		.def("add_child", [](const ExternalWidget& ref, py::object child) {
+			auto& host = checkedExternal(ref);
+			auto s = state(child);
+			checked(s);
+			transferTo(host, s->token->context, child, 0);
+		}, py::arg("child"),
+			"Hand a Python widget to this Rack-owned widget (e.g. a ScrollWidget's container), which then owns it.");
 	auto cls = py::classh<W, Widget<W>>(mod, "Widget", py::dynamic_attr(), "Subclassable, context-bound Rack Widget.")
 		.def(py::init([] {
 			auto* w = new Widget<W>();
