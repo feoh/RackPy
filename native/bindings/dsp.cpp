@@ -17,6 +17,7 @@ void bind_dsp(pybind11::module_ raw) {
 	pybind11::module_ dsp = raw.def_submodule("dsp", "rack::dsp: Rack's DSP helpers, triggers, filters and MIDI processors.");
 	dsp_bindings::bindBasic(dsp);
 	dsp_bindings::bindDigital(dsp);
+	dsp_bindings::bindFilter(dsp);
 }
 
 }  // namespace bindings

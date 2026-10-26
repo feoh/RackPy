@@ -14,6 +14,7 @@ import pytest
 # Case-name prefixes of each section other than RP-18A's (which takes the rest).
 SECTIONS = {
     "digital": ("boolean_trigger.", "schmitt.", "schmitt4.", "pulse.", "timer.", "timer4.", "clock_divider."),
+    "filters": ("rc", "smoothers", "deprecated_smoothers", "iir", "biquad"),
 }
 
 
@@ -23,6 +24,7 @@ def section(fn: str) -> str:
 
 def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addoption("--rackpy-reference", help="JSON from the rackpy_dsp_reference program")
+    parser.addoption("--rackpy-call-cost", help="where test_call_cost.py writes its measurements as JSON")
 
 
 @pytest.fixture(scope="session")
@@ -42,3 +44,8 @@ def basic_cases(reference: list[dict[str, Any]]) -> list[dict[str, Any]]:
 @pytest.fixture(scope="session")
 def digital_cases(reference: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [c for c in reference if section(c["fn"]) == "digital"]
+
+
+@pytest.fixture(scope="session")
+def filter_cases(reference: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [c for c in reference if section(c["fn"]) == "filters"]

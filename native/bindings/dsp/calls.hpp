@@ -106,5 +106,13 @@ RACKPY_OUT_OF_LINE void step(T t, T dt, T* x, int len, OdeSystem<T> f, void* con
 		d::stepRK4(t, dt, x, len, system);
 }
 
+// --- Members of Rack's stateful DSP objects (filter.hpp) -----------------------------
+/** obj.*M(args...), out of line, one function per member and argument types:
+`member<&TRCFilter<float>::process>(filter, x)`. */
+template <auto M, typename Object, typename... Args>
+RACKPY_OUT_OF_LINE decltype(auto) member(Object& object, Args... args) {
+	return (object.*M)(args...);
+}
+
 }  // namespace dsp_calls
 }  // namespace rackpy

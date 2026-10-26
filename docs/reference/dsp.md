@@ -3,11 +3,12 @@
 Rack's `dsp` headers, family 6 of the [SDK surface](surface/dsp.md)
 (**RP-18**, in slices). **Implemented, Linux x86_64 inside Rack Free 2.6.6:**
 `dsp/common.hpp`, `approx.hpp`, `convert.hpp`, `window.hpp` and `ode.hpp`
-(RP-18A), and `dsp/digital.hpp` (RP-18B), as `rackpy.raw.dsp` and the
-{py:mod}`rackpy.dsp.basic` and {py:mod}`rackpy.dsp.digital` imports (see the
-[coverage report](coverage.md)). Filters (RP-18C), VU meters and the MIDI
-processors (RP-18D), and FFT, resampling, FIR, MinBLEP and ring buffers
-(RP-19) are not bound yet.
+(RP-18A), `dsp/digital.hpp` (RP-18B) and `dsp/filter.hpp` (RP-18C), as
+`rackpy.raw.dsp` and the {py:mod}`rackpy.dsp.basic`,
+{py:mod}`rackpy.dsp.digital` and {py:mod}`rackpy.dsp.filters` imports (see
+the [coverage report](coverage.md)). VU meters and the MIDI processors
+(RP-18D), and FFT, resampling, FIR, MinBLEP and ring buffers (RP-19) are not
+bound yet.
 
 Every function runs **Rack's own C++ code**, compiled with the SDK's flags.
 `tests/dsp` replays more than 4,000 cases from a compiled C++ reference
@@ -44,12 +45,16 @@ freely, because C++ instantiates one function per value. RackPy's contract:
   number of coefficients) are instantiated for `N = 1` to `32`. More
   coefficients raise `ValueError`; none raises too, as C++ has no
   zero-length arrays.
+- `IIRFilter<B_ORDER, A_ORDER, T>` is instantiated for both orders from 2 to
+  8 ([below](#iir-filters)). Below 2, Rack's `process()` writes past a
+  zero-length array, so those orders are refused rather than offered.
 - `Frame<CHANNELS, T>` is plain data, so it is written in Python and takes any
   `CHANNELS` from 1 ([below](#frames)).
 
-**Owner review item:** the `poly*` bound of 32 is RackPy's choice, recorded
-in the manifest. A full-coverage release needs the owner to confirm it, or to
-choose another contract ([release bar](../coverage.md#release-bar)).
+**Owner review item:** the `poly*` bound of 32 and the `IIRFilter` orders 2
+to 8 are RackPy's choices, recorded in the manifest. A full-coverage release
+needs the owner to confirm them, or to choose another contract
+([release bar](../coverage.md#release-bar)).
 
 (dsp-common)=
 ## Constants, conversions and scalings
@@ -230,3 +235,104 @@ reads it, `reset()` ends it, and `remaining` is the time left.
   `reset`, and the `clock` and `division` fields). Both are `uint32_t`: values
   outside raise `OverflowError`, and the count wraps as unsigned arithmetic
   does. A division of 0 or 1 returns true every call.
+
+(dsp-filters)=
+## Filters
+
+Rack's filters are stateful objects like the [triggers](#triggers), each
+instantiated for `float`, named by Rack's alias, and for `float_4`, named
+`T<Name>_float_4`: `RCFilter` and `TRCFilter_float_4`. The templates
+themselves are subscriptable, as `TRCFilter[float_4]`. Vector fields are live
+views, and every method calls Rack's code out of line
+(`native/bindings/dsp/calls.hpp`).
+
+- `RCFilter`: an RC circuit by Euler's method. `set_cutoff(r)` takes the
+  angular cutoff in radians (`c = 2 / r`), `set_cutoff_freq(f)` the cutoff as a
+  ratio of the sample rate; `process(x)` steps it, and `lowpass()` and
+  `highpass()` read the outputs. `xstate` and `ystate` are Rack's one-element
+  arrays, as live views.
+- `ExponentialFilter`: exponential smoothing. `set_lambda`, `set_tau`
+  (`lambda = 1 / tau`) and `process(delta_time, in_)`, which returns the new
+  output and snaps to the input once a step no longer changes the output.
+  Rack's field `lambda` is `lambda_`, as `lambda` is a Python keyword.
+- `PeakFilter`: jumps to higher values at once and decays toward lower ones.
+- `SlewLimiter`: `set_rise_fall(rise, fall)` in units per second;
+  `process(delta_time, in_)` moves toward the input by at most that much.
+- `ExponentialSlewLimiter`: exponential smoothing with separate rise and fall
+  rates, `set_rise_fall` and `set_rise_fall_tau`.
+- **Deprecated.** `process(in_)` with one argument (Rack's `process(1, in)`)
+  on the four smoothers, and `PeakFilter.peak()` and `set_rate(r)`
+  (`lambda = 1 - r`), emit `DeprecationWarning`.
+
+(dsp-iir)=
+## IIR filters
+
+`IIRFilter[b_order, a_order]` (or `[b_order, a_order, float_4]`) is Rack's
+`IIRFilter<B_ORDER, A_ORDER, T>`, with `B_ORDER` numerator coefficients and
+`A_ORDER` denominator ones, `a_0 = 1` omitted:
+
+- `b`, `a`, `x` and `y` are Rack's coefficient and state arrays, as live
+  views (`b[0]` of a vector filter is itself a live `float_4`).
+- `set_coefficients(b, a)` takes `B_ORDER` b and `A_ORDER - 1` a coefficients
+  (Rack reads exactly that many from two arrays), `reset()` zeroes the state
+  but not the coefficients, and `process(in_)` returns the next output.
+- `get_transfer_function(s)` is `H` at the normalized angular frequency
+  `s = 2πf/f_s`: a Python complex, or a `(real, imag)` pair of `float_4` for
+  vectors. `get_frequency_response(f)` and `get_frequency_phase(f)` take
+  `f = f_c/f_s`.
+
+Each instantiation is a class (`IIRFilter[3, 3]` is `IIRFilter_3_3_float`,
+the biquads' base); a class's `B_ORDER` and `A_ORDER` say which.
+
+(dsp-biquad)=
+## Biquad filters
+
+`BiquadFilter` (and `TBiquadFilter[float_4]`) is an `IIRFilter[3, 3]` with
+Rack's designs: `set_parameters(type, f, q, v)` sets the coefficients for a
+`BiquadFilter.Type` (`LOWPASS_1POLE`, `HIGHPASS_1POLE`, `LOWPASS`,
+`HIGHPASS`, `LOWSHELF`, `HIGHSHELF`, `BANDPASS`, `PEAK`, `NOTCH`), at
+`f = f_c/f_s` (below 0.5), quality factor `q` and gain `v`. `NUM_TYPES` sets
+nothing. Both instantiations take `BiquadFilter.Type`; in C++ each has its own
+`Type` with the same values.
+
+**A new biquad's coefficients are NaN.** Rack's constructor calls
+`setParameters(LOWPASS, 0, 0, 1)`, which computes `K / Q = 0 / 0`, so a
+`BiquadFilter` outputs NaN until `set_parameters` gives it real values.
+
+(dsp-bulk)=
+## Whole buffers
+
+`rackpy.dsp.filters.process_block(filter, in_, out, delta_time=None)` runs
+a float filter over a float32 buffer natively, writing `out` (which may be
+`in_`). It is RackPy's convenience, not Rack API: each sample goes through
+the same Rack call as `filter.process`, in order, so the outputs and the
+filter's final state are exactly those of a loop of `process` calls. The
+exponential, peak and slew filters need `delta_time`; the IIR and biquad
+filters take none; RC filters have no single output and are refused. The
+buffers are read and written in place, with no copies. [What it
+costs](#what-the-calls-cost) compares it with a Python loop.
+
+(dsp-cost)=
+## What the calls cost
+
+Measured inside Rack Free 2.6.6 on the planning machine (an i9-14900K desktop
+under load, with the `powersave` governor: diagnostic numbers, not a
+performance claim; raw data in
+[benchmarks/rp18-dsp-call-cost.json](../../benchmarks/rp18-dsp-call-cost.json)),
+median nanoseconds per sample over 20,000 samples:
+
+| Workload | ns per sample |
+| --- | --- |
+| `BiquadFilter.process`, a Python loop of calls | 72 |
+| `BiquadFilter`, `process_block` | 2.7 |
+| `SlewLimiter.process(delta_time, x)`, a Python loop | 67 |
+| `SlewLimiter`, `process_block` | 3.3 |
+| `SchmittTrigger.process`, a Python loop | 71 |
+| `cubic(x)`, a Python loop | 32 |
+| `TBiquadFilter[float_4].process`, a loop (4 samples per call) | 45 |
+
+A Python call costs tens of nanoseconds whatever it computes, so
+`process_block` is 20 to 27 times faster for these filters; it copies
+nothing, reading and writing the caller's buffers. Neither is a way to run
+audio: at 48 kHz Rack calls a module's `process()` every 21 microseconds, on
+its engine thread, where Python never runs ([process audio](../how-to/dsp.md)).

@@ -12,7 +12,10 @@
 
 #include "../bindings/dsp/calls.hpp"
 
+#include <array>
 #include <cinttypes>
+#include <complex>
+#include <type_traits>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -434,6 +437,191 @@ void digital() {
 	}
 }
 
+// --- filter.hpp: fresh objects over whole streams, through the bindings' member wrappers ----
+
+#define RACKPY_DEPRECATED_CALL(...) \
+	_Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"") __VA_ARGS__ \
+		_Pragma("GCC diagnostic pop")
+
+using calls::member;
+
+template <typename T>
+std::string enc(T x) {
+	if constexpr (std::is_same<T, float>::value)
+		return f(x);
+	else
+		return f4(x);
+}
+
+template <typename T>
+T lane(float x, int k) {
+	if constexpr (std::is_same<T, float>::value)
+		return x;
+	else
+		return float_4(x, x * 0.5f + 0.25f * k, -x, 1.f - x);
+}
+
+std::vector<float> STREAM;
+
+/** The stream as T, with lane pattern k for float_4, as the arguments the replay passes. */
+template <typename T>
+std::vector<std::string> inputs(int k) {
+	std::vector<std::string> in;
+	for (float x : STREAM)
+		in.push_back(enc(lane<T>(x, k)));
+	return in;
+}
+
+template <typename T>
+void singlePole(const char* suffix) {
+	std::vector<std::string> in = inputs<T>(0);
+	for (float fc : {0.01f, 0.1f, 0.45f, 0.f}) {
+		dsp::TRCFilter<T> rc;
+		member<&dsp::TRCFilter<T>::setCutoffFreq>(rc, T(fc));
+		std::vector<std::string> out;
+		for (float x : STREAM) {
+			member<&dsp::TRCFilter<T>::process>(rc, lane<T>(x, 0));
+			out.push_back(list({enc(member<&dsp::TRCFilter<T>::lowpass>(rc)), enc(member<&dsp::TRCFilter<T>::highpass>(rc)), enc(rc.c)}));
+		}
+		add(std::string("rc") + suffix, {list(in), f(fc)}, list(out));
+	}
+	for (float lambda : {30.f, 1000.f, 0.f}) {
+		using E = dsp::TExponentialFilter<T>;
+		using P = dsp::TPeakFilter<T>;
+		using S = dsp::TSlewLimiter<T>;
+		using X = dsp::TExponentialSlewLimiter<T>;
+		E e;
+		P p;
+		S sl;
+		X xs;
+		float tau = 1.f / std::max(lambda, 1.f), rise = lambda, fall = lambda * 0.5f, riseTau = 0.01f;
+		float fallTau = lambda > 0.f ? 1.f / lambda : 0.f, step = 1.f / 48000.f;
+		member<&E::setLambda>(e, T(lambda));
+		member<&P::setTau>(p, T(tau));
+		member<&S::setRiseFall>(sl, T(rise), T(fall));
+		member<&X::setRiseFallTau>(xs, T(riseTau), T(fallTau));
+		std::vector<std::string> out;
+		for (float x : STREAM) {
+			T v = lane<T>(x, 1);
+			T dt = T(step);
+			T a = member<static_cast<T (E::*)(T, T)>(&E::process)>(e, dt, v);
+			T b2 = member<static_cast<T (P::*)(T, T)>(&P::process)>(p, dt, v);
+			T c2 = member<static_cast<T (S::*)(T, T)>(&S::process)>(sl, dt, v);
+			T d2 = member<static_cast<T (X::*)(T, T)>(&X::process)>(xs, dt, v);
+			out.push_back(list({enc(a), enc(b2), enc(c2), enc(d2)}));
+		}
+		add(std::string("smoothers") + suffix, {list(inputs<T>(1)), f(lambda), f(tau), f(rise), f(fall), f(riseTau), f(fallTau), f(step)},
+			list(out));
+	}
+	// The deprecated forms: process(in) is process(1, in); PeakFilter's peak() and setRate().
+	{
+		using E = dsp::TExponentialFilter<T>;
+		using P = dsp::TPeakFilter<T>;
+		using S = dsp::TSlewLimiter<T>;
+		using X = dsp::TExponentialSlewLimiter<T>;
+		E e;
+		P p;
+		S sl;
+		X xs;
+		member<&E::setLambda>(e, T(0.25f));
+		RACKPY_DEPRECATED_CALL(member<&P::setRate>(p, T(0.75f));)
+		member<&S::setRiseFall>(sl, T(0.5f), T(0.25f));
+		member<&X::setRiseFall>(xs, T(0.5f), T(0.125f));
+		std::vector<std::string> out;
+		for (float x : STREAM) {
+			T v = lane<T>(x, 2);
+			T a, b2, c2, d2, pk;
+			RACKPY_DEPRECATED_CALL(a = member<static_cast<T (E::*)(T)>(&E::process)>(e, v);)
+			RACKPY_DEPRECATED_CALL(b2 = member<static_cast<T (P::*)(T)>(&P::process)>(p, v);)
+			RACKPY_DEPRECATED_CALL(c2 = member<static_cast<T (S::*)(T)>(&S::process)>(sl, v);)
+			RACKPY_DEPRECATED_CALL(d2 = member<static_cast<T (X::*)(T)>(&X::process)>(xs, v);)
+			RACKPY_DEPRECATED_CALL(pk = member<&P::peak>(p);)
+			out.push_back(list({enc(a), enc(b2), enc(c2), enc(d2), enc(pk)}));
+		}
+		add(std::string("deprecated_smoothers") + suffix, {list(inputs<T>(2))}, list(out));
+	}
+}
+
+template <int B, int A, typename T>
+void iir(const char* suffix) {
+	using F = dsp::IIRFilter<B, A, T>;
+	F filter;
+	T b[B], a[A - 1];
+	std::vector<std::string> bs, as;
+	for (int k = 0; k < B; k++) {
+		b[k] = lane<T>(uniform(-1.f, 1.f), k);
+		bs.push_back(enc(b[k]));
+	}
+	for (int k = 0; k < A - 1; k++) {
+		a[k] = lane<T>(uniform(-0.4f, 0.4f) / (A - 1), k);
+		as.push_back(enc(a[k]));
+	}
+	const T* bp = b;
+	const T* ap = a;
+	member<&F::setCoefficients>(filter, bp, ap);
+	std::vector<std::string> in, out;
+	for (size_t k = 0; k < 48; k++) {
+		T x = k == 0 ? T(1.f) : lane<T>(STREAM[k % STREAM.size()], 3);
+		in.push_back(enc(x));
+		out.push_back(enc(member<&F::process>(filter, x)));
+	}
+	std::vector<std::string> response, frequencies;
+	for (float fr : {0.f, 0.01f, 0.125f, 0.25f, 0.49f}) {
+		float angular = opaque(2.f * (float) M_PI) * fr;
+		frequencies.push_back(list({f(fr), f(angular)}));
+		std::complex<T> h = member<&F::getTransferFunction>(filter, T(angular));
+		response.push_back(list({enc(h.real()), enc(h.imag()), enc(member<&F::getFrequencyResponse>(filter, T(fr))),
+			enc(member<&F::getFrequencyPhase>(filter, T(fr)))}));
+	}
+	std::string name = "iir" + std::string(suffix) + "." + std::to_string(B) + "." + std::to_string(A);
+	add(name, {list(bs), list(as), list(in), list(frequencies)}, list({list(out), list(response)}));
+}
+
+template <typename T>
+void biquads(const char* suffix) {
+	using F = dsp::TBiquadFilter<T>;
+	using Base = dsp::IIRFilter<3, 3, T>;  // the bindings call the inherited methods on the base, as here
+	{
+		F fresh;
+		Base& base = fresh;
+		add(std::string("biquad_default") + suffix, {}, list({enc(fresh.b[0]), enc(fresh.a[0]), enc(member<&Base::process>(base, T(1.f)))}));
+	}
+	for (int type = 0; type <= (int) F::NUM_TYPES; type++)
+		for (auto p : std::vector<std::array<float, 3>>{{0.1f, 0.707f, 1.f}, {0.01f, 2.f, 4.f}, {0.3f, 0.5f, 0.25f}, {0.49f, 10.f, 1.f}}) {
+			F filter;
+			member<&F::setParameters>(filter, (typename F::Type) type, p[0], p[1], p[2]);
+			std::vector<std::string> coefficients = {enc(filter.b[0]), enc(filter.b[1]), enc(filter.b[2]), enc(filter.a[0]), enc(filter.a[1])};
+			Base& base = filter;
+			std::vector<std::string> impulse;
+			for (int k = 0; k < 16; k++)
+				impulse.push_back(enc(member<&Base::process>(base, T(k == 0 ? 1.f : 0.f))));
+			std::vector<std::string> magnitudes, frequencies;
+			for (float fr : {0.01f, 0.1f, 0.25f}) {
+				frequencies.push_back(f(fr));
+				magnitudes.push_back(enc(member<&Base::getFrequencyResponse>(base, T(fr))));
+			}
+			add(std::string("biquad") + suffix, {i(type), f(p[0]), f(p[1]), f(p[2]), list(frequencies)},
+				list({list(coefficients), list(impulse), list(magnitudes)}));
+		}
+}
+
+void filters() {
+	STREAM = {0.f, 1.f, 1.f, 1.f, 0.f, -1.f, 0.5f, 10.f, -10.f, 0.f, 0.f, NAN_, 1.f, INF, 0.f, 0.f};
+	for (int k = 0; k < 48; k++)
+		STREAM.push_back(uniform(-5.f, 5.f));
+	singlePole<float>("");
+	singlePole<float_4>("4");
+	iir<2, 2, float>("");
+	iir<3, 3, float>("");
+	iir<4, 2, float>("");
+	iir<2, 5, float>("");
+	iir<8, 8, float>("");
+	iir<3, 3, float_4>("4");
+	iir<5, 4, float_4>("4");
+	biquads<float>("");
+	biquads<float_4>("4");
+}
+
 }  // namespace
 
 int main() {
@@ -446,6 +634,7 @@ int main() {
 	windows();
 	ode();
 	digital();
+	filters();
 	std::printf("{\"cases\": [\n");
 	for (size_t k = 0; k < cases.size(); k++)
 		std::printf("%s%s\n", cases[k].c_str(), k + 1 < cases.size() ? "," : "");

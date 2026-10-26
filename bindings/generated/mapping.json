@@ -134,10 +134,52 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.dsp.filters.BiquadFilter",
+      "id": "alias:rack::dsp::BiquadFilter",
+      "kind": "alias",
+      "raw": "rackpy.raw.dsp.BiquadFilter",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.filters.ExponentialFilter",
+      "id": "alias:rack::dsp::ExponentialFilter",
+      "kind": "alias",
+      "raw": "rackpy.raw.dsp.ExponentialFilter",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.filters.ExponentialSlewLimiter",
+      "id": "alias:rack::dsp::ExponentialSlewLimiter",
+      "kind": "alias",
+      "raw": "rackpy.raw.dsp.ExponentialSlewLimiter",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.filters.PeakFilter",
+      "id": "alias:rack::dsp::PeakFilter",
+      "kind": "alias",
+      "raw": "rackpy.raw.dsp.PeakFilter",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.filters.RCFilter",
+      "id": "alias:rack::dsp::RCFilter",
+      "kind": "alias",
+      "raw": "rackpy.raw.dsp.RCFilter",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.dsp.digital.SchmittTrigger",
       "id": "alias:rack::dsp::SchmittTrigger",
       "kind": "alias",
       "raw": "rackpy.raw.dsp.SchmittTrigger",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.filters.SlewLimiter",
+      "id": "alias:rack::dsp::SlewLimiter",
+      "kind": "alias",
+      "raw": "rackpy.raw.dsp.SlewLimiter",
       "status": "implemented"
     },
     {
@@ -722,10 +764,59 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.dsp.filters.IIRFilter",
+      "id": "class_template:rack::dsp::IIRFilter<value, value, type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.IIRFilter",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.filters.TBiquadFilter",
+      "id": "class_template:rack::dsp::TBiquadFilter<type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.TBiquadFilter",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.filters.TExponentialFilter",
+      "id": "class_template:rack::dsp::TExponentialFilter<type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.TExponentialFilter",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.filters.TExponentialSlewLimiter",
+      "id": "class_template:rack::dsp::TExponentialSlewLimiter<type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.TExponentialSlewLimiter",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.filters.TPeakFilter",
+      "id": "class_template:rack::dsp::TPeakFilter<type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.TPeakFilter",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.filters.TRCFilter",
+      "id": "class_template:rack::dsp::TRCFilter<type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.TRCFilter",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.dsp.digital.TSchmittTrigger",
       "id": "class_template:rack::dsp::TSchmittTrigger<type>",
       "kind": "factory",
       "raw": "rackpy.raw.dsp.TSchmittTrigger",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.filters.TSlewLimiter",
+      "id": "class_template:rack::dsp::TSlewLimiter<type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.TSlewLimiter",
       "status": "implemented"
     },
     {
@@ -1661,6 +1752,13 @@
     },
     {
       "facade": null,
+      "id": "constructor:rack::dsp::IIRFilter::IIRFilter<B_ORDER, A_ORDER, T>()",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.IIRFilter_3_3_float",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "constructor:rack::dsp::Int24::Int24()",
       "kind": "class",
       "raw": "rackpy.raw.dsp.Int24",
@@ -1671,6 +1769,20 @@
       "id": "constructor:rack::dsp::Int24::Int24(int32_t)",
       "kind": "class",
       "raw": "rackpy.raw.dsp.Int24",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::dsp::TBiquadFilter::TBiquadFilter<T>()",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.BiquadFilter",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::dsp::TRCFilter::TRCFilter<T>()",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.RCFilter",
       "status": "implemented"
     },
     {
@@ -2396,6 +2508,13 @@
     },
     {
       "facade": null,
+      "id": "enum:rack::dsp::TBiquadFilter::Type",
+      "kind": "enum",
+      "raw": "rackpy.raw.dsp.BiquadFilter.Type",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "enum:rack::dsp::TSchmittTrigger<float>::Event",
       "kind": "enum",
       "raw": "rackpy.raw.dsp.SchmittTrigger.Event",
@@ -2504,6 +2623,76 @@
       "id": "enumerator:rack::dsp::BooleanTrigger::State::UNINITIALIZED",
       "kind": "enum_member",
       "raw": "rackpy.raw.dsp.BooleanTrigger.State.UNINITIALIZED",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TBiquadFilter::Type::BANDPASS",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BiquadFilter.Type.BANDPASS",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TBiquadFilter::Type::HIGHPASS",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BiquadFilter.Type.HIGHPASS",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TBiquadFilter::Type::HIGHPASS_1POLE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BiquadFilter.Type.HIGHPASS_1POLE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TBiquadFilter::Type::HIGHSHELF",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BiquadFilter.Type.HIGHSHELF",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TBiquadFilter::Type::LOWPASS",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BiquadFilter.Type.LOWPASS",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TBiquadFilter::Type::LOWPASS_1POLE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BiquadFilter.Type.LOWPASS_1POLE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TBiquadFilter::Type::LOWSHELF",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BiquadFilter.Type.LOWSHELF",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TBiquadFilter::Type::NOTCH",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BiquadFilter.Type.NOTCH",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TBiquadFilter::Type::NUM_TYPES",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BiquadFilter.Type.NUM_TYPES",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::TBiquadFilter::Type::PEAK",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.BiquadFilter.Type.PEAK",
       "status": "implemented"
     },
     {
@@ -3810,6 +3999,34 @@
     },
     {
       "facade": null,
+      "id": "field:rack::dsp::IIRFilter::a",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.IIRFilter_3_3_float.a",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::IIRFilter::b",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.IIRFilter_3_3_float.b",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::IIRFilter::x",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.IIRFilter_3_3_float.x",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::IIRFilter::y",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.IIRFilter_3_3_float.y",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::dsp::Int24::i",
       "kind": "property",
       "raw": "rackpy.raw.dsp.Int24.i",
@@ -3820,6 +4037,76 @@
       "id": "field:rack::dsp::PulseGenerator::remaining",
       "kind": "property",
       "raw": "rackpy.raw.dsp.PulseGenerator.remaining",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TExponentialFilter::lambda",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.ExponentialFilter.lambda_",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TExponentialFilter::out",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.ExponentialFilter.out",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TExponentialSlewLimiter::fallLambda",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.ExponentialSlewLimiter.fall_lambda",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TExponentialSlewLimiter::out",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.ExponentialSlewLimiter.out",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TExponentialSlewLimiter::riseLambda",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.ExponentialSlewLimiter.rise_lambda",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TPeakFilter::lambda",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.PeakFilter.lambda_",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TPeakFilter::out",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.PeakFilter.out",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TRCFilter::c",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RCFilter.c",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TRCFilter::xstate",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RCFilter.xstate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TRCFilter::ystate",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RCFilter.ystate",
       "status": "implemented"
     },
     {
@@ -3841,6 +4128,27 @@
       "id": "field:rack::dsp::TSchmittTrigger<float>::state",
       "kind": "property",
       "raw": "rackpy.raw.dsp.SchmittTrigger.state",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TSlewLimiter::fall",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.SlewLimiter.fall",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TSlewLimiter::out",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.SlewLimiter.out",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::TSlewLimiter::rise",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.SlewLimiter.rise",
       "status": "implemented"
     },
     {
@@ -11300,6 +11608,48 @@
     },
     {
       "facade": null,
+      "id": "method:rack::dsp::IIRFilter::getFrequencyPhase($c2)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.IIRFilter_3_3_float.get_frequency_phase",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::IIRFilter::getFrequencyResponse($c2)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.IIRFilter_3_3_float.get_frequency_response",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::IIRFilter::getTransferFunction($c2)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.IIRFilter_3_3_float.get_transfer_function",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::IIRFilter::process($c2)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.IIRFilter_3_3_float.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::IIRFilter::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.IIRFilter_3_3_float.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::IIRFilter::setCoefficients(const $c2 *, const $c2 *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.IIRFilter_3_3_float.set_coefficients",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::dsp::PulseGenerator::isHigh()",
       "kind": "method",
       "raw": "rackpy.raw.dsp.PulseGenerator.is_high",
@@ -11324,6 +11674,174 @@
       "id": "method:rack::dsp::PulseGenerator::trigger(float)",
       "kind": "method",
       "raw": "rackpy.raw.dsp.PulseGenerator.trigger",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TBiquadFilter::setParameters(rack::dsp::TBiquadFilter<>::Type, float, float, float)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.BiquadFilter.set_parameters",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TExponentialFilter::process($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ExponentialFilter.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TExponentialFilter::process($c0, $c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ExponentialFilter.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TExponentialFilter::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ExponentialFilter.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TExponentialFilter::setLambda($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ExponentialFilter.set_lambda",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TExponentialFilter::setTau($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ExponentialFilter.set_tau",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TExponentialSlewLimiter::process($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ExponentialSlewLimiter.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TExponentialSlewLimiter::process($c0, $c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ExponentialSlewLimiter.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TExponentialSlewLimiter::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ExponentialSlewLimiter.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TExponentialSlewLimiter::setRiseFall($c0, $c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ExponentialSlewLimiter.set_rise_fall",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TExponentialSlewLimiter::setRiseFallTau($c0, $c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ExponentialSlewLimiter.set_rise_fall_tau",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TPeakFilter::peak()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.PeakFilter.peak",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TPeakFilter::process($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.PeakFilter.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TPeakFilter::process($c0, $c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.PeakFilter.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TPeakFilter::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.PeakFilter.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TPeakFilter::setLambda($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.PeakFilter.set_lambda",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TPeakFilter::setRate($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.PeakFilter.set_rate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TPeakFilter::setTau($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.PeakFilter.set_tau",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TRCFilter::highpass()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RCFilter.highpass",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TRCFilter::lowpass()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RCFilter.lowpass",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TRCFilter::process($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RCFilter.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TRCFilter::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RCFilter.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TRCFilter::setCutoff($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RCFilter.set_cutoff",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TRCFilter::setCutoffFreq($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RCFilter.set_cutoff_freq",
       "status": "implemented"
     },
     {
@@ -11373,6 +11891,34 @@
       "id": "method:rack::dsp::TSchmittTrigger<float>::reset()",
       "kind": "method",
       "raw": "rackpy.raw.dsp.SchmittTrigger.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TSlewLimiter::process($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.SlewLimiter.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TSlewLimiter::process($c0, $c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.SlewLimiter.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TSlewLimiter::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.SlewLimiter.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::TSlewLimiter::setRiseFall($c0, $c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.SlewLimiter.set_rise_fall",
       "status": "implemented"
     },
     {
@@ -18257,6 +18803,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "0a2a63a71c4dafdc",
+  "inputs": "a8c98c4a145870bd",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

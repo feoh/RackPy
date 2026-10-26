@@ -73,3 +73,21 @@ Validation: [rp-18b-validation.md](rp-18b-validation.md).
   undefined read of an invalid bool.
 - **Out-of-line wrappers.** Not needed: these are comparisons, single
   additions and bit operations.
+
+**RP-18C — DSP filters** (`tk-rackpy-18c-dsp-filters-rc-exponential-peak-slew--7c6985`).
+78 records. Validation: [rp-18c-validation.md](rp-18c-validation.md).
+
+- **Filters.** Native classes for `float` (Rack's aliases) and `float_4`
+  (`T<Name>_float_4`), subscriptable templates, live fields and array views
+  (`FloatArray`, `Float4Array`). Every method goes through one generic
+  `[[gnu::noipa]]` member wrapper (`calls.hpp`), shared with the reference.
+- **IIRFilter.** Orders 2 to 8 for both coefficient counts and both types
+  (98 classes in `rackpy.raw.dsp._iir`, reached as `IIRFilter[B, A, T]`; the
+  biquads' base `IIRFilter_3_3_float` and `_float_4` are also named). Below
+  2, Rack's `process()` writes past a zero-length array. Owner review item.
+- **Biquads.** One `BiquadFilter.Type` for both instantiations. A new
+  biquad's coefficients are NaN (Rack's constructor computes 0 / 0).
+- **Bulk path.** `rackpy.dsp.filters.process_block` runs the same wrapper
+  per sample over float32 buffers: results equal a loop of `process` calls
+  exactly, 20 to 27 times faster (`benchmarks/rp18-dsp-call-cost.json`,
+  diagnostic).

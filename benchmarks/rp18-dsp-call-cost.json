@@ -1,0 +1,101 @@
+{
+ "note": "RP-18C: what a call into Rack's DSP code costs from Python inside Rack, per call against process_block, in ns per sample (medians of 7 runs of 20,000 samples; raw runs included). Diagnostic only: measured on a shared, loaded desktop with the powersave governor, not controlled hardware (docs/performance.md); not a performance claim.",
+ "command": "RACKPY_CALL_COST_OUT=benchmarks/rp18-dsp-call-cost.json uv run pytest -q tests/dsp/test_basic.py",
+ "environment": {
+  "cpu": "Intel(R) Core(TM) i9-14900K",
+  "kernel": "7.2.11-1-cachyos",
+  "governor": "powersave",
+  "load_average_1min": "9.97",
+  "where": "inside Rack Free 2.6.6 (headless), Rack's main thread at plugin start-up, production build"
+ },
+ "samples_per_run": 20000,
+ "runs": 7,
+ "python": "3.14.9 (main, Oct 21 2026, 17:48:02) [Clang 23.1.3 ]",
+ "copies": "process_block reads in_ and writes out in place: no copies. A per-call loop converts each Python float to a C++ float and the result back.",
+ "results": {
+  "BiquadFilter.process, per call": {
+   "median_ns_per_sample": 72.21745,
+   "runs_ns_per_sample": [
+    73.15045,
+    73.06355,
+    72.20565,
+    71.34125,
+    71.36495,
+    72.21745,
+    72.33765
+   ]
+  },
+  "BiquadFilter, process_block": {
+   "median_ns_per_sample": 2.67485,
+   "runs_ns_per_sample": [
+    2.7561,
+    2.86475,
+    2.67485,
+    2.7057,
+    2.66785,
+    2.6733,
+    2.6653
+   ]
+  },
+  "SlewLimiter.process, per call": {
+   "median_ns_per_sample": 67.27765,
+   "runs_ns_per_sample": [
+    66.97205,
+    67.27765,
+    67.24225,
+    67.70015,
+    68.72065,
+    67.42335,
+    66.91365
+   ]
+  },
+  "SlewLimiter, process_block": {
+   "median_ns_per_sample": 3.2924,
+   "runs_ns_per_sample": [
+    3.30845,
+    3.28335,
+    3.33385,
+    3.2864,
+    3.3918,
+    3.2865,
+    3.2924
+   ]
+  },
+  "SchmittTrigger.process, per call": {
+   "median_ns_per_sample": 70.4577,
+   "runs_ns_per_sample": [
+    71.18715,
+    70.63645,
+    72.3499,
+    70.18045,
+    69.58105,
+    70.4577,
+    69.8586
+   ]
+  },
+  "cubic, per call": {
+   "median_ns_per_sample": 32.2244,
+   "runs_ns_per_sample": [
+    31.8367,
+    32.5065,
+    31.93995,
+    32.2244,
+    32.08255,
+    32.27185,
+    34.01075
+   ]
+  },
+  "TBiquadFilter[float_4].process, per call (4 samples each)": {
+   "median_ns_per_sample": 44.56545,
+   "runs_ns_per_sample": [
+    45.03365,
+    44.56545,
+    44.48365,
+    44.42005,
+    44.7083,
+    44.951,
+    44.48295
+   ]
+  }
+ }
+}
