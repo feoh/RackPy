@@ -31,6 +31,22 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 			auto s = weak.lock();
 			if (!s) throw runtime::StaleHandle("Widget state has expired");
 			checked(s);
+			// The existing Python object owns it again. pybind11 3.1's unique_ptr cast looks the object up at the
+			// most-derived address, which misses an alias whose Base is not its first base, and would make a second
+			// owning peer; so re-own the registered instance as pybind11's own reclaim does (version pinned).
+			auto* tinfo = py::detail::get_type_info(typeid(Base));
+			if (py::handle existing = tinfo ? py::detail::get_object_handle(pointer, tinfo) : py::handle()) {
+				auto* life = tinfo->get_trampoline_self_life_support(pointer);
+				if (life && life->v_h.inst && life->v_h.vh) {
+					auto& holder = life->v_h.template holder<py::memory::smart_holder>();
+					if (holder.is_disowned) {
+						life->deactivate_life_support();
+						holder.reclaim_disowned(tinfo->get_memory_guarded_delete);
+						s->pythonOwned = true;
+						return py::reinterpret_borrow<py::object>(existing);
+					}
+				}
+			}
 			auto peer = py::cast(std::unique_ptr<Base, UiDelete>(pointer, UiDelete{s}));
 			s->pythonOwned = true;
 			return peer;

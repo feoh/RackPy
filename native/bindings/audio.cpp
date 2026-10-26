@@ -512,6 +512,10 @@ const float* floatBuffer(const py::buffer_info& info, size_t needed, const char*
 
 }  // namespace
 
+rack::audio::Port& pythonAudioPort(py::handle value) {
+	return pythonPort(value);
+}
+
 void bindAudio(py::module_ mod) {
 	py::class_<DriverView>(mod, "Driver", py::is_final(), "One of Rack's audio drivers (get_driver), by its ID. Main thread.")
 		.def_property_readonly("id", [](const DriverView& d) { return d.id; })

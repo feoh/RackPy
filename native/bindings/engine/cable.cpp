@@ -17,6 +17,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -128,6 +129,79 @@ bool engineCablesTouch(RackModule& module) {
 			return true;
 	}
 	return false;
+}
+
+rack::engine::Cable* engineCableForWidget(py::handle value, const std::function<void(const Cable&)>& check) {
+	runtime::requireMainThread("giving a cable to a cable widget");
+	if (!py::isinstance<CableHandle>(value))
+		throw py::type_error("expected a rackpy.raw.engine.Cable");
+	auto& c = value.cast<CableHandle&>();
+	if (c.inEngine())
+		throw runtime::Ownership("Rack's engine already has this cable; a cable widget adopts a cable Python made");
+	Cable& cable = withPointers(c);
+	if (cable.inputId < 0 || static_cast<size_t>(cable.inputId) >= cable.inputModule->inputs.size() ||
+		cable.outputId < 0 || static_cast<size_t>(cable.outputId) >= cable.outputModule->outputs.size()) {
+		clearPointers(c);
+		throw std::invalid_argument("the cable's port IDs are out of range");
+	}
+	try {
+		check(cable);  // the widget's own requirements (module widgets, port widgets)
+	}
+	catch (...) {
+		clearPointers(c);
+		throw;
+	}
+	auto token = runtime::binding().current();
+	if (!token || !token->context->engine) {
+		clearPointers(c);
+		throw runtime::WrongContext("a cable goes into Rack's engine only in its live context");
+	}
+	runtime::refuseEngineReentry("CableWidget.set_cable");
+	Cable* raw = c.owned.get();
+	{
+		py::gil_scoped_release release;
+		runtime::EngineLease lease(*token);
+		token->context->engine->addCable(raw);  // Rack's setCable needs it in the engine
+	}
+	c.owned.release();
+	c.id = raw->id;
+	c.token = token;
+	c.input = py::none();
+	c.output = py::none();
+	return raw;
+}
+
+void undoEngineCableForWidget(py::handle value, rack::engine::Cable* raw) {
+	auto& c = value.cast<CableHandle&>();
+	py::object input = engineModuleHandle(raw->inputModule);
+	py::object output = engineModuleHandle(raw->outputModule);
+	{
+		py::gil_scoped_release release;
+		runtime::EngineLease lease(*c.token);
+		c.token->context->engine->removeCable(raw);
+	}
+	c.owned.reset(raw);
+	c.owned->inputModule = c.owned->outputModule = nullptr;
+	c.input = input;
+	c.output = output;
+	c.token.reset();
+	c.id = -1;
+}
+
+py::object pythonOwnedCable(rack::engine::Cable* removed) {
+	CableHandle handle;
+	handle.input = engineModuleHandle(removed->inputModule);
+	handle.output = engineModuleHandle(removed->outputModule);
+	handle.owned.reset(removed);  // Rack's `new`
+	handle.owned->inputModule = handle.owned->outputModule = nullptr;
+	return py::cast(std::move(handle));
+}
+
+py::object engineCableHandle(int64_t id) {
+	auto token = runtime::binding().current();
+	if (!token)
+		return py::none();
+	return cableObject(token, id);
 }
 
 void bindCables(py::module_ engine, py::class_<EngineHandle>& cls) {

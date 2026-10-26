@@ -546,6 +546,12 @@ void removeDevice(const PythonMidiDriver& d, const Handle& device) {
 
 }  // namespace
 
+rack::midi::Port& pythonMidiPort(py::handle value) {
+	if (!py::isinstance<m::Port>(value))
+		throw py::type_error("expected a rackpy.raw.midi port (Input, InputQueue or Output)");
+	return checked(value.cast<m::Port&>());
+}
+
 void bindMidi(py::module_ mod) {
 	py::class_<m::Message>(mod, "Message",
 		"Rack's MIDI message: its bytes (3 zeros at first) and the engine frame it belongs to (-1: now). The "

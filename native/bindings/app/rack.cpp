@@ -429,6 +429,34 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 		.def("get_top_cable", [](const HostRack& h, py::object port) {
 			return wrapper(hostAs<RW>(h).getTopCable(as<app::PortWidget>(port, "a rackpy.raw.app.PortWidget")));
 		}, py::arg("port"))
+		.def("add_cable", [](const HostRack& h, py::object cwObject) {
+			auto& rack = hostAs<RW>(h);
+			auto* cw = dynamic_cast<app::CableWidget*>(argument(cwObject));
+			if (!cw || !isPythonCableWidget(cw))
+				throw py::type_error("add_cable takes a rackpy.raw.app.CableWidget that Python made");
+			cwObject.attr("input_port");  // drops ports that died while it was detached
+			transferWith(*rack.getCableContainer(), cwObject, [&rack](W* w) { rack.addCable(static_cast<app::CableWidget*>(w)); });
+		}, py::arg("cable_widget"),
+			"Rack's addCable: the rack takes a cable widget Python made (and its plugs). It may be incomplete, as when "
+			"Rack's dragging starts; then update_cable or set_cable makes its engine cable.")
+		.def("remove_cable", [](const HostRack& h, py::object cwObject) {
+			checkMutation();
+			auto& rack = hostAs<RW>(h);
+			auto* cw = dynamic_cast<app::CableWidget*>(argument(cwObject));
+			if (!cw || !isPythonCableWidget(cw))
+				throw runtime::Ownership("Rack's own cable widgets leave the rack with Rack's actions (history CableRemove, "
+					"delete_top_cable_action, disconnect_action)");
+			if (cw->parent != rack.getCableContainer())
+				throw runtime::Ownership("this cable widget is not in Rack's rack");
+			auto s = managedState(cw);
+			unlocked([&] {
+				rack.removeCable(cw);
+				cw->setCable(nullptr);  // as Rack deletes the widget next: its engine cable goes
+			});
+			s->reclaim();  // Python owns it again, without an engine cable
+		}, py::arg("cable_widget"),
+			"Rack's removeCable for a cable widget Python made: Python owns it again, and RackPy also removes its engine "
+			"cable (Rack deletes the widget, and so the cable, right after).")
 		.def("get_cable", [](const HostRack& h, int64_t id) { return wrapper(hostAs<RW>(h).getCable(id)); }, py::arg("cable_id"))
 		.def("get_cable", [](const HostRack& h, py::object out, py::object in) {
 			return wrapper(hostAs<RW>(h).getCable(as<app::PortWidget>(out, "a PortWidget"), as<app::PortWidget>(in, "a PortWidget")));

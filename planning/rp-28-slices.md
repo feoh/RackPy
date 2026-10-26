@@ -128,3 +128,43 @@ Validation: [rp-28d-validation.md](rp-28d-validation.md).
   their `engine::Cable`, the Add/Remove handlers, `addCable` and
   `removeCable`, the audio and MIDI displays and buttons. RP-24 also takes
   `getModuleDragAction` (a history ComplexAction).
+
+**RP-28E — Python cable widgets, rack cable edits, and the audio/MIDI
+displays** (`tk-rackpy-28e-python-cable-widgets-rack-cable-edits-7eedc5`).
+75 records, and `record:rack::Context` is complete. Validation:
+[rp-28e-validation.md](rp-28e-validation.md).
+
+- **Cable widgets.** `CableWidget` is a subclassable managed widget
+  (`CableWidgetT`). It keeps RP-24B's invariant that no engine cable
+  without a widget touches a module with a widget:
+  - `update_cable`/`set_cable` act only while it is in Rack's rack.
+  - `set_cable` adds a Python `Cable` to the engine and adopts it at once
+    (`engineCableForWidget`, undone if Rack refuses).
+  - `release_cable` and `RackWidget.remove_cable` also take the engine
+    cable out.
+  - Port fields take cable-safe ports of the right direction, and are
+    weakly checked while detached.
+  - Rack's dispatch alone runs `on_add`/`on_remove` (they move the plugs);
+    a subclass's `super()` works inside it.
+- **Containers.** `attachChild` now refuses a widget of the wrong kind in
+  Rack's module, cable or plug containers, and a cable widget anywhere but
+  the cable container. Rack asserts on such children, so this closes a
+  latent RP-28D hazard (`get_*_container().add_child`).
+- **Plugs.** Rack's `PlugWidget()` leaves its pimpl's cable and type
+  uninitialized, so Python reaches plugs only as a cable widget's.
+- **Audio/MIDI widgets.** Choices, displays, buttons, the component
+  library's three buttons, and `append_audio_menu`/`append_midi_menu` take
+  Python's RP-29 ports. Each port is pinned to the widget or menu with
+  Rack's `WeakPtr` until Rack deletes it, because their `step()` and menu
+  items read the raw pointer. Rack's headers leave those widgets' port and
+  child pointers uninitialized, so Python-made ones start null
+  (`PortWidgetInit`, `AudioDisplayInit`, `MidiDisplayInit`); without this,
+  `AudioDriverChoice::step` crashed.
+- **Fixed in the widget runtime.** `Widget<Base>::reclaim` handed a
+  disowned widget back to Python through pybind11's `unique_ptr` cast,
+  which looks the object up at the most-derived address. That misses an
+  alias whose `Base` is not its first base, and it made a second owning
+  peer, whose loss deleted the widget: a cable widget was deleted after
+  `remove_cable` or `remove_from_parent`. `reclaim` now re-owns the
+  registered instance as pybind11's own reclaim does (pinned pybind11
+  3.1.0).

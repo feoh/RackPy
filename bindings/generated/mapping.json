@@ -674,6 +674,13 @@
     },
     {
       "facade": null,
+      "id": "constructor:rack::app::CableWidget::CableWidget()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.CableWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "constructor:rack::app::CircularShadow::CircularShadow()",
       "kind": "class",
       "raw": "rackpy.raw.app.CircularShadow",
@@ -733,6 +740,13 @@
       "id": "constructor:rack::app::ParamWidget::ParamWidget()",
       "kind": "class",
       "raw": "rackpy.raw.app.ParamWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::PlugWidget::PlugWidget()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.CableWidget",
       "status": "implemented"
     },
     {
@@ -817,6 +831,20 @@
       "id": "constructor:rack::audio::Port::Port()",
       "kind": "class",
       "raw": "rackpy.raw.audio.Port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::AudioButton_ADAT::AudioButton_ADAT()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.AudioButton_ADAT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::AudioButton_USB_B::AudioButton_USB_B()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.AudioButton_USB_B",
       "status": "implemented"
     },
     {
@@ -985,6 +1013,13 @@
       "id": "constructor:rack::componentlibrary::MediumSimpleLight::MediumSimpleLight<TBase>()",
       "kind": "class",
       "raw": "rackpy.raw.componentlibrary.MediumSimpleLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::MidiButton_MIDI_DIN::MidiButton_MIDI_DIN()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.MidiButton_MIDI_DIN",
       "status": "implemented"
     },
     {
@@ -1780,6 +1815,13 @@
     },
     {
       "facade": null,
+      "id": "destructor:rack::app::CableWidget::~CableWidget()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.CableWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "destructor:rack::app::Knob::~Knob()",
       "kind": "method",
       "raw": "rackpy.raw.widget.Widget.close",
@@ -1804,6 +1846,13 @@
       "id": "destructor:rack::app::ParamWidget::~ParamWidget()",
       "kind": "method",
       "raw": "rackpy.raw.widget.Widget.close",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::app::PlugWidget::~PlugWidget()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.CableWidget",
       "status": "implemented"
     },
     {
@@ -2200,6 +2249,97 @@
     },
     {
       "facade": null,
+      "id": "field:rack::app::AudioBlockSizeChoice::port",
+      "kind": "property",
+      "raw": "rackpy.raw.app.AudioBlockSizeChoice.port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::AudioButton::port",
+      "kind": "property",
+      "raw": "rackpy.raw.app.AudioButton.port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::AudioDeviceChoice::port",
+      "kind": "property",
+      "raw": "rackpy.raw.app.AudioDeviceChoice.port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::AudioDisplay::bufferSizeChoice",
+      "kind": "property",
+      "raw": "rackpy.raw.app.AudioDisplay.buffer_size_choice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::AudioDisplay::deviceChoice",
+      "kind": "property",
+      "raw": "rackpy.raw.app.AudioDisplay.device_choice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::AudioDisplay::deviceSeparator",
+      "kind": "property",
+      "raw": "rackpy.raw.app.AudioDisplay.device_separator",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::AudioDisplay::driverChoice",
+      "kind": "property",
+      "raw": "rackpy.raw.app.AudioDisplay.driver_choice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::AudioDisplay::driverSeparator",
+      "kind": "property",
+      "raw": "rackpy.raw.app.AudioDisplay.driver_separator",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::AudioDisplay::sampleRateChoice",
+      "kind": "property",
+      "raw": "rackpy.raw.app.AudioDisplay.sample_rate_choice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::AudioDisplay::sampleRateSeparator",
+      "kind": "property",
+      "raw": "rackpy.raw.app.AudioDisplay.sample_rate_separator",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::AudioDriverChoice::port",
+      "kind": "property",
+      "raw": "rackpy.raw.app.AudioDriverChoice.port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::AudioSampleRateChoice::port",
+      "kind": "property",
+      "raw": "rackpy.raw.app.AudioSampleRateChoice.port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::CableWidget::cable",
+      "kind": "property",
+      "raw": "rackpy.raw.app.CableWidget.cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::app::CableWidget::color",
       "kind": "property",
       "raw": "rackpy.raw.app.HostCableWidget.color",
@@ -2392,6 +2532,69 @@
       "id": "field:rack::app::LightWidget::color",
       "kind": "property",
       "raw": "rackpy.raw.app.LightWidget.color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::MidiButton::port",
+      "kind": "property",
+      "raw": "rackpy.raw.app.MidiButton.port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::MidiChannelChoice::port",
+      "kind": "property",
+      "raw": "rackpy.raw.app.MidiChannelChoice.port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::MidiDeviceChoice::port",
+      "kind": "property",
+      "raw": "rackpy.raw.app.MidiDeviceChoice.port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::MidiDisplay::channelChoice",
+      "kind": "property",
+      "raw": "rackpy.raw.app.MidiDisplay.channel_choice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::MidiDisplay::deviceChoice",
+      "kind": "property",
+      "raw": "rackpy.raw.app.MidiDisplay.device_choice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::MidiDisplay::deviceSeparator",
+      "kind": "property",
+      "raw": "rackpy.raw.app.MidiDisplay.device_separator",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::MidiDisplay::driverChoice",
+      "kind": "property",
+      "raw": "rackpy.raw.app.MidiDisplay.driver_choice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::MidiDisplay::driverSeparator",
+      "kind": "property",
+      "raw": "rackpy.raw.app.MidiDisplay.driver_separator",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::MidiDriverChoice::port",
+      "kind": "property",
+      "raw": "rackpy.raw.app.MidiDriverChoice.port",
       "status": "implemented"
     },
     {
@@ -4664,6 +4867,20 @@
     },
     {
       "facade": null,
+      "id": "function:rack::app::appendAudioMenu(rack::ui::Menu *, rack::audio::Port *)",
+      "kind": "function",
+      "raw": "rackpy.raw.app.append_audio_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::app::appendMidiMenu(rack::ui::Menu *, rack::midi::Port *)",
+      "kind": "function",
+      "raw": "rackpy.raw.app.append_midi_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "function:rack::appGet()",
       "kind": "function",
       "raw": "rackpy.raw.app_get",
@@ -5868,6 +6085,90 @@
     },
     {
       "facade": null,
+      "id": "method:rack::app::AudioBlockSizeChoice::onAction(const rack::widget::Widget::ActionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.AudioBlockSizeChoice.on_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::AudioBlockSizeChoice::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.AudioBlockSizeChoice.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::AudioButton::onAction(const rack::widget::Widget::ActionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.AudioButton.on_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::AudioButton::setAudioPort(rack::audio::Port *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.AudioButton.set_audio_port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::AudioDeviceChoice::onAction(const rack::widget::Widget::ActionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.AudioDeviceChoice.on_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::AudioDeviceChoice::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.AudioDeviceChoice.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::AudioDeviceMenuChoice::onAction(const rack::widget::Widget::ActionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.AudioDeviceMenuChoice.on_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::AudioDisplay::setAudioPort(rack::audio::Port *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.AudioDisplay.set_audio_port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::AudioDriverChoice::onAction(const rack::widget::Widget::ActionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.AudioDriverChoice.on_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::AudioDriverChoice::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.AudioDriverChoice.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::AudioSampleRateChoice::onAction(const rack::widget::Widget::ActionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.AudioSampleRateChoice.on_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::AudioSampleRateChoice::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.AudioSampleRateChoice.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::app::CableWidget::draw(const rack::widget::Widget::DrawArgs &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.draw",
@@ -5885,6 +6186,13 @@
       "id": "method:rack::app::CableWidget::fromJson(json_t *)",
       "kind": "method",
       "raw": "rackpy.raw.app.HostCableWidget.from_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::getCable()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.CableWidget.get_cable",
       "status": "implemented"
     },
     {
@@ -5934,6 +6242,34 @@
       "id": "method:rack::app::CableWidget::mergeJson(json_t *)",
       "kind": "method",
       "raw": "rackpy.raw.app.HostCableWidget.merge_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::onAdd(const rack::widget::Widget::AddEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.CableWidget.on_add",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::onRemove(const rack::widget::Widget::RemoveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.CableWidget.on_remove",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::releaseCable()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.CableWidget.release_cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CableWidget::setCable(rack::engine::Cable *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.CableWidget.set_cable",
       "status": "implemented"
     },
     {
@@ -6123,6 +6459,69 @@
       "id": "method:rack::app::LightWidget::drawLight(const rack::widget::Widget::DrawArgs &)",
       "kind": "method",
       "raw": "rackpy.raw.app.LightWidget.draw_light",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::MidiButton::onAction(const rack::widget::Widget::ActionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.MidiButton.on_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::MidiButton::setMidiPort(rack::midi::Port *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.MidiButton.set_midi_port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::MidiChannelChoice::onAction(const rack::widget::Widget::ActionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.MidiChannelChoice.on_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::MidiChannelChoice::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.MidiChannelChoice.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::MidiDeviceChoice::onAction(const rack::widget::Widget::ActionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.MidiDeviceChoice.on_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::MidiDeviceChoice::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.MidiDeviceChoice.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::MidiDisplay::setMidiPort(rack::midi::Port *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.MidiDisplay.set_midi_port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::MidiDriverChoice::onAction(const rack::widget::Widget::ActionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.MidiDriverChoice.on_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::MidiDriverChoice::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.MidiDriverChoice.step",
       "status": "implemented"
     },
     {
@@ -6932,6 +7331,13 @@
     },
     {
       "facade": null,
+      "id": "method:rack::app::RackWidget::addCable(rack::app::CableWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.add_cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::app::RackWidget::addModule(rack::app::ModuleWidget *)",
       "kind": "method",
       "raw": "rackpy.raw.app.HostRackWidget.add_module",
@@ -7299,6 +7705,13 @@
       "id": "method:rack::app::RackWidget::randomizeSelectionAction()",
       "kind": "method",
       "raw": "rackpy.raw.app.HostRackWidget.randomize_selection_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::removeCable(rack::app::CableWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.remove_cable",
       "status": "implemented"
     },
     {
@@ -12220,7 +12633,7 @@
       "id": "record:rack::Context",
       "kind": "class",
       "raw": "rackpy.raw.Context",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -12234,6 +12647,55 @@
       "id": "record:rack::Quantity",
       "kind": "class",
       "raw": "rackpy.raw.Quantity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::AudioBlockSizeChoice",
+      "kind": "class",
+      "raw": "rackpy.raw.app.AudioBlockSizeChoice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::AudioButton",
+      "kind": "class",
+      "raw": "rackpy.raw.app.AudioButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::AudioDeviceChoice",
+      "kind": "class",
+      "raw": "rackpy.raw.app.AudioDeviceChoice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::AudioDeviceMenuChoice",
+      "kind": "class",
+      "raw": "rackpy.raw.app.AudioDeviceMenuChoice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::AudioDisplay",
+      "kind": "class",
+      "raw": "rackpy.raw.app.AudioDisplay",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::AudioDriverChoice",
+      "kind": "class",
+      "raw": "rackpy.raw.app.AudioDriverChoice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::AudioSampleRateChoice",
+      "kind": "class",
+      "raw": "rackpy.raw.app.AudioSampleRateChoice",
       "status": "implemented"
     },
     {
@@ -12290,6 +12752,41 @@
       "id": "record:rack::app::LightWidget",
       "kind": "class",
       "raw": "rackpy.raw.app.LightWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::MidiButton",
+      "kind": "class",
+      "raw": "rackpy.raw.app.MidiButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::MidiChannelChoice",
+      "kind": "class",
+      "raw": "rackpy.raw.app.MidiChannelChoice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::MidiDeviceChoice",
+      "kind": "class",
+      "raw": "rackpy.raw.app.MidiDeviceChoice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::MidiDisplay",
+      "kind": "class",
+      "raw": "rackpy.raw.app.MidiDisplay",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::MidiDriverChoice",
+      "kind": "class",
+      "raw": "rackpy.raw.app.MidiDriverChoice",
       "status": "implemented"
     },
     {
@@ -12476,6 +12973,20 @@
     },
     {
       "facade": null,
+      "id": "record:rack::componentlibrary::AudioButton_ADAT",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.AudioButton_ADAT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::AudioButton_USB_B",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.AudioButton_USB_B",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "record:rack::componentlibrary::BefacoBigKnob",
       "kind": "class",
       "raw": "rackpy.raw.componentlibrary.BefacoBigKnob",
@@ -12633,6 +13144,13 @@
       "id": "record:rack::componentlibrary::LEDSliderYellow",
       "kind": "class",
       "raw": "rackpy.raw.componentlibrary.LEDSliderYellow",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::MidiButton_MIDI_DIN",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.MidiButton_MIDI_DIN",
       "status": "implemented"
     },
     {
@@ -14183,6 +14701,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "3950255b14d0e1b3",
+  "inputs": "5090d2b550d59548",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

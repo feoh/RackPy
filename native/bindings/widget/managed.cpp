@@ -92,6 +92,19 @@ void attachChild(W& parent, const std::shared_ptr<runtime::ContextToken>& contex
         throw runtime::WrongContext("widgets belong to different contexts");
     if (item.parent || &item == &parent || parent.isDescendantOf(&item))
         throw runtime::Ownership("child must be detached and cannot be its own ancestor");
+    // Rack's rack assumes each container holds one widget type (it asserts as it iterates them), and a
+    // cable widget's Add and Remove handlers move its plugs in and out of the plug container.
+    if (auto* c = rack::contextGet(); c && c->scene && c->scene->rack) {
+        auto* rackWidget = c->scene->rack;
+        bool cable = dynamic_cast<rack::app::CableWidget*>(&item) != nullptr;
+        if (cable != (&parent == rackWidget->getCableContainer()))
+            throw runtime::Ownership(cable ? "a cable widget lives only in Rack's rack: RackWidget.add_cable"
+                                           : "Rack's cable container holds only cable widgets");
+        if (&parent == rackWidget->getModuleContainer() && !dynamic_cast<rack::app::ModuleWidget*>(&item))
+            throw runtime::Ownership("Rack's module container holds only module widgets (RackWidget.add_module)");
+        if (&parent == rackWidget->getPlugContainer())
+            throw runtime::Ownership("Rack's plug container holds only the plugs of cable widgets in the rack");
+    }
     Owned owned(c->disown(child), UiDelete{c});
     try {
         CallbackGuard guard;

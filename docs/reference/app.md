@@ -313,9 +313,69 @@ The cables users plug are Rack's `CableWidget`s, which reach Python as
 - the `color`, `merge_json()` and `from_json()`;
 - `update_cable()`, which replaces the engine cable.
 
-A `HostPlugWidget` has `get_cable()` and `get_type()`. Making cable
-widgets from Python, and their engine cables, need RP-24's engine cable
-handles.
+A `HostPlugWidget` has `get_cable()` and `get_type()`.
+
+(app-cable-widgets)=
+### Cable widgets Python makes
+
+`CableWidget()` is Rack's cable widget, made by Python and subclassable,
+with the same fields and methods (**RP-28E**). It follows Rack's own cable
+dragging:
+
+```{rackpy-example} cable_widget.py
+```
+
+- **Ports.** `input_port` and `output_port` take port widgets of the right
+  direction that Rack can cable: Rack's own, or a Python module widget's
+  factory ports. While the widget is detached, RackPy drops a port whose
+  module widget dies.
+- **Where it lives.** A cable widget lives only in Rack's cable container
+  (`RackWidget.add_cable`). Its Add and Remove handlers move its plugs in
+  and out of Rack's plug container, so only Rack's dispatch runs them; a
+  subclass's `super().on_add(e)` reaches Rack's code then. Rack's module,
+  cable and plug containers each hold only their own kind of widget, as
+  Rack assumes.
+- **Engine cables.** `update_cable()` and `set_cable(cable)` change Rack's
+  engine, so the widget must be in the rack first, as in Rack's dragging.
+  Then no engine cable outlives its modules. `set_cable` adopts a `Cable`
+  Python made: RackPy adds it to the engine, as Rack requires, and the
+  widget takes its ports from it. `set_cable(None)` removes and deletes the
+  widget's engine cable. `cable` and `get_cable()` return the engine cable,
+  found by ID.
+- **Taking cables back.** `release_cable()` gives up the engine cable.
+  RackPy also takes it out of Rack's engine, because a cable without a
+  widget between module widgets would crash Rack when a module goes, and
+  Python owns it.
+- **Leaving the rack.** `RackWidget.remove_cable(widget)` gives the widget
+  back to Python, and RackPy removes its engine cable, as Rack's deletion of
+  the widget right after would. Rack's own cable widgets leave with Rack's
+  actions: the history's `CableRemove`, `delete_top_cable_action` or
+  `disconnect_action`.
+
+The plugs are Rack's, made by the cable widget and deleted with it.
+`PlugWidget()` alone leaves Rack's plug without a cable, so Python reaches
+plugs only through a cable widget. Rack's history (`CableAdd.set_cable`)
+and undo work with Python's cable widgets as with Rack's.
+
+(app-io-displays)=
+## Audio and MIDI displays, buttons and menus
+
+Rack's audio and MIDI widgets show a port and open its menus:
+
+- `AudioDriverChoice`, `AudioDeviceChoice`, `AudioSampleRateChoice`,
+  `AudioBlockSizeChoice` and `AudioDeviceMenuChoice`.
+- `MidiDriverChoice`, `MidiDeviceChoice` and `MidiChannelChoice`.
+- `AudioDisplay` and `MidiDisplay`, whose `set_audio_port` and
+  `set_midi_port` rebuild their choices (Rack's widgets).
+- `AudioButton` and `MidiButton`, with the component library's
+  `AudioButton_ADAT`, `AudioButton_USB_B` and `MidiButton_MIDI_DIN`, which
+  use Rack's artwork.
+- `append_audio_menu(menu, port)` and `append_midi_menu(menu, port)`.
+
+They take ports Python made ([audio](audio.md), [MIDI](midi.md)). Rack's
+widgets read their port every frame and their menus capture it, so RackPy
+keeps the port alive while any widget or menu that points at it exists, and
+lets it go once Rack deletes them.
 
 (app-led-displays)=
 ## LED displays

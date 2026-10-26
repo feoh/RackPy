@@ -645,8 +645,10 @@ void bindApp(py::module_ raw) {
 
 	appdetail::bindModuleWidget(mod);
 	bindForeignModuleWidget(mod);
+	appdetail::bindCableWidget(mod);
 	appdetail::bindRack(raw, mod);
 	appdetail::bindComponentLibrary(raw);
+	appdetail::bindIoDisplays(raw, mod);
 
 	// Rack's deprecated SVG* typedefs: the same classes, with a warning when used.
 	static const std::pair<const char*, const char*> aliases[] = {{"SVGKnob", "SvgKnob"}, {"SVGSlider", "SvgSlider"},

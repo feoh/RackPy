@@ -121,6 +121,12 @@ void bindComponentLibrary(py::module_ raw);
 /** Rack's scene, rack, scroll widget, cables and plugs as host views, and the LED displays (rack.cpp). */
 void bindRack(py::module_ raw, py::module_ app);
 
+/** rackpy.raw.app.CableWidget (RP-28E, cables.cpp). */
+void bindCableWidget(py::module_ mod);
+bool isPythonCableWidget(const rack::widget::Widget* w);
+/** Rack's audio and MIDI displays, buttons and menus (RP-28E, io_displays.cpp). After the component library. */
+void bindIoDisplays(py::module_ raw, py::module_ mod);
+
 }  // namespace appdetail
 }  // namespace widgets
 }  // namespace rackpy
