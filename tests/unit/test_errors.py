@@ -15,6 +15,7 @@ BUILTIN_BASES = {
     "ThreadError": RuntimeError,
     "OwnershipError": ValueError,
     "EngineLockError": RuntimeError,
+    "LaboratoryError": RuntimeError,
 }
 
 

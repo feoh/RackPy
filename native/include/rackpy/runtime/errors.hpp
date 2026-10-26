@@ -38,5 +38,10 @@ struct EngineLocked : Error {
 	using Error::Error;
 };
 
+/** A callback-laboratory operation while the laboratory is disabled, or one it refuses. -> rackpy.errors.LaboratoryError */
+struct Laboratory : Error {
+	using Error::Error;
+};
+
 }  // namespace runtime
 }  // namespace rackpy

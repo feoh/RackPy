@@ -120,6 +120,13 @@ void releaseFromSlot(Info* info) {
 
 struct Module : rack::engine::Module {
 	std::shared_ptr<runtime::ObjectToken> token = std::make_shared<runtime::ObjectToken>(nullptr);
+	// A callback-laboratory module (RP-22, native/laboratory): runs only on a
+	// laboratory Bench, never in Rack's engine.
+	const bool laboratory = false;
+	// While a laboratory Bench steps it (main thread): it cannot be closed or go to Rack's engine.
+	bool onBench = false;
+	Module() = default;
+	explicit Module(bool laboratory) : laboratory(laboratory) {}
 	// Set once Rack's engine owns the module (RP-14C2). Cleared only when Python
 	// takes it back after removing it from the engine (Construction::reclaimFromRack).
 	std::atomic<bool> engineOwned{false};
@@ -249,6 +256,8 @@ struct Construction {
 	bool configured = false;
 
 	Construction() = default;
+	/** A construction of a Module subclass (a laboratory module). */
+	explicit Construction(std::unique_ptr<Module> object) : object(std::move(object)) {}
 	/** Handles for a module Rack's engine already owns, after its earlier
 	handles were all dropped. Main thread. */
 	static std::shared_ptr<Construction> handleState(Module& m) {
@@ -291,6 +300,10 @@ struct Construction {
 			throw runtime::Ownership("a module can go to Rack's engine only after its constructor callback returns");
 		if (!object)
 			throw runtime::Ownership("Rack's engine already owns this module");
+		if (m.laboratory)
+			throw runtime::Laboratory("a laboratory module runs only on a laboratory Bench, never in Rack's engine");
+		if (m.onBench)
+			throw runtime::Ownership("remove the module from its laboratory Bench first");
 		rackToken = m.token;
 		rackOwned = object.release();
 		rackOwned->engineOwned.store(true, std::memory_order_release);
@@ -572,6 +585,8 @@ struct Construction {
 			throw runtime::Ownership("cannot close a module during its constructor callback");
 		if (current() && !object)
 			throw runtime::Ownership("Rack's engine owns this module, and Rack deletes it");
+		if (object && object->onBench)
+			throw runtime::Ownership("remove the module from its laboratory Bench before closing it");
 		object.reset();
 	}
 	void abort() { object.reset(); }

@@ -8,9 +8,10 @@ the how-to page *Register models*. The raw layer is :mod:`rackpy.raw.plugin`.
 """
 
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Self
 
 from rackpy.engine import Module
+from rackpy.errors import LaboratoryError
 from rackpy.raw import plugin as _raw
 from rackpy.raw.app import ModuleWidget
 from rackpy.raw.plugin import Model
@@ -18,6 +19,16 @@ from rackpy.raw.plugin import Model
 __all__ = ["Model", "ModuleClass", "Plugin", "on_destroy", "plugin"]
 
 _EVENTS = ("on_add", "on_remove", "on_bypass", "on_un_bypass", "on_port_change", "on_reset", "on_randomize", "on_save")
+# Rack calls these on its engine or audio driver threads, where Python never runs (ADR 003).
+_AUDIO_THREAD_METHODS = (
+    "process",
+    "process_bypass",
+    "step",
+    "on_sample_rate_change",
+    "on_set_master",
+    "on_unset_master",
+    "on_expander_change",
+)
 
 
 class ModuleClass:
@@ -34,6 +45,19 @@ class ModuleClass:
 
     def __init__(self, module: Module) -> None:
         self.module = module
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if getattr(cls, "_rackpy_laboratory", False):
+            return  # rackpy.laboratory.ModuleClass checks its own subclasses
+        defined = [name for name in _AUDIO_THREAD_METHODS if name in vars(cls)]
+        if defined:
+            raise TypeError(
+                f"{cls.__qualname__} defines {', '.join(defined)}: Rack calls these on its audio threads, where Python "
+                "never runs, so a module class cannot override them. Give the module a native kernel for its audio "
+                "(Module.set_kernel), or, to experiment offline, subclass rackpy.laboratory.ModuleClass and run it on "
+                "a laboratory Bench."
+            )
 
     def configure(self) -> None:
         """Configure :attr:`module`: ``config()``, ``config_param()`` and the rest. Runs once, first."""
@@ -78,18 +102,29 @@ class ModuleClass:
     @classmethod
     def factory(cls) -> Callable[[Module], None]:
         """A ``Module.create`` constructor callback that builds the module through this class."""
-        events = [name for name in _EVENTS if getattr(cls, name) is not getattr(ModuleClass, name)]
+        if getattr(cls, "_rackpy_laboratory", False):
+            raise LaboratoryError(
+                f"{cls.__qualname__} is a laboratory module class: it runs only on a laboratory Bench, and Rack "
+                "cannot create it from a model or a patch"
+            )
 
         def build(module: Module) -> None:
-            instance = cls(module)
-            instance.configure()
-            # The native module owns these bound methods, and through them the instance.
-            module.set_data_handlers(to_json=instance.to_json, from_json=instance.from_json)
-            if events:
-                module.set_event_handlers(**{name: getattr(instance, name) for name in events})
+            cls._build(module)
 
         build.__qualname__ = f"{cls.__qualname__}.factory.<locals>.build"
         return build
+
+    @classmethod
+    def _build(cls, module: Module) -> Self:
+        """Inside the constructor callback: the instance, configured, with its handlers installed."""
+        events = [name for name in _EVENTS if getattr(cls, name) is not getattr(ModuleClass, name)]
+        instance = cls(module)
+        instance.configure()
+        # The native module owns these bound methods, and through them the instance.
+        module.set_data_handlers(to_json=instance.to_json, from_json=instance.from_json)
+        if events:
+            module.set_event_handlers(**{name: getattr(instance, name) for name in events})
+        return instance
 
 
 class Plugin:

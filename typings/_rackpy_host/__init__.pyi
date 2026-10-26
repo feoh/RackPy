@@ -3,6 +3,7 @@
 
 from . import _testing as _testing
 from . import dsp as dsp
+from . import laboratory as laboratory
 from . import raw as raw
 
 HOST_ABI: int

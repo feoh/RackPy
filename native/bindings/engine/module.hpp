@@ -37,6 +37,8 @@ struct OwnerState {
 };
 
 pybind11::object moduleObject(const std::shared_ptr<module::Construction>& state);
+/** Module.create's transaction for a given construction: a laboratory module's (RP-22). Main thread. */
+pybind11::object createWith(std::shared_ptr<module::Construction> state, pybind11::object configure);
 /** A built-in slot's `module` field: its owner's handle or None. Writes are
 constructor-only and take only the owner or None (RP-14B2b7). */
 pybind11::object ownModuleField(rack::engine::Module* field, const std::shared_ptr<module::Construction>& state);

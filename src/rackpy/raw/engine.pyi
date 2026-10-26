@@ -321,6 +321,13 @@ class Module:
         sample_time: float
         def __init__(self, sample_rate: float = 44100.0, sample_time: float = ...) -> None: ...
 
+    # Rack's arguments to process() and processBypass() (RP-22A): a value.
+    class ProcessArgs:
+        sample_rate: float
+        sample_time: float
+        frame: int
+        def __init__(self, sample_rate: float = 44100.0, sample_time: float = ..., frame: int = 0) -> None: ...
+
     type LifecycleEvent = (
         AddEvent
         | RemoveEvent

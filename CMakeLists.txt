@@ -52,12 +52,14 @@ set(RACKPY_DSP_RUNTIME native/dsp/runtime/runtime.cpp native/dsp/runtime/builtin
 # and the hand-written adapters it calls (native/bindings/<family>.cpp).
 file(GLOB_RECURSE RACKPY_BINDING_ADAPTERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/native/bindings/*.cpp")
 list(FILTER RACKPY_BINDING_ADAPTERS EXCLUDE REGEX "/native/bindings/generated/")
+# The callback laboratory (RP-22): offline Python callbacks, never on Rack's engine threads.
+file(GLOB RACKPY_LABORATORY CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/native/laboratory/*.cpp")
 
 # rackpy_host.so: embeds CPython; exports only rackpy_host_init and rackpy_host_destroy.
 add_library(rackpy_host MODULE native/host/host.cpp native/host/host_module.cpp
   ${RACKPY_RUNTIME_CORE} native/runtime/python.cpp native/runtime/interpreter.cpp native/runtime/json.cpp
   native/bindings/generated/registry.cpp ${RACKPY_BINDING_ADAPTERS} native/module/lifecycle.cpp
-  native/plugin/model.cpp ${RACKPY_DSP_RUNTIME} native/dsp/runtime/libraries.cpp)
+  native/plugin/model.cpp ${RACKPY_DSP_RUNTIME} native/dsp/runtime/libraries.cpp ${RACKPY_LABORATORY})
 if(RACKPY_TEST_HOOKS)
   target_sources(rackpy_host PRIVATE native/testing/testing.cpp)
   target_compile_definitions(rackpy_host PRIVATE RACKPY_TEST_HOOKS)

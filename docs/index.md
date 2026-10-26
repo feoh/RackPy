@@ -44,7 +44,8 @@ Tutorials and troubleshooting pages will follow the
 [documentation plan](documentation.md) once there is an API to teach. The
 how-to guides cover [registering models](how-to/plugins.md),
 [saving a module's state](how-to/state.md) and
-[processing audio](how-to/dsp.md).
+[processing audio](how-to/dsp.md). [Callbacks and the laboratory](explanation/callbacks.md)
+explains where Python may run, and the offline laboratory for audio callbacks.
 
 ```{toctree}
 :caption: Start here
@@ -61,6 +62,7 @@ examples
 :hidden:
 
 runtime
+explanation/callbacks
 ```
 
 ```{toctree}

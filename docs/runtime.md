@@ -106,6 +106,7 @@ and from the built-in exception you would expect:
 | {py:class}`~rackpy.errors.ThreadError` | `RuntimeError` | a main-thread operation is called from another thread |
 | {py:class}`~rackpy.errors.OwnershipError` | `ValueError` | an object cannot be handed to Rack, for example twice |
 | {py:class}`~rackpy.errors.EngineLockError` | `RuntimeError` | a call that takes the engine lock is made inside a callback that Rack runs with the lock already held, such as a module reset |
+| {py:class}`~rackpy.errors.LaboratoryError` | `RuntimeError` | the [callback laboratory](explanation/callbacks.md) is used without being enabled, or refuses an operation, such as stepping a bench from one of its own callbacks |
 
 **Python errors never reach Rack.** When Rack calls your Python and it raises,
 RackPy catches the exception at the boundary, writes it to Rack's log

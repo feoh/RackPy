@@ -596,7 +596,30 @@ for a module made directly with `Module.create`.
 they give a module its production audio path, a native kernel that Rack's
 engine runs from the module's `process()` every frame. See
 [processing audio](../how-to/dsp.md). Rack's `process` itself, as a Python
-override, belongs to the laboratory (RP-22).
+override, exists only in the laboratory: see [audio callbacks](#audio-callbacks).
+
+(audio-callbacks)=
+## Audio callbacks: process, processBypass and step
+
+:::{admonition} Laboratory only
+:class: warning
+
+Rack's engine threads call `process`, `processBypass` and the deprecated
+`step()` once per sample; RackPy never runs Python there. A
+`rackpy.plugin.ModuleClass` that defines them is refused. Their Python
+overrides run only offline, on a
+[laboratory bench](../explanation/callbacks.md#the-laboratory-bench), after
+trusted code calls `rackpy.laboratory.enable()`; that is not real-time audio.
+:::
+
+`rackpy.laboratory.ModuleClass` may override `process(args)`,
+`process_bypass(args)` and `step()`; `super()` runs Rack's implementations
+(`process` calls `step()`, `processBypass` copies the bypass routes,
+`step()` does nothing and warns as deprecated). `Module.ProcessArgs` is
+Rack's argument record, a value with `sample_rate`, `sample_time` and
+`frame`. An ordinary module's `process` is its native kernel, and its
+`processBypass` is Rack's; a bench runs both, as Rack's engine does. Details:
+[laboratory modules](../explanation/callbacks.md#laboratory-modules).
 
 ## Bypass configuration
 

@@ -13,6 +13,7 @@
 #include "../support/overrides.hpp"
 #include "rackpy/runtime/json.hpp"
 #include "../values/values.hpp"
+#include "../../laboratory/laboratory.hpp"
 
 #include <pybind11/stl.h>
 
@@ -336,11 +337,10 @@ py::object configPort(const ModuleRef& r, int i, std::string name, py::object ty
 
 struct Counts { int params, inputs, outputs, lights; };
 
-py::object construct(py::object configure, const Counts* counts) {
+py::object construct(std::shared_ptr<module::Construction> state, py::object configure, const Counts* counts) {
 	runtime::requireMainThread("creating a RackPy module");
 	if (!configure.is_none() && !PyCallable_Check(configure.ptr()))
 		throw py::type_error("configure must be callable or None");
-	auto state = std::make_shared<module::Construction>();
 	state->object->construction = state;
 	py::object result = moduleObject(state);
 	try {
@@ -359,17 +359,21 @@ py::object construct(py::object configure, const Counts* counts) {
 }
 
 py::object create(py::object configure) {
-	return construct(std::move(configure), nullptr);
+	return construct(std::make_shared<module::Construction>(), std::move(configure), nullptr);
 }
 
 py::object createConfigured(int params, int inputs, int outputs, int lights, py::object configure) {
 	runtime::requireMainThread("creating a RackPy module");
 	deprecated("Module(numParams, numInputs, numOutputs, numLights) is deprecated in Rack; call config() in the constructor callback");
 	Counts counts{params, inputs, outputs, lights};
-	return construct(std::move(configure), &counts);
+	return construct(std::make_shared<module::Construction>(), std::move(configure), &counts);
 }
 
 }  // namespace
+
+py::object createWith(std::shared_ptr<module::Construction> state, py::object configure) {
+	return construct(std::move(state), std::move(configure), nullptr);
+}
 
 rack::engine::Module* createForRack(py::object configure, rack::plugin::Model& model) {
 	py::object handle = create(std::move(configure));
@@ -544,6 +548,15 @@ int traverseModule(PyObject* self, visitproc visit, void* arg) {
 	if (auto* handlers = dynamic_cast<PyEventHandlers*>(m.eventHandlers.get()))
 		for (const auto& handler : handlers->handlers)
 			Py_VISIT(handler.borrowed());
+	if (auto* lab = laboratory::laboratoryModule(m)) {
+		int failed = 0;
+		lab->visit([&](PyObject* object) {
+			if (object && !failed)
+				failed = visit(object, arg);
+		});
+		if (failed)
+			return failed;
+	}
 	for (auto* q : m.paramQuantities)
 		if (auto* t = module::transferredIn(q))
 			Py_VISIT(static_cast<PyObject*>(t->pythonObject()));
@@ -562,6 +575,8 @@ int clearModule(PyObject* self) {
 	if (ref.state && ref.state->object) {
 		ref.state->object->dataHandlers.reset();  // slot objects clear their own references
 		ref.state->object->eventHandlers.reset();
+		if (auto* lab = laboratory::laboratoryModule(*ref.state->object))
+			lab->clearOverrides();
 	}
 	return 0;
 }
@@ -656,6 +671,17 @@ void bindModule(py::module_ engine) {
 				values::floatRepr(e.sampleTime) + ")";
 		});
 
+	py::class_<M::ProcessArgs>(cls, "ProcessArgs", "Rack's arguments to process() and processBypass(): a value.")
+		.def(py::init([](float rate, float time, int64_t frame) { return M::ProcessArgs{rate, time, frame}; }),
+			py::arg("sample_rate") = 44100.f, py::arg("sample_time") = 1.f / 44100.f, py::arg("frame") = 0)
+		.def_readwrite("sample_rate", &M::ProcessArgs::sampleRate, "The sample rate in Hz.")
+		.def_readwrite("sample_time", &M::ProcessArgs::sampleTime, "The time step of process() in seconds: 1 / sample_rate.")
+		.def_readwrite("frame", &M::ProcessArgs::frame, "Audio frames since the engine's (or bench's) first.")
+		.def("__repr__", [](const M::ProcessArgs& a) {
+			return "Module.ProcessArgs(sample_rate=" + values::floatRepr(a.sampleRate) + ", sample_time=" +
+				values::floatRepr(a.sampleTime) + ", frame=" + std::to_string(a.frame) + ")";
+		});
+
 	cls.def("lifecycle_events", [](const ModuleRef& r) {
 		module::Module& m = r.get();
 		std::array<module::LifecycleRecord, module::LifecycleRing::CAPACITY> records;
@@ -699,7 +725,11 @@ void bindModule(py::module_ engine) {
 
 	// --- JSON (RP-15A) ---------------------------------------------------------
 	// Native kernels (RP-17A): the module's production audio path.
-	cls.def("set_kernel", [](const ModuleRef& r, py::handle kernel) { attachKernel(r, kernel); }, py::arg("kernel"),
+	cls.def("set_kernel", [](const ModuleRef& r, py::handle kernel) {
+		if (r.get().laboratory)
+			throw runtime::Laboratory("a laboratory module's audio is its Python process(); give an ordinary module the kernel");
+		attachKernel(r, kernel);
+	}, py::arg("kernel"),
 		"Make `kernel` this module's audio path: Rack's engine calls it every frame, with no Python. Its wiring is "
 		"checked against the module's configuration. In the constructor callback, or later to replace the "
 		"kernel at the next frame boundary. Main thread.")
@@ -722,7 +752,8 @@ void bindModule(py::module_ engine) {
 			if (found == std::end(names))
 				throw py::type_error("set_event_handlers() got an unexpected event " + key +
 					" (on_add, on_remove, on_bypass, on_un_bypass, on_port_change, on_reset, on_randomize, on_save; "
-					"sample-rate and master events run on Rack's audio threads: RP-22)");
+					"sample-rate and master events can run on Rack's audio threads, where Python never runs: "
+					"rackpy.laboratory runs such overrides offline)");
 			if (item.second.is_none())
 				continue;
 			if (!PyCallable_Check(item.second.ptr()))

@@ -226,6 +226,9 @@ void registerErrorTranslator() {
 		catch (const EngineLocked& e) {
 			PyErr_SetString(errorType("EngineLockError"), e.what());
 		}
+		catch (const Laboratory& e) {
+			PyErr_SetString(errorType("LaboratoryError"), e.what());
+		}
 	});
 }
 

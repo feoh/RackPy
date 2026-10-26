@@ -14,6 +14,7 @@ recorded in :func:`rackpy.runtime.diagnostics`.
 __all__ = [
     "ContextError",
     "EngineLockError",
+    "LaboratoryError",
     "OwnershipError",
     "RackPyError",
     "StaleHandleError",
@@ -66,4 +67,14 @@ class EngineLockError(RackPyError, RuntimeError):
     Rack runs some callbacks, such as a module's reset, with audio stopped and
     the engine locked. The engine lock is not recursive, so calling a locking
     engine function there would deadlock Rack; RackPy raises this instead.
+    """
+
+
+class LaboratoryError(RackPyError, RuntimeError):
+    """A callback-laboratory operation that is not allowed.
+
+    The laboratory (:mod:`rackpy.laboratory`) runs Python overrides of Rack's
+    audio-thread callbacks offline, for experiments and tests. It must be
+    enabled explicitly first, and it refuses what would be unsafe, such as
+    stepping a bench from inside one of its own callbacks.
     """

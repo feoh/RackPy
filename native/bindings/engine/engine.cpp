@@ -206,6 +206,8 @@ void bindEngine(py::module_ engine) {
 				throw runtime::Ownership("a module can go to Rack's engine only after its constructor callback returns");
 			if (m.engineOwned.load(std::memory_order_acquire))
 				throw runtime::Ownership("Rack's engine already has this module");
+			if (m.laboratory)
+				throw runtime::Laboratory("a laboratory module runs only on a laboratory Bench, never in Rack's engine");
 			if (!m.model || !m.model->plugin)
 				throw runtime::Ownership("Rack saves a module with its model and plugin: use a model of this plugin "
 					"(Model.create_module)");

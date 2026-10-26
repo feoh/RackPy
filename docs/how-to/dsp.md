@@ -15,6 +15,12 @@ and hands it to the module:
 ```{rackpy-example} module_kernel.py
 ```
 
+:::{note}
+To try a `process()` written in Python, for an experiment or a test, use the
+offline [callback laboratory](../explanation/callbacks.md). It never runs in
+Rack's engine and is not real-time audio.
+:::
+
 ## Kernels and their fields
 
 `rackpy.dsp.kernel` has the kernel types. Calling one with keyword arguments

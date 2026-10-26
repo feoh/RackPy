@@ -16,6 +16,7 @@
 #include "rackpy/runtime/threads.hpp"
 #include "registry.hpp"
 #include "../bindings/dsp/kernel.hpp"
+#include "../laboratory/laboratory.hpp"
 
 #ifdef RACKPY_TEST_HOOKS
 #include "testing.hpp"
@@ -79,6 +80,7 @@ PYBIND11_EMBEDDED_MODULE(_rackpy_host, m) {
 	rackpy::bindings::bindKernels(m);  // before rackpy.raw: Module.set_kernel takes a Kernel
 	py::module_ raw = m.def_submodule("raw", "Rack API bindings (rackpy.raw), registered from bindings/manifest.json.");
 	rackpy::bindings::registerAll(raw);
+	rackpy::laboratory::bind(m);  // after rackpy.raw: laboratory modules are rackpy.raw.engine.Module handles
 #ifdef RACKPY_TEST_HOOKS
 	rackpy::testing::define(m.def_submodule("_testing", "Test hooks; only in RACKPY_TEST_HOOKS builds."));
 #endif
