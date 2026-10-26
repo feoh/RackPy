@@ -453,6 +453,40 @@ void define(py::module_ m) {
 			std::copy_n(rows.data() + size_t(h - 1 - y) * w * 4, size_t(w) * 4, out.begin() + size_t(y) * w * 4);
 		return py::make_tuple(w, h, py::bytes(out));
 	});
+	m.def("set_rack_brightness", [](float rack, float spotlight) {
+		// Rack's View > Room brightness and spotlight settings (settings.hpp is RP-30's); returns the old values.
+		requireMainThread("set_rack_brightness");
+		auto old = py::make_tuple(rack::settings::rackBrightness, rack::settings::spotlightBrightness);
+		rack::settings::rackBrightness = rack;
+		rack::settings::spotlightBrightness = spotlight;
+		return old;
+	});
+	m.def("last_frame_pixel", [](int x, int y) {
+		// The RGBA of the last frame Rack drew at framebuffer pixel (x, y), top-left origin. Call
+		// from a step(), before Rack draws again. It reads the back buffer, which Mesa's software
+		// GLX (the tests' Xvfb renderer) keeps after glfwSwapBuffers; its front buffer reads as zeros.
+		requireMainThread("last_frame_pixel");
+		liveContext();
+		int w = 0, h = 0;
+		glfwGetFramebufferSize(APP->window->win, &w, &h);
+		if (x < 0 || y < 0 || x >= w || y >= h)
+			throw std::invalid_argument("pixel (" + std::to_string(x) + ", " + std::to_string(y) + ") is outside the " +
+				std::to_string(w) + " x " + std::to_string(h) + " window");
+		while (glGetError() != GL_NO_ERROR) {}
+		GLint fbo = 0, previous = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glGetIntegerv(GL_READ_BUFFER, &previous);
+		glReadBuffer(GL_BACK);
+		unsigned char rgba[4] = {0, 0, 0, 0};
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadPixels(x, h - 1 - y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
+		GLenum error = glGetError();
+		glReadBuffer(GLenum(previous));
+		glBindFramebuffer(GL_FRAMEBUFFER, GLuint(fbo));
+		if (error != GL_NO_ERROR) throw std::runtime_error("glReadPixels failed: GL error " + std::to_string(error));
+		return py::make_tuple(rgba[0], rgba[1], rgba[2], rgba[3]);
+	});
 	m.def("window_should_close", [] {
 		requireMainThread("window_should_close");
 		liveContext();

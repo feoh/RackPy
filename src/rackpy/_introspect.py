@@ -24,6 +24,7 @@ MODULES = (
     "rackpy.types",
     "rackpy.engine",
     "rackpy.widget",
+    "rackpy.drawing",
     "rackpy.plugin",
     "rackpy.assets",
     "rackpy.dsp",

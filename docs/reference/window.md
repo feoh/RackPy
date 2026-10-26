@@ -2,7 +2,7 @@
 
 `rackpy.raw.nanovg` is NanoVG's drawing API, the one Rack's `DrawArgs` hands
 widgets. `rackpy.raw.window` is `rack::window`: the OS window, its fonts and
-images, SVGs and unit helpers. **Implemented (RP-27A), Linux x86_64 inside
+images, SVGs and unit helpers. **Implemented (RP-27A, RP-27B), Linux x86_64 inside
 Rack Free 2.6.6**, for every `rack::window` record and the Context fields
 listed below (see the [coverage report](coverage.md)). Rack renders under
 Xvfb with Mesa's software OpenGL in the tests, which compare pixels Rack
@@ -72,6 +72,39 @@ window below, so NanoVG's own `nvgCreate*`, `nvgUpdateImage` and
 `nvgDeleteImage` are not bound either. Neither are its debugging functions.
 OpenGL itself is not bound: an `OpenGlWidget` can override `draw_framebuffer`
 and draw with NanoVG.
+
+(window-facade)=
+## The drawing facade
+
+`rackpy.drawing` is a more Pythonic shape for the same drawing. It adds no
+behaviour of its own:
+
+```{rackpy-example} painter.py
+```
+
+- `Painter(args)` (or `Painter(vg)` in `draw_vg`) wraps the callback's
+  `GraphicsContext`, and expires with it as the context does.
+- `saved()` and `clipped(x, y, width, height)` are context managers around
+  `save`/`restore` and the scissor.
+- `translate`, `scale`, `rotate` and `alpha` return the painter, so they
+  chain.
+- `path()` starts a `Path2D` whose methods chain and end in `fill(paint)` or
+  `stroke(paint, width=)`. `rect`, `circle` and `line` start one with a
+  shape; `hole()` makes the last shape cut out.
+- A colour is an `NVGcolor`, a `"#RRGGBB"` or `"#RRGGBBAA"` string, or a
+  tuple of 0-1 floats. `drawing.color()` converts one and, unlike Rack's
+  `fromHexString`, raises `ValueError` for bad text. The gradient methods
+  take colours too.
+- `text(text, x, y, size=, color=, font=, align=, width=)` draws text, and
+  wraps it at `width` if given. `measure()` returns a `TextBounds`. `font` is
+  a `Font` or a path, absolute or in Rack's system folder (`DEFAULT_FONT` is
+  Rack's UI font). `align` is a horizontal word (`left`, `center`, `right`)
+  and a vertical one (`top`, `middle`, `bottom`, `baseline`).
+- `image(image, x, y, width, height, alpha=)` draws an `Image` or an image
+  file.
+
+Fonts and images named by path are loaded through the window on every call,
+as Rack advises. A missing file raises `FileNotFoundError`.
 
 (window-context)=
 ## The context
@@ -153,6 +186,27 @@ Rack's deprecated name for `Svg`, and using it warns.
 
 `window.SVG_DPI` (75) is Rack's pixels per inch and `window.MM_PER_IN`
 is 25.4. `in2px` and `mm2px` convert a float or a `Vec`.
+
+(window-frames)=
+## Frames, framebuffers and layers
+
+These are Rack's behaviours, tested over Rack's real frames:
+
+- A `FramebufferWidget` renders its children only when it is dirty: at
+  first, after `set_dirty()`, when it moves to a new subpixel offset (unless
+  `dirty_on_subpixel_change` is off), or when its scale or visible area
+  changes. Otherwise Rack keeps drawing the framebuffer's image. A bypassed
+  one draws its children directly every frame. Rack may postpone a render to
+  a later frame when a frame runs late.
+- `RackWidget` draws modules on layer 0, dims the rack by the room
+  brightness, then calls `draw_layer(args, 1)` for lights and halos, which
+  therefore stay bright. A widget in a module widget can draw on layer 1 the
+  same way. A `FramebufferWidget` renders layer 0 only.
+
+The tests read the pixels of Rack's real window back, from the back buffer
+that Mesa's software GLX keeps after a swap. The guide drawing in
+`tests/rendering/reference/guide.png` is compared with tolerances, and was
+reviewed by eye.
 
 (window-lifetimes)=
 ## Lifetimes

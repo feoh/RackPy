@@ -3,7 +3,8 @@
 
 WidgetNode is a native-only checked adapter, not a subclassable Rack Widget.
 Subclassable widgets, events, drawing and the typed bases are in
-:mod:`rackpy.raw.widget` (``Widget`` and its variants); no facade wraps them yet.
+:mod:`rackpy.raw.widget` (``Widget`` and its variants); :mod:`rackpy.drawing` draws in their
+callbacks.
 """
 
 from rackpy.raw.widget import WidgetNode

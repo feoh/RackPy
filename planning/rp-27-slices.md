@@ -39,7 +39,24 @@ Validation: [rp-27a-validation.md](rp-27a-validation.md).
 
 Context's `engine`, `scene` and `history` stay with RP-24 and RP-28.
 
-**Next on RP-27 (RP-27B):** the Pythonic `rackpy.drawing` facade, light and
-dark panel integration with the settings, self-lit layer rendering through
-Rack's real frame (`draw_layer` from the module rack), and framebuffer dirty
-behaviour across real frames, with reviewed reference images.
+**RP-27B — drawing facade, real-frame layers and framebuffers, reference images**
+(`tk-rackpy-27b-drawing-facade-real-frame-layers-and--e78214`). No new
+records (the facade is convenience over RP-27A's mappings). Validation:
+[rp-27b-validation.md](rp-27b-validation.md).
+
+- **Facade.** `src/rackpy/drawing.py`: `Painter` (saved/clipped context
+  managers, chained transforms), `Path2D` (chained shapes, fill/stroke),
+  colours from NVGcolor/hex/tuples, gradients, text with fonts loaded through
+  the window per call, `measure()`, images. Decision: no behaviour of its
+  own; it expires with its callback exactly like the raw context.
+- **Real frames.** A windowed scenario steps through Rack's own frames: a
+  FramebufferWidget renders only when dirty (set_dirty, subpixel moves unless
+  disabled, bypass), and a Python widget in a module widget gets layer 1
+  after RackWidget's room dimming, read from the window's pixels.
+- **Reference image.** `tests/rendering/reference/guide.png`, rendered by
+  Rack and reviewed by eye; compared with tolerances.
+- **Moved.** Light/dark panel integration goes to RP-30 (the
+  `preferDarkPanels` setting) and RP-28 (Rack's themed panels), with
+  comments on both tasks.
+
+RP-27 is complete with RP-27A and RP-27B.
