@@ -67,3 +67,12 @@ bit trick that is wrong for 0, negatives and infinity.
 **Not tested:** arm64 (Rack's SIMDe NEON path), macOS and Windows. Only Linux
 x86_64 was built and run. DSP templates over `float_4` are RP-18; graph
 kernels are RP-21. C++ kernel libraries can already use `rack::simd`.
+
+**CI follow-up.** CI run 40342958413 (GCC 13 on ubuntu-24.04) failed 47 of
+the 23,985 replayed cases: `sse_mathfun_log_ps` and `sse_mathfun_sincos_ps`
+by one ULP, and `std::abs(std::complex<float>)` of `(3.4e38, 2)`, `inf`
+against `3.4e38`. The local GCC 16 build had matched. Rack's inline code had
+been compiled differently at the reference's and the bindings' call sites,
+which `-funsafe-math-optimizations` allows. Both now call Rack's functions
+through the same `[[gnu::noipa]]` wrappers (`native/bindings/simd/calls.hpp`),
+and the reference page says what that comparison does and does not show.

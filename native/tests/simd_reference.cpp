@@ -13,8 +13,11 @@
 //
 // Floats are written as their 32-bit patterns ("0x3f800000"), so NaN payloads,
 // mask lanes, signed zeros and denormals survive the trip. Inputs pass through
-// opaque() so the compiler cannot fold a case at compile time.
+// opaque() so the compiler cannot fold a case at compile time. Functions are called through
+// the same out-of-line wrappers as the bindings (native/bindings/simd/calls.hpp explains why).
 #include <rack.hpp>
+
+#include "../bindings/simd/calls.hpp"
 
 #include <cinttypes>
 #include <cmath>
@@ -28,6 +31,7 @@
 using namespace rack;
 using simd::float_4;
 using simd::int32_4;
+namespace calls = rackpy::simd_calls;
 
 #ifdef __SSE4_2__
 const char* IMPLEMENTATION = "sse4.2";
@@ -333,125 +337,125 @@ void operators() {
 void functions() {
 	auto fpairs = pairs(FLOAT_VECTORS, FLOAT_VECTORS.size() - EDGES.size());
 	std::vector<float_4> ms = masks();
-	BINARY_F4("andnot", simd::andnot(a, c))
+	BINARY_F4("andnot", calls::andnot(a, c))
 	for (int32_4 x : INT_VECTORS)
-		add("movemask_i4", {i4(x)}, i(simd::movemask(opaque(x))));
+		add("movemask_i4", {i4(x)}, i(calls::movemask(opaque(x))));
 	for (float_4 x : FLOAT_VECTORS)
-		add("movemask_f", {f4(x)}, i(simd::movemask(opaque(x))));
-	UNARY_F4("rsqrt", simd::rsqrt(a))
-	UNARY_F4("rcp", simd::rcp(a))
+		add("movemask_f", {f4(x)}, i(calls::movemask(opaque(x))));
+	UNARY_F4("rsqrt", calls::rsqrt(a))
+	UNARY_F4("rcp", calls::rcp(a))
 	for (bool cond : {true, false})
 		for (float x : EDGES)
-			add("ifelse_b", {b(cond), f(x), f(2.5f)}, f(simd::ifelse(opaque(cond), opaque(x), 2.5f)));
+			add("ifelse_b", {b(cond), f(x), f(2.5f)}, f(calls::ifelse(opaque(cond), opaque(x), 2.5f)));
 	for (float_4 m : ms)
 		for (size_t k = 0; k < FLOAT_VECTORS.size(); k += 3) {
 			float_4 x = FLOAT_VECTORS[k], y = FLOAT_VECTORS[(k * 11 + 5) % FLOAT_VECTORS.size()];
-			add("ifelse_f4", {f4(m), f4(x), f4(y)}, f4(simd::ifelse(opaque(m), opaque(x), opaque(y))));
+			add("ifelse_f4", {f4(m), f4(x), f4(y)}, f4(calls::ifelse(opaque(m), opaque(x), opaque(y))));
 		}
 	// A non-mask "mask": ifelse is bitwise, so arbitrary bits mix the two inputs.
 	for (size_t k = 0; k < FLOAT_VECTORS.size(); k++) {
 		float_4 m = FLOAT_VECTORS[k], x = FLOAT_VECTORS[(k + 1) % FLOAT_VECTORS.size()], y = FLOAT_VECTORS[(k + 2) % FLOAT_VECTORS.size()];
-		add("ifelse_f4", {f4(m), f4(x), f4(y)}, f4(simd::ifelse(opaque(m), opaque(x), opaque(y))));
+		add("ifelse_f4", {f4(m), f4(x), f4(y)}, f4(calls::ifelse(opaque(m), opaque(x), opaque(y))));
 	}
 	for (int m : {0, 1, 2, 5, 10, 15, 16, 31, -1, INT32_MAX, INT32_MIN}) {
-		add("movemask_inverse_i4", {i(m)}, i4(simd::movemaskInverse<int32_4>(opaque(m))));
-		add("movemask_inverse_f4", {i(m)}, f4(simd::movemaskInverse<float_4>(opaque(m))));
+		add("movemask_inverse_i4", {i(m)}, i4(calls::movemaskInverseInt(opaque(m))));
+		add("movemask_inverse_f4", {i(m)}, f4(calls::movemaskInverseFloat(opaque(m))));
 	}
 
-	BINARY_F4("fmax", simd::fmax(a, c))
-	BINARY_F4("fmin", simd::fmin(a, c))
-	UNARY_F4("sqrt", simd::sqrt(a))
-	UNARY_F4("log", simd::log(a))
-	UNARY_F4("log10", simd::log10(a))
-	UNARY_F4("log2", simd::log2(a))
-	UNARY_F4("exp", simd::exp(a))
-	UNARY_F4("sin", simd::sin(a))
-	UNARY_F4("cos", simd::cos(a))
-	UNARY_F4("tan", simd::tan(a))
-	UNARY_F4("atan", simd::atan(a))
-	BINARY_F4("atan2", simd::atan2(a, c))
-	UNARY_F4("trunc", simd::trunc(a))
-	UNARY_F4("floor", simd::floor(a))
-	UNARY_F4("ceil", simd::ceil(a))
-	UNARY_F4("round", simd::round(a))
-	BINARY_F4("fmod", simd::fmod(a, c))
-	BINARY_F4("hypot", simd::hypot(a, c))
-	UNARY_F4("fabs", simd::fabs(a))
-	UNARY_F4("abs", simd::abs(a))
-	BINARY_F4("abs_c", simd::abs(std::complex<float_4>(a, c)))
-	BINARY_F4("arg_c", simd::arg(std::complex<float_4>(a, c)))
-	BINARY_F4("pow", simd::pow(a, c))
+	BINARY_F4("fmax", calls::fmax(a, c))
+	BINARY_F4("fmin", calls::fmin(a, c))
+	UNARY_F4("sqrt", calls::sqrt(a))
+	UNARY_F4("log", calls::log(a))
+	UNARY_F4("log10", calls::log10(a))
+	UNARY_F4("log2", calls::log2(a))
+	UNARY_F4("exp", calls::exp(a))
+	UNARY_F4("sin", calls::sin(a))
+	UNARY_F4("cos", calls::cos(a))
+	UNARY_F4("tan", calls::tan(a))
+	UNARY_F4("atan", calls::atan(a))
+	BINARY_F4("atan2", calls::atan2(a, c))
+	UNARY_F4("trunc", calls::trunc(a))
+	UNARY_F4("floor", calls::floor(a))
+	UNARY_F4("ceil", calls::ceil(a))
+	UNARY_F4("round", calls::round(a))
+	BINARY_F4("fmod", calls::fmod(a, c))
+	BINARY_F4("hypot", calls::hypot(a, c))
+	UNARY_F4("fabs", calls::fabs(a))
+	UNARY_F4("abs", calls::abs(a))
+	BINARY_F4("abs_c", calls::abs(std::complex<float_4>(a, c)))
+	BINARY_F4("arg_c", calls::arg(std::complex<float_4>(a, c)))
+	BINARY_F4("pow", calls::pow(a, c))
 	for (float s : {0.f, 1.f, 2.f, 10.f, 0.5f, -2.f, INF, NAN_})
 		for (float_4 x : FLOAT_VECTORS)
-			add("pow_s", {f(s), f4(x)}, f4(simd::pow(opaque(s), opaque(x))));
+			add("pow_s", {f(s), f4(x)}, f4(calls::pow(opaque(s), opaque(x))));
 	for (int e : {-3, -1, 0, 1, 2, 3, 5, 8, 13, 31, 1000, (1 << 30) - 1})
 		for (float_4 x : FLOAT_VECTORS) {
-			add("pow_i", {f4(x), i(e)}, f4(simd::pow(opaque(x), opaque(e))));
-			add("pow_i_f", {f(x.s[0]), i(e)}, f(simd::pow(opaque(x.s[0]), opaque(e))));
+			add("pow_i", {f4(x), i(e)}, f4(calls::powInt(opaque(x), opaque(e))));
+			add("pow_i_f", {f(x.s[0]), i(e)}, f(calls::powInt(opaque(x.s[0]), opaque(e))));
 		}
 	for (size_t k = 0; k < fpairs.size(); k += 2) {
 		float_4 x = opaque(fpairs[k].first), lo = opaque(fpairs[k].second), hi = opaque(fpairs[(k + 1) % fpairs.size()].first);
-		add("clamp", {f4(fpairs[k].first), f4(fpairs[k].second), f4(fpairs[(k + 1) % fpairs.size()].first)}, f4(simd::clamp(x, lo, hi)));
+		add("clamp", {f4(fpairs[k].first), f4(fpairs[k].second), f4(fpairs[(k + 1) % fpairs.size()].first)}, f4(calls::clamp(x, lo, hi)));
 		float_4 y0 = opaque(fpairs[(k + 3) % fpairs.size()].second), y1 = opaque(fpairs[(k + 5) % fpairs.size()].first);
-		add("rescale", {f4(x), f4(lo), f4(hi), f4(y0), f4(y1)}, f4(simd::rescale(x, lo, hi, y0, y1)));
-		add("crossfade", {f4(x), f4(lo), f4(hi)}, f4(simd::crossfade(x, lo, hi)));
+		add("rescale", {f4(x), f4(lo), f4(hi), f4(y0), f4(y1)}, f4(calls::rescale(x, lo, hi, y0, y1)));
+		add("crossfade", {f4(x), f4(lo), f4(hi)}, f4(calls::crossfade(x, lo, hi)));
 	}
-	UNARY_F4("clamp_default", simd::clamp(a))
-	UNARY_F4("sgn", simd::sgn(a))
+	UNARY_F4("clamp_default", calls::clamp(a, 0.f, 1.f))
+	UNARY_F4("sgn", calls::sgn(a))
 
-	// The std:: and math:: scalar functions simd:: imports, for T = float.
-	BINARY_F("fmax_f", simd::fmax(a, c))
-	BINARY_F("fmin_f", simd::fmin(a, c))
-	UNARY_F("sqrt_f", simd::sqrt(a))
-	UNARY_F("log_f", simd::log(a))
-	UNARY_F("log10_f", simd::log10(a))
-	UNARY_F("log2_f", simd::log2(a))
-	UNARY_F("exp_f", simd::exp(a))
-	UNARY_F("sin_f", simd::sin(a))
-	UNARY_F("cos_f", simd::cos(a))
-	UNARY_F("tan_f", simd::tan(a))
-	UNARY_F("atan_f", simd::atan(a))
-	BINARY_F("atan2_f", simd::atan2(a, c))
-	UNARY_F("trunc_f", simd::trunc(a))
-	UNARY_F("floor_f", simd::floor(a))
-	UNARY_F("ceil_f", simd::ceil(a))
-	UNARY_F("round_f", simd::round(a))
-	BINARY_F("fmod_f", simd::fmod(a, c))
-	BINARY_F("hypot_f", simd::hypot(a, c))
-	UNARY_F("fabs_f", simd::fabs(a))
-	UNARY_F("abs_f", simd::abs(a))
-	BINARY_F("pow_f", simd::pow(a, c))
-	UNARY_F("sgn_f", simd::sgn(a))
+	// The std:: and math:: scalar functions calls:: imports, for T = float.
+	BINARY_F("fmax_f", calls::fmax(a, c))
+	BINARY_F("fmin_f", calls::fmin(a, c))
+	UNARY_F("sqrt_f", calls::sqrt(a))
+	UNARY_F("log_f", calls::log(a))
+	UNARY_F("log10_f", calls::log10(a))
+	UNARY_F("log2_f", calls::log2(a))
+	UNARY_F("exp_f", calls::exp(a))
+	UNARY_F("sin_f", calls::sin(a))
+	UNARY_F("cos_f", calls::cos(a))
+	UNARY_F("tan_f", calls::tan(a))
+	UNARY_F("atan_f", calls::atan(a))
+	BINARY_F("atan2_f", calls::atan2(a, c))
+	UNARY_F("trunc_f", calls::trunc(a))
+	UNARY_F("floor_f", calls::floor(a))
+	UNARY_F("ceil_f", calls::ceil(a))
+	UNARY_F("round_f", calls::round(a))
+	BINARY_F("fmod_f", calls::fmod(a, c))
+	BINARY_F("hypot_f", calls::hypot(a, c))
+	UNARY_F("fabs_f", calls::fabs(a))
+	UNARY_F("abs_f", calls::abs(a))
+	BINARY_F("pow_f", calls::pow(a, c))
+	UNARY_F("sgn_f", calls::sgn(a))
 	for (float x : EDGES)
 		for (float y : {0.5f, -1.f, INF}) {
-			add("clamp_f", {f(x), f(-1.f), f(y)}, f(simd::clamp(opaque(x), -1.f, opaque(y))));
-			add("rescale_f", {f(x), f(0.f), f(y), f(-1.f), f(1.f)}, f(simd::rescale(opaque(x), 0.f, opaque(y), -1.f, 1.f)));
-			add("crossfade_f", {f(x), f(y), f(0.25f)}, f(simd::crossfade(opaque(x), opaque(y), 0.25f)));
+			add("clamp_f", {f(x), f(-1.f), f(y)}, f(calls::clamp(opaque(x), -1.f, opaque(y))));
+			add("rescale_f", {f(x), f(0.f), f(y), f(-1.f), f(1.f)}, f(calls::rescale(opaque(x), 0.f, opaque(y), -1.f, 1.f)));
+			add("crossfade_f", {f(x), f(y), f(0.25f)}, f(calls::crossfade(opaque(x), opaque(y), 0.25f)));
 		}
 	for (float x : EDGES) {
 		std::complex<float> z(opaque(x), opaque(2.f));
-		add("abs_cf", {f(x), f(2.f)}, f(simd::abs(z)));
-		add("arg_cf", {f(x), f(2.f)}, f(simd::arg(z)));
+		add("abs_cf", {f(x), f(2.f)}, f(calls::abs(z)));
+		add("arg_cf", {f(x), f(2.f)}, f(calls::arg(z)));
 	}
 }
 
 void sseMathfun() {
 	auto fpairs = pairs(FLOAT_VECTORS, FLOAT_VECTORS.size() - EDGES.size());
-	add("sse_mathfun_one_ps", {}, f4(float_4(sse_mathfun_one_ps())));
-	UNARY_F4("sse_mathfun_log_ps", float_4(sse_mathfun_log_ps(a.v)))
-	UNARY_F4("sse_mathfun_exp_ps", float_4(sse_mathfun_exp_ps(a.v)))
-	UNARY_F4("sse_mathfun_sin_ps", float_4(sse_mathfun_sin_ps(a.v)))
-	UNARY_F4("sse_mathfun_cos_ps", float_4(sse_mathfun_cos_ps(a.v)))
-	UNARY_F4("sse_mathfun_tan_ps", float_4(sse_mathfun_tan_ps(a.v)))
-	UNARY_F4("sse_mathfun_cot_ps", float_4(sse_mathfun_cot_ps(a.v)))
-	UNARY_F4("sse_mathfun_atan_ps", float_4(sse_mathfun_atan_ps(a.v)))
-	BINARY_F4("sse_mathfun_atan2_ps", float_4(sse_mathfun_atan2_ps(a.v, c.v)))
+	add("sse_mathfun_one_ps", {}, f4(calls::sseOne()));
+	UNARY_F4("sse_mathfun_log_ps", calls::sseLog(a))
+	UNARY_F4("sse_mathfun_exp_ps", calls::sseExp(a))
+	UNARY_F4("sse_mathfun_sin_ps", calls::sseSin(a))
+	UNARY_F4("sse_mathfun_cos_ps", calls::sseCos(a))
+	UNARY_F4("sse_mathfun_tan_ps", calls::sseTan(a))
+	UNARY_F4("sse_mathfun_cot_ps", calls::sseCot(a))
+	UNARY_F4("sse_mathfun_atan_ps", calls::sseAtan(a))
+	BINARY_F4("sse_mathfun_atan2_ps", calls::sseAtan2(a, c))
 	for (float_4 x : FLOAT_VECTORS) {
-		__m128 s, c;
-		sse_mathfun_sincos_ps(opaque(x).v, &s, &c);
-		add("sse_mathfun_sincos_ps", {f4(x)}, list({f4(float_4(s)), f4(float_4(c))}));
+		float_4 s, c;
+		calls::sseSincos(opaque(x), &s, &c);
+		add("sse_mathfun_sincos_ps", {f4(x)}, list({f4(s), f4(c)}));
 		for (int flag : {0, 1, 2, -1})
-			add("sse_mathfun_tancot_ps", {f4(x), i(flag)}, f4(float_4(sse_mathfun_tancot_ps(opaque(x).v, opaque(flag)))));
+			add("sse_mathfun_tancot_ps", {f4(x), i(flag)}, f4(calls::sseTancot(opaque(x), opaque(flag))));
 	}
 }
 

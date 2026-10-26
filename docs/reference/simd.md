@@ -14,6 +14,15 @@ inside Rack, and requires every lane to match: bit for bit for bitwise logic,
 masks and casts, and with the sign of a zero and NaN payloads ignored for
 arithmetic, as for the [values](values.md#numbers-cross-as-c-numbers).
 
+The reference and the bindings call each Rack function through the same
+out-of-line wrapper (`native/bindings/simd/calls.hpp`), so the test shows that
+every Python call reaches the right Rack function with the right arguments. It
+does not promise the same last bits as Rack's inline code compiled into
+another plugin: the SDK's `-funsafe-math-optimizations` let the compiler
+reassociate composite arithmetic at each call site, and with GCC 13 the same
+`sse_mathfun_log_ps` inlined at two call sites differed by one ULP, and
+`std::abs` of a large `std::complex<float>` was `inf` at one of them.
+
 :::{admonition} What this is for
 :class: note
 
