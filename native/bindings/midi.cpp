@@ -20,7 +20,9 @@
 
 #include <algorithm>
 #include <array>
+#include <map>
 #include <atomic>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -306,12 +308,11 @@ py::object deviceObject(py::object owner, m::Device* device, bool input) {
 
 /** A port in a device's subscriber set that Python did not make (a module's): read-only, found again in the set. */
 struct PortView {
-	py::object device;  // the DeviceView it was listed by
+	std::function<m::Device&()> device;  // resolves the device again, or raises
 	const m::Port* port;
 	bool input;
 	const m::Port& get() const {
-		auto& view = device.cast<const DeviceView&>();
-		m::Device& d = view.get();
+		m::Device& d = device();
 		bool present = input ? static_cast<m::InputDevice&>(d).subscribed.count(const_cast<m::Input*>(
 								  static_cast<const m::Input*>(port))) != 0
 							 : static_cast<m::OutputDevice&>(d).subscribed.count(const_cast<m::Output*>(
@@ -344,13 +345,13 @@ T& pythonPort(py::handle value, const char* what) {
 }
 
 template <class Set>
-py::list subscribers(py::object deviceView, const Set& set, bool input) {
+py::list subscribers(std::function<m::Device&()> resolve, const Set& set, bool input) {
 	py::list out;
 	for (auto* port : set) {
 		if (py::object o = portObject(port))
 			out.append(o);
 		else
-			out.append(py::cast(PortView{deviceView, port, input}));
+			out.append(py::cast(PortView{resolve, port, input}));
 	}
 	return out;
 }
@@ -364,6 +365,183 @@ std::vector<uint8_t> messageBytes(py::handle value) {
 		out.push_back(static_cast<uint8_t>(byte));
 	}
 	return out;
+}
+
+// --- Drivers and devices Python configures (RP-29C) ---------------------------------------
+// Native code answers every Driver and Device call. An output device's sendMessage runs on engine
+// threads (modules' process()), so it only queues the message (try-lock, bounded, drops counted) for
+// Python to take on the main thread; an input device delivers what Python pushes.
+
+struct ConfiguredInput : m::InputDevice {
+	std::mutex nameMutex;
+	std::string name;
+	bool removed = false;
+	std::string getName() override {
+		std::lock_guard<std::mutex> lock(nameMutex);
+		return name;
+	}
+};
+
+struct ConfiguredOutput : m::OutputDevice {
+	std::mutex nameMutex;
+	std::string name;
+	bool removed = false;
+	MessageQueue sent;
+	std::string getName() override {
+		std::lock_guard<std::mutex> lock(nameMutex);
+		return name;
+	}
+	void sendMessage(const m::Message& message) override { sent.push(message); }
+};
+
+struct ConfiguredMidiDriver : m::Driver {
+	std::shared_ptr<std::atomic<bool>> alive = std::make_shared<std::atomic<bool>>(true);
+	std::mutex devicesMutex;
+	std::string name;
+	std::map<int, std::unique_ptr<ConfiguredInput>> inputs;
+	std::map<int, std::unique_ptr<ConfiguredOutput>> outputs;
+	int nextInput = 0, nextOutput = 0, defaultInput = -1, defaultOutput = -1;
+
+	~ConfiguredMidiDriver() override { alive->store(false); }
+	template <class Map>
+	static auto find(Map& map, int id, bool includeRemoved = false) -> decltype(map.begin()->second.get()) {
+		auto it = map.find(id);
+		if (it == map.end() || (it->second->removed && !includeRemoved))
+			return nullptr;
+		return it->second.get();
+	}
+	template <class Map>
+	static std::vector<int> ids(Map& map) {
+		std::vector<int> out;
+		for (auto& [id, device] : map)
+			if (!device->removed)
+				out.push_back(id);
+		return out;
+	}
+	std::string getName() override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		return name;
+	}
+	std::vector<int> getInputDeviceIds() override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		return ids(inputs);
+	}
+	int getDefaultInputDeviceId() override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		return find(inputs, defaultInput) ? defaultInput : -1;
+	}
+	std::string getInputDeviceName(int id) override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		auto* d = find(inputs, id);
+		return d ? d->getName() : "";
+	}
+	m::InputDevice* subscribeInput(int id, m::Input* input) override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		auto* d = find(inputs, id);
+		if (!d)
+			return nullptr;
+		d->subscribe(input);
+		return d;
+	}
+	void unsubscribeInput(int id, m::Input* input) override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		auto* d = find(inputs, id, true);
+		if (!d)
+			return;
+		d->unsubscribe(input);
+		if (d->removed && d->subscribed.empty())
+			inputs.erase(id);
+	}
+	std::vector<int> getOutputDeviceIds() override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		return ids(outputs);
+	}
+	int getDefaultOutputDeviceId() override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		return find(outputs, defaultOutput) ? defaultOutput : -1;
+	}
+	std::string getOutputDeviceName(int id) override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		auto* d = find(outputs, id);
+		return d ? d->getName() : "";
+	}
+	m::OutputDevice* subscribeOutput(int id, m::Output* output) override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		auto* d = find(outputs, id);
+		if (!d)
+			return nullptr;
+		d->subscribe(output);
+		return d;
+	}
+	void unsubscribeOutput(int id, m::Output* output) override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		auto* d = find(outputs, id, true);
+		if (!d)
+			return;
+		d->unsubscribe(output);
+		if (d->removed && d->subscribed.empty())
+			outputs.erase(id);
+	}
+};
+
+struct PythonMidiDriver {
+	std::unique_ptr<ConfiguredMidiDriver> owned;
+	ConfiguredMidiDriver* driver;
+	std::shared_ptr<std::atomic<bool>> alive;
+	int registeredId = -1;
+	explicit PythonMidiDriver(std::string name) : owned(std::make_unique<ConfiguredMidiDriver>()) {
+		driver = owned.get();
+		alive = driver->alive;
+		driver->name = std::move(name);
+	}
+	ConfiguredMidiDriver& get() const {
+		runtime::requireMainThread("configuring a MIDI driver");
+		if (!alive->load())
+			throw runtime::StaleHandle("Rack deleted this MIDI driver (it quit)");
+		return *driver;
+	}
+};
+
+/** Python's handle on one configured device: main thread (Python's pushes and Rack's subscriptions both are). */
+template <class Device, bool Input>
+struct PythonMidiDevice {
+	std::shared_ptr<std::atomic<bool>> alive;
+	ConfiguredMidiDriver* driver;
+	int id;
+	Device& get(bool allowRemoved = false) const {
+		runtime::requireMainThread("using a MIDI device");
+		if (!alive->load())
+			throw runtime::StaleHandle("Rack deleted this MIDI device's driver (it quit)");
+		std::lock_guard<std::mutex> lock(driver->devicesMutex);
+		Device* d;
+		if constexpr (Input)
+			d = ConfiguredMidiDriver::find(driver->inputs, id, true);
+		else
+			d = ConfiguredMidiDriver::find(driver->outputs, id, true);
+		if (!d)
+			throw runtime::StaleHandle("this MIDI device was removed and its last port left");
+		if (d->removed && !allowRemoved)
+			throw runtime::StaleHandle("this MIDI device was removed");
+		return *d;
+	}
+};
+using PythonMidiInput = PythonMidiDevice<ConfiguredInput, true>;
+using PythonMidiOutput = PythonMidiDevice<ConfiguredOutput, false>;
+
+template <class Handle>
+void removeDevice(const PythonMidiDriver& d, const Handle& device) {
+	d.get();
+	if (device.driver != d.driver)
+		throw runtime::Ownership("the device belongs to another driver");
+	auto& dev = device.get();
+	std::lock_guard<std::mutex> lock(d.driver->devicesMutex);
+	dev.removed = true;
+	if (dev.subscribed.empty()) {
+		if constexpr (std::is_same<Handle, PythonMidiInput>::value)
+			d.driver->inputs.erase(device.id);
+		else
+			d.driver->outputs.erase(device.id);
+	}
 }
 
 }  // namespace
@@ -466,7 +644,8 @@ void bindMidi(py::module_ mod) {
 	py::class_<InputDeviceView, DeviceView>(mod, "InputDevice")
 		.def_property_readonly("subscribed", [](py::object self) {
 			auto& v = self.cast<const InputDeviceView&>();
-			return subscribers(self, static_cast<m::InputDevice&>(v.get()).subscribed, true);
+			return subscribers([self]() -> m::Device& { return self.cast<const InputDeviceView&>().get(); },
+				static_cast<m::InputDevice&>(v.get()).subscribed, true);
 		}, "Rack's subscribers: Python's own ports, and PortViews of the others (modules' ports).")
 		.def("subscribe", [](const InputDeviceView& v, py::object input) {
 			auto& device = static_cast<m::InputDevice&>(v.get());
@@ -493,7 +672,8 @@ void bindMidi(py::module_ mod) {
 	py::class_<OutputDeviceView, DeviceView>(mod, "OutputDevice")
 		.def_property_readonly("subscribed", [](py::object self) {
 			auto& v = self.cast<const OutputDeviceView&>();
-			return subscribers(self, static_cast<m::OutputDevice&>(v.get()).subscribed, false);
+			return subscribers([self]() -> m::Device& { return self.cast<const OutputDeviceView&>().get(); },
+				static_cast<m::OutputDevice&>(v.get()).subscribed, false);
 		}, "Rack's subscribers: Python's own ports, and PortViews of the others (modules' ports).")
 		.def("subscribe", [](const OutputDeviceView& v, py::object output) {
 			auto& device = static_cast<m::OutputDevice&>(v.get());
@@ -639,6 +819,116 @@ void bindMidi(py::module_ mod) {
 			requireLiveContext("Output.send_message");
 			p.sendMessage(message);
 		}, py::arg("message"), "Rack's: sends to the port's device, with the port's channel unless it is -1.");
+
+	py::class_<PythonMidiInput>(mod, "PythonInputDevice", py::is_final(),
+		"An input device of a PythonMidiDriver: Rack's input ports subscribe to it, and Python pushes messages into it.")
+		.def_property_readonly("id", [](const PythonMidiInput& d) { return d.id; })
+		.def_property_readonly("alive", [](const PythonMidiInput& d) {
+			try {
+				d.get(true);
+				return true;
+			}
+			catch (const std::exception&) {
+				return false;
+			}
+		})
+		.def_property_readonly("removed", [](const PythonMidiInput& d) { return d.get(true).removed; })
+		.def_property("name", [](const PythonMidiInput& d) { return d.get(true).getName(); },
+			[](const PythonMidiInput& d, std::string name) {
+				auto& dev = d.get();
+				std::lock_guard<std::mutex> lock(dev.nameMutex);
+				dev.name = std::move(name);
+			})
+		.def_property_readonly("subscribed", [](py::object self) {
+			auto& d = self.cast<const PythonMidiInput&>();
+			return subscribers([self]() -> m::Device& { return self.cast<const PythonMidiInput&>().get(true); },
+				d.get(true).subscribed, true);
+		}, "Rack's subscribers: Python's own ports, and PortViews of the others (modules' ports).")
+		.def("push_message", [](const PythonMidiInput& d, const m::Message& message) {
+			requireLiveContext("push_message");
+			d.get().onMessage(message);
+		}, py::arg("message"),
+			"Rack's InputDevice::onMessage, as driver code calls it when a message arrives: each subscribed input gets "
+			"it (channel-filtered; an unset frame is set from Rack's engine timing).");
+
+	py::class_<PythonMidiOutput>(mod, "PythonOutputDevice", py::is_final(),
+		"An output device of a PythonMidiDriver: Rack's output ports subscribe to it, and what they send is queued "
+		"for Python (sendMessage runs on engine threads).")
+		.def_property_readonly("id", [](const PythonMidiOutput& d) { return d.id; })
+		.def_property_readonly("alive", [](const PythonMidiOutput& d) {
+			try {
+				d.get(true);
+				return true;
+			}
+			catch (const std::exception&) {
+				return false;
+			}
+		})
+		.def_property_readonly("removed", [](const PythonMidiOutput& d) { return d.get(true).removed; })
+		.def_property("name", [](const PythonMidiOutput& d) { return d.get(true).getName(); },
+			[](const PythonMidiOutput& d, std::string name) {
+				auto& dev = d.get();
+				std::lock_guard<std::mutex> lock(dev.nameMutex);
+				dev.name = std::move(name);
+			})
+		.def_property_readonly("subscribed", [](py::object self) {
+			auto& d = self.cast<const PythonMidiOutput&>();
+			return subscribers([self]() -> m::Device& { return self.cast<const PythonMidiOutput&>().get(true); },
+				d.get(true).subscribed, false);
+		}, "Rack's subscribers: Python's own ports, and PortViews of the others (modules' ports).")
+		.def("take_sent", [](const PythonMidiOutput& d) { return d.get(true).sent.take(); },
+			"The messages Rack's ports sent since the last call, in order (up to 1024 wait; more are dropped).")
+		.def_property_readonly("dropped", [](const PythonMidiOutput& d) { return d.get(true).sent.dropped.load(); });
+
+	py::class_<PythonMidiDriver>(mod, "PythonDriver", py::is_final(),
+		"A MIDI driver Python configures: devices whose calls native code answers. Give it to Rack with add_driver; "
+		"Rack keeps it until it quits.")
+		.def(py::init([](std::string name) { return new PythonMidiDriver(std::move(name)); }), py::arg("name"))
+		.def_property_readonly("registered_id", [](const PythonMidiDriver& d) { return d.registeredId; })
+		.def_property("name", [](const PythonMidiDriver& d) { return d.get().getName(); },
+			[](const PythonMidiDriver& d, std::string name) {
+				auto& driver = d.get();
+				std::lock_guard<std::mutex> lock(driver.devicesMutex);
+				driver.name = std::move(name);
+			})
+		.def("add_input_device", [](const PythonMidiDriver& d, std::string name) {
+			auto& driver = d.get();
+			auto device = std::make_unique<ConfiguredInput>();
+			device->name = std::move(name);
+			std::lock_guard<std::mutex> lock(driver.devicesMutex);
+			int id = driver.nextInput++;
+			driver.inputs[id] = std::move(device);
+			if (driver.defaultInput < 0)
+				driver.defaultInput = id;
+			return PythonMidiInput{d.alive, d.driver, id};
+		}, py::arg("name"), "A new input device (a hotplug, once Rack has the driver); the first is the default.")
+		.def("add_output_device", [](const PythonMidiDriver& d, std::string name) {
+			auto& driver = d.get();
+			auto device = std::make_unique<ConfiguredOutput>();
+			device->name = std::move(name);
+			std::lock_guard<std::mutex> lock(driver.devicesMutex);
+			int id = driver.nextOutput++;
+			driver.outputs[id] = std::move(device);
+			if (driver.defaultOutput < 0)
+				driver.defaultOutput = id;
+			return PythonMidiOutput{d.alive, d.driver, id};
+		}, py::arg("name"))
+		.def("remove_input_device", [](const PythonMidiDriver& d, const PythonMidiInput& device) { removeDevice(d, device); },
+			py::arg("device"), "Unplugs it: Rack's lists no longer show it, and it is deleted once its last port leaves.")
+		.def("remove_output_device", [](const PythonMidiDriver& d, const PythonMidiOutput& device) { removeDevice(d, device); },
+			py::arg("device"));
+
+	mod.def("add_driver", [](int id, PythonMidiDriver& d) {
+		runtime::requireMainThread("adding a MIDI driver");
+		if (m::getDriver(id))
+			throw runtime::Ownership("Rack already has a MIDI driver with this ID (it is stored in patches)");
+		if (!d.owned)
+			throw runtime::Ownership("Rack already has this driver");
+		m::addDriver(id, d.owned.release());  // Rack takes pointer ownership, until it quits
+		d.registeredId = id;
+	}, py::arg("driver_id"), py::arg("driver"),
+		"Rack's addDriver for a PythonDriver: Rack owns it from now on, until it quits. The ID is stored in patches and "
+		"must be unique.");
 
 	mod.def("get_driver_ids", [] {
 		runtime::requireMainThread("listing MIDI drivers");

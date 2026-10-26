@@ -11,7 +11,7 @@ extracted for that platform yet, which blocks a release there.
 
 | Platform | unreviewed | planned | implemented | verified | unrepresentable | excluded_internal | unknown | absent | not inventoried |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lin-x64 | 911 | 61 | 1973 | 0 | 0 | 111 | 0 | 2 | 0 |
+| lin-x64 | 909 | 11 | 2025 | 0 | 0 | 111 | 0 | 2 | 0 |
 | mac-arm64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3058 |
 | mac-x64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3058 |
 | win-x64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3058 |
@@ -33,6 +33,6 @@ extracted for that platform yet, which blocks a release there.
 | 4 widgets/ui/app/componentlibrary | 74 | 0 | 1152 | 0 | 0 | 50 | 0 | 0 | 0 |
 | 5 window/rendering/context | 0 | 1 | 72 | 0 | 0 | 12 | 0 | 0 | 0 |
 | 6 dsp/simd | 558 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0 |
-| 7 audio/midi | 3 | 50 | 116 | 0 | 0 | 6 | 0 | 0 | 0 |
+| 7 audio/midi | 1 | 0 | 168 | 0 | 0 | 6 | 0 | 0 | 0 |
 | 8 services | 128 | 0 | 0 | 0 | 0 | 9 | 0 | 0 | 0 |
 | 9 history | 0 | 0 | 88 | 0 | 0 | 5 | 0 | 0 | 0 |

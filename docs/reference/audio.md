@@ -1,10 +1,9 @@
 # Audio
 
 `rackpy.raw.audio` is Rack's `rack::audio`: Rack's audio drivers and
-devices, and audio ports that Python owns. **Implemented (RP-29B), Linux
-x86_64 inside Rack Free 2.6.6**, for ports and drivers. Implementing a
-driver or device in Python, and Python ports' stream callbacks on a real
-stream, are RP-29C (see the [coverage report](coverage.md)).
+devices, and audio ports that Python owns. **Implemented (RP-29B, RP-29C), Linux
+x86_64 inside Rack Free 2.6.6**, apart from `Port.getDeviceDetail`, which
+Rack declares but never defines (see the [coverage report](coverage.md)).
 
 (audio-drivers)=
 ## Rack's drivers
@@ -53,7 +52,9 @@ that thread:
 - `on_start_stream` and `on_stop_stream` reach a Python subclass queued, on
   the UI thread.
 - A Python override of the process callbacks runs only for a device that
-  Python drives itself (RP-29C).
+  Python drives itself ([Python drivers](#audio-python-drivers)), on
+  that thread. It gets copies of its part of the buffers, and its writes to
+  the output reach the device.
 
 Rack's audio drivers outlive its context but not RackPy's interpreter. Every
 Python port therefore gives its device back when Rack's context closes, and
@@ -72,3 +73,42 @@ name, channels, sample rate and block size. `subscribed` lists the device's
 subscribers, Python's own ports and read-only `PortView`s of the others,
 under Rack's `processMutex`. `subscribe` and `unsubscribe` are Rack's
 lower-level calls, which RackPy undoes with the port.
+
+(audio-python-drivers)=
+## Python drivers and devices
+
+Python implements an audio driver as a natively configured `PythonDriver`
+(RP-29C). Rack calls a driver's and a device's methods from driver threads
+and the engine thread; Core's Audio module, for one, reads a device's
+channel counts and rate on the audio thread. So native code answers every
+call from values Python set, and Python drives the stream from its own
+thread:
+
+```{rackpy-example} virtual_audio.py
+```
+
+- `PythonDriver(name)` holds devices: `add_device(name, num_inputs,
+  num_outputs, sample_rates, sample_rate, block_sizes, block_size)` returns a
+  `PythonDevice` with a stable ID. `add_driver(driver_id, driver)` gives it
+  to Rack, which owns it until it quits. The ID is stored in patches, so -1
+  and taken IDs are refused.
+- A `PythonDevice`'s `name`, channel counts, rates and block sizes are
+  native values that Rack reads on any thread. Rack's `setSampleRate` and
+  `setBlockSize` apply the value and record a request, which
+  `take_requests()` returns on the main thread.
+- `start_stream()`, `process_buffer(input, input_stride, output,
+  output_stride, frames)` and `stop_stream()` are Rack's driver-side calls,
+  run on the calling Python thread with the GIL released. The buffers are
+  interleaved float32 frames, and `process_buffer` overwrites the output.
+  Rack's ports run as they would on an audio thread. Core's Audio module
+  claims the master module and steps Rack's engine by the device's blocks,
+  and a Python port's overrides run synchronously.
+- `remove_device(device)` unplugs it: its stream stops and Rack's lists no
+  longer show it. Rack's ports keep it until they choose another device, as
+  with RtAudio, and it is deleted when the last one leaves. A removed device
+  refuses to stream.
+
+The `rackpy.audio` facade finds drivers by name (`drivers`, `find_driver`),
+opens ports (`open_port(driver, device, kind=...)`), makes and registers a
+virtual driver (`virtual_driver`), and drives a device one block at a time
+(`Stream`).

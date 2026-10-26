@@ -19,7 +19,10 @@
 #include <pybind11/stl.h>
 
 #include <algorithm>
+#include <map>
+#include <set>
 #include <atomic>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -46,6 +49,23 @@ namespace a = rack::audio;
 namespace {
 
 enum class StreamEvent : uint8_t { Start, Stop };
+
+/** Set while a device that Python drives (PythonDevice) runs Rack's Device code on Python's thread. */
+thread_local bool pythonDriving = false;
+
+/** Copies `count` floats into a new array('f'). */
+py::object floatArray(const float* data, size_t count) {
+	return py::module_::import("array").attr("array")("f", py::bytes(reinterpret_cast<const char*>(data), count * sizeof(float)));
+}
+
+/** Copies an array('f') (or any float32 buffer) back into `data`, up to `count` floats. */
+void copyBack(py::handle array, float* data, size_t count) {
+	py::buffer_info info = py::reinterpret_borrow<py::buffer>(array).request();
+	if (info.itemsize != sizeof(float) || info.format != py::format_descriptor<float>::format())
+		throw py::type_error("the output must stay a float32 buffer");
+	size_t n = std::min(count, static_cast<size_t>(info.size));
+	std::copy_n(static_cast<const float*>(info.ptr), n, data);
+}
 
 /** A Python audio port: Rack's Port, with its stream events queued for the UI thread. */
 struct PyAudioPort : a::Port {
@@ -77,16 +97,41 @@ struct PyAudioPort : a::Port {
 		return std::find(deviceSubscriptions.begin(), deviceSubscriptions.end(), device) != deviceSubscriptions.end();
 	}
 
+	// The process callbacks: native counting on Rack's audio thread; a Python override only on a Python-driven device.
+	size_t inputSpan(int stride, int count) const { return count > 0 ? size_t(count) * stride - inputOffset : 0; }
+	size_t outputSpan(int stride, int count) const { return count > 0 ? size_t(count) * stride - outputOffset : 0; }
 	void processBuffer(const float* input, int inputStride, float* output, int outputStride, int count) override {
 		buffers.fetch_add(1, std::memory_order_relaxed);
 		frames.fetch_add(static_cast<uint64_t>(count), std::memory_order_relaxed);
 		lastFrames.store(count, std::memory_order_relaxed);
+		if (!pythonDriving || !runtime::interpreterAlive())
+			return;
+		py::gil_scoped_acquire gil;
+		if (py::function f = py::get_override(static_cast<const a::Port*>(this), "process_buffer")) {
+			py::object in = floatArray(input, inputSpan(inputStride, count));
+			py::object out = floatArray(output, outputSpan(outputStride, count));
+			f(in, inputStride, out, outputStride, count);
+			copyBack(out, output, outputSpan(outputStride, count));
+		}
 	}
 	void processInput(const float* input, int inputStride, int count) override {
 		inputCalls.fetch_add(1, std::memory_order_relaxed);
+		if (!pythonDriving || !runtime::interpreterAlive())
+			return;
+		py::gil_scoped_acquire gil;
+		if (py::function f = py::get_override(static_cast<const a::Port*>(this), "process_input"))
+			f(floatArray(input, inputSpan(inputStride, count)), inputStride, count);
 	}
 	void processOutput(float* output, int outputStride, int count) override {
 		outputCalls.fetch_add(1, std::memory_order_relaxed);
+		if (!pythonDriving || !runtime::interpreterAlive())
+			return;
+		py::gil_scoped_acquire gil;
+		if (py::function f = py::get_override(static_cast<const a::Port*>(this), "process_output")) {
+			py::object out = floatArray(output, outputSpan(outputStride, count));
+			f(out, outputStride, count);
+			copyBack(out, output, outputSpan(outputStride, count));
+		}
 	}
 	void queue(StreamEvent event) noexcept {
 		std::unique_lock<std::mutex> lock(eventMutex, std::try_to_lock);
@@ -101,8 +146,18 @@ struct PyAudioPort : a::Port {
 			droppedEvents.fetch_add(1, std::memory_order_relaxed);
 		}
 	}
-	void onStartStream() override { queue(StreamEvent::Start); }
-	void onStopStream() override { queue(StreamEvent::Stop); }
+	void stream(StreamEvent event) {
+		if (pythonDriving && runtime::interpreterAlive()) {  // on Python's thread: synchronously
+			py::gil_scoped_acquire gil;
+			if (py::function f = py::get_override(static_cast<const a::Port*>(this),
+					event == StreamEvent::Start ? "on_start_stream" : "on_stop_stream"))
+				f();
+			return;
+		}
+		queue(event);
+	}
+	void onStartStream() override { stream(StreamEvent::Start); }
+	void onStopStream() override { stream(StreamEvent::Stop); }
 };
 
 std::vector<PyAudioPort*> ports;  // main thread
@@ -223,15 +278,29 @@ py::object deviceObject(py::object owner, a::Device* device) {
 
 /** A port in a device's subscriber set that Python did not make (a module's): read-only. */
 struct PortView {
-	py::object device;
+	std::function<a::Device&()> device;  // resolves the device again, or raises
 	const a::Port* port;
 	const a::Port& get() const {
-		a::Device& d = device.cast<const DeviceView&>().get();
+		a::Device& d = device();
+		std::lock_guard<std::mutex> lock(d.processMutex);
 		if (!d.subscribed.count(const_cast<a::Port*>(port)))
 			throw runtime::StaleHandle("the port no longer subscribes to this device");
 		return *port;
 	}
 };
+
+/** A device's subscribers: Python's own ports, and PortViews of the others. */
+py::list subscriberList(a::Device& d, std::function<a::Device&()> resolve) {
+	py::list out;
+	std::lock_guard<std::mutex> lock(d.processMutex);  // Rack's: ports do not change while it is held
+	for (a::Port* port : d.subscribed) {
+		if (dynamic_cast<PyAudioPort*>(port))
+			out.append(py::cast(port, py::return_value_policy::reference));
+		else
+			out.append(py::cast(PortView{resolve, port}));
+	}
+	return out;
+}
 
 PyAudioPort& pythonPort(py::handle value) {
 	if (!py::isinstance<a::Port>(value))
@@ -250,6 +319,195 @@ void requireLiveContext(const char* what) {
 template <class T>
 std::vector<T> sorted(const std::set<T>& values) {
 	return std::vector<T>(values.begin(), values.end());
+}
+
+// --- Drivers and devices Python configures (RP-29C) ---------------------------------------
+// Rack calls a driver's and device's virtuals from driver threads and the engine thread (Core Audio
+// reads getNumInputs and getSampleRate in processInput), so native code answers them all from values
+// Python set. Rack's requests (setSampleRate, setBlockSize) are recorded for Python to take on the
+// main thread. Python drives the stream from its own thread.
+
+struct ConfiguredDevice : a::Device {
+	std::atomic<int> numInputs{0}, numOutputs{0}, blockSize{256};
+	std::atomic<float> sampleRate{44100.f};
+	std::mutex fieldsMutex;
+	std::string name;
+	std::set<float> sampleRates;
+	std::set<int> blockSizes;
+	std::vector<std::pair<std::string, double>> requests;
+	bool removed = false;
+	int driving = 0;  // Python calls running Rack's Device code (under the driver's devicesMutex)
+
+	std::string getName() override {
+		std::lock_guard<std::mutex> lock(fieldsMutex);
+		return name;
+	}
+	int getNumInputs() override { return numInputs.load(); }
+	int getNumOutputs() override { return numOutputs.load(); }
+	std::set<float> getSampleRates() override {
+		std::lock_guard<std::mutex> lock(fieldsMutex);
+		return sampleRates;
+	}
+	float getSampleRate() override { return sampleRate.load(); }
+	void setSampleRate(float rate) override {
+		sampleRate.store(rate);
+		std::lock_guard<std::mutex> lock(fieldsMutex);
+		if (requests.size() < 1024)
+			requests.emplace_back("sample_rate", rate);
+	}
+	std::set<int> getBlockSizes() override {
+		std::lock_guard<std::mutex> lock(fieldsMutex);
+		return blockSizes;
+	}
+	int getBlockSize() override { return blockSize.load(); }
+	void setBlockSize(int size) override {
+		blockSize.store(size);
+		std::lock_guard<std::mutex> lock(fieldsMutex);
+		if (requests.size() < 1024)
+			requests.emplace_back("block_size", size);
+	}
+};
+
+struct ConfiguredDriver : a::Driver {
+	std::shared_ptr<std::atomic<bool>> alive = std::make_shared<std::atomic<bool>>(true);
+	std::mutex devicesMutex;
+	std::string name;
+	std::map<int, std::unique_ptr<ConfiguredDevice>> devices;
+	int nextId = 0;
+	int defaultId = -1;
+
+	~ConfiguredDriver() override { alive->store(false); }
+	ConfiguredDevice* find(int id, bool includeRemoved = false) {
+		auto it = devices.find(id);
+		if (it == devices.end() || (it->second->removed && !includeRemoved))
+			return nullptr;
+		return it->second.get();
+	}
+	std::string getName() override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		return name;
+	}
+	std::vector<int> getDeviceIds() override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		std::vector<int> ids;
+		for (auto& [id, device] : devices)
+			if (!device->removed)
+				ids.push_back(id);
+		return ids;
+	}
+	int getDefaultDeviceId() override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		return find(defaultId) ? defaultId : -1;
+	}
+	std::string getDeviceName(int id) override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		auto* d = find(id);
+		return d ? d->getName() : "";
+	}
+	int getDeviceNumInputs(int id) override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		auto* d = find(id);
+		return d ? d->getNumInputs() : 0;
+	}
+	int getDeviceNumOutputs(int id) override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		auto* d = find(id);
+		return d ? d->getNumOutputs() : 0;
+	}
+	a::Device* subscribe(int id, a::Port* port) override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		auto* d = find(id);
+		if (!d)
+			return nullptr;  // Rack's port keeps no device
+		d->subscribe(port);
+		return d;
+	}
+	void unsubscribe(int id, a::Port* port) override {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		auto* d = find(id, true);
+		if (!d)
+			return;
+		d->unsubscribe(port);
+		if (d->removed && d->subscribed.empty() && d->driving == 0)
+			devices.erase(id);  // a removed device goes once its last port leaves, as RtAudio's do
+	}
+};
+
+/** Python's handle on a configured driver: Python's until add_driver, then Rack's until Rack quits. */
+struct PythonDriver {
+	std::unique_ptr<ConfiguredDriver> owned;
+	ConfiguredDriver* driver;
+	std::shared_ptr<std::atomic<bool>> alive;
+	int registeredId = -1;
+
+	explicit PythonDriver(std::string name) : owned(std::make_unique<ConfiguredDriver>()) {
+		driver = owned.get();
+		alive = driver->alive;
+		driver->name = std::move(name);
+	}
+	ConfiguredDriver& get() const {
+		runtime::requireMainThread("configuring an audio driver");
+		if (!alive->load())
+			throw runtime::StaleHandle("Rack deleted this audio driver (it quit)");
+		return *driver;
+	}
+};
+
+/** Python's handle on one configured device, by its ID in its driver. */
+struct PythonDevice {
+	std::shared_ptr<std::atomic<bool>> alive;
+	ConfiguredDriver* driver;
+	int id;
+	ConfiguredDevice& get(bool allowRemoved = false) const {
+		if (!alive->load())
+			throw runtime::StaleHandle("Rack deleted this audio device's driver (it quit)");
+		std::lock_guard<std::mutex> lock(driver->devicesMutex);
+		auto* d = driver->find(id, true);
+		if (!d)
+			throw runtime::StaleHandle("this audio device was removed and its last port left");
+		if (d->removed && !allowRemoved)
+			throw runtime::StaleHandle("this audio device was removed");
+		return *d;
+	}
+};
+
+/** Keeps a device from deletion while Python runs Rack's Device code on it, from any thread. */
+struct DeviceLease {
+	ConfiguredDriver* driver;
+	int id;
+	ConfiguredDevice* device;
+	DeviceLease(const PythonDevice& handle, bool allowRemoved) : driver(handle.driver), id(handle.id) {
+		if (!handle.alive->load())
+			throw runtime::StaleHandle("Rack deleted this audio device's driver (it quit)");
+		std::lock_guard<std::mutex> lock(driver->devicesMutex);
+		device = driver->find(id, true);
+		if (!device)
+			throw runtime::StaleHandle("this audio device was removed and its last port left");
+		if (device->removed && !allowRemoved)
+			throw runtime::StaleHandle("this audio device was removed");
+		++device->driving;
+	}
+	~DeviceLease() {
+		std::lock_guard<std::mutex> lock(driver->devicesMutex);
+		if (--device->driving == 0 && device->removed && device->subscribed.empty())
+			driver->devices.erase(id);
+	}
+	DeviceLease(const DeviceLease&) = delete;
+	DeviceLease& operator=(const DeviceLease&) = delete;
+};
+
+struct DrivingScope {
+	bool previous = pythonDriving;
+	DrivingScope() { pythonDriving = true; }
+	~DrivingScope() { pythonDriving = previous; }
+};
+
+const float* floatBuffer(const py::buffer_info& info, size_t needed, const char* what) {
+	if (info.itemsize != sizeof(float) || info.format != py::format_descriptor<float>::format())
+		throw py::type_error(std::string(what) + " must be a float32 buffer (array('f'), say)");
+	if (static_cast<size_t>(info.size) < needed)
+		throw std::invalid_argument(std::string(what) + " needs at least " + std::to_string(needed) + " floats");
+	return static_cast<const float*>(info.ptr);
 }
 
 }  // namespace
@@ -338,15 +596,7 @@ void bindAudio(py::module_ mod) {
 		}, py::arg("block_size"))
 		.def_property_readonly("subscribed", [](py::object self) {
 			a::Device& d = self.cast<const DeviceView&>().get();
-			py::list out;
-			std::lock_guard<std::mutex> lock(d.processMutex);  // Rack's: ports do not change while it is held
-			for (a::Port* port : d.subscribed) {
-				if (dynamic_cast<PyAudioPort*>(port))
-					out.append(py::cast(port, py::return_value_policy::reference));
-				else
-					out.append(py::cast(PortView{self, port}));
-			}
-			return out;
+			return subscriberList(d, [self]() -> a::Device& { return self.cast<const DeviceView&>().get(); });
 		}, "Rack's subscribers: Python's own ports, and PortViews of the others (modules' ports).")
 		.def("subscribe", [](const DeviceView& v, py::object port) {
 			a::Device& d = v.get();
@@ -454,6 +704,199 @@ void bindAudio(py::module_ mod) {
 			return d;
 		}, "What Rack's audio thread did with this port: processBuffer calls and frames, the last block's frames, "
 			"processInput and processOutput calls, and stream events dropped (a full or busy queue).");
+
+	py::class_<PythonDevice>(mod, "PythonDevice", py::is_final(),
+		"An audio device of a PythonDriver: Rack's ports subscribe to it, and Python drives its stream. Its values are "
+		"native, so Rack reads them on any thread.")
+		.def_property_readonly("id", [](const PythonDevice& d) { return d.id; })
+		.def_property_readonly("alive", [](const PythonDevice& d) {
+			try {
+				d.get(true);
+				return true;
+			}
+			catch (const std::exception&) {
+				return false;
+			}
+		})
+		.def_property_readonly("removed", [](const PythonDevice& d) { return d.get(true).removed; })
+		.def_property("name", [](const PythonDevice& d) { return d.get(true).getName(); },
+			[](const PythonDevice& d, std::string name) {
+				auto& dev = d.get();
+				std::lock_guard<std::mutex> lock(dev.fieldsMutex);
+				dev.name = std::move(name);
+			}, "Rack's getName: also how a patch finds the device again.")
+		.def_property("num_inputs", [](const PythonDevice& d) { return d.get(true).numInputs.load(); },
+			[](const PythonDevice& d, int n) {
+				if (n < 0)
+					throw std::invalid_argument("channel counts are not negative");
+				d.get().numInputs.store(n);
+			})
+		.def_property("num_outputs", [](const PythonDevice& d) { return d.get(true).numOutputs.load(); },
+			[](const PythonDevice& d, int n) {
+				if (n < 0)
+					throw std::invalid_argument("channel counts are not negative");
+				d.get().numOutputs.store(n);
+			})
+		.def_property("sample_rates", [](const PythonDevice& d) {
+				auto& dev = d.get(true);
+				std::lock_guard<std::mutex> lock(dev.fieldsMutex);
+				return sorted(dev.sampleRates);
+			}, [](const PythonDevice& d, std::vector<float> rates) {
+				auto& dev = d.get();
+				std::lock_guard<std::mutex> lock(dev.fieldsMutex);
+				dev.sampleRates = std::set<float>(rates.begin(), rates.end());
+			})
+		.def_property("sample_rate", [](const PythonDevice& d) { return d.get(true).sampleRate.load(); },
+			[](const PythonDevice& d, float rate) {
+				if (!(rate > 0.f))
+					throw std::invalid_argument("the sample rate must be positive");
+				d.get().sampleRate.store(rate);
+			}, "What Rack's getSampleRate returns. Rack's setSampleRate also sets it, and records a request.")
+		.def_property("block_sizes", [](const PythonDevice& d) {
+				auto& dev = d.get(true);
+				std::lock_guard<std::mutex> lock(dev.fieldsMutex);
+				return sorted(dev.blockSizes);
+			}, [](const PythonDevice& d, std::vector<int> sizes) {
+				auto& dev = d.get();
+				std::lock_guard<std::mutex> lock(dev.fieldsMutex);
+				dev.blockSizes = std::set<int>(sizes.begin(), sizes.end());
+			})
+		.def_property("block_size", [](const PythonDevice& d) { return d.get(true).blockSize.load(); },
+			[](const PythonDevice& d, int size) {
+				if (size < 1)
+					throw std::invalid_argument("the block size must be positive");
+				d.get().blockSize.store(size);
+			})
+		.def_property_readonly("subscribed", [](py::object self) {
+			auto& dev = self.cast<const PythonDevice&>().get(true);
+			return subscriberList(dev, [self]() -> a::Device& { return self.cast<const PythonDevice&>().get(true); });
+		}, "Rack's subscribers: Python's own ports, and PortViews of the others (modules' ports).")
+		.def("take_requests", [](const PythonDevice& d) {
+			auto& dev = d.get(true);
+			std::lock_guard<std::mutex> lock(dev.fieldsMutex);
+			std::vector<std::pair<std::string, double>> out;
+			out.swap(dev.requests);
+			return out;
+		}, "Rack's calls to setSampleRate and setBlockSize since the last call, oldest first: [('sample_rate', 48000.0), "
+			"('block_size', 128.0), ...]. The values are applied already; a real driver would reopen its stream.")
+		.def("start_stream", [](const PythonDevice& d) {
+			DeviceLease lease(d, false);
+			DrivingScope driving;
+			py::gil_scoped_release release;
+			lease.device->onStartStream();
+		}, "Rack's Device::onStartStream, as driver code calls it: each subscribed port's on_start_stream (a Python "
+			"port's override runs now, on this thread).")
+		.def("stop_stream", [](const PythonDevice& d) {
+			DeviceLease lease(d, true);
+			DrivingScope driving;
+			py::gil_scoped_release release;
+			lease.device->onStopStream();
+		})
+		.def("process_buffer", [](const PythonDevice& d, py::buffer input, int inputStride, py::buffer output,
+			int outputStride, int frames) {
+			DeviceLease lease(d, false);
+			auto& dev = *lease.device;
+			if (frames < 0 || inputStride < 0 || outputStride < 0)
+				throw std::invalid_argument("frames and strides are not negative");
+			if (inputStride < dev.getNumInputs() || outputStride < dev.getNumOutputs())
+				throw std::invalid_argument("each stride must be at least the device's channel count");
+			py::buffer_info in = input.request();
+			py::buffer_info out = output.request(true);
+			const float* inData = floatBuffer(in, size_t(frames) * inputStride, "input");
+			float* outData = const_cast<float*>(floatBuffer(out, size_t(frames) * outputStride, "output"));
+			if (out.readonly)
+				throw py::type_error("the output buffer must be writable");
+			auto token = runtime::binding().current();
+			if (!token || !token->alive())
+				throw runtime::WrongContext("a device streams to Rack's ports only while Rack's context is live");
+			DrivingScope driving;
+			py::gil_scoped_release release;  // Rack's ports run (Core Audio steps the engine); Python ports take it back
+			dev.processBuffer(inData, inputStride, outData, outputStride, frames);
+		}, py::arg("input"), py::arg("input_stride"), py::arg("output"), py::arg("output_stride"), py::arg("frames"),
+			"Rack's Device::processBuffer, as driver code calls it: interleaved float32 frames in and out (output is "
+			"overwritten). Each subscribed port's process_input, process_buffer, process_output run on this thread, a "
+			"Python port's overrides with copies of its part of the buffers.");
+
+	py::class_<PythonDriver>(mod, "PythonDriver", py::is_final(),
+		"An audio driver Python configures: devices with native values that Rack reads on any thread. Give it to "
+		"Rack with add_driver; Rack keeps it until it quits.")
+		.def(py::init([](std::string name) { return new PythonDriver(std::move(name)); }), py::arg("name"))
+		.def_property_readonly("registered_id", [](const PythonDriver& d) { return d.registeredId; },
+			"The ID add_driver registered it with, or -1.")
+		.def_property("name", [](const PythonDriver& d) { return d.get().getName(); },
+			[](const PythonDriver& d, std::string name) {
+				auto& driver = d.get();
+				std::lock_guard<std::mutex> lock(driver.devicesMutex);
+				driver.name = std::move(name);
+			})
+		.def("add_device", [](const PythonDriver& d, std::string name, int numInputs, int numOutputs,
+			std::vector<float> rates, float rate, std::vector<int> sizes, int size) {
+			auto& driver = d.get();
+			if (numInputs < 0 || numOutputs < 0 || !(rate > 0.f) || size < 1)
+				throw std::invalid_argument("channel counts are not negative, and the rate and block size are positive");
+			auto device = std::make_unique<ConfiguredDevice>();
+			device->name = std::move(name);
+			device->numInputs.store(numInputs);
+			device->numOutputs.store(numOutputs);
+			device->sampleRates = std::set<float>(rates.begin(), rates.end());
+			device->sampleRate.store(rate);
+			device->blockSizes = std::set<int>(sizes.begin(), sizes.end());
+			device->blockSize.store(size);
+			std::lock_guard<std::mutex> lock(driver.devicesMutex);
+			int id = driver.nextId++;
+			driver.devices[id] = std::move(device);
+			if (driver.defaultId < 0)
+				driver.defaultId = id;
+			return PythonDevice{d.alive, d.driver, id};
+		}, py::arg("name"), py::arg("num_inputs") = 2, py::arg("num_outputs") = 2,
+			py::arg("sample_rates") = std::vector<float>{44100.f, 48000.f}, py::arg("sample_rate") = 48000.f,
+			py::arg("block_sizes") = std::vector<int>{64, 128, 256, 512}, py::arg("block_size") = 256,
+			"A new device (a hotplug, once Rack has the driver). Its ID is stable; the first is the default.")
+		.def("remove_device", [](const PythonDriver& d, const PythonDevice& device) {
+			d.get();
+			if (device.driver != d.driver)
+				throw runtime::Ownership("the device belongs to another driver");
+			DeviceLease lease(device, false);
+			{
+				DrivingScope driving;
+				py::gil_scoped_release release;
+				lease.device->onStopStream();  // the stream ends; ports keep the device until they leave it
+			}
+			std::lock_guard<std::mutex> lock(d.driver->devicesMutex);
+			lease.device->removed = true;  // the lease's end deletes it if no port holds it
+		}, py::arg("device"),
+			"Unplugs a device: its stream stops, Rack's device lists no longer show it, and it is deleted once its last "
+			"port leaves (Rack's ports keep it until then, as with RtAudio).")
+		.def_property("default_device_id", [](const PythonDriver& d) { return d.get().getDefaultDeviceId(); },
+			[](const PythonDriver& d, int id) {
+				auto& driver = d.get();
+				std::lock_guard<std::mutex> lock(driver.devicesMutex);
+				if (id != -1 && !driver.find(id))
+					throw std::invalid_argument("no such device");
+				driver.defaultId = id;
+			})
+		.def("get_device_ids", [](const PythonDriver& d) { return d.get().getDeviceIds(); })
+		.def("get_device", [](const PythonDriver& d, int id) -> py::object {
+			auto& driver = d.get();
+			std::lock_guard<std::mutex> lock(driver.devicesMutex);
+			if (!driver.find(id))
+				return py::none();
+			return py::cast(PythonDevice{d.alive, d.driver, id});
+		}, py::arg("device_id"));
+
+	mod.def("add_driver", [](int id, PythonDriver& d) {
+		runtime::requireMainThread("adding an audio driver");
+		if (id == -1)
+			throw std::invalid_argument("Rack reserves driver ID -1");
+		if (a::getDriver(id))
+			throw runtime::Ownership("Rack already has an audio driver with this ID (it is stored in patches)");
+		if (!d.owned)
+			throw runtime::Ownership("Rack already has this driver");
+		a::addDriver(id, d.owned.release());  // Rack takes pointer ownership, until it quits
+		d.registeredId = id;
+	}, py::arg("driver_id"), py::arg("driver"),
+		"Rack's addDriver for a PythonDriver: Rack owns it from now on, until it quits. The ID is stored in patches and "
+		"must be unique.");
 
 	mod.def("get_driver_ids", [] {
 		runtime::requireMainThread("listing audio drivers");

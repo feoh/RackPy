@@ -73,3 +73,34 @@ notifications through bounded native queues.
   - `audio::Port::getDeviceName` returns `0` as a `std::string` when the
     driver throws. libstdc++ throws `logic_error` for that, which reaches
     Python as an error.
+
+**RP-29C — Python-configured drivers and devices, and the facades**
+(`tk-rackpy-29c-python-configured-audio-and-midi-driv-e7a66b`). Every
+audio and MIDI record is implemented except `audio::Port::getDeviceDetail`,
+which is declared but never defined. Validation:
+[rp-29c-validation.md](rp-29c-validation.md).
+
+- **Audio.** `ConfiguredDriver`/`ConfiguredDevice` answer every virtual
+  from atomics, and locked fields for names and sets. Rack's
+  `setSampleRate`/`setBlockSize` apply the value and record a request
+  (`take_requests`). `PythonDevice.start_stream`/`process_buffer`/
+  `stop_stream` run Rack's `Device` code on Python's thread with the GIL
+  released. A thread-local `pythonDriving` flag makes Python ports'
+  overrides run synchronously there, with copies of the port's part of the
+  buffers written back. A `DeviceLease` keeps a removed device alive while
+  Python drives it.
+- **MIDI.** Configured input devices deliver `push_message` through Rack's
+  `InputDevice::onMessage`. Configured output devices queue `sendMessage`
+  calls from engine threads (try-lock ring, 1024, drops counted) for
+  `take_sent`.
+- **Hotplug.** A removed device disappears from Rack's lists, stops its
+  stream, refuses use, and is deleted when its last port leaves, as with
+  RtAudio and RtMidi.
+- **The deterministic fixture.** Core's Audio-2 module, subscribed to a
+  `PythonDevice` through its JSON, claims the master module and steps Rack's
+  engine by the device's blocks. Core's MIDI-CV module subscribes to a
+  `PythonInputDevice`.
+- **Facades.** `rackpy.audio` provides `drivers`, `find_driver`,
+  `open_port`, `virtual_driver` and `Stream`. `rackpy.midi` provides message
+  builders, `drivers`, `find_driver`, `open_input`, `open_output` and
+  `virtual_driver`.

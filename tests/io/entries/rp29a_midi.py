@@ -11,7 +11,7 @@ from typing import Any
 from _rackpy_host import _testing
 
 from rackpy.errors import ContextError
-from rackpy.raw import midi
+from rackpy.raw import audio, midi
 
 CONFIG: dict[str, Any] = json.loads((Path(__file__).resolve().parent / "rp29a_config.json").read_text())
 RESULT: dict[str, Any] = {"delivered": [], "threads": set()}
@@ -30,6 +30,16 @@ class Recorder(midi.Input):
 
         RESULT["delivered"].append(message.get_note())
         RESULT["threads"].add(threading.current_thread() is threading.main_thread())
+
+
+class StreamLog(audio.Port):
+    def on_start_stream(self) -> None:
+        import threading
+
+        RESULT.setdefault("stream", []).append(("start", threading.current_thread() is threading.main_thread()))
+
+    def on_stop_stream(self) -> None:
+        RESULT.setdefault("stream", []).append(("stop", True))
 
 
 KEEP: list[Any] = []
@@ -60,7 +70,20 @@ def scenario() -> Generator[None]:
     yield
     yield
     RESULT["overflow"] = [len(RESULT["delivered"]), rec.dropped]
-    KEEP.extend([out, rec])  # still alive when Rack quits: RackPy releases them while the drivers exist
+    # An audio port's stream events from Rack (its setDeviceId), queued for the UI thread.
+    driver = audio.PythonDriver("RackPy Windowed Audio")
+    driver.add_device("Fake 1")
+    audio.add_driver(4400, driver)
+    stream_port = StreamLog()
+    stream_port.set_driver_id(4400)
+    RESULT["stream_before"] = list(RESULT.get("stream", []))
+    yield
+    yield
+    stream_port.set_device_id(-1)
+    yield
+    yield
+    RESULT["stream_after"] = list(RESULT.get("stream", []))
+    KEEP.extend([out, rec, stream_port])  # still alive when Rack quits: RackPy releases them while the drivers exist
 
 
 running: list[Generator[None]] = []

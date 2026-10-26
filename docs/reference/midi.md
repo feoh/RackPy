@@ -2,8 +2,7 @@
 
 `rackpy.raw.midi` is Rack's `rack::midi`: MIDI messages, Rack's MIDI
 drivers and devices, and MIDI ports that Python owns. **Implemented
-(RP-29A), Linux x86_64 inside Rack Free 2.6.6**, apart from implementing a
-driver or device in Python, which is RP-29C (see the
+(RP-29A, RP-29C), Linux x86_64 inside Rack Free 2.6.6** (see the
 [coverage report](coverage.md)).
 
 ```{rackpy-example} midi_loopback.py
@@ -99,3 +98,30 @@ it (`port.device`, `input_device`, `output_device`, or a driver's
 - `subscribe` and `unsubscribe` are Rack's lower-level calls, which Rack
   says are not meant for plugins. RackPy undoes them with the port, as it
   does a driver's.
+
+(midi-python-drivers)=
+## Python drivers and devices
+
+Python implements a MIDI driver as a natively configured `PythonDriver`
+(RP-29C), whose calls native code answers:
+
+- `add_input_device(name)` returns a `PythonInputDevice`. Its
+  `push_message(message)` is Rack's `InputDevice::onMessage`, as a driver
+  calls it when a message arrives: every subscribed input gets it, filtered
+  by channel and timestamped by Rack's engine if its frame is unset.
+- `add_output_device(name)` returns a `PythonOutputDevice`. Rack's ports
+  send to it from engine threads (modules' `process()`), so it only queues
+  each message, without blocking, in a queue of 1024 that counts drops in
+  `dropped`. `take_sent()` returns the queued messages, in order, on the main
+  thread.
+- `remove_input_device`/`remove_output_device` unplug a device. Rack's lists
+  no longer show it, the ports that hold it keep it until they move, and it
+  is deleted when the last one leaves. A removed input refuses pushes.
+- `add_driver(driver_id, driver)` gives the driver to Rack, which owns it
+  until it quits. Taken IDs are refused.
+
+The `rackpy.midi` facade builds messages (`note_on`, `note_off`,
+`control_change`, `message`, with range checks), finds drivers by name
+(`drivers`, `find_driver`), opens ports by driver and device name
+(`open_input`, `open_output`), and makes a virtual driver with its devices
+(`virtual_driver`).

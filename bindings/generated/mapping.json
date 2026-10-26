@@ -1839,14 +1839,14 @@
       "id": "destructor:rack::audio::Device::~Device()",
       "kind": "class",
       "raw": "rackpy.raw.audio.Device",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "destructor:rack::audio::Driver::~Driver()",
       "kind": "class",
       "raw": "rackpy.raw.audio.Driver",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -1909,14 +1909,14 @@
       "id": "destructor:rack::midi::Device::~Device()",
       "kind": "class",
       "raw": "rackpy.raw.midi.Device",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "destructor:rack::midi::Driver::~Driver()",
       "kind": "class",
       "raw": "rackpy.raw.midi.Driver",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -2763,14 +2763,14 @@
       "id": "field:rack::audio::Device::processMutex",
       "kind": "property",
       "raw": "rackpy.raw.audio.Device.subscribed",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "field:rack::audio::Device::subscribed",
       "kind": "property",
       "raw": "rackpy.raw.audio.Device.subscribed",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -4692,6 +4692,13 @@
     },
     {
       "facade": null,
+      "id": "function:rack::audio::addDriver(int, rack::audio::Driver *)",
+      "kind": "function",
+      "raw": "rackpy.raw.audio.add_driver",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "function:rack::audio::getDriver(int)",
       "kind": "function",
       "raw": "rackpy.raw.audio.get_driver",
@@ -5038,6 +5045,13 @@
       "id": "function:rack::math::rescale(float, float, float, float, float)",
       "kind": "function",
       "raw": "rackpy.raw.math.rescale",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::midi::addDriver(int, rack::midi::Driver *)",
+      "kind": "function",
+      "raw": "rackpy.raw.midi.add_driver",
       "status": "implemented"
     },
     {
@@ -7747,154 +7761,154 @@
       "id": "method:rack::audio::Device::getBlockSize()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.get_block_size",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::getBlockSizes()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.get_block_sizes",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::getName()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.get_name",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::getNumInputs()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.get_num_inputs",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::getNumOutputs()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.get_num_outputs",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::getSampleRate()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.get_sample_rate",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::getSampleRates()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.get_sample_rates",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::onStartStream()",
       "kind": "method",
-      "raw": "rackpy.raw.audio.Device.on_start_stream",
-      "status": "planned"
+      "raw": "rackpy.raw.audio.PythonDevice.start_stream",
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::onStopStream()",
       "kind": "method",
-      "raw": "rackpy.raw.audio.Device.on_stop_stream",
-      "status": "planned"
+      "raw": "rackpy.raw.audio.PythonDevice.stop_stream",
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::processBuffer(const float *, int, float *, int, int)",
       "kind": "method",
-      "raw": "rackpy.raw.audio.Device.process_buffer",
-      "status": "planned"
+      "raw": "rackpy.raw.audio.PythonDevice.process_buffer",
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::setBlockSize(int)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.set_block_size",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::setSampleRate(float)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.set_sample_rate",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::subscribe(rack::audio::Port *)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.subscribe",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::unsubscribe(rack::audio::Port *)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.unsubscribe",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::getDefaultDeviceId()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.get_default_device_id",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::getDeviceIds()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.get_device_ids",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::getDeviceName(int)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.get_device_name",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::getDeviceNumInputs(int)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.get_device_num_inputs",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::getDeviceNumOutputs(int)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.get_device_num_outputs",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::getName()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.get_name",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::subscribe(int, rack::audio::Port *)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.subscribe",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::unsubscribe(int, rack::audio::Port *)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.unsubscribe",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -8013,35 +8027,35 @@
       "id": "method:rack::audio::Port::onStartStream()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Port.on_start_stream",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Port::onStopStream()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Port.on_stop_stream",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Port::processBuffer(const float *, int, float *, int, int)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Port.process_buffer",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Port::processInput(const float *, int, int)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Port.process_input",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Port::processOutput(float *, int, int)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Port.process_output",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -9777,84 +9791,84 @@
       "id": "method:rack::midi::Device::getName()",
       "kind": "method",
       "raw": "rackpy.raw.midi.Device.get_name",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::getDefaultInputDeviceId()",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.get_default_input_device_id",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::getDefaultOutputDeviceId()",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.get_default_output_device_id",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::getInputDeviceIds()",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.get_input_device_ids",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::getInputDeviceName(int)",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.get_input_device_name",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::getName()",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.get_name",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::getOutputDeviceIds()",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.get_output_device_ids",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::getOutputDeviceName(int)",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.get_output_device_name",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::subscribeInput(int, rack::midi::Input *)",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.subscribe_input",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::subscribeOutput(int, rack::midi::Output *)",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.subscribe_output",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::unsubscribeInput(int, rack::midi::Input *)",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.unsubscribe_input",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::unsubscribeOutput(int, rack::midi::Output *)",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.unsubscribe_output",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -10092,7 +10106,7 @@
       "id": "method:rack::midi::OutputDevice::sendMessage(const rack::midi::Message &)",
       "kind": "method",
       "raw": "rackpy.raw.midi.OutputDevice.send_message",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -12444,14 +12458,14 @@
       "id": "record:rack::audio::Device",
       "kind": "class",
       "raw": "rackpy.raw.audio.Device",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "record:rack::audio::Driver",
       "kind": "class",
       "raw": "rackpy.raw.audio.Driver",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -13270,14 +13284,14 @@
       "id": "record:rack::midi::Device",
       "kind": "class",
       "raw": "rackpy.raw.midi.Device",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "record:rack::midi::Driver",
       "kind": "class",
       "raw": "rackpy.raw.midi.Driver",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -14169,6 +14183,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "a912bef133014157",
+  "inputs": "3950255b14d0e1b3",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }
