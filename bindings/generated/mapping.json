@@ -1773,6 +1773,13 @@
     },
     {
       "facade": null,
+      "id": "constructor:rack::dsp::ComplexFFT::ComplexFFT(size_t)",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.ComplexFFT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "constructor:rack::dsp::IIRFilter::IIRFilter<B_ORDER, A_ORDER, T>()",
       "kind": "class",
       "raw": "rackpy.raw.dsp.IIRFilter_3_3_float",
@@ -1804,6 +1811,20 @@
       "id": "constructor:rack::dsp::MidiParser::MidiParser<MAX_CHANNELS>()",
       "kind": "class",
       "raw": "rackpy.raw.dsp.MidiParser_16",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::dsp::RealFFT::RealFFT(size_t)",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.RealFFT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::dsp::RealTimeConvolver::RealTimeConvolver(size_t)",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.RealTimeConvolver",
       "status": "implemented"
     },
     {
@@ -2364,6 +2385,27 @@
       "id": "destructor:rack::audio::Port::~Port()",
       "kind": "class",
       "raw": "rackpy.raw.audio.Port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::dsp::ComplexFFT::~ComplexFFT()",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.ComplexFFT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::dsp::RealFFT::~RealFFT()",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.RealFFT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::dsp::RealTimeConvolver::~RealTimeConvolver()",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.RealTimeConvolver",
       "status": "implemented"
     },
     {
@@ -4132,6 +4174,20 @@
     },
     {
       "facade": null,
+      "id": "field:rack::dsp::ComplexFFT::length",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.ComplexFFT.length",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::ComplexFFT::setup",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.ComplexFFT.setup",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::dsp::Frame::samples",
       "kind": "property",
       "raw": "rackpy.raw.dsp.Frame.samples",
@@ -4450,6 +4506,76 @@
       "id": "field:rack::dsp::PulseGenerator::remaining",
       "kind": "property",
       "raw": "rackpy.raw.dsp.PulseGenerator.remaining",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::RealFFT::length",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RealFFT.length",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::RealFFT::setup",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RealFFT.setup",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::RealTimeConvolver::blockSize",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RealTimeConvolver.block_size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::RealTimeConvolver::inputFfts",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RealTimeConvolver.input_ffts",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::RealTimeConvolver::inputPos",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RealTimeConvolver.input_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::RealTimeConvolver::kernelBlocks",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RealTimeConvolver.kernel_blocks",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::RealTimeConvolver::kernelFfts",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RealTimeConvolver.kernel_ffts",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::RealTimeConvolver::outputTail",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RealTimeConvolver.output_tail",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::RealTimeConvolver::pffft",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RealTimeConvolver.pffft",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::RealTimeConvolver::tmpBlock",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RealTimeConvolver.tmp_block",
       "status": "implemented"
     },
     {
@@ -6595,6 +6721,13 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.dsp.fft.boxcar_lowpass_ir",
+      "id": "function:rack::dsp::boxcarLowpassIR(float *, int, float)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.boxcar_lowpass_ir",
+      "status": "implemented"
+    },
+    {
       "facade": null,
       "id": "function:rack::dsp::convert<float, float>(float)",
       "kind": "function",
@@ -6669,6 +6802,13 @@
       "id": "function:rack::dsp::convert<rack::dsp::Int24, float>(float)",
       "kind": "function",
       "raw": "rackpy.raw.dsp.convert",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.fft.convolve_naive",
+      "id": "function:rack::dsp::convolveNaive(const float *, const float *, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.convolve_naive",
       "status": "implemented"
     },
     {
@@ -12056,6 +12196,41 @@
     },
     {
       "facade": null,
+      "id": "method:rack::dsp::ComplexFFT::fft(const float *, float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ComplexFFT.fft",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::ComplexFFT::fftUnordered(const float *, float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ComplexFFT.fft_unordered",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::ComplexFFT::ifft(const float *, float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ComplexFFT.ifft",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::ComplexFFT::ifftUnordered(const float *, float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ComplexFFT.ifft_unordered",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::ComplexFFT::scale(float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.ComplexFFT.scale",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::dsp::IIRFilter::getFrequencyPhase($c2)",
       "kind": "method",
       "raw": "rackpy.raw.dsp.IIRFilter_3_3_float.get_frequency_phase",
@@ -12430,6 +12605,55 @@
       "id": "method:rack::dsp::PulseGenerator::trigger(float)",
       "kind": "method",
       "raw": "rackpy.raw.dsp.PulseGenerator.trigger",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RealFFT::irfft(const float *, float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RealFFT.irfft",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RealFFT::irfftUnordered(const float *, float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RealFFT.irfft_unordered",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RealFFT::rfft(const float *, float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RealFFT.rfft",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RealFFT::rfftUnordered(const float *, float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RealFFT.rfft_unordered",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RealFFT::scale(float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RealFFT.scale",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RealTimeConvolver::processBlock(const float *, float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RealTimeConvolver.process_block",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RealTimeConvolver::setKernel(const float *, size_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RealTimeConvolver.set_kernel",
       "status": "implemented"
     },
     {
@@ -17935,6 +18159,13 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.dsp.fft.ComplexFFT",
+      "id": "record:rack::dsp::ComplexFFT",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.ComplexFFT",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.dsp.basic.Int24",
       "id": "record:rack::dsp::Int24",
       "kind": "class",
@@ -17946,6 +18177,20 @@
       "id": "record:rack::dsp::PulseGenerator",
       "kind": "class",
       "raw": "rackpy.raw.dsp.PulseGenerator",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.fft.RealFFT",
+      "id": "record:rack::dsp::RealFFT",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.RealFFT",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.fft.RealTimeConvolver",
+      "id": "record:rack::dsp::RealTimeConvolver",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.RealTimeConvolver",
       "status": "implemented"
     },
     {
@@ -19608,6 +19853,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "edd20a52c2a72e02",
+  "inputs": "64071a2f327ef556",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

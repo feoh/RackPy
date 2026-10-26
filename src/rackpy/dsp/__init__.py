@@ -5,6 +5,7 @@
 path: Python chooses and configures them, and never runs per sample.
 :mod:`rackpy.dsp.basic` has Rack's DSP helpers (conversions, windows,
 polynomials, ODE steps), :mod:`rackpy.dsp.digital` its triggers and timers,
-:mod:`rackpy.dsp.filters` its filters, and :mod:`rackpy.dsp.midi` its VU meter
-and MIDI generator and parser, for design, analysis and tests.
+:mod:`rackpy.dsp.filters` its filters, :mod:`rackpy.dsp.midi` its VU meter
+and MIDI generator and parser, and :mod:`rackpy.dsp.fft` its FFTs and
+convolution, for design, analysis and tests.
 """

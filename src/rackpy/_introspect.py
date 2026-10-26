@@ -33,6 +33,7 @@ MODULES = (
     "rackpy.dsp.digital",
     "rackpy.dsp.filters",
     "rackpy.dsp.midi",
+    "rackpy.dsp.fft",
     "rackpy.simd",
 )
 # Protocol methods a binding can map a C++ operator or lifetime to; recorded when a class defines them itself.

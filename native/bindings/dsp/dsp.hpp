@@ -21,6 +21,8 @@ void bindDigital(py::module_ dsp);
 void bindFilter(py::module_ dsp);
 /** dsp/vumeter.hpp and dsp/midi.hpp: VU meters, MidiGenerator and MidiParser (RP-18D). */
 void bindMidi(py::module_ dsp);
+/** dsp/fft.hpp and dsp/fir.hpp (RP-19A). */
+void bindAdvanced(py::module_ dsp);
 
 /** The largest polynomial (coefficient count N) polyDirect/Horner/Estrin<T, N> are instantiated for. */
 constexpr size_t MAX_POLY_COEFFICIENTS = 32;
@@ -29,6 +31,13 @@ constexpr int MAX_ODE_LEN = 4096;
 /** IIRFilter<B_ORDER, A_ORDER, T> is instantiated for both orders from 2 to this (below 2, Rack's
 process() writes past a zero-length array). */
 constexpr int MAX_IIR_ORDER = 8;
+/** The longest RealFFT and ComplexFFT RackPy makes: PFFFT puts 4 (real) or 8 (complex) bytes per point
+of scratch on the stack, as Rack passes it no work buffer. */
+constexpr long long MAX_FFT_LENGTH = 65536;
+/** The largest RealTimeConvolver block (its FFTs have twice as many points). */
+constexpr long long MAX_CONVOLVER_BLOCK = 32768;
+/** The longest RealTimeConvolver kernel, in samples (its FFTs are allocated with unchecked mallocs). */
+constexpr long long MAX_CONVOLVER_KERNEL = 1LL << 22;
 
 }  // namespace dsp_bindings
 }  // namespace rackpy

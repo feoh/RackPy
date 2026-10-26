@@ -837,6 +837,88 @@ void midiParsers() {
 		b(p.releaseVelocityEnabled), f(p.pwRange), b(p.smooth), i(p.clockDivision), f(p.pwFilters[0].lambda)}));
 }
 
+// --- fft.hpp and fir.hpp (RP-19A): PFFFT needs 16-byte-aligned buffers ----------------------
+
+struct Aligned {
+	float* data;
+	explicit Aligned(size_t n) : data((float*) pffft_aligned_malloc(n * sizeof(float))) { std::memset(data, 0, n * sizeof(float)); }
+	~Aligned() { pffft_aligned_free(data); }
+};
+
+std::vector<float> noise(size_t n, float amplitude) {
+	std::vector<float> out(n);
+	for (float& x : out)
+		x = uniform(-amplitude, amplitude);
+	return out;
+}
+
+void ffts() {
+	for (int n : {32, 96, 160, 1024}) {
+		using R = dsp::RealFFT;
+		R fft(n);
+		std::vector<float> x = noise(n, 1.f);
+		for (int k = 0; k < n; k++)
+			x[k] += std::sin(2 * (float) M_PI * 3 * k / n);  // a component at bin 3
+		Aligned in(n), out(n), back(n), ordered(n), inverse(n);
+		std::memcpy(in.data, x.data(), n * sizeof(float));
+		member<&R::rfftUnordered>(fft, (const float*) in.data, out.data);
+		member<&R::irfftUnordered>(fft, (const float*) out.data, back.data);
+		member<&R::rfft>(fft, (const float*) in.data, ordered.data);
+		member<&R::irfft>(fft, (const float*) ordered.data, inverse.data);
+		std::vector<float> scaled(inverse.data, inverse.data + n);
+		member<&R::scale>(fft, scaled.data());
+		add("rfft." + std::to_string(n), {floats(x.data(), n)},
+			list({floats(out.data, n), floats(back.data, n), floats(ordered.data, n), floats(inverse.data, n), floats(scaled.data(), n)}));
+	}
+	for (int n : {16, 48, 80, 512}) {
+		using C = dsp::ComplexFFT;
+		C fft(n);
+		std::vector<float> x = noise(2 * n, 1.f);
+		Aligned in(2 * n), out(2 * n), back(2 * n), ordered(2 * n), inverse(2 * n);
+		std::memcpy(in.data, x.data(), 2 * n * sizeof(float));
+		member<&C::fftUnordered>(fft, (const float*) in.data, out.data);
+		member<&C::ifftUnordered>(fft, (const float*) out.data, back.data);
+		member<&C::fft>(fft, (const float*) in.data, ordered.data);
+		member<&C::ifft>(fft, (const float*) ordered.data, inverse.data);
+		std::vector<float> scaled(inverse.data, inverse.data + 2 * n);
+		member<&C::scale>(fft, scaled.data());
+		add("cfft." + std::to_string(n), {floats(x.data(), 2 * n)}, list({floats(out.data, 2 * n), floats(back.data, 2 * n),
+			floats(ordered.data, 2 * n), floats(inverse.data, 2 * n), floats(scaled.data(), 2 * n)}));
+	}
+}
+
+void firs() {
+	for (int len : {0, 1, 7, 64}) {
+		std::vector<float> in = noise(std::max(len, 1), 2.f), kernel = noise(std::max(len, 1), 1.f);
+		add("convolve_naive", {floats(in.data(), in.size()), floats(kernel.data(), kernel.size()), i(len)},
+			f(calls::convolveNaive(in.data(), kernel.data(), opaque(len))));
+	}
+	for (int len : {0, 1, 5, 32})
+		for (float cutoff : {0.5f, 0.1f, 0.25f}) {
+			std::vector<float> out(std::max(len, 1), 7.f);
+			calls::boxcarLowpassIR(out.data(), opaque(len), cutoff);
+			add("boxcar_lowpass_ir", {i(len), f(cutoff)}, floats(out.data(), out.size()));
+		}
+	for (size_t block : {32, 64, 16})
+		for (size_t length : {0, 1, 100, 200}) {
+			using V = dsp::RealTimeConvolver;
+			V conv(block);
+			std::vector<float> kernel = noise(std::max<size_t>(length, 1), 1.f);
+			const float* kp = length ? kernel.data() : nullptr;
+			member<&V::setKernel>(conv, kp, length);
+			std::vector<std::string> inputs, outputs;
+			for (int k = 0; k < 8; k++) {
+				std::vector<float> in = noise(block, 1.f), out(block);
+				const float* ip = in.data();
+				member<&V::processBlock>(conv, ip, out.data());
+				inputs.push_back(floats(in.data(), block));
+				outputs.push_back(floats(out.data(), block));
+			}
+			add("convolver", {i(block), floats(kernel.data(), length), list(inputs)},
+				list({list(outputs), i(conv.kernelBlocks), i(conv.inputPos)}));
+		}
+}
+
 }  // namespace
 
 int main() {
@@ -855,6 +937,8 @@ int main() {
 	generator<4>();
 	generator<1>();
 	midiParsers();
+	ffts();
+	firs();
 	std::printf("{\"cases\": [\n");
 	for (size_t k = 0; k < cases.size(); k++)
 		std::printf("%s%s\n", cases[k].c_str(), k + 1 < cases.size() ? "," : "");

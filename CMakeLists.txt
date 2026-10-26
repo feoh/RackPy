@@ -167,6 +167,13 @@ if(RACKPY_BUILD_TESTS)
   add_executable(rackpy_dsp_reference native/tests/dsp_reference.cpp)
   set_target_properties(rackpy_dsp_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_link_libraries(rackpy_dsp_reference PRIVATE rackpy_sdk_program)
+  # The same reference under AddressSanitizer and UndefinedBehaviorSanitizer (tests/dsp/test_sanitizers.py):
+  # every buffer boundary it exercises in Rack's inline DSP code is checked. libRack is not instrumented.
+  add_executable(rackpy_dsp_reference_sanitized native/tests/dsp_reference.cpp)
+  set_target_properties(rackpy_dsp_reference_sanitized PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_compile_options(rackpy_dsp_reference_sanitized PRIVATE -fsanitize=address,undefined -fno-sanitize-recover=undefined)
+  target_link_options(rackpy_dsp_reference_sanitized PRIVATE -fsanitize=address,undefined)
+  target_link_libraries(rackpy_dsp_reference_sanitized PRIVATE rackpy_sdk_program)
   add_executable(rackpy_components_reference native/tests/components_reference.cpp)
   set_target_properties(rackpy_components_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_link_libraries(rackpy_components_reference PRIVATE rackpy_sdk_program)

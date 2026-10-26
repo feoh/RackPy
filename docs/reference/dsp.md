@@ -4,11 +4,12 @@ Rack's `dsp` headers, family 6 of the [SDK surface](surface/dsp.md)
 (**RP-18**, in slices). **Implemented, Linux x86_64 inside Rack Free 2.6.6:**
 `dsp/common.hpp`, `approx.hpp`, `convert.hpp`, `window.hpp` and `ode.hpp`
 (RP-18A), `dsp/digital.hpp` (RP-18B), `dsp/filter.hpp` (RP-18C), and
-`dsp/vumeter.hpp` and `dsp/midi.hpp` (RP-18D), as `rackpy.raw.dsp` and the
+`dsp/vumeter.hpp` and `dsp/midi.hpp` (RP-18D), and `dsp/fft.hpp` and
+`dsp/fir.hpp` (RP-19A), as `rackpy.raw.dsp` and the
 {py:mod}`rackpy.dsp.basic`, {py:mod}`rackpy.dsp.digital`,
-{py:mod}`rackpy.dsp.filters` and {py:mod}`rackpy.dsp.midi` imports (see the
-[coverage report](coverage.md)). FFT, resampling, FIR, MinBLEP and ring
-buffers (RP-19) are not bound yet.
+{py:mod}`rackpy.dsp.filters`, {py:mod}`rackpy.dsp.midi` and
+{py:mod}`rackpy.dsp.fft` imports (see the [coverage report](coverage.md)).
+MinBLEP, resampling (RP-19B) and the ring buffers (RP-19C) are not bound yet.
 
 Every function runs **Rack's own C++ code**, compiled with the SDK's flags.
 `tests/dsp` replays more than 4,000 cases from a compiled C++ reference
@@ -410,3 +411,58 @@ Rack trusts its inputs here; RackPy refuses what it would get wrong:
 - in `from_json`, a `channels` above `MAX_CHANNELS`, or a `monoMode` or
   `polyMode` outside its enum, which would make Rack index past its arrays or
   build an invalid enum value. Patch JSON is untrusted.
+
+(dsp-fft)=
+## FFTs
+
+`RealFFT(length)` and `ComplexFFT(length)` are Rack's wrappers of PFFFT.
+Each owns a PFFFT setup (`setup`, an opaque handle with identity, read-only
+because the FFT frees it; it keeps its FFT alive), and a copy is refused, as
+copying the C++ object would free the setup twice.
+
+- **Lengths.** PFFFT takes `2^a 3^b 5^c` points, a multiple of 32 for a real
+  FFT and of 16 for a complex one. It checks most of that only with `assert`,
+  which a release build skips, and it returns no setup for other lengths,
+  which Rack's destructor would then dereference: RackPy raises `ValueError`
+  first. Rack gives PFFFT no work buffer, so PFFFT puts its scratch (4 bytes
+  per point real, 8 complex) on the stack; RackPy allows lengths up to 65536.
+- **Buffers.** Contiguous float32 buffers, 16-byte aligned (PFFFT's SSE code
+  needs it; an `array.array` or numpy array is aligned, a slice of one may
+  not be), of the transform's size: `length` floats in and out for a real
+  FFT, `2 * length` (interleaved complex numbers) for a complex one. The
+  input and output may be the same buffer, but not partly overlap. Rack's
+  comments say a real FFT's output is `2 * length` floats; PFFFT writes
+  `length`.
+- **Order.** `rfft`/`fft` give the canonical order: for a real FFT `F(0)`,
+  `F(n/2)`, then the real and imaginary parts of `F(1)` to `F(n/2 - 1)`;
+  `rfft_unordered`/`fft_unordered` give PFFFT's internal order, faster and
+  consistent between transforms, for convolution or inverting.
+- **Scale.** Nothing is normalized: the inverse of a forward transform is
+  `length` times the input. `scale(x)` multiplies `length` floats (`2 *
+  length` complex) by `1 / length`. It reads the writable `length` field;
+  the transforms always use the setup's size.
+
+(dsp-fir)=
+## FIR helpers and the real-time convolver
+
+- `convolve_naive(in_, kernel, len)` is one output of a direct convolution,
+  `sum(in_[len - 1 - i] * kernel[i])`; `boxcar_lowpass_ir(out, len,
+  cutoff=0.5)` writes `len` taps of an unwindowed sinc lowpass at `cutoff`
+  (a ratio of the sample rate). Buffers are float32 with at least `len`
+  items; alignment does not matter.
+- `RealTimeConvolver(block_size)` convolves a block at a time with a long
+  impulse response, by partitioned FFTs. `2 * block_size` must be a PFFFT
+  real length (16, 32, 48, 64, ...; Rack recommends a power of 2 from 32),
+  and `block_size` at most 32768. `set_kernel(kernel, length)` takes the impulse response
+  (`None` or a length of 0 clears it, up to 4,194,304 samples) and allocates
+  its FFTs; `process_block(input, output)` convolves `block_size` floats,
+  with no latency, and the output may be the input.
+- Its arrays (`kernel_ffts`, `input_ffts`, `output_tail`, `tmp_block`) are
+  views that find the array again at every access, as `set_kernel`
+  reallocates them, so a view never dangles. `block_size`, `kernel_blocks`
+  and the `pffft` handle are read-only: Rack sizes the arrays by them, and
+  changing them in C++ would make it read and write past its allocations.
+  `input_pos` is writable; Rack reduces it modulo `kernel_blocks`.
+- RackPy's tests also run every case of the reference under AddressSanitizer
+  and UndefinedBehaviorSanitizer (`tests/dsp/test_advanced.py`), with Rack's
+  inline code instrumented.

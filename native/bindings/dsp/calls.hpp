@@ -106,7 +106,11 @@ RACKPY_OUT_OF_LINE void step(T t, T dt, T* x, int len, OdeSystem<T> f, void* con
 		d::stepRK4(t, dt, x, len, system);
 }
 
-// --- Members of Rack's stateful DSP objects (filter.hpp) -----------------------------
+// --- fir.hpp --------------------------------------------------------------------------
+RACKPY_OUT_OF_LINE float convolveNaive(const float* in, const float* kernel, int len) { return d::convolveNaive(in, kernel, len); }
+RACKPY_OUT_OF_LINE void boxcarLowpassIR(float* out, int len, float cutoff) { d::boxcarLowpassIR(out, len, cutoff); }
+
+// --- Members of Rack's stateful DSP objects (filter.hpp, fft.hpp, ...) ---------------
 /** obj.*M(args...), out of line, one function per member and argument types:
 `member<&TRCFilter<float>::process>(filter, x)`. */
 template <auto M, typename Object, typename... Args>
