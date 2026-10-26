@@ -67,6 +67,7 @@
     "RP-21C": "tk-rackpy-21c-compiled-graph-tier-and-native-extens-e80282",
     "RP-23A": "tk-rackpy-23a-raw-expander-mapping-and-rackpy-messa-6b626e",
     "RP-23B": "tk-rackpy-23b-one-sample-expander-message-exchange--e2a8dd",
+    "RP-23C": "tk-rackpy-23c-native-expander-schema-contract-compi-a3a9d8",
     "RP-25A": "tk-rackpy-25a-checked-detached-native-widget-tree-o-79a09d",
     "RP-25B": "tk-rackpy-25b-checked-widget-geometry-and-spatial-q-8df27f",
     "RP-25C": "tk-rackpy-25c-safe-widget-sibling-insertion-b4de86",
@@ -75,7 +76,8 @@
     "RP-22B": "tk-rackpy-22b-synchronous-laboratory-module-events--23893f",
     "RP-22C": "tk-rackpy-22c-laboratory-quantity-value-methods-rec-c2b64e",
     "RP-22D": "tk-rackpy-22d-callback-inventory-measured-laborator-f8465c",
-    "RP-22E": "tk-rackpy-22e-laboratory-python-override-of-dsp-mid-5172f2"
+    "RP-22E": "tk-rackpy-22e-laboratory-python-override-of-dsp-mid-5172f2",
+    "RP-22F": "tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3"
   },
   "tasks": {
     "RP-00": "tk-vcvpy-00-publish-the-planning-repository-and-det-699437",

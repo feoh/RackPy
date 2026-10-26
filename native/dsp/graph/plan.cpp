@@ -6,7 +6,9 @@
 // the main thread; process() only reads and writes that storage and the
 // module's ports, params and lights. Nodes dispatch through one switch, not
 // a virtual call each (ADR 004); the compiled tier (RP-21C) removes even that.
-// Native extension nodes from kernel libraries are virtual calls.
+// Native extension nodes from kernel libraries are virtual calls. Expander
+// nodes (RP-23B) exchange lanes of "rackpy.graph" messages with neighbouring
+// RackPy modules, after lock-free checks of the neighbour and its buffers.
 #include "plan.hpp"
 
 #include <algorithm>
@@ -17,6 +19,7 @@
 #include <set>
 #include <stdexcept>
 
+#include "../../engine/expanders.hpp"
 #include "rackpy/graph.hpp"
 
 namespace rackpy {
@@ -53,6 +56,8 @@ enum class Op : uint8_t {
 	DELAY,
 	OUTPUT,
 	LIGHT,
+	EXPANDER_SEND,
+	EXPANDER_RECEIVE,
 	EXTENSION,
 };
 
@@ -94,6 +99,8 @@ const OpInfo OPS[] = {
 	{"delay", Op::DELAY, 0, 1, true},
 	{"output", Op::OUTPUT, 1, 1, false},
 	{"light", Op::LIGHT, 1, 1, false},
+	{"expander_send", Op::EXPANDER_SEND, 1, 2, false},
+	{"expander_receive", Op::EXPANDER_RECEIVE, 0, 2, true},
 };
 
 const OpInfo* findOp(const std::string& name) {
@@ -110,6 +117,8 @@ struct Step {
 	int field = -1;  // INPUT, PARAM, OUTPUT, LIGHT: the kernel type's field holding the index; CONTROL: its slot
 	float x = 0.f, y = 0.f;  // CONSTANT: x; SCHMITT: low, high; PULSE: duration; DELAY: initial
 	int extension = -1;  // EXTENSION: index into Checked::extensions
+	uint8_t side = 0;  // EXPANDER_*: 0 left, 1 right
+	int lane = 0;  // EXPANDER_*: the lane of the message
 };
 
 /** A native extension node of a checked plan: its type, inputs and arguments in the type's order. */
@@ -124,7 +133,7 @@ struct Checked {
 	std::vector<Step> steps;
 	std::vector<std::pair<uint16_t, uint16_t>> latches;  // (delay node, source node)
 	std::vector<ExtensionStep> extensions;
-	size_t phasors = 0, schmitts = 0, pulses = 0, delays = 0;
+	size_t phasors = 0, schmitts = 0, pulses = 0, delays = 0, links = 0;
 };
 
 std::vector<std::unique_ptr<NodeType>>& registry() {
@@ -151,8 +160,9 @@ struct GraphKernel final : Kernel {
 		Op op;
 		uint16_t self;  // the node, whose signal this writes
 		uint16_t a, b, c;
-		uint16_t state;  // index into the node type's state vector
-		int index;  // a port, param or light index
+		uint16_t state;  // index into the node type's state vector; EXPANDER_*: into links
+		int index;  // a port, param or light index; EXPANDER_*: the lane's first value in the message
+		uint8_t side;  // EXPANDER_*
 	};
 	/** The nodes that do work each frame. Constants and controls are not among them: their signals are
 	written when the kernel is made and when a control changes (at a frame boundary, by the slot). */
@@ -166,11 +176,16 @@ struct GraphKernel final : Kernel {
 	std::vector<Delay> delays;
 	std::vector<std::unique_ptr<Node>> extensions;
 	std::vector<std::vector<const Signal*>> extensionInputs;
+	// EXPANDER_SEND uses one (the neighbour), EXPANDER_RECEIVE two (the neighbour, then this module).
+	std::vector<engine::Link> links;
+	const engine::Schema* schema = engine::graphSchema();
 
 	GraphKernel(const Checked& plan, const KernelType& type, const std::vector<double>& values)
-		: signals(plan.steps.size()), phasors(plan.phasors), schmitts(plan.schmitts), pulses(plan.pulses), delays(plan.delays) {
+		: signals(plan.steps.size()), phasors(plan.phasors), schmitts(plan.schmitts), pulses(plan.pulses), delays(plan.delays),
+		  links(plan.links) {
 		std::vector<uint16_t> stateOf(plan.steps.size(), 0);
 		size_t counts[4] = {0, 0, 0, 0};
+		size_t linked = 0;
 		// The controls are the type's NUMBER fields, in slot order, after the wiring.
 		std::vector<float> controlValues;
 		for (size_t i = 0; i < type.fields.size(); i++)
@@ -189,7 +204,7 @@ struct GraphKernel final : Kernel {
 				mono(signals[k], controlValues[(size_t) s.field]);
 				continue;
 			}
-			Run r{s.op, (uint16_t) k, s.a, s.b, s.c, 0, s.field >= 0 ? (int) values[(size_t) s.field] : 0};
+			Run r{s.op, (uint16_t) k, s.a, s.b, s.c, 0, s.field >= 0 ? (int) values[(size_t) s.field] : 0, s.side};
 			switch (s.op) {
 				case Op::PHASOR: r.state = (uint16_t) counts[0]++; break;
 				case Op::SCHMITT:
@@ -204,6 +219,12 @@ struct GraphKernel final : Kernel {
 				case Op::DELAY:
 					r.state = (uint16_t) counts[3];
 					delays[counts[3]++].initial = s.x;
+					break;
+				case Op::EXPANDER_SEND:
+				case Op::EXPANDER_RECEIVE:
+					r.state = (uint16_t) linked;
+					linked += s.op == Op::EXPANDER_SEND ? 1 : 2;
+					r.index = s.lane * LANE;
 					break;
 				case Op::EXTENSION: {
 					// The library's create() runs its own code: RackPy's caller turns what it throws into ValueError.
@@ -265,6 +286,23 @@ struct GraphKernel final : Kernel {
 				case Op::DELAY: delays[r.state].process(out); break;
 				case Op::OUTPUT: writeOutput(m.outputs[r.index], s[r.a]); break;
 				case Op::LIGHT: writeLight(m.lights[r.index], s[r.a]); break;
+				case Op::EXPANDER_SEND: {
+					rack::engine::Module::Expander* flip = nullptr;
+					size_t end = (size_t) (r.index + LANE);
+					if (float* message = engine::sendBuffer(m, r.side, schema, end, links[r.state], flip)) {
+						writeLane(message + r.index, s[r.a]);
+						flip->requestMessageFlip();  // Rack's engine swaps the buffers at the end of the frame
+					}
+					break;
+				}
+				case Op::EXPANDER_RECEIVE: {
+					size_t end = (size_t) (r.index + LANE);
+					if (float* message = engine::receiveBuffer(m, r.side, schema, end, links[r.state], links[r.state + 1u]))
+						readLane(out, message + r.index);
+					else
+						out.channels = 0;
+					break;
+				}
 				case Op::EXTENSION:
 					extensions[r.state]->process(out, extensionInputs[r.state].data(), args);
 					if (out.channels < 0 || out.channels > MAX_CHANNELS) {
@@ -369,6 +407,7 @@ std::shared_ptr<const KernelType> planType(const PlanSpec& spec) {
 	std::vector<Field> fields;
 	std::map<std::pair<int, long long>, int> fieldOf;  // (kind, index) -> field
 	std::set<long long> outputs, lights;
+	std::set<std::pair<int, long long>> sends, receives;  // (side, lane)
 	std::vector<const OpInfo*> infos;
 	for (size_t k = 0; k < spec.nodes.size(); k++) {
 		const PlanSpec::Node& node = spec.nodes[k];
@@ -441,12 +480,29 @@ std::shared_ptr<const KernelType> planType(const PlanSpec& spec) {
 				plan->delays++;
 				break;
 			case Op::PHASOR: plan->phasors++; break;
+			case Op::EXPANDER_SEND:
+			case Op::EXPANDER_RECEIVE: {
+				double side = node.args[0], lane = node.args[1];
+				if (side != 0 && side != 1)
+					refuse(k, node.op, "its side is 0 (left) or 1 (right)");
+				if (lane < 0 || lane != std::floor(lane) || lane >= (double) engine::MAX_GRAPH_LANES)
+					refuse(k, node.op, "its lane is a whole number from 0 to " + std::to_string(engine::MAX_GRAPH_LANES - 1));
+				auto key = std::make_pair((int) side, (long long) lane);
+				bool sending = info->op == Op::EXPANDER_SEND;
+				if (!(sending ? sends : receives).insert(key).second)
+					refuse(k, node.op, "lane " + std::to_string((long long) lane) + " of side " + std::to_string((int) side) +
+						(sending ? " is already sent" : " is already received") + "; a lane carries one signal");
+				step.side = (uint8_t) side;
+				step.lane = (int) lane;
+				plan->links += sending ? 1 : 2;
+				break;
+			}
 			default: break;
 		}
 		plan->steps.push_back(step);
 	}
-	if (outputs.empty() && lights.empty())
-		throw std::invalid_argument("a graph plan writes no output or light");
+	if (outputs.empty() && lights.empty() && sends.empty())
+		throw std::invalid_argument("a graph plan writes no output, light or expander lane");
 
 	std::vector<bool> fed(spec.nodes.size(), false);
 	for (const auto& latch : spec.latches) {

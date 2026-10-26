@@ -14,7 +14,7 @@ import pytest
 
 from rackpy.dsp import graph_reference
 from rackpy.dsp.graph import OPS, Graph, GraphError, Plan, Signal
-from rackpy.dsp.graph_reference import f32, run
+from rackpy.dsp.graph_reference import f32, run, run_pair
 
 pytestmark = pytest.mark.unit
 HERE = Path(__file__).name
@@ -217,7 +217,7 @@ def test_refusals_say_what_to_change() -> None:
     d.feed(s)
     with pytest.raises(GraphError, match="already fed"):
         d.feed(s)
-    with pytest.raises(GraphError, match="no output or light"):
+    with pytest.raises(GraphError, match="no output, light or expander lane"):
         Graph().plan()
     unfed = Graph()
     unfed.output(0, unfed.delay())
@@ -270,3 +270,75 @@ def test_native_extension_nodes_lower_by_name() -> None:
         g.node("example.Mix", *[g.input(0)] * 9)
     with pytest.raises(GraphError, match="finite"):
         g.node("example.Fold", g.input(0), drive=math.inf)
+
+
+# --- Expanders (RP-23B) ---------------------------------------------------------------------
+
+
+def counter(g: Graph, start: float = 1.0) -> Signal:
+    """Frame n: n + start."""
+    count = g.delay(start)
+    count.feed(count + 1)
+    return count
+
+
+def test_expander_nodes_lower_and_are_checked() -> None:
+    g = Graph()
+    g.expander_send(1, g.input(0), lane=2)
+    g.output(0, g.expander_receive(0))
+    plan = g.plan()
+    ops = {n.op: n for n in plan.nodes}
+    assert ops["expander_send"].args == (1.0, 2.0) and len(ops["expander_send"].inputs) == 1
+    assert ops["expander_receive"].args == (0.0, 0.0) and ops["expander_receive"].inputs == ()
+    only_sends = Graph()
+    only_sends.expander_send(0, 1.0)  # a sink of its own
+    assert [n.op for n in only_sends.plan().nodes] == ["constant", "expander_send"]
+    for side, lane, match in ((2, 0, "side is 0"), (True, 0, "side is 0"), (0, 64, "0 to 63"), (0, -1, "negative")):
+        with pytest.raises(GraphError, match=match):
+            g.expander_send(side, 1.0, lane)
+        with pytest.raises(GraphError, match=match):
+            g.expander_receive(side, lane)
+    with pytest.raises(GraphError, match="lane 2 of side 1 is already sent"):
+        g.expander_send(1, 0.0, lane=2)
+    with pytest.raises(GraphError, match="lane 0 of side 0 is already received"):
+        g.expander_receive(0, 0)
+    for op in ("expander_send", "expander_receive"):
+        assert OPS[op].args == ("side", "lane")
+
+
+def test_the_reference_receives_and_records_lanes() -> None:
+    g = Graph()
+    g.output(0, g.expander_receive(0) * 2)
+    g.expander_send(1, g.input(0), lane=5)
+    result = run(g, 3, inputs={0: [[1.0, 2.0], [], [3.0]]}, received={(0, 0): [[], [0.5, 1.5], [4.0]]})
+    assert result.outputs[0] == [[0.0], [1.0, 3.0], [8.0]]  # nothing received: 0 channels (an output shows 0 V)
+    assert result.sent == {(1, 5): [[1.0, 2.0], [], [3.0]]}
+    with pytest.raises(ValueError, match="receives 1 frames"):
+        run(g, 3, received={(0, 0): [[]]})
+
+
+def test_a_pair_exchanges_one_frame_apart_both_ways() -> None:
+    left, right = Graph(), Graph()
+    left.expander_send(1, counter(left))  # 1, 2, 3, ...
+    left.output(0, left.expander_receive(1, lane=3))
+    got = right.expander_receive(0)
+    right.output(0, got)
+    right.output(1, counter(right))
+    right.expander_send(0, got + 100, lane=3)  # echoes what it got
+    a, b = run_pair(left, right, 6)
+    assert b.outputs[1] == [[float(n + 1)] for n in range(6)]
+    assert b.outputs[0] == [[0.0]] + [[float(n)] for n in range(1, 6)]  # left's counter of frame n - 1
+    # The echo right sent at n - 1 (what it got then, 0 V at first, plus 100) reaches left at n.
+    assert a.outputs[0] == [[0.0]] + [[float(n - 1) + 100] for n in range(1, 6)]
+    with pytest.raises(TypeError, match="left_inputs takes"):
+        run_pair(left, right, 1, left_inputs={"received": {}})
+
+
+def test_a_pair_only_connects_the_facing_sides() -> None:
+    left, right = Graph(), Graph()
+    left.expander_send(0, 1.0)  # its own left: nobody there
+    left.expander_send(1, 2.0)
+    right.output(0, right.expander_receive(1))  # its own right: nobody there
+    right.output(1, right.expander_receive(0))
+    _, b = run_pair(left, right, 2)
+    assert b.outputs[0] == [[0.0], [0.0]] and b.outputs[1] == [[0.0], [2.0]]

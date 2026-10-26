@@ -5,8 +5,8 @@ native node types: ports, parameters and controls in, arithmetic,
 oscillators and Rack's own triggers in between, outputs and lights out.
 Python only describes it; nothing in a graph runs Python per sample.
 
-**Implemented (RP-21A, RP-21B, RP-21C), Linux x86_64 inside Rack Free
-2.6.6.** {py:mod}`rackpy.dsp.graph` builds, validates and lowers graphs.
+**Implemented (RP-21A, RP-21B, RP-21C; expander nodes RP-23B), Linux
+x86_64 inside Rack Free 2.6.6.** {py:mod}`rackpy.dsp.graph` builds, validates and lowers graphs.
 {py:meth}`~rackpy.dsp.graph.Graph.compile` turns one into a native
 [kernel](dsp.md) that the **plan interpreter** runs on Rack's engine
 thread, straight from Python. The **compiled tier**
@@ -118,6 +118,7 @@ signal or a number to a node raises
 | `pulse(trigger, duration)` | Rack's `dsp::PulseGenerator`: 1 for `duration` seconds after each trigger |
 | `delay(initial)` | the signal it is fed, one frame later |
 | `output(port, signal)`, `light(index, signal)` | write an output (at least one channel) or a light's brightness (channel 0) |
+| `expander_send(side, signal, lane)`, `expander_receive(side, lane)` | send a signal to the module beside it, and receive one, a frame later: see [expanders](#expanders) |
 
 Every operation computes in float32, as Rack does.
 
@@ -165,11 +166,56 @@ silenced and the failure is recorded, as for a failing kernel. The plan
 interpreter calls an extension node through one virtual call per frame, and
 the offline reference cannot run one.
 
+## Expanders
+
+A graph can exchange signals with the modules beside it, through Rack's
+[expanders](../reference/engine-module.md#expanders) (RP-23B).
+{py:meth}`~rackpy.dsp.graph.Graph.expander_send` writes a signal into a lane
+of the neighbour's message on one side (0 left, 1 right), and
+{py:meth}`~rackpy.dsp.graph.Graph.expander_receive` reads what the neighbour
+on a side sent. A message arrives **exactly one frame** after it was sent,
+in whatever order and on however many threads Rack's engine processes the
+two modules, because Rack swaps each side's two buffers at the end of the
+frame:
+
+```{rackpy-example} graph_expanders.py
+:caption: A module and its expander, stepped on a laboratory bench and by the offline reference
+```
+
+- **Messages.** A module receives in its own messages: give the side it
+  receives on `"rackpy.graph"` messages with
+  {py:func}`rackpy.engine.expanders.graph_messages` (one lane per signal, up
+  to 64), before the module goes to Rack's engine. The sender writes into
+  the neighbour's producer message and requests the flip; the receiver reads
+  its consumer message. Each lane holds a channel count and 16 voltages.
+- **Checks.** On Rack's engine thread, before touching anything, a send
+  checks that the neighbour is a RackPy module, that its facing expander
+  points back to the sender, and that its messages there have the
+  `"rackpy.graph"` schema and room for the lane; a receive checks that the
+  neighbour is a RackPy module and that its own messages fit. Otherwise
+  nothing is sent, and the receive gives 0 channels. These checks take no
+  lock and allocate nothing; a foreign plugin's pointer is never read.
+- **Read once.** A receive marks its lane read. So when the neighbour is
+  removed, moved away, or stops sending, the next frame receives 0 channels
+  instead of repeating the last message.
+- **Lanes.** Each lane of each side is sent by one node and received by one
+  node at most; a graph that only sends is valid.
+
+Two RackPy graphs exchange directly; exchanging with another plugin's
+modules, or with custom message layouts from C++ kernel libraries, is the
+native schema contract of RP-23C, as is the compiled tier for these nodes
+(`graph_codegen` refuses them for now; use `compile()`).
+{py:func}`rackpy.dsp.graph_reference.run_pair` evaluates two graphs side by
+side, one frame apart, and the live-Rack tests check Rack's own engine
+against it frame for frame, at 44.1, 48 and 96 kHz with 1, 2 and 4 engine
+threads.
+
 ## The offline reference
 
 {py:func}`rackpy.dsp.graph_reference.run` evaluates a graph for a number of
 frames, given each patched input's channels per frame, parameter values,
-control changes by frame and sample-rate changes. It rounds every operation
+control changes by frame, sample-rate changes and what each expander lane
+receives; its result records what each lane sent. It rounds every operation
 to float32. Arithmetic, comparisons, `minimum`, `maximum` and `clamp` match
 float32 exactly; `sin2pi` and `pitch_to_freq` round Python's double-precision
 functions, which may differ from the C library's by one unit in the last

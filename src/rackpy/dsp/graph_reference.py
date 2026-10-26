@@ -14,6 +14,8 @@ double-precision ``sin`` and ``pow``, which can differ from the C library's
 float functions by one unit in the last place. Triggers and pulses follow
 Rack's ``dsp::SchmittTrigger`` and ``dsp::PulseGenerator``, and outputs follow
 ``Port::setChannels`` on a patched output (at least one channel).
+Expander lanes are given (``received``) and recorded (``Result.sent``), or
+exchanged between two graphs by :func:`run_pair`, one frame apart.
 
 This module is pure Python and works outside Rack.
 """
@@ -24,10 +26,11 @@ import ctypes
 import dataclasses
 import math
 from collections.abc import Callable, Mapping, Sequence
+from typing import Any
 
 from rackpy.dsp.graph import MAX_CHANNELS, Graph, GraphError, Plan
 
-__all__ = ["Result", "run"]
+__all__ = ["Lane", "Result", "run", "run_pair"]
 
 FREQ_C4: float = ctypes.c_float(261.6256).value
 """``rack::dsp::FREQ_C4``, as the float it is."""
@@ -44,10 +47,12 @@ _LOW, _HIGH, _UNINITIALIZED = 0, 1, 2
 
 @dataclasses.dataclass
 class Result:
-    """What a run wrote: each output port's voltages per frame (one list of channels each), each light's brightness."""
+    """What a run wrote: each output port's voltages per frame (one list of channels each), each light's brightness,
+    and what each expander lane ``(side, lane)`` sent per frame (one list of channels each, possibly empty)."""
 
     outputs: dict[int, list[list[float]]]
     lights: dict[int, list[float]]
+    sent: dict[tuple[int, int], list[list[float]]] = dataclasses.field(default_factory=dict)
 
 
 def _lanes(signal: list[float], n: int) -> list[float]:
@@ -119,6 +124,10 @@ def _elementwise(op: str, operands: list[list[float]]) -> list[float]:
     return [f32(fn(*xs)) for xs in zip(*columns, strict=True)]
 
 
+Lane = tuple[int, int]
+"""An expander lane: ``(side, lane)``, side 0 left and 1 right."""
+
+
 def run(
     graph: Graph | Plan,
     frames: int,
@@ -128,6 +137,7 @@ def run(
     inputs: Mapping[int, Sequence[Sequence[float]]] | None = None,
     params: Mapping[int, float | Sequence[float]] | None = None,
     controls: Mapping[int, Mapping[str, float]] | None = None,
+    received: Mapping[Lane, Sequence[Sequence[float]]] | None = None,
 ) -> Result:
     """Evaluates ``graph`` for ``frames`` frames.
 
@@ -137,61 +147,140 @@ def run(
     - ``controls``: control changes, by frame: ``{100: {"gain": 0.5}}`` sets
       ``gain`` before frame 100 runs.
     - ``rate_changes``: new sample rates, by the frame they apply from.
+    - ``received``: what each ``expander_receive`` lane gets, one list of
+      channels per frame (an empty list when nothing arrived, as when the
+      neighbour sent nothing the frame before). Lanes not given receive
+      nothing. :attr:`Result.sent` has what each ``expander_send`` lane sent;
+      :func:`run_pair` connects two graphs side by side.
     """
-    plan = graph.plan() if isinstance(graph, Graph) else graph
-    for node in plan.nodes:
-        if "." in node.op:
-            raise GraphError(
-                f"the offline reference cannot run the native node type {node.op}: it exists only in Rack, "
-                "in its kernel library"
-            )
-    inputs = dict(inputs or {})
-    params = dict(params or {})
-    for port, values in inputs.items():
+    received = dict(received or {})
+    for lane, values in received.items():
         if len(values) != frames:
-            raise ValueError(f"input {port} has {len(values)} frames of voltages; the run has {frames}")
-        if any(len(v) > MAX_CHANNELS for v in values):
-            raise ValueError(f"input {port} has a frame of more than {MAX_CHANNELS} channels")
-    for index, value in params.items():
-        if not isinstance(value, int | float) and len(value) != frames:
-            raise ValueError(f"param {index} has {len(value)} values; the run has {frames}")
-    names = {c.name: c.node for c in plan.controls}
-    for frame, changes in (controls or {}).items():
-        unknown = set(changes) - set(names)
-        if unknown:
-            raise GraphError(f"frame {frame} sets unknown controls {sorted(unknown)}; the plan has {sorted(names)}")
-
-    nodes = plan.nodes
-    current: dict[int, float] = {k: f32(n.args[0]) for k, n in enumerate(nodes) if n.op == "control"}
-    phases = {k: [0.0] * MAX_CHANNELS for k, n in enumerate(nodes) if n.op == "phasor"}
-    triggers = {k: [_UNINITIALIZED] * MAX_CHANNELS for k, n in enumerate(nodes) if n.op == "schmitt"}
-    remaining = {k: [0.0] * MAX_CHANNELS for k, n in enumerate(nodes) if n.op == "pulse"}
-    delayed = {k: [f32(n.args[0])] for k, n in enumerate(nodes) if n.op == "delay"}
-    result = Result(
-        {int(n.args[0]): [] for n in nodes if n.op == "output"}, {int(n.args[0]): [] for n in nodes if n.op == "light"}
-    )
-    rate = f32(sample_rate)
-    signals: list[list[float]] = [[] for _ in nodes]
+            raise ValueError(f"lane {lane} receives {len(values)} frames; the run has {frames}")
+    evaluator = _Evaluator(graph, frames, sample_rate, rate_changes, inputs, params, controls)
     for frame in range(frames):
-        if rate_changes and frame in rate_changes:
-            rate = f32(rate_changes[frame])
+        evaluator.step(frame, {lane: list(values[frame]) for lane, values in received.items()})
+    return evaluator.result
+
+
+def run_pair(
+    left: Graph | Plan,
+    right: Graph | Plan,
+    frames: int,
+    *,
+    sample_rate: float = 44100.0,
+    left_inputs: Mapping[str, Any] | None = None,
+    right_inputs: Mapping[str, Any] | None = None,
+) -> tuple[Result, Result]:
+    """Evaluates two graphs side by side, ``left`` to the left of ``right``, exchanging expander lanes.
+
+    What ``left`` sends on its right side (1) arrives at ``right``'s
+    ``expander_receive`` on its left side (0) one frame later, and the other
+    way round, as Rack's double-buffered expander messages deliver it in
+    either processing order. It assumes both modules hold ``"rackpy.graph"``
+    messages with room for every lane used, on their facing sides. Lanes on
+    the outer sides receive nothing. ``left_inputs`` and ``right_inputs`` take
+    :func:`run`'s ``inputs``, ``params``, ``controls`` and ``rate_changes``.
+    """
+    a = _Evaluator(left, frames, sample_rate, **_options(left_inputs, "left_inputs"))
+    b = _Evaluator(right, frames, sample_rate, **_options(right_inputs, "right_inputs"))
+    to_right: dict[Lane, list[float]] = {}
+    to_left: dict[Lane, list[float]] = {}
+    for frame in range(frames):
+        sent_right = a.step(frame, {(1, lane): v for (side, lane), v in to_left.items() if side == 1})
+        sent_left = b.step(frame, {(0, lane): v for (side, lane), v in to_right.items() if side == 0})
+        to_right = {(0, lane): v for (side, lane), v in sent_right.items() if side == 1}
+        to_left = {(1, lane): v for (side, lane), v in sent_left.items() if side == 0}
+    return a.result, b.result
+
+
+def _options(options: Mapping[str, Any] | None, what: str) -> dict[str, Any]:
+    allowed = {"inputs", "params", "controls", "rate_changes"}
+    given = dict(options or {})
+    unknown = set(given) - allowed
+    if unknown:
+        raise TypeError(f"{what} takes {sorted(allowed)}, not {sorted(unknown)}")
+    return given
+
+
+class _Evaluator:
+    """One graph's state, one frame at a time."""
+
+    def __init__(
+        self,
+        graph: Graph | Plan,
+        frames: int,
+        sample_rate: float,
+        rate_changes: Mapping[int, float] | None = None,
+        inputs: Mapping[int, Sequence[Sequence[float]]] | None = None,
+        params: Mapping[int, float | Sequence[float]] | None = None,
+        controls: Mapping[int, Mapping[str, float]] | None = None,
+    ) -> None:
+        plan = graph.plan() if isinstance(graph, Graph) else graph
+        for node in plan.nodes:
+            if "." in node.op:
+                raise GraphError(
+                    f"the offline reference cannot run the native node type {node.op}: it exists only in Rack, "
+                    "in its kernel library"
+                )
+        self.inputs = dict(inputs or {})
+        self.params = dict(params or {})
+        for port, values in self.inputs.items():
+            if len(values) != frames:
+                raise ValueError(f"input {port} has {len(values)} frames of voltages; the run has {frames}")
+            if any(len(v) > MAX_CHANNELS for v in values):
+                raise ValueError(f"input {port} has a frame of more than {MAX_CHANNELS} channels")
+        for index, value in self.params.items():
+            if not isinstance(value, int | float) and len(value) != frames:
+                raise ValueError(f"param {index} has {len(value)} values; the run has {frames}")
+        self.names = {c.name: c.node for c in plan.controls}
+        self.controls = dict(controls or {})
+        for frame, changes in self.controls.items():
+            unknown = set(changes) - set(self.names)
+            if unknown:
+                raise GraphError(
+                    f"frame {frame} sets unknown controls {sorted(unknown)}; the plan has {sorted(self.names)}"
+                )
+        self.rate_changes = dict(rate_changes or {})
+        self.plan = plan
+        nodes = plan.nodes
+        self.current: dict[int, float] = {k: f32(n.args[0]) for k, n in enumerate(nodes) if n.op == "control"}
+        self.phases = {k: [0.0] * MAX_CHANNELS for k, n in enumerate(nodes) if n.op == "phasor"}
+        self.triggers = {k: [_UNINITIALIZED] * MAX_CHANNELS for k, n in enumerate(nodes) if n.op == "schmitt"}
+        self.remaining = {k: [0.0] * MAX_CHANNELS for k, n in enumerate(nodes) if n.op == "pulse"}
+        self.delayed = {k: [f32(n.args[0])] for k, n in enumerate(nodes) if n.op == "delay"}
+        self.result = Result(
+            {int(n.args[0]): [] for n in nodes if n.op == "output"},
+            {int(n.args[0]): [] for n in nodes if n.op == "light"},
+            {(int(n.args[0]), int(n.args[1])): [] for n in nodes if n.op == "expander_send"},
+        )
+        self.rate = f32(sample_rate)
+        self.signals: list[list[float]] = [[] for _ in nodes]
+
+    def step(self, frame: int, received: Mapping[Lane, list[float]]) -> dict[Lane, list[float]]:
+        """Runs one frame with what each receiving lane got; returns what each sending lane sent."""
+        nodes, signals = self.plan.nodes, self.signals
+        if frame in self.rate_changes:
+            self.rate = f32(self.rate_changes[frame])
+        rate = self.rate
         dt = f32(1.0 / rate)
-        for name, v in ((controls or {}).get(frame) or {}).items():
-            current[names[name]] = f32(v)
+        for name, v in (self.controls.get(frame) or {}).items():
+            self.current[self.names[name]] = f32(v)
+        sent: dict[Lane, list[float]] = {}
         for k, node in enumerate(nodes):
             args = [signals[i] for i in node.inputs]
             op = node.op
             out: list[float] = []
             if op == "input":
                 port = int(node.args[0])
-                out = [f32(v) for v in inputs[port][frame]] if port in inputs else []
+                out = [f32(v) for v in self.inputs[port][frame]] if port in self.inputs else []
             elif op == "param":
-                p = params.get(int(node.args[0]), 0.0)
+                p = self.params.get(int(node.args[0]), 0.0)
                 out = [f32(p if isinstance(p, int | float) else p[frame])]
             elif op == "constant":
                 out = [f32(node.args[0])]
             elif op == "control":
-                out = [current[k]]
+                out = [self.current[k]]
             elif op == "sample_rate":
                 out = [rate]
             elif op == "sample_time":
@@ -200,7 +289,7 @@ def run(
                 out = _elementwise(op, args)
             elif op == "phasor":
                 n = max(1, len(args[0]))
-                freq, phase = _lanes(args[0], n), phases[k]
+                freq, phase = _lanes(args[0], n), self.phases[k]
                 for c in range(n):
                     phase[c] = f32(phase[c] + f32(freq[c] * dt))
                     if phase[c] >= 1.0:
@@ -208,7 +297,7 @@ def run(
                 out = phase[:n]
             elif op == "schmitt":
                 n = max(1, len(args[0]))
-                x, state = _lanes(args[0], n), triggers[k]
+                x, state = _lanes(args[0], n), self.triggers[k]
                 low, high = f32(node.args[0]), f32(node.args[1])
                 for c in range(n):
                     fired = 0.0
@@ -223,7 +312,7 @@ def run(
                     out.append(fired)
             elif op == "pulse":
                 n = max(1, len(args[0]))
-                trigger, left = _lanes(args[0], n), remaining[k]
+                trigger, left = _lanes(args[0], n), self.remaining[k]
                 duration = f32(node.args[0])
                 for c in range(n):
                     if trigger[c] > 0 and duration > left[c]:
@@ -233,14 +322,20 @@ def run(
                         left[c] = f32(left[c] - dt)
                     out.append(1.0 if high else 0.0)
             elif op == "delay":
-                out = list(delayed[k])
+                out = list(self.delayed[k])
             elif op == "output":
-                result.outputs[int(node.args[0])].append(_lanes(args[0], max(1, len(args[0]))))
+                self.result.outputs[int(node.args[0])].append(_lanes(args[0], max(1, len(args[0]))))
             elif op == "light":
-                result.lights[int(node.args[0])].append(args[0][0] if args[0] else 0.0)
+                self.result.lights[int(node.args[0])].append(args[0][0] if args[0] else 0.0)
+            elif op == "expander_send":
+                lane = (int(node.args[0]), int(node.args[1]))
+                sent[lane] = list(args[0])
+                self.result.sent[lane].append(list(args[0]))
+            elif op == "expander_receive":
+                out = [f32(v) for v in received.get((int(node.args[0]), int(node.args[1])), [])]
             else:  # pragma: no cover - Plan only holds registered ops
                 raise GraphError(f"the reference does not know node type {op!r}")
             signals[k] = out
-        for target, source in plan.latches:
-            delayed[target] = list(signals[source])
-    return result
+        for target, source in self.plan.latches:
+            self.delayed[target] = list(signals[source])
+        return sent

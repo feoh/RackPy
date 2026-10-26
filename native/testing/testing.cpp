@@ -816,6 +816,15 @@ void define(py::module_ m) {
 		EngineLease lease(*ctx);
 		return APP->engine->getModule(id) != nullptr;
 	});
+	m.def("rack_set_expander_id", [](const bindings::ModuleRef& r, int side, int64_t id) {
+		// As RackWidget::updateExpanders does on the UI thread for adjacent module widgets, without a
+		// lock; Rack's engine follows the ID at its next block. Tests call it only while Rack's engine
+		// is not stepping (a RackPy master module, then Engine.step_block from Python).
+		requireMainThread("rack_set_expander_id");
+		if (side != 0 && side != 1)
+			throw py::value_error("side is 0 (left) or 1 (right)");
+		r.get().getExpander((uint8_t) side).moduleId = id;
+	}, py::arg("module"), py::arg("side"), py::arg("module_id"));
 	m.def("engine_reset", [](const bindings::ModuleRef& r) {
 		requireMainThread("engine_reset");
 		refuseEngineReentry("engine_reset");

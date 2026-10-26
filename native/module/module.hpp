@@ -119,7 +119,7 @@ void releaseFromSlot(Info* info) {
 		delete info;
 }
 
-struct Module : rack::engine::Module {
+struct Module : rack::engine::Module, engine::ExpanderChannels {
 	std::shared_ptr<runtime::ObjectToken> token = std::make_shared<runtime::ObjectToken>(nullptr);
 	// A callback-laboratory module (RP-22, native/laboratory): runs only on a
 	// laboratory Bench, never in Rack's engine.
@@ -147,7 +147,8 @@ struct Module : rack::engine::Module {
 	// The native kernel Python chose (RP-17A): the module's production audio path.
 	dsp::KernelSlot kernels;
 	// RackPy expander message buffers Python put in this module's expander slots (RP-23): kept
-	// alive as long as the module, as Rack expects a module to own its buffers. Main thread.
+	// alive as long as the module, as Rack expects a module to own its buffers. Main thread. The
+	// channels they form are published in the engine::ExpanderChannels base, for native code.
 	std::vector<std::shared_ptr<engine::MessageBuffer>> expanderMessages;
 	void process(const ProcessArgs& args) override { kernels.process(*this, args); }
 	json_t* dataToJson() override;

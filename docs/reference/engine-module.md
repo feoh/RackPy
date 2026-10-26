@@ -733,15 +733,20 @@ run the module: a Python-owned module, or one on a
 [laboratory bench](../explanation/callbacks.md#the-laboratory-bench), which
 swaps requested buffers at the end of each frame as Rack's engine does.
 Otherwise these raise `OwnershipError`. Exchanging messages in production,
-one sample apart, is native kernels' work (RP-23B).
+one sample apart, is native code's work: DSP graphs send and receive lanes
+of `"rackpy.graph"` messages ([graph expanders](../how-to/graphs.md#expanders),
+`graph_messages(expander, lanes)`), checking on Rack's engine thread,
+without locks, that the neighbour is a RackPy module whose messages fit.
 
 ```{rackpy-example} expanders.py
 ```
 
-Not yet established (RP-23B): native kernels and graph nodes that send and
-receive messages on Rack's engine thread, snapshots for Python while the
-engine runs, a measured one-frame latency in a Rack pair fixture, and the
-contract by which native extension code exchanges messages with custom
+Established (RP-23B): graph nodes exchange messages in Rack's own engine
+exactly one frame apart, at 44.1, 48 and 96 kHz with 1, 2 and 4 engine
+threads, and give silence on removal, reordering and a schema mismatch.
+Not yet established (RP-23C): snapshots for Python while the engine runs,
+sanitizer stress runs, the compiled tier for expander nodes, and the
+contract by which C++ kernel libraries exchange messages with custom
 schemas. Until then, Python cannot interpret a foreign plugin's message:
 those `void*` semantics stay open in the coverage records of
 `producerMessage` and `consumerMessage`.

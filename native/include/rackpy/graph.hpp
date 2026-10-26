@@ -198,6 +198,34 @@ struct Delay {
 	void latch(const Signal& source) { held = source; }
 };
 
+// --- Expander lanes (RP-23B) ----------------------------------------------------------------
+// A graph sends a signal to a neighbouring module through a lane of a "rackpy.graph" expander message
+// (docs/how-to/graphs.md#expanders): the channel count, then the voltages.
+
+/** Values in one lane: the channel count, then MAX_CHANNELS voltages. */
+constexpr int LANE = 1 + MAX_CHANNELS;
+
+/** Writes `s` to a lane: its channel count and its channels' voltages (the others are left as they are). */
+inline void writeLane(float* lane, const Signal& s) {
+	lane[0] = (float) s.channels;
+	for (int c = 0; c < s.channels; c++)
+		lane[1 + c] = s.v[c];
+}
+
+/** Reads a lane into `out` and marks it read (0 channels), so that a message is received once and a
+neighbour that stops sending reads as silence. A count that is not a whole number from 0 to MAX_CHANNELS
+reads as 0 channels. */
+inline void readLane(Signal& out, float* lane) {
+	float n = lane[0];
+	int channels = (n >= 0.f && n <= (float) MAX_CHANNELS) ? (int) n : 0;
+	if ((float) channels != n)
+		channels = 0;
+	out.channels = channels;
+	for (int c = 0; c < channels; c++)
+		out.v[c] = lane[1 + c];
+	lane[0] = 0.f;
+}
+
 // --- Native extension node types (from kernel libraries) ------------------------------------
 
 /** Bumped whenever Node, NodeType or NodeRegistrar change incompatibly. */

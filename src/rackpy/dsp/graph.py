@@ -15,12 +15,18 @@ operand read 0 V. Feedback within the module needs an explicit
 :meth:`Graph.delay` of one sample: a cycle without one is refused, with its
 path, rather than given hidden latency.
 
+A graph may also exchange signals with the modules beside it, through
+Rack's expanders: :meth:`Graph.expander_send` writes a signal into a lane of
+the neighbour's ``"rackpy.graph"`` message, and :meth:`Graph.expander_receive`
+reads what the neighbour sent, exactly one frame later, as Rack's double
+buffers deliver it (RP-23B).
+
 :meth:`Graph.plan` validates the graph and lowers it to a :class:`Plan`,
 the description its execution tiers share. :meth:`Graph.compile` turns it
 into a native kernel run by the plan interpreter on Rack's engine thread,
 for ``Module.set_kernel``; :mod:`rackpy.dsp.graph_reference` evaluates it
-offline, for tests and teaching. A compiled tier that composes the nodes
-statically is RP-21C, not available yet.
+offline, for tests and teaching; :mod:`rackpy.dsp.graph_codegen` emits a
+compiled tier that composes the nodes statically.
 
 This module is pure Python and works outside Rack, except for
 :meth:`Graph.compile`.
@@ -37,7 +43,10 @@ if TYPE_CHECKING:
     from _rackpy_host.dsp import Kernel
 
 __all__ = [
+    "EXPANDER_SCHEMA",
+    "LANE",
     "MAX_CHANNELS",
+    "MAX_LANES",
     "OPS",
     "Control",
     "Delay",
@@ -54,6 +63,15 @@ __all__ = [
 
 MAX_CHANNELS: Final = 16
 """Rack's ``PORT_MAX_CHANNELS``: the most channels a signal carries."""
+
+EXPANDER_SCHEMA: Final = "rackpy.graph"
+"""The schema of the expander messages graphs exchange (:meth:`Graph.expander_send`)."""
+
+LANE: Final = 1 + MAX_CHANNELS
+"""Values in one lane of a ``"rackpy.graph"`` message: the channel count, then the voltages."""
+
+MAX_LANES: Final = 64
+"""The most lanes a graph addresses on one side."""
 
 
 class GraphError(ValueError):
@@ -130,6 +148,24 @@ OPS: Final[dict[str, Op]] = _ops(
     ),
     Op("output", 1, ("port",), False, "Writes an output port: its channels (at least one) and voltages."),
     Op("light", 1, ("index",), False, "Sets a light's brightness from channel 0."),
+    Op(
+        "expander_send",
+        1,
+        ("side", "lane"),
+        False,
+        "Writes the signal into lane `lane` of the neighbour's message on `side` (0 left, 1 right) and requests "
+        "the flip, if the neighbour is a RackPy module whose facing expander points back and holds "
+        '"rackpy.graph" messages with that lane; otherwise nothing.',
+    ),
+    Op(
+        "expander_receive",
+        0,
+        ("side", "lane"),
+        True,
+        "What the neighbour on `side` sent in lane `lane` during the previous frame, read once; 0 channels if "
+        'nothing was sent, the neighbour is not a RackPy module, or this module holds no "rackpy.graph" '
+        "messages with that lane on that side.",
+    ),
 )
 
 
@@ -346,6 +382,8 @@ class Graph:
         self._bound: dict[int, int] = {}  # forward -> source
         self._outputs: dict[int, int] = {}  # port -> output node
         self._lights: dict[int, int] = {}  # index -> light node
+        self._sends: dict[tuple[int, int], int] = {}  # (side, lane) -> expander_send node
+        self._receives: dict[tuple[int, int], int] = {}  # (side, lane) -> expander_receive node
         self._controls: dict[str, int] = {}
 
     # --- sources ---------------------------------------------------------------------------
@@ -436,6 +474,23 @@ class Graph:
         self._made.append(_Made(name, ids, numbers, _caller(), names=tuple(args)))
         return Signal(self, len(self._made) - 1)
 
+    def expander_receive(self, side: int, lane: int = 0) -> Signal:
+        """What the neighbour on ``side`` (0 left, 1 right) sent in ``lane``, one frame later, read once.
+
+        The module must hold ``"rackpy.graph"`` messages with room for the lane
+        on that side (:func:`rackpy.engine.expanders.graph_messages`); the
+        signal has 0 channels whenever nothing arrived.
+        """
+        key = self._lane(side, lane, "expander_receive")
+        if key in self._receives:
+            raise GraphError(
+                f"lane {key[1]} of side {key[0]} is already received (at {self._made[self._receives[key]].where}); "
+                "a lane carries one signal: receive it once and reuse the signal"
+            )
+        node = self._node("expander_receive", (), (float(key[0]), float(key[1])))
+        self._receives[key] = node
+        return Signal(self, node)
+
     # --- feedback and forward references -----------------------------------------------------
     def delay(self, initial: float = 0.0) -> Delay:
         """A one-sample delay; give it its source with :meth:`Delay.feed`."""
@@ -466,6 +521,23 @@ class Graph:
             raise GraphError(f"light {light} is already set (at {self._made[self._lights[light]].where})")
         self._lights[light] = self._node("light", (brightness,), (float(light),))
 
+    def expander_send(self, side: int, signal: Signal | float, lane: int = 0) -> None:
+        """Sends ``signal`` to the neighbour on ``side`` (0 left, 1 right) in ``lane``, once per lane.
+
+        It arrives one frame later, at the neighbour's ``expander_receive`` on
+        the facing side. It is written only if the neighbour is a RackPy
+        module, its facing expander points back to this module, and it holds
+        ``"rackpy.graph"`` messages with room for the lane; otherwise nothing
+        is sent.
+        """
+        key = self._lane(side, lane, "expander_send")
+        if key in self._sends:
+            raise GraphError(
+                f"lane {key[1]} of side {key[0]} is already sent (at {self._made[self._sends[key]].where}); "
+                "a lane carries one signal"
+            )
+        self._sends[key] = self._node("expander_send", (signal,), (float(key[0]), float(key[1])))
+
     # --- execution -----------------------------------------------------------------------------
     def compile(self) -> Kernel:
         """The graph as a native kernel, run by the plan interpreter: hand it to ``Module.set_kernel``.
@@ -488,9 +560,9 @@ class Graph:
     # --- lowering ------------------------------------------------------------------------------
     def plan(self) -> Plan:
         """Validates the graph and lowers it: see :class:`Plan`. Raises :class:`GraphError`."""
-        sinks = [*self._outputs.values(), *self._lights.values()]
+        sinks = [*self._outputs.values(), *self._lights.values(), *self._sends.values()]
         if not sinks:
-            raise GraphError("the graph writes no output or light, so it would do nothing")
+            raise GraphError("the graph writes no output, light or expander lane, so it would do nothing")
         resolve = self._resolver()
         # Nodes the sinks need, through forwards and the delays' sources.
         needed: set[int] = set()
@@ -540,6 +612,15 @@ class Graph:
         ids = [self._operand(x, f"{op}'s operand {k + 1}") for k, x in enumerate(inputs)]
         self._made.append(_Made(op, ids, args, _caller()))
         return len(self._made) - 1
+
+    @staticmethod
+    def _lane(side: object, lane: object, what: str) -> tuple[int, int]:
+        if not isinstance(side, int) or isinstance(side, bool) or side not in (0, 1):
+            raise GraphError(f"{what}'s side is 0 (left) or 1 (right), not {side!r}")
+        index = _index(lane, f"{what}'s lane")
+        if index >= MAX_LANES:
+            raise GraphError(f"{what}'s lane is 0 to {MAX_LANES - 1}, not {index}")
+        return side, index
 
     def _operand(self, value: object, what: str) -> int:
         if isinstance(value, Signal):

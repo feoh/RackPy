@@ -66,6 +66,10 @@ def test_what_cannot_be_compiled_is_refused() -> None:
     extended.output(0, extended.node("example.Fold", extended.input(0), drive=1.0, limit=5.0))
     with pytest.raises(GraphError, match=r"native extension nodes \(example\.Fold\).*Graph\.compile\(\)"):
         emit({"Folded": extended}, "mine")
+    neighbourly = Graph()
+    neighbourly.expander_send(1, neighbourly.input(0))
+    with pytest.raises(GraphError, match=r"uses expander_send.*RP-23C.*Graph\.compile\(\)"):
+        emit({"Neighbourly": neighbourly}, "mine")
     looped = Graph()
     f = looped.forward()
     f.bind(f * 2)

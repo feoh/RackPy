@@ -124,6 +124,7 @@ void assignMessage(const ExpanderView& v, bool producer, py::handle value) {
 		MessageBuffer* old = engine::findMessage(slot);
 		slot = nullptr;
 		release(m, old);
+		engine::publishChannel(m, m, v.side);
 		return;
 	}
 	if (!py::isinstance<MessageBuffer>(value))
@@ -137,7 +138,7 @@ void assignMessage(const ExpanderView& v, bool producer, py::handle value) {
 	if (MessageBuffer* pair = engine::findMessage(other))
 		if (pair->schema != buffer->schema || pair->size != buffer->size)
 			throw py::value_error(std::string(what) + ": the two messages of a side must have the same schema and size, "
-				"as Rack swaps them (the other is " + pair->schema + "[" + std::to_string(pair->size) + "])");
+				"as Rack swaps them (the other is " + pair->schema->name + "[" + std::to_string(pair->size) + "])");
 	if (module::Module* owner = buffer->liveOwner())
 		throw runtime::Ownership(std::string(what) + ": this message is already in " +
 			(owner == &m ? "another expander slot of this module" : "another module's expander") + "; take it out first");
@@ -147,6 +148,7 @@ void assignMessage(const ExpanderView& v, bool producer, py::handle value) {
 	buffer->ownerToken = m.token;
 	m.expanderMessages.push_back(buffer);
 	release(m, old);
+	engine::publishChannel(m, m, v.side);  // for native code on Rack's engine thread (RP-23B)
 }
 
 /** A message whose contents Python may touch now: refused while Rack's engine runs the module holding it. */
@@ -223,7 +225,7 @@ void bindExpanders(py::module_ engine, py::class_<ModuleRef>& module) {
 				throw py::value_error(e.what());
 			}
 		}), py::arg("schema"), py::arg("size"))
-		.def_property_readonly("schema", [](const MessageBuffer& b) { return b.schema; })
+		.def_property_readonly("schema", [](const MessageBuffer& b) { return b.schema->name; })
 		.def_property_readonly("size", [](const MessageBuffer& b) { return b.size; })
 		.def_property_readonly("owner", [](const MessageBuffer& b) {
 			runtime::requireMainThread("using an expander message");
@@ -249,7 +251,7 @@ void bindExpanders(py::module_ engine, py::class_<ModuleRef>& module) {
 			std::copy(values.begin(), values.end(), m.data);
 		}, py::arg("values"), "Sets every value.")
 		.def("__repr__", [](const MessageBuffer& b) {
-			return "<ExpanderMessage " + b.schema + "[" + std::to_string(b.size) + "]>";
+			return "<ExpanderMessage " + b.schema->name + "[" + std::to_string(b.size) + "]>";
 		});
 
 	py::class_<ForeignMessage>(engine, "ForeignMessage", py::is_final(),

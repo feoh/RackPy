@@ -7,9 +7,11 @@ Available inside Rack only. A module's ``left_expander`` and
 :class:`ForeignMessage` pointers that another plugin allocated, or ``None``.
 Python touches message slots, message contents and the flip flag only while
 Rack's engine does not run the module; native kernels exchange messages
-while it does (RP-23B). See ``docs/reference/engine-module.md#expanders``.
+while it does: :func:`graph_messages` gives a side the messages that DSP
+graphs exchange (RP-23B). See ``docs/reference/engine-module.md#expanders``.
 """
 
+from rackpy.dsp.graph import EXPANDER_SCHEMA, LANE, MAX_LANES
 from rackpy.raw import engine as _engine
 
 Expander = _engine.Module.Expander
@@ -36,4 +38,17 @@ def allocate_messages(expander: Expander, schema: str, size: int) -> tuple[Expan
     return producer, consumer
 
 
-__all__ = ["Expander", "ExpanderMessage", "ForeignMessage", "allocate_messages"]
+def graph_messages(expander: Expander, lanes: int = 1) -> tuple[ExpanderMessage, ExpanderMessage]:
+    """Gives one side of a RackPy module the ``"rackpy.graph"`` messages DSP graphs exchange (RP-23B).
+
+    Each of the ``lanes`` lanes carries one signal (``rackpy.dsp.graph.LANE``
+    values: the channel count, then the voltages). A module receives in its
+    own messages: the neighbour's ``Graph.expander_send`` writes into them, and
+    this module's ``Graph.expander_receive`` reads them one frame later.
+    """
+    if isinstance(lanes, bool) or not isinstance(lanes, int) or not 1 <= lanes <= MAX_LANES:
+        raise ValueError(f"graph_messages takes 1 to {MAX_LANES} lanes, not {lanes!r}")
+    return allocate_messages(expander, EXPANDER_SCHEMA, lanes * LANE)
+
+
+__all__ = ["Expander", "ExpanderMessage", "ForeignMessage", "allocate_messages", "graph_messages"]

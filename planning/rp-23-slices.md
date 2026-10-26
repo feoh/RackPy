@@ -48,12 +48,21 @@ and `request_message_flip()` follow the rule above, and assigned buffers
 belong to the module from then on. Tests inside Rack; docs.
 
 **RP-23B — one-sample production exchange.** Graph nodes that send to and
-receive from an expander, in both tiers and the offline reference; neighbour
-and schema checks, and invalidation on removal, reordering and mismatch;
-snapshots for Python while the engine runs; a Rack pair fixture measuring
-exactly one frame of latency across sample rates and engine thread counts;
-hot removal, reordering, mismatch and repeated flips under sanitizers; the
-interoperability and extension contract for custom native schemas.
+receive from an expander, in the plan interpreter, the offline reference
+(with a pair runner) and on a laboratory Bench; neighbour, back-link,
+schema and size checks on Rack's engine thread, and silence on removal,
+reordering and mismatch; a Rack pair fixture measuring exactly one frame of
+latency across sample rates and engine thread counts.
+
+**RP-23C — the native schema contract and the rest** (split from RP-23B on
+2026-10-26, `tk-rackpy-23c-native-expander-schema-contract-compi-a3a9d8`).
+The public C++ contract by which kernel libraries and extension nodes
+exchange messages with custom schemas; the compiled tier's expander nodes
+through it; seqlock snapshots for Python while the engine runs; hot
+removal, reordering, mismatch and repeated flips under sanitizers; the
+interoperability and extension documentation for custom native schemas and
+raw `void*` semantics. Then `producerMessage` and `consumerMessage` can
+leave `planned`.
 
 ## RP-23A decisions
 
@@ -74,3 +83,39 @@ interoperability and extension contract for custom native schemas.
 - **Facade.** `rackpy.engine.expanders` re-exports the three types and adds
   `allocate_messages(expander, schema, size)`, which gives a side both
   buffers and restores the producer slot if the consumer assignment fails.
+
+## RP-23B decisions
+
+- **Split.** Kernel libraries are separate DSOs with their own static
+  libstdc++, so neither RTTI nor C++ calls into RackPy may cross to them
+  (ADR 002). Checking a neighbour's RackPy messages from a library therefore
+  needs a C contract with its own ABI number: that, the compiled tier that
+  depends on it, snapshots and the sanitizer stress went to RP-23C. RP-23B
+  is the interpreter, the reference, the Bench and the Rack measurement.
+- **Rack's own pattern.** The receiver allocates and owns both buffers of
+  the side it receives on; the sender writes the receiver's producer buffer
+  and requests the flip on the receiver's expander; the receiver reads its
+  consumer buffer. Rack swaps after every module of the frame has run, so a
+  message arrives exactly one frame later in any order and on any number of
+  engine threads, and the two modules never touch the same buffer in a
+  frame.
+- **One fixed schema for graphs.** Plans carry numbers only, so graph nodes
+  use RackPy's `"rackpy.graph"` schema: lanes of 17 floats (a channel
+  count, then 16 voltages), up to 64 per side, addressed by `(side, lane)`.
+- **Lock-free checks.** The address registry takes a mutex, so the engine
+  thread never uses it. Each RackPy module publishes per side the schema,
+  size and two buffers its slots hold (`engine::ExpanderChannels`, a second
+  base of `module::Module`), on the main thread while Rack's engine does not
+  run it. Native code finds a neighbour's channels by a cross-cast, cached
+  per node by module pointer and ID, since a deleted module's address can be
+  reused. A send also requires the neighbour's facing expander to point back
+  to the sender, so a half-done rearrangement cannot misdirect a message.
+- **Read once.** A receive marks its lane read (0 channels), so a
+  neighbour that is removed, moves away or stops sending is heard as
+  silence at once, never as a repeated last message. A receive also needs a
+  RackPy neighbour present: a message flipped just before the neighbour's
+  removal is dropped, as a Rack module checking its neighbour would.
+- **Test placement.** The live-Rack tests place modules with a test hook
+  that writes the expander IDs as `RackWidget::updateExpanders` does (on the
+  main thread, without a lock), only while Rack's engine is stepped by the
+  test.

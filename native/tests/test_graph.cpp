@@ -346,7 +346,20 @@ void testBadPlansAreRefused() {
 		b.node("output", {b.constant(1)}, {0});
 		b.node("output", {b.constant(2)}, {0});
 	}, "output 0 is already written"));
-	CHECK(refused([](Builder& b) { b.constant(1); }, "writes no output or light"));
+	CHECK(refused([](Builder& b) { b.constant(1); }, "writes no output, light or expander lane"));
+	CHECK(refused([](Builder& b) { b.node("expander_send", {b.constant(1)}, {2, 0}); }, "its side is 0 (left) or 1 (right)"));
+	CHECK(refused([](Builder& b) { b.node("expander_send", {b.constant(1)}, {1, 64}); }, "whole number from 0 to 63"));
+	CHECK(refused([](Builder& b) { b.node("expander_send", {b.constant(1)}, {1, 0.5}); }, "whole number from 0 to 63"));
+	CHECK(refused([](Builder& b) {
+		b.node("expander_send", {b.constant(1)}, {1, 3});
+		b.node("expander_send", {b.constant(2)}, {1, 3});
+	}, "lane 3 of side 1 is already sent"));
+	CHECK(refused([](Builder& b) {
+		b.node("output", {b.node("expander_receive", {}, {0, 0})}, {0});
+		b.node("light", {b.node("expander_receive", {}, {0, 0})}, {0});
+	}, "lane 0 of side 0 is already received"));
+	CHECK(refused([](Builder& b) { b.node("output", {b.node("expander_receive", {b.constant(1)}, {0, 0})}, {0}); },
+		"reads 0 signals, not 1"));
 	CHECK(refused([](Builder& b) { b.node("output", {b.node("pulse", {b.constant(1)}, {-1})}, {0}); }, "duration must not be negative"));
 	CHECK(refused([](Builder& b) { b.node("output", {b.node("delay", {}, {0})}, {0}); }, "it is never fed"));
 	CHECK(refused([](Builder& b) {
@@ -485,6 +498,212 @@ void testExtensionNodes() {
 
 }  // namespace
 
+// --- Expander exchange (RP-23B) -------------------------------------------------------------
+
+/** Gives `side` of `m` two "rackpy.graph" buffers of `lanes` lanes, as Python's graph_messages() does. */
+void giveMessages(module::Module& m, uint8_t side, size_t lanes, const char* schema = engine::GRAPH_SCHEMA) {
+	auto a = engine::allocateMessage(schema, lanes * graph::LANE), b = engine::allocateMessage(schema, lanes * graph::LANE);
+	rack::engine::Module::Expander& e = m.getExpander(side);
+	e.producerMessage = a->data;
+	e.consumerMessage = b->data;
+	m.expanderMessages.push_back(a);
+	m.expanderMessages.push_back(b);
+	engine::publishChannel(m, m, side);
+}
+
+/** Puts `left` and `right` side by side, as Rack's engine does from the expanders' module IDs. */
+void place(rack::engine::Module& left, rack::engine::Module& right) {
+	left.rightExpander.moduleId = right.id;
+	left.rightExpander.module = &right;
+	right.leftExpander.moduleId = left.id;
+	right.leftExpander.module = &left;
+}
+
+/** One frame of Rack's engine (Engine_stepFrame): every module in `order`, then the requested flips. */
+void stepFrame(const std::vector<rack::engine::Module*>& order, int64_t n) {
+	for (rack::engine::Module* m : order)
+		m->process(frame(48000.f, n));
+	for (rack::engine::Module* m : order)
+		for (rack::engine::Module::Expander* e : {&m->leftExpander, &m->rightExpander})
+			if (e->messageFlipRequested) {
+				std::swap(e->producerMessage, e->consumerMessage);
+				e->messageFlipRequested = false;
+			}
+}
+
+/** A counter from 1 (frame n: n + 1) sent right on lane `lane`, and a 16-channel ramp on lane 1. */
+graph::PlanSpec sender(double lane = 0) {
+	Builder b;
+	long long count = b.node("delay", {}, {1});
+	b.feed(count, b.node("add", {count, b.constant(1)}));
+	b.node("expander_send", {count}, {1, lane});
+	b.node("expander_send", {b.node("input", {}, {0})}, {1, 1});
+	return b.spec;
+}
+
+/** Receives lanes 0 and 1 from the left onto outputs 0 and 1. */
+graph::PlanSpec receiver() {
+	Builder b;
+	b.node("output", {b.node("expander_receive", {}, {0, 0})}, {0});
+	b.node("output", {b.node("expander_receive", {}, {0, 1})}, {1});
+	return b.spec;
+}
+
+struct Pair {
+	module::Module a, b;
+	Pair() {
+		a.id = 11;
+		b.id = 12;
+		a.config(0, 1, 0, 0);
+		b.config(0, 0, 2, 0);
+		a.kernels.attach(hosted(graph::planType(sender())), false);
+		b.kernels.attach(hosted(graph::planType(receiver())), false);
+		connect(a.inputs[0], 16);
+		connect(b.outputs[0]);
+		connect(b.outputs[1]);
+		giveMessages(b, 0, 2);
+		place(a, b);
+	}
+	void drive(int64_t n) {
+		for (int c = 0; c < 16; c++)
+			a.inputs[0].setVoltage((float) (n * 16 + c), c);
+	}
+};
+
+void testOneFrameOfLatencyInEitherOrder() {
+	for (bool senderFirst : {true, false}) {
+		Pair p;
+		std::vector<rack::engine::Module*> order = senderFirst ? std::vector<rack::engine::Module*>{&p.a, &p.b}
+			: std::vector<rack::engine::Module*>{&p.b, &p.a};
+		for (int64_t n = 0; n < 1000; n++) {
+			p.drive(n);
+			stepFrame(order, n);
+			if (n == 0) {
+				CHECK(p.b.outputs[0].getVoltage() == 0.f && p.b.outputs[1].getChannels() == 1);  // nothing yet: silence
+				continue;
+			}
+			// What A sent during frame n - 1: its counter (n) and the ramp it read.
+			CHECK(p.b.outputs[0].getChannels() == 1 && p.b.outputs[0].getVoltage() == (float) n);
+			CHECK(p.b.outputs[1].getChannels() == 16);
+			for (int c = 0; c < 16; c++)
+				if (p.b.outputs[1].getVoltage(c) != (float) ((n - 1) * 16 + c)) {
+					CHECK(!"a polyphonic lane did not arrive one frame later");
+					return;
+				}
+		}
+	}
+}
+
+void testMismatchedOrMissingNeighboursExchangeNothing() {
+	// The receiver's buffers have another schema: nothing is sent (no flip), silence is received.
+	{
+		Pair p;
+		p.b.expanderMessages.clear();
+		giveMessages(p.b, 0, 2, "demo.Other");
+		void* consumer = p.b.leftExpander.consumerMessage;
+		for (int64_t n = 0; n < 3; n++) {
+			p.drive(n);
+			stepFrame({&p.a, &p.b}, n);
+			CHECK(p.b.leftExpander.consumerMessage == consumer);
+			CHECK(p.b.outputs[0].getVoltage() == 0.f && p.b.outputs[1].getChannels() == 1);
+		}
+	}
+	// One lane only: lane 0 still arrives, lane 1 does not fit and reads silence.
+	{
+		Pair p;
+		p.b.expanderMessages.clear();
+		giveMessages(p.b, 0, 1);
+		for (int64_t n = 0; n < 3; n++) {
+			p.drive(n);
+			stepFrame({&p.a, &p.b}, n);
+			CHECK(p.b.outputs[0].getVoltage() == (float) n);
+			CHECK(p.b.outputs[1].getVoltage() == 0.f && p.b.outputs[1].getChannels() == 1);
+		}
+	}
+	// Another plugin's module (not a RackPy module) between them: neither side reaches it.
+	{
+		Pair p;
+		rack::engine::Module foreign;
+		foreign.id = 13;
+		place(p.a, foreign);
+		place(foreign, p.b);
+		for (int64_t n = 0; n < 3; n++) {
+			p.drive(n);
+			stepFrame({&p.a, &foreign, &p.b}, n);
+			CHECK(!foreign.leftExpander.producerMessage && !foreign.leftExpander.consumerMessage);
+			CHECK(p.b.outputs[0].getVoltage() == 0.f);
+		}
+	}
+	// The receiver's left neighbour is another module: the sender does not write into it.
+	{
+		Pair p;
+		module::Module other;
+		other.id = 14;
+		p.b.leftExpander.module = &other;
+		p.b.leftExpander.moduleId = other.id;
+		void* consumer = p.b.leftExpander.consumerMessage;
+		for (int64_t n = 0; n < 3; n++) {
+			p.drive(n);
+			stepFrame({&p.a, &p.b, &other}, n);
+			CHECK(p.b.leftExpander.consumerMessage == consumer && p.b.outputs[0].getVoltage() == 0.f);
+		}
+	}
+}
+
+void testRemovalAndAStoppedSenderGiveSilence() {
+	// Rack's removeModule clears the neighbour's pointer: a message already flipped is not read.
+	{
+		Pair p;
+		for (int64_t n = 0; n < 5; n++) {
+			p.drive(n);
+			stepFrame({&p.a, &p.b}, n);
+		}
+		CHECK(p.b.outputs[0].getVoltage() == 4.f);
+		p.b.leftExpander.module = nullptr;
+		p.b.leftExpander.moduleId = -1;
+		stepFrame({&p.b}, 5);
+		CHECK(p.b.outputs[0].getVoltage() == 0.f && p.b.outputs[1].getVoltage(0) == 0.f);
+	}
+	// A sender that stops (its right neighbour is gone) leaves no flip: the last message is read once.
+	{
+		Pair p;
+		for (int64_t n = 0; n < 5; n++) {
+			p.drive(n);
+			stepFrame({&p.a, &p.b}, n);
+		}
+		p.a.rightExpander.module = nullptr;
+		p.a.rightExpander.moduleId = -1;
+		stepFrame({&p.a, &p.b}, 5);
+		CHECK(p.b.outputs[0].getVoltage() == 5.f);  // sent during frame 4
+		stepFrame({&p.a, &p.b}, 6);
+		CHECK(p.b.outputs[0].getVoltage() == 0.f && p.b.outputs[1].getChannels() == 1);  // read once, then silence
+	}
+	// Another receiver in its place is found at the next frame.
+	{
+		Pair p;
+		for (int64_t n = 0; n < 3; n++)
+			stepFrame({&p.a, &p.b}, n);
+		module::Module next;
+		next.id = 15;
+		next.config(0, 0, 2, 0);
+		next.kernels.attach(hosted(graph::planType(receiver())), false);
+		connect(next.outputs[0]);
+		giveMessages(next, 0, 2);
+		place(p.a, next);
+		p.b.leftExpander.module = nullptr;
+		stepFrame({&p.a, &next}, 3);
+		stepFrame({&p.a, &next}, 4);
+		CHECK(next.outputs[0].getVoltage() == 4.f);
+	}
+}
+
+void testAPlanThatOnlySendsIsAccepted() {
+	Builder b;
+	b.node("expander_send", {b.constant(1)}, {0, 63});
+	auto type = graph::planType(b.spec);
+	CHECK(type->fields.empty());
+}
+
 int main() {
 	runtime::markMainThread();
 	testTheTutorialOscillatorMatchesDirectCpp();
@@ -497,6 +716,10 @@ int main() {
 	testBadPlansAreRefused();
 	registerTestNodes();
 	testExtensionNodes();
+	testOneFrameOfLatencyInEitherOrder();
+	testMismatchedOrMissingNeighboursExchangeNothing();
+	testRemovalAndAStoppedSenderGiveSilence();
+	testAPlanThatOnlySendsIsAccepted();
 	if (failures)
 		std::fprintf(stderr, "%d check(s) failed\n", failures);
 	else

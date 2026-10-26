@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Expander message buffers (RP-23): allocation and the address registry. See expanders.hpp.
+// Expander message buffers (RP-23): schemas, allocation, the address registry and channel publication.
+// See expanders.hpp.
 #include "expanders.hpp"
 
 #include <mutex>
@@ -11,12 +12,17 @@ namespace engine {
 
 namespace {
 
-// Main thread in practice; the mutex only makes a misuse safe rather than racy.
+// Main thread in practice; the mutex only makes a misuse safe rather than racy. Never on the engine thread.
 std::mutex registryMutex;
 
 std::unordered_map<const void*, MessageBuffer*>& registry() {
 	static auto* buffers = new std::unordered_map<const void*, MessageBuffer*>();  // outlives static destruction
 	return *buffers;
+}
+
+std::unordered_map<std::string, const Schema*>& schemas() {
+	static auto* names = new std::unordered_map<std::string, const Schema*>();  // never freed: see Schema
+	return *names;
 }
 
 bool schemaName(const std::string& name) {
@@ -30,8 +36,25 @@ bool schemaName(const std::string& name) {
 
 }  // namespace
 
-MessageBuffer::MessageBuffer(std::string schema, size_t size)
-	: schema(std::move(schema)), size(size), data(new float[size]()) {
+const Schema* internSchema(const std::string& name) {
+	if (!schemaName(name))
+		throw std::invalid_argument("an expander message schema is 1 to 64 letters, digits, '_', '.' or '-', not \"" + name + "\"");
+	std::lock_guard<std::mutex> lock(registryMutex);
+	auto found = schemas().find(name);
+	if (found != schemas().end())
+		return found->second;
+	const Schema* schema = new Schema{name};
+	schemas().emplace(name, schema);
+	return schema;
+}
+
+const Schema* graphSchema() {
+	static const Schema* schema = internSchema(GRAPH_SCHEMA);
+	return schema;
+}
+
+MessageBuffer::MessageBuffer(const Schema* schema, size_t size)
+	: schema(schema), size(size), data(new float[size]()) {
 	std::lock_guard<std::mutex> lock(registryMutex);
 	registry()[data] = this;
 }
@@ -45,12 +68,11 @@ MessageBuffer::~MessageBuffer() {
 }
 
 std::shared_ptr<MessageBuffer> allocateMessage(const std::string& schema, size_t size) {
-	if (!schemaName(schema))
-		throw std::invalid_argument("an expander message schema is 1 to 64 letters, digits, '_', '.' or '-', not \"" + schema + "\"");
+	const Schema* interned = internSchema(schema);
 	if (size < 1 || size > MAX_MESSAGE_SIZE)
 		throw std::invalid_argument("an expander message holds 1 to " + std::to_string(MAX_MESSAGE_SIZE) + " floats, not " +
 			std::to_string(size));
-	return std::make_shared<MessageBuffer>(schema, size);
+	return std::make_shared<MessageBuffer>(interned, size);
 }
 
 MessageBuffer* findMessage(const void* pointer) {
@@ -64,6 +86,16 @@ MessageBuffer* findMessage(const void* pointer) {
 size_t messageCount() {
 	std::lock_guard<std::mutex> lock(registryMutex);
 	return registry().size();
+}
+
+void publishChannel(rack::engine::Module& module, ExpanderChannels& channels, uint8_t side) {
+	const rack::engine::Module::Expander& e = module.getExpander(side);
+	MessageBuffer* a = findMessage(e.producerMessage);
+	MessageBuffer* b = findMessage(e.consumerMessage);
+	Channel c;
+	if (a && b && a != b && a->schema == b->schema && a->size == b->size)
+		c = Channel{a->schema, a->size, {a->data, b->data}};
+	channels.channels[side ? 1 : 0] = c;
 }
 
 }  // namespace engine

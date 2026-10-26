@@ -17,7 +17,9 @@ reassociate across nodes. A kernel's fields are the graph's wiring
 
 Native extension nodes are not composed: their types live in other
 libraries, out of a generated library's reach. Graphs that use them run on
-the interpreter (:meth:`rackpy.dsp.graph.Graph.compile`).
+the interpreter (:meth:`rackpy.dsp.graph.Graph.compile`), as do graphs with
+expander nodes for now: a kernel library cannot yet check a neighbour's
+RackPy messages (RP-23C).
 
 ``bin/rackpy-graph emit`` runs this from the command line. Pure Python.
 """
@@ -73,6 +75,13 @@ def _identifier(name: str, what: str) -> None:
 def _kernel(name: str, namespace: str, plan: Plan) -> tuple[str, str]:
     """The kernel struct for one plan, and its registration."""
     nodes = plan.nodes
+    expanders = sorted({node.op for node in nodes if node.op.startswith("expander_")})
+    if expanders:
+        raise GraphError(
+            f"graph {name} uses {', '.join(expanders)}, which the compiled tier does not compose yet (a kernel "
+            "library cannot check a neighbour's RackPy messages until RP-23C's expander contract); run it with "
+            "Graph.compile() instead"
+        )
     if any("." in node.op for node in nodes):
         extensions = sorted({node.op for node in nodes if "." in node.op})
         raise GraphError(
