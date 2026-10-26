@@ -9,6 +9,7 @@ namespace bindings {
 void bind_services(pybind11::module_ raw) {
 	services::bindSystem(raw.def_submodule("system", "rack::system: files, paths, archives, time and processes."));
 	services::bindNetwork(raw.def_submodule("network", "rack::network: HTTP requests, downloads and URLs."));
+	services::bindSettings(raw.def_submodule("settings", "rack::settings: Rack's settings."));
 }
 
 }  // namespace bindings

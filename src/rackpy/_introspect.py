@@ -59,6 +59,7 @@ DUNDERS = frozenset(
         "__str__",
         "__repr__",
         "__copy__",
+        "__bool__",
         "__deepcopy__",
         "__init_subclass__",
     }

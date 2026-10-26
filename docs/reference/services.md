@@ -1,10 +1,11 @@
 # Services
 
 Rack's services: text, random numbers and the log (**RP-30A**), files and
-HTTP (**RP-30B**), with settings and synchronization to follow (RP-30C).
-**Implemented so far, Linux x86_64 inside Rack Free 2.6.6:**
+HTTP (**RP-30B**), and settings, Rack's shared mutex and weak pointers
+(**RP-30C**). **Implemented, Linux x86_64 inside Rack Free 2.6.6:**
 `rackpy.raw.string`, `rackpy.raw.random`, `rackpy.raw.logger`, the logging
-macros, `rackpy.raw.system` and `rackpy.raw.network`, with the
+macros, `rackpy.raw.system`, `rackpy.raw.network`, `rackpy.raw.settings`,
+`rackpy.raw.SharedMutex`/`SharedLock` and `rackpy.raw.WeakPtr`, with the
 `rackpy.services` facade (see the [coverage report](coverage.md)).
 
 (services-string)=
@@ -153,6 +154,77 @@ no overall limit, with the GIL released.
 - `request_download` returns whether it succeeded; an HTTP error fails.
 - `encode_url(s)` URL-encodes a string, and `url_path(url)` returns a
   URL's path.
+
+(services-settings)=
+## Settings: `rackpy.raw.settings`
+
+Rack keeps its settings in globals, which its UI reads and writes on the
+main thread. `rackpy.raw.settings.settings` has one property for each of
+them, such as `prefer_dark_panels`, `rack_brightness`, `cable_colors`,
+`knob_mode` and `thread_count`. The properties work on the main thread only.
+Rack writes the settings to `settings_path` when it quits.
+
+- **Read-only.** Rack sets `headless` and `is_plugin` at start-up and relies
+  on them afterwards, so they cannot be changed.
+- **Checks.** Float settings must be finite, and `thread_count` must be at
+  least 1. Rack's engine reads `thread_count` at each block.
+- **Copies.** `plugin_settings` (Rack's `pluginSettingsJ`) is Python data;
+  assign it to replace Rack's. `module_infos` and `module_whitelist` are
+  copies too, and assigning one replaces Rack's whole mapping.
+- **One module.** `get_module_info(plugin_slug, module_slug)` returns a
+  `ModuleInfoView`, which writes straight to Rack's entry, or `None`.
+  `is_module_whitelisted` and `reset_cables` are Rack's functions.
+- **Re-rendering.** Rack's themed widgets (`ThemedSvgPanel`, and the themed
+  ports and screws) pick their SVG from `prefer_dark_panels` in `step()`.
+  So changing the setting re-renders them at the next frame, and their
+  framebuffers are marked dirty. This is tested in Rack.
+- **Not refreshed.** Writing `ui_theme` alone does not refresh the UI;
+  Rack's View menu also refreshes the theme.
+- **The login token.** `token` is the user's VCV login token. Never log it.
+
+(services-mutex)=
+## Rack's shared mutex: `rackpy.raw.SharedMutex`
+
+`SharedMutex` is Rack's read-write lock: many readers, or one writer. It
+has Rack's `lock`, `try_lock`, `unlock`, `lock_shared`, `try_lock_shared`
+and `unlock_shared`, and `with mutex:` holds it for writing.
+`SharedLock(mutex)` is Rack's `SharedLock`: it holds the mutex shared from
+construction until `release()`, or until its `with` block ends.
+
+Rack's mutex asserts on every pthread error, which would stop Rack. RackPy
+records which threads hold the mutex and raises `ValueError` before pthread
+sees a misuse:
+
+- a thread locking a mutex it already holds;
+- a thread unlocking a mutex it does not hold.
+
+Other risks remain:
+
+- **Waiting releases the GIL,** so a Python thread holding the mutex can
+  still run and let it go.
+- **Deadlocks between threads are not detected.** Two threads that each
+  wait for a mutex the other holds deadlock, as in C++.
+- **A mutex dropped while held is leaked.** Destroying a held rwlock is
+  undefined, so RackPy logs a warning and leaks it instead.
+- **Not for Rack's audio path.** A blocking lock does not belong there, and
+  Python never runs there.
+
+(services-weakptr)=
+## Weak pointers: `rackpy.raw.WeakPtr`
+
+In the `rack.hpp` closure, Rack's `WeakBase` is a base of `Widget`. So a
+`WeakPtr` points at a widget, RackPy's or Rack's own, and `get()` returns
+`None` once Rack deletes it. Weak pointers work on the main thread only,
+because Rack's are not thread-safe.
+
+- **Rack's members.** `WeakPtr()`, `WeakPtr(widget)`, `get()`, `set()`,
+  truth testing, and `__copy__` (Rack's copy). `weak_handle` is the
+  `WeakHandle` the pointers share.
+- **On widgets.** `Widget` and `HostWidget` have Rack's
+  `get_weak_count()` and `weak_handle`.
+- **Handles.** A `WeakHandle` view has `ptr` (the widget, or `None`) and
+  `count`. The view holds the handle alive, so it counts as one of its
+  pointers.
 
 ## The facade: `rackpy.services`
 

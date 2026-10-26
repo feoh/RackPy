@@ -54,6 +54,7 @@
     "RP-29C": "tk-rackpy-29c-python-configured-audio-and-midi-driv-e7a66b",
     "RP-30A": "tk-rackpy-30a-string-random-and-logger-utilities-eb984d",
     "RP-30B": "tk-rackpy-30b-system-and-network-services-2efdfb",
+    "RP-30C": "tk-rackpy-30c-settings-mutex-and-weak-pointers-bfa22a",
     "RP-25A": "tk-rackpy-25a-checked-detached-native-widget-tree-o-79a09d",
     "RP-25B": "tk-rackpy-25b-checked-widget-geometry-and-spatial-q-8df27f",
     "RP-25C": "tk-rackpy-25c-safe-widget-sibling-insertion-b4de86",

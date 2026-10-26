@@ -59,3 +59,25 @@ Validation: [rp-30a-validation.md](rp-30a-validation.md).
 - **Network.** `request_json`/`request_download` block in curl (30 s to
   connect). A `DownloadProgress` lets another thread watch a download, and
   the facade's `download(on_progress)` uses it.
+
+**RP-30C — settings, mutex and weak pointers**
+(`tk-rackpy-30c-settings-mutex-and-weak-pointers-bfa22a`). 109 records;
+families 1 and 8 have none left. Validation:
+[rp-30c-validation.md](rp-30c-validation.md).
+
+- **Settings.** One property per global on a `settings` object, used on
+  the main thread only, as Rack's UI does. `headless` and `is_plugin` are
+  read-only. Float settings must be finite, and `thread_count` must be at
+  least 1. `pluginSettingsJ`, `moduleInfos` and `moduleWhitelist` are
+  copies. `get_module_info` returns a view that is found again by its slugs
+  each time it is used. A `prefer_dark_panels` change re-renders a
+  `ThemedSvgPanel` at its next `step()`, as RP-27 asked (tested).
+- **Mutex.** Rack's `SharedMutex` asserts on pthread errors, so RackPy
+  records the threads that hold it and refuses relocking or a foreign
+  unlock. Waiting releases the GIL. A mutex dropped while held is leaked
+  (a held rwlock must not be destroyed). `SharedLock` is RAII made
+  explicit: `release()` or the end of its `with` block. Its native object
+  cannot be copied, so the lock is released exactly once.
+- **Weak pointers.** `WeakBase` is `Widget`'s base in the closure, so
+  `WeakPtr` is for widgets; `WeakBase`'s members are on `Widget` and
+  `HostWidget`. Rack's `rwlock` field has no runtime meaning in Python.

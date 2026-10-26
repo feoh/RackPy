@@ -40,6 +40,10 @@ class WidgetChildren(Sequence[Widget | HostWidget]):
 
 class HostWidget:
     """Checked nonowning host identity; not a transferable Widget."""
+
+    def get_weak_count(self) -> int: ...
+    @property
+    def weak_handle(self) -> Any: ...
     @property
     def alive(self) -> bool: ...
     @property
@@ -140,6 +144,9 @@ _BaseEvent: TypeAlias = BaseEvent  # noqa: UP040
 
 class Widget:
     BaseEvent: TypeAlias = _BaseEvent  # noqa: UP040
+    def get_weak_count(self) -> int: ...
+    @property
+    def weak_handle(self) -> Any: ...
 
     class PositionBaseEvent:
         def __init__(self, *, pos: Vec | WidgetVecView = ...) -> None: ...

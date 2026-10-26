@@ -464,6 +464,20 @@
     },
     {
       "facade": null,
+      "id": "class_template:rack::SharedLock<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.SharedLock",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::WeakPtr<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.WeakPtr",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "class_template:rack::componentlibrary::LargeLight<type>",
       "kind": "class",
       "raw": "rackpy.raw.componentlibrary.LargeLight",
@@ -684,6 +698,48 @@
       "id": "constructor:rack::Exception::Exception(const std::string &)",
       "kind": "class",
       "raw": "rackpy.raw.Exception",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::SharedLock::SharedLock<TMutex>($c0 &)",
+      "kind": "class",
+      "raw": "rackpy.raw.SharedLock",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::SharedMutex::SharedMutex()",
+      "kind": "class",
+      "raw": "rackpy.raw.SharedMutex",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::WeakHandle::WeakHandle(void *)",
+      "kind": "class",
+      "raw": "rackpy.raw.WeakHandle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::WeakPtr::WeakPtr<T>($c0 *)",
+      "kind": "class",
+      "raw": "rackpy.raw.WeakPtr",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::WeakPtr::WeakPtr<T>()",
+      "kind": "class",
+      "raw": "rackpy.raw.WeakPtr",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::WeakPtr::WeakPtr<T>(const rack::WeakPtr<$c0> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.WeakPtr.__copy__",
       "status": "implemented"
     },
     {
@@ -1843,6 +1899,20 @@
     },
     {
       "facade": null,
+      "id": "conversion:rack::WeakPtr::operator bool() const",
+      "kind": "method",
+      "raw": "rackpy.raw.WeakPtr.__bool__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "conversion:rack::WeakPtr::operator type-parameter-0-0 *() const",
+      "kind": "method",
+      "raw": "rackpy.raw.WeakPtr.get",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "conversion:rack::string::Version::operator basic_string() const",
       "kind": "method",
       "raw": "rackpy.raw.string.Version.__str__",
@@ -1867,6 +1937,34 @@
       "id": "destructor:rack::Quantity::~Quantity()",
       "kind": "class",
       "raw": "rackpy.raw.Quantity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::SharedLock::~SharedLock<TMutex>()",
+      "kind": "method",
+      "raw": "rackpy.raw.SharedLock.release",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::SharedMutex::~SharedMutex()",
+      "kind": "class",
+      "raw": "rackpy.raw.SharedMutex",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::WeakBase::~WeakBase()",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::WeakPtr::~WeakPtr<T>()",
+      "kind": "class",
+      "raw": "rackpy.raw.WeakPtr",
       "status": "implemented"
     },
     {
@@ -2144,6 +2242,20 @@
     },
     {
       "facade": null,
+      "id": "enum:rack::settings::BrowserSort",
+      "kind": "enum",
+      "raw": "rackpy.raw.settings.BrowserSort",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enum:rack::settings::KnobMode",
+      "kind": "enum",
+      "raw": "rackpy.raw.settings.KnobMode",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "enum:rack::ui::Label::Alignment",
       "kind": "enum",
       "raw": "rackpy.raw.ui.Label.Alignment",
@@ -2231,6 +2343,76 @@
       "id": "enumerator:rack::network::Method::METHOD_PUT",
       "kind": "enum_member",
       "raw": "rackpy.raw.network.Method.METHOD_PUT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::settings::BrowserSort::BROWSER_SORT_BRAND",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.settings.BrowserSort.BROWSER_SORT_BRAND",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::settings::BrowserSort::BROWSER_SORT_LAST_USED",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.settings.BrowserSort.BROWSER_SORT_LAST_USED",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::settings::BrowserSort::BROWSER_SORT_MOST_USED",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.settings.BrowserSort.BROWSER_SORT_MOST_USED",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::settings::BrowserSort::BROWSER_SORT_NAME",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.settings.BrowserSort.BROWSER_SORT_NAME",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::settings::BrowserSort::BROWSER_SORT_RANDOM",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.settings.BrowserSort.BROWSER_SORT_RANDOM",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::settings::BrowserSort::BROWSER_SORT_UPDATED",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.settings.BrowserSort.BROWSER_SORT_UPDATED",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::settings::KnobMode::KNOB_MODE_LINEAR",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.settings.KnobMode.KNOB_MODE_LINEAR",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::settings::KnobMode::KNOB_MODE_ROTARY_ABSOLUTE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.settings.KnobMode.KNOB_MODE_ROTARY_ABSOLUTE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::settings::KnobMode::KNOB_MODE_ROTARY_RELATIVE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.settings.KnobMode.KNOB_MODE_ROTARY_RELATIVE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::settings::KnobMode::KNOB_MODE_SCALED_LINEAR",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.settings.KnobMode.KNOB_MODE_SCALED_LINEAR",
       "status": "implemented"
     },
     {
@@ -2371,6 +2553,48 @@
       "id": "field:rack::Exception::msg",
       "kind": "attribute",
       "raw": "rackpy.raw.Exception.msg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::SharedLock::m",
+      "kind": "property",
+      "raw": "rackpy.raw.SharedLock.m",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::SharedMutex::rwlock",
+      "kind": "class",
+      "raw": "rackpy.raw.SharedMutex",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::WeakBase::weakHandle",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.Widget.weak_handle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::WeakHandle::count",
+      "kind": "property",
+      "raw": "rackpy.raw.WeakHandle.count",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::WeakHandle::ptr",
+      "kind": "property",
+      "raw": "rackpy.raw.WeakHandle.ptr",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::WeakPtr::weakHandle",
+      "kind": "property",
+      "raw": "rackpy.raw.WeakPtr.weak_handle",
       "status": "implemented"
     },
     {
@@ -4188,6 +4412,48 @@
     },
     {
       "facade": null,
+      "id": "field:rack::settings::ModuleInfo::added",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.ModuleInfo.added",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::settings::ModuleInfo::enabled",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.ModuleInfo.enabled",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::settings::ModuleInfo::favorite",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.ModuleInfo.favorite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::settings::ModuleInfo::lastAdded",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.ModuleInfo.last_added",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::settings::PluginWhitelist::moduleSlugs",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.PluginWhitelist.module_slugs",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::settings::PluginWhitelist::subscribed",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.PluginWhitelist.subscribed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::string::Location::column",
       "kind": "property",
       "raw": "rackpy.raw.string.Location.column",
@@ -5623,6 +5889,27 @@
     },
     {
       "facade": null,
+      "id": "function:rack::settings::getModuleInfo(const std::string &, const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.settings.get_module_info",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::settings::isModuleWhitelisted(const std::string &, const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.settings.is_module_whitelisted",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::settings::resetCables()",
+      "kind": "function",
+      "raw": "rackpy.raw.settings.reset_cables",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "function:rack::string::UTF32toUTF8(const std::u32string &)",
       "kind": "function",
       "raw": "rackpy.raw.string.utf32_to_utf8",
@@ -6956,6 +7243,90 @@
       "id": "method:rack::Quantity::toggle()",
       "kind": "method",
       "raw": "rackpy.raw.Quantity.toggle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::SharedMutex::lock()",
+      "kind": "method",
+      "raw": "rackpy.raw.SharedMutex.lock",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::SharedMutex::lock_shared()",
+      "kind": "method",
+      "raw": "rackpy.raw.SharedMutex.lock_shared",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::SharedMutex::try_lock()",
+      "kind": "method",
+      "raw": "rackpy.raw.SharedMutex.try_lock",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::SharedMutex::try_lock_shared()",
+      "kind": "method",
+      "raw": "rackpy.raw.SharedMutex.try_lock_shared",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::SharedMutex::unlock()",
+      "kind": "method",
+      "raw": "rackpy.raw.SharedMutex.unlock",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::SharedMutex::unlock_shared()",
+      "kind": "method",
+      "raw": "rackpy.raw.SharedMutex.unlock_shared",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::WeakBase::getWeakCount()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.get_weak_count",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::WeakPtr::get() const",
+      "kind": "method",
+      "raw": "rackpy.raw.WeakPtr.get",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::WeakPtr::operator*() const",
+      "kind": "method",
+      "raw": "rackpy.raw.WeakPtr.get",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::WeakPtr::operator->() const",
+      "kind": "method",
+      "raw": "rackpy.raw.WeakPtr.get",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::WeakPtr::operator=(const rack::WeakPtr<$c0> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.WeakPtr.__copy__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::WeakPtr::set($c0 *)",
+      "kind": "method",
+      "raw": "rackpy.raw.WeakPtr.set",
       "status": "implemented"
     },
     {
@@ -13603,6 +13974,27 @@
     },
     {
       "facade": null,
+      "id": "record:rack::SharedMutex",
+      "kind": "class",
+      "raw": "rackpy.raw.SharedMutex",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::WeakBase",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.Widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::WeakHandle",
+      "kind": "class",
+      "raw": "rackpy.raw.WeakHandle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "record:rack::app::AudioBlockSizeChoice",
       "kind": "class",
       "raw": "rackpy.raw.app.AudioBlockSizeChoice",
@@ -14835,6 +15227,20 @@
     },
     {
       "facade": null,
+      "id": "record:rack::settings::ModuleInfo",
+      "kind": "class",
+      "raw": "rackpy.raw.settings.ModuleInfo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::settings::PluginWhitelist",
+      "kind": "class",
+      "raw": "rackpy.raw.settings.PluginWhitelist",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "record:rack::string::CaseInsensitiveCompare",
       "kind": "class",
       "raw": "rackpy.raw.string.CaseInsensitiveCompare",
@@ -15675,6 +16081,363 @@
     },
     {
       "facade": null,
+      "id": "variable:rack::settings::allowCursorLock",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.allow_cursor_lock",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::autoCheckUpdates",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.auto_check_updates",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::autosaveInterval",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.autosave_interval",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::browserSort",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.browser_sort",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::browserZoom",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.browser_zoom",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::cableAutoRotate",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.cable_auto_rotate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::cableColors",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.cable_colors",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::cableLabels",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.cable_labels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::cableOpacity",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.cable_opacity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::cableTension",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.cable_tension",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::cpuMeter",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.cpu_meter",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::devMode",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.dev_mode",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::frameRateLimit",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.frame_rate_limit",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::haloBrightness",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.halo_brightness",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::headless",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.headless",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::invertZoom",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.invert_zoom",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::isPlugin",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.is_plugin",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::knobLinearSensitivity",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.knob_linear_sensitivity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::knobMode",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.knob_mode",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::knobScroll",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.knob_scroll",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::knobScrollSensitivity",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.knob_scroll_sensitivity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::language",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.language",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::lastPatchDirectory",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.last_patch_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::lastSelectionDirectory",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.last_selection_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::lockModules",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.lock_modules",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::moduleInfos",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.module_infos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::moduleWhitelist",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.module_whitelist",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::mouseWheelZoom",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.mouse_wheel_zoom",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::pixelRatio",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.pixel_ratio",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::pluginSettingsJ",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.plugin_settings",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::preferDarkPanels",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.prefer_dark_panels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::rackBrightness",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.rack_brightness",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::recentPatchPaths",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.recent_patch_paths",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::restart",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.restart",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::safeMode",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.safe_mode",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::sampleRate",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.sample_rate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::settingsPath",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.settings_path",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::showTipsOnLaunch",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.show_tips_on_launch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::skipLoadOnLaunch",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.skip_load_on_launch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::spotlightBrightness",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.spotlight_brightness",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::spotlightRadius",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.spotlight_radius",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::squeezeModules",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.squeeze_modules",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::threadCount",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.thread_count",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::tipIndex",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.tip_index",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::token",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.token",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::tooltips",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.tooltips",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::uiTheme",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.ui_theme",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::verifyHttpsCerts",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.verify_https_certs",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::windowMaximized",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.window_maximized",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::windowPos",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.window_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::settings::windowSize",
+      "kind": "property",
+      "raw": "rackpy.raw.settings.Settings.window_size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "variable:rack::window::MM_PER_IN",
       "kind": "constant",
       "raw": "rackpy.raw.window.MM_PER_IN",
@@ -15688,6 +16451,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "9be9e04f07572f26",
+  "inputs": "1334624f237bc9e3",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

@@ -5,6 +5,7 @@
 #include "widget/tree.hpp"
 #include "app/app.hpp"
 #include "ui/ui.hpp"
+#include "widget/managed.hpp"
 
 namespace rackpy {
 namespace bindings {
@@ -14,6 +15,7 @@ void bind_widgets(pybind11::module_ raw) {
 	widgets::bindUi(raw);
 	widgets::bindApp(raw);
 	widgets::bindEventState(raw.attr("widget"));
+	widgets::bindWeakPointers(raw, raw.attr("widget"));  // family 1's weakptr.hpp: Rack's WeakBase is Widget's base
 }
 
 }  // namespace bindings

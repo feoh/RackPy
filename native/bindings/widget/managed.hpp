@@ -87,6 +87,8 @@ void checkStep(const std::shared_ptr<State>& owner);
 void bindManagedWidgets(py::module_ mod);
 /** Hand a managed Python widget to a Rack-owned parent (the scene, a module widget). */
 void transferToHost(W& parent, py::object child);
+/** rackpy.raw.WeakPtr and WeakHandle, and WeakBase's members on Widget and HostWidget (RP-30C). */
+void bindWeakPointers(py::module_ raw, py::module_ widgetModule);
 /** Whether RackPy manages this widget (it has a Python peer). */
 bool managedWidget(W* w);
 void bindTemplates(py::module_ mod);

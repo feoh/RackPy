@@ -15,6 +15,10 @@ void bindString(pybind11::module_ string);
 void bindRandom(pybind11::module_ random);
 /** rackpy.raw.logger (RP-30A). */
 void bindLogger(pybind11::module_ logger);
+/** rackpy.raw.SharedMutex and SharedLock (RP-30C, family 1). */
+void bindMutex(pybind11::module_ raw);
+/** rackpy.raw.settings (RP-30C). */
+void bindSettings(pybind11::module_ settings);
 /** rackpy.raw.system (RP-30B). */
 void bindSystem(pybind11::module_ system);
 /** rackpy.raw.network (RP-30B). */

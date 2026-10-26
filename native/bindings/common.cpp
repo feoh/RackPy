@@ -16,6 +16,7 @@ void bind_common(pybind11::module_ raw) {
 	services::bindString(raw.def_submodule("string", "rack::string: text, UTF-8, Base64, versions and translations."));
 	services::bindRandom(raw.def_submodule("random", "rack::random: Rack's random number generator."));
 	services::bindLogger(raw.def_submodule("logger", "rack::logger: Rack's log."));
+	services::bindMutex(raw);
 }
 
 }  // namespace bindings
