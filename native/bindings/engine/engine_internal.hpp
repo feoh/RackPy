@@ -35,23 +35,52 @@ struct EngineHandle {
 	}
 };
 
-/** A module in Rack's engine that RackPy did not create: found again by its ID at every use. */
+/** Deletes a native object Rack's code may need for its destructor (the engine, APP): on the
+main thread, outside Rack's engine lock and without the GIL; otherwise on the next UI step. */
+void deleteOnMainThread(std::function<void()> deleter);
+
+template <class T>
+struct MainThreadDelete {
+	void operator()(T* object) const noexcept {
+		deleteOnMainThread([object] { delete object; });
+	}
+};
+
+/** A module RackPy did not create (another plugin's), which Python owns until Engine.add_module. */
+struct OwnedForeignModule {
+	std::unique_ptr<RackModule, MainThreadDelete<RackModule>> module;
+	int64_t id = -1;  // its ID once Rack's engine has it
+};
+
+/** A module in Rack's engine that RackPy did not create: found again by its ID at every use. Or one
+Model.create_module made, which Python owns until Engine.add_module gives it to Rack's engine. */
 struct EngineModule {
 	std::shared_ptr<runtime::ContextToken> token;
 	int64_t id;
+	std::shared_ptr<OwnedForeignModule> owned;
+
+	bool pythonOwned() const { return owned && owned->module; }
+	int64_t currentId() const {
+		if (!owned)
+			return id;
+		return owned->module ? owned->module->id : owned->id;
+	}
 	RackModule* find() const {
 		runtime::requireMainThread("using an engine module");
-		if (!token->alive() || !token->context->engine)
+		if (pythonOwned())
+			return owned->module.get();
+		int64_t key = currentId();
+		if (key < 0 || !token->alive() || !token->context->engine)
 			return nullptr;
 		runtime::refuseEngineReentry("finding an engine module");
 		pybind11::gil_scoped_release release;
 		runtime::EngineLease lease(*token);
-		return token->context->engine->getModule(id);
+		return token->context->engine->getModule(key);
 	}
 	RackModule& get() const {
 		RackModule* m = find();
 		if (!m)
-			throw runtime::StaleHandle("module " + std::to_string(id) + " is no longer in Rack's engine");
+			throw runtime::StaleHandle("module " + std::to_string(currentId()) + " is no longer in Rack's engine");
 		return *m;
 	}
 };

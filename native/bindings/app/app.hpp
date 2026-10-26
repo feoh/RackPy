@@ -2,6 +2,7 @@
 #pragma once
 #include <pybind11/pybind11.h>
 
+#include <functional>
 #include <memory>
 
 #include <rack.hpp>
@@ -26,6 +27,15 @@ pybind11::object createModuleWidgetForPython(plugin::ModuleWidgetFactory& factor
 bool moduleHasWidget(const rack::engine::Module* module);
 /** Whether Rack may cable this port: Rack's own ports, or a Python port its module widget's factory made. */
 bool portCableSafe(rack::app::PortWidget& port);
+/** rackpy.raw.app.ForeignModuleWidget (RP-24D). */
+void bindForeignModuleWidget(pybind11::module_ app);
+/** A module widget a model's own code made: Python owns it until Rack's rack takes it. */
+pybind11::object ownModuleWidget(rack::app::ModuleWidget* widget);
+/** Whether a ForeignModuleWidget Python owns has this module. */
+bool foreignWidgetOwns(const rack::engine::Module* module);
+/** RackWidget.add_module for a ForeignModuleWidget (false for other widgets): `add` is Rack's addModule. */
+bool addForeignWidget(pybind11::handle value, rack::app::RackWidget& rack,
+	const std::function<void(rack::app::ModuleWidget*)>& add);
 
 }  // namespace widgets
 }  // namespace rackpy

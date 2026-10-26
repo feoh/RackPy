@@ -468,7 +468,7 @@ py::object createModuleWidgetForPython(plugin::ModuleWidgetFactory& factory, rac
 
 bool moduleHasWidget(const rack::engine::Module* module) {
 	runtime::requireMainThread("finding a module's widget");
-	if (appdetail::ownedElsewhere(module, nullptr))
+	if (appdetail::ownedElsewhere(module, nullptr) || foreignWidgetOwns(module))
 		return true;
 	auto* context = rack::contextGet();
 	return context && context->scene && context->scene->rack && context->scene->rack->getModule(module->id);

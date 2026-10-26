@@ -121,8 +121,8 @@ def test_what_the_engine_refuses(probe: EngineModule) -> None:
         e.clear()  # it deletes modules Rack's widgets own
     with pytest.raises(OwnershipError, match="clear the rack"):
         e.from_json(e.to_json())
-    with pytest.raises(TypeError):
-        e.remove_module(probe)  # type: ignore[arg-type]  # another plugin's module leaves with its widget
+    with pytest.raises(OwnershipError, match="widget owns it"):
+        e.remove_module(probe)  # another plugin's module leaves with its widget
     modelless = Module.create(lambda m: m.config(0, 0, 0, 0))
     try:
         with pytest.raises(OwnershipError, match="model"):

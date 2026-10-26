@@ -13,6 +13,7 @@
 #include "app_internal.hpp"
 #include "rackpy/runtime/json.hpp"
 #include "../history/history.hpp"
+#include "app.hpp"
 
 namespace pybind11 {
 #define RACKPY_RACK_ADDRESS(T) \
@@ -232,9 +233,13 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 		})
 		.def("add_module", [](const HostRack& h, py::object mwObject) {
 			auto& rack = hostAs<RW>(h);
+			if (addForeignWidget(mwObject, rack, [&rack](app::ModuleWidget* w) { rack.addModule(w); }))
+				return;
 			auto* mw = as<app::ModuleWidget>(mwObject, "a rackpy.raw.app.ModuleWidget");
 			if (!mw->model)
 				throw runtime::Ownership("Rack needs the module widget's model");
+			if (!mw->module)
+				throw runtime::Ownership("Rack's rack indexes module widgets by their module: a preview cannot go in it");
 			if (mw->module && rack.getModule(mw->module->id))
 				throw runtime::Ownership("this module already has its widget in the rack");
 			transferWith(*rack.getModuleContainer(), mwObject, [&rack](W* w) { rack.addModule(static_cast<app::ModuleWidget*>(w)); });
@@ -243,9 +248,13 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 			"Rack refuses one that is not 3U high and at least half an HP wide.")
 		.def("add_module_at_mouse", [](const HostRack& h, py::object mwObject) {
 			auto& rack = hostAs<RW>(h);
+			if (addForeignWidget(mwObject, rack, [&rack](app::ModuleWidget* w) { rack.addModuleAtMouse(w); }))
+				return;
 			auto* mw = as<app::ModuleWidget>(mwObject, "a rackpy.raw.app.ModuleWidget");
 			if (!mw->model)
 				throw runtime::Ownership("Rack needs the module widget's model");
+			if (!mw->module)
+				throw runtime::Ownership("Rack's rack indexes module widgets by their module: a preview cannot go in it");
 			if (mw->module && rack.getModule(mw->module->id))
 				throw runtime::Ownership("this module already has its widget in the rack");
 			transferWith(*rack.getModuleContainer(), mwObject,

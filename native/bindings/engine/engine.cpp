@@ -17,11 +17,13 @@
 #include <vector>
 
 #include "../../module/module.hpp"
+#include "../app/app.hpp"
 #include "../plugin.hpp"
 #include "engine.hpp"
 #include "engine_internal.hpp"
 #include "module.hpp"
 #include "rackpy/runtime/context.hpp"
+#include "rackpy/runtime/interpreter.hpp"
 #include "rackpy/runtime/errors.hpp"
 #include "rackpy/runtime/json.hpp"
 #include "rackpy/runtime/python.hpp"
@@ -73,15 +75,73 @@ py::object engineModuleHandle(RackModule* module) {
 	auto token = runtime::binding().current();
 	if (!token)
 		return py::none();
-	return py::cast(EngineModule{token, module->id});
+	return py::cast(EngineModule{token, module->id, nullptr});
+}
+
+py::object ownForeignModule(RackModule* module) {
+	auto owned = std::make_shared<OwnedForeignModule>();
+	owned->module.reset(module);
+	return py::cast(EngineModule{runtime::binding().current(), -1, owned});
+}
+
+namespace {
+std::vector<std::function<void()>> pendingDeletes;
+bool deleteHooked = false;
+
+void runDelete(const std::function<void()>& deleter) noexcept {
+	try {
+		if (runtime::interpreterAlive() && PyGILState_Check()) {
+			py::gil_scoped_release release;
+			deleter();
+		}
+		else
+			deleter();
+	}
+	catch (const std::exception& e) {
+		WARN("RackPy: deleting a native object failed: %s", e.what());
+	}
+	catch (...) {
+		WARN("RackPy: deleting a native object failed");
+	}
+}
+
+void drainDeletes() noexcept {
+	while (!pendingDeletes.empty()) {
+		std::vector<std::function<void()>> due;
+		due.swap(pendingDeletes);
+		for (auto& deleter : due)
+			runDelete(deleter);
+	}
+}
+}  // namespace
+
+void deleteOnMainThread(std::function<void()> deleter) {
+	bool now = runtime::isMainThread() && !runtime::insideExclusive() && rack::contextGet() &&
+		rack::contextGet()->engine;
+	if (now) {
+		runDelete(deleter);
+		return;
+	}
+	if (!runtime::isMainThread()) {
+		WARN("RackPy: a native module or widget was dropped off the main thread; it is leaked");
+		return;
+	}
+	pendingDeletes.push_back(std::move(deleter));
+	if (!deleteHooked) {
+		deleteHooked = true;
+		runtime::onUiStep([] { drainDeletes(); });
+		runtime::onContextClosing([] { drainDeletes(); });
+	}
 }
 
 void bindEngine(py::module_ engine) {
 	py::class_<EngineModule>(engine, "EngineModule", py::is_final(),
 		"A module in Rack's engine that RackPy did not create (another plugin's), found again by its ID at every use: "
 		"stale once it leaves the engine.")
-		.def_property_readonly("id", [](const EngineModule& m) { return m.id; })
+		.def_property_readonly("id", [](const EngineModule& m) { return m.currentId(); })
 		.def_property_readonly("alive", [](const EngineModule& m) { return m.find() != nullptr; })
+		.def_property_readonly("in_engine", [](const EngineModule& m) { return !m.pythonOwned() && m.find() != nullptr; },
+			"False while Python owns it (Model.create_module made it; Engine.add_module gives it to Rack's engine).")
 		.def_property_readonly("model", [](const EngineModule& m) { return modelObject(m.get().model); })
 		.def("is_bypassed", [](const EngineModule& m) { return m.get().isBypassed(); })
 		.def("get_num_params", [](const EngineModule& m) { return m.get().getNumParams(); })
@@ -89,10 +149,20 @@ void bindEngine(py::module_ engine) {
 		.def("get_num_outputs", [](const EngineModule& m) { return m.get().getNumOutputs(); })
 		.def("get_num_lights", [](const EngineModule& m) { return m.get().getNumLights(); })
 		.def("__eq__", [](const EngineModule& a, py::handle b) {
-			return py::isinstance<EngineModule>(b) && b.cast<const EngineModule&>().id == a.id;
+			if (!py::isinstance<EngineModule>(b))
+				return false;
+			const auto& o = b.cast<const EngineModule&>();
+			if (a.pythonOwned() || o.pythonOwned())
+				return a.owned == o.owned;
+			return o.currentId() == a.currentId();
 		}, py::is_operator())
-		.def("__hash__", [](const EngineModule& m) { return py::hash(py::int_(m.id)); })
-		.def("__repr__", [](const EngineModule& m) { return "<EngineModule " + std::to_string(m.id) + ">"; });
+		.def("__hash__", [](const EngineModule& m) {
+			return m.pythonOwned() ? py::hash(py::int_(reinterpret_cast<uintptr_t>(m.owned.get())))
+				: py::hash(py::int_(m.currentId()));
+		})
+		.def("__repr__", [](const EngineModule& m) {
+			return m.pythonOwned() ? std::string("<EngineModule (Python's)>") : "<EngineModule " + std::to_string(m.currentId()) + ">";
+		});
 
 	py::class_<EngineHandle> cls(engine, "Engine", py::is_final(),
 		"Rack's engine (Context.engine): modules, cables, parameters and timing. Main thread; calls that take Rack's "
@@ -111,8 +181,25 @@ void bindEngine(py::module_ engine) {
 		}, "Rack's getModuleIds (both overloads): the IDs of the modules in the engine.")
 		.def("add_module", [](const EngineHandle& h, py::object module) {
 			Engine& engine = h.get();
+			if (py::isinstance<EngineModule>(module)) {  // another plugin's, from Model.create_module
+				auto& foreign = module.cast<EngineModule&>();
+				if (!foreign.pythonOwned())
+					throw runtime::Ownership("Rack's engine already has this module");
+				runtime::refuseEngineReentry("add_module");
+				RackModule* raw = foreign.owned->module.get();
+				{
+					py::gil_scoped_release release;
+					runtime::EngineLease lease(*h.token);
+					engine.addModule(raw);  // Rack assigns an ID if it has none
+				}
+				foreign.owned->id = raw->id;
+				foreign.owned->module.release();
+				foreign.token = h.token;
+				return;
+			}
 			if (!py::isinstance<ModuleRef>(module))
-				throw py::type_error("add_module takes a rackpy.raw.engine.Module that Python owns");
+				throw py::type_error("add_module takes a module Python owns: a rackpy.raw.engine.Module, or an EngineModule "
+					"from Model.create_module");
 			const auto& ref = module.cast<const ModuleRef&>();
 			module::Module& m = ref.get();
 			if (ref.state->constructing)
@@ -132,8 +219,29 @@ void bindEngine(py::module_ engine) {
 			"with Model.create_module_widget), and its handles keep working.")
 		.def("remove_module", [](const EngineHandle& h, py::object module) {
 			Engine& engine = h.get();
+			if (py::isinstance<EngineModule>(module)) {  // another plugin's: only one no module widget owns
+				auto& foreign = module.cast<EngineModule&>();
+				if (foreign.pythonOwned())
+					throw runtime::Ownership("Rack's engine does not have this module");
+				RackModule& m = foreign.get();
+				if (widgets::moduleHasWidget(&m))
+					throw runtime::Ownership("this module's widget owns it: delete it with the widget (a ModuleRemove action, "
+						"say)");
+				if (engineCablesTouch(m))
+					throw runtime::Ownership("cables are still connected to this module (Rack removes them first)");
+				runtime::refuseEngineReentry("remove_module");
+				{
+					py::gil_scoped_release release;
+					runtime::EngineLease lease(*h.token);
+					engine.removeModule(&m);
+				}
+				if (!foreign.owned)
+					foreign.owned = std::make_shared<OwnedForeignModule>();
+				foreign.owned->module.reset(&m);  // Rack's `new`: Python owns it again
+				return;
+			}
 			if (!py::isinstance<ModuleRef>(module))
-				throw py::type_error("remove_module takes a RackPy module; another plugin's module leaves with its widget");
+				throw py::type_error("remove_module takes a rackpy.raw.engine.Module or an EngineModule");
 			const auto& ref = module.cast<const ModuleRef&>();
 			module::Module& m = ref.get();
 			if (!m.engineOwned.load(std::memory_order_acquire))
@@ -211,7 +319,7 @@ void bindEngine(py::module_ engine) {
 			requireLockHeld("set_master_module_no_lock");
 			RackModule* m = nullptr;
 			if (py::isinstance<EngineModule>(module)) {
-				m = engine.getModule_NoLock(module.cast<const EngineModule&>().id);
+				m = engine.getModule_NoLock(module.cast<const EngineModule&>().currentId());
 				if (!m)
 					throw runtime::StaleHandle("the module is no longer in Rack's engine");
 			}

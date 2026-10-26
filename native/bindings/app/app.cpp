@@ -644,6 +644,7 @@ void bindApp(py::module_ raw) {
 	variant<app::RailWidget, TW>(mod, "RailWidget");
 
 	appdetail::bindModuleWidget(mod);
+	bindForeignModuleWidget(mod);
 	appdetail::bindRack(raw, mod);
 	appdetail::bindComponentLibrary(raw);
 

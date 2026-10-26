@@ -169,12 +169,15 @@ def phase1() -> Frames:
     model = raw.plugin.get_model("RackPy", "PyVoice")
     assert model is not None
     made = model.create_module()
+    assert isinstance(made, Module)
     RESULT["create_module"] = [made.model is model, made.alive]
     shown = model.create_module_widget()
+    assert isinstance(shown, app.ModuleWidget)  # this model has a Python widget factory
     RESULT["preview_call"] = [shown.module is None, shown.parent is None]
     shown.close()
     module_id = _testing.engine_adopt(made)
     owner = model.create_module_widget(made)
+    assert isinstance(owner, app.ModuleWidget)
     try:
         model.create_module_widget(made)
         RESULT["second_owner"] = "allowed"

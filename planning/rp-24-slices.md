@@ -101,3 +101,30 @@ every public `rack::history` record, `Context.history`,
   `_rack_undo`/`_rack_redo`, and the Python methods otherwise.
 - **`State.undo`/`redo`** release the GIL and report Python actions' errors,
   as Rack's Edit menu does. A bound `action.undo()` raises them.
+
+**RP-24D — other plugins' models, foreign module widgets, and the host
+facade** (`tk-rackpy-24d-other-plugins-models-createmodule-cre-4e0b8c`).
+`Model::createModule`/`createModuleWidget` are complete. Validation:
+[rp-24d-validation.md](rp-24d-validation.md).
+
+- **Other plugins' modules.** `create_module()` runs the model's own C++
+  with the GIL released, and Python owns the result as an `EngineModule`
+  (an `OwnedForeignModule` state) until `Engine.add_module`. Then the handle
+  finds it by ID. `Engine.remove_module` returns a widgetless, uncabled one
+  to Python.
+- **Foreign widgets.** `create_module_widget()` for another plugin's model,
+  or a RackPy model without a widget factory, returns a
+  `ForeignModuleWidget` that `HostRackWidget.add_module(_at_mouse)` hands to
+  Rack. The module must be in the engine, with no widget and no Python
+  engine cables. `moduleHasWidget` now counts these widgets.
+- **Deletion.** Dropped native modules and widgets are deleted by
+  `deleteOnMainThread`: on the main thread, outside Rack's engine lock,
+  without the GIL, or else on the next UI step. Core's MIDI-Map constructor
+  and destructor use Rack's engine.
+- **Fix to RP-28D's `add_module`.** It refused nothing for a module widget
+  without a module (a browser preview), and Rack's `RackWidget::getModule`
+  dereferences `mw->module`. Such widgets are now refused.
+- **Facade.** `rackpy.engine.host` provides `engine`, `history`, `modules`,
+  `module`, `cables`, `connect`, `disconnect`, `map_param`, `unmap_param`
+  and `undo_step`. Everything is synchronous; `map_param` and `undo_step`
+  roll back on failure.

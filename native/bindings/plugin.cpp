@@ -8,6 +8,8 @@
 
 #include "plugin.hpp"
 #include "../plugin/model.hpp"
+#include "engine/engine.hpp"
+#include "engine/engine_internal.hpp"
 #include "engine/module.hpp"
 #include "app/app.hpp"
 #include "widget/managed.hpp"
@@ -23,6 +25,18 @@ namespace bindings {
 namespace py = pybind11;
 using RackPlugin = rack::plugin::Plugin;
 using RackModel = rack::plugin::Model;
+
+namespace {
+
+/** Model calls that run a model's own code, which may use Rack's engine, scene and APP. */
+void liveUi(const char* what) {
+	auto token = runtime::binding().current();
+	auto* c = rack::contextGet();
+	if (!token || c != token->context || !c->engine || !c->scene || !c->scene->rack)
+		throw runtime::WrongContext(std::string(what) + " needs Rack's live bound UI context");
+}
+
+}  // namespace
 
 namespace {
 
@@ -353,10 +367,21 @@ void bind_plugin(py::module_ raw) {
 		.def("set_favorite", [](const ModelHandle& h, bool favorite) { addedModel(h, "set_favorite").setFavorite(favorite); },
 			py::arg("favorite"))
 		.def("create_module", [](const ModelHandle& h) {
-			auto* m = dynamic_cast<plugin::Model*>(&checked(h));
-			if (!m)
-				throw py::type_error("create_module() makes modules of RackPy's Python models; modules of other plugins' "
-					"models need handles for foreign modules (RP-24)");
+			RackModel& model = checked(h);
+			auto* m = dynamic_cast<plugin::Model*>(&model);
+			if (!m) {  // another plugin's model: its own C++ code makes the module
+				runtime::requireMainThread("creating a module");
+				liveUi("create_module");
+				runtime::refuseEngineReentry("create_module");
+				rack::engine::Module* made;
+				{
+					py::gil_scoped_release release;  // a module's constructor may take Rack's engine lock
+					made = model.createModule();
+				}
+				if (!made)
+					throw std::runtime_error("the model made no module");
+				return ownForeignModule(made);
+			}
 			auto* factory = dynamic_cast<PyModuleFactory*>(m->factory.get());
 			if (!factory || !factory->fn)
 				throw std::runtime_error("this model's module factory is not available");
@@ -364,17 +389,51 @@ void bind_plugin(py::module_ raw) {
 		}, "Rack's Model::createModule for a RackPy model: a new module of it, which Python owns (Rack's own calls "
 			"hand theirs to its engine).")
 		.def("create_module_widget", [](const ModelHandle& h, py::object module) {
-			auto* m = dynamic_cast<plugin::Model*>(&checked(h));
-			if (!m)
-				throw py::type_error("create_module_widget() makes widgets of RackPy's Python models; other plugins' "
-					"models need handles for foreign modules (RP-24)");
-			if (!m->widgetFactory)
-				throw std::invalid_argument("this model has no Python widget factory (add_model's widget=)");
-			return widgets::createModuleWidgetForPython(*m->widgetFactory, *m, module);
+			RackModel& model = checked(h);
+			auto* m = dynamic_cast<plugin::Model*>(&model);
+			if (m && m->widgetFactory)
+				return widgets::createModuleWidgetForPython(*m->widgetFactory, *m, module);
+			// The model's own C++ code (another plugin's, or RackPy's plain panel) makes the widget.
+			runtime::requireMainThread("creating a module widget");
+			liveUi("create_module_widget");
+			runtime::refuseEngineReentry("create_module_widget");
+			rack::engine::Module* target = nullptr;
+			if (!module.is_none()) {
+				if (py::isinstance<EngineModule>(module)) {
+					auto& foreign = module.cast<const EngineModule&>();
+					if (foreign.pythonOwned())
+						throw runtime::Ownership("the module must be in Rack's engine first (Engine.add_module): its widget "
+							"removes it from the engine when deleted");
+					target = &foreign.get();
+				}
+				else if (py::isinstance<ModuleRef>(module)) {
+					auto& own = module.cast<const ModuleRef&>().get();
+					if (!own.engineOwned.load(std::memory_order_acquire))
+						throw runtime::Ownership("the module must be in Rack's engine first (Engine.add_module)");
+					target = &own;
+				}
+				else
+					throw py::type_error("module must be a rackpy.raw.engine.Module, an EngineModule or None");
+				if (target->model != &model)
+					throw std::invalid_argument("the module is not of this model");
+				if (widgets::moduleHasWidget(target))
+					throw runtime::Ownership("another module widget already owns this module");
+				if (engineCablesTouch(*target))
+					throw runtime::Ownership("cables Python added to Rack's engine touch this module; Rack would assert "
+						"when its widget deletes it (remove the cables first)");
+			}
+			rack::app::ModuleWidget* made;
+			{
+				py::gil_scoped_release release;
+				made = model.createModuleWidget(target);
+			}
+			if (!made)
+				throw std::runtime_error("the model made no module widget");
+			return widgets::ownModuleWidget(made);
 		}, py::arg("module") = py::none(),
-			"Rack's Model::createModuleWidget for a RackPy model with a widget factory: its widget for module (a "
-			"module of this model in Rack's engine, which the widget then owns and deletes with itself) or None (a "
-			"browser preview). Python owns the widget.")
+			"Rack's Model::createModuleWidget: the model's widget for module (a module of this model in Rack's engine, "
+			"which the widget then owns and deletes with itself) or None (a browser preview). Python owns the widget: a "
+			"Python widget for a RackPy model with a widget factory, else a ForeignModuleWidget.")
 		.def("append_context_menu", [](const ModelHandle& h, py::object menu, bool inBrowser) {
 			RackModel& m = addedModel(h, "append_context_menu");
 			auto* target = dynamic_cast<rack::ui::Menu*>(widgets::argument(menu));

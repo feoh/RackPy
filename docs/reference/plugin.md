@@ -56,7 +56,8 @@ added so far, and raises `ValueError` otherwise.
 
 The new `Model` belongs to Python until `add_model`.
 `Model.create_module()` and `Model.create_module_widget(module=None)` make a
-module or widget of a RackPy model, which Python then owns.
+module or widget of a model, a RackPy model's or another plugin's, which
+Python then owns ([modules from other plugins](app.md#modules-from-other-plugins)).
 
 A `Model` has Rack's fields. `slug` can change only before the model is
 added: Rack and patches look models up by it. `plugin` is its plugin, or

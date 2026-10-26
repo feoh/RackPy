@@ -17,6 +17,8 @@ void bindEngine(pybind11::module_ engine);
 pybind11::object engineObject(const std::shared_ptr<runtime::ContextToken>& token);
 /** A module of Rack's engine: its RackPy Module handle, an EngineModule for another plugin's, or None. */
 pybind11::object engineModuleHandle(rack::engine::Module* module);
+/** A module Model.create_module made for another plugin's model: Python owns it (RP-24D). */
+pybind11::object ownForeignModule(rack::engine::Module* module);
 /** Whether a cable in Rack's engine touches this module (RP-24B). Main thread, GIL held. */
 bool engineCablesTouch(rack::engine::Module& module);
 

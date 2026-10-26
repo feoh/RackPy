@@ -79,6 +79,7 @@ def rp24a(state: dict[str, Any]) -> None:
     model = raw.plugin.get_model("RackPy", "PyTone")
     assert model is not None
     m = model.create_module()  # Python owns it
+    assert isinstance(m, Module)
     e.add_module(m)
     RESULT["added"] = [e.has_module(m), m.id >= 0, e.get_module(m.id) is m, e.module_to_json(m)["model"]]
     RESULT["again"] = refused(lambda: e.add_module(m))
@@ -112,6 +113,7 @@ def rp24b(state: dict[str, Any]) -> None:
     e = engine()
     model, owned = state["model"], state["owned"]
     a, b = model.create_module(), model.create_module()
+    assert isinstance(a, Module) and isinstance(b, Module)
     e.add_module(a)
     e.add_module(b)
     c = Cable()

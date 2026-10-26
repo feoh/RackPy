@@ -75,10 +75,32 @@ and the actions) release the GIL while they run. Closing a Python-owned
 module widget deletes its module, as Rack's destructor does.
 
 `Model.create_module()` and `Model.create_module_widget(module=None)` are
-Rack's calls for a RackPy model. Python owns what they make, and a widget
-made for a module owns that module, which must be in Rack's engine and must
-have no other widget. Other plugins' models need RP-24's handles for their
-modules.
+Rack's calls. Python owns what they make, and a widget made for a module
+owns that module, which must be in Rack's engine, must have no other widget
+and must have no cables that Python added to the engine. A RackPy model's
+module is a `Module`, and its widget, with a widget factory, is a Python
+`ModuleWidget`.
+
+### Modules from other plugins
+
+For another plugin's model (or a RackPy model without a widget factory),
+the model's own code makes the module and the widget (**RP-24D**):
+
+- `create_module()` returns an `EngineModule` that Python owns
+  (`in_engine` false). `Engine.add_module(module)` gives it to Rack's
+  engine, after which the handle finds it by ID. If Python drops it first,
+  it is deleted on Rack's main thread, outside the engine lock: a module's
+  destructor may use Rack's engine, as Core's MIDI-Map does.
+- `create_module_widget(module)` returns a `ForeignModuleWidget` that
+  Python owns: its `model`, its `module`, a writable `box` and `close()`.
+  `HostRackWidget.add_module(widget)` or `add_module_at_mouse(widget)` hands
+  it to Rack's rack, which refuses a widget that is not 3U high. Closing or
+  dropping it deletes it and its module, on the main thread outside the
+  engine lock. A preview widget (`module=None`) never enters the rack,
+  because Rack indexes the rack's widgets by their module. The same rule now
+  applies to Python module widgets.
+- `Engine.remove_module` takes back another plugin's module only when no
+  module widget owns it and no cables touch it. Python then owns it again.
 
 (app-controls)=
 ## Params

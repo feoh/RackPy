@@ -39,7 +39,10 @@ the module with that ID: a RackPy module's own `Module` handle, an
 the ID and finds the module again at every use, so it goes stale
 (`StaleHandleError`, `alive` false) once the module leaves the engine; it
 never holds Rack's pointer. It reports the model, bypass state and component
-counts. Two handles for one ID are equal.
+counts. Two handles for one ID are equal. `Model.create_module()` for
+another plugin's model also returns an `EngineModule`, which Python owns
+(`in_engine` false) until `add_module`
+([modules from other plugins](app.md#modules-from-other-plugins)).
 
 `reset_module`, `randomize_module` and `bypass_module` are Rack's: they send
 the module its event under the lock, without an undo step.
@@ -56,11 +59,13 @@ Rack deletes a module with its widget. RackPy follows that:
   a model of this plugin (`Model.create_module` makes one), since Rack saves a
   module with its plugin and model; a constructor callback cannot add its own
   module. Its handles keep working, and `get_module` returns them.
+- `add_module(module)` also takes another plugin's module that Python owns
+  (from `Model.create_module`).
 - `remove_module(module)` takes a RackPy module out of the engine and gives it
   back to Python. Rack refuses nothing here, so RackPy refuses a module that a
   widget owns (delete the widget with its `remove_action`), that controls
-  still point at, or that cables still connect. Other plugins' modules leave
-  the engine only with their widgets.
+  still point at, or that cables still connect. Another plugin's module comes
+  back to Python only when no module widget owns it and no cables touch it.
 - `clear()` and `from_json(data)` delete every module and cable in the
   engine, so they are refused while Rack's rack has module or cable widgets.
   Rack's patch manager clears the rack first.
@@ -159,3 +164,27 @@ Rack's context closes are removed while the engine lives.
 `to_json()` is the engine's part of a patch: modules, cables and the master
 module. `from_json(data)` clears the engine and creates the patch's modules
 and cables, and is refused while Rack's rack has widgets.
+
+(engine-host)=
+## The host facade
+
+`rackpy.engine.host` puts the same calls in a more Pythonic shape, for
+scripts working on Rack's running patch:
+
+- `engine()` and `history()` return `Context.engine` and `Context.history`,
+  and raise `ContextError` outside Rack's live UI.
+- `modules()`, `module(module_id)` and `cables()` list the engine's modules
+  and cables.
+- `connect((module, output_id), (module, input_id))` returns the new
+  `Cable`, and `disconnect(cable)` removes it, under the rules in
+  [Cables](#cables).
+- `map_param(module, param_id, text=..., color=...)` returns a mapped
+  `ParamHandle`, and `unmap_param(handle)` removes it.
+- `undo_step(name)` is a context manager that yields a `ComplexAction`:
+  make each change, push its action to it, and the step goes to Rack's
+  history when the block ends.
+
+Every call is synchronous. It runs Rack's code on the main thread before
+returning, and nothing is queued. A failed call leaves the engine as it was:
+`map_param` removes its handle again, and when an `undo_step` block raises,
+the actions it collected are undone and nothing is pushed.
