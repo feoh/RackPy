@@ -2,6 +2,7 @@
 # Stub for rackpy.raw (src/rackpy/raw/__init__.py assembles it from the native module).
 from rackpy.raw import _arch as _arch
 from rackpy.raw import _types as _types
+from rackpy.raw import app as app
 from rackpy.raw import asset as asset
 from rackpy.raw import color as color
 from rackpy.raw import engine as engine
@@ -28,6 +29,17 @@ from rackpy.raw._helpers import create_index_submenu_item as create_index_submen
 from rackpy.raw._helpers import create_menu_item as create_menu_item
 from rackpy.raw._helpers import create_menu_label as create_menu_label
 from rackpy.raw._helpers import create_submenu_item as create_submenu_item
+from rackpy.raw._widget_helpers import create_input as create_input
+from rackpy.raw._widget_helpers import create_input_centered as create_input_centered
+from rackpy.raw._widget_helpers import create_light as create_light
+from rackpy.raw._widget_helpers import create_light_centered as create_light_centered
+from rackpy.raw._widget_helpers import create_output as create_output
+from rackpy.raw._widget_helpers import create_output_centered as create_output_centered
+from rackpy.raw._widget_helpers import create_panel as create_panel
+from rackpy.raw._widget_helpers import create_param as create_param
+from rackpy.raw._widget_helpers import create_param_centered as create_param_centered
+from rackpy.raw._widget_helpers import create_widget as create_widget
+from rackpy.raw._widget_helpers import create_widget_centered as create_widget_centered
 from rackpy.raw.window import NativeHandle as _NativeHandle
 from rackpy.raw.window import Window as _Window
 

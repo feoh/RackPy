@@ -18,10 +18,12 @@ void bindEventVariants(py::module_ mod);
 void bindTransformVariants(py::module_ mod);
 void bindFramebufferVariants(py::module_ mod);
 void bindSvgVariant(py::module_ raw, py::module_ mod);
+void bindHostViews(py::module_ mod);
 inline void bindVariants(py::module_ raw, py::module_ mod) {
 	bindEventVariants(mod);
 	bindTransformVariants(mod);
 	bindFramebufferVariants(mod);
 	bindSvgVariant(raw, mod);
+	bindHostViews(mod);
 }
 } }

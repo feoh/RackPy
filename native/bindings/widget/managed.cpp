@@ -22,12 +22,14 @@ const State* allowedStep = nullptr;
 bool initialized = false;
 bool closing = false;
 
-struct ExternalState {
-	rack::WeakPtr<W> weak;
-	std::shared_ptr<runtime::ContextToken> context;
-};
-struct ExternalWidget { std::shared_ptr<ExternalState> owner; };
+W* appending = nullptr;
 std::unordered_map<W*, std::shared_ptr<ExternalState>> externalStates;
+struct HostView {
+	std::function<bool(W*)> matches;
+	std::function<py::object(const ExternalWidget&)> make;
+};
+std::vector<HostView> hostViews;
+}  // namespace
 
 W& checkedExternal(const ExternalWidget& ref) {
 	runtime::requireMainThread("using a borrowed host Widget");
@@ -36,6 +38,10 @@ W& checkedExternal(const ExternalWidget& ref) {
 	if (!w) throw runtime::StaleHandle("borrowed host Widget has been deleted");
 	return *w;
 }
+void registerHostView(std::function<bool(W*)> matches, std::function<py::object(const ExternalWidget&)> make) {
+	hostViews.push_back({std::move(matches), std::move(make)});
+}
+namespace {
 
 void deleteDetached(const std::shared_ptr<State>& s) {
 	// EventState can retain a detached widget (for example after raw tree
@@ -211,9 +217,13 @@ void checkMutation() {
 }
 FactoryScope::FactoryScope() { ++factoryDepth; }
 FactoryScope::~FactoryScope() { --factoryDepth; }
+AppendScope::AppendScope(W* subtree) : previous(appending) { appending = subtree; }
+AppendScope::~AppendScope() { appending = previous; }
 void checkMutationOf(W& parent) {
 	runtime::requireMainThread("changing Widget ownership");
 	if (!callbackDepth)
+		return;
+	if (appending && (&parent == appending || parent.isDescendantOf(appending)))
 		return;
 	if (factoryDepth) {
 		// A tree Python owns outright is not attached anywhere Rack could be iterating.
@@ -300,7 +310,11 @@ py::object wrapper(W* native) {
 		owner->weak.set(native);
 	}
 	return runtime::identity(owner.get(), owner->context->generation, [&] {
-		return py::cast(ExternalWidget{owner});
+		ExternalWidget ref{owner};
+		for (auto it = hostViews.rbegin(); it != hostViews.rend(); ++it)
+			if (it->matches(native))
+				return it->make(ref);
+		return py::cast(ref);
 	});
 }
 W* argument(py::handle value) {
@@ -431,8 +445,9 @@ void bindChildrenView(py::module_ mod) {
 
 void bindManagedWidgets(py::module_ mod) {
 	bindChildrenView(mod);
-	py::class_<ExternalWidget>(mod, "HostWidget", py::is_final(),
-		"Nonowning, checked host Widget identity; cannot transfer or destroy Rack-owned nodes.")
+	py::class_<ExternalWidget>(mod, "HostWidget",
+		"Nonowning, checked host Widget identity; cannot transfer or destroy Rack-owned nodes. Typed subclasses "
+		"(HostFramebufferWidget, HostSvgWidget, ...) also reach a known Rack type's public fields.")
 		.def_property_readonly("alive", [](const ExternalWidget& ref) {
 			runtime::requireMainThread("checking a host Widget");
 			return ref.owner->context->alive() && ref.owner->weak.get() != nullptr;

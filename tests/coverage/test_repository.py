@@ -48,6 +48,7 @@ def test_every_record_is_accounted_for() -> None:
     bound = [r for r in manifest["entries"] if r["status"] in bm.BOUND]
     families = {bm.family_of(inputs.inventory, inputs.index[r["id"]]) for r in bound}
     allowed = {
+        "0 entry point",
         "1 common/value",
         "2 engine",
         "3 plugin/model/assets/helpers",
@@ -55,8 +56,8 @@ def test_every_record_is_accounted_for() -> None:
         "5 window/rendering/context",
     }
     assert families <= allowed, (
-        "only families 1 (RP-12), 2 (RP-13/RP-14/RP-15), 3 (RP-16A plugins and models), 4 (RP-25 widgets) "
-        "and 5 (RP-25's SvgWidget slice) are bound so far"
+        "only families 0 (RP-28A's PRIVATE macro), 1 (RP-12), 2 (RP-13/RP-14/RP-15), 3 (RP-16A plugins and "
+        "models), 4 (RP-25/RP-26/RP-28 widgets) and 5 (RP-26B/RP-27 window and context) are bound so far"
     )
     counted = [e for e in inputs.index.values() if bm.counted(e)]
     assert len(manifest["entries"]) == len(counted) == 3058

@@ -111,8 +111,44 @@ struct FactoryScope {
 	FactoryScope();
 	~FactoryScope();
 };
-/** Refuse a change to `parent`'s children during a callback, unless a factory is building a detached tree. */
+/** While Rack asks Python to fill a menu it just created (ParamWidget/PortWidget
+appendContextMenu, RP-28A), Python may add to that menu's subtree: Rack is not
+iterating it, as Rack's own C++ overrides rely on. */
+struct AppendScope {
+	explicit AppendScope(W* subtree);
+	~AppendScope();
+	W* previous;
+};
+/** Refuse a change to `parent`'s children during a callback, unless a factory is building a
+detached tree or Rack has handed Python a menu to fill. */
 void checkMutationOf(W& parent);
+
+/** A borrowed Rack-owned widget: rackpy.raw.widget.HostWidget. Typed subclasses (host views)
+reach a known Rack type's public fields; none can transfer or destroy the widget. */
+struct ExternalState {
+	rack::WeakPtr<W> weak;
+	std::shared_ptr<runtime::ContextToken> context;
+};
+struct ExternalWidget {
+	std::shared_ptr<ExternalState> owner;
+};
+W& checkedExternal(const ExternalWidget& ref);
+template <class T>
+T& hostAs(const ExternalWidget& ref) {
+	auto* value = dynamic_cast<T*>(&checkedExternal(ref));
+	if (!value)
+		throw runtime::StaleHandle("borrowed host Widget is not of its view's type");
+	return *value;
+}
+/** An Svg handed to a widget Rack draws natively: None or a loaded one. Rack's svgDraw
+dereferences the parsed image unchecked, and RackPy's Svg loads never unload one. */
+inline std::shared_ptr<rack::window::Svg> drawableSvg(std::shared_ptr<rack::window::Svg> svg) {
+	if (svg && !svg->handle)
+		throw std::invalid_argument("this Svg has no image loaded; Rack would crash drawing it (use None or a loaded Svg)");
+	return svg;
+}
+/** wrapper() gives a borrowed widget the view of the last registered type it matches. */
+void registerHostView(std::function<bool(W*)> matches, std::function<py::object(const ExternalWidget&)> make);
 
 struct Managed {
 	std::shared_ptr<State> lifetime;

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <atomic>
 #include <memory>
+#include <functional>
 #include <mutex>
 #include <stdexcept>
 #include <string>
@@ -27,11 +28,15 @@ main-thread-only. A standalone metadata object's last Python reference may die
 on another thread: detach synchronizes with clear before its SDK field dies.
 This is not an audio-path primitive; engine-owned metadata factories are separate. */
 struct ModuleBackreference {
-	explicit ModuleBackreference(rack::engine::Module** target) : target(target) {}
+	explicit ModuleBackreference(rack::engine::Module** target, std::function<void()> cleared = {})
+		: target(target), cleared(std::move(cleared)) {}
 	void clear() {
 		std::lock_guard<std::mutex> lock(mutex);
-		if (target)
+		if (target) {
 			*target = nullptr;
+			if (cleared)
+				cleared();  // never throws (callers make it noexcept-safe)
+		}
 	}
 	void detach() {
 		std::lock_guard<std::mutex> lock(mutex);
@@ -40,6 +45,7 @@ struct ModuleBackreference {
 private:
 	std::mutex mutex;
 	rack::engine::Module** target;
+	std::function<void()> cleared;
 };
 
 /** Metadata that Python constructed and a module slot now owns (RP-14B2b5).
@@ -163,13 +169,13 @@ struct Module : rack::engine::Module {
 	using Tokens = std::vector<std::shared_ptr<runtime::ObjectToken>>;
 	Tokens paramQuantityTokens, inputInfoTokens, outputInfoTokens, lightInfoTokens;
 	std::vector<std::weak_ptr<ModuleBackreference>> backreferences;
-	std::shared_ptr<ModuleBackreference> trackBackreference(rack::engine::Module** target) {
+	std::shared_ptr<ModuleBackreference> trackBackreference(rack::engine::Module** target, std::function<void()> cleared = {}) {
 		runtime::requireMainThread("linking standalone metadata to a module");
 		// Prune on registration, so repeated reassignments/deleted metadata do
 		// not leave an unbounded history on a long-lived module.
 		backreferences.erase(std::remove_if(backreferences.begin(), backreferences.end(),
 			[](const auto& link) { return link.expired(); }), backreferences.end());
-		auto link = std::make_shared<ModuleBackreference>(target);
+		auto link = std::make_shared<ModuleBackreference>(target, std::move(cleared));
 		backreferences.push_back(link);
 		return link;
 	}

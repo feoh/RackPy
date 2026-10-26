@@ -60,6 +60,34 @@ __all__ += [
     "create_submenu_item",
 ]
 
+from rackpy.raw._widget_helpers import (  # noqa: E402
+    create_input,
+    create_input_centered,
+    create_light,
+    create_light_centered,
+    create_output,
+    create_output_centered,
+    create_panel,
+    create_param,
+    create_param_centered,
+    create_widget,
+    create_widget_centered,
+)
+
+__all__ += [
+    "create_input",
+    "create_input_centered",
+    "create_light",
+    "create_light_centered",
+    "create_output",
+    "create_output_centered",
+    "create_panel",
+    "create_param",
+    "create_param_centered",
+    "create_widget",
+    "create_widget_centered",
+]
+
 from rackpy.raw import event as event  # noqa: E402
 
 __all__.append("event")

@@ -116,11 +116,21 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 	void draw(const W::DrawArgs& args) override { drawImpl(args, 0, false); }
 	void drawLayer(const W::DrawArgs& args, int layer) override { drawImpl(args, layer, true); }
 	void drawImpl(const W::DrawArgs& args, int layer, bool layered) noexcept {
+		pyDraw(layered ? "draw_layer" : "draw", args,
+			[&](py::function& f, py::object value) { if (layered) f(value, layer); else f(value); },
+			[&] {
+				if (layered) Base::drawLayer(args, layer);
+				else { validateNativeDraw(*this, args); Base::draw(args); }
+			});
+	}
+	/** A Rack drawing virtual (draw, drawLayer, LightWidget::drawLight...) that Python may
+	override: the override gets a callback-scoped DrawArgs; otherwise Rack's own runs. */
+	template<class Call, class Fallback>
+	void pyDraw(const char* name, const W::DrawArgs& args, Call call, Fallback fallback) noexcept {
 		if (!runtime::isMainThread()) return;
 		CallbackGuard dispatch;
 		++lifetime->graphicsGeneration;
 		DrawGuard drawing(lifetime);
-		const char* name = layered ? "draw_layer" : "draw";
 		bool answered = false;
 		runtime::callPython(name, [&] {
 			checked(lifetime);
@@ -131,17 +141,31 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 				DrawScope nanovg{scope, args.vg};
 				CallbackGuard guard;
 				answered = true;
-				auto value = eventObject(borrowedEvent(args, "DrawArgs", scope));
-				if (layered) f(value, layer); else f(value);
+				call(f, eventObject(borrowedEvent(args, "DrawArgs", scope)));
 			}
 		});
 		if (!answered) {
-			try {
-				CallbackGuard guard;
-				if (layered) Base::drawLayer(args, layer);
-				else { validateNativeDraw(*this, args); Base::draw(args); }
-			}
+			try { CallbackGuard guard; fallback(); }
 			catch (...) { runtime::detail::noteRaised(name, "native Widget draw failed"); }
+		}
+	}
+	/** A void Rack virtual Python may override (ParamWidget::initParamQuantity...). */
+	template<class Fallback, class... Args>
+	void pyVoid(const char* name, Fallback fallback, Args&&... args) noexcept {
+		if (!runtime::isMainThread()) return;
+		CallbackGuard dispatch;
+		bool answered = false;
+		runtime::callPython(name, [&] {
+			checked(lifetime);
+			if (auto f = py::get_override(static_cast<const Base*>(this), name)) {
+				CallbackGuard guard;
+				answered = true;
+				f(std::forward<Args>(args)...);
+			}
+		});
+		if (!answered) {
+			try { CallbackGuard guard; fallback(); }
+			catch (...) { runtime::detail::noteRaised(name, "native Widget fallback failed"); }
 		}
 	}
 	void step() override {

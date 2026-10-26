@@ -487,6 +487,28 @@ void define(py::module_ m) {
 		if (error != GL_NO_ERROR) throw std::runtime_error("glReadPixels failed: GL error " + std::to_string(error));
 		return py::make_tuple(rgba[0], rgba[1], rgba[2], rgba[3]);
 	});
+	m.def("touched_param", []() -> py::object {
+		// Rack's RackWidget::touchedParam: the ParamWidget MIDI-Map would learn, or None.
+		requireMainThread("touched_param");
+		liveContext();
+		return widgets::wrapper(APP->scene->rack->touchedParam);
+	});
+	m.def("rack_cables", [] {
+		// (complete, incomplete) CableWidgets in Rack's rack, and the engine's cable count.
+		requireMainThread("rack_cables");
+		liveContext();
+		return py::make_tuple(APP->scene->rack->getCompleteCables().size(), APP->scene->rack->getIncompleteCables().size(),
+			APP->engine->getNumCables());
+	});
+	m.def("module_widget_add_child_by_id", [](int64_t id, py::object child) {
+		// As a ModuleWidget's own constructor adding a control: the module's widget owns it.
+		requireMainThread("module_widget_add_child_by_id");
+		liveContext();
+		rack::app::ModuleWidget* mw = APP->scene->rack->getModule(id);
+		if (!mw)
+			throw std::invalid_argument("no module widget " + std::to_string(id));
+		widgets::transferToHost(*mw, child);
+	});
 	m.def("window_should_close", [] {
 		requireMainThread("window_should_close");
 		liveContext();

@@ -26,6 +26,7 @@ plugin
 widgets
 ui
 window
+app
 widget-trees
 ```
 

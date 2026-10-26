@@ -2,6 +2,55 @@
   "entries": [
     {
       "facade": null,
+      "id": "alias:rack::app::SVGButton",
+      "kind": "alias",
+      "raw": "rackpy.raw.app.SVGButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::app::SVGKnob",
+      "kind": "alias",
+      "raw": "rackpy.raw.app.SVGKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::app::SVGPanel",
+      "kind": "alias",
+      "raw": "rackpy.raw.app.SVGPanel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::app::SVGPort",
+      "kind": "alias",
+      "raw": "rackpy.raw.app.SVGPort",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::app::SVGScrew",
+      "kind": "alias",
+      "raw": "rackpy.raw.app.SVGScrew",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::app::SVGSlider",
+      "kind": "alias",
+      "raw": "rackpy.raw.app.SVGSlider",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::app::SVGSwitch",
+      "kind": "alias",
+      "raw": "rackpy.raw.app.SVGSwitch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "alias:rack::event::Action",
       "kind": "alias",
       "raw": "rackpy.raw.event.Action",
@@ -295,6 +344,111 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "constructor:rack::app::CircularShadow::CircularShadow()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.CircularShadow",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::Knob::Knob()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.Knob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::ModuleLightWidget::ModuleLightWidget()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.ModuleLightWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::ParamWidget::ParamWidget()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.ParamWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::PortWidget::PortWidget()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.PortWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::RailWidget::RailWidget()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.RailWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::SliderKnob::SliderKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SliderKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::SvgButton::SvgButton()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SvgButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::SvgKnob::SvgKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SvgKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::SvgPanel::SvgPanel()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SvgPanel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::SvgPort::SvgPort()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SvgPort",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::SvgScrew::SvgScrew()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SvgScrew",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::SvgSlider::SvgSlider()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SvgSlider",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::SvgSwitch::SvgSwitch()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SvgSwitch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::app::Switch::Switch()",
+      "kind": "class",
+      "raw": "rackpy.raw.app.Switch",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.engine.Module.create",
       "id": "constructor:rack::engine::Module::Module()",
       "kind": "factory",
@@ -481,6 +635,55 @@
       "id": "destructor:rack::Quantity::~Quantity()",
       "kind": "class",
       "raw": "rackpy.raw.Quantity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::app::Knob::~Knob()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.close",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::app::ModuleLightWidget::~ModuleLightWidget()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.close",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::app::ParamWidget::~ParamWidget()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.close",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::app::PortWidget::~PortWidget()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.close",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::app::RailWidget::~RailWidget()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.close",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::app::SvgSwitch::~SvgSwitch()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.close",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::app::Switch::~Switch()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.Widget.close",
       "status": "implemented"
     },
     {
@@ -733,6 +936,384 @@
       "id": "field:rack::Exception::msg",
       "kind": "attribute",
       "raw": "rackpy.raw.Exception.msg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::CircularShadow::blurRadius",
+      "kind": "property",
+      "raw": "rackpy.raw.app.CircularShadow.blur_radius",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::CircularShadow::opacity",
+      "kind": "property",
+      "raw": "rackpy.raw.app.CircularShadow.opacity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::Knob::forceLinear",
+      "kind": "property",
+      "raw": "rackpy.raw.app.Knob.force_linear",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::Knob::horizontal",
+      "kind": "property",
+      "raw": "rackpy.raw.app.Knob.horizontal",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::Knob::maxAngle",
+      "kind": "property",
+      "raw": "rackpy.raw.app.Knob.max_angle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::Knob::minAngle",
+      "kind": "property",
+      "raw": "rackpy.raw.app.Knob.min_angle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::Knob::smooth",
+      "kind": "property",
+      "raw": "rackpy.raw.app.Knob.smooth",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::Knob::snap",
+      "kind": "property",
+      "raw": "rackpy.raw.app.Knob.snap",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::Knob::speed",
+      "kind": "property",
+      "raw": "rackpy.raw.app.Knob.speed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::LightWidget::bgColor",
+      "kind": "property",
+      "raw": "rackpy.raw.app.LightWidget.bg_color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::LightWidget::borderColor",
+      "kind": "property",
+      "raw": "rackpy.raw.app.LightWidget.border_color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::LightWidget::color",
+      "kind": "property",
+      "raw": "rackpy.raw.app.LightWidget.color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::ModuleLightWidget::firstLightId",
+      "kind": "property",
+      "raw": "rackpy.raw.app.ModuleLightWidget.first_light_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::ModuleLightWidget::module",
+      "kind": "property",
+      "raw": "rackpy.raw.app.ModuleLightWidget.module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::MultiLightWidget::baseColors",
+      "kind": "property",
+      "raw": "rackpy.raw.app.MultiLightWidget.base_colors",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::ParamWidget::module",
+      "kind": "property",
+      "raw": "rackpy.raw.app.ParamWidget.module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::ParamWidget::paramId",
+      "kind": "property",
+      "raw": "rackpy.raw.app.ParamWidget.param_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::PortWidget::module",
+      "kind": "property",
+      "raw": "rackpy.raw.app.PortWidget.module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::PortWidget::portId",
+      "kind": "property",
+      "raw": "rackpy.raw.app.PortWidget.port_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::PortWidget::type",
+      "kind": "property",
+      "raw": "rackpy.raw.app.PortWidget.type",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgButton::fb",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgButton.fb",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgButton::frames",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgButton.frames",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgButton::shadow",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgButton.shadow",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgButton::sw",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgButton.sw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgKnob::fb",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgKnob.fb",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgKnob::shadow",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgKnob.shadow",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgKnob::sw",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgKnob.sw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgKnob::tw",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgKnob.tw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgPanel::fb",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgPanel.fb",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgPanel::panelBorder",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgPanel.panel_border",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgPanel::svg",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgPanel.svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgPanel::sw",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgPanel.sw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgPort::fb",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgPort.fb",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgPort::shadow",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgPort.shadow",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgPort::sw",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgPort.sw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgScrew::fb",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgScrew.fb",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgScrew::sw",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgScrew.sw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgSlider::background",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgSlider.background",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgSlider::fb",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgSlider.fb",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgSlider::handle",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgSlider.handle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgSlider::maxHandlePos",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgSlider.max_handle_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgSlider::minHandlePos",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgSlider.min_handle_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgSwitch::fb",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgSwitch.fb",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgSwitch::frames",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgSwitch.frames",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgSwitch::latch",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgSwitch.latch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgSwitch::shadow",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgSwitch.shadow",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::SvgSwitch::sw",
+      "kind": "property",
+      "raw": "rackpy.raw.app.SvgSwitch.sw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::Switch::momentary",
+      "kind": "property",
+      "raw": "rackpy.raw.app.Switch.momentary",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::ThemedSvgPanel::darkSvg",
+      "kind": "property",
+      "raw": "rackpy.raw.app.ThemedSvgPanel.dark_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::ThemedSvgPanel::lightSvg",
+      "kind": "property",
+      "raw": "rackpy.raw.app.ThemedSvgPanel.light_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::ThemedSvgPort::darkSvg",
+      "kind": "property",
+      "raw": "rackpy.raw.app.ThemedSvgPort.dark_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::ThemedSvgPort::lightSvg",
+      "kind": "property",
+      "raw": "rackpy.raw.app.ThemedSvgPort.light_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::ThemedSvgScrew::darkSvg",
+      "kind": "property",
+      "raw": "rackpy.raw.app.ThemedSvgScrew.dark_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::app::ThemedSvgScrew::lightSvg",
+      "kind": "property",
+      "raw": "rackpy.raw.app.ThemedSvgScrew.light_svg",
       "status": "implemented"
     },
     {
@@ -2662,6 +3243,34 @@
     },
     {
       "facade": null,
+      "id": "function_template:rack::createInput<type>(rack::math::Vec, rack::engine::Module *, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_input",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createInputCentered<type>(rack::math::Vec, rack::engine::Module *, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_input_centered",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createLight<type>(rack::math::Vec, rack::engine::Module *, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_light",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createLightCentered<type>(rack::math::Vec, rack::engine::Module *, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_light_centered",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "function_template:rack::createMenu<type>()",
       "kind": "function",
       "raw": "rackpy.raw.create_menu",
@@ -2697,9 +3306,65 @@
     },
     {
       "facade": null,
+      "id": "function_template:rack::createOutput<type>(rack::math::Vec, rack::engine::Module *, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_output",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createOutputCentered<type>(rack::math::Vec, rack::engine::Module *, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_output_centered",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createPanel<type>(std::string)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_panel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createPanel<type>(std::string, std::string)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_panel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createParam<type>(rack::math::Vec, rack::engine::Module *, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_param",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createParamCentered<type>(rack::math::Vec, rack::engine::Module *, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_param_centered",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "function_template:rack::createSubmenuItem<type>(std::string, std::string, std::function<void (ui::Menu *)>, bool)",
       "kind": "function",
       "raw": "rackpy.raw.create_submenu_item",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createWidget<type>(rack::math::Vec)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createWidgetCentered<type>(rack::math::Vec)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_widget_centered",
       "status": "implemented"
     },
     {
@@ -2873,6 +3538,13 @@
     {
       "facade": null,
       "id": "macro:NANOVG_GL2",
+      "kind": "no_runtime_meaning",
+      "raw": null,
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:PRIVATE",
       "kind": "no_runtime_meaning",
       "raw": null,
       "status": "implemented"
@@ -3169,6 +3841,692 @@
       "id": "method:rack::Quantity::toggle()",
       "kind": "method",
       "raw": "rackpy.raw.Quantity.toggle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::CircularShadow::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.CircularShadow.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Knob::initParamQuantity()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Knob.init_param_quantity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Knob::onAction(const rack::widget::Widget::ActionEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Knob.on_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Knob::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Knob.on_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Knob::onDragEnd(const rack::widget::Widget::DragEndEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Knob.on_drag_end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Knob::onDragLeave(const rack::widget::Widget::DragLeaveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Knob.on_drag_leave",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Knob::onDragMove(const rack::widget::Widget::DragMoveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Knob.on_drag_move",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Knob::onDragStart(const rack::widget::Widget::DragStartEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Knob.on_drag_start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Knob::onHover(const rack::widget::Widget::HoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Knob.on_hover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Knob::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Knob.on_hover_scroll",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Knob::onLeave(const rack::widget::Widget::LeaveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Knob.on_leave",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::LightWidget::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.LightWidget.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::LightWidget::drawBackground(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.LightWidget.draw_background",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::LightWidget::drawHalo(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.LightWidget.draw_halo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::LightWidget::drawLayer(const rack::widget::Widget::DrawArgs &, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.LightWidget.draw_layer",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::LightWidget::drawLight(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.LightWidget.draw_light",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleLightWidget::createTooltip()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleLightWidget.create_tooltip",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleLightWidget::destroyTooltip()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleLightWidget.destroy_tooltip",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleLightWidget::getLight(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleLightWidget.get_light",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleLightWidget::getLightInfo()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleLightWidget.get_light_info",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleLightWidget::onEnter(const rack::widget::Widget::EnterEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleLightWidget.on_enter",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleLightWidget::onHover(const rack::widget::Widget::HoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleLightWidget.on_hover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleLightWidget::onLeave(const rack::widget::Widget::LeaveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleLightWidget.on_leave",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ModuleLightWidget::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleLightWidget.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::MultiLightWidget::addBaseColor(NVGcolor)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.MultiLightWidget.add_base_color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::MultiLightWidget::getNumColors()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.MultiLightWidget.get_num_colors",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::MultiLightWidget::setBrightnesses(const std::vector<float> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.MultiLightWidget.set_brightnesses",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PanelBorder::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PanelBorder.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ParamWidget::appendContextMenu(rack::ui::Menu *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ParamWidget.append_context_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ParamWidget::createContextMenu()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ParamWidget.create_context_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ParamWidget::createTooltip()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ParamWidget.create_tooltip",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ParamWidget::destroyTooltip()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ParamWidget.destroy_tooltip",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ParamWidget::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ParamWidget.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ParamWidget::getParamQuantity()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ParamWidget.get_param_quantity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ParamWidget::initParamQuantity()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ParamWidget.init_param_quantity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ParamWidget::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ParamWidget.on_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ParamWidget::onDoubleClick(const rack::widget::Widget::DoubleClickEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ParamWidget.on_double_click",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ParamWidget::onEnter(const rack::widget::Widget::EnterEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ParamWidget.on_enter",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ParamWidget::onLeave(const rack::widget::Widget::LeaveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ParamWidget.on_leave",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ParamWidget::resetAction()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ParamWidget.reset_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ParamWidget::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ParamWidget.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::appendContextMenu(rack::ui::Menu *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.append_context_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::createContextMenu()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.create_context_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::createTooltip()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.create_tooltip",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::deleteTopCableAction()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.delete_top_cable_action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::destroyTooltip()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.destroy_tooltip",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::getPort()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.get_port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::getPortInfo()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.get_port_info",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.on_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::onDragDrop(const rack::widget::Widget::DragDropEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.on_drag_drop",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::onDragEnd(const rack::widget::Widget::DragEndEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.on_drag_end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::onDragEnter(const rack::widget::Widget::DragEnterEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.on_drag_enter",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::onDragLeave(const rack::widget::Widget::DragLeaveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.on_drag_leave",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::onDragStart(const rack::widget::Widget::DragStartEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.on_drag_start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::onEnter(const rack::widget::Widget::EnterEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.on_enter",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::onLeave(const rack::widget::Widget::LeaveEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.on_leave",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::PortWidget::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.PortWidget.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RailWidget::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.RailWidget.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RailWidget::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.RailWidget.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SliderKnob::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SliderKnob.on_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SliderKnob::onHover(const rack::widget::Widget::HoverEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SliderKnob.on_hover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgButton::addFrame(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgButton.add_frame",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgButton::onButton(const rack::widget::Widget::ButtonEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgButton.on_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgButton::onDragDrop(const rack::widget::Widget::DragDropEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgButton.on_drag_drop",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgButton::onDragEnd(const rack::widget::Widget::DragEndEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgButton.on_drag_end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgButton::onDragStart(const rack::widget::Widget::DragStartEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgButton.on_drag_start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgKnob::onChange(const rack::widget::Widget::ChangeEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgKnob.on_change",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgKnob::setSVG(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgKnob.set_svg_legacy",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgKnob::setSvg(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgKnob.set_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgPanel::setBackground(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgPanel.set_background",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgPanel::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgPanel.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgPort::setSVG(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgPort.set_svg_legacy",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgPort::setSvg(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgPort.set_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgScrew::setSvg(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgScrew.set_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgSlider::onChange(const rack::widget::Widget::ChangeEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgSlider.on_change",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgSlider::setBackgroundSVG(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgSlider.set_background_svg_legacy",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgSlider::setBackgroundSvg(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgSlider.set_background_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgSlider::setHandlePos(rack::math::Vec, rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgSlider.set_handle_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgSlider::setHandlePosCentered(rack::math::Vec, rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgSlider.set_handle_pos_centered",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgSlider::setHandleSVG(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgSlider.set_handle_svg_legacy",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgSlider::setHandleSvg(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgSlider.set_handle_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgSlider::setSVGs(std::shared_ptr<rack::window::Svg>, std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgSlider.set_svgs",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgSwitch::addFrame(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgSwitch.add_frame",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgSwitch::onChange(const rack::widget::Widget::ChangeEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgSwitch.on_change",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgSwitch::onDragEnd(const rack::widget::Widget::DragEndEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgSwitch.on_drag_end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::SvgSwitch::onDragStart(const rack::widget::Widget::DragStartEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.SvgSwitch.on_drag_start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Switch::initParamQuantity()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Switch.init_param_quantity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Switch::onDoubleClick(const rack::widget::Widget::DoubleClickEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Switch.on_double_click",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Switch::onDragEnd(const rack::widget::Widget::DragEndEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Switch.on_drag_end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Switch::onDragStart(const rack::widget::Widget::DragStartEvent &)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Switch.on_drag_start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::Switch::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.Switch.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ThemedSvgPanel::setBackground(std::shared_ptr<rack::window::Svg>, std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ThemedSvgPanel.set_background",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ThemedSvgPanel::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ThemedSvgPanel.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ThemedSvgPort::setSvg(std::shared_ptr<rack::window::Svg>, std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ThemedSvgPort.set_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ThemedSvgPort::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ThemedSvgPort.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ThemedSvgScrew::setSvg(std::shared_ptr<rack::window::Svg>, std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ThemedSvgScrew.set_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::ThemedSvgScrew::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ThemedSvgScrew.step",
       "status": "implemented"
     },
     {
@@ -6161,6 +7519,153 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "record:rack::app::CircularShadow",
+      "kind": "class",
+      "raw": "rackpy.raw.app.CircularShadow",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::Knob",
+      "kind": "class",
+      "raw": "rackpy.raw.app.Knob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::LightWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.app.LightWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::ModuleLightWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.app.ModuleLightWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::MultiLightWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.app.MultiLightWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::PanelBorder",
+      "kind": "class",
+      "raw": "rackpy.raw.app.PanelBorder",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::ParamWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.app.ParamWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::PortWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.app.PortWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::RailWidget",
+      "kind": "class",
+      "raw": "rackpy.raw.app.RailWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::SliderKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SliderKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::SvgButton",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SvgButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::SvgKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SvgKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::SvgPanel",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SvgPanel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::SvgPort",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SvgPort",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::SvgScrew",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SvgScrew",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::SvgSlider",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SvgSlider",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::SvgSwitch",
+      "kind": "class",
+      "raw": "rackpy.raw.app.SvgSwitch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::Switch",
+      "kind": "class",
+      "raw": "rackpy.raw.app.Switch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::ThemedSvgPanel",
+      "kind": "class",
+      "raw": "rackpy.raw.app.ThemedSvgPanel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::ThemedSvgPort",
+      "kind": "class",
+      "raw": "rackpy.raw.app.ThemedSvgPort",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::app::ThemedSvgScrew",
+      "kind": "class",
+      "raw": "rackpy.raw.app.ThemedSvgScrew",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.engine.Input",
       "id": "record:rack::engine::Input",
       "kind": "class",
@@ -6925,6 +8430,34 @@
     },
     {
       "facade": null,
+      "id": "variable:rack::app::RACK_GRID_HEIGHT",
+      "kind": "constant",
+      "raw": "rackpy.raw.app.RACK_GRID_HEIGHT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::app::RACK_GRID_SIZE",
+      "kind": "constant",
+      "raw": "rackpy.raw.app.RACK_GRID_SIZE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::app::RACK_GRID_WIDTH",
+      "kind": "constant",
+      "raw": "rackpy.raw.app.RACK_GRID_WIDTH",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::app::RACK_OFFSET",
+      "kind": "constant",
+      "raw": "rackpy.raw.app.RACK_OFFSET",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "variable:rack::asset::bundlePath",
       "kind": "constant",
       "raw": "rackpy.raw.asset.bundlePath",
@@ -7057,6 +8590,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "99238627ca5cb4f9",
+  "inputs": "17f6efe44f98678b",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }
