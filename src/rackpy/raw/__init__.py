@@ -109,12 +109,15 @@ _ENGINE_THREAD_METHODS = ("get_value", "set_value", "get_min_value", "get_max_va
 
 
 def _refuse_engine_thread_overrides(cls: type, **kwargs: _Any) -> None:
+    if getattr(cls, "_rackpy_laboratory", False):
+        return  # rackpy.laboratory's quantities: Python value methods, offline only
     defined = [name for name in _ENGINE_THREAD_METHODS if name in vars(cls)]
     if defined:
         raise TypeError(
             f"{cls.__qualname__} defines {', '.join(defined)}: Rack can call these on its engine thread, where "
             "Python never runs, so a Python Quantity cannot override them. Subclass rackpy.types.ValueQuantity, "
-            "which stores its value natively, and override the display methods instead."
+            "which stores its value natively, and override the display methods instead (or, offline only, a "
+            "rackpy.laboratory quantity class)."
         )
 
 

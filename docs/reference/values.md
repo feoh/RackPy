@@ -134,7 +134,9 @@ where Rack calls each method ([callback matrix](callback-matrix.md)):
 | `reset`, `randomize` | sometimes with audio stopped | override, but keep it brief (ADR 004: 1 ms) |
 | `get_value`, `set_value`, `get_min_value`, `get_max_value`, `get_default_value` | also on the **engine thread** (Core MIDI-Map) | **cannot** be overridden: a subclass that defines one raises `TypeError` |
 
-Because the value methods cannot be Python, use
+Outside the [callback laboratory](../explanation/callbacks.md#laboratory-quantities),
+whose `rackpy.laboratory.Quantity` lets an offline experiment override them,
+the value methods cannot be Python, so use
 {py:class}`rackpy.types.ValueQuantity`: RackPy's own Quantity, which keeps its
 value, bounds and default natively, so Rack can read them from any thread,
 while Python sets them and overrides the display methods. Like Rack's

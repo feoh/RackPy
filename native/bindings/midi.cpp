@@ -552,6 +552,32 @@ rack::midi::Port& pythonMidiPort(py::handle value) {
 	return checked(value.cast<m::Port&>());
 }
 
+void connectOutputDevice(py::handle output, m::OutputDevice& device) {
+	auto* port = dynamic_cast<m::Output*>(&pythonMidiPort(output));
+	if (!port)
+		throw py::type_error("expected a rackpy.raw.midi.Output");
+	Tracked& t = tracked(*port);
+	if (t.holds(&device))
+		throw runtime::Ownership("the port is already connected to this device");
+	port->m::Output::setDeviceId(-1);  // Rack's: leave its driver's device (no Python override)
+	device.subscribe(port);
+	t.deviceSubscriptions.push_back(&device);  // the port leaves the device when it goes, as for subscribe()
+	port->device = port->outputDevice = &device;
+}
+
+void disconnectOutputDevice(m::OutputDevice& device) noexcept {
+	auto subscribed = device.subscribed;
+	for (m::Output* port : subscribed) {
+		if (port->outputDevice == &device)
+			port->device = port->outputDevice = nullptr;
+		device.unsubscribe(port);
+		if (auto* t = dynamic_cast<Tracked*>(static_cast<m::Port*>(port))) {
+			auto& subs = t->deviceSubscriptions;
+			subs.erase(std::remove(subs.begin(), subs.end(), static_cast<m::Device*>(&device)), subs.end());
+		}
+	}
+}
+
 void bindMidi(py::module_ mod) {
 	py::class_<m::Message>(mod, "Message",
 		"Rack's MIDI message: its bytes (3 zeros at first) and the engine frame it belongs to (-1: now). The "

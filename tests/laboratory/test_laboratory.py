@@ -17,11 +17,23 @@ pytestmark = [pytest.mark.host, linux_x64_only()]
 SUITE = Path(__file__).resolve().parent / "in_rack"
 
 
-def expect_only(outcomes: dict[str, str], skipped: str) -> None:
-    """Every test passed, except the one that needs the other run's conditions (a Rack context, or none)."""
+# Tests that need the other run's conditions: Rack's live context, or none.
+NEEDS_RACK = [
+    "test_racks_to_json_calls_python_params_and_data_overrides",
+    "test_racks_module_code_reaches_slot_quantities_python_value_methods",
+    "test_rack_threads_never_run_laboratory_python",
+    "test_racks_output_reaches_a_python_output_device",
+]
+NEEDS_NO_RACK = ["test_parameter_events_and_json_need_racks_context"]
+
+
+def expect_only(outcomes: dict[str, str], skipped: list[str]) -> None:
+    """Every test passed, except exactly the ones this run cannot provide for, which skipped."""
     assert outcomes, "no tests ran"
-    assert {n for n, o in outcomes.items() if o != "passed"} == {n for n in outcomes if n.endswith("::" + skipped)}
-    assert outcomes[next(n for n in outcomes if n.endswith("::" + skipped))] == "skipped"
+    expected = {n for n in outcomes if n.rsplit("::", 1)[-1] in skipped}
+    assert len(expected) == len(skipped), sorted(expected)
+    assert {n for n, o in outcomes.items() if o != "passed"} == expected
+    assert {outcomes[n] for n in expected} <= {"skipped"}
 
 
 UI_ONLY = ["test_engine_reference.py", "test_engine_events.py"]
@@ -31,7 +43,7 @@ def test_laboratory_in_production_host(make_bundle: Callable[[], Path], rack_hos
     ignored = [arg for name in UI_ONLY for arg in ("--ignore", str(SUITE / name))]
     result = run_pytest_in_rack(make_bundle(), rack_host, tmp_path, SUITE, args=ignored)
     assert result.exit == 0, result.summary()
-    expect_only(result.outcomes(), skipped="test_racks_to_json_calls_python_params_and_data_overrides")
+    expect_only(result.outcomes(), NEEDS_RACK)
 
 
 @pytest.mark.gui
@@ -43,4 +55,4 @@ def test_laboratory_with_live_rack_context(
     outcomes = result.outcomes()
     for ui_test in ("test_a_bench_reproduces_racks_engine_frame_for_frame", "test_bench_events_match_racks_engine"):
         assert any(ui_test in n for n in outcomes), result.summary()
-    expect_only(outcomes, skipped="test_parameter_events_and_json_need_racks_context")
+    expect_only(outcomes, NEEDS_NO_RACK)

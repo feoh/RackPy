@@ -34,6 +34,7 @@ throw into Rack (rackCaller). Calls from Python keep every check. */
 template <typename Base>
 struct StandaloneQuantity : QuantityTrampoline<Base, StandaloneGuard>, SlotTransfer<Base, StandaloneQuantity<Base>> {
 	using Slot = SlotTransfer<Base, StandaloneQuantity<Base>>;
+	using Trampoline = QuantityTrampoline<Base, StandaloneGuard>;
 	StandaloneQuantity() { StandaloneGuard::check(); }
 	void guard() const {
 		if (this->rackCaller())
@@ -66,14 +67,14 @@ struct StandaloneQuantity : QuantityTrampoline<Base, StandaloneGuard>, SlotTrans
 		// here implies an engine-owned module (RP-16), where smoothing is safe.
 		if (!this->rackCaller() && this->module && this->smoothEnabled && !module::smoothingAllowed(this->module))
 			throw runtime::Ownership("smoothing targets require engine-owned modules; use set_immediate_value");
-		Base::setValue(value);
+		Trampoline::setValue(value);
 	}
-	float getValue() override { checkAccess(true); return Base::getValue(); }
+	float getValue() override { checkAccess(true); return Trampoline::getValue(); }
 	float immediate() { checkAccess(true); return this->getImmediateValue(); }
 	void immediate(float value) { checkAccess(true); this->setImmediateValue(value); }
-	float getMinValue() override { guard(); return Base::getMinValue(); }
-	float getMaxValue() override { guard(); return Base::getMaxValue(); }
-	float getDefaultValue() override { guard(); return Base::getDefaultValue(); }
+	float getMinValue() override { guard(); return Trampoline::getMinValue(); }
+	float getMaxValue() override { guard(); return Trampoline::getMaxValue(); }
+	float getDefaultValue() override { guard(); return Trampoline::getDefaultValue(); }
 	std::string getLabel() override {
 		guard();
 		return overrideOr<std::string>(static_cast<const Base*>(this), "get_label", [this] {
@@ -184,12 +185,22 @@ void guardQuantity(Q& q) {
 	guard(q);
 }
 
+/** Rack's engine thread reaches a module's slot quantities (Core MIDI-Map): a laboratory
+quantity, whose value methods are Python, goes only into a laboratory module. */
+void refuseLaboratoryQuantity(const ModuleRef& ref, Q& q) {
+	auto* flag = dynamic_cast<LaboratoryQuantity*>(&q);
+	if (flag && flag->laboratoryOverrides && !ref.get().laboratory)
+		throw runtime::Laboratory("a laboratory parameter quantity goes only into a laboratory module's slot: Rack's "
+			"engine can call an ordinary module's quantities on its own threads, where Python never runs");
+}
+
 std::unique_ptr<Q> takeQuantity(const ModuleRef& ref, py::handle value) {
 	if (value.is_none())
 		return nullptr;
 	if (!py::isinstance<Q>(value))
 		throw py::type_error("a module's quantity vector takes a ParamQuantity you created, or None");
 	auto instance = py::reinterpret_borrow<py::object>(value);
+	refuseLaboratoryQuantity(ref, instance.cast<Q&>());
 	return standalone(instance.cast<Q&>(), [&](auto& alias) { return disownForSlot<Q>(instance, alias, ref.state, false); });
 }
 
@@ -200,6 +211,7 @@ std::unique_ptr<Q> makeTransferredQuantity(const ModuleRef& ref, py::handle type
 	};
 	py::object instance = switchOnly ? constructForSlot<S>(type, "quantity_type", "SwitchQuantity", recheck)
 		: constructForSlot<Q>(type, "quantity_type", "ParamQuantity", recheck);
+	refuseLaboratoryQuantity(ref, instance.cast<Q&>());
 	return standalone(instance.cast<Q&>(), [&](auto& alias) { return disownForSlot<Q>(instance, alias, ref.state); });
 }
 
@@ -231,6 +243,13 @@ void bindStandaloneQuantities(py::module_ engine) {
 		.def("get_display_value_string", [](Q& q) { return q.getDisplayValueString(); })
 		.def("set_display_value_string", [](Q& q, std::string s) { q.setDisplayValueString(std::move(s)); }, py::arg("s"))
 		.def("reset", [](Q& q) { q.reset(); })
+		// The mixed value and range methods: ParamQuantity's implementations
+		// (value through Rack's engine), or a laboratory subclass's override (RP-22C).
+		.def("get_value", [](Q& q) { return q.getValue(); })
+		.def("set_value", [](Q& q, float value) { q.setValue(value); }, py::arg("value"))
+		.def("get_min_value", [](Q& q) { return q.getMinValue(); })
+		.def("get_max_value", [](Q& q) { return q.getMaxValue(); })
+		.def("get_default_value", [](Q& q) { return q.getDefaultValue(); })
 		.def("to_json", [](Q& q) {
 			ErrorCapture capture;
 			std::unique_ptr<json_t, decltype(&json_decref)> json(q.toJson(), json_decref);

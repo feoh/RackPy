@@ -120,31 +120,29 @@ def test_metadata_class_factories_complete_only_templates_and_getters(symbol: st
     assert any("test_transferred_metadata.py" in t for t in record["tests"])
 
 
-def test_quantity_records_left_open_name_their_responsible_tasks() -> None:
+def test_quantity_records_are_mapped_with_their_laboratory_path() -> None:
+    entries = bm.load_json(bm.MANIFEST)["entries"]
     records = [
         r
-        for r in bm.load_json(bm.MANIFEST)["entries"]
+        for r in entries
         if r["id"].split(":", 1)[1].startswith(("rack::engine::ParamQuantity", "rack::engine::SwitchQuantity"))
-        and "Json(" not in r["id"]
-        and r["status"] != "implemented"
     ]
-    # RP-14B2b8/RP-14C2: only the mixed value/range virtuals stay open, for
-    # RP-22's laboratory path (smoothing works once the engine owns a module).
-    assert {r["id"].rsplit("::", 1)[1] for r in records} == {
+    # RP-14B2b8/RP-14C2 left the mixed value/range virtuals open for RP-22's laboratory path; RP-22C mapped them.
+    assert records and {r["status"] for r in records} == {"implemented"}
+    mixed = [r for r in entries if r["callback"] == "mixed"]
+    assert {r["id"].rsplit("::", 1)[1] for r in mixed} == {
         "getDefaultValue()",
         "getMaxValue()",
         "getMinValue()",
         "getValue()",
         "setValue(float)",
     }
-    for record in records:
-        assert record["status"] == "planned" and record["python"] is None
-        assert record["notes"].startswith("Responsible task: RP-22")
-        assert "RP-14B2b8" in record["notes"] and "RP-15" in record["notes"]
-        if record["callback"] == "mixed":
-            assert record["notes"].startswith("Responsible task: RP-22") and "policy 11" in record["notes"]
+    assert len(mixed) == 10  # rack::Quantity and rack::engine::ParamQuantity
+    for record in mixed:
+        assert record["status"] == "implemented" and "RP-22C" in record["notes"]
+        assert "rackpy.laboratory" in record["notes"]
     # Quantity JSON is mapped by RP-15A.
-    for record in bm.load_json(bm.MANIFEST)["entries"]:
+    for record in entries:
         if "ParamQuantity::" in record["id"] and "Json(" in record["id"]:
             assert record["status"] == "implemented" and record["notes"].startswith("RP-15A")
 

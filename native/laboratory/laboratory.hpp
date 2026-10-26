@@ -117,6 +117,8 @@ inline Module* laboratoryModule(module::Module& m) {
 /** _rackpy_host.laboratory: enablement, laboratory modules and the Bench. */
 void bind(py::module_ host);
 void bindModules(py::module_ lab);
+void bindQuantities(py::module_ lab);
+void bindMidi(py::module_ lab);
 void bindBench(py::module_ lab);
 
 }  // namespace laboratory

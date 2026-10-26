@@ -449,8 +449,9 @@ struct Construction {
 		};
 		replaceInfoWith(id, m.paramQuantities, m.paramQuantityTokens, prepare, make);
 		// getDefaultValue is native (Python cannot override it) and, like
-		// Param::setValue, cannot throw here. Nothing mutates the Param before
-		// preparation has succeeded.
+		// Param::setValue, cannot throw here, except on a laboratory quantity
+		// (RP-22C), whose Python error leaves the committed slot and an unset
+		// Param default. Nothing mutates the Param before preparation has succeeded.
 		m.params[id].setValue(m.paramQuantities[id]->getDefaultValue());
 	}
 	void configBypass(int input, int output) {

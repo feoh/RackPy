@@ -8,6 +8,7 @@
 #include "../bindings/engine/module.hpp"
 #include "../bindings/plugin.hpp"
 #include "../bindings/support/hooks.hpp"
+#include "../bindings/support/quantity.hpp"
 #include "rackpy/runtime/context.hpp"
 #include "rackpy/runtime/errors.hpp"
 #include "rackpy/runtime/interpreter.hpp"
@@ -378,9 +379,28 @@ void bindModules(py::module_ lab) {
 	}, py::arg("module"), py::arg("data"), "The module's data handlers (ModuleClass.from_json); nothing without them.");
 }
 
+void bindQuantities(py::module_ lab) {
+	lab.def("mark_quantity", [](rack::Quantity& q) {
+		requireEnabled("creating a laboratory quantity");
+		runtime::requireMainThread("creating a laboratory quantity");
+		auto* flag = dynamic_cast<bindings::LaboratoryQuantity*>(&q);
+		if (!flag)
+			throw py::type_error("only a Quantity, ParamQuantity or SwitchQuantity made in Python can be a laboratory quantity");
+		if (auto* pq = dynamic_cast<rack::engine::ParamQuantity*>(&q); pq && pq->module)
+			throw runtime::Laboratory("a quantity becomes a laboratory quantity only as it is created, before it has a module");
+		flag->laboratoryOverrides = true;
+	}, py::arg("quantity"), "rackpy.laboratory's quantity classes call this from __init__: their value methods become Python.");
+	lab.def("is_laboratory_quantity", [](rack::Quantity& q) {
+		auto* flag = dynamic_cast<bindings::LaboratoryQuantity*>(&q);
+		return flag && flag->laboratoryOverrides;
+	}, py::arg("quantity"));
+}
+
 void bind(py::module_ host) {
 	py::module_ lab = host.def_submodule("laboratory", "The callback laboratory (RP-22); use rackpy.laboratory.");
 	bindModules(lab);
+	bindQuantities(lab);
+	bindMidi(lab);
 	bindBench(lab);
 	runtime::onFinalize([] { laboratoryEnabled.store(false); });
 }

@@ -151,3 +151,38 @@ The rules that keep it contained:
   calls `super().process`, whose `step` calls `process`, ...) stop with
   `RecursionError` after 200 levels.
 - **Main thread only**, like the rest of the module API.
+
+## Laboratory quantities
+
+Rack calls a quantity's value and range methods (`get_value`, `set_value`,
+`get_min_value`, `get_max_value`, `get_default_value`) from its engine
+thread too, for a module's parameters (Core MIDI-Map), so outside the
+laboratory a Python quantity cannot override them. The laboratory's
+{py:class}`rackpy.laboratory.Quantity`, {py:class}`~rackpy.laboratory.ParamQuantity`
+and {py:class}`~rackpy.laboratory.SwitchQuantity` may; creating one needs
+`enable()`. Rack's own code that calls them (display values and strings,
+`reset`, `randomize`, scaled values, `paramsToJson`, `paramsFromJson`,
+`setImmediateValue`'s clamping) reaches the Python override synchronously,
+and an override's error reaches the Python caller. `super()` runs Rack's
+implementation.
+
+Only a laboratory module takes a laboratory parameter quantity, through
+`config_param(..., quantity_type=...)` or its `param_quantities`; an ordinary
+module raises `LaboratoryError`, because Rack's engine can call its
+quantities on its own threads. Were Rack ever to call a laboratory quantity
+from one of its threads, RackPy would refuse to run Python there (a
+`refused_rack_thread` diagnostic) and Rack's implementation would answer; the
+test-hooks build checks exactly that.
+
+## A laboratory MIDI output device
+
+`midi::OutputDevice::sendMessage` runs on Rack's engine threads, when a
+module's `process` sends MIDI, so a production device Python configures
+only queues what it receives ([MIDI devices](../reference/midi.md#python-drivers-and-devices)).
+{py:class}`rackpy.laboratory.MidiOutputDevice` is a device whose
+`send_message(message)` a Python subclass overrides. It is never one of
+Rack's drivers' devices: `device.connect(output)` points a
+`rackpy.raw.midi.Output` you made at it, and Rack's `Output::sendMessage`
+(which applies the port's channel) then calls the override synchronously,
+for example from a laboratory module's `process` on a bench. Deleting the
+device disconnects its ports; a deleted port leaves the device.

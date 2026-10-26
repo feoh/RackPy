@@ -22,13 +22,29 @@ except ImportError as e:
     raise ImportError("rackpy.laboratory is available only inside Rack, in a RackPy plugin") from e
 
 from rackpy import plugin as _plugin
+from rackpy import raw as _raw
 from rackpy.engine import Module
+from rackpy.raw import engine as _engine
 from rackpy.raw.plugin import Model
 
-__all__ = ["Bench", "ModuleClass", "ProcessArgs", "disable", "enable", "enabled"]
+__all__ = [
+    "Bench",
+    "MidiOutputDevice",
+    "ModuleClass",
+    "ParamQuantity",
+    "ProcessArgs",
+    "Quantity",
+    "SwitchQuantity",
+    "disable",
+    "enable",
+    "enabled",
+]
 
 Bench = _lab.Bench
 ProcessArgs = Module.ProcessArgs
+MidiOutputDevice = _lab.MidiOutputDevice
+"""A MIDI output device whose ``send_message`` a subclass overrides; ``device.connect(output)`` points a
+``rackpy.raw.midi.Output`` you made at it, so Rack's ``Output::sendMessage`` reaches the override."""
 
 # The Rack virtuals a laboratory module may override, by their Python names.
 _OVERRIDES: tuple[str, ...] = _lab.OVERRIDES
@@ -199,3 +215,50 @@ class ModuleClass(_plugin.ModuleClass):
 
         _lab.create_module(build, model)
         return built[0]
+
+
+# Quantities whose value and range methods (get_value, set_value, get_min_value, get_max_value,
+# get_default_value) may be Python. Rack also calls these on its engine thread for a module's
+# quantities, so outside the laboratory Python cannot override them.
+
+
+class Quantity(_raw.Quantity):
+    """``rack::Quantity`` whose value and range methods a subclass may override, offline.
+
+    Rack's own code that calls them (display values, ``reset``, ``randomize``,
+    scaled values, the display string) reaches the override synchronously.
+    Creating one needs :func:`enable`. Main thread.
+    """
+
+    _rackpy_laboratory = True
+
+    def __init__(self) -> None:
+        super().__init__()
+        _lab.mark_quantity(self)
+
+
+class ParamQuantity(_engine.ParamQuantity):
+    """``rack::engine::ParamQuantity`` whose value and range methods a subclass may override, offline.
+
+    Only a laboratory module takes one as ``config_param(..., quantity_type=...)``
+    or in its ``param_quantities``: Rack's engine can call an ordinary
+    module's quantities on its own threads. Rack's code calling them
+    (``paramsToJson``, reset, randomize, display) reaches the override
+    synchronously. Creating one needs :func:`enable`.
+    """
+
+    _rackpy_laboratory = True
+
+    def __init__(self) -> None:
+        super().__init__()
+        _lab.mark_quantity(self)
+
+
+class SwitchQuantity(_engine.SwitchQuantity):
+    """``rack::engine::SwitchQuantity`` with laboratory value methods; see :class:`ParamQuantity`."""
+
+    _rackpy_laboratory = True
+
+    def __init__(self) -> None:
+        super().__init__()
+        _lab.mark_quantity(self)

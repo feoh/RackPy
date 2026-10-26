@@ -113,7 +113,8 @@ Python implements a MIDI driver as a natively configured `PythonDriver`
   send to it from engine threads (modules' `process()`), so it only queues
   each message, without blocking, in a queue of 1024 that counts drops in
   `dropped`. `take_sent()` returns the queued messages, in order, on the main
-  thread.
+  thread. A Python `sendMessage` override exists only offline, in the
+  [laboratory](../explanation/callbacks.md#a-laboratory-midi-output-device).
 - `remove_input_device`/`remove_output_device` unplug a device. Rack's lists
   no longer show it, the ports that hold it keep it until they move, and it
   is deleted when the last one leaves. A removed input refuses pushes.

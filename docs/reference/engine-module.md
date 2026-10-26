@@ -410,15 +410,20 @@ The ParamQuantity and SwitchQuantity fields, UI virtuals (`get_label`,
 `get_immediate_value`, `set_immediate_value`, `get_param` and both classes are
 `implemented` (RP-14B2b8): Python objects, slot-owned objects and built-in
 views give them their full semantics, including Python overrides of the UI
-virtuals. Five records stay `planned`, with their responsible task:
+virtuals.
 
-- `get_value`, `set_value`, `get_min_value`, `get_max_value` and
-  `get_default_value` are *mixed*: Rack calls them from the engine thread as
-  well. Their native production path is complete, and a subclass that
-  overrides one is refused when it is defined. A Python override needs the
-  non-real-time callback laboratory (RP-22), which the coverage contract
-  requires for these methods.
-- JSON (`to_json`, `from_json`) is RP-15.
+`get_value`, `set_value`, `get_min_value`, `get_max_value` and
+`get_default_value` are *mixed*: Rack calls them from the engine thread as
+well (Core MIDI-Map). Their production path is native, and a subclass of
+`ParamQuantity` that overrides one is refused when it is defined. A Python
+override exists only in the laboratory (RP-22C): a subclass of
+`rackpy.laboratory.ParamQuantity` or `SwitchQuantity`, created after
+`rackpy.laboratory.enable()`, which only a laboratory module's slots accept
+(an ordinary module's raise `LaboratoryError`), so Rack's engine thread never
+reaches it. Rack's own code (display, `reset`, `randomize`, `paramsToJson`,
+`paramsFromJson`) then calls the Python methods synchronously on the main
+thread; see [laboratory quantities](../explanation/callbacks.md#laboratory-quantities).
+JSON (`to_json`, `from_json`) is RP-15.
 
 Smoothing, including the deprecated `set_smooth_value`/`get_smooth_value`,
 works once Rack's engine owns the module (RP-14C2) and is refused before.

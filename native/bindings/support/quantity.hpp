@@ -26,9 +26,46 @@ struct ExclusiveBudget {
 /** Shared UI-safe virtuals. Base is Quantity, ValueQuantity or a parameter quantity. */
 struct UnguardedQuantity { static void check() {} };
 
+/** Set only by the callback laboratory's quantity classes (RP-22C, native/laboratory), and
+only before the object can reach a module: its value and range methods then dispatch to
+Python overrides. Rack's engine thread never reaches such an object (a laboratory
+parameter quantity is accepted only by laboratory modules, which Rack's engine never
+runs); were it to, callPython would refuse and Rack's implementation would answer. */
+struct LaboratoryQuantity {
+	virtual ~LaboratoryQuantity() = default;
+	bool laboratoryOverrides = false;
+};
+
 template <typename Base, typename Guard = UnguardedQuantity>
-struct QuantityTrampoline : Base, py::trampoline_self_life_support {
+struct QuantityTrampoline : Base, LaboratoryQuantity, py::trampoline_self_life_support {
 	using Base::Base;
+	// The mixed value and range methods (RP-06): native, except on a laboratory quantity.
+	float getValue() override {
+		if (!laboratoryOverrides)
+			return Base::getValue();
+		return overrideOr<float>(static_cast<const Base*>(this), "get_value", [this] { return Base::getValue(); });
+	}
+	void setValue(float v) override {
+		if (!laboratoryOverrides)
+			return Base::setValue(v);
+		overrideOrVoid(static_cast<const Base*>(this), "set_value", [this, v] { Base::setValue(v); }, v);
+	}
+	float getMinValue() override {
+		if (!laboratoryOverrides)
+			return Base::getMinValue();
+		return overrideOr<float>(static_cast<const Base*>(this), "get_min_value", [this] { return Base::getMinValue(); });
+	}
+	float getMaxValue() override {
+		if (!laboratoryOverrides)
+			return Base::getMaxValue();
+		return overrideOr<float>(static_cast<const Base*>(this), "get_max_value", [this] { return Base::getMaxValue(); });
+	}
+	float getDefaultValue() override {
+		if (!laboratoryOverrides)
+			return Base::getDefaultValue();
+		return overrideOr<float>(static_cast<const Base*>(this), "get_default_value",
+			[this] { return Base::getDefaultValue(); });
+	}
 	// Standalone attached quantities additionally guard engine-dependent UI
 	// calls. The default preserves Quantity/ValueQuantity's existing domain.
 	virtual void checkAccess(bool = false) const { Guard::check(); }

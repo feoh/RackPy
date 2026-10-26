@@ -35,7 +35,7 @@ listed as gaps in `docs/explanation/callbacks.md`.
 | --- | --- |
 | 22A | Bench, `rackpy.laboratory.enable()`, `process`/`processBypass`/`step` trampolines, `ProcessArgs`, normal-mode refusals (7 records) |
 | 22B | Synchronous laboratory overrides of module events and JSON, the sample-rate, master and expander-change events (7 records, 18 annotated) |
-| 22C | Laboratory `Quantity`/`ParamQuantity` value methods; the RP-12 base-Quantity inconsistency; `midi::OutputDevice::sendMessage` |
+| 22C | Laboratory `Quantity`/`ParamQuantity` value methods; the RP-12 base-Quantity inconsistency; `midi::OutputDevice::sendMessage` (5 records, 6 reconciled) |
 | 22D | Callback inventory (all 434 virtuals), measured laboratory costs, subprocess races, RP-22 closing validation |
 | 22E | `dsp::MidiGenerator::onMessage` laboratory override (after RP-18D) |
 
@@ -92,5 +92,32 @@ gain a laboratory override path in their notes. Validation:
   engine. `ModuleClass.create(model)` names a laboratory module's model for
   Rack's `toJson`; Rack still never creates or runs it.
 
-**RP-22C, 22D, 22E** are described in their Witan tasks and are recorded
-here as they land.
+**RP-22C — Laboratory quantities and MIDI output device**
+(`tk-rackpy-22c-laboratory-quantity-value-methods-rec-c2b64e`). Records:
+the five `ParamQuantity` value and range methods move to `implemented`; the
+five base `Quantity` ones and `midi::OutputDevice::sendMessage` keep
+`implemented` and gain their laboratory path. Validation:
+[rp-22c-validation.md](rp-22c-validation.md).
+
+- **RP-12 inconsistency, resolved.** The base `Quantity` value records were
+  `implemented` with a native path only, while the same methods on
+  `ParamQuantity` stayed `planned` for want of a laboratory path. Both now
+  have the same contract: native production path, laboratory Python path
+  (`rackpy.laboratory.Quantity`, `ParamQuantity`, `SwitchQuantity`).
+- **Mechanism.** The shared `QuantityTrampoline` dispatches the value
+  methods to Python only for an object the laboratory marked as it was
+  created (after `enable()`); every other quantity keeps exactly its native
+  path. Laboratory parameter quantities are accepted only by laboratory
+  modules' slots, so Rack's engine thread cannot reach them; if it did,
+  `callPython` would refuse and Rack's implementation would answer.
+- **Names.** The five methods are bound on `rackpy.raw.engine.ParamQuantity`
+  as well (they were inherited from `Quantity`), so the records name the
+  SDK declaration, as for the class's UI virtuals.
+- **`sendMessage`, reconciled.** RP-29C's queueing `PythonOutputDevice` is
+  the native production path; the laboratory path is
+  `rackpy.laboratory.MidiOutputDevice`, a subclassable device never
+  registered with Rack's drivers. Python-made output ports connect to it
+  directly, and Rack's `Output::sendMessage` reaches the override.
+
+**RP-22D, 22E** are described in their Witan tasks and are recorded here as
+they land.
