@@ -65,6 +65,8 @@
     "RP-21A": "tk-rackpy-21a-graph-model-validation-and-the-offlin-1c0f89",
     "RP-21B": "tk-rackpy-21b-native-graph-plan-interpreter-cef2f3",
     "RP-21C": "tk-rackpy-21c-compiled-graph-tier-and-native-extens-e80282",
+    "RP-23A": "tk-rackpy-23a-raw-expander-mapping-and-rackpy-messa-6b626e",
+    "RP-23B": "tk-rackpy-23b-one-sample-expander-message-exchange--e2a8dd",
     "RP-25A": "tk-rackpy-25a-checked-detached-native-widget-tree-o-79a09d",
     "RP-25B": "tk-rackpy-25b-checked-widget-geometry-and-spatial-q-8df27f",
     "RP-25C": "tk-rackpy-25c-safe-widget-sibling-insertion-b4de86",
