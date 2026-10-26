@@ -194,6 +194,9 @@ graph::PlanSpec planSpec(const py::dict& plan) {
 			n.inputs.push_back(whole(i, "node inputs"));
 		for (py::handle a : node["args"].cast<py::list>())
 			n.args.push_back(number(a, "node arguments"));
+		if (node.contains("names"))
+			for (py::handle name : node["names"].cast<py::list>())
+				n.names.push_back(name.cast<std::string>());
 		spec.nodes.push_back(std::move(n));
 	}
 	for (py::handle item : plan["latches"].cast<py::list>()) {
@@ -325,6 +328,13 @@ void bindKernels(py::module_ host) {
 			throw py::key_error("no kernel type " + name);
 		return typeObject(type);
 	}, py::arg("name"));
+	mod.def("graph_node_types", [] {
+		runtime::requireMainThread("listing graph node types");
+		py::list out;
+		for (const graph::NodeType* type : graph::nodeTypes())
+			out.append(py::make_tuple(type->name, type->doc, type->inputs, py::tuple(py::cast(type->args))));
+		return py::tuple(out);
+	}, "(name, doc, inputs, args) for each native extension node type from kernel libraries.");
 	mod.def("graph_kernel", &graphKernel, py::arg("plan"),
 		"A plan interpreter kernel for a graph plan (rackpy.dsp.graph.Plan.to_dict()); use Graph.compile().");
 	mod.attr("GRAPH_MAX_NODES") = graph::MAX_NODES;

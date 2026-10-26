@@ -73,7 +73,7 @@ struct NativePoly : rack::engine::Module {
 struct Builder {
 	graph::PlanSpec spec;
 	long long node(const char* op, std::vector<long long> inputs = {}, std::vector<double> args = {}) {
-		spec.nodes.push_back({op, std::move(inputs), std::move(args)});
+		spec.nodes.push_back({op, std::move(inputs), std::move(args), {}});
 		return (long long) spec.nodes.size() - 1;
 	}
 };

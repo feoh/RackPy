@@ -102,6 +102,31 @@ is defined, without adding any delay, so a cycle built with forward
 references alone is refused, naming each node in the cycle and the line
 that made it. RackPy never adds latency to make a graph run.
 
+## Native extension nodes
+
+RackPy's node types cover oscillators, arithmetic, triggers, lights and
+polyphony. For anything else, a [kernel library](dsp.md#write-a-kernel-in-c)
+adds native node types in C++: it implements `rackpy::graph::Node`
+(`process` reads its input signals and writes its output signal, channel
+count included, under the same real-time rules as a kernel) and registers
+`rackpy::graph::NodeType`s with `RACKPY_GRAPH_NODES`, under its namespace.
+Python uses them by name:
+
+```{rackpy-conceptual}
+:caption: Inside Rack, with the example kernel library loaded (its test runs this)
+folded = g.node("example.Fold", g.input(0), drive=2.0, limit=5.0)
+held = g.node("example.Hold", folded, g.input(1))
+```
+
+{py:func}`~rackpy.dsp.graph.node_types` lists the types loaded, with their
+inputs and argument names. The node type, its inputs and its arguments (by
+name, in any order, all required) are checked when the graph is compiled;
+the type's own `create` may refuse its arguments (`ValueError`). A node that
+writes a channel count outside 0 to 16 fails the plan: the module is
+silenced and the failure is recorded, as for a failing kernel. The plan
+interpreter calls an extension node through one virtual call per frame, and
+the offline reference cannot run one.
+
 ## The offline reference
 
 {py:func}`rackpy.dsp.graph_reference.run` evaluates a graph for a number of

@@ -21,7 +21,7 @@ from tests.support import linux_x64_only, run_pytest_in_rack
 pytestmark = [linux_x64_only()]
 SUITE = Path(__file__).resolve().parent / "in_rack"
 LIBRARY_SUITE = Path(__file__).resolve().parent / "in_rack_libraries"
-LIBRARIES = ["example", "wrong_abi", "throws", "duplicate", "reserved", "bad_name"]
+LIBRARIES = ["example", "wrong_abi", "throws", "duplicate", "reserved", "bad_name", "graph_wrong_abi", "graph_bad_node"]
 
 
 @pytest.mark.native
@@ -104,12 +104,15 @@ def test_kernel_libraries_load_and_bad_ones_are_skipped(
     assert result.outcomes() and set(result.outcomes().values()) == {"passed"}, result.summary()
     log = result.run
     assert log.lines("kernel type example.Fold from kernels/kernels_example.so")
+    assert log.lines("graph node type example.Hold from kernels/kernels_example.so")
     expected = {
         "kernels_wrong_abi.so": "built for kernel ABI 999",
         "kernels_throws.so": "registration raised: kernel-library-intentional-error",
         "kernels_duplicate.so": "kernel type example.Fold is already registered",
         "kernels_reserved.so": "namespace rackpy is reserved",
         "kernels_bad_name.so": 'kernel type name "not.good" is not an identifier',
+        "kernels_graph_wrong_abi.so": "built for graph ABI 999",
+        "kernels_graph_bad_node.so": "graph node type graphbad.Wide reads 9 signals; at most 8",
         "missing.so": "no such file",
         "../RackPy/kernels/kernels_example.so": 'without ".."',
         "escape.so": "resolves outside the plugin folder",

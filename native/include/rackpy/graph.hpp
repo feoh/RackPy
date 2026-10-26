@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Native node types for DSP graphs (RP-21). The plan interpreter (plan.cpp)
-// dispatches to these, and the compiled tier (RP-21C) composes them
-// statically, so both tiers share one implementation of each node.
+// RackPy DSP graph nodes (RP-21): the native node types that Python graphs
+// (rackpy.dsp.graph) are built from, and the interface for adding more.
+//
+// RackPy's plan interpreter dispatches to these functions and structs, and
+// the C++ that RackPy generates from a graph (the compiled tier) composes
+// them statically, so every tier computes each node the same way. Kernel
+// libraries (RP-17B) include this header to add native node types of their
+// own (RACKPY_GRAPH_NODES below). Include it after <rack.hpp>; it uses only
+// Rack's public API.
 //
 // Engine-thread code: no allocation, locks, IO, logging, exceptions or
 // Python. Semantics are documented in docs/how-to/graphs.md and mirrored by
@@ -11,6 +17,10 @@
 
 #include <algorithm>
 #include <cmath>
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace rackpy {
 namespace graph {
@@ -156,5 +166,56 @@ struct Delay {
 	void latch(const Signal& source) { held = source; }
 };
 
+// --- Native extension node types (from kernel libraries) ------------------------------------
+
+/** Bumped whenever Node, NodeType or NodeRegistrar change incompatibly. */
+constexpr int GRAPH_ABI = 1;
+
+/** The most signals a node reads. */
+constexpr int MAX_NODE_INPUTS = 8;
+
+/** One instance of a native node type, owned by one plan. */
+struct Node {
+	virtual ~Node() = default;
+	/** One frame, on Rack's engine thread, under Kernel::process's rules. Read the `NodeType::inputs` signals
+	in `inputs` and write `out`, its channel count (0 to MAX_CHANNELS) included. A count outside that
+	range fails the plan: RackPy silences the module and records a diagnostic. */
+	virtual void process(Signal& out, const Signal* const* inputs, const rack::engine::Module::ProcessArgs& args) noexcept = 0;
+	/** Rack's reset (the module's Initialize): start the node's state over. */
+	virtual void reset() noexcept {}
+};
+
+/** A kind of node that Python graphs use as Graph.node("namespace.Name", *inputs, **args). */
+struct NodeType {
+	/** Short ("Fold"); Python sees it as "namespace.Fold", the library's namespace. */
+	std::string name;
+	std::string doc;
+	/** How many signals it reads, 0 to MAX_NODE_INPUTS. */
+	int inputs = 1;
+	/** The names of the numbers that configure it, in the order `create` receives them. */
+	std::vector<std::string> args;
+	/** Main thread. Throw std::invalid_argument for numbers the type cannot use. */
+	std::function<std::unique_ptr<Node>(const std::vector<double>& args)> create;
+};
+
+/** What a kernel library's graph-node registration adds its types to. */
+struct NodeRegistrar {
+	virtual void add(NodeType type) = 0;
+
+protected:
+	~NodeRegistrar() = default;
+};
+
 }  // namespace graph
 }  // namespace rackpy
+
+/** Defines a kernel library's graph-node entry points (RP-21C), next to its
+RACKPY_KERNEL_LIBRARY, whose namespace the node types share:
+
+	RACKPY_GRAPH_NODES(registrar) {
+		registrar.add(rackpy::graph::NodeType{"Fold", "...", 1, {"drive"}, create});
+	}
+*/
+#define RACKPY_GRAPH_NODES(REGISTRAR) \
+	extern "C" __attribute__((visibility("default"))) int rackpy_graph_abi() { return rackpy::graph::GRAPH_ABI; } \
+	extern "C" __attribute__((visibility("default"))) void rackpy_register_graph_nodes(rackpy::graph::NodeRegistrar& REGISTRAR)

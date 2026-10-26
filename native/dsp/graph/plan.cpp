@@ -6,8 +6,10 @@
 // the main thread; process() only reads and writes that storage and the
 // module's ports, params and lights. Nodes dispatch through one switch, not
 // a virtual call each (ADR 004); the compiled tier (RP-21C) removes even that.
+// Native extension nodes from kernel libraries are virtual calls.
 #include "plan.hpp"
 
+#include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <cstdint>
@@ -15,7 +17,7 @@
 #include <set>
 #include <stdexcept>
 
-#include "nodes.hpp"
+#include "rackpy/graph.hpp"
 
 namespace rackpy {
 namespace graph {
@@ -51,6 +53,7 @@ enum class Op : uint8_t {
 	DELAY,
 	OUTPUT,
 	LIGHT,
+	EXTENSION,
 };
 
 struct OpInfo {
@@ -106,14 +109,28 @@ struct Step {
 	uint16_t a = 0, b = 0, c = 0;  // input nodes
 	int field = -1;  // INPUT, PARAM, OUTPUT, LIGHT: the kernel type's field holding the index; CONTROL: its slot
 	float x = 0.f, y = 0.f;  // CONSTANT: x; SCHMITT: low, high; PULSE: duration; DELAY: initial
+	int extension = -1;  // EXTENSION: index into Checked::extensions
+};
+
+/** A native extension node of a checked plan: its type, inputs and arguments in the type's order. */
+struct ExtensionStep {
+	const NodeType* type;
+	std::vector<uint16_t> inputs;
+	std::vector<double> args;
 };
 
 /** A checked plan, owned by its kernel type and shared by every kernel made from it. */
 struct Checked {
 	std::vector<Step> steps;
 	std::vector<std::pair<uint16_t, uint16_t>> latches;  // (delay node, source node)
+	std::vector<ExtensionStep> extensions;
 	size_t phasors = 0, schmitts = 0, pulses = 0, delays = 0;
 };
+
+std::vector<std::unique_ptr<NodeType>>& registry() {
+	static std::vector<std::unique_ptr<NodeType>> types;
+	return types;
+}
 
 [[noreturn]] void refuse(size_t node, const std::string& op, const std::string& why) {
 	throw std::invalid_argument("graph node " + std::to_string(node) + " (" + op + "): " + why);
@@ -147,6 +164,8 @@ struct GraphKernel final : Kernel {
 	std::vector<Schmitt> schmitts;
 	std::vector<Pulse> pulses;
 	std::vector<Delay> delays;
+	std::vector<std::unique_ptr<Node>> extensions;
+	std::vector<std::vector<const Signal*>> extensionInputs;
 
 	GraphKernel(const Checked& plan, const KernelType& type, const std::vector<double>& values)
 		: signals(plan.steps.size()), phasors(plan.phasors), schmitts(plan.schmitts), pulses(plan.pulses), delays(plan.delays) {
@@ -186,6 +205,19 @@ struct GraphKernel final : Kernel {
 					r.state = (uint16_t) counts[3];
 					delays[counts[3]++].initial = s.x;
 					break;
+				case Op::EXTENSION: {
+					// The library's create() runs its own code: RackPy's caller turns what it throws into ValueError.
+					const ExtensionStep& e = plan.extensions[(size_t) s.extension];
+					r.state = (uint16_t) extensions.size();
+					extensions.push_back(e.type->create(e.args));
+					if (!extensions.back())
+						throw std::invalid_argument(e.type->name + " created no node");
+					std::vector<const Signal*> inputs;
+					for (uint16_t i : e.inputs)
+						inputs.push_back(&signals[i]);
+					extensionInputs.push_back(std::move(inputs));
+					break;
+				}
 				default: break;
 			}
 			stateOf[k] = r.state;
@@ -233,6 +265,13 @@ struct GraphKernel final : Kernel {
 				case Op::DELAY: delays[r.state].process(out); break;
 				case Op::OUTPUT: writeOutput(m.outputs[r.index], s[r.a]); break;
 				case Op::LIGHT: writeLight(m.lights[r.index], s[r.a]); break;
+				case Op::EXTENSION:
+					extensions[r.state]->process(out, extensionInputs[r.state].data(), args);
+					if (out.channels < 0 || out.channels > MAX_CHANNELS) {
+						out.channels = 0;
+						return false;  // the slot silences the module and records the failure
+					}
+					break;
 			}
 		}
 		for (const auto& latch : latches)
@@ -250,6 +289,8 @@ struct GraphKernel final : Kernel {
 			p.reset();
 		for (auto& d : delays)
 			d.reset();
+		for (auto& e : extensions)
+			e->reset();
 	}
 
 	/** At a frame boundary (RP-17A's slot), so the next frame's nodes all see the new value. */
@@ -259,7 +300,66 @@ struct GraphKernel final : Kernel {
 	}
 };
 
+const OpInfo EXTENSION_INFO = {"extension", Op::EXTENSION, 0, 0, true};
+
+/** Checks a native extension node: a registered type, its inputs, and its arguments by name. */
+Step extensionStep(Checked& plan, size_t k, const PlanSpec::Node& node, const std::vector<const OpInfo*>& infos) {
+	const NodeType* type = findNodeType(node.op);
+	if (!type)
+		refuse(k, node.op, "no native node type has this name (rackpy.dsp.graph.node_types() lists them)");
+	if (node.inputs.size() != (size_t) type->inputs)
+		refuse(k, node.op, "reads " + std::to_string(type->inputs) + " signals, not " + std::to_string(node.inputs.size()));
+	ExtensionStep e{type, {}, std::vector<double>(type->args.size(), 0.0)};
+	for (long long source : node.inputs) {
+		if (source < 0 || (size_t) source >= k)
+			refuse(k, node.op, "reads node " + std::to_string(source) + "; a node reads only earlier nodes");
+		if (!infos[(size_t) source]->signal)
+			refuse(k, node.op, "reads node " + std::to_string(source) + ", which makes no signal");
+		e.inputs.push_back((uint16_t) source);
+	}
+	if (node.names.size() != node.args.size())
+		refuse(k, node.op, "needs a name for each of its numbers");
+	std::vector<bool> given(type->args.size(), false);
+	for (size_t i = 0; i < node.names.size(); i++) {
+		auto at = std::find(type->args.begin(), type->args.end(), node.names[i]);
+		if (at == type->args.end())
+			refuse(k, node.op, "takes no number \"" + node.names[i] + "\"");
+		size_t slot = (size_t) (at - type->args.begin());
+		if (given[slot])
+			refuse(k, node.op, "is given \"" + node.names[i] + "\" twice");
+		if (!std::isfinite(node.args[i]))
+			refuse(k, node.op, "its numbers must be finite");
+		given[slot] = true;
+		e.args[slot] = node.args[i];
+	}
+	for (size_t slot = 0; slot < given.size(); slot++)
+		if (!given[slot])
+			refuse(k, node.op, "needs \"" + type->args[slot] + "\"");
+	Step step{Op::EXTENSION};
+	step.extension = (int) plan.extensions.size();
+	plan.extensions.push_back(std::move(e));
+	return step;
+}
+
 }  // namespace
+
+void registerNodeType(NodeType type) {
+	registry().push_back(std::make_unique<NodeType>(std::move(type)));
+}
+
+const NodeType* findNodeType(const std::string& name) {
+	for (const auto& type : registry())
+		if (type->name == name)
+			return type.get();
+	return nullptr;
+}
+
+std::vector<const NodeType*> nodeTypes() {
+	std::vector<const NodeType*> out;
+	for (const auto& type : registry())
+		out.push_back(type.get());
+	return out;
+}
 
 std::shared_ptr<const KernelType> planType(const PlanSpec& spec) {
 	if (spec.nodes.empty() || spec.nodes.size() > MAX_NODES)
@@ -272,6 +372,11 @@ std::shared_ptr<const KernelType> planType(const PlanSpec& spec) {
 	std::vector<const OpInfo*> infos;
 	for (size_t k = 0; k < spec.nodes.size(); k++) {
 		const PlanSpec::Node& node = spec.nodes[k];
+		if (node.op.find('.') != std::string::npos) {
+			plan->steps.push_back(extensionStep(*plan, k, node, infos));
+			infos.push_back(&EXTENSION_INFO);
+			continue;
+		}
 		const OpInfo* info = findOp(node.op);
 		if (!info)
 			refuse(k, node.op, "not a node type");

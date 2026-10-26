@@ -139,6 +139,12 @@ def run(
     - ``rate_changes``: new sample rates, by the frame they apply from.
     """
     plan = graph.plan() if isinstance(graph, Graph) else graph
+    for node in plan.nodes:
+        if "." in node.op:
+            raise GraphError(
+                f"the offline reference cannot run the native node type {node.op}: it exists only in Rack, "
+                "in its kernel library"
+            )
     inputs = dict(inputs or {})
     params = dict(params or {})
     for port, values in inputs.items():

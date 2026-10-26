@@ -250,3 +250,23 @@ def test_compiling_needs_rack() -> None:
     g.output(0, g.input(0))
     with pytest.raises(ImportError, match=r"needs Rack.*graph_reference"):
         g.compile()
+
+
+def test_native_extension_nodes_lower_by_name() -> None:
+    g = Graph()
+    folded = g.node("example.Fold", g.input(0), drive=2.0, limit=5)
+    g.output(0, folded + 1)
+    plan = g.plan()
+    [node] = [n for n in plan.nodes if n.op == "example.Fold"]
+    assert node.args == (2.0, 5.0) and node.names == ("drive", "limit") and len(node.inputs) == 1
+    assert plan.to_dict()["nodes"][plan.nodes.index(node)]["names"] == ["drive", "limit"]
+    assert "names" not in plan.to_dict()["nodes"][0]  # RackPy's own node types carry none
+    with pytest.raises(GraphError, match=r"cannot run the native node type example\.Fold"):
+        run(g, 1)
+    for bad in ("Fold", "a.b.c", "example.not valid", 3):
+        with pytest.raises(GraphError, match=r"namespace\.Name"):
+            g.node(bad)  # type: ignore[arg-type]
+    with pytest.raises(GraphError, match="at most 8"):
+        g.node("example.Mix", *[g.input(0)] * 9)
+    with pytest.raises(GraphError, match="finite"):
+        g.node("example.Fold", g.input(0), drive=math.inf)

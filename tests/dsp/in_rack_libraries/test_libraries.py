@@ -2,15 +2,19 @@
 """RP-17B: a plugin's own C++ kernel library, run by Rack's engine (live UI suite).
 
 tests/dsp/test_runtime.py stages the example library and several broken ones;
-only the example's types may appear.
+only the example's types may appear. RP-21C: the example's graph node types
+too, used from Python graphs.
 """
 
+import math
 import time
 from collections.abc import Callable
 
 import pytest
 from _rackpy_host import _testing as HOOKS
 
+from rackpy.dsp.graph import Graph, Signal, node_types
+from rackpy.dsp.graph_reference import f32
 from rackpy.dsp.kernel import kernel_types, load
 from rackpy.raw.engine import Module
 
@@ -64,3 +68,69 @@ def test_rack_runs_the_library_kernel() -> None:
         HOOKS.engine_disconnect(cable)
         HOOKS.engine_delete(m, None)
         HOOKS.engine_delete(source, None)
+
+
+def test_graph_node_types_load_with_their_library() -> None:
+    types = {t.name: t for t in node_types()}
+    assert set(types) >= {"example.Fold", "example.Hold"}
+    assert types["example.Fold"].inputs == 1 and types["example.Fold"].args == ("drive", "limit")
+    assert types["example.Hold"].inputs == 2 and types["example.Hold"].args == ()
+    assert not {name for name in types if name.startswith(("graphabi.", "graphbad."))}
+    kernels = {t.name for t in kernel_types()}
+    assert "graphabi.Kept" not in kernels and "graphbad.Kept" not in kernels  # all or nothing per library
+
+
+def stepped(m: Module, voltages: list[list[float]], frames: int) -> list[list[float]]:
+    out = []
+    for frame in range(frames):
+        for port, v in enumerate(voltages):
+            m.inputs[port].channels = 1
+            m.inputs[port].set_voltage(v[frame])
+        HOOKS.module_process(m, 48000.0, frame)
+        out.append([m.outputs[0].get_voltage(c) for c in range(m.outputs[0].get_channels())])
+    return out
+
+
+def test_a_graph_node_matches_the_library_kernel() -> None:
+    frames = 400
+    x = [f32(12.0 * math.sin(k / 9.0)) for k in range(frames)]
+    g = Graph()
+    g.output(0, g.node("example.Fold", g.input(0), limit=5.0, drive=2.0))
+    graphed = Module.create(lambda m: m.config(0, 1, 1, 0))
+    kernel = Module.create(lambda m: m.config(0, 1, 1, 0))
+    try:
+        graphed.outputs[0].channels = kernel.outputs[0].channels = 1
+        graphed.set_kernel(g.compile())
+        kernel.set_kernel(load("example.Fold")(input=0, output=0, gain=2.0, limit=5.0))
+        assert stepped(graphed, [x], frames) == stepped(kernel, [x], frames)
+    finally:
+        graphed.close()
+        kernel.close()
+
+
+def test_a_stateful_graph_node_holds_its_samples() -> None:
+    g = Graph()
+    g.output(0, g.node("example.Hold", g.input(0), g.input(1)))
+    m = Module.create(lambda m: m.config(0, 2, 1, 0))
+    try:
+        m.outputs[0].channels = 1
+        m.set_kernel(g.compile())
+        signal = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+        trigger = [0.0, 2.0, 2.0, 0.0, 2.0, 0.0]
+        assert stepped(m, [signal, trigger], 6) == [[0.0], [2.0], [2.0], [2.0], [5.0], [5.0]]
+    finally:
+        m.close()
+
+
+def test_graph_nodes_are_checked_when_compiled() -> None:
+    cases: list[tuple[Callable[[Graph], Signal], str]] = [
+        (lambda g: g.node("example.Missing", g.input(0)), "no native node type has this name"),
+        (lambda g: g.node("example.Fold", g.input(0), drive=1.0), 'needs "limit"'),
+        (lambda g: g.node("example.Fold", g.input(0), g.input(0), drive=1.0, limit=1.0), "reads 1 signals, not 2"),
+        (lambda g: g.node("example.Fold", g.input(0), drive=1.0, limit=0.0), "limit must be positive"),
+    ]
+    for build, message in cases:
+        g = Graph()
+        g.output(0, build(g))
+        with pytest.raises(ValueError, match=message):
+            g.compile()

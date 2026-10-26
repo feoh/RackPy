@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Kernel libraries that RackPy must refuse (RP-17B tests), one per VARIANT_*.
 #include <rack.hpp>
+#include <rackpy/graph.hpp>
 #include <rackpy/kernel.hpp>
 
 #include <stdexcept>
@@ -38,6 +39,21 @@ RACKPY_KERNEL_LIBRARY("rackpy", registrar) {
 RACKPY_KERNEL_LIBRARY("badname", registrar) {
 	registrar.add(type("Good"));
 	registrar.add(type("not.good"));
+}
+#elif defined(VARIANT_GRAPH_WRONG_ABI)
+RACKPY_KERNEL_LIBRARY("graphabi", registrar) {
+	registrar.add(type("Kept"));  // must not be registered: the library fails as a whole
+}
+extern "C" __attribute__((visibility("default"))) int rackpy_graph_abi() { return 999; }
+extern "C" __attribute__((visibility("default"))) void rackpy_register_graph_nodes(rackpy::graph::NodeRegistrar&) {}
+#elif defined(VARIANT_GRAPH_BAD_NODE)
+RACKPY_KERNEL_LIBRARY("graphbad", registrar) {
+	registrar.add(type("Kept"));  // must not be registered: the library fails as a whole
+}
+RACKPY_GRAPH_NODES(registrar) {
+	registrar.add(rackpy::graph::NodeType{"Wide", "test", 9, {}, [](const std::vector<double>&) {
+		return std::unique_ptr<rackpy::graph::Node>();
+	}});
 }
 #else
 #error "build broken.cpp with one VARIANT_* definition"

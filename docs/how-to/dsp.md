@@ -97,8 +97,11 @@ in your plugin as a **kernel library**. RackPy loads the libraries listed in
 
 A library includes RackPy's `rackpy/kernel.hpp` (from RackPy's
 `native/include`) after `<rack.hpp>`, implements `rackpy::Kernel`, and
-registers its types with `RACKPY_KERNEL_LIBRARY`. This wavefolder is the
-example RackPy's tests build and run in Rack:
+registers its types with `RACKPY_KERNEL_LIBRARY`. It may also add node types
+for [DSP graphs](graphs.md#native-extension-nodes) with `rackpy/graph.hpp`
+and `RACKPY_GRAPH_NODES`. This wavefolder, with a graph node version of the
+same fold and a sample-and-hold node, is the example RackPy's tests build and
+run in Rack:
 
 ```{literalinclude} ../../tests/dsp/kernel_library/fold.cpp
 :language: c++
@@ -127,11 +130,13 @@ The rules:
   it throws, Python gets `ValueError` with your message.
 - Names are identifiers. Python sees `namespace.Name`. `rackpy` and names
   starting with `rackpy_` are reserved.
-- A library loads all or nothing. If it cannot be loaded, was built for
-  another kernel ABI (`rackpy::KERNEL_ABI`), throws while registering,
-  repeats a type name, uses a reserved namespace or a bad name, or its path
-  leaves the plugin folder, Rack's log says `RackPy skipped kernel library
-  ...` with the reason, none of its types appear, and the other libraries
-  still load.
+- A library loads all or nothing, kernel types and graph node types
+  together. If it cannot be loaded, was built for another kernel ABI
+  (`rackpy::KERNEL_ABI`) or graph ABI (`rackpy::graph::GRAPH_ABI`), defines
+  only part of `RACKPY_GRAPH_NODES`, throws while registering, repeats a
+  type name, uses a reserved namespace or a bad name, gives a node type more
+  than 8 inputs or repeated argument names, or its path leaves the plugin
+  folder, Rack's log says `RackPy skipped kernel library ...` with the
+  reason, none of its types appear, and the other libraries still load.
 - Libraries stay loaded until Rack exits. They are trusted code from your
   plugin, like your Python.

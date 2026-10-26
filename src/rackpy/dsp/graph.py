@@ -31,7 +31,7 @@ from __future__ import annotations
 import dataclasses
 import math
 import sys
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Any, Final
 
 if TYPE_CHECKING:
     from _rackpy_host.dsp import Kernel
@@ -45,9 +45,11 @@ __all__ = [
     "Graph",
     "GraphError",
     "Node",
+    "NodeType",
     "Op",
     "Plan",
     "Signal",
+    "node_types",
 ]
 
 MAX_CHANNELS: Final = 16
@@ -133,11 +135,35 @@ OPS: Final[dict[str, Op]] = _ops(
 
 @dataclasses.dataclass(frozen=True)
 class Node:
-    """One node of a plan: ``op`` reads the signals of the earlier nodes ``inputs``, configured by ``args``."""
+    """One node of a plan: ``op`` reads the signals of the earlier nodes ``inputs``, configured by ``args``.
+
+    For a native extension node (``op`` is ``"namespace.Name"``), ``names``
+    names each of ``args``; for RackPy's own node types it is empty.
+    """
 
     op: str
     inputs: tuple[int, ...]
     args: tuple[float, ...]
+    names: tuple[str, ...] = ()
+
+
+@dataclasses.dataclass(frozen=True)
+class NodeType:
+    """A native extension node type from a kernel library: see :func:`node_types`."""
+
+    name: str
+    doc: str
+    inputs: int
+    args: tuple[str, ...]
+
+
+def node_types() -> tuple[NodeType, ...]:
+    """The native extension node types that kernel libraries registered. Available inside Rack only."""
+    try:
+        from _rackpy_host import dsp
+    except ImportError as e:
+        raise ImportError("node_types() needs Rack, in a RackPy plugin") from e
+    return tuple(NodeType(name, doc, inputs, tuple(args)) for name, doc, inputs, args in dsp.graph_node_types())
 
 
 @dataclasses.dataclass(frozen=True)
@@ -163,10 +189,14 @@ class Plan:
     latches: tuple[tuple[int, int], ...]
     controls: tuple[Control, ...]
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, list[Any]]:
         """The plan as plain data (lists, numbers, strings)."""
         return {
-            "nodes": [{"op": n.op, "inputs": list(n.inputs), "args": list(n.args)} for n in self.nodes],
+            "nodes": [
+                {"op": n.op, "inputs": list(n.inputs), "args": list(n.args)}
+                | ({"names": list(n.names)} if n.names else {})
+                for n in self.nodes
+            ],
             "latches": [list(latch) for latch in self.latches],
             "controls": [{"name": c.name, "node": c.node, "default": c.default} for c in self.controls],
         }
@@ -279,6 +309,7 @@ class _Made:
     args: tuple[float, ...]
     where: str
     name: str | None = None  # a control's name
+    names: tuple[str, ...] = ()  # an extension node's argument names
 
 
 def _caller() -> str:
@@ -388,6 +419,23 @@ class Graph:
             raise GraphError(f"pulse's duration must not be negative, not {seconds}")
         return self._apply("pulse", trigger, args=(seconds,))
 
+    def node(self, name: str, *inputs: Signal | float, **args: float) -> Signal:
+        """A native extension node from a kernel library, ``"namespace.Name"``: its signals and named numbers.
+
+        The type, its inputs and its numbers are checked when the graph is
+        compiled, inside Rack (:func:`node_types` lists the types). The
+        offline reference cannot run extension nodes.
+        """
+        parts = name.split(".") if isinstance(name, str) else []
+        if len(parts) != 2 or not all(part.isidentifier() for part in parts):
+            raise GraphError(f'a native node type is named "namespace.Name", not {name!r}')
+        if len(inputs) > 8:
+            raise GraphError(f"{name} reads at most 8 signals, not {len(inputs)}")
+        numbers = tuple(_number(value, f"{name}'s {key}") for key, value in args.items())
+        ids = [self._operand(x, f"{name}'s operand {k + 1}") for k, x in enumerate(inputs)]
+        self._made.append(_Made(name, ids, numbers, _caller(), names=tuple(args)))
+        return Signal(self, len(self._made) - 1)
+
     # --- feedback and forward references -----------------------------------------------------
     def delay(self, initial: float = 0.0) -> Delay:
         """A one-sample delay; give it its source with :meth:`Delay.feed`."""
@@ -465,6 +513,7 @@ class Graph:
                 self._made[node].op,
                 tuple(position[resolve(i)] for i in self._made[node].inputs),
                 self._made[node].args,
+                self._made[node].names,
             )
             for node in order
         )

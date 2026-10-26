@@ -13,6 +13,7 @@
 #include <utility>
 #include <vector>
 
+#include "rackpy/graph.hpp"
 #include "rackpy/kernel.hpp"
 
 namespace rackpy {
@@ -21,9 +22,10 @@ namespace graph {
 /** A plan as Python lowered it (rackpy.dsp.graph.Plan.to_dict()), not yet checked. */
 struct PlanSpec {
 	struct Node {
-		std::string op;
+		std::string op;  // a node type of rackpy.dsp.graph.OPS, or a native extension's "namespace.Name"
 		std::vector<long long> inputs;
 		std::vector<double> args;
+		std::vector<std::string> names;  // an extension's argument names, one per arg (any order)
 	};
 	struct Control {
 		std::string name;
@@ -44,6 +46,11 @@ std::shared_ptr<const KernelType> planType(const PlanSpec& spec);
 
 /** The values a kernel of `type` starts with: the plan's wiring and its controls' defaults. */
 std::vector<double> planDefaults(const KernelType& type);
+
+/** Native extension node types, from kernel libraries (main thread). `name` is "namespace.Name". */
+void registerNodeType(NodeType type);
+const NodeType* findNodeType(const std::string& name);
+std::vector<const NodeType*> nodeTypes();
 
 }  // namespace graph
 }  // namespace rackpy

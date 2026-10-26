@@ -75,7 +75,7 @@ std::string run(module::Module& m, int frames, bool swapping) {
 std::unique_ptr<dsp::Hosted> everyNode(double seed) {
 	graph::PlanSpec spec;
 	auto node = [&](const char* op, std::vector<long long> inputs = {}, std::vector<double> args = {}) {
-		spec.nodes.push_back({op, std::move(inputs), std::move(args)});
+		spec.nodes.push_back({op, std::move(inputs), std::move(args), {}});
 		return (long long) spec.nodes.size() - 1;
 	};
 	long long in = node("input", {}, {0}), param = node("param", {}, {0});

@@ -139,7 +139,8 @@ if(RACKPY_BUILD_TESTS)
   # Kernel libraries for tests/dsp (RP-17B): the example, and ones RackPy must refuse.
   set(_rackpy_kernel_libraries example:fold.cpp:NONE wrong_abi:broken.cpp:VARIANT_WRONG_ABI
     throws:broken.cpp:VARIANT_THROWS duplicate:broken.cpp:VARIANT_DUPLICATE reserved:broken.cpp:VARIANT_RESERVED
-    bad_name:broken.cpp:VARIANT_BAD_NAME)
+    bad_name:broken.cpp:VARIANT_BAD_NAME graph_wrong_abi:broken.cpp:VARIANT_GRAPH_WRONG_ABI
+    graph_bad_node:broken.cpp:VARIANT_GRAPH_BAD_NODE)
   foreach(_entry IN LISTS _rackpy_kernel_libraries)
     string(REPLACE ":" ";" _parts "${_entry}")
     list(GET _parts 0 _name)

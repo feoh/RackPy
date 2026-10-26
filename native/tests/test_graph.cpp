@@ -44,7 +44,7 @@ bool throwsInvalid(F action, const char* text) {
 struct Builder {
 	graph::PlanSpec spec;
 	long long node(const char* op, std::vector<long long> inputs = {}, std::vector<double> args = {}) {
-		spec.nodes.push_back({op, std::move(inputs), std::move(args)});
+		spec.nodes.push_back({op, std::move(inputs), std::move(args), {}});
 		return (long long) spec.nodes.size() - 1;
 	}
 	long long constant(double x) { return node("constant", {}, {x}); }
@@ -383,6 +383,106 @@ void testBadPlansAreRefused() {
 	}, "1 to 4096 nodes"));
 }
 
+/** Native extension node types, registered as a kernel library's RACKPY_GRAPH_NODES would add them. */
+struct Scale : graph::Node {
+	float by;
+	explicit Scale(float by) : by(by) {}
+	void process(graph::Signal& out, const graph::Signal* const* in, const rack::engine::Module::ProcessArgs&) noexcept override {
+		graph::map1(out, *in[0], [this](float x) { return x * by; });
+	}
+};
+
+struct Count : graph::Node {
+	float count = 0.f;
+	void process(graph::Signal& out, const graph::Signal* const*, const rack::engine::Module::ProcessArgs&) noexcept override {
+		graph::mono(out, count++);
+	}
+	void reset() noexcept override { count = 0.f; }
+};
+
+struct TooWide : graph::Node {
+	void process(graph::Signal& out, const graph::Signal* const*, const rack::engine::Module::ProcessArgs&) noexcept override {
+		out.channels = 99;
+	}
+};
+
+void registerTestNodes() {
+	graph::registerNodeType({"test.Scale", "x * by", 1, {"by", "offset"}, [](const std::vector<double>& a) -> std::unique_ptr<graph::Node> {
+		if (a[1] != 0)
+			throw std::invalid_argument("test.Scale: offset must be 0");
+		return std::make_unique<Scale>((float) a[0]);
+	}});
+	graph::registerNodeType({"test.Count", "frames since reset", 0, {}, [](const std::vector<double>&) {
+		return std::unique_ptr<graph::Node>(new Count);
+	}});
+	graph::registerNodeType({"test.TooWide", "claims 99 channels", 0, {}, [](const std::vector<double>&) {
+		return std::unique_ptr<graph::Node>(new TooWide);
+	}});
+}
+
+void testExtensionNodes() {
+	CHECK(graph::findNodeType("test.Scale") && graph::nodeTypes().size() == 3);
+	Builder b;
+	long long in = b.node("input", {}, {0});
+	b.spec.nodes.push_back({"test.Scale", {in}, {0.0, 2.5}, {"offset", "by"}});  // by name, in any order
+	long long scaled = (long long) b.spec.nodes.size() - 1;
+	b.spec.nodes.push_back({"test.Count", {}, {}, {}});
+	long long count = (long long) b.spec.nodes.size() - 1;
+	b.node("output", {b.node("add", {scaled, count})}, {0});
+	module::Module m;
+	m.config(0, 1, 1, 0);
+	m.kernels.attach(hosted(graph::planType(b.spec)), false);
+	connect(m.inputs[0], 4);
+	connect(m.outputs[0]);
+	uint32_t seed = 11;
+	for (int64_t n = 0; n < 1000; n++) {
+		for (int c = 0; c < 4; c++)
+			m.inputs[0].setVoltage(noise(seed), c);
+		m.process(frame(48000.f, n));
+		for (int c = 0; c < 4; c++)
+			if (!same(m.outputs[0].getVoltage(c), keep(m.inputs[0].getVoltage(c) * 2.5f) + (float) n)) {
+				CHECK(!"an extension node differs from direct C++");
+				return;
+			}
+	}
+	m.kernels.reset();  // reaches the extension's reset
+	m.process(frame(48000.f, 1000));
+	CHECK(m.outputs[0].getVoltage(0) == keep(m.inputs[0].getVoltage(0) * 2.5f));
+	// A node that claims more channels than a signal holds fails the plan instead of being read past.
+	Builder wide;
+	wide.spec.nodes.push_back({"test.TooWide", {}, {}, {}});
+	wide.node("output", {wide.node("neg", {0})}, {0});
+	module::Module w;
+	w.config(0, 0, 1, 0);
+	connect(w.outputs[0]);
+	w.kernels.attach(hosted(graph::planType(wide.spec)), false);
+	w.process(frame(48000.f, 0));
+	CHECK(w.kernels.failed() && w.outputs[0].getVoltage() == 0.f);
+	// Refusals.
+	auto refused = [](graph::PlanSpec::Node node, const char* text) {
+		Builder r;
+		long long x = r.constant(1);
+		for (long long& i : node.inputs)
+			i = x;
+		r.spec.nodes.push_back(std::move(node));
+		r.node("output", {(long long) r.spec.nodes.size() - 1}, {0});
+		return throwsInvalid([&] { graph::planType(r.spec); }, text);
+	};
+	CHECK(refused({"test.Missing", {}, {}, {}}, "no native node type has this name"));
+	CHECK(refused({"test.Scale", {0, 0}, {1, 0}, {"by", "offset"}}, "reads 1 signals, not 2"));
+	CHECK(refused({"test.Scale", {0}, {1}, {"by"}}, "needs \"offset\""));
+	CHECK(refused({"test.Scale", {0}, {1, 0}, {"by", "by"}}, "is given \"by\" twice"));
+	CHECK(refused({"test.Scale", {0}, {1, 0, 2}, {"by", "offset", "gain"}}, "takes no number \"gain\""));
+	CHECK(refused({"test.Scale", {0}, {1, 0}, {"by"}}, "needs a name for each of its numbers"));
+	CHECK(refused({"test.Scale", {0}, {NAN, 0}, {"by", "offset"}}, "must be finite"));
+	Builder throwing;
+	long long x = throwing.constant(1);
+	throwing.spec.nodes.push_back({"test.Scale", {x}, {1.0, 3.0}, {"by", "offset"}});
+	throwing.node("output", {1}, {0});
+	auto type = graph::planType(throwing.spec);  // the plan is well formed; the type refuses when the kernel is made
+	CHECK(throwsInvalid([&] { type->create(graph::planDefaults(*type)); }, "offset must be 0"));
+}
+
 }  // namespace
 
 int main() {
@@ -395,6 +495,8 @@ int main() {
 	testFieldsWiringAndReset();
 	testReplacementKeepsAndThenFreesThePlan();
 	testBadPlansAreRefused();
+	registerTestNodes();
+	testExtensionNodes();
 	if (failures)
 		std::fprintf(stderr, "%d check(s) failed\n", failures);
 	else
