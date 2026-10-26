@@ -1605,6 +1605,41 @@
     },
     {
       "facade": null,
+      "id": "constructor:rack::midi::Input::Input()",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Input",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::midi::InputQueue::InputQueue()",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.InputQueue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::midi::Message::Message()",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Message",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::midi::Output::Output()",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Output",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::midi::Port::Port()",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "constructor:rack::ui::Button::Button()",
       "kind": "class",
       "raw": "rackpy.raw.ui.Button",
@@ -1839,6 +1874,48 @@
       "id": "destructor:rack::history::ModuleChange::~ModuleChange()",
       "kind": "class",
       "raw": "rackpy.raw.history.ModuleChange",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::midi::Device::~Device()",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Device",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::midi::Driver::~Driver()",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Driver",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::midi::Input::~Input()",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Input",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::midi::InputQueue::~InputQueue()",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.InputQueue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::midi::Output::~Output()",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Output",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::midi::Port::~Port()",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Port",
       "status": "implemented"
     },
     {
@@ -3404,6 +3481,90 @@
     },
     {
       "facade": null,
+      "id": "field:rack::midi::Input::inputDevice",
+      "kind": "property",
+      "raw": "rackpy.raw.midi.Input.input_device",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::midi::InputDevice::subscribed",
+      "kind": "property",
+      "raw": "rackpy.raw.midi.InputDevice.subscribed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::midi::Message::bytes",
+      "kind": "property",
+      "raw": "rackpy.raw.midi.Message.bytes",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::midi::Message::frame",
+      "kind": "property",
+      "raw": "rackpy.raw.midi.Message.frame",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::midi::Output::outputDevice",
+      "kind": "property",
+      "raw": "rackpy.raw.midi.Output.output_device",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::midi::OutputDevice::subscribed",
+      "kind": "property",
+      "raw": "rackpy.raw.midi.OutputDevice.subscribed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::midi::Port::channel",
+      "kind": "property",
+      "raw": "rackpy.raw.midi.Port.channel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::midi::Port::context",
+      "kind": "property",
+      "raw": "rackpy.raw.midi.Port.context",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::midi::Port::device",
+      "kind": "property",
+      "raw": "rackpy.raw.midi.Port.device",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::midi::Port::deviceId",
+      "kind": "property",
+      "raw": "rackpy.raw.midi.Port.device_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::midi::Port::driver",
+      "kind": "property",
+      "raw": "rackpy.raw.midi.Port.driver",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::midi::Port::driverId",
+      "kind": "property",
+      "raw": "rackpy.raw.midi.Port.driver_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::plugin::Model::description",
       "kind": "property",
       "raw": "rackpy.raw.plugin.Model.description",
@@ -4758,6 +4919,20 @@
       "id": "function:rack::math::rescale(float, float, float, float, float)",
       "kind": "function",
       "raw": "rackpy.raw.math.rescale",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::midi::getDriver(int)",
+      "kind": "function",
+      "raw": "rackpy.raw.midi.get_driver",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::midi::getDriverIds()",
+      "kind": "function",
+      "raw": "rackpy.raw.midi.get_driver_ids",
       "status": "implemented"
     },
     {
@@ -9137,6 +9312,447 @@
     },
     {
       "facade": null,
+      "id": "method:rack::midi::Device::getName()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Device.get_name",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Driver::getDefaultInputDeviceId()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Driver.get_default_input_device_id",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Driver::getDefaultOutputDeviceId()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Driver.get_default_output_device_id",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Driver::getInputDeviceIds()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Driver.get_input_device_ids",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Driver::getInputDeviceName(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Driver.get_input_device_name",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Driver::getName()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Driver.get_name",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Driver::getOutputDeviceIds()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Driver.get_output_device_ids",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Driver::getOutputDeviceName(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Driver.get_output_device_name",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Driver::subscribeInput(int, rack::midi::Input *)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Driver.subscribe_input",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Driver::subscribeOutput(int, rack::midi::Output *)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Driver.subscribe_output",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Driver::unsubscribeInput(int, rack::midi::Input *)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Driver.unsubscribe_input",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Driver::unsubscribeOutput(int, rack::midi::Output *)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Driver.unsubscribe_output",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Input::getChannels()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_channels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Input::getDefaultDeviceId()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_default_device_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Input::getDeviceIds()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_device_ids",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Input::getDeviceName(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_device_name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Input::onMessage(const rack::midi::Message &)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Input.on_message",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Input::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Input.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Input::setDeviceId(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.set_device_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::InputDevice::onMessage(const rack::midi::Message &)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.InputDevice.on_message",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::InputDevice::subscribe(rack::midi::Input *)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.InputDevice.subscribe",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::InputDevice::unsubscribe(rack::midi::Input *)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.InputDevice.unsubscribe",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::InputQueue::onMessage(const rack::midi::Message &)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.InputQueue.on_message",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::InputQueue::size()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.InputQueue.size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::InputQueue::tryPop(rack::midi::Message *, int64_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.InputQueue.try_pop",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Message::getChannel() const",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Message.get_channel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Message::getFrame() const",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Message.get_frame",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Message::getNote() const",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Message.get_note",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Message::getSize() const",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Message.get_size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Message::getStatus() const",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Message.get_status",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Message::getValue() const",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Message.get_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Message::setChannel(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Message.set_channel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Message::setFrame(int64_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Message.set_frame",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Message::setNote(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Message.set_note",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Message::setSize(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Message.set_size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Message::setStatus(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Message.set_status",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Message::setValue(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Message.set_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Message::toString() const",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Message.to_string",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Output::getChannels()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_channels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Output::getDefaultDeviceId()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_default_device_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Output::getDeviceIds()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_device_ids",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Output::getDeviceName(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_device_name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Output::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Output.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Output::sendMessage(const rack::midi::Message &)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Output.send_message",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Output::setDeviceId(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.set_device_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::OutputDevice::sendMessage(const rack::midi::Message &)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.OutputDevice.send_message",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::OutputDevice::subscribe(rack::midi::Output *)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.OutputDevice.subscribe",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::OutputDevice::unsubscribe(rack::midi::Output *)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.OutputDevice.unsubscribe",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::fromJson(json_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.from_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::getChannel()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_channel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::getChannelName(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_channel_name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::getChannels()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_channels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::getDefaultDeviceId()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_default_device_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::getDevice()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_device",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::getDeviceId()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_device_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::getDeviceIds()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_device_ids",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::getDeviceName(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_device_name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::getDriver()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_driver",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::getDriverId()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.get_driver_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::setChannel(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.set_channel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::setDeviceId(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.set_device_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::setDriverId(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.set_driver_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::midi::Port::toJson()",
+      "kind": "method",
+      "raw": "rackpy.raw.midi.Port.to_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::plugin::Model::appendContextMenu(rack::ui::Menu *, bool)",
       "kind": "method",
       "raw": "rackpy.raw.plugin.Model.append_context_menu",
@@ -12167,6 +12783,69 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "record:rack::midi::Device",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Device",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::midi::Driver",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Driver",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::midi::Input",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Input",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::midi::InputDevice",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.InputDevice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::midi::InputQueue",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.InputQueue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::midi::Message",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Message",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::midi::Output",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Output",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::midi::OutputDevice",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.OutputDevice",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::midi::Port",
+      "kind": "class",
+      "raw": "rackpy.raw.midi.Port",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.plugin.Model",
       "id": "record:rack::plugin::Model",
       "kind": "class",
@@ -13007,6 +13686,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "f567064fd99e3016",
+  "inputs": "b932ee4adae5a36d",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

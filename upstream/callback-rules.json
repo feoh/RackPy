@@ -211,36 +211,32 @@
       "methods": [
         "*"
       ],
-      "strategy": "unresolved",
-      "blocks": "RP-29",
-      "evidence": "Driver and device implementations run partly on driver threads. RP-29 must decide whether Python may implement drivers or only use them."
+      "strategy": "driver",
+      "evidence": "RP-29 decision (ADR 003, RP-29 note): Rack calls driver and device virtuals from driver threads and the engine thread (Core Audio reads Device::getNumInputs/getSampleRate in processInput on the audio thread). Python may implement drivers and devices only as natively configured objects: native code answers every call from values Python set, and Rack's requests reach Python as queued UI-thread notifications."
     },
     {
       "family": "rack::audio::Device",
       "methods": [
         "*"
       ],
-      "strategy": "unresolved",
-      "blocks": "RP-29",
-      "evidence": "As for audio::Driver."
+      "strategy": "driver",
+      "evidence": "RP-29 decision (ADR 003, RP-29 note): Rack calls driver and device virtuals from driver threads and the engine thread (Core Audio reads Device::getNumInputs/getSampleRate in processInput on the audio thread). Python may implement drivers and devices only as natively configured objects: native code answers every call from values Python set, and Rack's requests reach Python as queued UI-thread notifications."
     },
     {
       "family": "rack::midi::Driver",
       "methods": [
         "*"
       ],
-      "strategy": "unresolved",
-      "blocks": "RP-29",
-      "evidence": "As for audio::Driver."
+      "strategy": "driver",
+      "evidence": "RP-29 decision (ADR 003, RP-29 note): Rack calls driver and device virtuals from driver threads and the engine thread (Core Audio reads Device::getNumInputs/getSampleRate in processInput on the audio thread). Python may implement drivers and devices only as natively configured objects: native code answers every call from values Python set, and Rack's requests reach Python as queued UI-thread notifications."
     },
     {
       "family": "rack::midi::Device",
       "methods": [
         "*"
       ],
-      "strategy": "unresolved",
-      "blocks": "RP-29",
-      "evidence": "As for audio::Driver."
+      "strategy": "driver",
+      "evidence": "RP-29 decision (ADR 003, RP-29 note): Rack calls driver and device virtuals from driver threads and the engine thread (Core Audio reads Device::getNumInputs/getSampleRate in processInput on the audio thread). Python may implement drivers and devices only as natively configured objects: native code answers every call from values Python set, and Rack's requests reach Python as queued UI-thread notifications."
     },
     {
       "family": "rack::audio::Port",

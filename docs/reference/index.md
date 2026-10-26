@@ -24,6 +24,7 @@ engine-components
 engine-module
 engine
 history
+midi
 plugin
 widgets
 ui

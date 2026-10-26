@@ -190,7 +190,14 @@ Other facts:
 - **RP-14** must keep `ui-exclusive` Python short and refuse engine re-entry.
   **RP-13/RP-14** implement `Quantity` value and range methods natively.
 - **RP-22** owns every `engine` callback's Python laboratory path.
-- **RP-29** is blocked on the 31 unresolved driver and device methods.
+- **RP-29** resolved the 31 driver and device methods (amended 2026-10-26).
+  They are `driver`: Rack calls them from driver threads and the engine
+  thread, and Core Audio reads `Device::getNumInputs` and `getSampleRate` in
+  `processInput` on the audio thread. Python may implement drivers and
+  devices only as natively configured objects. Native code answers every
+  call from values Python set, Python drives the streams from its own
+  thread, and Rack's requests reach Python as queued UI-thread
+  notifications (`planning/rp-29-slices.md`).
 - **RP-07** must set the `ui-exclusive` time budget and measure the queues.
 
 ## Not covered

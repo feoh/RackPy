@@ -41,8 +41,8 @@ nitpick_ignore_regex = [
     # Private implementation modules; their public names are documented where rackpy.raw re-exports them.
     ("py:class", r"rackpy\.raw\._\w+\.\w+"),
     # rackpy.raw's own classes from its __init__.pyi (see suppress_warnings above): autoapi does not
-    # resolve cross-references to them; the values reference documents rackpy.raw.Quantity.
-    ("py:class", r"rackpy\.raw\.Quantity"),
+    # resolve cross-references to them; the values and window references document Quantity and Context.
+    ("py:class", r"rackpy\.raw\.(Quantity|Context)"),
     # The internal host module; rackpy.dsp.kernel re-exports its kernel classes and documents them.
     ("py:class", r"_rackpy_host\.dsp\.\w+"),
 ]

@@ -159,11 +159,32 @@ def assert_clean_exit(run: RackRun) -> None:
     assert run.lines("Destroying logger"), run.tail()
 
 
+SHARED_FILE_BYTES = 1 << 20
+
+
+def _copy_or_link(src: str, dst: str) -> object:
+    # Large files are the bundle's binaries, which no test writes: share them (a hard link) instead of
+    # copying hundreds of megabytes per test into the tmpfs. Small files (JSON, Python) stay copies, so
+    # a test may rewrite them.
+    if Path(src).stat().st_size >= SHARED_FILE_BYTES:
+        try:
+            os.link(src, dst)
+            return dst
+        except OSError:
+            pass
+    return shutil.copy2(src, dst)
+
+
+def copy_sharing_binaries(src: Path, dst: Path) -> None:
+    """Copy a plugin bundle; files of 1 MiB or more are hard links to the source's (never modify them)."""
+    shutil.copytree(src, dst, symlinks=True, copy_function=_copy_or_link)
+
+
 def stage_plugin(bundle: Path, user: Path, *, entry: str | None = None, files: dict[str, str] | None = None) -> Path:
     """Copy a bundle into a Rack user directory's plugin folder, optionally setting the entry module."""
     plugin = user / "plugins-lin-x64" / bundle.name
     plugin.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(bundle, plugin, symlinks=True)
+    copy_sharing_binaries(bundle, plugin)
     for rel, text in (files or {}).items():
         (plugin / rel).parent.mkdir(parents=True, exist_ok=True)
         (plugin / rel).write_text(text)

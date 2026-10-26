@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import BIN, REPO, require_tools, tool
+from tests.support import BIN, REPO, copy_sharing_binaries, require_tools, tool
 
 # Suites under */in_rack*/ run inside Rack (tests.support.run_pytest_in_rack); outside Rack they cannot import.
 collect_ignore_glob = ["*/in_rack", "*/in_rack/*", "*/in_rack_*", "*/in_rack_*/*"]
@@ -58,10 +58,16 @@ def dev_build(native_tools: None, tmp_path_factory: pytest.TempPathFactory) -> P
 def make_bundle(dev_build: Path, tmp_path_factory: pytest.TempPathFactory) -> Callable[[], Path]:
     """Return a factory for fresh plugin directories (runtime symlinked) from the dev build."""
 
+    pristine: list[Path] = []  # bundled once; every caller gets a copy that shares its binaries
+
     def make() -> Path:
-        dest = tmp_path_factory.mktemp("bundle")
-        out = tool("rackpy-dev", "bundle", str(dest), "--build-dir", str(dev_build))
-        return Path(out.strip().splitlines()[-1])
+        if not pristine:
+            base = tmp_path_factory.mktemp("bundle-base")
+            out = tool("rackpy-dev", "bundle", str(base), "--build-dir", str(dev_build))
+            pristine.append(Path(out.strip().splitlines()[-1]))
+        bundle = tmp_path_factory.mktemp("bundle") / pristine[0].name
+        copy_sharing_binaries(pristine[0], bundle)
+        return bundle
 
     return make
 
@@ -77,8 +83,15 @@ def hooks_build(native_tools: None, tmp_path_factory: pytest.TempPathFactory) ->
 
 @pytest.fixture(scope="session")
 def make_hooks_bundle(hooks_build: Path, tmp_path_factory: pytest.TempPathFactory) -> Callable[[], Path]:
+    pristine: list[Path] = []  # bundled once; every caller gets a copy that shares its binaries
+
     def make() -> Path:
-        dest = tmp_path_factory.mktemp("hooks-bundle")
-        return Path(tool("rackpy-dev", "bundle", str(dest), "--build-dir", str(hooks_build)).strip().splitlines()[-1])
+        if not pristine:
+            base = tmp_path_factory.mktemp("hooks-bundle-base")
+            out = tool("rackpy-dev", "bundle", str(base), "--build-dir", str(hooks_build))
+            pristine.append(Path(out.strip().splitlines()[-1]))
+        bundle = tmp_path_factory.mktemp("hooks-bundle") / pristine[0].name
+        copy_sharing_binaries(pristine[0], bundle)
+        return bundle
 
     return make

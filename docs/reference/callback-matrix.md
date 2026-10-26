@@ -14,10 +14,10 @@ Every public virtual method in the inventory: **434** entries.
 | `ui-exclusive` | 19 | Main thread, or whichever thread called the engine method, while Rack holds the engine mutex EXCLUSIVELY and audio processing is stopped. A Python override may run, but must not call any engine method that locks (RackPy refuses it), and its run time stalls audio. |
 | `ui-shared` | 5 | Main thread while Rack holds the engine mutex SHARED, so process() keeps running concurrently. A Python override may run synchronously, but must read module state through atomics or snapshots, never through fields that process() writes. |
 | `engine` | 6 | Engine worker or fallback threads during processing. Production: native code only. Python only in the separately enabled RP-22 laboratory. |
-| `driver` | 11 | Audio or MIDI driver threads (and, for some, the engine thread or UI under the exclusive lock). Native code only; Python receives queued notifications on the UI thread. |
+| `driver` | 42 | Audio or MIDI driver threads (and, for some, the engine thread or UI under the exclusive lock). Native code only; Python receives queued notifications on the UI thread. |
 | `mixed` | 10 | Reachable from both the UI thread and engine threads. Native implementation only; Python may configure the native behaviour but never runs in the call. |
 | `lifecycle` | 33 | Destructor: runs on the thread that deletes the object, which Rack keeps on the main thread for widgets and modules. Trampolines release their Python state with the GIL there; production deletion paths do no Python work. |
-| `unresolved` | 31 | Not yet decided. Blocks the implementation task named in the rule. |
+| `unresolved` | 0 | Not yet decided. Blocks the implementation task named in the rule. |
 | `value` | 1 | Not a callback: a virtual on a C++ exception or value type. RackPy translates or wraps it; Python never overrides it. |
 
 ## By family
@@ -29,8 +29,8 @@ Every public virtual method in the inventory: **434** entries.
 | `rack::Quantity` | `mixed` | `getDefaultValue`, `getMaxValue`, `getMinValue`, `getValue`, `setValue` | 10 |
 | `rack::Quantity` | `ui` | `getDescription`, `getDisplayPrecision`, `getDisplayValue`, `getDisplayValueString`, `getLabel`, `getString`, `getUnit`, `setDisplayValue`, `setDisplayValueString` | 18 |
 | `rack::Quantity` | `ui-exclusive` | `randomize`, `reset` | 4 |
-| `rack::audio::Device` | `unresolved` | `getBlockSize`, `getBlockSizes`, `getName`, `getNumInputs`, `getNumOutputs`, `getSampleRate`, `getSampleRates`, `setBlockSize`, `setSampleRate`, `subscribe`, `unsubscribe` | 11 |
-| `rack::audio::Driver` | `unresolved` | `getDefaultDeviceId`, `getDeviceIds`, `getDeviceName`, `getDeviceNumInputs`, `getDeviceNumOutputs`, `getName`, `subscribe`, `unsubscribe` | 8 |
+| `rack::audio::Device` | `driver` | `getBlockSize`, `getBlockSizes`, `getName`, `getNumInputs`, `getNumOutputs`, `getSampleRate`, `getSampleRates`, `setBlockSize`, `setSampleRate`, `subscribe`, `unsubscribe` | 11 |
+| `rack::audio::Driver` | `driver` | `getDefaultDeviceId`, `getDeviceIds`, `getDeviceName`, `getDeviceNumInputs`, `getDeviceNumOutputs`, `getName`, `subscribe`, `unsubscribe` | 8 |
 | `rack::audio::Port` | `driver` | `onStartStream`, `onStopStream`, `processBuffer`, `processInput`, `processOutput` | 5 |
 | `rack::dsp::MidiGenerator` | `engine` | `onMessage` | 1 |
 | `rack::engine::LightInfo` | `ui` | `getDescription`, `getName` | 2 |
@@ -43,8 +43,8 @@ Every public virtual method in the inventory: **434** entries.
 | `rack::engine::ParamQuantity` | `ui-shared` | `toJson` | 1 |
 | `rack::engine::PortInfo` | `ui` | `getDescription`, `getName` | 2 |
 | `rack::history::Action` | `ui` | `redo`, `undo` | 18 |
-| `rack::midi::Device` | `unresolved` | `getName` | 1 |
-| `rack::midi::Driver` | `unresolved` | `getDefaultInputDeviceId`, `getDefaultOutputDeviceId`, `getInputDeviceIds`, `getInputDeviceName`, `getName`, `getOutputDeviceIds`, `getOutputDeviceName`, `subscribeInput`, `subscribeOutput`, `unsubscribeInput`, `unsubscribeOutput` | 11 |
+| `rack::midi::Device` | `driver` | `getName` | 1 |
+| `rack::midi::Driver` | `driver` | `getDefaultInputDeviceId`, `getDefaultOutputDeviceId`, `getInputDeviceIds`, `getInputDeviceName`, `getName`, `getOutputDeviceIds`, `getOutputDeviceName`, `subscribeInput`, `subscribeOutput`, `unsubscribeInput`, `unsubscribeOutput` | 11 |
 | `rack::midi::Input` | `driver` | `onMessage` | 2 |
 | `rack::midi::InputQueue` | `lifecycle` | `~` | 1 |
 | `rack::midi::Output` | `lifecycle` | `~` | 1 |
@@ -56,4 +56,4 @@ Every public virtual method in the inventory: **434** entries.
 
 ## Unresolved
 
-31 methods are unresolved and block: RP-29.
+0 methods are unresolved and block: nothing.
