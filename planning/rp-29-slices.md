@@ -46,3 +46,30 @@ notifications through bounded native queues.
 - **Left planned for 29C.** Records for implementing a driver or device in
   Python: `Driver`'s virtuals, `Device::getName`,
   `OutputDevice::sendMessage` and `addDriver`.
+
+**RP-29B — audio ports and Rack's audio drivers**
+(`tk-rackpy-29b-audio-ports-and-rack-s-audio-drivers-d3e047`). Validation:
+[rp-29b-validation.md](rp-29b-validation.md).
+
+- **Drivers and devices.** Rack's audio drivers are `Driver` views by ID.
+  Devices are reached through the Python port that holds them, and others'
+  ports are `PortView`s, listed under Rack's `processMutex`.
+- **Ports.** Python's `Port` is a trampoline (`PyAudioPort`) with
+  registry, direct-subscription tracking, context-close release and
+  main-thread deletion, as in 29A.
+- **Callbacks.** The process callbacks stay native on the audio thread and
+  count into `stream_stats`. `on_start_stream` and `on_stop_stream` queue to
+  the UI thread (try-lock, bounded, drops counted). Exercising them, and
+  Python's synchronous overrides, needs a stream: RP-29C.
+- **Test isolation.** Every Rack test run gets `isolated_audio_env`: an
+  empty `XDG_RUNTIME_DIR`, Pulse, PipeWire and JACK pointed nowhere, and an
+  ALSA config without hardware. Rack's RtAudio drivers load and list no
+  devices (the 0-devices case), and RtMidi's ALSA driver fails to start.
+  Tests never open the machine's audio or MIDI devices.
+- **Found.**
+  - `audio::Port::getDeviceDetail` is declared but defined nowhere in Rack
+    2.6.6: no source and no libRack symbol. It stays unreviewed pending an
+    owner decision on declared-but-undefined API.
+  - `audio::Port::getDeviceName` returns `0` as a `std::string` when the
+    driver throws. libstdc++ throws `logic_error` for that, which reaches
+    Python as an error.

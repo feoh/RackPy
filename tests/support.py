@@ -71,6 +71,33 @@ class RackRun:
         return self.log[-4000:]
 
 
+# ALSA as Rack sees it in tests: no hardware definitions, only a null default PCM.
+NULL_ALSA_CONFIG = "pcm.!default {\n    type null\n}\n"
+
+
+def isolated_audio_env(user: Path) -> dict[str, str]:
+    """Keep Rack's audio and MIDI drivers off this machine's sound servers and devices.
+
+    An empty XDG_RUNTIME_DIR hides the PulseAudio, PipeWire and JACK sockets (and the variables below
+    point their clients nowhere), and ALSA reads a configuration without hardware definitions. Rack's
+    RtAudio drivers (ALSA, PulseAudio, JACK) still load and list no devices, and RtMidi's ALSA driver
+    fails to start, so tests never open this machine's audio or MIDI devices.
+    """
+    runtime = user / "xdg-runtime"
+    runtime.mkdir(parents=True, exist_ok=True)
+    runtime.chmod(0o700)
+    alsa = user / "alsa-null.conf"
+    alsa.write_text(NULL_ALSA_CONFIG)
+    return {
+        "XDG_RUNTIME_DIR": str(runtime),
+        "ALSA_CONFIG_PATH": str(alsa),
+        "PULSE_SERVER": "unix:" + str(runtime / "no-pulse"),
+        "PIPEWIRE_REMOTE": "rackpy-test-none",
+        "JACK_NO_START_SERVER": "1",
+        "JACK_DEFAULT_SERVER": "rackpy-test-none",
+    }
+
+
 def run_rack(
     rack: Path, user: Path, *, settle: float = 1.0, timeout: float = 60, env: dict[str, str] | None = None
 ) -> RackRun:
@@ -80,7 +107,11 @@ def run_rack(
     headless, when a patch references an unavailable module. Rack creates and
     removes /tmp/Rack2 while it loads plugins, so runs must not overlap.
     """
-    environ = {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}} | (env or {})
+    environ = (
+        {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}
+        | isolated_audio_env(user)
+        | (env or {})
+    )
     log = user / "log.txt"
     (user / "autosave").mkdir(parents=True, exist_ok=True)
     patch = user / "autosave" / "patch.json"
@@ -121,7 +152,9 @@ def run_rack_windowed(rack: Path, user: Path, *, timeout: float = 120, patch: Pa
     and Xvfb) is killed and returncode is None.
     """
     require("xvfb-run", shutil.which("xvfb-run") is not None, "install Xvfb (xorg-server-xvfb or xvfb)")
-    environ = {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}
+    environ = {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}} | isolated_audio_env(
+        user
+    )
     (user / "autosave").mkdir(parents=True, exist_ok=True)
     cmd = ["xvfb-run", "-a", "-s", "-screen 0 1600x1000x24", str(rack / "Rack"), "-u", str(user)]
     if patch is not None:

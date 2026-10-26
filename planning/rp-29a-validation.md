@@ -14,7 +14,7 @@ Date 2026-10-26, on `main` after 574d52c. Pinned inputs as in
 | `uv run bin/callback-matrix check --write` | 434 virtual methods, 0 unresolved (42 driver) |
 | `uv run bin/generate_bindings.py check`, `prek run --all-files`, `uv run sphinx-build -q -W --keep-going -n -b html docs build/docs/html` | pass, 0 warnings |
 
-In actual Rack's live UI (`tests/io/in_rack/test_midi.py`), with Rack's
+In actual Rack's live UI (`tests/io/in_rack_midi/test_midi.py`), with Rack's
 Loopback MIDI driver (-12):
 
 - **Messages.** Rack's byte rules: masking, missing bytes, sizes, frames

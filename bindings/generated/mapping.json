@@ -814,6 +814,13 @@
     },
     {
       "facade": null,
+      "id": "constructor:rack::audio::Port::Port()",
+      "kind": "class",
+      "raw": "rackpy.raw.audio.Port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "constructor:rack::componentlibrary::BefacoBigKnob::BefacoBigKnob()",
       "kind": "class",
       "raw": "rackpy.raw.componentlibrary.BefacoBigKnob",
@@ -1829,6 +1836,27 @@
     },
     {
       "facade": null,
+      "id": "destructor:rack::audio::Device::~Device()",
+      "kind": "class",
+      "raw": "rackpy.raw.audio.Device",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::audio::Driver::~Driver()",
+      "kind": "class",
+      "raw": "rackpy.raw.audio.Driver",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::audio::Port::~Port()",
+      "kind": "class",
+      "raw": "rackpy.raw.audio.Port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "destructor:rack::engine::LightInfo::~LightInfo()",
       "kind": "class",
       "raw": "rackpy.raw.engine.LightInfo",
@@ -2728,6 +2756,83 @@
       "id": "field:rack::app::ThemedSvgScrew::lightSvg",
       "kind": "property",
       "raw": "rackpy.raw.app.ThemedSvgScrew.light_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::audio::Device::processMutex",
+      "kind": "property",
+      "raw": "rackpy.raw.audio.Device.subscribed",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::audio::Device::subscribed",
+      "kind": "property",
+      "raw": "rackpy.raw.audio.Device.subscribed",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::audio::Port::context",
+      "kind": "property",
+      "raw": "rackpy.raw.audio.Port.context",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::audio::Port::device",
+      "kind": "property",
+      "raw": "rackpy.raw.audio.Port.device",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::audio::Port::deviceId",
+      "kind": "property",
+      "raw": "rackpy.raw.audio.Port.device_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::audio::Port::driver",
+      "kind": "property",
+      "raw": "rackpy.raw.audio.Port.driver",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::audio::Port::driverId",
+      "kind": "property",
+      "raw": "rackpy.raw.audio.Port.driver_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::audio::Port::inputOffset",
+      "kind": "property",
+      "raw": "rackpy.raw.audio.Port.input_offset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::audio::Port::maxInputs",
+      "kind": "property",
+      "raw": "rackpy.raw.audio.Port.max_inputs",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::audio::Port::maxOutputs",
+      "kind": "property",
+      "raw": "rackpy.raw.audio.Port.max_outputs",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::audio::Port::outputOffset",
+      "kind": "property",
+      "raw": "rackpy.raw.audio.Port.output_offset",
       "status": "implemented"
     },
     {
@@ -4583,6 +4688,20 @@
       "id": "function:rack::asset::user(std::string)",
       "kind": "function",
       "raw": "rackpy.raw.asset.user",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::audio::getDriver(int)",
+      "kind": "function",
+      "raw": "rackpy.raw.audio.get_driver",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::audio::getDriverIds()",
+      "kind": "function",
+      "raw": "rackpy.raw.audio.get_driver_ids",
       "status": "implemented"
     },
     {
@@ -7621,6 +7740,349 @@
       "id": "method:rack::app::ThemedSvgScrew::step()",
       "kind": "method",
       "raw": "rackpy.raw.app.ThemedSvgScrew.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Device::getBlockSize()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Device.get_block_size",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Device::getBlockSizes()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Device.get_block_sizes",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Device::getName()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Device.get_name",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Device::getNumInputs()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Device.get_num_inputs",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Device::getNumOutputs()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Device.get_num_outputs",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Device::getSampleRate()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Device.get_sample_rate",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Device::getSampleRates()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Device.get_sample_rates",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Device::onStartStream()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Device.on_start_stream",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Device::onStopStream()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Device.on_stop_stream",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Device::processBuffer(const float *, int, float *, int, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Device.process_buffer",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Device::setBlockSize(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Device.set_block_size",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Device::setSampleRate(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Device.set_sample_rate",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Device::subscribe(rack::audio::Port *)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Device.subscribe",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Device::unsubscribe(rack::audio::Port *)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Device.unsubscribe",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Driver::getDefaultDeviceId()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Driver.get_default_device_id",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Driver::getDeviceIds()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Driver.get_device_ids",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Driver::getDeviceName(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Driver.get_device_name",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Driver::getDeviceNumInputs(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Driver.get_device_num_inputs",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Driver::getDeviceNumOutputs(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Driver.get_device_num_outputs",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Driver::getName()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Driver.get_name",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Driver::subscribe(int, rack::audio::Port *)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Driver.subscribe",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Driver::unsubscribe(int, rack::audio::Port *)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Driver.unsubscribe",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::fromJson(json_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.from_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getBlockSize()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_block_size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getBlockSizes()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_block_sizes",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getDevice()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_device",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getDeviceId()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_device_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getDeviceIds()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_device_ids",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getDeviceName(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_device_name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getDeviceNumInputs(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_device_num_inputs",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getDeviceNumOutputs(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_device_num_outputs",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getDriver()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_driver",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getDriverId()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_driver_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getDriverName()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_driver_name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getNumInputs()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_num_inputs",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getNumOutputs()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_num_outputs",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getSampleRate()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_sample_rate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::getSampleRates()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.get_sample_rates",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::onStartStream()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.on_start_stream",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::onStopStream()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.on_stop_stream",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::processBuffer(const float *, int, float *, int, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.process_buffer",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::processInput(const float *, int, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.process_input",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::processOutput(float *, int, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.process_output",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::setBlockSize(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.set_block_size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::setDeviceId(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.set_device_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::setDriverId(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.set_driver_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::setSampleRate(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.set_sample_rate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::audio::Port::toJson()",
+      "kind": "method",
+      "raw": "rackpy.raw.audio.Port.to_json",
       "status": "implemented"
     },
     {
@@ -11979,6 +12441,27 @@
     },
     {
       "facade": null,
+      "id": "record:rack::audio::Device",
+      "kind": "class",
+      "raw": "rackpy.raw.audio.Device",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::audio::Driver",
+      "kind": "class",
+      "raw": "rackpy.raw.audio.Driver",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::audio::Port",
+      "kind": "class",
+      "raw": "rackpy.raw.audio.Port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "record:rack::componentlibrary::BefacoBigKnob",
       "kind": "class",
       "raw": "rackpy.raw.componentlibrary.BefacoBigKnob",
@@ -13686,6 +14169,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "b932ee4adae5a36d",
+  "inputs": "a912bef133014157",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

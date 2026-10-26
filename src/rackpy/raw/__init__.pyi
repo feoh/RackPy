@@ -4,6 +4,7 @@ from rackpy.raw import _arch as _arch
 from rackpy.raw import _types as _types
 from rackpy.raw import app as app
 from rackpy.raw import asset as asset
+from rackpy.raw import audio as audio
 from rackpy.raw import color as color
 from rackpy.raw import componentlibrary as componentlibrary
 from rackpy.raw import engine as engine

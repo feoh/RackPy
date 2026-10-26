@@ -25,6 +25,7 @@ engine-module
 engine
 history
 midi
+audio
 plugin
 widgets
 ui
