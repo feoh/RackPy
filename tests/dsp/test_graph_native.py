@@ -31,6 +31,7 @@ def test_a_sixteen_channel_plan_makes_no_forbidden_calls(dev_build: Path) -> Non
     out = subprocess.run([str(dev_build / "rackpy_kernel_guard")], capture_output=True, text=True, check=True, env=env)
     report = json.loads(out.stdout)
     assert not any(report["graph"].values()), report["graph"]
+    assert not any(report["compiled"].values()), report["compiled"]  # RP-21C: a compiled kernel, both paths
     assert report["inject"]["malloc"] >= report["frames"]  # the guard is live in this run
 
 
@@ -38,7 +39,9 @@ def test_the_plan_cost_benchmark_runs(dev_build: Path) -> None:
     """Timings are recorded in benchmarks/rp21-graph-cost.json, not asserted: CI is not controlled hardware."""
     out = subprocess.run([str(dev_build / "rackpy_graph_bench")], capture_output=True, text=True, check=True)
     results = {r["workload"]: r for r in json.loads(out.stdout)["results"]}
-    assert set(results) == {"plan_sine", "plan_sine_gain", "plan_vca", "plan_poly16"}
+    assert set(results) == {
+        f"{tier}_{w}" for tier in ("plan", "compiled") for w in ("sine", "sine_gain", "vca", "poly16")
+    }
     assert all(r["plan_p50_ns"] > 0 and r["native_p50_ns"] > 0 for r in results.values())
 
 

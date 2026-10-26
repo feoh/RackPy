@@ -1,5 +1,5 @@
 {
-  "note": "RP-21B: the graph plan interpreter (native/tests/graph_bench.cpp) against the same DSP hand-fused into plain C++ modules, ns per process() call, one frame per call, nothing batched. ADR 004 proposes at most 1.5 ns per frame per plan (owner approval pending); the interpreter does not meet it for mono plans (about 1.3-1.6 ns per node that runs each frame), which is what the compiled tier (RP-21C) is for. plan_poly16 is faster than the hand-written 16-voice loop. Planning machine, not controlled hardware (RP-43 repeats on controlled hardware).",
+  "note": "RP-21B/C: DSP graph plans in both tiers (native/tests/graph_bench.cpp) against the same DSP hand-fused into plain C++ modules, ns per process() call, one frame per call, nothing batched. plan_*: the plan interpreter (Graph.compile()); compiled_*: the compiled tier (bin/rackpy-graph's tests/dsp/kernel_library/graphs.cpp), with its register barrier per node, which keeps it bit-identical to the interpreter. Both include RP-17's fixed per-module kernel cost (benchmarks/rp17-kernel-overhead.json). ADR 004 proposes at most 1.5 ns per frame per plan (owner approval pending): the compiled tier meets it for the sine (1.46-1.48), is at it for the VCA (1.46-1.57) and 0.15-0.17 over for sine->gain; the interpreter does not (about 1.3-1.6 ns per running node). Both are faster than the hand-written 16-voice loop. Planning machine, not controlled hardware (RP-43 repeats on controlled hardware).",
   "environment": {
     "cpu": "Intel(R) Core(TM) i9-14900K",
     "kernel": "7.2.11-1-cachyos",
@@ -7,11 +7,16 @@
     "governor": "powersave",
     "energy_preference": "balance_performance",
     "load_average_1min": [
-      7.51,
-      6.99,
-      6.51
+      9.09,
+      8.6,
+      7.58
     ],
-    "load_note": "a parallel agent's builds and Rack tests were running on other cores; the native baselines match RP-17's (benchmarks/rp17-kernel-overhead.json)",
+    "runnable_processes": [
+      2,
+      2,
+      2
+    ],
+    "load_note": "the 1-minute load average was still decaying from a parallel agent's builds; 2 processes were runnable during each run, and the native baselines match RP-17's",
     "pinned_cores": [
       4,
       6,
@@ -29,34 +34,66 @@
         {
           "workload": "plan_sine",
           "nodes": 7,
-          "native_p50_ns": 8.824,
-          "plan_p50_ns": 18.369,
-          "overhead_p50_ns": 9.513,
-          "overhead_p99_ns": 10.046
+          "native_p50_ns": 9.153,
+          "plan_p50_ns": 18.973,
+          "overhead_p50_ns": 9.718,
+          "overhead_p99_ns": 10.279
         },
         {
           "workload": "plan_sine_gain",
           "nodes": 9,
-          "native_p50_ns": 8.863,
-          "plan_p50_ns": 20.379,
-          "overhead_p50_ns": 11.53,
-          "overhead_p99_ns": 11.998
+          "native_p50_ns": 9.054,
+          "plan_p50_ns": 20.712,
+          "overhead_p50_ns": 11.728,
+          "overhead_p99_ns": 12.404
         },
         {
           "workload": "plan_vca",
           "nodes": 4,
-          "native_p50_ns": 1.95,
-          "plan_p50_ns": 8.37,
-          "overhead_p50_ns": 6.435,
-          "overhead_p99_ns": 6.872
+          "native_p50_ns": 3.095,
+          "plan_p50_ns": 14.093,
+          "overhead_p50_ns": 10.955,
+          "overhead_p99_ns": 11.865
         },
         {
           "workload": "plan_poly16",
           "nodes": 7,
-          "native_p50_ns": 122.664,
-          "plan_p50_ns": 109.993,
-          "overhead_p50_ns": -12.716,
-          "overhead_p99_ns": -11.784
+          "native_p50_ns": 125.28,
+          "plan_p50_ns": 111.008,
+          "overhead_p50_ns": -14.547,
+          "overhead_p99_ns": -11.85
+        },
+        {
+          "workload": "compiled_sine",
+          "nodes": 7,
+          "native_p50_ns": 8.937,
+          "plan_p50_ns": 10.411,
+          "overhead_p50_ns": 1.478,
+          "overhead_p99_ns": 1.708
+        },
+        {
+          "workload": "compiled_sine_gain",
+          "nodes": 9,
+          "native_p50_ns": 9.002,
+          "plan_p50_ns": 10.675,
+          "overhead_p50_ns": 1.667,
+          "overhead_p99_ns": 1.973
+        },
+        {
+          "workload": "compiled_vca",
+          "nodes": 4,
+          "native_p50_ns": 1.971,
+          "plan_p50_ns": 3.44,
+          "overhead_p50_ns": 1.522,
+          "overhead_p99_ns": 2.073
+        },
+        {
+          "workload": "compiled_poly16",
+          "nodes": 7,
+          "native_p50_ns": 124.509,
+          "plan_p50_ns": 115.85,
+          "overhead_p50_ns": -8.599,
+          "overhead_p99_ns": -6.921
         }
       ]
     },
@@ -68,34 +105,66 @@
         {
           "workload": "plan_sine",
           "nodes": 7,
-          "native_p50_ns": 8.84,
-          "plan_p50_ns": 18.38,
-          "overhead_p50_ns": 9.506,
-          "overhead_p99_ns": 9.986
+          "native_p50_ns": 9.015,
+          "plan_p50_ns": 18.663,
+          "overhead_p50_ns": 9.667,
+          "overhead_p99_ns": 9.893
         },
         {
           "workload": "plan_sine_gain",
           "nodes": 9,
-          "native_p50_ns": 8.863,
-          "plan_p50_ns": 20.372,
-          "overhead_p50_ns": 11.519,
-          "overhead_p99_ns": 11.757
+          "native_p50_ns": 9.036,
+          "plan_p50_ns": 20.676,
+          "overhead_p50_ns": 11.657,
+          "overhead_p99_ns": 12.597
         },
         {
           "workload": "plan_vca",
           "nodes": 4,
-          "native_p50_ns": 1.969,
-          "plan_p50_ns": 8.536,
-          "overhead_p50_ns": 6.543,
-          "overhead_p99_ns": 6.943
+          "native_p50_ns": 2.063,
+          "plan_p50_ns": 7.858,
+          "overhead_p50_ns": 5.811,
+          "overhead_p99_ns": 6.16
         },
         {
           "workload": "plan_poly16",
           "nodes": 7,
-          "native_p50_ns": 120.111,
-          "plan_p50_ns": 107.621,
-          "overhead_p50_ns": -12.482,
-          "overhead_p99_ns": -11.153
+          "native_p50_ns": 121.534,
+          "plan_p50_ns": 107.658,
+          "overhead_p50_ns": -13.885,
+          "overhead_p99_ns": -12.247
+        },
+        {
+          "workload": "compiled_sine",
+          "nodes": 7,
+          "native_p50_ns": 8.95,
+          "plan_p50_ns": 10.418,
+          "overhead_p50_ns": 1.478,
+          "overhead_p99_ns": 1.62
+        },
+        {
+          "workload": "compiled_sine_gain",
+          "nodes": 9,
+          "native_p50_ns": 8.88,
+          "plan_p50_ns": 10.537,
+          "overhead_p50_ns": 1.652,
+          "overhead_p99_ns": 3.48
+        },
+        {
+          "workload": "compiled_vca",
+          "nodes": 4,
+          "native_p50_ns": 1.971,
+          "plan_p50_ns": 3.424,
+          "overhead_p50_ns": 1.463,
+          "overhead_p99_ns": 1.654
+        },
+        {
+          "workload": "compiled_poly16",
+          "nodes": 7,
+          "native_p50_ns": 121.363,
+          "plan_p50_ns": 112.875,
+          "overhead_p50_ns": -8.35,
+          "overhead_p99_ns": -6.971
         }
       ]
     },
@@ -107,34 +176,66 @@
         {
           "workload": "plan_sine",
           "nodes": 7,
-          "native_p50_ns": 8.799,
-          "plan_p50_ns": 18.279,
-          "overhead_p50_ns": 9.469,
-          "overhead_p99_ns": 9.586
+          "native_p50_ns": 8.855,
+          "plan_p50_ns": 18.336,
+          "overhead_p50_ns": 9.475,
+          "overhead_p99_ns": 9.705
         },
         {
           "workload": "plan_sine_gain",
           "nodes": 9,
-          "native_p50_ns": 8.852,
-          "plan_p50_ns": 20.357,
-          "overhead_p50_ns": 11.51,
-          "overhead_p99_ns": 11.705
+          "native_p50_ns": 8.893,
+          "plan_p50_ns": 20.372,
+          "overhead_p50_ns": 11.465,
+          "overhead_p99_ns": 11.598
         },
         {
           "workload": "plan_vca",
           "nodes": 4,
-          "native_p50_ns": 1.945,
-          "plan_p50_ns": 8.54,
-          "overhead_p50_ns": 6.613,
-          "overhead_p99_ns": 7.014
+          "native_p50_ns": 1.973,
+          "plan_p50_ns": 7.379,
+          "overhead_p50_ns": 5.403,
+          "overhead_p99_ns": 5.931
         },
         {
           "workload": "plan_poly16",
           "nodes": 7,
-          "native_p50_ns": 120.56,
-          "plan_p50_ns": 108.053,
-          "overhead_p50_ns": -12.513,
-          "overhead_p99_ns": -10.289
+          "native_p50_ns": 120.955,
+          "plan_p50_ns": 106.925,
+          "overhead_p50_ns": -13.854,
+          "overhead_p99_ns": -12.354
+        },
+        {
+          "workload": "compiled_sine",
+          "nodes": 7,
+          "native_p50_ns": 8.831,
+          "plan_p50_ns": 10.275,
+          "overhead_p50_ns": 1.461,
+          "overhead_p99_ns": 1.664
+        },
+        {
+          "workload": "compiled_sine_gain",
+          "nodes": 9,
+          "native_p50_ns": 8.931,
+          "plan_p50_ns": 10.6,
+          "overhead_p50_ns": 1.656,
+          "overhead_p99_ns": 1.82
+        },
+        {
+          "workload": "compiled_vca",
+          "nodes": 4,
+          "native_p50_ns": 1.971,
+          "plan_p50_ns": 3.457,
+          "overhead_p50_ns": 1.569,
+          "overhead_p99_ns": 1.848
+        },
+        {
+          "workload": "compiled_poly16",
+          "nodes": 7,
+          "native_p50_ns": 121.011,
+          "plan_p50_ns": 112.926,
+          "overhead_p50_ns": -8.015,
+          "overhead_p99_ns": -5.316
         }
       ]
     }

@@ -5,7 +5,9 @@
 // counts heap, lock, write and GIL calls inside the marks. Main-thread work
 // (attach, set, reclaim) stays outside them, as in Rack. Prints JSON.
 // RP-21B adds a graph run: a 16-channel plan with every node type, its
-// controls set through the queue and the plan replaced while it runs.
+// controls set through the queue and the plan replaced while it runs; RP-21C
+// the same for a compiled graph kernel (tests/dsp/kernel_library/graphs.cpp),
+// alternating single-channel and 16-channel input to cover both its paths.
 #include "../dsp/graph/plan.hpp"
 #include "../module/module.hpp"
 
@@ -13,11 +15,33 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <memory>
 #include <string>
+#include <vector>
 
 using namespace rackpy;
 
+// The compiled tier's kernel library, linked in: its registration function.
+extern "C" void rackpy_register_kernels(rackpy::KernelRegistrar& registrar);
+
 namespace {
+
+struct Compiled : KernelRegistrar {
+	std::vector<std::unique_ptr<KernelType>> types;
+	void add(KernelType type) override { types.push_back(std::make_unique<KernelType>(std::move(type))); }
+	std::unique_ptr<dsp::Hosted> make(const std::string& name) {
+		for (auto& type : types)
+			if (type->name == name) {
+				auto h = std::make_unique<dsp::Hosted>();
+				h->type = type.get();
+				for (const Field& f : type->fields)
+					h->values.push_back(f.defaultValue);
+				h->kernel = type->create(h->values);
+				return h;
+			}
+		std::abort();
+	}
+};
 
 using GuardFn = void (*)();
 using ReportFn = void (*)(char*, size_t);
@@ -127,6 +151,34 @@ std::string runGraph(module::Module& m, int frames) {
 	return text;
 }
 
+std::string runCompiled(module::Module& m, Compiled& compiled, int frames) {
+	resetCounts();
+	rack::engine::Module::ProcessArgs args;
+	args.sampleRate = 48000.f;
+	args.sampleTime = 1.f / 48000.f;
+	for (int n = 0; n < frames; n++) {
+		args.frame = n;
+		if (n % 1000 == 500)
+			m.kernels.attach(compiled.make("Everything"), true);
+		if (n % 7 == 0)
+			m.kernels.set(m.kernels.latest(), 0, 0.5 + (n % 3), true);
+		int channels = (n / 250) % 2 ? 16 : 1;  // both of the compiled kernel's paths
+		m.inputs[0].channels = m.inputs[1].channels = (uint8_t) channels;
+		for (int c = 0; c < channels; c++) {
+			m.inputs[0].setVoltage((float) ((n + c) % 11) / 5.f - 1.f, c);
+			m.inputs[1].setVoltage((float) ((n + 2 * c) % 7) / 3.f - 1.f, c);
+		}
+		enter();
+		m.process(args);
+		leave();
+		if (n % 100 == 0)
+			m.kernels.reclaim();
+	}
+	char text[512];
+	report(text, sizeof text);
+	return text;
+}
+
 }  // namespace
 
 int main() {
@@ -168,7 +220,15 @@ int main() {
 	graphed.outputs[0].channels = graphed.outputs[1].channels = 1;
 	graphed.kernels.attach(everyNode(1), true);
 	std::string graphRun = runGraph(graphed, frames);
-	std::printf("{\"frames\": %d, \"production\": %s, \"failure\": %s, \"inject\": %s, \"graph\": %s}\n", frames,
-		production.c_str(), failure.c_str(), inject.c_str(), graphRun.c_str());
+	Compiled compiled;
+	rackpy_register_kernels(compiled);
+	module::Module composed;
+	composed.config(1, 2, 6, 1);
+	for (auto& o : composed.outputs)
+		o.channels = 1;
+	composed.kernels.attach(compiled.make("Everything"), true);
+	std::string compiledRun = runCompiled(composed, compiled, frames);
+	std::printf("{\"frames\": %d, \"production\": %s, \"failure\": %s, \"inject\": %s, \"graph\": %s, \"compiled\": %s}\n",
+		frames, production.c_str(), failure.c_str(), inject.c_str(), graphRun.c_str(), compiledRun.c_str());
 	return 0;
 }

@@ -73,3 +73,28 @@ types statically (`bin/rackpy-graph`, cyclopts), checked equal to the
 interpreter and benchmarked against ADR 004. Native extension node types
 registered by kernel libraries, through a public header and an optional
 library entry point.
+
+## RP-21C decisions
+
+- **Public node header.** The node types moved to `rackpy/graph.hpp`, next to
+  `rackpy/kernel.hpp`, because generated code and kernel libraries compile
+  against them.
+- **Extension nodes** are `rackpy::graph::Node` subclasses registered with
+  `RACKPY_GRAPH_NODES` (optional next to `RACKPY_KERNEL_LIBRARY`, with its
+  own `GRAPH_ABI`), loaded with the library's kernels all or nothing. The
+  interpreter calls them through one virtual call each; a node that writes
+  an impossible channel count fails the plan instead of being read past.
+- **Compiled tier** (`rackpy.dsp.graph_codegen`, `bin/rackpy-graph`): one
+  kernel type per graph, fields as the interpreter's type (wiring with the
+  graph's indices as defaults, then controls). Graphs with extension nodes
+  are refused: their types live in other libraries.
+- **Exactness over 0.25 ns (owner review item).** A register barrier after
+  every node keeps the compiled tier bit-identical to the interpreter (and
+  to the offline reference's arithmetic) under
+  `-funsafe-math-optimizations`. Without it, sine→gain measured 1.50 ns over
+  hand-fused C++ instead of 1.75 ns; sine and VCA did not change.
+- **Single-channel fast path.** Composing the general 0 to 16 channel code
+  statically saved only about 2 ns per frame. A compiled kernel therefore
+  also has a scalar path, taken while every input and delay holds at most
+  one channel, which keeps the 0-channel semantics (a value and a channel
+  count of 0 or 1 per node).

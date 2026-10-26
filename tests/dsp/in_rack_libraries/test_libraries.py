@@ -3,12 +3,16 @@
 
 tests/dsp/test_runtime.py stages the example library and several broken ones;
 only the example's types may appear. RP-21C: the example's graph node types
-too, used from Python graphs.
+too, used from Python graphs, and the "graphs" library that bin/rackpy-graph
+compiled from graphs.py, each kernel checked against the plan interpreter.
 """
 
 import math
+import random
+import runpy
 import time
 from collections.abc import Callable
+from pathlib import Path
 
 import pytest
 from _rackpy_host import _testing as HOOKS
@@ -17,6 +21,11 @@ from rackpy.dsp.graph import Graph, Signal, node_types
 from rackpy.dsp.graph_reference import f32
 from rackpy.dsp.kernel import kernel_types, load
 from rackpy.raw.engine import Module
+
+# The graphs bin/rackpy-graph compiled into the "graphs" kernel library (tests/dsp/kernel_library/graphs.cpp).
+_GRAPHS = runpy.run_path(str(Path(__file__).with_name("graphs.py")))
+GRAPHS: dict[str, Graph] = _GRAPHS["GRAPHS"]
+CONFIG: dict[str, tuple[int, int, int, int]] = _GRAPHS["CONFIG"]
 
 
 def until(condition: Callable[[], bool], seconds: float = 2.0) -> bool:
@@ -134,3 +143,57 @@ def test_graph_nodes_are_checked_when_compiled() -> None:
         g.output(0, build(g))
         with pytest.raises(ValueError, match=message):
             g.compile()
+
+
+def run_frames(m: Module, inputs: list[list[list[float]]], params: list[float], rates: list[float]) -> list[object]:
+    """Steps a Python-owned module; each frame's output channels and voltages, and light 0."""
+    frames: list[object] = []
+    for frame, rate in enumerate(rates):
+        for port, values in enumerate(inputs):
+            m.inputs[port].channels = len(values[frame])
+            for c, v in enumerate(values[frame]):
+                m.inputs[port].set_voltage(v, c)
+        if len(m.params):
+            m.params[0].value = params[frame]
+        if frame == 150 and m.kernel is not None and "level" in m.kernel.values:
+            m.kernel.set("level", -1.25)
+        HOOKS.module_process(m, rate, frame)
+        outs = [[o.get_voltage(c) for c in range(o.get_channels())] for o in m.outputs]
+        frames.append((outs, [light.get_brightness() for light in m.lights]))
+    return frames
+
+
+@pytest.mark.parametrize("name", sorted(GRAPHS))
+def test_compiled_kernels_match_the_plan_interpreter(name: str) -> None:
+    """The same graph in both tiers: bit for bit, on the single-channel path and the polyphonic one."""
+    params, ins, outs, lights = CONFIG[name]
+    rng = random.Random(name)
+    frames = 300
+    # Frames 0-99 single channel or none; then up to 16 channels; then single again.
+    widths = [rng.choice([0, 1]) if (k < 100 or k >= 200) else rng.choice([0, 1, 3, 16]) for k in range(frames)]
+    inputs = [[[f32(rng.uniform(-3, 3)) for _ in range(widths[k])] for k in range(frames)] for _ in range(ins)]
+    values = [f32(rng.uniform(-1, 1)) for _ in range(frames)]
+    rates = [48000.0] * 220 + [96000.0] * 80
+    compiled = Module.create(lambda m: m.config(params, ins, outs, lights))
+    interpreted = Module.create(lambda m: m.config(params, ins, outs, lights))
+    try:
+        for m in (compiled, interpreted):
+            for o in m.outputs:
+                o.channels = 1
+        kernel = load(f"graphs.{name}")()
+        assert kernel.values == GRAPHS[name].compile().values  # the same wiring and controls
+        compiled.set_kernel(kernel)
+        interpreted.set_kernel(GRAPHS[name].compile())
+        a = run_frames(compiled, inputs, values, rates)
+        b = run_frames(interpreted, inputs, values, rates)
+    finally:
+        compiled.close()
+        interpreted.close()
+    assert len(a) == frames
+    for frame, (x, y) in enumerate(zip(a, b, strict=True)):
+        assert repr(x) == repr(y), (frame, x, y)  # repr: NaN and -0.0 compare too
+
+
+def test_compiled_kernels_refuse_unwired_fields() -> None:
+    with pytest.raises(ValueError, match=r"graphs\.Vca: input\[0\] must be wired"):
+        load("graphs.Vca")(**{"input[0]": -1})

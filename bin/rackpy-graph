@@ -1,0 +1,65 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["cyclopts>=5.2,<6"]
+#
+# [tool.uv]
+# exclude-newer = "2026-10-21T00:00:00Z"
+# ///
+"""Compile Python DSP graphs into a RackPy kernel library (RP-21C, the compiled tier).
+
+emit  run a Python file that defines a dict of graphs (GRAPHS by default:
+      kernel type name -> rackpy.dsp.graph.Graph) and write C++ for a kernel
+      library that registers each one as namespace.Name. Build that file as
+      any kernel library (docs: Process audio) and list it in
+      rackpy-loader.json.
+
+The source file is trusted code: it runs here, with this checkout's rackpy.
+"""
+
+import runpy
+import sys
+from pathlib import Path
+
+import cyclopts
+
+REPO = Path(__file__).resolve().parent.parent
+app = cyclopts.App(help=__doc__)
+
+
+@app.command
+def emit(source: Path, namespace: str, /, *, output: Path | None = None, variable: str = "GRAPHS") -> None:
+    """Write the C++ for the graphs in SOURCE, registered under NAMESPACE.
+
+    Parameters
+    ----------
+    source
+        A Python file defining a dict of graphs.
+    namespace
+        The kernel library's namespace: Python loads its types as "namespace.Name".
+    output
+        Where to write the C++ (standard output if not given).
+    variable
+        The name of the dict in SOURCE.
+    """
+    sys.path.insert(0, str(REPO / "src"))
+    from rackpy.dsp.graph import Graph, GraphError
+    from rackpy.dsp.graph_codegen import emit as generate
+
+    graphs = runpy.run_path(str(source)).get(variable)
+    if not isinstance(graphs, dict) or not all(isinstance(g, Graph) for g in graphs.values()):
+        sys.exit(f"rackpy-graph: {source} must define {variable} as a dict of kernel type names to Graphs")
+    path = source.resolve()
+    shown = path.relative_to(REPO).as_posix() if path.is_relative_to(REPO) else path.name
+    try:
+        text = generate(graphs, namespace, source=shown)
+    except GraphError as e:
+        sys.exit(f"rackpy-graph: {e}")
+    if output is None:
+        sys.stdout.write(text)
+    else:
+        output.write_text(text, encoding="utf-8")
+
+
+if __name__ == "__main__":
+    app()

@@ -5,13 +5,15 @@ native node types: ports, parameters and controls in, arithmetic,
 oscillators and Rack's own triggers in between, outputs and lights out.
 Python only describes it; nothing in a graph runs Python per sample.
 
-**Implemented (RP-21A, RP-21B), Linux x86_64 inside Rack Free 2.6.6.**
-{py:mod}`rackpy.dsp.graph` builds, validates and lowers graphs, and
+**Implemented (RP-21A, RP-21B, RP-21C), Linux x86_64 inside Rack Free
+2.6.6.** {py:mod}`rackpy.dsp.graph` builds, validates and lowers graphs.
 {py:meth}`~rackpy.dsp.graph.Graph.compile` turns one into a native
 [kernel](dsp.md) that the **plan interpreter** runs on Rack's engine
-thread. {py:mod}`rackpy.dsp.graph_reference` evaluates graphs offline, in
-Python, for tests and teaching. A compiled tier, which composes the nodes at
-C++ compile time for the lowest cost, is RP-21C and **not available yet**.
+thread, straight from Python. The **compiled tier**
+({py:mod}`rackpy.dsp.graph_codegen`, `bin/rackpy-graph`) turns graphs into
+C++ for a kernel library, for the lowest cost. Both compute exactly the same
+results. {py:mod}`rackpy.dsp.graph_reference` evaluates graphs offline, in
+Python, for tests and teaching.
 
 Building, checking and the offline reference work outside Rack;
 `compile()` needs Rack.
@@ -34,9 +36,45 @@ controls Python set.
 
 **Cost.** The interpreter runs a plan's nodes in order through one `switch`,
 with no virtual call per node, and writes constants and controls in
-advance. That still costs more than the same DSP fused by hand in C++; the
-measurements are in `benchmarks/rp21-graph-cost.json`. Use a C++ kernel
-where those nanoseconds matter, until the compiled tier exists.
+advance. That still costs more than the same DSP fused by hand in C++: about
+1.3 to 1.6 ns per node per frame on the planning machine
+(`benchmarks/rp21-graph-cost.json`). Where that matters, compile the graph.
+
+## Compile graphs into a kernel library
+
+The compiled tier writes C++ that composes RackPy's node types (from
+`rackpy/graph.hpp`) statically, one kernel type per graph, registered in a
+kernel library. Write the graphs in a Python file as a dict of kernel type
+names to graphs (`GRAPHS`, unless you pass `--variable`), then:
+
+```bash
+bin/rackpy-graph emit tests/dsp/in_rack_libraries/graphs.py graphs --output graphs.cpp
+```
+
+Build `graphs.cpp` as any [kernel library](dsp.md#write-a-kernel-in-c), list
+it in `rackpy-loader.json`, and use its types like any kernel:
+`rackpy.dsp.kernel.load("graphs.Tutorial")()`. A type's fields are the
+graph's wiring (`input[0]`, `light[0]`, ...), each defaulting to the graph's
+own index, then its controls; `-1` is refused. RackPy's tests compile
+exactly this example (`tests/dsp/kernel_library/graphs.cpp`, checked to be
+current) and run every kernel against the plan interpreter inside Rack.
+
+- **Exact.** Each node is the same function the interpreter calls, and a
+  register barrier after each node (`settle`) stops the SDK's
+  `-funsafe-math-optimizations` from folding or reassociating across nodes,
+  so the two tiers agree bit for bit.
+- **Fast when it can be.** While every input and delay carries at most one
+  channel (so every signal does), a compiled kernel computes one value per
+  node; otherwise it runs the general 0 to 16 channel code.
+- **RackPy's node types only.** Graphs that use native extension nodes are
+  refused (their types live in other libraries); compile those with
+  `Graph.compile()`.
+- **Trusted.** `emit` runs the Python file you give it.
+
+On the planning machine a compiled mono plan costs about 1.5 to 1.7 ns per
+frame more than the same DSP fused by hand in C++, RackPy's own fixed cost
+per kernel module included, and 16 voices run faster than a hand-written
+loop (`benchmarks/rp21-graph-cost.json`).
 
 ## Build and check a graph
 

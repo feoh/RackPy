@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// RP-21B: the plan interpreter against the same DSP hand-fused into a plain
-// C++ module, per process() call, as RP-07 and RP-17 measured (ADR 004's
-// proposed budget for plans: at most 1.5 ns per frame per plan). One frame
-// per call, nothing batched, randomized A/B order, the SDK's flags. Prints
-// JSON; tests do not assert timings (the planning machine is not controlled
-// hardware).
+// RP-21B/C: graph plans against the same DSP hand-fused into a plain C++
+// module, per process() call, as RP-07 and RP-17 measured (ADR 004's proposed
+// budget for plans: at most 1.5 ns per frame per plan). Each graph runs in
+// both tiers: the plan interpreter ("plan_*") and the compiled tier
+// ("compiled_*", tests/dsp/kernel_library/graphs.cpp from bin/rackpy-graph).
+// One frame per call, nothing batched, randomized A/B order, the SDK's flags.
+// Prints JSON; tests do not assert timings (the planning machine is not
+// controlled hardware).
 #include "../dsp/graph/plan.hpp"
 #include "../module/module.hpp"
 
@@ -12,12 +14,34 @@
 #include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
+#include <string>
 #include <random>
 #include <vector>
 
 using namespace rackpy;
 
+// The compiled tier's kernel library, linked in: its registration function.
+extern "C" void rackpy_register_kernels(rackpy::KernelRegistrar& registrar);
+
 namespace {
+
+struct Compiled : KernelRegistrar {
+	std::vector<std::unique_ptr<KernelType>> types;
+	void add(KernelType type) override { types.push_back(std::make_unique<KernelType>(std::move(type))); }
+	std::unique_ptr<dsp::Hosted> make(const std::string& name) {
+		for (auto& type : types)
+			if (type->name == name) {
+				auto h = std::make_unique<dsp::Hosted>();
+				h->type = type.get();
+				for (const Field& f : type->fields)
+					h->values.push_back(f.defaultValue);
+				h->kernel = type->create(h->values);
+				return h;
+			}
+		std::abort();
+	}
+};
 
 /** RP-07's reference sine module, written directly (as kernel_bench.cpp). */
 struct NativeSine : rack::engine::Module {
@@ -141,26 +165,34 @@ int main() {
 	NativeSineGain sineGain;
 	NativeGain gain;
 	NativePoly poly;
-	module::Module pSine, pSineGain, pGain, pPoly;
-	pSine.config(0, 1, 1, 0);
-	pSineGain.config(1, 1, 1, 0);
-	pGain.config(1, 1, 1, 0);
-	pPoly.config(0, 1, 1, 0);
+	module::Module pSine, pSineGain, pGain, pPoly, cSine, cSineGain, cGain, cPoly;
+	for (module::Module* m : {&pSine, &cSine, &pPoly, &cPoly})
+		m->config(0, 1, 1, 0);
+	for (module::Module* m : {&pSineGain, &cSineGain, &pGain, &cGain})
+		m->config(1, 1, 1, 0);
 	for (rack::engine::Module* m : std::initializer_list<rack::engine::Module*>{&sine, &sineGain, &gain, &poly, &pSine,
-			&pSineGain, &pGain, &pPoly}) {
+			&pSineGain, &pGain, &pPoly, &cSine, &cSineGain, &cGain, &cPoly}) {
 		m->inputs[0].channels = 1;
 		m->outputs[0].channels = 1;
 		if (!m->params.empty())
 			m->params[0].setValue(0.5f);
 	}
-	poly.inputs[0].channels = pPoly.inputs[0].channels = 16;
+	poly.inputs[0].channels = pPoly.inputs[0].channels = cPoly.inputs[0].channels = 16;
 	pSine.kernels.attach(hosted(sinePlan(false)), true);  // through the engine handover
 	pSineGain.kernels.attach(hosted(sinePlan(true)), true);
 	pGain.kernels.attach(hosted(vcaPlan()), true);
 	pPoly.kernels.attach(hosted(sinePlan(false)), true);
+	Compiled compiled;
+	rackpy_register_kernels(compiled);
+	cSine.kernels.attach(compiled.make("Sine"), true);
+	cSineGain.kernels.attach(compiled.make("SineGain"), true);
+	cGain.kernels.attach(compiled.make("Vca"), true);
+	cPoly.kernels.attach(compiled.make("Sine"), true);
 	struct Pair { const char* name; rack::engine::Module* native; module::Module* plan; int nodes; };
 	std::vector<Pair> pairs = {{"plan_sine", &sine, &pSine, 7}, {"plan_sine_gain", &sineGain, &pSineGain, 9},
-		{"plan_vca", &gain, &pGain, 4}, {"plan_poly16", &poly, &pPoly, 7}};
+		{"plan_vca", &gain, &pGain, 4}, {"plan_poly16", &poly, &pPoly, 7}, {"compiled_sine", &sine, &cSine, 7},
+		{"compiled_sine_gain", &sineGain, &cSineGain, 9}, {"compiled_vca", &gain, &cGain, 4},
+		{"compiled_poly16", &poly, &cPoly, 7}};
 	std::mt19937 rng(1234);
 	std::printf("{\"frames_per_rep\": %d, \"reps\": %d, \"results\": [", frames, reps);
 	for (size_t p = 0; p < pairs.size(); p++) {

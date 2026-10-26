@@ -127,8 +127,8 @@ if(RACKPY_BUILD_TESTS)
   set_target_properties(rackpy_audio_guard PROPERTIES PREFIX "" OUTPUT_NAME audio_guard C_STANDARD 11)
   target_link_libraries(rackpy_audio_guard PRIVATE dl)
   # Runs the kernel path under the RP-07 audio-path guard (tests/dsp/test_runtime.py preloads it).
-  add_executable(rackpy_kernel_guard native/tests/kernel_guard.cpp native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE}
-    ${RACKPY_DSP_RUNTIME})
+  add_executable(rackpy_kernel_guard native/tests/kernel_guard.cpp tests/dsp/kernel_library/graphs.cpp
+    native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE} ${RACKPY_DSP_RUNTIME})
   set_target_properties(rackpy_kernel_guard PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_include_directories(rackpy_kernel_guard PRIVATE native/include)
   target_link_libraries(rackpy_kernel_guard PRIVATE rackpy_sdk_program)
@@ -140,9 +140,10 @@ if(RACKPY_BUILD_TESTS)
   target_include_directories(rackpy_kernel_bench PRIVATE native/include)
   target_link_libraries(rackpy_kernel_bench PRIVATE rackpy_sdk_program)
 
-  # RP-21B: the plan interpreter against hand-fused C++ modules (timing only; not a CTest).
-  add_executable(rackpy_graph_bench native/tests/graph_bench.cpp native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE}
-    ${RACKPY_DSP_RUNTIME})
+  # RP-21B/C: the plan interpreter and the compiled tier (bin/rackpy-graph's tests/dsp/kernel_library/graphs.cpp)
+  # against hand-fused C++ modules (timing only; not a CTest).
+  add_executable(rackpy_graph_bench native/tests/graph_bench.cpp tests/dsp/kernel_library/graphs.cpp
+    native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE} ${RACKPY_DSP_RUNTIME})
   set_target_properties(rackpy_graph_bench PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_include_directories(rackpy_graph_bench PRIVATE native/include)
   target_link_libraries(rackpy_graph_bench PRIVATE rackpy_sdk_program)
@@ -151,7 +152,7 @@ if(RACKPY_BUILD_TESTS)
   set(_rackpy_kernel_libraries example:fold.cpp:NONE wrong_abi:broken.cpp:VARIANT_WRONG_ABI
     throws:broken.cpp:VARIANT_THROWS duplicate:broken.cpp:VARIANT_DUPLICATE reserved:broken.cpp:VARIANT_RESERVED
     bad_name:broken.cpp:VARIANT_BAD_NAME graph_wrong_abi:broken.cpp:VARIANT_GRAPH_WRONG_ABI
-    graph_bad_node:broken.cpp:VARIANT_GRAPH_BAD_NODE)
+    graph_bad_node:broken.cpp:VARIANT_GRAPH_BAD_NODE graphs:graphs.cpp:NONE)
   foreach(_entry IN LISTS _rackpy_kernel_libraries)
     string(REPLACE ":" ";" _parts "${_entry}")
     list(GET _parts 0 _name)

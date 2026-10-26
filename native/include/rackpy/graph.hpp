@@ -38,6 +38,32 @@ inline float lane(const Signal& s, int c) {
 	return s.channels == 1 ? s.v[0] : (c < s.channels ? s.v[c] : 0.f);
 }
 
+/** Makes a node's values opaque to the optimizer. The compiled tier calls it on every node's signal, so
+that -funsafe-math-optimizations can neither fold nor reassociate across nodes: composed code then
+rounds exactly as the plan interpreter, which keeps each node's result apart, does. */
+inline void settle(Signal& s) {
+	for (int c = 0; c < s.channels; c++) {
+#if defined(__x86_64__) || defined(__i386__)
+		asm volatile("" : "+x"(s.v[c]));
+#elif defined(__aarch64__)
+		asm volatile("" : "+w"(s.v[c]));
+#else
+		asm volatile("" : "+m"(s.v[c]));
+#endif
+	}
+}
+
+/** settle() for one value: the compiled tier's single-channel path. */
+inline void settle(float& x) {
+#if defined(__x86_64__) || defined(__i386__)
+	asm volatile("" : "+x"(x));
+#elif defined(__aarch64__)
+	asm volatile("" : "+w"(x));
+#else
+	asm volatile("" : "+m"(x));
+#endif
+}
+
 inline void mono(Signal& out, float x) {
 	out.channels = 1;
 	out.v[0] = x;
@@ -110,15 +136,18 @@ inline void writeLight(rack::engine::Light& light, const Signal& s) {
 struct Phasor {
 	float phase[MAX_CHANNELS] = {};
 	void reset() { std::fill(phase, phase + MAX_CHANNELS, 0.f); }
+	/** One channel: what process() computes for channel c. */
+	float step(int c, float freq, float sampleTime) {
+		phase[c] += freq * sampleTime;
+		if (phase[c] >= 1.f)
+			phase[c] -= 1.f;
+		return phase[c];
+	}
 	void process(Signal& out, const Signal& freq, float sampleTime) {
 		int n = std::max(1, freq.channels);
 		out.channels = n;
-		for (int c = 0; c < n; c++) {
-			phase[c] += lane(freq, c) * sampleTime;
-			if (phase[c] >= 1.f)
-				phase[c] -= 1.f;
-			out.v[c] = phase[c];
-		}
+		for (int c = 0; c < n; c++)
+			out.v[c] = step(c, lane(freq, c), sampleTime);
 	}
 };
 
@@ -130,11 +159,12 @@ struct Schmitt {
 		for (auto& t : trigger)
 			t.reset();
 	}
+	float step(int c, float x) { return trigger[c].process(x, low, high) ? 1.f : 0.f; }
 	void process(Signal& out, const Signal& x) {
 		int n = std::max(1, x.channels);
 		out.channels = n;
 		for (int c = 0; c < n; c++)
-			out.v[c] = trigger[c].process(lane(x, c), low, high) ? 1.f : 0.f;
+			out.v[c] = step(c, lane(x, c));
 	}
 };
 
@@ -146,14 +176,16 @@ struct Pulse {
 		for (auto& p : pulse)
 			p.reset();
 	}
+	float step(int c, float trigger, float sampleTime) {
+		if (trigger > 0.f)
+			pulse[c].trigger(duration);
+		return pulse[c].process(sampleTime) ? 1.f : 0.f;
+	}
 	void process(Signal& out, const Signal& trigger, float sampleTime) {
 		int n = std::max(1, trigger.channels);
 		out.channels = n;
-		for (int c = 0; c < n; c++) {
-			if (lane(trigger, c) > 0.f)
-				pulse[c].trigger(duration);
-			out.v[c] = pulse[c].process(sampleTime) ? 1.f : 0.f;
-		}
+		for (int c = 0; c < n; c++)
+			out.v[c] = step(c, lane(trigger, c), sampleTime);
 	}
 };
 

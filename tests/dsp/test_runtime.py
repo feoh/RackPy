@@ -21,7 +21,17 @@ from tests.support import linux_x64_only, run_pytest_in_rack
 pytestmark = [linux_x64_only()]
 SUITE = Path(__file__).resolve().parent / "in_rack"
 LIBRARY_SUITE = Path(__file__).resolve().parent / "in_rack_libraries"
-LIBRARIES = ["example", "wrong_abi", "throws", "duplicate", "reserved", "bad_name", "graph_wrong_abi", "graph_bad_node"]
+LIBRARIES = [
+    "example",
+    "wrong_abi",
+    "throws",
+    "duplicate",
+    "reserved",
+    "bad_name",
+    "graph_wrong_abi",
+    "graph_bad_node",
+    "graphs",
+]
 
 
 @pytest.mark.native
@@ -105,6 +115,7 @@ def test_kernel_libraries_load_and_bad_ones_are_skipped(
     log = result.run
     assert log.lines("kernel type example.Fold from kernels/kernels_example.so")
     assert log.lines("graph node type example.Hold from kernels/kernels_example.so")
+    assert log.lines("kernel type graphs.Tutorial from kernels/kernels_graphs.so")
     expected = {
         "kernels_wrong_abi.so": "built for kernel ABI 999",
         "kernels_throws.so": "registration raised: kernel-library-intentional-error",
