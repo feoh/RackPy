@@ -5,6 +5,7 @@ from rackpy.raw import _types as _types
 from rackpy.raw import app as app
 from rackpy.raw import asset as asset
 from rackpy.raw import color as color
+from rackpy.raw import componentlibrary as componentlibrary
 from rackpy.raw import engine as engine
 from rackpy.raw import event as event
 from rackpy.raw import literals as literals
@@ -33,6 +34,8 @@ from rackpy.raw._widget_helpers import create_input as create_input
 from rackpy.raw._widget_helpers import create_input_centered as create_input_centered
 from rackpy.raw._widget_helpers import create_light as create_light
 from rackpy.raw._widget_helpers import create_light_centered as create_light_centered
+from rackpy.raw._widget_helpers import create_light_param as create_light_param
+from rackpy.raw._widget_helpers import create_light_param_centered as create_light_param_centered
 from rackpy.raw._widget_helpers import create_output as create_output
 from rackpy.raw._widget_helpers import create_output_centered as create_output_centered
 from rackpy.raw._widget_helpers import create_panel as create_panel

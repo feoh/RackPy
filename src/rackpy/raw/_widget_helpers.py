@@ -20,6 +20,8 @@ __all__ = [
     "create_input_centered",
     "create_light",
     "create_light_centered",
+    "create_light_param",
+    "create_light_param_centered",
     "create_output",
     "create_output_centered",
     "create_panel",
@@ -141,3 +143,29 @@ def create_light_centered[T: _app.ModuleLightWidget](
 ) -> T:
     """Rack's ``createLightCentered``: ``create_light`` centred on ``pos``."""
     return _centered(create_light(light_type, pos, module, first_light_id))
+
+
+def create_light_param[T: _app.ParamWidget](
+    param_type: type[T], pos: _Vec, module: _Module | None, param_id: int, first_light_id: int
+) -> T:
+    """Rack's ``createLightParam<TParamWidget>``: ``create_param``, then the widget's ``get_light()`` gets the lights.
+
+    ``param_type`` needs a ``get_light()`` method, as Rack's light sliders and buttons have
+    (``rackpy.raw.componentlibrary.VCVLightSlider``, ``VCVLightButton`` ...).
+    """
+    widget = create_param(param_type, pos, module, param_id)
+    get_light = getattr(widget, "get_light", None)
+    if get_light is None:
+        widget.close()
+        raise TypeError("create_light_param needs a ParamWidget with a get_light() method, like Rack's light buttons")
+    light: _app.ModuleLightWidget = get_light()
+    light.first_light_id = first_light_id
+    light.module = module
+    return widget
+
+
+def create_light_param_centered[T: _app.ParamWidget](
+    param_type: type[T], pos: _Vec, module: _Module | None, param_id: int, first_light_id: int
+) -> T:
+    """Rack's ``createLightParamCentered``: ``create_light_param`` centred on ``pos``."""
+    return _centered(create_light_param(param_type, pos, module, param_id, first_light_id))

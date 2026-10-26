@@ -51,6 +51,90 @@
     },
     {
       "facade": null,
+      "id": "alias:rack::componentlibrary::BlueLight",
+      "kind": "alias",
+      "raw": "rackpy.raw.componentlibrary.BlueLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::componentlibrary::GrayModuleLightWidget",
+      "kind": "alias",
+      "raw": "rackpy.raw.componentlibrary.GrayModuleLightWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::componentlibrary::GreenLight",
+      "kind": "alias",
+      "raw": "rackpy.raw.componentlibrary.GreenLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::componentlibrary::GreenRedLight",
+      "kind": "alias",
+      "raw": "rackpy.raw.componentlibrary.GreenRedLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::componentlibrary::LEDBezel",
+      "kind": "alias",
+      "raw": "rackpy.raw.componentlibrary.LEDBezel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::componentlibrary::LEDButton",
+      "kind": "alias",
+      "raw": "rackpy.raw.componentlibrary.LEDButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::componentlibrary::LEDSlider",
+      "kind": "alias",
+      "raw": "rackpy.raw.componentlibrary.LEDSlider",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::componentlibrary::RedGreenBlueLight",
+      "kind": "alias",
+      "raw": "rackpy.raw.componentlibrary.RedGreenBlueLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::componentlibrary::RedLight",
+      "kind": "alias",
+      "raw": "rackpy.raw.componentlibrary.RedLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::componentlibrary::SvgLight",
+      "kind": "alias",
+      "raw": "rackpy.raw.componentlibrary.SvgLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::componentlibrary::WhiteLight",
+      "kind": "alias",
+      "raw": "rackpy.raw.componentlibrary.WhiteLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::componentlibrary::YellowLight",
+      "kind": "alias",
+      "raw": "rackpy.raw.componentlibrary.YellowLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "alias:rack::event::Action",
       "kind": "alias",
       "raw": "rackpy.raw.event.Action",
@@ -317,9 +401,247 @@
     },
     {
       "facade": null,
+      "id": "alias_template:rack::componentlibrary::LEDBezelLight<type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.componentlibrary.LEDBezelLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias_template:rack::componentlibrary::LEDLightBezel<type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.componentlibrary.LEDLightBezel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias_template:rack::componentlibrary::LEDLightButton<type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.componentlibrary.LEDLightButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias_template:rack::componentlibrary::LEDLightSlider<type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.componentlibrary.LEDLightSlider",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias_template:rack::componentlibrary::LEDSliderLight<type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.componentlibrary.LEDSliderLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias_template:rack::componentlibrary::VCVLightButton<type>",
+      "kind": "factory",
+      "raw": "rackpy.raw.componentlibrary.VCVLightButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "class_template:rack::DeferWrapper<type>",
       "kind": "class",
       "raw": "rackpy.raw.DeferWrapper",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::LargeLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.LargeLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::LargeSimpleLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.LargeSimpleLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::LightButton<type, type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.LightButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::LightSlider<type, type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.LightSlider",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::MediumLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.MediumLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::MediumSimpleLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.MediumSimpleLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::MomentarySwitch<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.MomentarySwitch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::PB61303Light<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.PB61303Light",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::RectangleLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RectangleLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::SmallLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.SmallLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::SmallSimpleLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.SmallSimpleLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::TBlueLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TBlueLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::TGrayModuleLightWidget<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TGrayModuleLightWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::TGreenLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TGreenLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::TGreenRedLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TGreenRedLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::TRedGreenBlueLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TRedGreenBlueLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::TRedLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TRedLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::TSvgLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TSvgLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::TWhiteLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TWhiteLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::TYellowLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TYellowLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::TinyLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TinyLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::TinySimpleLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TinySimpleLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::VCVBezelLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVBezelLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::VCVLightBezel<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVLightBezel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::VCVLightBezelLatch<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVLightBezelLatch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::VCVLightLatch<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVLightLatch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::VCVLightSlider<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVLightSlider",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "class_template:rack::componentlibrary::VCVSliderLight<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVSliderLight",
       "status": "implemented"
     },
     {
@@ -460,6 +782,678 @@
       "id": "constructor:rack::app::Switch::Switch()",
       "kind": "class",
       "raw": "rackpy.raw.app.Switch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::BefacoBigKnob::BefacoBigKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.BefacoBigKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::BefacoPush::BefacoPush()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.BefacoPush",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::BefacoSlidePot::BefacoSlidePot()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.BefacoSlidePot",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::BefacoSwitch::BefacoSwitch()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.BefacoSwitch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::BefacoTinyKnob::BefacoTinyKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.BefacoTinyKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::CKD6::CKD6()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.CKD6",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::CKSS::CKSS()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.CKSS",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::CKSSThree::CKSSThree()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.CKSSThree",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::CKSSThreeHorizontal::CKSSThreeHorizontal()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.CKSSThreeHorizontal",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::CL1362Port::CL1362Port()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.CL1362Port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::DarkPJ301MPort::DarkPJ301MPort()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.DarkPJ301MPort",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Davies1900hBlackKnob::Davies1900hBlackKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hBlackKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Davies1900hKnob::Davies1900hKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Davies1900hLargeBlackKnob::Davies1900hLargeBlackKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hLargeBlackKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Davies1900hLargeRedKnob::Davies1900hLargeRedKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hLargeRedKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Davies1900hLargeWhiteKnob::Davies1900hLargeWhiteKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hLargeWhiteKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Davies1900hRedKnob::Davies1900hRedKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hRedKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Davies1900hWhiteKnob::Davies1900hWhiteKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hWhiteKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::LargeLight::LargeLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.LargeLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::LargeSimpleLight::LargeSimpleLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.LargeSimpleLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::LightButton::LightButton<TBase, TLight>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.LightButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::LightSlider::LightSlider<TBase, TLightBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.LightSlider",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::MediumLight::MediumLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.MediumLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::MediumSimpleLight::MediumSimpleLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.MediumSimpleLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::MomentarySwitch::MomentarySwitch<TSwitch>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.MomentarySwitch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::NKK::NKK()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.NKK",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::PB61303::PB61303()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.PB61303",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::PB61303Light::PB61303Light<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.PB61303Light",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::PJ301MPort::PJ301MPort()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.PJ301MPort",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::PJ3410Port::PJ3410Port()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.PJ3410Port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan1PBlue::Rogan1PBlue()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PBlue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan1PGreen::Rogan1PGreen()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PGreen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan1PRed::Rogan1PRed()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PRed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan1PSBlue::Rogan1PSBlue()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PSBlue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan1PSGreen::Rogan1PSGreen()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PSGreen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan1PSRed::Rogan1PSRed()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PSRed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan1PSWhite::Rogan1PSWhite()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PSWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan1PWhite::Rogan1PWhite()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan2PBlue::Rogan2PBlue()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PBlue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan2PGreen::Rogan2PGreen()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PGreen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan2PRed::Rogan2PRed()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PRed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan2PSBlue::Rogan2PSBlue()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PSBlue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan2PSGreen::Rogan2PSGreen()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PSGreen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan2PSRed::Rogan2PSRed()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PSRed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan2PSWhite::Rogan2PSWhite()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PSWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan2PWhite::Rogan2PWhite()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan2SGray::Rogan2SGray()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2SGray",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan3PBlue::Rogan3PBlue()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PBlue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan3PGreen::Rogan3PGreen()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PGreen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan3PRed::Rogan3PRed()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PRed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan3PSBlue::Rogan3PSBlue()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PSBlue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan3PSGreen::Rogan3PSGreen()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PSGreen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan3PSRed::Rogan3PSRed()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PSRed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan3PSWhite::Rogan3PSWhite()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PSWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan3PWhite::Rogan3PWhite()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan5PSGray::Rogan5PSGray()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan5PSGray",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan6PSWhite::Rogan6PSWhite()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan6PSWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Rogan::Rogan()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::RoundBigBlackKnob::RoundBigBlackKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RoundBigBlackKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::RoundBlackKnob::RoundBlackKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RoundBlackKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::RoundBlackSnapKnob::RoundBlackSnapKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RoundBlackSnapKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::RoundHugeBlackKnob::RoundHugeBlackKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RoundHugeBlackKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::RoundKnob::RoundKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RoundKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::RoundLargeBlackKnob::RoundLargeBlackKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RoundLargeBlackKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::RoundSmallBlackKnob::RoundSmallBlackKnob()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RoundSmallBlackKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::ScrewBlack::ScrewBlack()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.ScrewBlack",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::ScrewSilver::ScrewSilver()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.ScrewSilver",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::SmallLight::SmallLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.SmallLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::SmallSimpleLight::SmallSimpleLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.SmallSimpleLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::SynthTechAlco::SynthTechAlco()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.SynthTechAlco",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::TBlueLight::TBlueLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TBlueLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::TGrayModuleLightWidget::TGrayModuleLightWidget<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TGrayModuleLightWidget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::TGreenLight::TGreenLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TGreenLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::TGreenRedLight::TGreenRedLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TGreenRedLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::TL1105::TL1105()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TL1105",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::TRedGreenBlueLight::TRedGreenBlueLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TRedGreenBlueLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::TRedLight::TRedLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TRedLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::TSvgLight::TSvgLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TSvgLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::TWhiteLight::TWhiteLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TWhiteLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::TYellowLight::TYellowLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TYellowLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::ThemedPJ301MPort::ThemedPJ301MPort()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.ThemedPJ301MPort",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::ThemedScrew::ThemedScrew()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.ThemedScrew",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::TinyLight::TinyLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TinyLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::TinySimpleLight::TinySimpleLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TinySimpleLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::Trimpot::Trimpot()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Trimpot",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::VCVBezel::VCVBezel()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVBezel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::VCVBezelLatch::VCVBezelLatch()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVBezelLatch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::VCVBezelLight::VCVBezelLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVBezelLight",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::VCVButton::VCVButton()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::VCVLatch::VCVLatch()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVLatch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::VCVLightBezel::VCVLightBezel<TLightBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVLightBezel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::VCVLightBezelLatch::VCVLightBezelLatch<TLightBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVLightBezelLatch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::VCVLightLatch::VCVLightLatch<TLight>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVLightLatch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::VCVLightSlider::VCVLightSlider<TLightBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVLightSlider",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::VCVSlider::VCVSlider()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVSlider",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::componentlibrary::VCVSliderLight::VCVSliderLight<TBase>()",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVSliderLight",
       "status": "implemented"
     },
     {
@@ -1349,6 +2343,118 @@
       "id": "field:rack::app::ThemedSvgScrew::lightSvg",
       "kind": "property",
       "raw": "rackpy.raw.app.ThemedSvgScrew.light_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::BefacoBigKnob::bg",
+      "kind": "property",
+      "raw": "rackpy.raw.componentlibrary.BefacoBigKnob.bg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::BefacoTinyKnob::bg",
+      "kind": "property",
+      "raw": "rackpy.raw.componentlibrary.BefacoTinyKnob.bg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::Davies1900hKnob::bg",
+      "kind": "property",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hKnob.bg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::LightButton::light",
+      "kind": "attribute",
+      "raw": "rackpy.raw.componentlibrary.LightButton.light",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::LightSlider::light",
+      "kind": "attribute",
+      "raw": "rackpy.raw.componentlibrary.LightSlider.light",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::Rogan::bg",
+      "kind": "property",
+      "raw": "rackpy.raw.componentlibrary.Rogan.bg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::Rogan::fg",
+      "kind": "property",
+      "raw": "rackpy.raw.componentlibrary.Rogan.fg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::RoundKnob::bg",
+      "kind": "property",
+      "raw": "rackpy.raw.componentlibrary.RoundKnob.bg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::SegmentDisplay::lightsLen",
+      "kind": "property",
+      "raw": "rackpy.raw.componentlibrary.SegmentDisplay.lights_len",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::SegmentDisplay::margin",
+      "kind": "property",
+      "raw": "rackpy.raw.componentlibrary.SegmentDisplay.margin",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::SegmentDisplay::vertical",
+      "kind": "property",
+      "raw": "rackpy.raw.componentlibrary.SegmentDisplay.vertical",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::SynthTechAlco::bg",
+      "kind": "property",
+      "raw": "rackpy.raw.componentlibrary.SynthTechAlco.bg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::TSvgLight::fb",
+      "kind": "attribute",
+      "raw": "rackpy.raw.componentlibrary.TSvgLight.fb",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::TSvgLight::sw",
+      "kind": "attribute",
+      "raw": "rackpy.raw.componentlibrary.TSvgLight.sw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::Trimpot::bg",
+      "kind": "property",
+      "raw": "rackpy.raw.componentlibrary.Trimpot.bg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::componentlibrary::VCVLightBezel::light",
+      "kind": "attribute",
+      "raw": "rackpy.raw.componentlibrary.VCVLightBezel.light",
       "status": "implemented"
     },
     {
@@ -3306,6 +4412,20 @@
     },
     {
       "facade": null,
+      "id": "function_template:rack::createLightParam<type>(rack::math::Vec, rack::engine::Module *, int, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_light_param",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createLightParamCentered<type>(rack::math::Vec, rack::engine::Module *, int, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_light_param_centered",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "function_template:rack::createMenu<type>()",
       "kind": "function",
       "raw": "rackpy.raw.create_menu",
@@ -4947,6 +6067,62 @@
       "id": "method:rack::app::ThemedSvgScrew::step()",
       "kind": "method",
       "raw": "rackpy.raw.app.ThemedSvgScrew.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::componentlibrary::LightButton::getLight()",
+      "kind": "method",
+      "raw": "rackpy.raw.componentlibrary.LightButton.get_light",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::componentlibrary::LightSlider::getLight()",
+      "kind": "method",
+      "raw": "rackpy.raw.componentlibrary.LightSlider.get_light",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::componentlibrary::LightSlider::step()",
+      "kind": "method",
+      "raw": "rackpy.raw.componentlibrary.LightSlider.step",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::componentlibrary::RectangleLight::drawBackground(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.componentlibrary.RectangleLight.draw_background",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::componentlibrary::RectangleLight::drawLight(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.componentlibrary.RectangleLight.draw_light",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::componentlibrary::SegmentDisplay::draw(const rack::widget::Widget::DrawArgs &)",
+      "kind": "method",
+      "raw": "rackpy.raw.componentlibrary.SegmentDisplay.draw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::componentlibrary::TSvgLight::setSvg(std::shared_ptr<rack::window::Svg>)",
+      "kind": "method",
+      "raw": "rackpy.raw.componentlibrary.TSvgLight.set_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::componentlibrary::VCVLightBezel::getLight()",
+      "kind": "method",
+      "raw": "rackpy.raw.componentlibrary.VCVLightBezel.get_light",
       "status": "implemented"
     },
     {
@@ -7855,6 +9031,13 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "method_template:rack::componentlibrary::SegmentDisplay::setLights<type>(rack::engine::Module *, int, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.componentlibrary.SegmentDisplay.set_lights",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.engine.Module.config_button",
       "id": "method_template:rack::engine::Module::configButton<type>(int, std::string)",
       "kind": "method",
@@ -8111,6 +9294,531 @@
       "id": "record:rack::app::ThemedSvgScrew",
       "kind": "class",
       "raw": "rackpy.raw.app.ThemedSvgScrew",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::BefacoBigKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.BefacoBigKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::BefacoPush",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.BefacoPush",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::BefacoSlidePot",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.BefacoSlidePot",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::BefacoSwitch",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.BefacoSwitch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::BefacoTinyKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.BefacoTinyKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::CKD6",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.CKD6",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::CKSS",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.CKSS",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::CKSSThree",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.CKSSThree",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::CKSSThreeHorizontal",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.CKSSThreeHorizontal",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::CL1362Port",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.CL1362Port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::DarkPJ301MPort",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.DarkPJ301MPort",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Davies1900hBlackKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hBlackKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Davies1900hKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Davies1900hLargeBlackKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hLargeBlackKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Davies1900hLargeRedKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hLargeRedKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Davies1900hLargeWhiteKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hLargeWhiteKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Davies1900hRedKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hRedKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Davies1900hWhiteKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Davies1900hWhiteKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::LEDSliderBlue",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.LEDSliderBlue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::LEDSliderGreen",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.LEDSliderGreen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::LEDSliderRed",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.LEDSliderRed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::LEDSliderWhite",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.LEDSliderWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::LEDSliderYellow",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.LEDSliderYellow",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::NKK",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.NKK",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::PB61303",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.PB61303",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::PJ301MPort",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.PJ301MPort",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::PJ3410Port",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.PJ3410Port",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan1PBlue",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PBlue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan1PGreen",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PGreen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan1PRed",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PRed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan1PSBlue",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PSBlue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan1PSGreen",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PSGreen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan1PSRed",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PSRed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan1PSWhite",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PSWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan1PWhite",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan1PWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan2PBlue",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PBlue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan2PGreen",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PGreen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan2PRed",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PRed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan2PSBlue",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PSBlue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan2PSGreen",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PSGreen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan2PSRed",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PSRed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan2PSWhite",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PSWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan2PWhite",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2PWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan2SGray",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan2SGray",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan3PBlue",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PBlue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan3PGreen",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PGreen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan3PRed",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PRed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan3PSBlue",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PSBlue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan3PSGreen",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PSGreen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan3PSRed",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PSRed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan3PSWhite",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PSWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan3PWhite",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan3PWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan5PSGray",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan5PSGray",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Rogan6PSWhite",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Rogan6PSWhite",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::RoundBigBlackKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RoundBigBlackKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::RoundBlackKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RoundBlackKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::RoundBlackSnapKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RoundBlackSnapKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::RoundHugeBlackKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RoundHugeBlackKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::RoundKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RoundKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::RoundLargeBlackKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RoundLargeBlackKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::RoundSmallBlackKnob",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.RoundSmallBlackKnob",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::ScrewBlack",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.ScrewBlack",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::ScrewSilver",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.ScrewSilver",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::SegmentDisplay",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.SegmentDisplay",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::SynthTechAlco",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.SynthTechAlco",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::TL1105",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.TL1105",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::ThemedPJ301MPort",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.ThemedPJ301MPort",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::ThemedScrew",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.ThemedScrew",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::Trimpot",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.Trimpot",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::VCVBezel",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVBezel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::VCVBezelLatch",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVBezelLatch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::VCVButton",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVButton",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::VCVLatch",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVLatch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::componentlibrary::VCVSlider",
+      "kind": "class",
+      "raw": "rackpy.raw.componentlibrary.VCVSlider",
       "status": "implemented"
     },
     {
@@ -9003,6 +10711,90 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "variable:rack::componentlibrary::SCHEME_BLACK",
+      "kind": "constant",
+      "raw": "rackpy.raw.componentlibrary.SCHEME_BLACK",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::componentlibrary::SCHEME_BLACK_TRANSPARENT",
+      "kind": "constant",
+      "raw": "rackpy.raw.componentlibrary.SCHEME_BLACK_TRANSPARENT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::componentlibrary::SCHEME_BLUE",
+      "kind": "constant",
+      "raw": "rackpy.raw.componentlibrary.SCHEME_BLUE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::componentlibrary::SCHEME_CYAN",
+      "kind": "constant",
+      "raw": "rackpy.raw.componentlibrary.SCHEME_CYAN",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::componentlibrary::SCHEME_DARK_GRAY",
+      "kind": "constant",
+      "raw": "rackpy.raw.componentlibrary.SCHEME_DARK_GRAY",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::componentlibrary::SCHEME_GREEN",
+      "kind": "constant",
+      "raw": "rackpy.raw.componentlibrary.SCHEME_GREEN",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::componentlibrary::SCHEME_LIGHT_GRAY",
+      "kind": "constant",
+      "raw": "rackpy.raw.componentlibrary.SCHEME_LIGHT_GRAY",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::componentlibrary::SCHEME_ORANGE",
+      "kind": "constant",
+      "raw": "rackpy.raw.componentlibrary.SCHEME_ORANGE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::componentlibrary::SCHEME_PURPLE",
+      "kind": "constant",
+      "raw": "rackpy.raw.componentlibrary.SCHEME_PURPLE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::componentlibrary::SCHEME_RED",
+      "kind": "constant",
+      "raw": "rackpy.raw.componentlibrary.SCHEME_RED",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::componentlibrary::SCHEME_WHITE",
+      "kind": "constant",
+      "raw": "rackpy.raw.componentlibrary.SCHEME_WHITE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::componentlibrary::SCHEME_YELLOW",
+      "kind": "constant",
+      "raw": "rackpy.raw.componentlibrary.SCHEME_YELLOW",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.engine.PORT_MAX_CHANNELS",
       "id": "variable:rack::engine::PORT_MAX_CHANNELS",
       "kind": "constant",
@@ -9038,6 +10830,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "cc680d937bfb1810",
+  "inputs": "335eee004ccc7a2d",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

@@ -74,3 +74,26 @@ Validation: [rp-28b-validation.md](rp-28b-validation.md).
 
 `appendDisconnectActions` takes a `history::ComplexAction`, so it waits for
 the history family (RP-24's history-facing operations).
+
+**RP-28C — the component library** (`tk-rackpy-28c-the-component-library-f63202`).
+256 records, plus `createLightParam` and `createLightParamCentered`.
+Validation: [rp-28c-validation.md](rp-28c-validation.md). The task was
+created after this slice's work had begun, and claimed when it was created.
+
+- **Components.** Rack's concrete classes are bound natively, so their own
+  constructors load Rack's installed artwork and none is redistributed. The
+  knobs' `bg` and Rogan's `fg` are host views.
+- **Templates.** Decision: each CRTP template is a Python *template class*
+  holding the template's header code. `Template[args]` gives a cached
+  specialization deriving from both the template class and its base, so
+  `isinstance(x, MediumLight)` holds. Rack's aliases are the default
+  specializations, and alias templates give the aliased specialization.
+  Each template reads its own arguments (`_args_<Template>`), so a
+  specialization deriving from another keeps the base's.
+- **Other parts.** `SegmentDisplay.set_lights` is Rack's
+  `setLights<TLightBase>`. `create_light_param` and its centred version use
+  `get_light()`. The `SCHEME_*` colours are bound.
+- **Build time.** The bindings are split over five translation units. One
+  file took 181 s to compile; a fresh build is back to 96 s on 32 cores.
+- **Moved.** `AudioButton_*` and `MidiButton_*` go to RP-28D, with the
+  displays they derive from.

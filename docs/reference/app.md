@@ -220,4 +220,8 @@ sets Rack's fields in Rack's order:
 - `create_light(cls, pos, module, first_light_id)` and
   `create_light_centered(...)`.
 
-`createLightParam` comes with the component library's light buttons.
+- `create_light_param(cls, pos, module, param_id, first_light_id)` and
+  `create_light_param_centered(...)` are for a control with a
+  `get_light()`, such as the [component library](componentlibrary.md)'s
+  light sliders and buttons. They set the light's module and first light
+  ID too.

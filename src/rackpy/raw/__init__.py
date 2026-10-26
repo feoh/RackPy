@@ -60,11 +60,14 @@ __all__ += [
     "create_submenu_item",
 ]
 
+from rackpy.raw import _componentlibrary as _componentlibrary  # noqa: E402  # the library's templates
 from rackpy.raw._widget_helpers import (  # noqa: E402
     create_input,
     create_input_centered,
     create_light,
     create_light_centered,
+    create_light_param,
+    create_light_param_centered,
     create_output,
     create_output_centered,
     create_panel,
@@ -79,6 +82,8 @@ __all__ += [
     "create_input_centered",
     "create_light",
     "create_light_centered",
+    "create_light_param",
+    "create_light_param_centered",
     "create_output",
     "create_output_centered",
     "create_panel",

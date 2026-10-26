@@ -27,6 +27,7 @@ widgets
 ui
 window
 app
+componentlibrary
 widget-trees
 ```
 
