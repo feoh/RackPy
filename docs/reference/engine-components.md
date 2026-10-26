@@ -53,8 +53,8 @@ RackPy checks what Rack does not. A channel outside 0 to 15 raises `IndexError`
 before Rack indexes its array. A channel count above 16, which would make
 Rack's loops run past the array, raises `ValueError`.
 
-The SIMD forms (`getVoltageSimd<T>` and friends) arrive with the SIMD vector
-types in RP-20.
+The SIMD forms (`getVoltageSimd<T>` and friends) read and write four
+channels as a `float_4`: see [port voltages as vectors](simd.md#port-voltages-as-vectors).
 
 (components-voltages)=
 ## The voltage array: views and copies

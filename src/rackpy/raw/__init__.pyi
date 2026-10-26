@@ -22,6 +22,8 @@ from rackpy.raw import network as network
 from rackpy.raw import plugin as plugin
 from rackpy.raw import random as random
 from rackpy.raw import settings as settings
+from rackpy.raw import simd as simd
+from rackpy.raw import sse_mathfun as sse_mathfun
 from rackpy.raw import string as string
 from rackpy.raw import system as system
 from rackpy.raw import ui as ui

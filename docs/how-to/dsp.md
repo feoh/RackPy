@@ -2,7 +2,8 @@
 
 **Implemented (RP-17A, RP-17B), Linux x86_64 inside Rack Free 2.6.6.** Two
 built-in kernel types and kernels you write in C++; DSP building blocks
-(filters, oscillators, MinBLEP, ...) for Python come with RP-18 to RP-21.
+(filters, oscillators, MinBLEP, ...) for Python come with RP-18, RP-19 and
+RP-21. Rack's SIMD vectors are [bound](../reference/simd.md) (RP-20).
 
 Rack calls every module's `process()` once per sample, tens of thousands of
 times a second, on its engine thread. Python is far too slow and too

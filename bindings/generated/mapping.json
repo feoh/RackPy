@@ -387,6 +387,34 @@
     },
     {
       "facade": null,
+      "id": "alias:rack::simd::Vector<float, 4>::type",
+      "kind": "alias",
+      "raw": "rackpy.raw.simd.float_4.type",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::simd::Vector<int32_t, 4>::type",
+      "kind": "alias",
+      "raw": "rackpy.raw.simd.int32_4.type",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.float_4",
+      "id": "alias:rack::simd::float_4",
+      "kind": "alias",
+      "raw": "rackpy.raw.simd.float_4",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.int32_4",
+      "id": "alias:rack::simd::int32_4",
+      "kind": "alias",
+      "raw": "rackpy.raw.simd.int32_4",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "alias:rack::ui::ScrollBar",
       "kind": "alias",
       "raw": "rackpy.raw.ui.ScrollBar",
@@ -1762,6 +1790,76 @@
       "id": "constructor:rack::random::Xoroshiro128Plus::Xoroshiro128Plus(uint64_t, uint64_t)",
       "kind": "class",
       "raw": "rackpy.raw.random.Xoroshiro128Plus",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.float_4",
+      "id": "constructor:rack::simd::Vector<float, 4>::Vector()",
+      "kind": "class",
+      "raw": "rackpy.raw.simd.float_4",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.float_4",
+      "id": "constructor:rack::simd::Vector<float, 4>::Vector(__m128)",
+      "kind": "class",
+      "raw": "rackpy.raw.simd.float_4",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.float_4",
+      "id": "constructor:rack::simd::Vector<float, 4>::Vector(float)",
+      "kind": "class",
+      "raw": "rackpy.raw.simd.float_4",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.float_4",
+      "id": "constructor:rack::simd::Vector<float, 4>::Vector(float, float, float, float)",
+      "kind": "class",
+      "raw": "rackpy.raw.simd.float_4",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.float_4",
+      "id": "constructor:rack::simd::Vector<float, 4>::Vector(rack::simd::Vector<int32_t, 4>)",
+      "kind": "class",
+      "raw": "rackpy.raw.simd.float_4",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.int32_4",
+      "id": "constructor:rack::simd::Vector<int32_t, 4>::Vector()",
+      "kind": "class",
+      "raw": "rackpy.raw.simd.int32_4",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.int32_4",
+      "id": "constructor:rack::simd::Vector<int32_t, 4>::Vector(__m128i)",
+      "kind": "class",
+      "raw": "rackpy.raw.simd.int32_4",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.int32_4",
+      "id": "constructor:rack::simd::Vector<int32_t, 4>::Vector(int32_t)",
+      "kind": "class",
+      "raw": "rackpy.raw.simd.int32_4",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.int32_4",
+      "id": "constructor:rack::simd::Vector<int32_t, 4>::Vector(int32_t, int32_t, int32_t, int32_t)",
+      "kind": "class",
+      "raw": "rackpy.raw.simd.int32_4",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.int32_4",
+      "id": "constructor:rack::simd::Vector<int32_t, 4>::Vector(rack::simd::Vector<float, 4>)",
+      "kind": "class",
+      "raw": "rackpy.raw.simd.int32_4",
       "status": "implemented"
     },
     {
@@ -4454,6 +4552,34 @@
     },
     {
       "facade": null,
+      "id": "field:rack::simd::Vector<float, 4>::s",
+      "kind": "property",
+      "raw": "rackpy.raw.simd.float_4.s",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::simd::Vector<float, 4>::v",
+      "kind": "property",
+      "raw": "rackpy.raw.simd.float_4.v",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::simd::Vector<int32_t, 4>::s",
+      "kind": "property",
+      "raw": "rackpy.raw.simd.int32_4.s",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::simd::Vector<int32_t, 4>::v",
+      "kind": "property",
+      "raw": "rackpy.raw.simd.int32_4.v",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::string::Location::column",
       "kind": "property",
       "raw": "rackpy.raw.string.Location.column",
@@ -5909,6 +6035,629 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.simd.abs",
+      "id": "function:rack::simd::abs(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.abs",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.abs",
+      "id": "function:rack::simd::abs(std::complex<rack::simd::float_4>)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.abs",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.andnot",
+      "id": "function:rack::simd::andnot(rack::simd::float_4, rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.andnot",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.arg",
+      "id": "function:rack::simd::arg(std::complex<rack::simd::float_4>)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.arg",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.atan",
+      "id": "function:rack::simd::atan(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.atan",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.atan2",
+      "id": "function:rack::simd::atan2(rack::simd::float_4, rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.atan2",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.ceil",
+      "id": "function:rack::simd::ceil(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.ceil",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.clamp",
+      "id": "function:rack::simd::clamp(rack::simd::float_4, rack::simd::float_4, rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.clamp",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.cos",
+      "id": "function:rack::simd::cos(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.cos",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.crossfade",
+      "id": "function:rack::simd::crossfade(rack::simd::float_4, rack::simd::float_4, rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.crossfade",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.exp",
+      "id": "function:rack::simd::exp(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.exp",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.fabs",
+      "id": "function:rack::simd::fabs(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.fabs",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.floor",
+      "id": "function:rack::simd::floor(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.floor",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.fmax",
+      "id": "function:rack::simd::fmax(rack::simd::float_4, rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.fmax",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.fmin",
+      "id": "function:rack::simd::fmin(rack::simd::float_4, rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.fmin",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.fmod",
+      "id": "function:rack::simd::fmod(rack::simd::float_4, rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.fmod",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.hypot",
+      "id": "function:rack::simd::hypot(rack::simd::float_4, rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.hypot",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.ifelse",
+      "id": "function:rack::simd::ifelse(bool, float, float)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.ifelse",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.ifelse",
+      "id": "function:rack::simd::ifelse(rack::simd::float_4, rack::simd::float_4, rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.ifelse",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.log",
+      "id": "function:rack::simd::log(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.log",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.log10",
+      "id": "function:rack::simd::log10(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.log10",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.log2",
+      "id": "function:rack::simd::log2(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.log2",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.movemask",
+      "id": "function:rack::simd::movemask(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.movemask",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.movemask",
+      "id": "function:rack::simd::movemask(rack::simd::int32_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.movemask",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.movemask_inverse",
+      "id": "function:rack::simd::movemaskInverse<rack::simd::float_4>(int)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.movemask_inverse",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.movemask_inverse",
+      "id": "function:rack::simd::movemaskInverse<rack::simd::int32_4>(int)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.movemask_inverse",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator!=(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__ne__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator!=(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__ne__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator&(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__and__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator&(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__and__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator&=(rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__iand__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator&=(rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__iand__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator*(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__mul__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator*=(rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__imul__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator+(const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__pos__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator+(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__add__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator+(const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__pos__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator+(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__add__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator++(rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.pre_increment",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator++(rack::simd::Vector<float, 4> &, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.post_increment",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator++(rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.pre_increment",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator++(rack::simd::Vector<int32_t, 4> &, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.post_increment",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator+=(rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__iadd__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator+=(rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__iadd__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator-(const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__neg__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator-(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__sub__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator-(const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__neg__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator-(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__sub__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator--(rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.pre_decrement",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator--(rack::simd::Vector<float, 4> &, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.post_decrement",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator--(rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.pre_decrement",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator--(rack::simd::Vector<int32_t, 4> &, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.post_decrement",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator-=(rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__isub__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator-=(rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__isub__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator/(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__truediv__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator/=(rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__itruediv__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator<(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__lt__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator<(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__lt__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator<<(const rack::simd::Vector<int32_t, 4> &, const int &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__lshift__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator<=(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__le__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator<=(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__le__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator==(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__eq__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator==(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__eq__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator>(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__gt__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator>(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__gt__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator>=(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__ge__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator>=(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__ge__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator>>(const rack::simd::Vector<int32_t, 4> &, const int &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__rshift__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator^(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__xor__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator^(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__xor__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator^=(rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__ixor__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator^=(rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__ixor__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator|(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__or__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator|(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__or__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator|=(rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__ior__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator|=(rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__ior__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator~(const rack::simd::Vector<float, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__invert__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::simd::operator~(const rack::simd::Vector<int32_t, 4> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__invert__",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.pow",
+      "id": "function:rack::simd::pow(float, rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.pow",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.pow",
+      "id": "function:rack::simd::pow(rack::simd::float_4, rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.pow",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.rcp",
+      "id": "function:rack::simd::rcp(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.rcp",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.rescale",
+      "id": "function:rack::simd::rescale(rack::simd::float_4, rack::simd::float_4, rack::simd::float_4, rack::simd::float_4, rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.rescale",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.round",
+      "id": "function:rack::simd::round(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.round",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.rsqrt",
+      "id": "function:rack::simd::rsqrt(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.rsqrt",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.sgn",
+      "id": "function:rack::simd::sgn(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.sgn",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.sin",
+      "id": "function:rack::simd::sin(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.sin",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.sqrt",
+      "id": "function:rack::simd::sqrt(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.sqrt",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.tan",
+      "id": "function:rack::simd::tan(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.tan",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.trunc",
+      "id": "function:rack::simd::trunc(rack::simd::float_4)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.trunc",
+      "status": "implemented"
+    },
+    {
       "facade": null,
       "id": "function:rack::string::UTF32toUTF8(const std::u32string &)",
       "kind": "function",
@@ -6512,6 +7261,83 @@
     },
     {
       "facade": null,
+      "id": "function:sse_mathfun_atan2_ps(__m128, __m128)",
+      "kind": "function",
+      "raw": "rackpy.raw.sse_mathfun.sse_mathfun_atan2_ps",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:sse_mathfun_atan_ps(__m128)",
+      "kind": "function",
+      "raw": "rackpy.raw.sse_mathfun.sse_mathfun_atan_ps",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:sse_mathfun_cos_ps(__m128)",
+      "kind": "function",
+      "raw": "rackpy.raw.sse_mathfun.sse_mathfun_cos_ps",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:sse_mathfun_cot_ps(__m128)",
+      "kind": "function",
+      "raw": "rackpy.raw.sse_mathfun.sse_mathfun_cot_ps",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:sse_mathfun_exp_ps(__m128)",
+      "kind": "function",
+      "raw": "rackpy.raw.sse_mathfun.sse_mathfun_exp_ps",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:sse_mathfun_log_ps(__m128)",
+      "kind": "function",
+      "raw": "rackpy.raw.sse_mathfun.sse_mathfun_log_ps",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:sse_mathfun_one_ps()",
+      "kind": "function",
+      "raw": "rackpy.raw.sse_mathfun.sse_mathfun_one_ps",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:sse_mathfun_sin_ps(__m128)",
+      "kind": "function",
+      "raw": "rackpy.raw.sse_mathfun.sse_mathfun_sin_ps",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:sse_mathfun_sincos_ps(__m128, __m128 *, __m128 *)",
+      "kind": "function",
+      "raw": "rackpy.raw.sse_mathfun.sse_mathfun_sincos_ps",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:sse_mathfun_tan_ps(__m128)",
+      "kind": "function",
+      "raw": "rackpy.raw.sse_mathfun.sse_mathfun_tan_ps",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:sse_mathfun_tancot_ps(__m128, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.sse_mathfun.sse_mathfun_tancot_ps",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "function_template:rack::bitCast<type, type>($1)",
       "kind": "function",
       "raw": "rackpy.raw.bit_cast",
@@ -6763,6 +7589,20 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.simd.movemask_inverse",
+      "id": "function_template:rack::simd::movemaskInverse<type>(int)",
+      "kind": "factory",
+      "raw": "rackpy.raw.simd.movemask_inverse",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.pow",
+      "id": "function_template:rack::simd::pow<type>($0, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.simd.pow",
+      "status": "implemented"
+    },
+    {
       "facade": null,
       "id": "function_template:rack::string::convertFArg<type>(const $0 &)",
       "kind": "function",
@@ -6872,6 +7712,20 @@
       "id": "macro:DEBUG",
       "kind": "function",
       "raw": "rackpy.raw.macros.DEBUG",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:DECLARE_VECTOR_OPERATOR_INCREMENT",
+      "kind": "no_runtime_meaning",
+      "raw": null,
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:DECLARE_VECTOR_OPERATOR_INFIX",
+      "kind": "no_runtime_meaning",
+      "raw": null,
       "status": "implemented"
     },
     {
@@ -7016,6 +7870,13 @@
     },
     {
       "facade": null,
+      "id": "macro:SIMDE_ENABLE_NATIVE_ALIASES",
+      "kind": "no_runtime_meaning",
+      "raw": null,
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "macro:TOSTRING",
       "kind": "no_runtime_meaning",
       "raw": null,
@@ -7040,6 +7901,13 @@
       "id": "macro:WARN",
       "kind": "function",
       "raw": "rackpy.raw.macros.WARN",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:_MM_FROUND_NO_EXC",
+      "kind": "no_runtime_meaning",
+      "raw": null,
       "status": "implemented"
     },
     {
@@ -12035,6 +12903,104 @@
     },
     {
       "facade": null,
+      "id": "method:rack::simd::Vector<float, 4>::cast(rack::simd::Vector<int32_t, 4>)",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.simd.float_4.cast",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::simd::Vector<float, 4>::load(const float *)",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.simd.float_4.load",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::simd::Vector<float, 4>::mask()",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.simd.float_4.mask",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::simd::Vector<float, 4>::operator[](int)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__setitem__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::simd::Vector<float, 4>::operator[](int) const",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.__getitem__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::simd::Vector<float, 4>::store(float *)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.float_4.store",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::simd::Vector<float, 4>::zero()",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.simd.float_4.zero",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::simd::Vector<int32_t, 4>::cast(rack::simd::Vector<float, 4>)",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.simd.int32_4.cast",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::simd::Vector<int32_t, 4>::load(const int32_t *)",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.simd.int32_4.load",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::simd::Vector<int32_t, 4>::mask()",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.simd.int32_4.mask",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::simd::Vector<int32_t, 4>::operator[](int)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__setitem__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::simd::Vector<int32_t, 4>::operator[](int) const",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.__getitem__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::simd::Vector<int32_t, 4>::store(int32_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.simd.int32_4.store",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::simd::Vector<int32_t, 4>::zero()",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.simd.int32_4.zero",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::string::CaseInsensitiveCompare::operator()(const std::string &, const std::string &) const",
       "kind": "method",
       "raw": "rackpy.raw.string.CaseInsensitiveCompare.__call__",
@@ -13911,6 +14877,41 @@
     },
     {
       "facade": null,
+      "id": "method_template:rack::engine::Port::getNormalPolyVoltageSimd<type>($0, uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.get_normal_poly_voltage_simd",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method_template:rack::engine::Port::getNormalVoltageSimd<type>($0, uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.get_normal_voltage_simd",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method_template:rack::engine::Port::getPolyVoltageSimd<type>(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.get_poly_voltage_simd",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method_template:rack::engine::Port::getVoltageSimd<type>(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.get_voltage_simd",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method_template:rack::engine::Port::setVoltageSimd<type>($0, uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Port.set_voltage_simd",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method_template:rack::widget::Widget::getAncestorOfType<type>()",
       "kind": "method",
       "raw": "rackpy.raw.widget.Widget.get_ancestor_of_type",
@@ -13949,6 +14950,13 @@
       "id": "opaque_record:rack::patch::Manager",
       "kind": "class",
       "raw": "rackpy.raw.window.NativeHandle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "opaque_record:rack::simd::Vector<type, value>",
+      "kind": "factory",
+      "raw": "rackpy.raw.simd.Vector",
       "status": "implemented"
     },
     {
@@ -15772,6 +16780,34 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.simd.float_4",
+      "id": "specialization:rack::simd::Vector<float, 4>",
+      "kind": "class",
+      "raw": "rackpy.raw.simd.float_4",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.simd.int32_4",
+      "id": "specialization:rack::simd::Vector<int32_t, 4>",
+      "kind": "class",
+      "raw": "rackpy.raw.simd.int32_4",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "static_field:rack::simd::Vector<float, 4>::size",
+      "kind": "constant",
+      "raw": "rackpy.raw.simd.float_4.size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "static_field:rack::simd::Vector<int32_t, 4>::size",
+      "kind": "constant",
+      "raw": "rackpy.raw.simd.int32_4.size",
+      "status": "implemented"
+    },
+    {
       "facade": null,
       "id": "variable:rack::API_URL",
       "kind": "constant",
@@ -16451,6 +17487,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "1334624f237bc9e3",
+  "inputs": "bc564651c241bb38",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

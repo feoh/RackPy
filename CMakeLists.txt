@@ -149,6 +149,20 @@ if(RACKPY_BUILD_TESTS)
   add_executable(rackpy_values_reference native/tests/values_reference.cpp)
   set_target_properties(rackpy_values_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_link_libraries(rackpy_values_reference PRIVATE rackpy_sdk_program)
+  # Rack's own SIMD results (RP-20) with SSE4.2, as Rack builds for x64, and through simd/common.hpp's
+  # SIMDe branch with SIMDe's portable code (no SSE3 or later, SIMDE_NO_NATIVE). tests/simd compares
+  # rackpy.raw.simd with the first inside Rack, and the two implementations with each other.
+  add_executable(rackpy_simd_reference native/tests/simd_reference.cpp)
+  set_target_properties(rackpy_simd_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_link_libraries(rackpy_simd_reference PRIVATE rackpy_sdk_program)
+  add_executable(rackpy_simd_reference_simde native/tests/simd_reference.cpp)
+  set_target_properties(rackpy_simd_reference_simde PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  # Explicit -mno-* flags win over the SDK's -march=nehalem whatever their order. -mno-sse3 (which
+  # also drops SSSE3 and SSE4) keeps libstdc++'s <random> from including the native pmmintrin.h,
+  # whose __m128i would clash with SIMDe's. SIMDe's headers trip GCC's maybe-uninitialized analysis.
+  target_compile_options(rackpy_simd_reference_simde PRIVATE -mno-sse3 -Wno-maybe-uninitialized)
+  target_compile_definitions(rackpy_simd_reference_simde PRIVATE SIMDE_NO_NATIVE)
+  target_link_libraries(rackpy_simd_reference_simde PRIVATE rackpy_sdk_program)
   add_executable(rackpy_components_reference native/tests/components_reference.cpp)
   set_target_properties(rackpy_components_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_link_libraries(rackpy_components_reference PRIVATE rackpy_sdk_program)

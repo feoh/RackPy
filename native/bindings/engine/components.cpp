@@ -35,6 +35,7 @@ using rack::engine::Param;
 using rack::engine::Port;
 using rack::engine::PortInfo;
 using rack::engine::PORT_MAX_CHANNELS;
+using rack::simd::float_4;
 
 namespace {
 
@@ -59,6 +60,14 @@ struct VoltagesRef {
 uint8_t channel(int c) {
 	if (c < 0 || c >= PORT_MAX_CHANNELS)
 		throw py::index_error("channel must be 0 to " + std::to_string(PORT_MAX_CHANNELS - 1) + ", not " + std::to_string(c));
+	return (uint8_t) c;
+}
+
+/** A float_4 reads or writes 4 channels; Rack's templates would run past the voltage array from channel 13 on. */
+uint8_t simdChannel(int c) {
+	if (c < 0 || c > PORT_MAX_CHANNELS - 4)
+		throw py::index_error("first_channel must be 0 to " + std::to_string(PORT_MAX_CHANNELS - 4) +
+			" (a float_4 spans 4 channels), not " + std::to_string(c));
 	return (uint8_t) c;
 }
 
@@ -281,6 +290,20 @@ void bindComponents(py::module_ m) {
 			py::arg("normal_voltage"), py::arg("channel") = 0, "The voltage if connected, else normal_voltage.")
 		.def("get_normal_poly_voltage", [](const PortRef& r, float n, int c) { return r.get().getNormalPolyVoltage(n, channel(c)); },
 			py::arg("normal_voltage"), py::arg("channel"))
+		// The SIMD templates, for T = float_4 (the only Vector whose load and store take float*).
+		.def("get_voltage_simd", [](const PortRef& r, int c) { return r.get().getVoltageSimd<float_4>(simdChannel(c)); },
+			py::arg("first_channel"), "Channels first_channel to first_channel + 3 as a float_4 (getVoltageSimd<float_4>).")
+		.def("get_poly_voltage_simd", [](const PortRef& r, int c) { return r.get().getPolyVoltageSimd<float_4>(simdChannel(c)); },
+			py::arg("first_channel"), "get_voltage_simd if polyphonic, else channel 0's voltage in every lane.")
+		.def("get_normal_voltage_simd", [](const PortRef& r, const float_4& n, int c) {
+			return r.get().getNormalVoltageSimd<float_4>(n, simdChannel(c));
+		}, py::arg("normal_voltage"), py::arg("first_channel"), "get_voltage_simd if connected, else normal_voltage.")
+		.def("get_normal_poly_voltage_simd", [](const PortRef& r, const float_4& n, int c) {
+			return r.get().getNormalPolyVoltageSimd<float_4>(n, simdChannel(c));
+		}, py::arg("normal_voltage"), py::arg("first_channel"), "get_poly_voltage_simd if connected, else normal_voltage.")
+		.def("set_voltage_simd", [](const PortRef& r, const float_4& v, int c) { r.get().setVoltageSimd<float_4>(v, simdChannel(c)); },
+			py::arg("voltage"), py::arg("first_channel"),
+			"Writes the 4 lanes to channels first_channel to first_channel + 3; the channel count does not change.")
 		.def("get_voltages", [](const PortRef& r, int first) {
 			channel(first);
 			r.get();

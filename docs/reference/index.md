@@ -27,6 +27,7 @@ history
 midi
 audio
 services
+simd
 plugin
 widgets
 ui
