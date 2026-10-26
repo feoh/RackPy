@@ -6,6 +6,8 @@
 // indices (negative ones count from the end). Numbers read as Python values and
 // are range-checked when written (OverflowError outside the C++ type); objects
 // (float_4, ExponentialFilter, PulseGenerator) read as live views of the element.
+// A read-only view (for Rack's const T* results, RP-19C) refuses writes and reads
+// objects as copies.
 #pragma once
 #include <pybind11/pybind11.h>
 
@@ -27,6 +29,7 @@ struct ArrayView {
 	T* data;
 	size_t size;
 	py::object owner;
+	bool readonly = false;
 	size_t index(int i) const {
 		int n = (int) size;
 		if (i < 0)
@@ -76,12 +79,19 @@ template <typename T>
 void bindArrayView(py::module_ m, const char* name) {
 	py::class_<ArrayView<T>>(m, name, "A live view of a fixed array field of a Rack DSP object; it keeps the object alive.")
 		.def("__len__", [](const ArrayView<T>& v) { return v.size; })
-		.def("__getitem__", [](py::object self, int i) {
+		.def("__getitem__", [](py::object self, int i) -> py::object {
 			auto& v = self.cast<ArrayView<T>&>();
+			if constexpr (!isNumber<T>())
+				if (v.readonly)
+					return py::cast(T(v.data[v.index(i)]));
 			return item(self, &v.data[v.index(i)]);
 		}, py::arg("i"))
-		.def("__setitem__", [name](ArrayView<T>& v, int i, py::handle x) { assign(&v.data[v.index(i)], x, name); }, py::arg("i"),
-			py::arg("x"))
+		.def("__setitem__", [name](ArrayView<T>& v, int i, py::handle x) {
+			if (v.readonly)
+				throw py::type_error(std::string(name) + " view is read-only (Rack returns a const pointer)");
+			assign(&v.data[v.index(i)], x, name);
+		}, py::arg("i"), py::arg("x"))
+		.def_property_readonly("readonly", [](const ArrayView<T>& v) { return v.readonly; })
 		.def("tolist", [](py::object self) {
 			auto& v = self.cast<ArrayView<T>&>();
 			py::list out;
@@ -99,8 +109,8 @@ void bindArrayView(py::module_ m, const char* name) {
 }
 
 template <typename T>
-py::object view(py::object self, T* data, size_t n) {
-	return py::cast(ArrayView<T>{data, n, std::move(self)});
+py::object view(py::object self, T* data, size_t n, bool readonly = false) {
+	return py::cast(ArrayView<T>{data, n, std::move(self), readonly});
 }
 
 template <typename Class>

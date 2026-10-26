@@ -7,6 +7,6 @@ path: Python chooses and configures them, and never runs per sample.
 polynomials, ODE steps), :mod:`rackpy.dsp.digital` its triggers and timers,
 :mod:`rackpy.dsp.filters` its filters, :mod:`rackpy.dsp.midi` its VU meter
 and MIDI generator and parser, :mod:`rackpy.dsp.fft` its FFTs and
-convolution, and :mod:`rackpy.dsp.resampling` its MinBLEP and resamplers, for
-design, analysis and tests.
+convolution, :mod:`rackpy.dsp.resampling` its MinBLEP and resamplers, and
+:mod:`rackpy.dsp.ringbuffer` its ring buffers, for design, analysis and tests.
 """

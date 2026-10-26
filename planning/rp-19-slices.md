@@ -56,3 +56,25 @@ Validation: [rp-19b-validation.md](rp-19b-validation.md).
 - **Out-of-line constructors.** The kernels are computed in inline
   constructors, so both the reference and the bindings construct through
   `calls.hpp`'s `make<X>()`.
+
+**RP-19C — ring buffers**
+(`tk-rackpy-19c-dsp-ring-buffers-ringbuffer-doublerin-9d17ea`). 43 records.
+Validation: [rp-19c-validation.md](rp-19c-validation.md).
+
+- **Generic contract (coverage policy 10; owner review item).** T = float,
+  float_4, and `Frame<2>`, `Frame<8>`, `Frame<16>` (Rack's audio interfaces'
+  frame sizes); `RingBuffer` and `DoubleRingBuffer` for S = 16 to 32768 and
+  `AppleRingBuffer` for S = 16 to 4096 with N = 16 S (Rack's 64-in-1024
+  example), powers of 2: 165 instantiations. Arbitrary `T` cannot cross to
+  Python, and every `S` cannot be compiled.
+- **Rack's semantics kept where defined.** `RingBuffer` and
+  `DoubleRingBuffer` reduce their indices modulo S, so overruns, underruns
+  and wrapped `size()` are memory-safe and follow Rack. Refused: bulk copies
+  past S, and `AppleRingBuffer`'s unreduced indices leaving
+  `0 <= start <= end <= N`.
+- **Views.** Rack's pointers are live views of the inline data, which never
+  moves; `const T*` results are read-only views (`ArrayView` gained a
+  read-only mode). `Frame` elements cross as `Frame[C]` objects and appear in
+  views as floats; `rackpy.raw._dsp` re-keys the Frame instantiations by
+  `Frame[C]` once it has written `Frame`.
+

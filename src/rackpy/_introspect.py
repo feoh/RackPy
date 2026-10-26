@@ -35,6 +35,7 @@ MODULES = (
     "rackpy.dsp.midi",
     "rackpy.dsp.fft",
     "rackpy.dsp.resampling",
+    "rackpy.dsp.ringbuffer",
     "rackpy.simd",
     "rackpy.laboratory",
 )

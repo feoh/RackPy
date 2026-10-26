@@ -764,10 +764,24 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.dsp.ringbuffer.AppleRingBuffer",
+      "id": "class_template:rack::dsp::AppleRingBuffer<type, value, value>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.dsp.resampling.Decimator",
       "id": "class_template:rack::dsp::Decimator<value, value, type>",
       "kind": "factory",
       "raw": "rackpy.raw.dsp.Decimator",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.ringbuffer.DoubleRingBuffer",
+      "id": "class_template:rack::dsp::DoubleRingBuffer<type, value>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer",
       "status": "implemented"
     },
     {
@@ -803,6 +817,13 @@
       "id": "class_template:rack::dsp::MinBlepGenerator<value, value, type>",
       "kind": "factory",
       "raw": "rackpy.raw.dsp.MinBlepGenerator",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.ringbuffer.RingBuffer",
+      "id": "class_template:rack::dsp::RingBuffer<type, value>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.RingBuffer",
       "status": "implemented"
     },
     {
@@ -4209,6 +4230,27 @@
     },
     {
       "facade": null,
+      "id": "field:rack::dsp::AppleRingBuffer::data",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer_float_64_1024.data",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::AppleRingBuffer::end",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer_float_64_1024.end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::AppleRingBuffer::start",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer_float_64_1024.start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::dsp::BooleanTrigger::s",
       "kind": "property",
       "raw": "rackpy.raw.dsp.BooleanTrigger.s",
@@ -4268,6 +4310,27 @@
       "id": "field:rack::dsp::Decimator::kernel",
       "kind": "property",
       "raw": "rackpy.raw.dsp.Decimator_16_16_float.kernel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::DoubleRingBuffer::data",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer_float_1024.data",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::DoubleRingBuffer::end",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer_float_1024.end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::DoubleRingBuffer::start",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer_float_1024.start",
       "status": "implemented"
     },
     {
@@ -4681,6 +4744,27 @@
       "id": "field:rack::dsp::RealTimeConvolver::tmpBlock",
       "kind": "property",
       "raw": "rackpy.raw.dsp.RealTimeConvolver.tmp_block",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::RingBuffer::data",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RingBuffer_float_1024.data",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::RingBuffer::end",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RingBuffer_float_1024.end",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::RingBuffer::start",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.RingBuffer_float_1024.start",
       "status": "implemented"
     },
     {
@@ -12322,6 +12406,83 @@
     },
     {
       "facade": null,
+      "id": "method:rack::dsp::AppleRingBuffer::capacity() const",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer_float_64_1024.capacity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::AppleRingBuffer::empty() const",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer_float_64_1024.empty",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::AppleRingBuffer::endData(size_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer_float_64_1024.end_data",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::AppleRingBuffer::endIncr(size_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer_float_64_1024.end_incr",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::AppleRingBuffer::full() const",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer_float_64_1024.full",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::AppleRingBuffer::push($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer_float_64_1024.push",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::AppleRingBuffer::returnBuffer()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer_float_64_1024.return_buffer",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::AppleRingBuffer::shift()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer_float_64_1024.shift",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::AppleRingBuffer::size() const",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer_float_64_1024.size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::AppleRingBuffer::startData() const",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer_float_64_1024.start_data",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::AppleRingBuffer::startIncr(size_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.AppleRingBuffer_float_64_1024.start_incr",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::dsp::BooleanTrigger::isHigh()",
       "kind": "method",
       "raw": "rackpy.raw.dsp.BooleanTrigger.is_high",
@@ -12430,6 +12591,83 @@
       "id": "method:rack::dsp::Decimator::reset()",
       "kind": "method",
       "raw": "rackpy.raw.dsp.Decimator_16_16_float.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::DoubleRingBuffer::capacity() const",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer_float_1024.capacity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::DoubleRingBuffer::clear()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer_float_1024.clear",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::DoubleRingBuffer::empty() const",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer_float_1024.empty",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::DoubleRingBuffer::endData()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer_float_1024.end_data",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::DoubleRingBuffer::endIncr(size_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer_float_1024.end_incr",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::DoubleRingBuffer::full() const",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer_float_1024.full",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::DoubleRingBuffer::push($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer_float_1024.push",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::DoubleRingBuffer::shift()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer_float_1024.shift",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::DoubleRingBuffer::size() const",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer_float_1024.size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::DoubleRingBuffer::startData() const",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer_float_1024.start_data",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::DoubleRingBuffer::startIncr(size_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.DoubleRingBuffer_float_1024.start_incr",
       "status": "implemented"
     },
     {
@@ -12871,6 +13109,69 @@
       "id": "method:rack::dsp::RealTimeConvolver::setKernel(const float *, size_t)",
       "kind": "method",
       "raw": "rackpy.raw.dsp.RealTimeConvolver.set_kernel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RingBuffer::capacity() const",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RingBuffer_float_1024.capacity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RingBuffer::clear()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RingBuffer_float_1024.clear",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RingBuffer::empty() const",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RingBuffer_float_1024.empty",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RingBuffer::full() const",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RingBuffer_float_1024.full",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RingBuffer::push($c0)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RingBuffer_float_1024.push",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RingBuffer::pushBuffer(const $c0 *, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RingBuffer_float_1024.push_buffer",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RingBuffer::shift()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RingBuffer_float_1024.shift",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RingBuffer::shiftBuffer($c0 *, size_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RingBuffer_float_1024.shift_buffer",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::RingBuffer::size() const",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.RingBuffer_float_1024.size",
       "status": "implemented"
     },
     {
@@ -20154,6 +20455,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "739aad5c967f530d",
+  "inputs": "385164f64a87255e",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

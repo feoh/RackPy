@@ -25,6 +25,8 @@ void bindMidi(py::module_ dsp);
 void bindAdvanced(py::module_ dsp);
 /** dsp/minblep.hpp and dsp/resampler.hpp (RP-19B). */
 void bindResampling(py::module_ dsp);
+/** dsp/ringbuffer.hpp (RP-19C). */
+void bindRingBuffers(py::module_ dsp);
 
 /** The largest polynomial (coefficient count N) polyDirect/Horner/Estrin<T, N> are instantiated for. */
 constexpr size_t MAX_POLY_COEFFICIENTS = 32;

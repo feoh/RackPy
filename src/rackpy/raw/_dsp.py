@@ -132,6 +132,16 @@ _rackpy_host.raw.dsp.Frame = Frame
 _rackpy_host.raw.dsp.Float4Samples = Float4Samples
 
 
+def _key_ring_buffers_by_frame() -> None:
+    """Key the ring buffers' Frame instantiations by Frame[C], written above after the native module loaded (RP-19C)."""
+    for specializations in _rackpy_host.raw.dsp._ringbuffers.SPECIALIZATIONS.values():
+        for key in [k for k in specializations if isinstance(k[0], tuple)]:
+            specializations[(Frame.__class_getitem__(key[0][1]), *key[1:])] = specializations.pop(key)
+
+
+_key_ring_buffers_by_frame()
+
+
 def _deprecated_alias(name: str) -> Any:
     if name == "VUMeter":
         warnings.warn(

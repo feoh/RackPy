@@ -1038,6 +1038,142 @@ void resamplers() {
 	upsampler<8, 4>();
 }
 
+// --- ringbuffer.hpp (RP-19C): operation scripts, with the state after each step -----------
+
+std::string u(size_t x) {
+	return std::to_string((unsigned long long) x);
+}
+
+struct RingOp {
+	std::string op;
+	size_t n;
+};
+
+enum class Ring { plain, doubled, apple };
+
+/** Runs ops on a fresh R (constructed as the bindings construct it), recording each step. */
+template <Ring K, typename R, typename T>
+void ringScript(const std::string& fn, const std::vector<RingOp>& ops) {
+	constexpr size_t L = sizeof(T) / sizeof(float);
+	std::unique_ptr<R> r(calls::make<R>());
+	std::vector<std::string> steps;
+	for (const RingOp& o : ops) {
+		std::vector<std::string> step = {"\"" + o.op + "\""};
+		std::string ret = "null";
+		if (o.op == "push") {
+			std::vector<float> x = noise(L, 1.f);
+			T t;
+			std::memcpy(&t, x.data(), sizeof(T));
+			member<&R::push>(*r, t);
+			step.push_back(floats(x.data(), L));
+		}
+		else if (o.op == "shift") {
+			T t = member<&R::shift>(*r);
+			ret = floats(reinterpret_cast<const float*>(&t), L);
+		}
+		else if (o.op == "clear") {
+			if constexpr (K != Ring::apple)
+				member<&R::clear>(*r);
+		}
+		else if (o.op == "return_buffer") {
+			if constexpr (K == Ring::apple)
+				member<&R::returnBuffer>(*r);
+		}
+		else if (o.op == "start_incr") {
+			if constexpr (K != Ring::plain)
+				member<&R::startIncr>(*r, o.n);
+			step.push_back(u(o.n));
+		}
+		else if (o.op == "push_buffer") {
+			std::vector<float> x = noise(L * o.n, 1.f);
+			std::vector<T> tmp(o.n ? o.n : 1);
+			if (o.n)
+				std::memcpy(tmp.data(), x.data(), sizeof(T) * o.n);
+			if constexpr (K == Ring::plain) {
+				const T* p = tmp.data();
+				member<&R::pushBuffer>(*r, p, (int) o.n);
+			}
+			step.push_back(floats(x.data(), x.size()));
+			step.push_back(u(o.n));
+		}
+		else if (o.op == "shift_buffer") {
+			std::vector<T> tmp(o.n ? o.n : 1);
+			if constexpr (K == Ring::plain) {
+				T* p = tmp.data();
+				member<&R::shiftBuffer>(*r, p, o.n);
+			}
+			ret = floats(reinterpret_cast<const float*>(tmp.data()), L * o.n);
+			step.push_back(u(o.n));
+		}
+		else if (o.op == "end_write") {
+			std::vector<float> x = noise(L * o.n, 1.f);
+			if constexpr (K == Ring::doubled) {
+				T* p = member<&R::endData>(*r);
+				if (o.n)
+					std::memcpy(p, x.data(), sizeof(T) * o.n);
+				member<&R::endIncr>(*r, o.n);
+			}
+			else if constexpr (K == Ring::apple) {
+				T* p = member<&R::endData>(*r, o.n);
+				if (o.n)
+					std::memcpy(p, x.data(), sizeof(T) * o.n);
+				member<&R::endIncr>(*r, o.n);
+			}
+			step.push_back(floats(x.data(), x.size()));
+			step.push_back(u(o.n));
+		}
+		else if (o.op == "start_read") {
+			if constexpr (K != Ring::plain) {
+				const T* p = member<&R::startData>(static_cast<const R&>(*r));
+				ret = floats(reinterpret_cast<const float*>(p), L * o.n);
+				member<&R::startIncr>(*r, o.n);
+			}
+			step.push_back(u(o.n));
+		}
+		const R& c = *r;
+		std::vector<std::string> state = {ret, u(member<&R::size>(c)), b(member<&R::empty>(c)), b(member<&R::full>(c)),
+			u(member<&R::capacity>(c)), u(r->start), u(r->end)};
+		steps.push_back(list({list(step), list(state)}));
+	}
+	size_t n = sizeof(r->data) / sizeof(T);
+	add(fn, {u(n)}, list({list(steps), floats(reinterpret_cast<const float*>(r->data), L * n)}));
+}
+
+std::vector<RingOp> repeat(const std::string& op, int k, size_t n = 0) {
+	return std::vector<RingOp>((size_t) k, RingOp{op, n});
+}
+
+std::vector<RingOp> concat(std::vector<std::vector<RingOp>> parts) {
+	std::vector<RingOp> out;
+	for (auto& part : parts)
+		out.insert(out.end(), part.begin(), part.end());
+	return out;
+}
+
+void ringBuffers() {
+	// S = 16: wrap in both bulk copies, overrun (push when full), underrun (shift when empty), n = S and n = 0.
+	auto plain = concat({repeat("push", 5), repeat("shift", 2), {{"push_buffer", 12}, {"shift_buffer", 10}}, repeat("push", 20),
+		repeat("shift", 3), {{"clear", 0}, {"shift", 0}, {"push_buffer", 16}, {"shift_buffer", 16}, {"push_buffer", 0},
+		{"shift_buffer", 0}, {"push_buffer", 7}, {"shift_buffer", 5}}});
+	ringScript<Ring::plain, dsp::RingBuffer<float, 16>, float>("ring.float.16", plain);
+	ringScript<Ring::plain, dsp::RingBuffer<float_4, 16>, float_4>("ring.float_4.16", plain);
+	ringScript<Ring::plain, dsp::RingBuffer<dsp::Frame<2>, 16>, dsp::Frame<2>>("ring.Frame2.16", plain);
+	// The doubled copy: appends through end_data that wrap, reads through start_data, overrun and underrun.
+	auto doubled = concat({repeat("push", 5), repeat("shift", 2), {{"end_write", 14}, {"start_read", 8}}, repeat("push", 20),
+		{{"clear", 0}, {"shift", 0}, {"start_incr", 3}, {"end_write", 16}, {"start_read", 16}, {"end_write", 9}, {"start_read", 4},
+		{"end_write", 0}}});
+	ringScript<Ring::doubled, dsp::DoubleRingBuffer<float, 16>, float>("doublering.float.16", doubled);
+	ringScript<Ring::doubled, dsp::DoubleRingBuffer<float_4, 16>, float_4>("doublering.float_4.16", doubled);
+	ringScript<Ring::doubled, dsp::DoubleRingBuffer<dsp::Frame<8>, 16>, dsp::Frame<8>>("doublering.Frame8.16", doubled);
+	// N = 256: pushes and appends that reach the end of the block and move the window back, past S (Rack allows it).
+	auto apple = concat({repeat("push", 5), repeat("shift", 2), {{"end_write", 100}, {"start_read", 90}}, repeat("push", 160),
+		{{"start_read", 150}, {"return_buffer", 0}, {"end_write", 200}, {"start_read", 210}, {"end_write", 0}},
+		repeat("push", 3), repeat("shift", 4)});
+	ringScript<Ring::apple, dsp::AppleRingBuffer<float, 16, 256>, float>("applering.float.16.256", apple);
+	ringScript<Ring::apple, dsp::AppleRingBuffer<float_4, 16, 256>, float_4>("applering.float_4.16.256", apple);
+	ringScript<Ring::apple, dsp::AppleRingBuffer<dsp::Frame<16>, 16, 256>, dsp::Frame<16>>("applering.Frame16.16.256", apple);
+}
+
 }  // namespace
 
 int main() {
@@ -1060,6 +1196,7 @@ int main() {
 	firs();
 	minBleps();
 	resamplers();
+	ringBuffers();
 	std::printf("{\"cases\": [\n");
 	for (size_t k = 0; k < cases.size(); k++)
 		std::printf("%s%s\n", cases[k].c_str(), k + 1 < cases.size() ? "," : "");

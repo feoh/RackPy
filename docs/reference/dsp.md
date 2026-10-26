@@ -5,13 +5,13 @@ Rack's `dsp` headers, family 6 of the [SDK surface](surface/dsp.md)
 `dsp/common.hpp`, `approx.hpp`, `convert.hpp`, `window.hpp` and `ode.hpp`
 (RP-18A), `dsp/digital.hpp` (RP-18B), `dsp/filter.hpp` (RP-18C), and
 `dsp/vumeter.hpp` and `dsp/midi.hpp` (RP-18D), `dsp/fft.hpp` and
-`dsp/fir.hpp` (RP-19A), and `dsp/minblep.hpp` and `dsp/resampler.hpp`
-(RP-19B), as `rackpy.raw.dsp` and the {py:mod}`rackpy.dsp.basic`,
-{py:mod}`rackpy.dsp.digital`, {py:mod}`rackpy.dsp.filters`,
-{py:mod}`rackpy.dsp.midi`, {py:mod}`rackpy.dsp.fft` and
-{py:mod}`rackpy.dsp.resampling` imports (see the
-[coverage report](coverage.md)). The ring buffers (RP-19C) are not bound
-yet.
+`dsp/fir.hpp` (RP-19A), `dsp/minblep.hpp` and `dsp/resampler.hpp`
+(RP-19B), and `dsp/ringbuffer.hpp` (RP-19C), as `rackpy.raw.dsp` and the
+{py:mod}`rackpy.dsp.basic`, {py:mod}`rackpy.dsp.digital`,
+{py:mod}`rackpy.dsp.filters`, {py:mod}`rackpy.dsp.midi`,
+{py:mod}`rackpy.dsp.fft`, {py:mod}`rackpy.dsp.resampling` and
+{py:mod}`rackpy.dsp.ringbuffer` imports (see the
+[coverage report](coverage.md)).
 
 Every function runs **Rack's own C++ code**, compiled with the SDK's flags.
 `tests/dsp` replays more than 4,000 cases from a compiled C++ reference
@@ -58,13 +58,18 @@ freely, because C++ instantiates one function per value. RackPy's contract:
   `Decimator<OVERSAMPLE, QUALITY, T>` and `Upsampler<OVERSAMPLE, QUALITY>`
   for 2, 4, 8, 16, 32; `SampleRateConverter<MAX_CHANNELS>` for 1 to 16
   ([below](#minblep)).
+- `RingBuffer<T, S>` and `DoubleRingBuffer<T, S>` for `S` = 16 to 32768 and
+  `AppleRingBuffer<T, S, N>` for `S` = 16 to 4096 with `N` = 16 `S` (powers
+  of 2), each for `T` = float, float_4, `Frame<2>`, `Frame<8>` and
+  `Frame<16>`: the generic contract coverage policy 10 asks for
+  ([below](#ring-buffers)).
 - `Frame<CHANNELS, T>` is plain data, so it is written in Python and takes any
   `CHANNELS` from 1 ([below](#frames)).
 
 **Owner review item:** these bounds (the `poly*` 32, the `IIRFilter` orders
 2 to 8, the MIDI processors' and the sample-rate converter's 1 to 16
-channels, and the MinBLEP, decimator and upsampler sizes) are RackPy's
-choices, recorded in the manifest. A full-coverage release
+channels, the MinBLEP, decimator and upsampler sizes, and the ring buffers'
+element types and sizes) are RackPy's choices, recorded in the manifest. A full-coverage release
 needs the owner to confirm them, or to choose another contract
 ([release bar](../coverage.md#release-bar)).
 
@@ -520,3 +525,54 @@ as in Rack), and `process()` returns the next correction to add. `buf`
   `cutoff`, as a ratio of the lower rate's Nyquist frequency (0.9 by default), and keep
   `in_index` within the range Rack's code keeps it in, as it copies or
   indexes from there.
+
+(dsp-ring-buffers)=
+## Ring buffers
+
+Rack's ring buffers are templates over an element type and compile-time
+sizes, so no binding can take every `T` and `S`. RackPy's generic contract
+(an owner review item; coverage policy 10) instantiates:
+
+- `T`: float, `float_4`, and `Frame[2]`, `Frame[8]` and `Frame[16]`, the
+  frame sizes of Rack's audio interfaces.
+- `RingBuffer[T, S]` and `DoubleRingBuffer[T, S]`: `S` = 16, 32, ..., 32768.
+- `AppleRingBuffer[T, S, N]`: `S` = 16, 32, ..., 4096 and `N` = 16 `S`, the
+  ratio of Rack's own example (64 in 1024).
+
+Subscripting with anything else raises `TypeError` and lists the set.
+`RingBuffer[float, 1024]`, `DoubleRingBuffer[float, 1024]` and
+`AppleRingBuffer[float, 64, 1024]` are also named
+(`RingBuffer_float_1024`, ...).
+
+Elements cross as Python values: `push(t)` takes a float, a `float_4` or a
+`Frame[C]`, and `shift()` returns a new one. Bulk copies (`push_buffer`,
+`shift_buffer`) take float32 buffers holding the elements' lanes (one float
+per float element, four per `float_4`, `C` per `Frame[C]`). `data` and the
+pointers Rack returns are live views of the inline data, which never moves,
+so a view stays valid, if stale, as long as it keeps the buffer alive. The
+`const T*` results (`start_data`) are read-only views. `Frame` elements
+appear in views as their floats. New buffers are empty with zeroed data
+(C++'s default initialization leaves the data indeterminate).
+
+- **`RingBuffer`**, Rack's single-producer, single-consumer lock-free queue.
+  Its `start` and `end` only grow (wrapping at 2^64) and are taken modulo `S`.
+  As in Rack, `push` to a full buffer overwrites the oldest element and
+  `shift` from an empty one returns a stale element; `size()` and
+  `capacity()` then wrap. `push_buffer` and `shift_buffer` refuse `n` above
+  `S`, which would copy past the data. C++ cannot copy it (its indices are
+  atomics), so neither can Python.
+- **`DoubleRingBuffer`** keeps a copy after the data (`data` has `2 S`
+  elements), so `end_data()` gives `S` writable elements to append (then
+  `end_incr(n)`, `n` at most `S`) and `start_data()` `S` to read (then
+  `start_incr(n)`). Otherwise it behaves as `RingBuffer`. Not thread-safe.
+- **`AppleRingBuffer`** slides a window along a block of `N` and moves it
+  back with `return_buffer()`. Its indices are used unreduced, so RackPy keeps
+  `0 <= start <= end <= N`: it refuses field writes outside that, `push` when
+  the block is full, `shift` when empty, `end_data(n)` above `N - size()`,
+  `end_incr` past `N` and `start_incr` past `end`. As in Rack, up to `N`
+  elements may be held, past `S`; `full()` (`size() == S`) and `capacity()`
+  follow its arithmetic. `start_data()` views the `size()` elements held.
+  It copies as plain data.
+
+The buffers hold the GIL during every call; `RingBuffer`'s lock-free
+guarantee is between one producer and one consumer.

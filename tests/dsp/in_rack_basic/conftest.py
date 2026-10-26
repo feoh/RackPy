@@ -18,6 +18,7 @@ SECTIONS = {
     "midi": ("vumeter", "generator.", "parser."),
     "advanced": ("rfft.", "cfft.", "convolve_naive", "boxcar_lowpass_ir", "convolver"),
     "resampling": ("min_blep_impulse", "minblep", "src.", "decimator", "upsampler"),
+    "ringbuffer": ("ring.", "doublering.", "applering."),
 }
 
 
@@ -67,3 +68,8 @@ def advanced_cases(reference: list[dict[str, Any]]) -> list[dict[str, Any]]:
 @pytest.fixture(scope="session")
 def resampling_cases(reference: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [c for c in reference if section(c["fn"]) == "resampling"]
+
+
+@pytest.fixture(scope="session")
+def ringbuffer_cases(reference: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [c for c in reference if section(c["fn"]) == "ringbuffer"]
