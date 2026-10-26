@@ -9,6 +9,7 @@ from rackpy.raw import asset as asset
 from rackpy.raw import audio as audio
 from rackpy.raw import color as color
 from rackpy.raw import componentlibrary as componentlibrary
+from rackpy.raw import dsp as dsp
 from rackpy.raw import engine as engine
 from rackpy.raw import event as event
 from rackpy.raw import history as history

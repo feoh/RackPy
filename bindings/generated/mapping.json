@@ -701,6 +701,13 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.dsp.basic.Frame",
+      "id": "class_template:rack::dsp::Frame<value, type>",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.Frame",
+      "status": "implemented"
+    },
+    {
       "facade": null,
       "id": "class_template:rack::history::InverseAction<type>",
       "kind": "class",
@@ -1625,6 +1632,20 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "constructor:rack::dsp::Int24::Int24()",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.Int24",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::dsp::Int24::Int24(int32_t)",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.Int24",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.engine.Module.create",
       "id": "constructor:rack::engine::Module::Module()",
       "kind": "factory",
@@ -2007,6 +2028,13 @@
       "id": "conversion:rack::WeakPtr::operator type-parameter-0-0 *() const",
       "kind": "method",
       "raw": "rackpy.raw.WeakPtr.get",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "conversion:rack::dsp::Int24::operator int()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.Int24.__int__",
       "status": "implemented"
     },
     {
@@ -3596,6 +3624,20 @@
       "id": "field:rack::componentlibrary::VCVLightBezel::light",
       "kind": "attribute",
       "raw": "rackpy.raw.componentlibrary.VCVLightBezel.light",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::Frame::samples",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.Frame.samples",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::Int24::i",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.Int24.i",
       "status": "implemented"
     },
     {
@@ -5563,6 +5605,132 @@
       "id": "function:rack::contextSet(rack::Context *)",
       "kind": "function",
       "raw": "rackpy.raw.context_set",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.blackman_harris_window",
+      "id": "function:rack::dsp::blackmanHarrisWindow(float *, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.blackman_harris_window",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.blackman_nuttall_window",
+      "id": "function:rack::dsp::blackmanNuttallWindow(float *, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.blackman_nuttall_window",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.blackman_window",
+      "id": "function:rack::dsp::blackmanWindow(float, float *, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.blackman_window",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::dsp::convert<float, float>(float)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.convert",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::dsp::convert<float, int16_t>(int16_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.convert",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::dsp::convert<float, int32_t>(int32_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.convert",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::dsp::convert<float, int64_t>(int64_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.convert",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::dsp::convert<float, int8_t>(int8_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.convert",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::dsp::convert<float, rack::dsp::Int24>(rack::dsp::Int24)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.convert",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::dsp::convert<int16_t, float>(float)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.convert",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::dsp::convert<int32_t, float>(float)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.convert",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::dsp::convert<int64_t, float>(float)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.convert",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::dsp::convert<int8_t, float>(float)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.convert",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::dsp::convert<rack::dsp::Int24, float>(float)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.convert",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.exp2_floor",
+      "id": "function:rack::dsp::exp2Floor<float>(float, float *)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.exp2_floor",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.exp2_floor",
+      "id": "function:rack::dsp::exp2Floor<rack::simd::float_4>(rack::simd::float_4, rack::simd::float_4 *)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.exp2_floor",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.hann_window",
+      "id": "function:rack::dsp::hannWindow(float *, int)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.hann_window",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.sinc",
+      "id": "function:rack::dsp::sinc(float)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.sinc",
       "status": "implemented"
     },
     {
@@ -7537,6 +7705,181 @@
       "id": "function_template:rack::deferWrapper<type>($0)",
       "kind": "function",
       "raw": "rackpy.raw.defer_wrapper",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.amplitude_to_db",
+      "id": "function_template:rack::dsp::amplitudeToDb<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.amplitude_to_db",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::dsp::approxExp2Floor<type>($0, $0 *)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.approx_exp2_floor",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::dsp::approxExp2_taylor5<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.approx_exp2_taylor5",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.blackman",
+      "id": "function_template:rack::dsp::blackman<type>($0, $0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.blackman",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.blackman_harris",
+      "id": "function_template:rack::dsp::blackmanHarris<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.blackman_harris",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.blackman_nuttall",
+      "id": "function_template:rack::dsp::blackmanNuttall<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.blackman_nuttall",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.convert",
+      "id": "function_template:rack::dsp::convert<type, type>($1)",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.convert",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::dsp::convert<type, type>(const $1 *, $0 *, size_t)",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.convert",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.cubic",
+      "id": "function_template:rack::dsp::cubic<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.cubic",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.db_to_amplitude",
+      "id": "function_template:rack::dsp::dbToAmplitude<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.db_to_amplitude",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.exp2_floor",
+      "id": "function_template:rack::dsp::exp2Floor<type>($0, $0 *)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.exp2_floor",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.exp2_taylor5",
+      "id": "function_template:rack::dsp::exp2_taylor5<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.exp2_taylor5",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.exponential_bipolar",
+      "id": "function_template:rack::dsp::exponentialBipolar<type>($0, $0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.exponential_bipolar",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.hann",
+      "id": "function_template:rack::dsp::hann<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.hann",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.poly_direct",
+      "id": "function_template:rack::dsp::polyDirect<type, value>(const $0 (&)[$1], $0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.poly_direct",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.poly_estrin",
+      "id": "function_template:rack::dsp::polyEstrin<type, value>(const $0 (&)[$1], $0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.poly_estrin",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.poly_horner",
+      "id": "function_template:rack::dsp::polyHorner<type, value>(const $0 (&)[$1], $0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.poly_horner",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.quadratic_bipolar",
+      "id": "function_template:rack::dsp::quadraticBipolar<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.quadratic_bipolar",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.quartic_bipolar",
+      "id": "function_template:rack::dsp::quarticBipolar<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.quartic_bipolar",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.quintic",
+      "id": "function_template:rack::dsp::quintic<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.quintic",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.sinc",
+      "id": "function_template:rack::dsp::sinc<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.sinc",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.sqrt_bipolar",
+      "id": "function_template:rack::dsp::sqrtBipolar<type>($0)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.sqrt_bipolar",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.step_euler",
+      "id": "function_template:rack::dsp::stepEuler<type, type>($0, $0, $0[], int, $1)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.step_euler",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.step_rk2",
+      "id": "function_template:rack::dsp::stepRK2<type, type>($0, $0, $0[], int, $1)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.step_rk2",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.step_rk4",
+      "id": "function_template:rack::dsp::stepRK4<type, type>($0, $0, $0[], int, $1)",
+      "kind": "function",
+      "raw": "rackpy.raw.dsp.step_rk4",
       "status": "implemented"
     },
     {
@@ -15870,6 +16213,13 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.dsp.basic.Int24",
+      "id": "record:rack::dsp::Int24",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.Int24",
+      "status": "implemented"
+    },
+    {
       "facade": null,
       "id": "record:rack::engine::Cable",
       "kind": "class",
@@ -17088,6 +17438,27 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.dsp.basic.FREQ_A4",
+      "id": "variable:rack::dsp::FREQ_A4",
+      "kind": "constant",
+      "raw": "rackpy.raw.dsp.FREQ_A4",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.FREQ_C4",
+      "id": "variable:rack::dsp::FREQ_C4",
+      "kind": "constant",
+      "raw": "rackpy.raw.dsp.FREQ_C4",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.basic.FREQ_SEMITONE",
+      "id": "variable:rack::dsp::FREQ_SEMITONE",
+      "kind": "constant",
+      "raw": "rackpy.raw.dsp.FREQ_SEMITONE",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.engine.PORT_MAX_CHANNELS",
       "id": "variable:rack::engine::PORT_MAX_CHANNELS",
       "kind": "constant",
@@ -17487,6 +17858,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "bc564651c241bb38",
+  "inputs": "ec39d8a87a9dc708",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

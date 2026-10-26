@@ -3,4 +3,6 @@
 
 :mod:`rackpy.dsp.kernel` has the native kernels that run a module's audio
 path: Python chooses and configures them, and never runs per sample.
+:mod:`rackpy.dsp.basic` has Rack's DSP helpers (conversions, windows,
+polynomials, ODE steps) for design, analysis and tests.
 """

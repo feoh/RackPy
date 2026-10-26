@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Family 6 adapter (RP-20, RP-18, RP-19): the generated registry calls bind_dsp().
-// SIMD is in native/bindings/simd/. The kernel runtime's Python API
-// (rackpy.dsp.kernel, RP-17) is not a Rack binding; the host module binds it.
+// SIMD is in native/bindings/simd/, the DSP algorithms in native/bindings/dsp/.
+// The kernel runtime's Python API (rackpy.dsp.kernel, RP-17) is not a Rack
+// binding; the host module binds it.
+#include "dsp/dsp.hpp"
 #include "simd/simd.hpp"
 
 namespace rackpy {
@@ -12,6 +14,8 @@ void bind_dsp(pybind11::module_ raw) {
 	simd_bindings::bindVectors(simd);
 	simd_bindings::bindFunctions(simd);
 	simd_bindings::bindSseMathfun(raw);
+	pybind11::module_ dsp = raw.def_submodule("dsp", "rack::dsp: Rack's DSP helpers, triggers, filters and MIDI processors.");
+	dsp_bindings::bindBasic(dsp);
 }
 
 }  // namespace bindings

@@ -29,6 +29,7 @@ MODULES = (
     "rackpy.assets",
     "rackpy.dsp",
     "rackpy.dsp.kernel",
+    "rackpy.dsp.basic",
     "rackpy.simd",
 )
 # Protocol methods a binding can map a C++ operator or lifetime to; recorded when a class defines them itself.
@@ -79,6 +80,7 @@ DUNDERS = frozenset(
         "__repr__",
         "__copy__",
         "__bool__",
+        "__int__",
         "__deepcopy__",
         "__init_subclass__",
     }

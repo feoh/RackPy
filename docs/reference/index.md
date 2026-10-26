@@ -28,6 +28,7 @@ midi
 audio
 services
 simd
+dsp
 plugin
 widgets
 ui
