@@ -24,9 +24,26 @@ main thread.
 - **Tests.** The actual-Rack live-UI tests also run Rack's own drawing of
   each widget through a framebuffer.
 
-**Next on RP-26:** menu helper templates from `helpers.hpp` (`createMenu`,
-`createMenuItem`, `createBoolMenuItem`, `createIndexSubmenuItem`, ...) with
-callback lifetimes that survive module deletion. Then `EventState` and
-Rack's input dispatch, with the `Context` accessor (`contextGet`, `APP`,
-`Context::event`); the `RACK_MOD_*` and `RACK_HELD` macros; the deprecated
-`rack::event::*` aliases; and `Model::appendContextMenu` (from RP-16).
+**RP-26B — menu helpers, Context accessor and EventState**
+(`tk-rackpy-26b-menu-helpers-context-accessor-and-eve-66c09a`). 89 records:
+
+- **Menu helpers.** The `helpers.hpp` menu templates are factories in
+  `rackpy.raw`. `create_menu` is native (a menu at the mouse in a scene
+  overlay); the rest are Python subclasses around Python callables, with
+  `item_type`/`label_type` for the template parameter and `Ref` for the
+  pointer variants. A callback for a deleted module fails contained.
+- **Context and input.** `context_get()`, `APP()` and `Context.event` are
+  bound; the Context record stays planned while its other fields wait for
+  their families. `EventState` has checked fields (writes take only live
+  widgets; Rack's finalizeWidget clears them), the set*/finalize methods and
+  every `handle*` dispatcher, which run Rack's input through Python widgets.
+- **Constants and aliases.** The `RACK_MOD_*`/`RACK_HELD` macros, and
+  `rack::event` aliases that warn on use. The introspection snapshot resolves
+  lazily provided names.
+- **From RP-16.** `Model.append_context_menu`.
+
+All of RP-26's records are implemented. Tests run in actual Rack's live UI:
+keyboard, text (including an emoji code point), scroll, mouse button,
+hover, select and leave, raw field writes and their finalization, every
+menu helper including submenus and index menus, and a menu outliving its
+module.

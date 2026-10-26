@@ -7,6 +7,7 @@ a manifest record that claims a Python name passes only if that name is here.
 
 import importlib
 import inspect
+import warnings
 from types import ModuleType
 from typing import Any
 
@@ -101,6 +102,13 @@ def snapshot() -> dict[str, Any]:
             if isinstance(value, ModuleType) and not value.__name__.startswith(("rackpy", "_rackpy_host")):
                 continue  # imported library modules
             queue.append((f"{path}.{name}", value, depth + 1))
+        if inspect.ismodule(obj) and public is not None and "__getattr__" in vars(obj):
+            # Lazily provided names (deprecated aliases that warn when used): resolve them quietly.
+            for name in public:
+                if name not in vars(obj):
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore", DeprecationWarning)
+                        queue.append((f"{path}.{name}", getattr(obj, name), depth + 1))
         if inspect.isclass(obj):
             # Annotated instance attributes (set in __init__) are part of a class's API too.
             for name in inspect.get_annotations(obj):

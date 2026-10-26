@@ -5,17 +5,28 @@ from rackpy.raw import _types as _types
 from rackpy.raw import asset as asset
 from rackpy.raw import color as color
 from rackpy.raw import engine as engine
+from rackpy.raw import event as event
 from rackpy.raw import literals as literals
 from rackpy.raw import macros as macros
 from rackpy.raw import math as math
 from rackpy.raw import nanovg as nanovg
 from rackpy.raw import plugin as plugin
 from rackpy.raw import ui as ui
+from rackpy.raw import widget as widget
 from rackpy.raw._common import DeferWrapper as DeferWrapper
 from rackpy.raw._common import Exception as Exception
 from rackpy.raw._common import construct as construct
 from rackpy.raw._common import defer_wrapper as defer_wrapper
 from rackpy.raw._common import get as get
+from rackpy.raw._helpers import Ref as Ref
+from rackpy.raw._helpers import create_bool_menu_item as create_bool_menu_item
+from rackpy.raw._helpers import create_bool_ptr_menu_item as create_bool_ptr_menu_item
+from rackpy.raw._helpers import create_check_menu_item as create_check_menu_item
+from rackpy.raw._helpers import create_index_ptr_submenu_item as create_index_ptr_submenu_item
+from rackpy.raw._helpers import create_index_submenu_item as create_index_submenu_item
+from rackpy.raw._helpers import create_menu_item as create_menu_item
+from rackpy.raw._helpers import create_menu_label as create_menu_label
+from rackpy.raw._helpers import create_submenu_item as create_submenu_item
 
 APP_NAME: str
 APP_EDITION: str
@@ -60,3 +71,13 @@ class Quantity:
     def set_scaled_value(self, scaled_value: float) -> None: ...
     def get_scaled_value(self) -> float: ...
     def move_scaled_value(self, delta_scaled_value: float) -> None: ...
+
+class Context:
+    @property
+    def alive(self) -> bool: ...
+    @property
+    def event(self) -> widget.EventState | None: ...
+
+def context_get() -> Context | None: ...
+def APP() -> Context | None: ...
+def create_menu(menu_type: type[ui.Menu] | None = None) -> ui.Menu: ...

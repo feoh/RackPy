@@ -16,7 +16,35 @@ from rackpy.raw import _arch
 from rackpy.raw._common import DeferWrapper
 from rackpy.raw.math import Rect, Vec
 
-__all__ = ["DEFER", "DEPRECATED", "ENUMS", "LENGTHOF", "RECT_ARGS", "VEC_ARGS"]
+__all__ = [
+    "DEFER",
+    "DEPRECATED",
+    "ENUMS",
+    "LENGTHOF",
+    "RACK_HELD",
+    "RACK_MOD_ALT",
+    "RACK_MOD_ALT_NAME",
+    "RACK_MOD_CTRL",
+    "RACK_MOD_CTRL_NAME",
+    "RACK_MOD_MASK",
+    "RACK_MOD_SHIFT",
+    "RACK_MOD_SHIFT_NAME",
+    "RECT_ARGS",
+    "VEC_ARGS",
+]
+
+# widget/event.hpp's key modifiers, with GLFW's values (GLFW_MOD_SHIFT 1, CONTROL 2, ALT 4, SUPER 8).
+# Rack's "Ctrl" is the Command key on macOS.
+RACK_MOD_SHIFT = 0x0001
+RACK_MOD_SHIFT_NAME = "Shift"
+RACK_MOD_ALT = 0x0004
+RACK_MOD_ALT_NAME = "Alt"
+RACK_MOD_CTRL = 0x0008 if hasattr(_arch, "ARCH_MAC") else 0x0002
+RACK_MOD_CTRL_NAME = "⌘" if hasattr(_arch, "ARCH_MAC") else "Ctrl"
+RACK_MOD_MASK = 0x0001 | 0x0002 | 0x0004 | 0x0008
+"""Filters the real modifier keys out of a mods value (no Caps Lock or Num Lock)."""
+RACK_HELD = 3
+"""A key action meaning the key is (still) held, next to GLFW's PRESS 1, RELEASE 0 and REPEAT 2."""
 
 for _name in ("ARCH_X64", "ARCH_ARM64", "ARCH_WIN", "ARCH_MAC", "ARCH_LIN"):
     if hasattr(_arch, _name):

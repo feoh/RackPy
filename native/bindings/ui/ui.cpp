@@ -338,6 +338,26 @@ void bindUi(py::module_ raw) {
 			[](py::object self, std::string v) { native<ui::MenuLabel>(self).text = std::move(v); });
 	variant<ui::MenuSeparator, ui::MenuEntry>(mod, "MenuSeparator");
 
+	// rack::createMenu<TMenu>() (RP-26B): a menu at the mouse, in a MenuOverlay in Rack's scene.
+	raw.def("create_menu", [mod](py::object menuType) {
+		runtime::requireMainThread("opening a menu");
+		auto* context = rack::contextGet();
+		if (!context || !context->scene)
+			throw runtime::WrongContext("menus need Rack's live UI context");
+		py::object menuClass = menuType.is_none() ? mod.attr("Menu") : menuType;
+		if (!PyType_Check(menuClass.ptr()) || !PyObject_IsSubclass(menuClass.ptr(), mod.attr("Menu").ptr()))
+			throw py::type_error("create_menu takes a rackpy.raw.ui.Menu subclass");
+		py::object menu = menuClass();
+		native<ui::Menu>(menu).box.pos = context->scene->mousePos;
+		py::object overlay = mod.attr("MenuOverlay")();
+		auto overlayState = state(overlay);
+		transferToHost(checked(overlayState), menu);  // the overlay owns the menu
+		transferToHost(*context->scene, overlay);  // Rack's scene owns the overlay
+		return menu;
+	}, py::arg("menu_type") = py::none(),
+		"Rack's createMenu<TMenu>(): a new menu at the mouse position, in a MenuOverlay added to Rack's scene. "
+		"Rack closes it (deleting both) when the user clicks outside or picks an item.");
+
 	// --- Theme and macros -------------------------------------------------------------------
 	mod.def("set_theme", [](NVGcolor bg, NVGcolor fg) {
 		runtime::requireMainThread("setting Rack's UI theme");

@@ -36,6 +36,34 @@ from rackpy.raw import macros as macros  # noqa: E402
 
 __all__.append("macros")
 
+from rackpy.raw._helpers import (  # noqa: E402
+    Ref,
+    create_bool_menu_item,
+    create_bool_ptr_menu_item,
+    create_check_menu_item,
+    create_index_ptr_submenu_item,
+    create_index_submenu_item,
+    create_menu_item,
+    create_menu_label,
+    create_submenu_item,
+)
+
+__all__ += [
+    "Ref",
+    "create_bool_menu_item",
+    "create_bool_ptr_menu_item",
+    "create_check_menu_item",
+    "create_index_ptr_submenu_item",
+    "create_index_submenu_item",
+    "create_menu_item",
+    "create_menu_label",
+    "create_submenu_item",
+]
+
+from rackpy.raw import event as event  # noqa: E402
+
+__all__.append("event")
+
 from rackpy._widget_events import register as _register_widget_events  # noqa: E402
 
 _register_widget_events(_rackpy_host.raw.widget)

@@ -2,6 +2,244 @@
   "entries": [
     {
       "facade": null,
+      "id": "alias:rack::event::Action",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Add",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Add",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Base",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Base",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Button",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Change",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Change",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Deselect",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Deselect",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Dirty",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Dirty",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::DoubleClick",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.DoubleClick",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::DragBase",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.DragBase",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::DragDrop",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.DragDrop",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::DragEnd",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.DragEnd",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::DragEnter",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.DragEnter",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::DragHover",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.DragHover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::DragLeave",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.DragLeave",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::DragMove",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.DragMove",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::DragStart",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.DragStart",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Enter",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Enter",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Hide",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Hide",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Hover",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Hover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::HoverKey",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.HoverKey",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::HoverScroll",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.HoverScroll",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::HoverText",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.HoverText",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::KeyBase",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.KeyBase",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Leave",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Leave",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::PathDrop",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.PathDrop",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::PositionBase",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.PositionBase",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Remove",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Remove",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Reposition",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Reposition",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Resize",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Resize",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Select",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Select",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::SelectKey",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.SelectKey",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::SelectText",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.SelectText",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::Show",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.Show",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "alias:rack::event::TextBase",
+      "kind": "alias",
+      "raw": "rackpy.raw.event.TextBase",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "alias:rack::ui::ScrollBar",
       "kind": "alias",
       "raw": "rackpy.raw.ui.ScrollBar",
@@ -418,6 +656,13 @@
       "id": "enumerator:rack::ui::SequentialLayout::Orientation::VERTICAL_ORIENTATION",
       "kind": "enum_member",
       "raw": "rackpy.raw.ui.SequentialLayout.Orientation.VERTICAL_ORIENTATION",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::Context::event",
+      "kind": "property",
+      "raw": "rackpy.raw.Context.event",
       "status": "implemented"
     },
     {
@@ -1311,6 +1556,69 @@
     },
     {
       "facade": null,
+      "id": "field:rack::widget::EventState::dragButton",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.EventState.drag_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::EventState::dragHoveredWidget",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.EventState.drag_hovered_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::EventState::draggedWidget",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.EventState.dragged_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::EventState::heldKeys",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.EventState.held_keys",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::EventState::hoveredWidget",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.EventState.hovered_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::EventState::lastClickTime",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.EventState.last_click_time",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::EventState::lastClickedWidget",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.EventState.last_clicked_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::EventState::rootWidget",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.EventState.root_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::widget::EventState::selectedWidget",
+      "kind": "property",
+      "raw": "rackpy.raw.widget.EventState.selected_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::widget::FramebufferWidget::bypassed",
       "kind": "property",
       "raw": "rackpy.raw.widget.FramebufferWidget.bypassed",
@@ -1772,6 +2080,13 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "function:rack::contextGet()",
+      "kind": "function",
+      "raw": "rackpy.raw.context_get",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.math.chop",
       "id": "function:rack::math::chop(float, float)",
       "kind": "function",
@@ -2129,11 +2444,81 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "function_template:rack::createBoolMenuItem<type>(std::string, std::string, std::function<bool ()>, std::function<void (bool)>, bool, bool)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_bool_menu_item",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createBoolPtrMenuItem<type>(std::string, std::string, $0 *)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_bool_ptr_menu_item",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createCheckMenuItem<type>(std::string, std::string, std::function<bool ()>, std::function<void ()>, bool, bool)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_check_menu_item",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createIndexPtrSubmenuItem<type>(std::string, std::vector<std::string>, $0 *)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_index_ptr_submenu_item",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createIndexSubmenuItem<type>(std::string, std::vector<std::string>, std::function<size_t ()>, std::function<void (size_t)>, bool, bool)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_index_submenu_item",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createMenu<type>()",
+      "kind": "function",
+      "raw": "rackpy.raw.create_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createMenuItem<type>(std::string, std::string)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_menu_item",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createMenuItem<type>(std::string, std::string, std::function<void ()>, bool, bool)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_menu_item",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createMenuLabel<type>(std::string)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_menu_label",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.plugin.Plugin.add_model",
       "id": "function_template:rack::createModel<type, type>(std::string)",
       "kind": "factory",
       "raw": "rackpy.raw.plugin.create_model",
       "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::createSubmenuItem<type>(std::string, std::string, std::function<void (ui::Menu *)>, bool)",
+      "kind": "function",
+      "raw": "rackpy.raw.create_submenu_item",
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -2182,6 +2567,13 @@
       "id": "function_template:rack::math::sgn<type>($0)",
       "kind": "function",
       "raw": "rackpy.raw.math.sgn",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:APP",
+      "kind": "function",
+      "raw": "rackpy.raw.APP",
       "status": "implemented"
     },
     {
@@ -2280,6 +2672,62 @@
       "id": "macro:LENGTHOF",
       "kind": "function",
       "raw": "rackpy.raw.macros.LENGTHOF",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:RACK_HELD",
+      "kind": "constant",
+      "raw": "rackpy.raw.macros.RACK_HELD",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:RACK_MOD_ALT",
+      "kind": "constant",
+      "raw": "rackpy.raw.macros.RACK_MOD_ALT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:RACK_MOD_ALT_NAME",
+      "kind": "constant",
+      "raw": "rackpy.raw.macros.RACK_MOD_ALT_NAME",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:RACK_MOD_CTRL",
+      "kind": "constant",
+      "raw": "rackpy.raw.macros.RACK_MOD_CTRL",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:RACK_MOD_CTRL_NAME",
+      "kind": "constant",
+      "raw": "rackpy.raw.macros.RACK_MOD_CTRL_NAME",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:RACK_MOD_MASK",
+      "kind": "constant",
+      "raw": "rackpy.raw.macros.RACK_MOD_MASK",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:RACK_MOD_SHIFT",
+      "kind": "constant",
+      "raw": "rackpy.raw.macros.RACK_MOD_SHIFT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:RACK_MOD_SHIFT_NAME",
+      "kind": "constant",
+      "raw": "rackpy.raw.macros.RACK_MOD_SHIFT_NAME",
       "status": "implemented"
     },
     {
@@ -3530,6 +3978,13 @@
     },
     {
       "facade": null,
+      "id": "method:rack::plugin::Model::appendContextMenu(rack::ui::Menu *, bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.plugin.Model.append_context_menu",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::plugin::Model::fromJson(json_t *)",
       "kind": "method",
       "raw": "rackpy.raw.plugin.Model.from_json",
@@ -4219,6 +4674,160 @@
       "id": "method:rack::widget::BaseEvent::unconsume() const",
       "kind": "method",
       "raw": "rackpy.raw.widget.BaseEvent.unconsume",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::finalizeWidget(rack::widget::Widget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.finalize_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::getDragHoveredWidget()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.get_drag_hovered_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::getDraggedWidget()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.get_dragged_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::getHoveredWidget()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.get_hovered_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::getRootWidget()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.get_root_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::getSelectedWidget()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.get_selected_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::handleButton(rack::math::Vec, int, int, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.handle_button",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::handleDirty()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.handle_dirty",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::handleDrop(rack::math::Vec, const std::vector<std::string> &)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.handle_drop",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::handleHover(rack::math::Vec, rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.handle_hover",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::handleKey(rack::math::Vec, int, int, int, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.handle_key",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::handleLeave()",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.handle_leave",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::handleScroll(rack::math::Vec, rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.handle_scroll",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::handleText(rack::math::Vec, uint32_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.handle_text",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::setDragHovered(rack::widget::Widget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.set_drag_hovered",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::setDragHoveredWidget(rack::widget::Widget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.set_drag_hovered_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::setDragged(rack::widget::Widget *, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.set_dragged",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::setDraggedWidget(rack::widget::Widget *, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.set_dragged_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::setHovered(rack::widget::Widget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.set_hovered",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::setHoveredWidget(rack::widget::Widget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.set_hovered_widget",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::setSelected(rack::widget::Widget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.set_selected",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::widget::EventState::setSelectedWidget(rack::widget::Widget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.widget.EventState.set_selected_widget",
       "status": "implemented"
     },
     {
@@ -5168,6 +5777,13 @@
     },
     {
       "facade": null,
+      "id": "record:rack::Context",
+      "kind": "class",
+      "raw": "rackpy.raw.Context",
+      "status": "planned"
+    },
+    {
+      "facade": null,
       "id": "record:rack::Exception",
       "kind": "class",
       "raw": "rackpy.raw.Exception",
@@ -5528,6 +6144,13 @@
       "id": "record:rack::widget::EventContext",
       "kind": "class",
       "raw": "rackpy.raw.widget.EventContext",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::widget::EventState",
+      "kind": "class",
+      "raw": "rackpy.raw.widget.EventState",
       "status": "implemented"
     },
     {
@@ -6035,6 +6658,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "0df221a1f9821b87",
+  "inputs": "1055d0f5d7a4999f",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

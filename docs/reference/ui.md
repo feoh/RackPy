@@ -1,9 +1,8 @@
 # UI widgets and menus
 
-`rackpy.raw.ui` is `rack::ui`. **Implemented (RP-26A), Linux x86_64 inside
-Rack Free 2.6.6**, for every record in `include/ui/` (see the
-[coverage report](coverage.md)). Menu helper functions and Rack's input
-dispatcher come with the rest of RP-26.
+`rackpy.raw.ui` is `rack::ui`. **Implemented (RP-26A, RP-26B), Linux x86_64
+inside Rack Free 2.6.6**, for every record in `include/ui/`, the menu helpers
+and Rack's input dispatcher (see the [coverage report](coverage.md)).
 
 (ui-widgets)=
 ## Widgets
@@ -73,6 +72,65 @@ gives Rack no menu. `Menu.set_child_menu(menu)` does the same by hand. It
 hands the menu to Rack, which deletes the previous child menu. `child_menu`
 and `active_entry` are read-only. So is `parent_menu`, which Rack 2.6.6 never
 sets. `ColorDotMenuItem` adds a `color`.
+
+(ui-menu-helpers)=
+## Menu helpers
+
+Rack's `helpers.hpp` templates are functions in `rackpy.raw`, which take
+Python callables. The template parameter becomes a keyword (`menu_type`,
+`item_type`, `label_type`), and a Python subclass is fine:
+
+- `create_menu()` opens a menu at the mouse position, in a `MenuOverlay` in
+  Rack's scene, which owns both.
+- `create_menu_label(text)` makes a label.
+- `create_menu_item(text, right_text="", action=None, disabled=False,
+  always_consume=False)` makes an item. Without `action` it is a plain item.
+  With it, choosing the item calls `action()`.
+- `create_check_menu_item(text, right_text, checked, action, ...)` shows a
+  check mark while `checked()` is true.
+- `create_bool_menu_item(text, right_text, getter, setter, ...)` toggles a
+  bool.
+- `create_submenu_item(text, right_text, create_menu)` opens a submenu that
+  `create_menu(menu)` fills.
+- `create_index_submenu_item(text, labels, getter, setter, ...)` chooses an
+  index from `labels`.
+- `create_bool_ptr_menu_item(text, right_text, ptr)` and
+  `create_index_ptr_submenu_item(text, labels, ptr)` take a `rackpy.raw.Ref`
+  (or any object with a `value`) where C++ takes a pointer. `None` behaves
+  like a null pointer.
+
+The callables live as long as Rack's menu item. If one uses a module that was
+deleted while the menu was open, it raises `StaleHandleError`, which RackPy
+logs and contains, so Rack carries on. `Model.append_context_menu(menu)` adds
+Rack's own items for a model ([plugins and models](plugin.md#models)).
+
+(ui-input)=
+## Context and input
+
+`rackpy.raw.context_get()`, and Rack's `APP()` macro, return the Rack context
+current on this thread: RackPy's bound context on Rack's main thread, `None`
+on threads Python starts. So far its `event` attribute is bound: Rack's input
+dispatcher, a `rackpy.raw.widget.EventState`.
+
+- `handle_button`, `handle_hover`, `handle_leave`, `handle_scroll`,
+  `handle_text`, `handle_key`, `handle_drop` and `handle_dirty` do what
+  Rack's window does with GLFW's input. They dispatch through the widget
+  tree, Python widgets' handlers included. They are refused inside another
+  widget callback, where Rack may be iterating the tree.
+- `set_hovered_widget`, `set_dragged_widget`, `set_drag_hovered_widget` and
+  `set_selected_widget` change the focus and send Rack's enter, leave,
+  select and drag events.
+- `finalize_widget` makes Rack forget a widget.
+- The raw fields (`hovered_widget`, `selected_widget`, and the rest) can be
+  written with `None` or a live widget without sending events.
+  `root_widget`, the scene, is read-only. Rack clears the fields when a
+  widget leaves its tree or is deleted. `held_keys` is a copy of Rack's set.
+
+`rackpy.raw.macros` has `RACK_MOD_CTRL`, `RACK_MOD_SHIFT`, `RACK_MOD_ALT`
+(Ctrl is Command on macOS), their `*_NAME`s, `RACK_MOD_MASK` and
+`RACK_HELD`. `rackpy.raw.event` keeps Rack's deprecated `rack::event`
+aliases (`event.Action` is `widget.ActionEvent`, and so on), with a
+`DeprecationWarning`.
 
 (ui-theme)=
 ## Theme and symbols

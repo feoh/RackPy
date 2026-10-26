@@ -11,7 +11,7 @@ extracted for that platform yet, which blocks a release there.
 
 | Platform | unreviewed | planned | implemented | verified | unrepresentable | excluded_internal | unknown | absent | not inventoried |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lin-x64 | 2073 | 11 | 861 | 0 | 0 | 111 | 0 | 2 | 0 |
+| lin-x64 | 1984 | 12 | 949 | 0 | 0 | 111 | 0 | 2 | 0 |
 | mac-arm64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3058 |
 | mac-x64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3058 |
 | win-x64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3058 |
@@ -29,9 +29,9 @@ extracted for that platform yet, which blocks a release there.
 | 0 entry point | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 1 common/value | 122 | 0 | 214 | 0 | 0 | 3 | 0 | 0 | 0 |
 | 2 engine | 93 | 10 | 173 | 0 | 0 | 22 | 0 | 0 | 0 |
-| 3 plugin/model/assets/helpers | 27 | 1 | 62 | 0 | 0 | 4 | 0 | 0 | 0 |
-| 4 widgets/ui/app/componentlibrary | 823 | 0 | 403 | 0 | 0 | 50 | 0 | 0 | 0 |
-| 5 window/rendering/context | 64 | 0 | 9 | 0 | 0 | 12 | 0 | 0 | 0 |
+| 3 plugin/model/assets/helpers | 16 | 1 | 73 | 0 | 0 | 4 | 0 | 0 | 0 |
+| 4 widgets/ui/app/componentlibrary | 749 | 0 | 477 | 0 | 0 | 50 | 0 | 0 | 0 |
+| 5 window/rendering/context | 60 | 1 | 12 | 0 | 0 | 12 | 0 | 0 | 0 |
 | 6 dsp/simd | 558 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0 |
 | 7 audio/midi | 169 | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 0 |
 | 8 services | 128 | 0 | 0 | 0 | 0 | 9 | 0 | 0 | 0 |

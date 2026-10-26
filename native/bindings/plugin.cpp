@@ -9,6 +9,7 @@
 #include "plugin.hpp"
 #include "../plugin/model.hpp"
 #include "engine/module.hpp"
+#include "widget/managed.hpp"
 #include "rackpy/runtime/errors.hpp"
 #include "rackpy/runtime/interpreter.hpp"
 #include "rackpy/runtime/json.hpp"
@@ -350,6 +351,15 @@ void bind_plugin(py::module_ raw) {
 		.def("is_favorite", [](const ModelHandle& h) { return addedModel(h, "is_favorite").isFavorite(); })
 		.def("set_favorite", [](const ModelHandle& h, bool favorite) { addedModel(h, "set_favorite").setFavorite(favorite); },
 			py::arg("favorite"))
+		.def("append_context_menu", [](const ModelHandle& h, py::object menu, bool inBrowser) {
+			RackModel& m = addedModel(h, "append_context_menu");
+			auto* target = dynamic_cast<rack::ui::Menu*>(widgets::argument(menu));
+			if (!target)
+				throw py::type_error("append_context_menu takes a rackpy.raw.ui.Menu");
+			widgets::checkMutationOf(*target);
+			m.appendContextMenu(target, inBrowser);
+		}, py::arg("menu"), py::arg("in_browser") = false,
+			"Rack's Model::appendContextMenu: Rack's own items for this model (manual, presets folder, favorite...).")
 		.def("from_json", [](const ModelHandle& h, py::handle data) {
 			checkModelJson(data);
 			RackModel& m = addedModel(h, "from_json");

@@ -11,6 +11,7 @@ namespace bindings {
 void bind_widgets(pybind11::module_ raw) {
 	bindWidgetTrees(raw);
 	widgets::bindUi(raw);
+	widgets::bindEventState(raw.attr("widget"));
 }
 
 }  // namespace bindings
