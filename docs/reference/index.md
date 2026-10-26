@@ -26,6 +26,7 @@ engine
 history
 midi
 audio
+services
 plugin
 widgets
 ui

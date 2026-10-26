@@ -11,11 +11,14 @@ from rackpy.raw import engine as engine
 from rackpy.raw import event as event
 from rackpy.raw import history as history
 from rackpy.raw import literals as literals
+from rackpy.raw import logger as logger
 from rackpy.raw import macros as macros
 from rackpy.raw import math as math
 from rackpy.raw import midi as midi
 from rackpy.raw import nanovg as nanovg
 from rackpy.raw import plugin as plugin
+from rackpy.raw import random as random
+from rackpy.raw import string as string
 from rackpy.raw import ui as ui
 from rackpy.raw import widget as widget
 from rackpy.raw import window as window

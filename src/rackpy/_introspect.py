@@ -51,6 +51,8 @@ DUNDERS = frozenset(
         "__ne__",
         "__iter__",
         "__len__",
+        "__lt__",
+        "__call__",
         "__hash__",
         "__enter__",
         "__exit__",

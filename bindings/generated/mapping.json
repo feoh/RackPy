@@ -373,6 +373,13 @@
     },
     {
       "facade": null,
+      "id": "alias:rack::random::Xoroshiro128Plus::result_type",
+      "kind": "alias",
+      "raw": "rackpy.raw.random.Xoroshiro128Plus.result_type",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "alias:rack::ui::ScrollBar",
       "kind": "alias",
       "raw": "rackpy.raw.ui.ScrollBar",
@@ -1682,6 +1689,41 @@
     },
     {
       "facade": null,
+      "id": "constructor:rack::random::Xoroshiro128Plus::Xoroshiro128Plus()",
+      "kind": "class",
+      "raw": "rackpy.raw.random.Xoroshiro128Plus",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::random::Xoroshiro128Plus::Xoroshiro128Plus(uint64_t, uint64_t)",
+      "kind": "class",
+      "raw": "rackpy.raw.random.Xoroshiro128Plus",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::string::Version::Version()",
+      "kind": "class",
+      "raw": "rackpy.raw.string.Version",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::string::Version::Version(const char *)",
+      "kind": "class",
+      "raw": "rackpy.raw.string.Version",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::string::Version::Version(const std::string &)",
+      "kind": "class",
+      "raw": "rackpy.raw.string.Version",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "constructor:rack::ui::Button::Button()",
       "kind": "class",
       "raw": "rackpy.raw.ui.Button",
@@ -1790,6 +1832,13 @@
       "id": "constructor:rack::widget::Widget::PathDropEvent::PathDropEvent(const std::vector<std::string> &)",
       "kind": "class",
       "raw": "rackpy.raw.widget.Widget.PathDropEvent",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "conversion:rack::string::Version::operator basic_string() const",
+      "kind": "method",
+      "raw": "rackpy.raw.string.Version.__str__",
       "status": "implemented"
     },
     {
@@ -2074,6 +2123,13 @@
     },
     {
       "facade": null,
+      "id": "enum:rack::logger::Level",
+      "kind": "enum",
+      "raw": "rackpy.raw.logger.Level",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "enum:rack::ui::Label::Alignment",
       "kind": "enum",
       "raw": "rackpy.raw.ui.Label.Alignment",
@@ -2105,6 +2161,34 @@
       "id": "enumerator:rack::engine::Port::Type::OUTPUT",
       "kind": "enum_member",
       "raw": "rackpy.raw.engine.Port.Type.OUTPUT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::logger::Level::DEBUG_LEVEL",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.logger.Level.DEBUG_LEVEL",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::logger::Level::FATAL_LEVEL",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.logger.Level.FATAL_LEVEL",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::logger::Level::INFO_LEVEL",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.logger.Level.INFO_LEVEL",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::logger::Level::WARN_LEVEL",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.logger.Level.WARN_LEVEL",
       "status": "implemented"
     },
     {
@@ -4055,6 +4139,34 @@
     },
     {
       "facade": null,
+      "id": "field:rack::random::Xoroshiro128Plus::state",
+      "kind": "property",
+      "raw": "rackpy.raw.random.Xoroshiro128Plus.state",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::string::Location::column",
+      "kind": "property",
+      "raw": "rackpy.raw.string.Location.column",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::string::Location::line",
+      "kind": "property",
+      "raw": "rackpy.raw.string.Location.line",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::string::Version::parts",
+      "kind": "property",
+      "raw": "rackpy.raw.string.Version.parts",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::ui::Button::quantity",
       "kind": "property",
       "raw": "rackpy.raw.ui.Button.quantity",
@@ -5020,6 +5132,13 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "function:rack::logger::log(rack::logger::Level, const char *, int, const char *, const char *, ...)",
+      "kind": "function",
+      "raw": "rackpy.raw.logger.log",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.math.chop",
       "id": "function:rack::math::chop(float, float)",
       "kind": "function",
@@ -5332,6 +5451,328 @@
       "id": "function:rack::plugin::normalizeSlug(const std::string &)",
       "kind": "function",
       "raw": "rackpy.raw.plugin.normalize_slug",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::random::buffer(uint8_t *, size_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.random.buffer",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::random::get<bool>()",
+      "kind": "function",
+      "raw": "rackpy.raw.random.get_bool",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::random::get<double>()",
+      "kind": "function",
+      "raw": "rackpy.raw.random.get_double",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::random::get<float>()",
+      "kind": "function",
+      "raw": "rackpy.raw.random.get_float",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::random::get<uint16_t>()",
+      "kind": "function",
+      "raw": "rackpy.raw.random.get_uint16",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::random::get<uint32_t>()",
+      "kind": "function",
+      "raw": "rackpy.raw.random.get_uint32",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::random::get<uint8_t>()",
+      "kind": "function",
+      "raw": "rackpy.raw.random.get_uint8",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::random::init()",
+      "kind": "function",
+      "raw": "rackpy.raw.random.init",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::random::local()",
+      "kind": "function",
+      "raw": "rackpy.raw.random.local",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::random::normal()",
+      "kind": "function",
+      "raw": "rackpy.raw.random.normal",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::random::u32()",
+      "kind": "function",
+      "raw": "rackpy.raw.random.u32",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::random::u64()",
+      "kind": "function",
+      "raw": "rackpy.raw.random.u64",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::random::uniform()",
+      "kind": "function",
+      "raw": "rackpy.raw.random.uniform",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::random::vector(size_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.random.vector",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::UTF32toUTF8(const std::u32string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.utf32_to_utf8",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::UTF8CodepointIndex(const std::string &, size_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.utf8_codepoint_index",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::UTF8CodepointPos(const std::string &, size_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.utf8_codepoint_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::UTF8Length(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.utf8_length",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::UTF8NextCodepoint(const std::string &, size_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.utf8_next_codepoint",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::UTF8PrevCodepoint(const std::string &, size_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.utf8_prev_codepoint",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::UTF8toUTF32(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.utf8_to_utf32",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::convertFArg(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.f",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::ellipsize(const std::string &, size_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.ellipsize",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::ellipsizePrefix(const std::string &, size_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.ellipsize_prefix",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::endsWith(const std::string &, const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.ends_with",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::f(const char *, ...)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.f",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::fV(const char *, va_list)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.fv",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::formatTime(const char *, double)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.format_time",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::formatTimeISO(double)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.format_time_iso",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::fromBase64(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.from_base64",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::getLanguages()",
+      "kind": "function",
+      "raw": "rackpy.raw.string.get_languages",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::init()",
+      "kind": "function",
+      "raw": "rackpy.raw.string.init",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::locationToPosition(const std::string &, rack::string::Location)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.location_to_position",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::lowercase(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.lowercase",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::positionToLocation(const std::string &, size_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.position_to_location",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::split(const std::string &, const std::string &, size_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.split",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::startsWith(const std::string &, const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.starts_with",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::strcasecmp(const char *, const char *)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.strcasecmp",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::toBase64(const std::vector<uint8_t> &)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.to_base64",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::toBase64(const uint8_t *, size_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.to_base64",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::translate(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.translate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::translate(const std::string &, const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.translate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::trim(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.trim",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::truncate(const std::string &, size_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.truncate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::truncatePrefix(const std::string &, size_t)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.truncate_prefix",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::string::uppercase(const std::string &)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.uppercase",
       "status": "implemented"
     },
     {
@@ -5658,6 +6099,34 @@
     },
     {
       "facade": null,
+      "id": "function_template:rack::random::get<type>()",
+      "kind": "function",
+      "raw": "rackpy.raw.random.get",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::string::convertFArg<type>(const $0 &)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.f",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::string::f<type...>($0...)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.f",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function_template:rack::string::join<type>(const $0 &, std::string)",
+      "kind": "function",
+      "raw": "rackpy.raw.string.join",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "macro:APP",
       "kind": "function",
       "raw": "rackpy.raw.APP",
@@ -5735,6 +6204,13 @@
     },
     {
       "facade": null,
+      "id": "macro:DEBUG",
+      "kind": "function",
+      "raw": "rackpy.raw.macros.DEBUG",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "macro:DEFER",
       "kind": "function",
       "raw": "rackpy.raw.macros.DEFER",
@@ -5756,6 +6232,13 @@
     },
     {
       "facade": null,
+      "id": "macro:FATAL",
+      "kind": "function",
+      "raw": "rackpy.raw.macros.FATAL",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "macro:GLEW_NO_GLU",
       "kind": "no_runtime_meaning",
       "raw": null,
@@ -5766,6 +6249,13 @@
       "id": "macro:GLEW_STATIC",
       "kind": "no_runtime_meaning",
       "raw": null,
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:INFO",
+      "kind": "function",
+      "raw": "rackpy.raw.macros.INFO",
       "status": "implemented"
     },
     {
@@ -5878,6 +6368,13 @@
       "id": "macro:VEC_ARGS",
       "kind": "function",
       "raw": "rackpy.raw.macros.VEC_ARGS",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:WARN",
+      "kind": "function",
+      "raw": "rackpy.raw.macros.WARN",
       "status": "implemented"
     },
     {
@@ -10747,6 +11244,83 @@
     },
     {
       "facade": null,
+      "id": "method:rack::random::Xoroshiro128Plus::isSeeded()",
+      "kind": "method",
+      "raw": "rackpy.raw.random.Xoroshiro128Plus.is_seeded",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::random::Xoroshiro128Plus::max()",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.random.Xoroshiro128Plus.max",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::random::Xoroshiro128Plus::min()",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.random.Xoroshiro128Plus.min",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::random::Xoroshiro128Plus::operator()()",
+      "kind": "method",
+      "raw": "rackpy.raw.random.Xoroshiro128Plus.__call__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::random::Xoroshiro128Plus::rotl(uint64_t, int)",
+      "kind": "staticmethod",
+      "raw": "rackpy.raw.random.Xoroshiro128Plus.rotl",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::random::Xoroshiro128Plus::seed(uint64_t, uint64_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.random.Xoroshiro128Plus.seed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::string::CaseInsensitiveCompare::operator()(const std::string &, const std::string &) const",
+      "kind": "method",
+      "raw": "rackpy.raw.string.CaseInsensitiveCompare.__call__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::string::Version::getMajor() const",
+      "kind": "method",
+      "raw": "rackpy.raw.string.Version.get_major",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::string::Version::getMinor() const",
+      "kind": "method",
+      "raw": "rackpy.raw.string.Version.get_minor",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::string::Version::getRevision() const",
+      "kind": "method",
+      "raw": "rackpy.raw.string.Version.get_revision",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::string::Version::operator<(const rack::string::Version &)",
+      "kind": "method",
+      "raw": "rackpy.raw.string.Version.__lt__",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::ui::Button::draw(const rack::widget::Widget::DrawArgs &)",
       "kind": "method",
       "raw": "rackpy.raw.ui.Button.draw",
@@ -13876,6 +14450,34 @@
     },
     {
       "facade": null,
+      "id": "record:rack::random::Xoroshiro128Plus",
+      "kind": "class",
+      "raw": "rackpy.raw.random.Xoroshiro128Plus",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::string::CaseInsensitiveCompare",
+      "kind": "class",
+      "raw": "rackpy.raw.string.CaseInsensitiveCompare",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::string::Location",
+      "kind": "class",
+      "raw": "rackpy.raw.string.Location",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::string::Version",
+      "kind": "class",
+      "raw": "rackpy.raw.string.Version",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "record:rack::ui::Button",
       "kind": "class",
       "raw": "rackpy.raw.ui.Button",
@@ -14674,6 +15276,13 @@
     },
     {
       "facade": null,
+      "id": "variable:rack::logger::logPath",
+      "kind": "function",
+      "raw": "rackpy.raw.logger.get_log_path",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "variable:rack::plugin::plugins",
       "kind": "attribute",
       "raw": "rackpy.raw.plugin.plugins",
@@ -14701,6 +15310,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "5090d2b550d59548",
+  "inputs": "183da2abb66a8fc8",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }
