@@ -61,6 +61,7 @@ __all__ += [
 ]
 
 from rackpy.raw import _componentlibrary as _componentlibrary  # noqa: E402  # the library's templates
+from rackpy.raw import _history as _history  # noqa: E402  # InverseAction
 from rackpy.raw._widget_helpers import (  # noqa: E402
     create_input,
     create_input_centered,

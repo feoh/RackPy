@@ -14,6 +14,7 @@
 #include "rackpy/runtime/threads.hpp"
 #include "drawing/drawing.hpp"
 #include "engine/engine.hpp"
+#include "history/history.hpp"
 #include "widget/managed.hpp"
 #include "ui/ui.hpp"
 
@@ -46,7 +47,7 @@ py::object currentContext() {
 
 void bind_window(py::module_ raw) {
 	py::class_<ContextHandle> context(raw, "Context", py::is_final(),
-		"Rack's Context (APP): the objects of one Rack instance. Partial: the history comes with its family (RP-24C).");
+		"Rack's Context (APP): the objects of one Rack instance.");
 	context
 		.def_property_readonly("alive", [](const ContextHandle& h) { return h.token->alive(); })
 		.def_property_readonly("event", [](const ContextHandle& h) {
@@ -64,6 +65,11 @@ void bind_window(py::module_ raw) {
 			h.get();
 			return engineObject(h.token);
 		}, "Rack's rackpy.raw.engine.Engine.")
+		.def_property_readonly("history", [](const ContextHandle& h) {
+			runtime::requireMainThread("using Rack's history");
+			h.get();
+			return historyObject(h.token);
+		}, "Rack's undo history: rackpy.raw.history.State.")
 		.def_property_readonly("scene", [](const ContextHandle& h) {
 			runtime::requireMainThread("using Rack's scene");
 			auto& context = h.get();

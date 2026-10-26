@@ -8,6 +8,7 @@ from rackpy.raw import color as color
 from rackpy.raw import componentlibrary as componentlibrary
 from rackpy.raw import engine as engine
 from rackpy.raw import event as event
+from rackpy.raw import history as history
 from rackpy.raw import literals as literals
 from rackpy.raw import macros as macros
 from rackpy.raw import math as math
@@ -102,6 +103,8 @@ class Context:
     def scene(self) -> app.HostScene | None: ...
     @property
     def engine(self) -> _Engine | None: ...
+    @property
+    def history(self) -> history.State | None: ...
     @property
     def patch(self) -> _NativeHandle | None: ...
     @property

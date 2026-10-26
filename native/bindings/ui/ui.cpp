@@ -6,6 +6,7 @@
 
 #include "../widget/variants.hpp"
 #include "ui.hpp"
+#include "../history/history.hpp"
 
 // As managed.hpp does for rack::widget: keep the registered SDK-base address.
 namespace pybind11 {
@@ -321,7 +322,10 @@ void bindUi(py::module_ raw) {
 			[](py::object self, std::string v) { native<MI>(self).rightText = std::move(v); })
 		.def_property("disabled", [](py::object self) { return native<MI>(self).disabled; },
 			[](py::object self, bool v) { native<MI>(self).disabled = v; })
-		.def("do_action", [](py::object self, bool consume) { native<MI>(self).doAction(consume); },
+		.def("do_action", [](py::object self, bool consume) {
+			bindings::refuseInAction("do_action");  // a menu item's action may push to Rack's history
+			native<MI>(self).doAction(consume);
+		},
 			py::arg("consume") = true, "Rack's MenuItem::doAction: dispatch an ActionEvent and close the menu if consumed.")
 		.def("create_child_menu", [](py::object self) -> py::object {
 			ui::Menu* menu = native<MI>(self).MI::createChildMenu();

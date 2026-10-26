@@ -646,6 +646,13 @@
     },
     {
       "facade": null,
+      "id": "class_template:rack::history::InverseAction<type>",
+      "kind": "class",
+      "raw": "rackpy.raw.history.InverseAction",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "constructor:rack::DeferWrapper::DeferWrapper<F>($c0)",
       "kind": "class",
       "raw": "rackpy.raw.DeferWrapper",
@@ -1492,6 +1499,69 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "constructor:rack::history::CableAdd::CableAdd()",
+      "kind": "class",
+      "raw": "rackpy.raw.history.CableAdd",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::history::CableColorChange::CableColorChange()",
+      "kind": "class",
+      "raw": "rackpy.raw.history.CableColorChange",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::history::CableRemove::CableRemove()",
+      "kind": "class",
+      "raw": "rackpy.raw.history.CableRemove",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::history::ModuleAdd::ModuleAdd()",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ModuleAdd",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::history::ModuleBypass::ModuleBypass()",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ModuleBypass",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::history::ModuleChange::ModuleChange()",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ModuleChange",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::history::ModuleMove::ModuleMove()",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ModuleMove",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::history::ModuleRemove::ModuleRemove()",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ModuleRemove",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::history::ParamChange::ParamChange()",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ParamChange",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.math.Rect",
       "id": "constructor:rack::math::Rect::Rect()",
       "kind": "class",
@@ -1745,6 +1815,34 @@
     },
     {
       "facade": null,
+      "id": "destructor:rack::history::Action::~Action()",
+      "kind": "class",
+      "raw": "rackpy.raw.history.Action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::history::ComplexAction::~ComplexAction()",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ComplexAction",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::history::ModuleAdd::~ModuleAdd()",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ModuleAdd",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::history::ModuleChange::~ModuleChange()",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ModuleChange",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "destructor:rack::plugin::Model::~Model()",
       "kind": "class",
       "raw": "rackpy.raw.plugin.Model",
@@ -1944,6 +2042,13 @@
       "id": "field:rack::Context::event",
       "kind": "property",
       "raw": "rackpy.raw.Context.event",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::Context::history",
+      "kind": "property",
+      "raw": "rackpy.raw.Context.history",
       "status": "implemented"
     },
     {
@@ -3085,6 +3190,188 @@
       "id": "field:rack::engine::SwitchQuantity::labels",
       "kind": "property",
       "raw": "rackpy.raw.engine.SwitchQuantity.labels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::Action::name",
+      "kind": "property",
+      "raw": "rackpy.raw.history.Action.name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::CableAdd::cableId",
+      "kind": "property",
+      "raw": "rackpy.raw.history.CableAdd.cable_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::CableAdd::color",
+      "kind": "property",
+      "raw": "rackpy.raw.history.CableAdd.color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::CableAdd::inputId",
+      "kind": "property",
+      "raw": "rackpy.raw.history.CableAdd.input_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::CableAdd::inputModuleId",
+      "kind": "property",
+      "raw": "rackpy.raw.history.CableAdd.input_module_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::CableAdd::outputId",
+      "kind": "property",
+      "raw": "rackpy.raw.history.CableAdd.output_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::CableAdd::outputModuleId",
+      "kind": "property",
+      "raw": "rackpy.raw.history.CableAdd.output_module_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::CableColorChange::cableId",
+      "kind": "property",
+      "raw": "rackpy.raw.history.CableColorChange.cable_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::CableColorChange::newColor",
+      "kind": "property",
+      "raw": "rackpy.raw.history.CableColorChange.new_color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::CableColorChange::oldColor",
+      "kind": "property",
+      "raw": "rackpy.raw.history.CableColorChange.old_color",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::ComplexAction::actions",
+      "kind": "property",
+      "raw": "rackpy.raw.history.ComplexAction.actions",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::ModuleAction::moduleId",
+      "kind": "property",
+      "raw": "rackpy.raw.history.ModuleAction.module_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::ModuleAdd::model",
+      "kind": "property",
+      "raw": "rackpy.raw.history.ModuleAdd.model",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::ModuleAdd::moduleJ",
+      "kind": "property",
+      "raw": "rackpy.raw.history.ModuleAdd.module_j",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::ModuleAdd::pos",
+      "kind": "property",
+      "raw": "rackpy.raw.history.ModuleAdd.pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::ModuleBypass::bypassed",
+      "kind": "property",
+      "raw": "rackpy.raw.history.ModuleBypass.bypassed",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::ModuleChange::newModuleJ",
+      "kind": "property",
+      "raw": "rackpy.raw.history.ModuleChange.new_module_j",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::ModuleChange::oldModuleJ",
+      "kind": "property",
+      "raw": "rackpy.raw.history.ModuleChange.old_module_j",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::ModuleMove::newPos",
+      "kind": "property",
+      "raw": "rackpy.raw.history.ModuleMove.new_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::ModuleMove::oldPos",
+      "kind": "property",
+      "raw": "rackpy.raw.history.ModuleMove.old_pos",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::ParamChange::newValue",
+      "kind": "property",
+      "raw": "rackpy.raw.history.ParamChange.new_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::ParamChange::oldValue",
+      "kind": "property",
+      "raw": "rackpy.raw.history.ParamChange.old_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::ParamChange::paramId",
+      "kind": "property",
+      "raw": "rackpy.raw.history.ParamChange.param_id",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::State::actionIndex",
+      "kind": "property",
+      "raw": "rackpy.raw.history.State.action_index",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::State::actions",
+      "kind": "property",
+      "raw": "rackpy.raw.history.State.actions",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::history::State::savedIndex",
+      "kind": "property",
+      "raw": "rackpy.raw.history.State.saved_index",
       "status": "implemented"
     },
     {
@@ -5616,6 +5903,13 @@
     },
     {
       "facade": null,
+      "id": "method:rack::app::ModuleWidget::appendDisconnectActions(rack::history::ComplexAction *)",
+      "kind": "method",
+      "raw": "rackpy.raw.app.ModuleWidget.append_disconnect_actions",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::app::ModuleWidget::bypassAction(bool)",
       "kind": "method",
       "raw": "rackpy.raw.app.ModuleWidget.bypass_action",
@@ -6508,6 +6802,13 @@
       "id": "method:rack::app::RackWidget::getModuleContainer()",
       "kind": "method",
       "raw": "rackpy.raw.app.HostRackWidget.get_module_container",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::app::RackWidget::getModuleDragAction()",
+      "kind": "method",
+      "raw": "rackpy.raw.app.HostRackWidget.get_module_drag_action",
       "status": "implemented"
     },
     {
@@ -8174,6 +8475,251 @@
       "id": "method:rack::engine::SwitchQuantity::setDisplayValueString(std::string)",
       "kind": "method",
       "raw": "rackpy.raw.engine.SwitchQuantity.set_display_value_string",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::Action::redo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.Action.redo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::Action::undo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.Action.undo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::CableAdd::isCable(rack::app::CableWidget *) const",
+      "kind": "method",
+      "raw": "rackpy.raw.history.CableAdd.is_cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::CableAdd::redo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.CableAdd.redo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::CableAdd::setCable(rack::app::CableWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.history.CableAdd.set_cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::CableAdd::undo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.CableAdd.undo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::CableColorChange::redo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.CableColorChange.redo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::CableColorChange::setCable(rack::app::CableWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.history.CableColorChange.set_cable",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::CableColorChange::undo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.CableColorChange.undo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ComplexAction::isEmpty()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ComplexAction.is_empty",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ComplexAction::push(rack::history::Action *)",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ComplexAction.push",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ComplexAction::redo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ComplexAction.redo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ComplexAction::undo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ComplexAction.undo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::InverseAction::redo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.InverseAction.redo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::InverseAction::undo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.InverseAction.undo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ModuleAdd::redo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ModuleAdd.redo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ModuleAdd::setModule(rack::app::ModuleWidget *)",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ModuleAdd.set_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ModuleAdd::undo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ModuleAdd.undo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ModuleBypass::redo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ModuleBypass.redo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ModuleBypass::undo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ModuleBypass.undo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ModuleChange::redo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ModuleChange.redo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ModuleChange::undo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ModuleChange.undo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ModuleMove::redo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ModuleMove.redo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ModuleMove::undo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ModuleMove.undo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ParamChange::redo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ParamChange.redo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::ParamChange::undo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.ParamChange.undo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::State::canRedo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.State.can_redo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::State::canUndo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.State.can_undo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::State::getRedoName()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.State.get_redo_name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::State::getUndoName()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.State.get_undo_name",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::State::isSaved()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.State.is_saved",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::State::push(rack::history::Action *)",
+      "kind": "method",
+      "raw": "rackpy.raw.history.State.push",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::State::redo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.State.redo",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::State::setSaved()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.State.set_saved",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::history::State::undo()",
+      "kind": "method",
+      "raw": "rackpy.raw.history.State.undo",
       "status": "implemented"
     },
     {
@@ -11516,6 +12062,97 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "record:rack::history::Action",
+      "kind": "class",
+      "raw": "rackpy.raw.history.Action",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::history::CableAdd",
+      "kind": "class",
+      "raw": "rackpy.raw.history.CableAdd",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::history::CableColorChange",
+      "kind": "class",
+      "raw": "rackpy.raw.history.CableColorChange",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::history::CableRemove",
+      "kind": "class",
+      "raw": "rackpy.raw.history.CableRemove",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::history::ComplexAction",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ComplexAction",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::history::ModuleAction",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ModuleAction",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::history::ModuleAdd",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ModuleAdd",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::history::ModuleBypass",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ModuleBypass",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::history::ModuleChange",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ModuleChange",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::history::ModuleMove",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ModuleMove",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::history::ModuleRemove",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ModuleRemove",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::history::ParamChange",
+      "kind": "class",
+      "raw": "rackpy.raw.history.ParamChange",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::history::State",
+      "kind": "class",
+      "raw": "rackpy.raw.history.State",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.math.Rect",
       "id": "record:rack::math::Rect",
       "kind": "class",
@@ -12370,6 +13007,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "05e2d74f9dac7a58",
+  "inputs": "ce32664f5f0cd342",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

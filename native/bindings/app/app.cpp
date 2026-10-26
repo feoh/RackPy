@@ -20,6 +20,7 @@
 #include "../widget/variants.hpp"
 #include "app.hpp"
 #include "app_internal.hpp"
+#include "../history/history.hpp"
 
 namespace pybind11 {
 #define RACKPY_APP_ADDRESS(T) \
@@ -262,6 +263,13 @@ bool cableSafe(rack::app::PortWidget& port) {
 	auto* mw = port.getAncestorOfType<rack::app::ModuleWidget>();
 	return mw && mw->module == port.module;
 }
+}  // namespace appdetail
+
+bool portCableSafe(rack::app::PortWidget& port) {
+	return managedWidget(&port) ? appdetail::cableSafe(port) : true;
+}
+
+namespace appdetail {
 void trackMenu(const std::shared_ptr<State>& s, rack::ui::Menu* menu, rack::app::ParamWidget* touched) {
 	control(s, touched).menu.set(menu);
 }
@@ -313,7 +321,10 @@ void bindApp(py::module_ raw) {
 		.def("destroy_tooltip", [](py::object self) { checkMutation(); native<PW>(self).destroyTooltip(); })
 		.def("create_context_menu", [](py::object self) { checkMutation(); native<PW>(self).createContextMenu(); },
 			"Rack's param context menu (value entry, reset, append_context_menu's items), opened in Rack's scene.")
-		.def("reset_action", [](py::object self) { native<PW>(self).resetAction(); },
+		.def("reset_action", [](py::object self) {
+			bindings::refuseInAction("reset_action");
+			native<PW>(self).resetAction();
+		},
 			"Rack's reset to the default value, with an undo history action.");
 
 	using K = app::Knob;
@@ -386,7 +397,11 @@ void bindApp(py::module_ raw) {
 		.def("create_context_menu", [](py::object self) { checkMutation(); native<P>(self).createContextMenu(); })
 		.def("append_context_menu", [](py::object self, py::object menu) { native<P>(self).P::appendContextMenu(menuArgument(menu)); },
 			py::arg("menu"), "Rack's default adds nothing. Override to add items to the port's context menu.")
-		.def("delete_top_cable_action", [](py::object self) { checkMutation(); native<P>(self).deleteTopCableAction(); },
+		.def("delete_top_cable_action", [](py::object self) {
+			bindings::refuseInAction("delete_top_cable_action");
+			checkMutation();
+			native<P>(self).deleteTopCableAction();
+		},
 			"Rack's: deletes the top cable on this port, with an undo history action.");
 
 	// --- Lights -------------------------------------------------------------------------------

@@ -24,6 +24,8 @@ pybind11::object createModuleWidgetForPython(plugin::ModuleWidgetFactory& factor
 	pybind11::object module);
 /** Whether a module widget owns this module: one in Rack's rack, or a Python one that took it. Main thread. */
 bool moduleHasWidget(const rack::engine::Module* module);
+/** Whether Rack may cable this port: Rack's own ports, or a Python port its module widget's factory made. */
+bool portCableSafe(rack::app::PortWidget& port);
 
 }  // namespace widgets
 }  // namespace rackpy

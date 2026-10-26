@@ -72,3 +72,32 @@ and `rack::engine::Engine` is now complete. Validation:
 - **Test hook.** `call_after_ui_step` runs a callable from RackPy's
   scene-level step, which may clear Rack's rack and delete the RuntimeProbe
   widget that drives tests.
+
+**RP-24C — history: undo actions and `Context.history`**
+(`tk-rackpy-24c-history-undo-actions-and-context-hist-e2938d`). 91 records:
+every public `rack::history` record, `Context.history`,
+`appendDisconnectActions` and `getModuleDragAction`. Validation:
+[rp-24c-validation.md](rp-24c-validation.md).
+
+- **Python actions.** Every action type is a pybind11 `classh` trampoline
+  (`py::init_alias`). An action pushed to Rack's State or a ComplexAction
+  goes to Rack through pybind11's self-life support, which keeps its Python
+  half alive, and `noteTransferred` counts it for shutdown. When Rack
+  deletes it, the Python object has no native object left.
+- **Rack's actions** are `ActionView`s, found again in their tree at every
+  use. `type_name` is the C++ type.
+- **Checks on Rack's own undo and redo.** `ParamChange` checks its param
+  ID. `CableAdd`/`CableRemove` check port IDs and port widgets, using
+  `portCableSafe` for Python ports. `ModuleAdd`/`ModuleRemove` need their
+  model and JSON, and `ModuleChange` its JSON. A failed check does nothing,
+  as Rack does for a missing module.
+- **Re-entrancy.** Rack's `State::push` deletes the actions after the
+  current one, which can include the running action. While an undo or redo
+  runs, every history-pushing binding is therefore refused: `push`, the
+  `*_action` methods, `do_action` and `ComplexAction.push`.
+- **InverseAction** is a Python template class, built on the component
+  library's `Template` (whose specializations now take the template's own
+  module). Its swapped methods run Rack's code for native types through
+  `_rack_undo`/`_rack_redo`, and the Python methods otherwise.
+- **`State.undo`/`redo`** release the GIL and report Python actions' errors,
+  as Rack's Edit menu does. A bound `action.undo()` raises them.

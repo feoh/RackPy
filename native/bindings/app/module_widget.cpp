@@ -21,6 +21,7 @@
 #include "app.hpp"
 #include "app_internal.hpp"
 #include "rackpy/runtime/json.hpp"
+#include "../history/history.hpp"
 
 namespace pybind11 {
 template <>
@@ -315,6 +316,7 @@ void bindModuleWidget(py::module_ app) {
 			unlocked([&] { mw.fromJson(json.get()); });
 		}, py::arg("data"), "Rack's: loads the module from patch JSON (Engine::moduleFromJson).")
 		.def("paste_json_action", [](py::object self, py::handle data) {
+			bindings::refuseInAction("paste_json_action");
 			auto& mw = inRack(self, "paste_json_action");
 			std::unique_ptr<json_t, decltype(&json_decref)> json(runtime::toJson(data), json_decref);
 			return unlocked([&] { return mw.pasteJsonAction(json.get()); });
@@ -324,6 +326,7 @@ void bindModuleWidget(py::module_ app) {
 			unlocked([&] { mw.copyClipboard(); });
 		})
 		.def("paste_clipboard_action", [](py::object self) {
+			bindings::refuseInAction("paste_clipboard_action");
 			auto& mw = inRack(self, "paste_clipboard_action");
 			return unlocked([&] { return mw.pasteClipboardAction(); });
 		})
@@ -332,6 +335,7 @@ void bindModuleWidget(py::module_ app) {
 			unlocked([&] { mw.load(filename); });
 		}, py::arg("filename"), "Rack's: loads a .vcvm preset; raises rackpy.raw.Exception if it cannot.")
 		.def("load_action", [](py::object self, const std::string& filename) {
+			bindings::refuseInAction("load_action");
 			auto& mw = inRack(self, "load_action");
 			unlocked([&] { mw.loadAction(filename); });
 		}, py::arg("filename"), "load() with an undo step; Rack reports a failure in a dialog.")
@@ -373,28 +377,42 @@ void bindModuleWidget(py::module_ app) {
 			unlocked([&] { mw.disconnect(); });
 		}, "Rack's: removes every cable on the widget's ports, without an undo step.")
 		.def("reset_action", [](py::object self) {
+			bindings::refuseInAction("reset_action");
 			auto& mw = inRack(self, "reset_action");
 			unlocked([&] { mw.resetAction(); });
 		}, "Rack's Initialize, with an undo step.")
 		.def("randomize_action", [](py::object self) {
+			bindings::refuseInAction("randomize_action");
 			auto& mw = inRack(self, "randomize_action");
 			unlocked([&] { mw.randomizeAction(); });
 		}, "Rack's Randomize, with an undo step.")
+		.def("append_disconnect_actions", [](py::object self, py::object complexAction) {
+			checkMutation();
+			auto& mw = inRack(self, "append_disconnect_actions");
+			auto& target = bindings::ownedComplexAction(complexAction);
+			mw.appendDisconnectActions(&target);
+		}, py::arg("complex_action"),
+			"Rack's: for each of this widget's cables, adds a CableRemove to the ComplexAction (one Python owns) and "
+			"removes the cable, as Rack's disconnect_action does before pushing it. Push it to Context.history.")
 		.def("disconnect_action", [](py::object self) {
+			bindings::refuseInAction("disconnect_action");
 			checkMutation();
 			auto& mw = inRack(self, "disconnect_action");
 			unlocked([&] { mw.disconnectAction(); });
 		}, "Rack's Disconnect cables, with an undo step.")
 		.def("clone_action", [](py::object self, bool cloneCables) {
+			bindings::refuseInAction("clone_action");
 			checkMutation();
 			auto& mw = inRack(self, "clone_action");
 			unlocked([&] { mw.cloneAction(cloneCables); });
 		}, py::arg("clone_cables") = true, "Rack's Duplicate (with cables, or without), with an undo step.")
 		.def("bypass_action", [](py::object self, bool bypassed) {
+			bindings::refuseInAction("bypass_action");
 			auto& mw = inRack(self, "bypass_action");
 			unlocked([&] { mw.bypassAction(bypassed); });
 		}, py::arg("bypassed"), "Rack's Bypass, with an undo step.")
 		.def("remove_action", [](py::object self) {
+			bindings::refuseInAction("remove_action");
 			checkMutation();
 			auto& mw = inRack(self, "remove_action");
 			unlocked([&] { mw.removeAction(); });

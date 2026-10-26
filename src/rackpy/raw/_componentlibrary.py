@@ -87,7 +87,7 @@ class Template:
             name = f"{cls.__name__}[{', '.join(a.__name__ for a in key)}]"
             # Each template (and template it derives from) reads its own arguments, so a specialization
             # deriving from another (VCVLightLatch[L] from LightButton[VCVButton, L]) keeps the base's.
-            attrs: dict[str, Any] = {"__module__": _MODULE, "__qualname__": name, "_args": key}
+            attrs: dict[str, Any] = {"__module__": cls.__module__, "__qualname__": name, "_args": key}
             for ancestor in cls.__mro__:
                 if isinstance(ancestor, type) and issubclass(ancestor, Template) and "_params" in vars(ancestor):
                     attrs[f"_args_{ancestor.__name__}"] = key

@@ -23,6 +23,7 @@ values
 engine-components
 engine-module
 engine
+history
 plugin
 widgets
 ui

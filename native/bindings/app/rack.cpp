@@ -12,6 +12,7 @@
 
 #include "app_internal.hpp"
 #include "rackpy/runtime/json.hpp"
+#include "../history/history.hpp"
 
 namespace pybind11 {
 #define RACKPY_RACK_ADDRESS(T) \
@@ -210,18 +211,21 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 			"Rack's: widgets for the patch's modules and cables, which Rack's engine must already have (as when Rack "
 			"opens a patch). Modules and cables that already have widgets are refused.")
 		.def("paste_json_action", [](const HostRack& h, py::handle data) {
+			bindings::refuseInAction("paste_json_action");
 			checkMutation();
 			auto& rack = hostAs<RW>(h);
 			auto root = json(data);
 			unlocked([&] { rack.pasteJsonAction(root.get()); });
 		}, py::arg("data"), "Rack's paste of a selection's JSON, with an undo step.")
 		.def("paste_module_json_action", [](const HostRack& h, py::handle data) {
+			bindings::refuseInAction("paste_module_json_action");
 			checkMutation();
 			auto& rack = hostAs<RW>(h);
 			auto module = json(data);
 			unlocked([&] { rack.pasteModuleJsonAction(module.get()); });
 		}, py::arg("data"), "Rack's paste of one module's JSON, with an undo step.")
 		.def("paste_clipboard_action", [](const HostRack& h) {
+			bindings::refuseInAction("paste_clipboard_action");
 			checkMutation();
 			auto& rack = hostAs<RW>(h);
 			unlocked([&] { rack.pasteClipboardAction(); });
@@ -282,6 +286,11 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 			rack.setModulePosSqueeze(&inRack(rack, mw), pos);
 		}, py::arg("module_widget"), py::arg("pos"))
 		.def("update_module_old_positions", [](const HostRack& h) { hostAs<RW>(h).updateModuleOldPositions(); })
+		.def("get_module_drag_action", [](const HostRack& h) {
+			auto& rack = hostAs<RW>(h);
+			return bindings::adoptComplexAction(rack.getModuleDragAction());
+		}, "Rack's: a ComplexAction of ModuleMoves for the modules that moved since update_module_old_positions. "
+			"Python owns it (push it to Context.history).")
 		.def("update_selection_from_rect", [](const HostRack& h) { hostAs<RW>(h).updateSelectionFromRect(); })
 		.def("select_all", [](const HostRack& h) { hostAs<RW>(h).selectAll(); })
 		.def("deselect_all", [](const HostRack& h) { hostAs<RW>(h).deselectAll(); })
@@ -328,29 +337,35 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 			unlocked([&] { rack.copyClipboardSelection(); });
 		})
 		.def("reset_selection_action", [](const HostRack& h) {
+			bindings::refuseInAction("reset_selection_action");
 			auto& rack = hostAs<RW>(h);
 			unlocked([&] { rack.resetSelectionAction(); });
 		})
 		.def("randomize_selection_action", [](const HostRack& h) {
+			bindings::refuseInAction("randomize_selection_action");
 			auto& rack = hostAs<RW>(h);
 			unlocked([&] { rack.randomizeSelectionAction(); });
 		})
 		.def("disconnect_selection_action", [](const HostRack& h) {
+			bindings::refuseInAction("disconnect_selection_action");
 			checkMutation();
 			auto& rack = hostAs<RW>(h);
 			unlocked([&] { rack.disconnectSelectionAction(); });
 		})
 		.def("clone_selection_action", [](const HostRack& h, bool cloneCables) {
+			bindings::refuseInAction("clone_selection_action");
 			checkMutation();
 			auto& rack = hostAs<RW>(h);
 			unlocked([&] { rack.cloneSelectionAction(cloneCables); });
 		}, py::arg("clone_cables") = true)
 		.def("bypass_selection_action", [](const HostRack& h, bool bypassed) {
+			bindings::refuseInAction("bypass_selection_action");
 			auto& rack = hostAs<RW>(h);
 			unlocked([&] { rack.bypassSelectionAction(bypassed); });
 		}, py::arg("bypassed"))
 		.def("is_selection_bypassed", [](const HostRack& h) { return hostAs<RW>(h).isSelectionBypassed(); })
 		.def("delete_selection_action", [](const HostRack& h) {
+			bindings::refuseInAction("delete_selection_action");
 			checkMutation();
 			auto& rack = hostAs<RW>(h);
 			unlocked([&] { rack.deleteSelectionAction(); });
@@ -375,6 +390,7 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 			unlocked([&] { rack.clearCables(); });
 		}, "Rack's: removes every cable (no undo step).")
 		.def("clear_cables_action", [](const HostRack& h) {
+			bindings::refuseInAction("clear_cables_action");
 			checkMutation();
 			auto& rack = hostAs<RW>(h);
 			unlocked([&] { rack.clearCablesAction(); });
