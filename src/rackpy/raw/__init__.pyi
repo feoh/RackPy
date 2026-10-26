@@ -43,6 +43,7 @@ from rackpy.raw._widget_helpers import create_param as create_param
 from rackpy.raw._widget_helpers import create_param_centered as create_param_centered
 from rackpy.raw._widget_helpers import create_widget as create_widget
 from rackpy.raw._widget_helpers import create_widget_centered as create_widget_centered
+from rackpy.raw.engine import Engine as _Engine
 from rackpy.raw.window import NativeHandle as _NativeHandle
 from rackpy.raw.window import Window as _Window
 
@@ -99,6 +100,8 @@ class Context:
     def window(self) -> _Window | None: ...
     @property
     def scene(self) -> app.HostScene | None: ...
+    @property
+    def engine(self) -> _Engine | None: ...
     @property
     def patch(self) -> _NativeHandle | None: ...
     @property

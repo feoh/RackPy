@@ -172,7 +172,7 @@ void attach(py::handle self, rack::engine::Module*& field, py::handle value,
 	validate(m);
 	Control& record = control(s, touched);
 	auto backreference = m.trackBackreference(&field, touched ? std::function<void()>([touched] { releaseTouched(touched); })
-		: std::function<void()>());
+		: std::function<void()>(), true);
 	// Nothing below throws.
 	if (record.link.ref)
 		record.link.ref->detach();

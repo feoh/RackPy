@@ -28,8 +28,10 @@ main-thread-only. A standalone metadata object's last Python reference may die
 on another thread: detach synchronizes with clear before its SDK field dies.
 This is not an audio-path primitive; engine-owned metadata factories are separate. */
 struct ModuleBackreference {
-	explicit ModuleBackreference(rack::engine::Module** target, std::function<void()> cleared = {})
-		: target(target), cleared(std::move(cleared)) {}
+	explicit ModuleBackreference(rack::engine::Module** target, std::function<void()> cleared = {}, bool external = false)
+		: external(external), target(target), cleared(std::move(cleared)) {}
+	/** A widget's pointer (a control), not one of the module's own metadata. */
+	const bool external;
 	void clear() {
 		std::lock_guard<std::mutex> lock(mutex);
 		if (target) {
@@ -41,6 +43,10 @@ struct ModuleBackreference {
 	void detach() {
 		std::lock_guard<std::mutex> lock(mutex);
 		target = nullptr;
+	}
+	bool attached() {
+		std::lock_guard<std::mutex> lock(mutex);
+		return target != nullptr;
 	}
 private:
 	std::mutex mutex;
@@ -114,8 +120,8 @@ void releaseFromSlot(Info* info) {
 
 struct Module : rack::engine::Module {
 	std::shared_ptr<runtime::ObjectToken> token = std::make_shared<runtime::ObjectToken>(nullptr);
-	// Set once Rack's engine owns the module (RP-14C2); never cleared: Rack
-	// deletes an engine-owned module only after Engine::removeModule.
+	// Set once Rack's engine owns the module (RP-14C2). Cleared only when Python
+	// takes it back after removing it from the engine (Construction::reclaimFromRack).
 	std::atomic<bool> engineOwned{false};
 	// The Python handles' shared state, while any handle lives (see handleState).
 	std::weak_ptr<Construction> construction;
@@ -169,13 +175,21 @@ struct Module : rack::engine::Module {
 	using Tokens = std::vector<std::shared_ptr<runtime::ObjectToken>>;
 	Tokens paramQuantityTokens, inputInfoTokens, outputInfoTokens, lightInfoTokens;
 	std::vector<std::weak_ptr<ModuleBackreference>> backreferences;
-	std::shared_ptr<ModuleBackreference> trackBackreference(rack::engine::Module** target, std::function<void()> cleared = {}) {
+	/** Whether a widget (a control) still points at this module. */
+	bool referenced() const {
+		for (const auto& weak : backreferences)
+			if (auto link = weak.lock(); link && link->external && link->attached())
+				return true;
+		return false;
+	}
+	std::shared_ptr<ModuleBackreference> trackBackreference(rack::engine::Module** target, std::function<void()> cleared = {},
+		bool external = false) {
 		runtime::requireMainThread("linking standalone metadata to a module");
 		// Prune on registration, so repeated reassignments/deleted metadata do
 		// not leave an unbounded history on a long-lived module.
 		backreferences.erase(std::remove_if(backreferences.begin(), backreferences.end(),
 			[](const auto& link) { return link.expired(); }), backreferences.end());
-		auto link = std::make_shared<ModuleBackreference>(target, std::move(cleared));
+		auto link = std::make_shared<ModuleBackreference>(target, std::move(cleared), external);
 		backreferences.push_back(link);
 		return link;
 	}
@@ -281,6 +295,17 @@ struct Construction {
 		rackOwned = object.release();
 		rackOwned->engineOwned.store(true, std::memory_order_release);
 		return rackOwned;
+	}
+	/** Python takes back a module Rack's engine no longer has (Engine.remove_module, RP-24A):
+	the caller has removed it from the engine, and nothing of Rack's still points at it. */
+	void reclaimFromRack() {
+		runtime::requireMainThread("taking a module back from Rack");
+		if (object || !rackOwned || !rackToken->alive())
+			throw runtime::Ownership("only a module Rack's engine owned can be taken back");
+		object.reset(rackOwned);
+		rackOwned = nullptr;
+		rackToken.reset();
+		object->engineOwned.store(false, std::memory_order_release);
 	}
 	void requireConstruction() const {
 		get();

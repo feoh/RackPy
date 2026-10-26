@@ -13,6 +13,7 @@
 #include "rackpy/runtime/python.hpp"
 #include "rackpy/runtime/threads.hpp"
 #include "drawing/drawing.hpp"
+#include "engine/engine.hpp"
 #include "widget/managed.hpp"
 #include "ui/ui.hpp"
 
@@ -45,8 +46,7 @@ py::object currentContext() {
 
 void bind_window(py::module_ raw) {
 	py::class_<ContextHandle> context(raw, "Context", py::is_final(),
-		"Rack's Context (APP): the objects of one Rack instance. Partial: the engine and history come with their "
-		"family (RP-24).");
+		"Rack's Context (APP): the objects of one Rack instance. Partial: the history comes with its family (RP-24C).");
 	context
 		.def_property_readonly("alive", [](const ContextHandle& h) { return h.token->alive(); })
 		.def_property_readonly("event", [](const ContextHandle& h) {
@@ -59,6 +59,11 @@ void bind_window(py::module_ raw) {
 			h.get();
 			return drawing::windowObject(h.token);
 		}, "Rack's rackpy.raw.window.Window, or None when Rack is headless.")
+		.def_property_readonly("engine", [](const ContextHandle& h) {
+			runtime::requireMainThread("using Rack's engine");
+			h.get();
+			return engineObject(h.token);
+		}, "Rack's rackpy.raw.engine.Engine.")
 		.def_property_readonly("scene", [](const ContextHandle& h) {
 			runtime::requireMainThread("using Rack's scene");
 			auto& context = h.get();

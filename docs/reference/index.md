@@ -22,6 +22,7 @@ coverage
 values
 engine-components
 engine-module
+engine
 plugin
 widgets
 ui

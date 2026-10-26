@@ -1934,6 +1934,13 @@
     },
     {
       "facade": null,
+      "id": "field:rack::Context::engine",
+      "kind": "property",
+      "raw": "rackpy.raw.Context.engine",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::Context::event",
       "kind": "property",
       "raw": "rackpy.raw.Context.event",
@@ -7127,6 +7134,258 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "method:rack::engine::Engine::addModule(rack::engine::Module *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.add_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::bypassModule(rack::engine::Module *, bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.bypass_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::clear()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.clear",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::fromJson(json_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.from_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getBlock()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_block",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getBlockDuration()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_block_duration",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getBlockFrame()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_block_frame",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getBlockFrames()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_block_frames",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getBlockTime()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_block_time",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getFrame()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_frame",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getMasterModule()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_master_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getMeterAverage()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_meter_average",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getMeterMax()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_meter_max",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getModule(int64_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getModuleIds()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_module_ids",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getModuleIds(int64_t *, size_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_module_ids",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getNumModules()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_num_modules",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getParamSmoothValue(rack::engine::Module *, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_param_smooth_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getParamValue(rack::engine::Module *, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_param_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getSampleRate()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_sample_rate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::getSampleTime()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.get_sample_time",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::hasModule(rack::engine::Module *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.has_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::moduleFromJson(rack::engine::Module *, json_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.module_from_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::moduleToJson(rack::engine::Module *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.module_to_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::prepareSave()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.prepare_save",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::prepareSaveModule(rack::engine::Module *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.prepare_save_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::randomizeModule(rack::engine::Module *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.randomize_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::removeModule(rack::engine::Module *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.remove_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::resetModule(rack::engine::Module *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.reset_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::setMasterModule(rack::engine::Module *)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.set_master_module",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::setParamSmoothValue(rack::engine::Module *, int, float)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.set_param_smooth_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::setParamValue(rack::engine::Module *, int, float)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.set_param_value",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::setSuggestedSampleRate(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.set_suggested_sample_rate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::stepBlock(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.step_block",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::toJson()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.to_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::engine::Engine::yieldWorkers()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Engine.yield_workers",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.engine.Light.brightness",
       "id": "method:rack::engine::Light::getBrightness()",
       "kind": "method",
@@ -10886,6 +11145,13 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "record:rack::engine::Engine",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.Engine",
+      "status": "planned"
+    },
+    {
       "facade": "rackpy.engine.Input",
       "id": "record:rack::engine::Input",
       "kind": "class",
@@ -11894,6 +12160,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "ddb9140870335c1a",
+  "inputs": "a8882abd237f6dfb",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }
