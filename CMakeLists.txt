@@ -44,7 +44,8 @@ target_include_directories(rackpy_loader PRIVATE native/include)
 target_link_libraries(rackpy_loader PRIVATE rackpy_sdk_plugin)
 
 # The runtime's native-only parts, shared by the host and the native unit tests.
-set(RACKPY_RUNTIME_CORE native/runtime/threads.cpp native/runtime/diagnostics.cpp native/runtime/context.cpp)
+set(RACKPY_RUNTIME_CORE native/runtime/threads.cpp native/runtime/diagnostics.cpp native/runtime/context.cpp
+  native/engine/expanders.cpp)
 # The kernel runtime (RP-17A): Python-free, and the production audio path.
 set(RACKPY_DSP_RUNTIME native/dsp/runtime/runtime.cpp native/dsp/runtime/builtin.cpp native/dsp/graph/plan.cpp)
 

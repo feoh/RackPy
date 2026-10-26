@@ -80,6 +80,10 @@ does, using only public API:
   pointer follows and each module whose neighbour changed gets an
   `ExpanderChangeEvent`. Rack's own `setExpanderModule` is `PRIVATE`; the
   bench repeats what it does with the public `Expander` fields.
+  Because Rack's engine does not run a bench's modules, Python may use
+  their [expanders](../reference/engine-module.md#expanders) directly:
+  assign RackPy message buffers, write them, request a flip and read the
+  swapped buffers after the step.
 
 It runs ordinary RackPy modules (with native kernels) and laboratory modules
 side by side. In the live-Rack tests, a patch of kernels, a bypass route,

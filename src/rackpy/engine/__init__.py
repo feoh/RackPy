@@ -2,8 +2,9 @@
 """Rack's engine objects, as one tidy import. Available inside Rack only.
 
 Ports, parameters and lights (:mod:`rackpy.engine.components`), scoped
-module construction (:mod:`rackpy.engine.module`), and Rack's running engine
-and undo history (:mod:`rackpy.engine.host`). Models are registered with
+module construction (:mod:`rackpy.engine.module`), module expanders and their
+messages (:mod:`rackpy.engine.expanders`), and Rack's running engine and undo
+history (:mod:`rackpy.engine.host`). Models are registered with
 :mod:`rackpy.plugin`.
 """
 

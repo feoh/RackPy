@@ -4,6 +4,8 @@
 // Python runs only synchronously during construction on the main thread,
 // before publication: the constructor callback and class-factory constructors.
 #include "module.hpp"
+
+#include "expander.hpp"
 #include "../dsp/kernel.hpp"
 #include "../plugin.hpp"
 #include "components.hpp"
@@ -395,6 +397,16 @@ py::object engineModuleObject(rack::engine::Module* module) {
 	return moduleObject(module::Construction::handleState(*m));
 }
 
+py::object liveModuleObject(module::Module& m) {
+	if (!m.token->alive())
+		return py::none();
+	if (auto state = m.construction.lock())
+		return moduleObject(state);
+	if (m.engineOwned.load(std::memory_order_acquire))
+		return moduleObject(module::Construction::handleState(m));
+	return py::none();  // a Python-owned module lives only as long as its handles
+}
+
 using M = rack::engine::Module;
 
 /** A Rack event as Python reads it: a copied value of Rack's own record. */
@@ -647,6 +659,7 @@ void bindModule(py::module_ engine) {
 		type->tp_traverse = traverseModule;
 		type->tp_clear = clearModule;
 	}), "An owned native Rack module, built with Module.create(configure). Not yet registerable as a plugin model.");
+	bindExpanders(engine, cls);  // RP-23A (expander.cpp)
 	py::class_<rack::engine::Module::BypassRoute>(cls, "BypassRoute", "A route value; module.bypass_routes returns copies.")
 		.def(py::init<>())
 		.def_readwrite("input_id", &rack::engine::Module::BypassRoute::inputId)

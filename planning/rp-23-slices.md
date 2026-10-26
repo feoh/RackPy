@@ -54,3 +54,23 @@ snapshots for Python while the engine runs; a Rack pair fixture measuring
 exactly one frame of latency across sample rates and engine thread counts;
 hot removal, reordering, mismatch and repeated flips under sanitizers; the
 interoperability and extension contract for custom native schemas.
+
+## RP-23A decisions
+
+- **`module` is read-only.** Rack's engine sets the pointer from
+  `moduleId` every block, through the PRIVATE `setExpanderModule`, so a
+  Python write would have no public meaning. While Rack's engine runs the
+  module, `module` is found by `module_id` through `Engine::getModule`;
+  otherwise it is the pointer, which only Rack's engine or a laboratory
+  Bench sets and both clear on removal.
+- **Neighbours are handles.** A RackPy neighbour, engine- or Python-owned,
+  comes back as its own `Module` handle (`liveModuleObject`), another
+  plugin's as an `EngineModule`.
+- **The message records stay planned.** `producerMessage` and
+  `consumerMessage` are bound for RackPy buffers and opaque foreign
+  pointers, but stay `planned` with RP-23B responsible: Python cannot
+  interpret another module's `void*`, and the native-schema
+  interoperability contract that gives native code that meaning is RP-23B's.
+- **Facade.** `rackpy.engine.expanders` re-exports the three types and adds
+  `allocate_messages(expander, schema, size)`, which gives a side both
+  buffers and restores the producer slot if the consumer assignment fails.

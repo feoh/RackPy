@@ -20,6 +20,8 @@
 #include "../app/app.hpp"
 #include "../plugin.hpp"
 #include "engine.hpp"
+
+#include "expander.hpp"
 #include "engine_internal.hpp"
 #include "module.hpp"
 #include "rackpy/runtime/context.hpp"
@@ -135,9 +137,11 @@ void deleteOnMainThread(std::function<void()> deleter) {
 }
 
 void bindEngine(py::module_ engine) {
-	py::class_<EngineModule>(engine, "EngineModule", py::is_final(),
+	py::class_<EngineModule> engineModuleClass(engine, "EngineModule", py::is_final(),
 		"A module in Rack's engine that RackPy did not create (another plugin's), found again by its ID at every use: "
-		"stale once it leaves the engine.")
+		"stale once it leaves the engine.");
+	bindEngineModuleExpanders(engineModuleClass);  // RP-23A (expander.cpp)
+	engineModuleClass
 		.def_property_readonly("id", [](const EngineModule& m) { return m.currentId(); })
 		.def_property_readonly("alive", [](const EngineModule& m) { return m.find() != nullptr; })
 		.def_property_readonly("in_engine", [](const EngineModule& m) { return !m.pythonOwned() && m.find() != nullptr; },

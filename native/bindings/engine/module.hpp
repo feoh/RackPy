@@ -55,6 +55,9 @@ Python-owned (a Module handle), since nobody hands it to Rack's engine. */
 pybind11::object createOwned(pybind11::object configure, rack::plugin::Model& model);
 /** The handle of a RackPy module Rack's engine owns, or None for anything else. Main thread, GIL. */
 pybind11::object engineModuleObject(rack::engine::Module* module);
+/** The handle of a live RackPy module whoever owns it (Rack's engine, or Python, as on a laboratory
+Bench), or None once it is gone. Main thread, GIL. */
+pybind11::object liveModuleObject(module::Module& module);
 
 }  // namespace bindings
 }  // namespace rackpy

@@ -681,6 +681,71 @@ the real engine with 0, 1 and 16 channels and compare the output with Rack's
 own `processBypass` on a plain module (RP-14C4). Enabling the module again
 clears its outputs, as Rack does.
 
+(expanders)=
+## Expanders
+
+Rack gives every module two expanders, `leftExpander` and `rightExpander`:
+the ID of the module next to it on that side, a pointer to that module, and
+two message buffers that the module allocates and Rack's engine swaps when a
+flip is requested, so a message arrives one frame after it is written. In
+`rackpy.raw.engine` (and `rackpy.engine.expanders`):
+
+- `left_expander`, `right_expander`, `get_left_expander()`,
+  `get_right_expander()` and `get_expander(side)` (0 is left, any other
+  `uint8_t` right, as in Rack) return a `Module.Expander` view, on a RackPy
+  module and on another plugin's `EngineModule`. A view never owns the
+  module; it raises `StaleHandleError` once the module is gone. Main thread.
+- `module_id` is the neighbour's ID or -1. Rack sets it on the main thread
+  for adjacent modules and when it loads a patch; Python may set it while
+  Rack's engine does not run the module.
+- `module` is the neighbour: its own `Module` handle if RackPy made it, an
+  `EngineModule` otherwise, or `None`. It is read-only, because Rack's
+  engine sets the pointer from `module_id` at every block (through
+  `setExpanderModule`, which is PRIVATE). While the engine runs the module,
+  RackPy finds the neighbour by `module_id` through Rack's engine instead of
+  reading a pointer the engine thread writes.
+- `producer_message` and `consumer_message` are an `ExpanderMessage`, a
+  `ForeignMessage` or `None`; `message_flip_requested` and
+  `request_message_flip()` are Rack's flag and request.
+
+`ExpanderMessage(schema, size)` is a RackPy buffer of `size` float32
+values (1 to 65,536), zeroed, under a schema name (1 to 64 letters, digits,
+`_`, `.` or `-`). It has `schema`, `size`, `owner` (the RackPy module whose
+expander holds it, or `None`), `len()`, indexing, `tolist()` and
+`write(values)`. Assigning one to a slot of a RackPy module gives it to the
+module, which keeps it alive while a slot holds it; it can be in only one
+slot at a time, and the two slots of a side need the same schema and size,
+because Rack swaps them. `allocate_messages(expander, schema, size)` gives
+a side both of its buffers.
+
+RackPy never shows Python a `void*`. It recognizes its own buffers by
+looking their address up in a registry, without reading the memory, so any
+other pointer, a foreign plugin's, is an opaque `ForeignMessage`: it is
+true and compares equal to the same pointer, and is never read. Only a
+RackPy module takes RackPy messages; another plugin's module allocates its
+own.
+
+Rack's engine thread reads, writes and swaps the message pointers and the
+flip flag while it runs a module, and Rack has no public way to pause it.
+So Python reads or assigns the slots, reads or writes a message's values,
+and reads, sets or requests the flip only while Rack's engine does **not**
+run the module: a Python-owned module, or one on a
+[laboratory bench](../explanation/callbacks.md#the-laboratory-bench), which
+swaps requested buffers at the end of each frame as Rack's engine does.
+Otherwise these raise `OwnershipError`. Exchanging messages in production,
+one sample apart, is native kernels' work (RP-23B).
+
+```{rackpy-example} expanders.py
+```
+
+Not yet established (RP-23B): native kernels and graph nodes that send and
+receive messages on Rack's engine thread, snapshots for Python while the
+engine runs, a measured one-frame latency in a Rack pair fixture, and the
+contract by which native extension code exchanges messages with custom
+schemas. Until then, Python cannot interpret a foreign plugin's message:
+those `void*` semantics stay open in the coverage records of
+`producerMessage` and `consumerMessage`.
+
 ## Remaining proof gates
 
 The host tests construct and delete these owned native modules **inside actual

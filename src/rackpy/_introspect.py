@@ -23,6 +23,7 @@ MODULES = (
     "rackpy.math",
     "rackpy.types",
     "rackpy.engine",
+    "rackpy.engine.expanders",
     "rackpy.widget",
     "rackpy.drawing",
     "rackpy.plugin",

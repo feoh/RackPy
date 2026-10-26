@@ -5062,6 +5062,41 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.engine.expanders.Expander.consumer_message",
+      "id": "field:rack::engine::Module::Expander::consumerMessage",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.Module.Expander.consumer_message",
+      "status": "planned"
+    },
+    {
+      "facade": "rackpy.engine.expanders.Expander.message_flip_requested",
+      "id": "field:rack::engine::Module::Expander::messageFlipRequested",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.Module.Expander.message_flip_requested",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.expanders.Expander.module",
+      "id": "field:rack::engine::Module::Expander::module",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.Module.Expander.module",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.expanders.Expander.module_id",
+      "id": "field:rack::engine::Module::Expander::moduleId",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.Module.Expander.module_id",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.expanders.Expander.producer_message",
+      "id": "field:rack::engine::Module::Expander::producerMessage",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.Module.Expander.producer_message",
+      "status": "planned"
+    },
+    {
       "facade": "rackpy.engine.Module.ExpanderChangeEvent.side",
       "id": "field:rack::engine::Module::ExpanderChangeEvent::side",
       "kind": "property",
@@ -5153,6 +5188,13 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.engine.Module.left_expander",
+      "id": "field:rack::engine::Module::leftExpander",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.Module.left_expander",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.engine.Module.light_infos",
       "id": "field:rack::engine::Module::lightInfos",
       "kind": "property",
@@ -5199,6 +5241,13 @@
       "id": "field:rack::engine::Module::params",
       "kind": "property",
       "raw": "rackpy.raw.engine.Module.params",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.Module.right_expander",
+      "id": "field:rack::engine::Module::rightExpander",
+      "kind": "property",
+      "raw": "rackpy.raw.engine.Module.right_expander",
       "status": "implemented"
     },
     {
@@ -13966,6 +14015,13 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.engine.expanders.Expander.request_message_flip",
+      "id": "method:rack::engine::Module::Expander::requestMessageFlip()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Module.Expander.request_message_flip",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.engine.Module.config",
       "id": "method:rack::engine::Module::config(int, int, int, int)",
       "kind": "method",
@@ -14008,6 +14064,13 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.engine.Module.get_expander",
+      "id": "method:rack::engine::Module::getExpander(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Module.get_expander",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.engine.Module.get_id",
       "id": "method:rack::engine::Module::getId()",
       "kind": "method",
@@ -14026,6 +14089,13 @@
       "id": "method:rack::engine::Module::getInputInfo(int)",
       "kind": "method",
       "raw": "rackpy.raw.engine.Module.get_input_info",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.Module.get_left_expander",
+      "id": "method:rack::engine::Module::getLeftExpander()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Module.get_left_expander",
       "status": "implemented"
     },
     {
@@ -14110,6 +14180,13 @@
       "id": "method:rack::engine::Module::getPatchStorageDirectory()",
       "kind": "method",
       "raw": "rackpy.raw.engine.Module.get_patch_storage_directory",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.engine.Module.get_right_expander",
+      "id": "method:rack::engine::Module::getRightExpander()",
+      "kind": "method",
+      "raw": "rackpy.raw.engine.Module.get_right_expander",
       "status": "implemented"
     },
     {
@@ -18943,6 +19020,13 @@
       "status": "implemented"
     },
     {
+      "facade": "rackpy.engine.expanders.Expander",
+      "id": "record:rack::engine::Module::Expander",
+      "kind": "class",
+      "raw": "rackpy.raw.engine.Module.Expander",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.engine.Module.ExpanderChangeEvent",
       "id": "record:rack::engine::Module::ExpanderChangeEvent",
       "kind": "class",
@@ -20539,6 +20623,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "bcacc5dc6a5a0773",
+  "inputs": "69025599d309b7b0",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }
