@@ -60,6 +60,17 @@ add_library(rackpy_host MODULE native/host/host.cpp native/host/host_module.cpp
   ${RACKPY_RUNTIME_CORE} native/runtime/python.cpp native/runtime/interpreter.cpp native/runtime/json.cpp
   native/bindings/generated/registry.cpp ${RACKPY_BINDING_ADAPTERS} native/module/lifecycle.cpp
   native/plugin/model.cpp ${RACKPY_DSP_RUNTIME} native/dsp/runtime/libraries.cpp ${RACKPY_LABORATORY})
+# Compiling a binding translation unit takes up to about 5 GB (pybind11 templates: dsp/filter.cpp and
+# dsp/resampler.cpp measured 4.8 GB with GCC 16), so parallel compiles are capped by memory rather than
+# by cores: one per 6 GB, which is 2 on a 16 GB CI runner. Ninja job pools; other generators ignore it.
+cmake_host_system_information(RESULT _rackpy_memory_mib QUERY TOTAL_PHYSICAL_MEMORY)
+math(EXPR _rackpy_compile_jobs "${_rackpy_memory_mib} / 6144")
+if(_rackpy_compile_jobs LESS 1)
+  set(_rackpy_compile_jobs 1)
+endif()
+set(RACKPY_COMPILE_JOBS ${_rackpy_compile_jobs} CACHE STRING "Parallel compiles of RackPy's heavy sources (memory-bound)")
+set_property(GLOBAL APPEND PROPERTY JOB_POOLS rackpy_heavy=${RACKPY_COMPILE_JOBS})
+set_property(TARGET rackpy_host PROPERTY JOB_POOL_COMPILE rackpy_heavy)
 if(RACKPY_TEST_HOOKS)
   target_sources(rackpy_host PRIVATE native/testing/testing.cpp)
   target_compile_definitions(rackpy_host PRIVATE RACKPY_TEST_HOOKS)
@@ -191,6 +202,7 @@ if(RACKPY_BUILD_TESTS)
   target_compile_options(rackpy_dsp_reference_sanitized PRIVATE -fsanitize=address,undefined -fno-sanitize-recover=undefined)
   target_link_options(rackpy_dsp_reference_sanitized PRIVATE -fsanitize=address,undefined)
   target_link_libraries(rackpy_dsp_reference_sanitized PRIVATE rackpy_sdk_program)
+  set_property(TARGET rackpy_dsp_reference rackpy_dsp_reference_sanitized PROPERTY JOB_POOL_COMPILE rackpy_heavy)
   add_executable(rackpy_components_reference native/tests/components_reference.cpp)
   set_target_properties(rackpy_components_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_link_libraries(rackpy_components_reference PRIVATE rackpy_sdk_program)
