@@ -5,6 +5,7 @@
 
 #include <cmath>
 
+#include "../../dsp/graph/plan.hpp"
 #include "../../dsp/runtime/runtime.hpp"
 #include "rackpy/runtime/errors.hpp"
 #include "rackpy/runtime/python.hpp"
@@ -19,6 +20,7 @@ namespace {
 
 struct TypeHandle {
 	const KernelType* type;
+	std::shared_ptr<const KernelType> keep;  // a graph plan's type, which no registry owns
 };
 
 /** A kernel Python made. Before Module.set_kernel it owns the kernel; after,
@@ -26,6 +28,7 @@ the module does, and the handle reaches it through the module while that
 kernel is the module's latest. */
 struct KernelHandle {
 	const KernelType* type;
+	std::shared_ptr<const KernelType> keep;  // as TypeHandle::keep
 	std::unique_ptr<dsp::Hosted> owned;
 	dsp::Hosted* hosted = nullptr;
 	std::shared_ptr<runtime::ObjectToken> hostedToken;
@@ -85,7 +88,9 @@ size_t fieldIndex(const KernelType& type, const std::string& name) {
 	throw std::logic_error("control " + name + " is not a field of " + type.name);
 }
 
-KernelHandle createKernel(const KernelType& type, py::kwargs kwargs) {
+KernelHandle makeKernel(const KernelType& type, std::vector<double> values, std::shared_ptr<const KernelType> keep);
+
+KernelHandle createKernel(const KernelType& type, py::kwargs kwargs, std::shared_ptr<const KernelType> keep) {
 	runtime::requireMainThread("creating a kernel");
 	std::vector<double> values;
 	for (const Field& field : type.fields) {
@@ -104,10 +109,16 @@ KernelHandle createKernel(const KernelType& type, py::kwargs kwargs) {
 		if (!known)
 			throw py::type_error(type.name + "() got an unexpected field " + name);
 	}
+	return makeKernel(type, std::move(values), std::move(keep));
+}
+
+KernelHandle makeKernel(const KernelType& type, std::vector<double> values, std::shared_ptr<const KernelType> keep) {
 	KernelHandle handle;
 	handle.type = &type;
+	handle.keep = keep;
 	handle.owned = std::make_unique<dsp::Hosted>();
 	handle.owned->type = &type;
+	handle.owned->ownedType = std::move(keep);
 	handle.owned->values = values;
 	// A kernel library's create() runs its own code, with its own copy of the C++ runtime: turn
 	// whatever it throws into ValueError here rather than relying on matching exception types.
@@ -152,8 +163,63 @@ void setControl(KernelHandle& k, const std::string& name, py::handle value) {
 	k.hosted->values[fieldIndex(*k.type, name)] = v;  // alive: checked above
 }
 
-py::object typeObject(const KernelType* type) {
-	return runtime::identity(type, 0, [&] { return py::cast(TypeHandle{type}); });
+py::object typeObject(const KernelType* type, const std::shared_ptr<const KernelType>& keep = nullptr) {
+	return runtime::identity(type, 0, [&] { return py::cast(TypeHandle{type, keep}); });
+}
+
+/** A Python plan dict (rackpy.dsp.graph.Plan.to_dict()) as a PlanSpec; graph::planType checks the rest. */
+graph::PlanSpec planSpec(const py::dict& plan) {
+	auto number = [](py::handle value, const char* what) {
+		if (PyBool_Check(value.ptr()) || !(PyLong_Check(value.ptr()) || PyFloat_Check(value.ptr())))
+			throw py::type_error(std::string("a graph plan's ") + what + " must be numbers");
+		return value.cast<double>();
+	};
+	auto whole = [](py::handle value, const char* what) {
+		if (PyBool_Check(value.ptr()) || !PyLong_Check(value.ptr()))
+			throw py::type_error(std::string("a graph plan's ") + what + " must be ints");
+		return value.cast<long long>();
+	};
+	graph::PlanSpec spec;
+	for (const char* key : {"nodes", "latches", "controls"})
+		if (!plan.contains(key))
+			throw py::type_error(std::string("a graph plan needs \"") + key + "\"; make it with rackpy.dsp.graph.Graph.plan()");
+	py::list nodes = plan["nodes"].cast<py::list>();
+	if (nodes.size() > graph::MAX_NODES)
+		throw py::value_error("a graph plan has at most " + std::to_string(graph::MAX_NODES) + " nodes");
+	for (py::handle item : nodes) {
+		py::dict node = item.cast<py::dict>();
+		graph::PlanSpec::Node n;
+		n.op = node["op"].cast<std::string>();
+		for (py::handle i : node["inputs"].cast<py::list>())
+			n.inputs.push_back(whole(i, "node inputs"));
+		for (py::handle a : node["args"].cast<py::list>())
+			n.args.push_back(number(a, "node arguments"));
+		spec.nodes.push_back(std::move(n));
+	}
+	for (py::handle item : plan["latches"].cast<py::list>()) {
+		py::list latch = item.cast<py::list>();
+		if (latch.size() != 2)
+			throw py::type_error("a graph plan's latches are [delay, source] pairs");
+		spec.latches.emplace_back(whole(latch[0], "latches"), whole(latch[1], "latches"));
+	}
+	for (py::handle item : plan["controls"].cast<py::list>()) {
+		py::dict control = item.cast<py::dict>();
+		spec.controls.push_back({control["name"].cast<std::string>(), whole(control["node"], "control nodes"),
+			number(control["default"], "control defaults")});
+	}
+	return spec;
+}
+
+KernelHandle graphKernel(const py::dict& plan) {
+	runtime::requireMainThread("compiling a graph");
+	std::shared_ptr<const KernelType> type;
+	try {
+		type = graph::planType(planSpec(plan));
+	}
+	catch (const std::invalid_argument& e) {
+		throw py::value_error(e.what());
+	}
+	return makeKernel(*type, graph::planDefaults(*type), type);
 }
 
 }  // namespace
@@ -185,6 +251,7 @@ py::object moduleKernel(const ModuleRef& ref) {
 	return runtime::identity(hosted, hosted->token->generation, [&] {
 		KernelHandle k;
 		k.type = hosted->type;
+		k.keep = hosted->ownedType;
 		k.hosted = hosted;
 		k.hostedToken = hosted->token;
 		k.module = &m;
@@ -208,13 +275,13 @@ void bindKernels(py::module_ host) {
 			return py::tuple(out);
 		}, "(name, kind, default, required, doc) for each field; kind is input, output, param, light or number.")
 		.def_property_readonly("controls", [](const TypeHandle& t) { return py::tuple(py::cast(t.type->controls)); })
-		.def("__call__", [](const TypeHandle& t, py::kwargs kwargs) { return createKernel(*t.type, kwargs); })
+		.def("__call__", [](const TypeHandle& t, py::kwargs kwargs) { return createKernel(*t.type, kwargs, t.keep); })
 		.def("__repr__", [](const TypeHandle& t) { return "<kernel type " + t.type->name + ">"; });
 
 	py::class_<KernelHandle>(mod, "Kernel", py::is_final(),
 		"A native kernel. Module.set_kernel hands it to a module; set() changes a control without running Python "
 		"on the audio path.")
-		.def_property_readonly("type", [](const KernelHandle& k) { return typeObject(k.type); })
+		.def_property_readonly("type", [](const KernelHandle& k) { return typeObject(k.type, k.keep); })
 		.def_property_readonly("attached", [](const KernelHandle& k) { return !k.owned; })
 		.def_property_readonly("alive", [](const KernelHandle& k) {
 			runtime::requireMainThread("checking a kernel");
@@ -258,6 +325,9 @@ void bindKernels(py::module_ host) {
 			throw py::key_error("no kernel type " + name);
 		return typeObject(type);
 	}, py::arg("name"));
+	mod.def("graph_kernel", &graphKernel, py::arg("plan"),
+		"A plan interpreter kernel for a graph plan (rackpy.dsp.graph.Plan.to_dict()); use Graph.compile().");
+	mod.attr("GRAPH_MAX_NODES") = graph::MAX_NODES;
 	mod.attr("CONTROL_CAPACITY") = dsp::CONTROL_CAPACITY;
 	mod.attr("KERNEL_ABI") = KERNEL_ABI;
 }

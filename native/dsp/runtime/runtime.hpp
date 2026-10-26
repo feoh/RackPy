@@ -51,6 +51,8 @@ deleted on the main thread; the engine thread only calls `kernel`. */
 struct Hosted {
 	std::unique_ptr<Kernel> kernel;
 	const KernelType* type = nullptr;
+	/** For a type that is not registered (a graph plan's, RP-21B): keeps `type` alive as long as the kernel. */
+	std::shared_ptr<const KernelType> ownedType;
 	std::shared_ptr<runtime::ObjectToken> token = std::make_shared<runtime::ObjectToken>(nullptr);
 	bool started = false;  // engine thread: sampleRateChange sent before the first frame
 	std::vector<double> values;  // main thread: the fields as created, controls as last set

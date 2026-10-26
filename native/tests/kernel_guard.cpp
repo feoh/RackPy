@@ -4,6 +4,9 @@
 // draining, kernel pickup, retirement and failure) is marked, and the guard
 // counts heap, lock, write and GIL calls inside the marks. Main-thread work
 // (attach, set, reclaim) stays outside them, as in Rack. Prints JSON.
+// RP-21B adds a graph run: a 16-channel plan with every node type, its
+// controls set through the queue and the plan replaced while it runs.
+#include "../dsp/graph/plan.hpp"
 #include "../module/module.hpp"
 
 #include <dlfcn.h>
@@ -68,6 +71,62 @@ std::string run(module::Module& m, int frames, bool swapping) {
 	return text;
 }
 
+/** A plan with every node type, on 16 channels; `seed` varies its constants so replacements differ. */
+std::unique_ptr<dsp::Hosted> everyNode(double seed) {
+	graph::PlanSpec spec;
+	auto node = [&](const char* op, std::vector<long long> inputs = {}, std::vector<double> args = {}) {
+		spec.nodes.push_back({op, std::move(inputs), std::move(args)});
+		return (long long) spec.nodes.size() - 1;
+	};
+	long long in = node("input", {}, {0}), param = node("param", {}, {0});
+	long long level = node("control", {}, {seed});
+	spec.controls.push_back({"level", level, seed});
+	long long rate = node("sample_rate"), time = node("sample_time");
+	long long pitch = node("add", {in, param});
+	long long voices = node("sin2pi", {node("phasor", {node("pitch_to_freq", {pitch})})});
+	long long mixed = node("mul", {voices, level});
+	long long shaped = node("clamp", {node("sub", {mixed, node("div", {in, node("constant", {}, {3})})}),
+		node("neg", {node("abs", {level})}), level});
+	long long picked = node("where", {node("gt", {in, param}), node("min", {shaped, rate}), node("max", {shaped, time})});
+	long long edge = node("schmitt", {in}, {0.1, 1.0});
+	long long gate = node("pulse", {edge}, {0.001});
+	long long held = node("delay", {}, {0});
+	spec.latches.emplace_back(held, node("add", {node("mul", {held, node("constant", {}, {0.5})}), picked}));
+	node("output", {node("add", {held, gate})}, {0});
+	node("output", {node("lt", {node("le", {edge, gate}), node("ge", {in, param})})}, {1});
+	auto type = graph::planType(spec);
+	auto hosted = std::make_unique<dsp::Hosted>();
+	hosted->type = type.get();
+	hosted->ownedType = type;
+	hosted->values = graph::planDefaults(*type);
+	hosted->kernel = type->create(hosted->values);
+	return hosted;
+}
+
+std::string runGraph(module::Module& m, int frames) {
+	resetCounts();
+	rack::engine::Module::ProcessArgs args;
+	args.sampleRate = 48000.f;
+	args.sampleTime = 1.f / 48000.f;
+	for (int n = 0; n < frames; n++) {
+		args.frame = n;
+		if (n % 1000 == 500)
+			m.kernels.attach(everyNode(1 + n % 7), true);
+		if (n % 7 == 0)
+			m.kernels.set(m.kernels.latest(), 0, 0.5 + (n % 3), true);
+		for (int c = 0; c < 16; c++)
+			m.inputs[0].setVoltage((float) ((n + c) % 11) / 5.f - 1.f, c);
+		enter();
+		m.process(args);
+		leave();
+		if (n % 100 == 0)
+			m.kernels.reclaim();
+	}
+	char text[512];
+	report(text, sizeof text);
+	return text;
+}
+
 }  // namespace
 
 int main() {
@@ -103,7 +162,13 @@ int main() {
 	hostedAllocating->kernel = std::make_unique<Allocating>();
 	injected.kernels.attach(std::move(hostedAllocating), true);
 	std::string inject = run(injected, frames, false);
-	std::printf("{\"frames\": %d, \"production\": %s, \"failure\": %s, \"inject\": %s}\n", frames, production.c_str(),
-		failure.c_str(), inject.c_str());
+	module::Module graphed;
+	graphed.config(1, 1, 2, 0);
+	graphed.inputs[0].channels = 16;
+	graphed.outputs[0].channels = graphed.outputs[1].channels = 1;
+	graphed.kernels.attach(everyNode(1), true);
+	std::string graphRun = runGraph(graphed, frames);
+	std::printf("{\"frames\": %d, \"production\": %s, \"failure\": %s, \"inject\": %s, \"graph\": %s}\n", frames,
+		production.c_str(), failure.c_str(), inject.c_str(), graphRun.c_str());
 	return 0;
 }

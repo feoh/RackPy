@@ -46,7 +46,7 @@ target_link_libraries(rackpy_loader PRIVATE rackpy_sdk_plugin)
 # The runtime's native-only parts, shared by the host and the native unit tests.
 set(RACKPY_RUNTIME_CORE native/runtime/threads.cpp native/runtime/diagnostics.cpp native/runtime/context.cpp)
 # The kernel runtime (RP-17A): Python-free, and the production audio path.
-set(RACKPY_DSP_RUNTIME native/dsp/runtime/runtime.cpp native/dsp/runtime/builtin.cpp)
+set(RACKPY_DSP_RUNTIME native/dsp/runtime/runtime.cpp native/dsp/runtime/builtin.cpp native/dsp/graph/plan.cpp)
 
 # Rack API bindings: the registry bin/generate_bindings.py generates from bindings/manifest.json,
 # and the hand-written adapters it calls (native/bindings/<family>.cpp).
@@ -104,6 +104,13 @@ if(RACKPY_BUILD_TESTS)
   target_include_directories(rackpy_kernel_tests PRIVATE native/include)
   target_link_libraries(rackpy_kernel_tests PRIVATE rackpy_sdk_program)
   add_test(NAME kernel_runtime COMMAND rackpy_kernel_tests)
+  # RP-21B: graph plans against direct C++ twins.
+  add_executable(rackpy_graph_tests native/tests/test_graph.cpp native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE}
+    ${RACKPY_DSP_RUNTIME})
+  set_target_properties(rackpy_graph_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_include_directories(rackpy_graph_tests PRIVATE native/include)
+  target_link_libraries(rackpy_graph_tests PRIVATE rackpy_sdk_program)
+  add_test(NAME graph_plans COMMAND rackpy_graph_tests)
   # The RP-07 audio-path guard, preloaded by tests/dsp/test_runtime.py around rackpy_kernel_guard.
   add_library(rackpy_audio_guard MODULE native/testing/audio_guard.c)
   set_target_properties(rackpy_audio_guard PROPERTIES PREFIX "" OUTPUT_NAME audio_guard C_STANDARD 11)
@@ -121,6 +128,13 @@ if(RACKPY_BUILD_TESTS)
   set_target_properties(rackpy_kernel_bench PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_include_directories(rackpy_kernel_bench PRIVATE native/include)
   target_link_libraries(rackpy_kernel_bench PRIVATE rackpy_sdk_program)
+
+  # RP-21B: the plan interpreter against hand-fused C++ modules (timing only; not a CTest).
+  add_executable(rackpy_graph_bench native/tests/graph_bench.cpp native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE}
+    ${RACKPY_DSP_RUNTIME})
+  set_target_properties(rackpy_graph_bench PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_include_directories(rackpy_graph_bench PRIVATE native/include)
+  target_link_libraries(rackpy_graph_bench PRIVATE rackpy_sdk_program)
 
   # Kernel libraries for tests/dsp (RP-17B): the example, and ones RackPy must refuse.
   set(_rackpy_kernel_libraries example:fold.cpp:NONE wrong_abi:broken.cpp:VARIANT_WRONG_ABI

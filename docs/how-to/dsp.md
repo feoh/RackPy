@@ -5,8 +5,8 @@ built-in kernel types and kernels you write in C++. Rack's DSP helpers
 (filters, FFTs, MinBLEP, resamplers, ring buffers, ...) are
 [bound for Python](../reference/dsp.md) (RP-18, RP-19) for design, analysis
 and tests, and its SIMD vectors [too](../reference/simd.md) (RP-20).
-[DSP graphs](graphs.md) can be described and checked offline (RP-21A); their
-native execution is RP-21B.
+[DSP graphs](graphs.md) built in Python run as kernels too, through the
+native plan interpreter (RP-21A, RP-21B).
 
 Rack calls every module's `process()` once per sample, tens of thousands of
 times a second, on its engine thread. Python is far too slow and too

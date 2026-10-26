@@ -348,6 +348,17 @@ void define(py::module_ m) {
 	m.def("module_process_bypass", [](const bindings::ModuleRef& r) {
 		r.get().processBypass({48000.f, 1.f / 48000.f, 0});
 	});
+	// RP-21B: step a Python-owned module's process() on the main thread, frame by frame, so that a
+	// graph plan's output can be compared exactly. The engine never runs such a module.
+	m.def("module_process", [](const bindings::ModuleRef& r, float sampleRate, int64_t frame) {
+		requireMainThread("module_process");
+		module::Module& mod = r.get();
+		if (mod.engineOwned.load(std::memory_order_acquire))
+			throw Ownership("Rack's engine runs this module; module_process steps only Python-owned modules");
+		if (!(sampleRate > 0.f))
+			throw py::value_error("module_process needs a positive sample rate");
+		mod.process({sampleRate, 1.f / sampleRate, frame});
+	}, py::arg("module"), py::arg("sample_rate"), py::arg("frame") = 0);
 	m.def("try_python_on_engine_thread", [](const ModuleHandle& h) { live(h).tryPython.store(true); });
 	m.def("drop_on_engine_thread", [](const ModuleHandle& h, py::object o) {
 		requireMainThread("drop_on_engine_thread");

@@ -74,6 +74,8 @@ def test_kernels_in_rack(make_hooks_bundle: Callable[[], Path], rack_host: Path,
     result = run_pytest_in_rack(make_hooks_bundle(), rack_host, tmp_path, SUITE, during_ui=True)
     assert result.exit == 0, result.summary()
     assert result.outcomes() and set(result.outcomes().values()) == {"passed"}, result.summary()
+    ran = {name.split("::", 1)[0].rsplit("/", 1)[-1] for name in result.outcomes()}
+    assert ran == {p.name for p in SUITE.glob("test_*.py")}, f"every in-Rack test file reports: {sorted(ran)}"
 
 
 @pytest.mark.host

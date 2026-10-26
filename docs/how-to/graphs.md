@@ -5,14 +5,38 @@ native node types: ports, parameters and controls in, arithmetic,
 oscillators and Rack's own triggers in between, outputs and lights out.
 Python only describes it; nothing in a graph runs Python per sample.
 
-**What is available today (RP-21A):** {py:mod}`rackpy.dsp.graph` builds,
-validates and lowers graphs, and {py:mod}`rackpy.dsp.graph_reference`
-evaluates them offline, in Python, for tests and teaching. Running a graph
-inside a module, on Rack's engine thread, needs the native plan interpreter
-(RP-21B) or the compiled tier (RP-21C), which are **not available yet**.
-Until then, use a [kernel](dsp.md) for a module's audio path.
+**Implemented (RP-21A, RP-21B), Linux x86_64 inside Rack Free 2.6.6.**
+{py:mod}`rackpy.dsp.graph` builds, validates and lowers graphs, and
+{py:meth}`~rackpy.dsp.graph.Graph.compile` turns one into a native
+[kernel](dsp.md) that the **plan interpreter** runs on Rack's engine
+thread. {py:mod}`rackpy.dsp.graph_reference` evaluates graphs offline, in
+Python, for tests and teaching. A compiled tier, which composes the nodes at
+C++ compile time for the lowest cost, is RP-21C and **not available yet**.
 
-Both modules are plain Python and work outside Rack.
+Building, checking and the offline reference work outside Rack;
+`compile()` needs Rack.
+
+## Run a graph in a module
+
+```{rackpy-example} graph_kernel.py
+:caption: Rack's tutorial oscillator as a graph, run natively
+```
+
+`compile()` checks the plan again natively and allocates everything the plan
+needs, on the main thread. The kernel's fields are the ports, params and
+lights the graph uses (`input[0]`, `light[0]`, ...), which `set_kernel`
+checks against the module's configuration, followed by its controls, which
+`Kernel.set` changes through RP-17's bounded queue at a frame boundary.
+Replacing a module's kernel, plan or not, happens at a frame boundary, and
+the old one is freed on the main thread. Rack's reset (Initialize) starts
+the nodes' state over (phases, triggers, pulses, delays) and keeps the
+controls Python set.
+
+**Cost.** The interpreter runs a plan's nodes in order through one `switch`,
+with no virtual call per node, and writes constants and controls in
+advance. That still costs more than the same DSP fused by hand in C++; the
+measurements are in `benchmarks/rp21-graph-cost.json`. Use a C++ kernel
+where those nanoseconds matter, until the compiled tier exists.
 
 ## Build and check a graph
 

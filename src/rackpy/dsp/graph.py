@@ -16,12 +16,14 @@ operand read 0 V. Feedback within the module needs an explicit
 path, rather than given hidden latency.
 
 :meth:`Graph.plan` validates the graph and lowers it to a :class:`Plan`,
-the description its execution tiers share. Today the only one is the
-offline reference, :mod:`rackpy.dsp.graph_reference`, for tests and
-teaching. The native plan interpreter and the compiled tier that run plans
-on Rack's engine thread are RP-21B and RP-21C, and are not available yet.
+the description its execution tiers share. :meth:`Graph.compile` turns it
+into a native kernel run by the plan interpreter on Rack's engine thread,
+for ``Module.set_kernel``; :mod:`rackpy.dsp.graph_reference` evaluates it
+offline, for tests and teaching. A compiled tier that composes the nodes
+statically is RP-21C, not available yet.
 
-This module is pure Python and works outside Rack.
+This module is pure Python and works outside Rack, except for
+:meth:`Graph.compile`.
 """
 
 from __future__ import annotations
@@ -29,7 +31,10 @@ from __future__ import annotations
 import dataclasses
 import math
 import sys
-from typing import Final
+from typing import TYPE_CHECKING, Final
+
+if TYPE_CHECKING:
+    from _rackpy_host.dsp import Kernel
 
 __all__ = [
     "MAX_CHANNELS",
@@ -412,6 +417,25 @@ class Graph:
         if light in self._lights:
             raise GraphError(f"light {light} is already set (at {self._made[self._lights[light]].where})")
         self._lights[light] = self._node("light", (brightness,), (float(light),))
+
+    # --- execution -----------------------------------------------------------------------------
+    def compile(self) -> Kernel:
+        """The graph as a native kernel, run by the plan interpreter: hand it to ``Module.set_kernel``.
+
+        The plan is checked again natively, and its kernel allocates all its
+        state now, on the main thread. Its fields are the ports, params and
+        lights the graph uses, which ``set_kernel`` checks against the
+        module; its controls change with ``Kernel.set``. Available inside
+        Rack only.
+        """
+        plan = self.plan()
+        try:
+            from _rackpy_host import dsp
+        except ImportError as e:
+            raise ImportError(
+                "Graph.compile needs Rack, in a RackPy plugin; rackpy.dsp.graph_reference runs graphs offline"
+            ) from e
+        return dsp.graph_kernel(plan.to_dict())
 
     # --- lowering ------------------------------------------------------------------------------
     def plan(self) -> Plan:

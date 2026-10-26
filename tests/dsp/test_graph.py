@@ -243,3 +243,10 @@ def test_the_reference_checks_its_inputs() -> None:
         run(tutorial(), 1, inputs={0: [[0.0] * 17]})
     with pytest.raises(ValueError, match="1 values"):
         run(tutorial(), 2, params={0: [0.0]})
+
+
+def test_compiling_needs_rack() -> None:
+    g = Graph()
+    g.output(0, g.input(0))
+    with pytest.raises(ImportError, match=r"needs Rack.*graph_reference"):
+        g.compile()
