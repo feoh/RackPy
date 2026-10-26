@@ -66,12 +66,14 @@ freely, because C++ instantiates one function per value. RackPy's contract:
 - `Frame<CHANNELS, T>` is plain data, so it is written in Python and takes any
   `CHANNELS` from 1 ([below](#frames)).
 
-**Owner review item:** these bounds (the `poly*` 32, the `IIRFilter` orders
-2 to 8, the MIDI processors' and the sample-rate converter's 1 to 16
+**Approved by the owner (2026-10-26):** the sample-rate converter's 1 to 16
 channels, the MinBLEP, decimator and upsampler sizes, and the ring buffers'
-element types and sizes) are RackPy's choices, recorded in the manifest. A full-coverage release
-needs the owner to confirm them, or to choose another contract
-([release bar](../coverage.md#release-bar)).
+element types and sizes.
+
+**Owner review item:** the `poly*` bound of 32, the `IIRFilter` orders 2 to
+8 and the MIDI processors' 1 to 16 channels are RackPy's choices, recorded
+in the manifest. A full-coverage release needs the owner to confirm them, or
+to choose another contract ([release bar](../coverage.md#release-bar)).
 
 (dsp-common)=
 ## Constants, conversions and scalings
@@ -531,7 +533,7 @@ as in Rack), and `process()` returns the next correction to add. `buf`
 
 Rack's ring buffers are templates over an element type and compile-time
 sizes, so no binding can take every `T` and `S`. RackPy's generic contract
-(an owner review item; coverage policy 10) instantiates:
+(coverage policy 10; approved by the owner on 2026-10-26) instantiates:
 
 - `T`: float, `float_4`, and `Frame[2]`, `Frame[8]` and `Frame[16]`, the
   frame sizes of Rack's audio interfaces.

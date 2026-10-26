@@ -43,7 +43,7 @@ Validation: [rp-19a-validation.md](rp-19a-validation.md).
 (`tk-rackpy-19b-minblep-and-the-sample-rate-converter-67a664`). 36 records.
 Validation: [rp-19b-validation.md](rp-19b-validation.md).
 
-- **Bounded contracts (owner review item).** `MinBlepGenerator<Z, O, T>` for
+- **Bounded contracts (owner-approved 2026-10-26).** `MinBlepGenerator<Z, O, T>` for
   Z and O = 4 to 64, `Decimator<OVERSAMPLE, QUALITY, T>` and
   `Upsampler<OVERSAMPLE, QUALITY>` for 2 to 32 (powers of 2), T = float and
   float_4; `SampleRateConverter<MAX_CHANNELS>` for 1 to 16, Rack's own
@@ -61,7 +61,7 @@ Validation: [rp-19b-validation.md](rp-19b-validation.md).
 (`tk-rackpy-19c-dsp-ring-buffers-ringbuffer-doublerin-9d17ea`). 43 records.
 Validation: [rp-19c-validation.md](rp-19c-validation.md).
 
-- **Generic contract (coverage policy 10; owner review item).** T = float,
+- **Generic contract (coverage policy 10; owner-approved 2026-10-26).** T = float,
   float_4, and `Frame<2>`, `Frame<8>`, `Frame<16>` (Rack's audio interfaces'
   frame sizes); `RingBuffer` and `DoubleRingBuffer` for S = 16 to 32768 and
   `AppleRingBuffer` for S = 16 to 4096 with N = 16 S (Rack's 64-in-1024

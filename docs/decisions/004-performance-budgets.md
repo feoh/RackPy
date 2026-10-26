@@ -1,8 +1,9 @@
 # ADR 004: Performance and real-time budgets
 
-- **Status:** Accepted as the working budgets for implementation. Two
-  revisions to the candidate budgets in [performance](../performance.md) need
-  **owner approval** (marked below). Every number comes from the planning
+- **Status:** Accepted as the working budgets for implementation. Of two
+  revisions to the candidate budgets in [performance](../performance.md), the
+  owner approved the graph-plan budget on 2026-10-26; the `ui-exclusive`
+  budget still needs **owner approval** (marked below). Every number comes from the planning
   machine, which is **not** controlled hardware; RP-43 repeats them on
   controlled hardware with an audio interface before any performance claim.
 - **Date:** 2026-10-21
@@ -129,7 +130,7 @@ violations must be impossible to optimize away.
 | --- | --- | --- | --- |
 | Production audio path: Python, GIL, refcount, heap, locks, IO, logging | **Zero**, enforced by the guard in CI plus a check that kernel objects reference no `Py*` symbols | Guard validated | Frozen |
 | Fixed overhead of a RackPy module vs. the equivalent C++ module | **≤ 1.5 ns per frame** absolute on this CPU class, and **≤ 10% p50 / ≤ 20% p99** for kernels of at least sine-oscillator cost | 0.87–0.99 ns; sine +9.3%, poly16 +6.7% | Frozen. For trivial kernels report nanoseconds, not ratios. |
-| Graph plans (RP-21) vs. hand-fused native | **≤ 1.5 ns per frame per plan**, ≤ 1 ULP output difference | Virtual nodes +3.0 ns; static composition +1.15 ns | **Owner approval needed.** Replaces "≤10%" for plans: the remaining 12% is stores between nodes, not RackPy dispatch. |
+| Graph plans (RP-21) vs. hand-fused native | **≤ 1.5 ns per frame per plan**, ≤ 1 ULP output difference | Virtual nodes +3.0 ns; static composition +1.15 ns | **Approved by the owner, 2026-10-26.** Replaces "≤10%" for plans: the remaining 12% is stores between nodes, not RackPy dispatch. RP-21's compiled tier measured +1.46 to 1.67 ns ([rp21-graph-cost.json](../../benchmarks/rp21-graph-cost.json)); the owner also approved keeping it bit-identical to the interpreter at about 0.25 ns on sine→gain, the excess. The interpreter is not held to this budget. |
 | Python inside a `ui-exclusive` callback | **≤ 1 ms p99 per call**, with a UI-thread diagnostic when exceeded | Audio stops for the whole call | **Owner approval needed.** New budget. |
 | Slow Python UI | Must not reduce frames processed | 98.7% with 100 ms sleeps per UI frame | Frozen as a test |
 | Audio deadline misses attributable to RackPy | Zero in a 30-minute stress run | Not measurable here: no audio device | Unchanged; RP-43 on controlled hardware |

@@ -96,6 +96,16 @@ of every sample's feature is still required; see
 below keep their original wording; this amendment and the Witan comments on
 those tasks take precedence.
 
+**2026-10-26: RP-19 and RP-21 review items approved.** The owner accepted:
+the bounded contracts for `MinBlepGenerator`, `Decimator`, `Upsampler` and
+`SampleRateConverter` ([RP-19B](rp-19-slices.md)); the ring buffers' generic
+contract for coverage policy 10 ([RP-19C](rp-19-slices.md)); ADR 004's graph
+plan budget of 1.5 ns per frame per plan; and keeping the compiled graph tier
+bit-identical to the interpreter at about 0.25 ns over that budget on
+sine→gain ([RP-21C](rp-21-slices.md#rp-21c-decisions)). Still open: RP-18's
+`poly*`, `IIRFilter` and MIDI channel bounds, and ADR 004's `ui-exclusive`
+budget.
+
 ## Witan project and recovery history
 
 The initial WorkflowProject search/create returned:

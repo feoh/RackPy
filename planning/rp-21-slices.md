@@ -21,8 +21,8 @@ option, and are recorded here.
     main-thread reclamation are RP-17A's `KernelSlot`, unchanged.
   - **Compiled tier (21C).** Code generation emits a kernel library (RP-17B)
     that composes the same native node types statically. This is ADR 004's
-    condition 1: a virtual call per node does not meet the proposed
-    ≤ 1.5 ns per plan budget, which is still awaiting owner approval. The
+    condition 1: a virtual call per node does not meet the
+    ≤ 1.5 ns per plan budget (owner-approved 2026-10-26). The
     interpreter's cost is measured and reported against that budget, not
     assumed.
 - **Signals.** Every edge carries a polyphonic signal of 0 to 16 channels,
@@ -88,7 +88,7 @@ library entry point.
   kernel type per graph, fields as the interpreter's type (wiring with the
   graph's indices as defaults, then controls). Graphs with extension nodes
   are refused: their types live in other libraries.
-- **Exactness over 0.25 ns (owner review item).** A register barrier after
+- **Exactness over 0.25 ns (owner-approved 2026-10-26).** A register barrier after
   every node keeps the compiled tier bit-identical to the interpreter (and
   to the offline reference's arithmetic) under
   `-funsafe-math-optimizations`. Without it, sine→gain measured 1.50 ns over

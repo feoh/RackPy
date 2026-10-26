@@ -22,8 +22,8 @@ presented as production performance.
 
 **RP-07 measured these on the planning machine and froze working budgets in
 [ADR 004](decisions/004-performance-budgets.md)** (raw data:
-[benchmarks/baseline.json](../benchmarks/baseline.json)). Two revisions await
-owner approval there. The table below is the original candidate list.
+[benchmarks/baseline.json](../benchmarks/baseline.json)). The owner approved
+its graph-plan budget on 2026-10-26; one revision still awaits approval there. The table below is the original candidate list.
 
 | Measurement | Initial candidate |
 | --- | --- |
