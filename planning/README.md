@@ -13,6 +13,7 @@ This is a specification and task graph, not a completed implementation.
 - [RP-17 bounded implementation slices](rp-17-slices.md) (supplements the original graph)
 - [RP-18 bounded implementation slices](rp-18-slices.md) (supplements the original graph)
 - [RP-19 bounded implementation slices](rp-19-slices.md) (supplements the original graph)
+- [RP-21 bounded implementation slices](rp-21-slices.md) (supplements the original graph)
 - [RP-22 bounded implementation slices](rp-22-slices.md) (supplements the original graph)
 - [RP-25 bounded implementation slices](rp-25-slices.md) (supplements the original graph)
 - [RP-26 bounded implementation slices](rp-26-slices.md) (supplements the original graph)
