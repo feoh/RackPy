@@ -1,0 +1,4 @@
+['input', 'param', 'mul', 'output', 'constant', 'phasor', 'constant', 'lt', 'light', 'delay', 'constant', 'add', 'output']
+[[0.5, -1.0], [0.5, -1.0], [0.5, -1.0], [0.5, -1.0]]
+[1.0, 0.0, 0.0, 1.0]
+[[0.0], [1.0], [2.0], [3.0]]

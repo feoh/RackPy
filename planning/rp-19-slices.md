@@ -77,4 +77,3 @@ Validation: [rp-19c-validation.md](rp-19c-validation.md).
   read-only mode). `Frame` elements cross as `Frame[C]` objects and appear in
   views as floats; `rackpy.raw._dsp` re-keys the Frame instantiations by
   `Frame[C]` once it has written `Frame`.
-

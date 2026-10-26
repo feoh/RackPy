@@ -1,9 +1,12 @@
 # Process audio
 
 **Implemented (RP-17A, RP-17B), Linux x86_64 inside Rack Free 2.6.6.** Two
-built-in kernel types and kernels you write in C++; DSP building blocks
-(filters, oscillators, MinBLEP, ...) for Python come with RP-18, RP-19 and
-RP-21. Rack's SIMD vectors are [bound](../reference/simd.md) (RP-20).
+built-in kernel types and kernels you write in C++. Rack's DSP helpers
+(filters, FFTs, MinBLEP, resamplers, ring buffers, ...) are
+[bound for Python](../reference/dsp.md) (RP-18, RP-19) for design, analysis
+and tests, and its SIMD vectors [too](../reference/simd.md) (RP-20).
+[DSP graphs](graphs.md) can be described and checked offline (RP-21A); their
+native execution is RP-21B.
 
 Rack calls every module's `process()` once per sample, tens of thousands of
 times a second, on its engine thread. Python is far too slow and too

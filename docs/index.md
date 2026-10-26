@@ -73,6 +73,7 @@ explanation/callbacks
 how-to/plugins
 how-to/state
 how-to/dsp
+how-to/graphs
 ```
 
 ```{toctree}
