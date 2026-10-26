@@ -105,6 +105,7 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 				scope->context = lifetime->token->context;
 				ScopeEnd end{scope};
 				DrawGuard drawing(lifetime);
+				DrawScope nanovg{scope, vg};
 				CallbackGuard guard;
 				answered = true;
 				f(Graphics{scope, vg});
@@ -127,6 +128,7 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 				auto scope = std::make_shared<Scope>();
 				scope->context = lifetime->token->context;
 				ScopeEnd end{scope};
+				DrawScope nanovg{scope, args.vg};
 				CallbackGuard guard;
 				answered = true;
 				auto value = eventObject(borrowedEvent(args, "DrawArgs", scope));

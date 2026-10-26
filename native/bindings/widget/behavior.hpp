@@ -60,7 +60,7 @@ void bindBehavior(py::classh<Base, Options...>& cls) {
 	}, py::arg("args"))
 	.def("draw_vg", [](py::object self, const Graphics& vg) {
 		auto& w = native<Base>(self);
-		legacyDraw(w, vg.get());
+		legacyDraw(w, vg.draw());
 	}, py::arg("graphics"))
 	.def("draw_layer", [](py::object self, py::object args, int layer) {
 		auto owner = state(self);

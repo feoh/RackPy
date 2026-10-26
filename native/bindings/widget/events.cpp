@@ -63,10 +63,17 @@ EventRef make(const E& event, const char* kind, const std::shared_ptr<Scope>& sc
 			if (!held) throw runtime::StaleHandle("event record has expired");
 			return wrapper(held->widgetTargets.at("origin").get());
 		}
+		// A field copied from a callback keeps that callback's scope, not this record's.
+		[[maybe_unused]] auto scopeOf = [&](const char* field) {
+			auto held = weak.lock();
+			if (!held) throw runtime::StaleHandle("event record has expired");
+			auto it = held->resources.find(field);
+			return it != held->resources.end() ? it->second : scope;
+		};
 		if constexpr (has_vg<E>::value) if (name == "vg")
-			return event.vg ? py::cast(Graphics{scope, event.vg}) : py::none();
+			return event.vg ? py::cast(Graphics{scopeOf("vg"), event.vg}) : py::none();
 		if constexpr (has_fb<E>::value) if (name == "fb")
-			return event.fb ? py::cast(Framebuffer{scope, event.fb}) : py::none();
+			return event.fb ? py::cast(Framebuffer{scopeOf("fb"), event.fb}) : py::none();
 		if constexpr (std::is_base_of<rack::widget::BaseEvent, E>::value) {
 			if (name == "context")
 				return event.context ? contextObject(ContextRef{scope, event.context, contextStorage(event.context)}) : py::none();
@@ -181,7 +188,7 @@ EventRef eventData(py::handle object) {
 }
 
 void bindWidgetEvents(py::module_ mod) {
-	py::class_<Graphics>(mod, "GraphicsContext", py::is_final(), "Callback-scoped, opaque NanoVG context (drawing APIs are RP-27).")
+	py::class_<Graphics>(mod, "GraphicsContext", py::is_final(), "A drawing callback's NanoVG context: rackpy.raw.nanovg draws with it during that callback only.")
 		.def_property_readonly("alive", [](const Graphics& g) { g.scope->check(); return g.vg != nullptr; });
 	py::class_<Framebuffer>(mod, "Framebuffer", py::is_final(), "Opaque, checked framebuffer resource; never an integer address.")
 		.def_property_readonly("alive", [](const Framebuffer& f) { return f.get() != nullptr; });

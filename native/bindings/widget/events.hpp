@@ -56,10 +56,59 @@ struct ScopeEnd {
 	std::shared_ptr<Scope> scope;
 	~ScopeEnd() { scope->active = false; }
 };
+/** The innermost drawing callback running on the main thread (nullptr outside drawing). */
+inline Scope*& currentDrawing() {
+	static Scope* current = nullptr;
+	return current;
+}
+/** A drawing callback's NanoVG state: its context, and the nvgSave calls Python has not restored yet. */
+struct DrawState {
+	NVGcontext* vg = nullptr;
+	int saves = 0;
+	Scope* enclosing = nullptr;
+};
+inline std::unordered_map<const Scope*, DrawState>& drawStates() {
+	static std::unordered_map<const Scope*, DrawState> states;
+	return states;
+}
+/** Makes a callback scope the innermost drawing scope. At its end, restores the NanoVG
+states Python saved and did not restore, so Rack's own nvgSave/nvgRestore pairs stay matched. */
+struct DrawScope {
+	std::shared_ptr<Scope> scope;
+	DrawScope(std::shared_ptr<Scope> s, NVGcontext* vg) : scope(std::move(s)) {
+		auto& state = drawStates()[scope.get()];
+		state.vg = vg;
+		state.enclosing = currentDrawing();
+		currentDrawing() = scope.get();
+	}
+	~DrawScope() {
+		auto it = drawStates().find(scope.get());
+		if (it == drawStates().end()) return;
+		for (; it->second.saves > 0; --it->second.saves)
+			nvgRestore(it->second.vg);
+		currentDrawing() = it->second.enclosing;
+		drawStates().erase(it);
+	}
+	DrawScope(const DrawScope&) = delete;
+	DrawScope& operator=(const DrawScope&) = delete;
+};
 struct Graphics {
 	std::shared_ptr<Scope> scope;
 	NVGcontext* vg;
 	NVGcontext* get() const { scope->check(); return vg; }
+	/** For drawing: only in its own callback while it is the innermost one, so nested
+	Rack drawing (drawChild's saved states) cannot be disturbed from an enclosing callback. */
+	NVGcontext* draw() const {
+		scope->check();
+		auto it = drawStates().find(scope.get());
+		if (it == drawStates().end() || it->second.vg != vg)
+			throw runtime::Ownership("this GraphicsContext is not a drawing callback's (draw, draw_layer or draw_vg)");
+		if (currentDrawing() != scope.get())
+			throw runtime::Ownership("this GraphicsContext belongs to an enclosing drawing callback; draw with the "
+				"innermost callback's GraphicsContext");
+		return vg;
+	}
+	DrawState& state() const { draw(); return drawStates()[scope.get()]; }
 };
 struct Framebuffer {
 	std::shared_ptr<Scope> scope;

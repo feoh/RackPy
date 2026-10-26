@@ -11,8 +11,9 @@ too, with their fields and methods. This page is about these classes;
 
 **Implemented, Linux x86_64 inside Rack Free 2.6.6 (RP-25).** The records
 these classes touch are **implemented** in the [coverage report](coverage.md).
-Rack's input dispatcher `EventState` (RP-26), NanoVG drawing and the rest of
-`rack::window` (RP-27) are not mapped yet. Module removal and null-module
+Rack's input dispatcher is in [UI widgets and menus](ui.md#context-and-input), and
+NanoVG drawing and `rack::window` are in [drawing and the window](window.md).
+Module removal and null-module
 browser previews are tested through test hooks that follow Rack's code; a
 smoke test in Rack's real module browser with Python module widgets waits for
 RP-28. The names below are the raw layer; there is no `rackpy.widget` facade
@@ -143,8 +144,8 @@ in Rack's language. They need only the main thread, not a window.
 Rack draws a widget by calling `draw(args)` with a `DrawArgs` record:
 `args.vg` is an opaque `GraphicsContext`, `args.fb` the target `Framebuffer`
 or `None`, and `args.clip_box` the visible part in the widget's own
-coordinates. Both handles expire with the call. NanoVG drawing functions are
-not bound yet (RP-27); within a draw call you can draw an `Svg`
+coordinates. Both handles expire with the call. Within a draw call you can
+draw with [NanoVG](window.md#drawing-with-nanovg) or draw an `Svg`
 (`svg.draw(args.vg)`), call `super().draw(args)` to draw the children, or call
 `self.draw_child(child, args, layer)` as Rack's `drawChild` does.
 
@@ -179,7 +180,7 @@ scene, as a host that recreates its window would.
 - `SvgWidget.svg` is the raw field: assigning it does not resize the widget,
   while `set_svg()` and `wrap()` do. `SVGWidget` and `set_svg_legacy()` are
   Rack's deprecated spellings. `rackpy.raw.window.Svg` loads SVGs
-  (`load_string`, `load_file`, `Svg.load`); the rest of the window API is RP-27.
+  (`load_string`, `load_file`, `Svg.load`; see [SVGs](window.md#svgs)).
 - `FramebufferWidget` has Rack's `dirty`, `bypassed`, `oversample`,
   `dirty_on_subpixel_change` and a checked `viewport_margin` view.
   `OpenGlWidget` derives from it.

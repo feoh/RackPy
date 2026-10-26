@@ -13,6 +13,7 @@ This is a specification and task graph, not a completed implementation.
 - [RP-17 bounded implementation slices](rp-17-slices.md) (supplements the original graph)
 - [RP-25 bounded implementation slices](rp-25-slices.md) (supplements the original graph)
 - [RP-26 bounded implementation slices](rp-26-slices.md) (supplements the original graph)
+- [RP-27 bounded implementation slices](rp-27-slices.md) (supplements the original graph)
 
 Witan is authoritative for live task status, ownership, comments and blockers.
 Git holds a durable copy of task scope; status is deliberately not frozen into

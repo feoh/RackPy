@@ -428,6 +428,42 @@ void define(py::module_ m) {
 		created.vg = vg;
 		APP->scene->onContextCreate(created);
 	});
+	m.def("framebuffer_pixels", [](py::object frame) {
+		// The RGBA bytes of a FramebufferWidget's last render, top row first, read back from
+		// its GL framebuffer (NanoVG draws y down; GL rows run bottom up). Premultiplied alpha.
+		requireMainThread("framebuffer_pixels");
+		liveContext();
+		auto* fbw = dynamic_cast<rack::widget::FramebufferWidget*>(widgets::argument(frame));
+		if (!fbw)
+			throw std::invalid_argument("framebuffer_pixels needs a FramebufferWidget");
+		if (!fbw->getFramebuffer())
+			throw std::invalid_argument("framebuffer_pixels needs a rendered FramebufferWidget (size " +
+				std::to_string(fbw->getFramebufferSize().x) + " x " + std::to_string(fbw->getFramebufferSize().y) + ")");
+		rack::math::Vec size = fbw->getFramebufferSize();
+		int w = int(size.x), h = int(size.y);
+		std::vector<unsigned char> rows(size_t(w) * h * 4);
+		GLint previous = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previous);
+		nvgluBindFramebuffer(fbw->getFramebuffer());
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, rows.data());
+		glBindFramebuffer(GL_FRAMEBUFFER, GLuint(previous));
+		std::string out(rows.size(), '\0');
+		for (int y = 0; y < h; ++y)
+			std::copy_n(rows.data() + size_t(h - 1 - y) * w * 4, size_t(w) * 4, out.begin() + size_t(y) * w * 4);
+		return py::make_tuple(w, h, py::bytes(out));
+	});
+	m.def("window_should_close", [] {
+		requireMainThread("window_should_close");
+		liveContext();
+		return bool(glfwWindowShouldClose(APP->window->win));
+	});
+	m.def("cancel_window_close", [] {
+		// Undoes Window::close() before the frame ends, so a test of it leaves Rack running.
+		requireMainThread("cancel_window_close");
+		liveContext();
+		glfwSetWindowShouldClose(APP->window->win, GLFW_FALSE);
+	});
 	m.def("with_foreign_context", [](py::function f) {
 		std::shared_ptr<ContextToken> refused = binding().observe(foreignContext());
 		if (refused)

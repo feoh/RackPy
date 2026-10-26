@@ -261,6 +261,13 @@
     },
     {
       "facade": null,
+      "id": "alias:rack::window::SVG",
+      "kind": "alias",
+      "raw": "rackpy.raw.window.SVG",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "class_template:rack::DeferWrapper<type>",
       "kind": "class",
       "raw": "rackpy.raw.DeferWrapper",
@@ -457,6 +464,13 @@
     },
     {
       "facade": null,
+      "id": "destructor:rack::Context::~Context()",
+      "kind": "class",
+      "raw": "rackpy.raw.Context",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "destructor:rack::DeferWrapper::~DeferWrapper<F>()",
       "kind": "method",
       "raw": "rackpy.raw.DeferWrapper.__exit__",
@@ -537,6 +551,27 @@
       "id": "destructor:rack::widget::Widget::~Widget()",
       "kind": "method",
       "raw": "rackpy.raw.widget.Widget.close",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::window::Font::~Font()",
+      "kind": "class",
+      "raw": "rackpy.raw.window.Font",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::window::Image::~Image()",
+      "kind": "class",
+      "raw": "rackpy.raw.window.Image",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "destructor:rack::window::Svg::~Svg()",
+      "kind": "class",
+      "raw": "rackpy.raw.window.Svg",
       "status": "implemented"
     },
     {
@@ -663,6 +698,27 @@
       "id": "field:rack::Context::event",
       "kind": "property",
       "raw": "rackpy.raw.Context.event",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::Context::midiLoopbackContext",
+      "kind": "property",
+      "raw": "rackpy.raw.Context.midi_loopback_context",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::Context::patch",
+      "kind": "property",
+      "raw": "rackpy.raw.Context.patch",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::Context::window",
+      "kind": "property",
+      "raw": "rackpy.raw.Context.window",
       "status": "implemented"
     },
     {
@@ -1884,6 +1940,83 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "field:rack::window::Font::handle",
+      "kind": "property",
+      "raw": "rackpy.raw.window.Font.handle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::window::Font::vg",
+      "kind": "property",
+      "raw": "rackpy.raw.window.Font.vg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::window::Image::handle",
+      "kind": "property",
+      "raw": "rackpy.raw.window.Image.handle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::window::Image::vg",
+      "kind": "property",
+      "raw": "rackpy.raw.window.Image.vg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::window::Svg::handle",
+      "kind": "property",
+      "raw": "rackpy.raw.window.Svg.handle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::window::Window::fbVg",
+      "kind": "property",
+      "raw": "rackpy.raw.window.Window.fb_vg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::window::Window::pixelRatio",
+      "kind": "property",
+      "raw": "rackpy.raw.window.Window.pixel_ratio",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::window::Window::uiFont",
+      "kind": "property",
+      "raw": "rackpy.raw.window.Window.ui_font",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::window::Window::vg",
+      "kind": "property",
+      "raw": "rackpy.raw.window.Window.vg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::window::Window::win",
+      "kind": "property",
+      "raw": "rackpy.raw.window.Window.win",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::window::Window::windowRatio",
+      "kind": "property",
+      "raw": "rackpy.raw.window.Window.window_ratio",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.plugin.on_destroy",
       "id": "function:destroy()",
       "kind": "function",
@@ -1979,6 +2112,13 @@
       "id": "function:operator\"\"_u8(unsigned long long)",
       "kind": "function",
       "raw": "rackpy.raw.literals.u8",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::appGet()",
+      "kind": "function",
+      "raw": "rackpy.raw.app_get",
       "status": "implemented"
     },
     {
@@ -2084,6 +2224,13 @@
       "id": "function:rack::contextGet()",
       "kind": "function",
       "raw": "rackpy.raw.context_get",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::contextSet(rack::Context *)",
+      "kind": "function",
+      "raw": "rackpy.raw.context_set",
       "status": "implemented"
     },
     {
@@ -2409,6 +2556,41 @@
       "status": "implemented"
     },
     {
+      "facade": null,
+      "id": "function:rack::window::in2px(float)",
+      "kind": "function",
+      "raw": "rackpy.raw.window.in2px",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::window::in2px(rack::math::Vec)",
+      "kind": "function",
+      "raw": "rackpy.raw.window.in2px",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::window::mm2px(float)",
+      "kind": "function",
+      "raw": "rackpy.raw.window.mm2px",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::window::mm2px(rack::math::Vec)",
+      "kind": "function",
+      "raw": "rackpy.raw.window.mm2px",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "function:rack::window::svgDraw(NVGcontext *, NSVGimage *)",
+      "kind": "function",
+      "raw": "rackpy.raw.window.svg_draw",
+      "status": "implemented"
+    },
+    {
       "facade": "rackpy.plugin.Plugin.set_settings_handlers",
       "id": "function:settingsFromJson(json_t *)",
       "kind": "function",
@@ -2669,9 +2851,30 @@
     },
     {
       "facade": null,
+      "id": "macro:GLEW_NO_GLU",
+      "kind": "no_runtime_meaning",
+      "raw": null,
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:GLEW_STATIC",
+      "kind": "no_runtime_meaning",
+      "raw": null,
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "macro:LENGTHOF",
       "kind": "function",
       "raw": "rackpy.raw.macros.LENGTHOF",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "macro:NANOVG_GL2",
+      "kind": "no_runtime_meaning",
+      "raw": null,
       "status": "implemented"
     },
     {
@@ -5651,6 +5854,34 @@
     },
     {
       "facade": null,
+      "id": "method:rack::window::Font::load(const std::string &)",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Font.load",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Font::loadFile(const std::string &, NVGcontext *)",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Font.load_file",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Image::load(const std::string &)",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Image.load",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Image::loadFile(const std::string &, NVGcontext *)",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Image.load_file",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::window::Svg::draw(NVGcontext *)",
       "kind": "method",
       "raw": "rackpy.raw.window.Svg.draw",
@@ -5703,6 +5934,125 @@
       "id": "method:rack::window::Svg::loadString(const std::string &)",
       "kind": "method",
       "raw": "rackpy.raw.window.Svg.load_string",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::close()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.close",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::cursorLock()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.cursor_lock",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::cursorUnlock()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.cursor_unlock",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::getFrameDurationRemaining()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.get_frame_duration_remaining",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::getFrameTime()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.get_frame_time",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::getLastFrameDuration()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.get_last_frame_duration",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::getMods()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.get_mods",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::getMonitorRefreshRate()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.get_monitor_refresh_rate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::getSize()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.get_size",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::isCursorLocked()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.is_cursor_locked",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::isFullScreen()",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.is_full_screen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::loadFont(const std::string &)",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.load_font",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::loadFontWithoutFallbacks(const std::string &)",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.load_font_without_fallbacks",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::loadImage(const std::string &)",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.load_image",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::loadSvg(const std::string &)",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.load_svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::setFullScreen(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.set_full_screen",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::window::Window::setSize(rack::math::Vec)",
+      "kind": "method",
+      "raw": "rackpy.raw.window.Window.set_size",
       "status": "implemented"
     },
     {
@@ -5773,6 +6123,20 @@
       "id": "method_template:rack::widget::Widget::recursePositionEvent<type, type>($0, const $1 &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.Widget.recurse_position_event",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "opaque_record:rack::midiloopback::Context",
+      "kind": "class",
+      "raw": "rackpy.raw.window.NativeHandle",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "opaque_record:rack::patch::Manager",
+      "kind": "class",
+      "raw": "rackpy.raw.window.NativeHandle",
       "status": "implemented"
     },
     {
@@ -6463,9 +6827,30 @@
     },
     {
       "facade": null,
+      "id": "record:rack::window::Font",
+      "kind": "class",
+      "raw": "rackpy.raw.window.Font",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::window::Image",
+      "kind": "class",
+      "raw": "rackpy.raw.window.Image",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "record:rack::window::Svg",
       "kind": "class",
       "raw": "rackpy.raw.window.Svg",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "record:rack::window::Window",
+      "kind": "class",
+      "raw": "rackpy.raw.window.Window",
       "status": "implemented"
     },
     {
@@ -6656,8 +7041,22 @@
       "kind": "constant",
       "raw": "rackpy.raw.plugin.pluginsPath",
       "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::window::MM_PER_IN",
+      "kind": "constant",
+      "raw": "rackpy.raw.window.MM_PER_IN",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "variable:rack::window::SVG_DPI",
+      "kind": "constant",
+      "raw": "rackpy.raw.window.SVG_DPI",
+      "status": "implemented"
     }
   ],
-  "inputs": "1055d0f5d7a4999f",
+  "inputs": "99238627ca5cb4f9",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

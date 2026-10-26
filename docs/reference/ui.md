@@ -109,8 +109,9 @@ Rack's own items for a model ([plugins and models](plugin.md#models)).
 
 `rackpy.raw.context_get()`, and Rack's `APP()` macro, return the Rack context
 current on this thread: RackPy's bound context on Rack's main thread, `None`
-on threads Python starts. So far its `event` attribute is bound: Rack's input
-dispatcher, a `rackpy.raw.widget.EventState`.
+on threads Python starts (see [the context](window.md#the-context)). Its
+`event` attribute is Rack's input dispatcher, a
+`rackpy.raw.widget.EventState`.
 
 - `handle_button`, `handle_hover`, `handle_leave`, `handle_scroll`,
   `handle_text`, `handle_key`, `handle_drop` and `handle_dirty` do what

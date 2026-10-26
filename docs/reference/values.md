@@ -226,4 +226,5 @@ appear:
 - **Opaque handles.** Pointers Python must not dereference (`GLFWwindow*`,
   `NVGcontext*`, `Context::patch`) become handle objects that support identity
   and a null check and nothing else, never an integer address (coverage
-  policies 4, 8 and 13). RP-24 and RP-27 implement them.
+  policies 4, 8 and 13): `rackpy.raw.window.NativeHandle` ([drawing and the
+  window](window.md#the-context)).

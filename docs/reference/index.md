@@ -25,6 +25,7 @@ engine-module
 plugin
 widgets
 ui
+window
 widget-trees
 ```
 
