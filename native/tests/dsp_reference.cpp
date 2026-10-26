@@ -13,6 +13,7 @@
 #include "../bindings/dsp/calls.hpp"
 
 #include <array>
+#include <cstdlib>
 #include <cinttypes>
 #include <complex>
 #include <type_traits>
@@ -622,6 +623,220 @@ void filters() {
 	biquads<float_4>("4");
 }
 
+// --- vumeter.hpp and midi.hpp: op scripts, recorded with the state after each op ----------
+
+void vumeters() {
+	RACKPY_DEPRECATED_CALL(dsp::VuMeter old;)
+	old.dBScaled = 0.f;
+	std::vector<std::string> values, states;
+	for (float v : {1.f, 0.5f, 2.f, 0.f, -0.25f, 1e-3f, 0.708f, INF, NAN_}) {
+		values.push_back(f(v));
+		member<&dsp::VuMeter::setValue>(old, opaque(v));
+		std::vector<std::string> lights;
+		for (int k = 0; k < 7; k++)
+			lights.push_back(f(member<&dsp::VuMeter::getBrightness>(old, k)));
+		states.push_back(list({f(old.dBScaled), list(lights)}));
+	}
+	add("vumeter.old", {list(values)}, list(states));
+	for (int mode : {0, 1}) {
+		dsp::VuMeter2 meter;
+		meter.mode = (dsp::VuMeter2::Mode) mode;
+		std::vector<std::string> in, out;
+		for (size_t k = 0; k < STREAM.size(); k++) {
+			float x = STREAM[k] * 0.2f;
+			in.push_back(f(x));
+			member<&dsp::VuMeter2::process>(meter, opaque(1.f / 1000.f), x);
+			out.push_back(list({f(meter.v), f(member<&dsp::VuMeter2::getBrightness>(meter, -12.f, -6.f)),
+				f(member<&dsp::VuMeter2::getBrightness>(meter, -6.f, 0.f)), f(member<&dsp::VuMeter2::getBrightness>(meter, 0.f, 0.f))}));
+			if (k == 40)
+				member<&dsp::VuMeter2::reset>(meter);
+		}
+		add("vumeter2", {i(mode), f(1.f / 1000.f), list(in)}, list(out));
+	}
+}
+
+template <int N>
+struct Recorder : dsp::MidiGenerator<N> {
+	std::vector<midi::Message> sent;
+	void onMessage(const midi::Message& message) override { sent.push_back(message); }
+};
+
+std::string message(const midi::Message& m) {
+	std::vector<std::string> bytes;
+	for (uint8_t b2 : m.bytes)
+		bytes.push_back(i(b2));
+	return list({list(bytes), i(m.frame)});
+}
+
+template <int N>
+void generator() {
+	using G = dsp::MidiGenerator<N>;
+	Recorder<N> rec;
+	G& g = rec;
+	std::vector<std::string> ops, out;
+	auto record = [&](const std::string& op) {
+		ops.push_back(op);
+		std::vector<std::string> msgs;
+		for (const auto& m : rec.sent)
+			msgs.push_back(message(m));
+		rec.sent.clear();
+		out.push_back(list(msgs));
+	};
+	int last = N - 1;
+	member<&G::setFrame>(g, (int64_t) 100);
+	record("[\"frame\", 100]");
+	member<&G::setVelocity>(g, (int8_t) 90, 0);
+	record("[\"vel\", 90, 0]");
+	member<&G::setNoteGate>(g, (int8_t) 60, true, 0);
+	record("[\"gate\", 60, true, 0]");
+	member<&G::setNoteGate>(g, (int8_t) 64, true, 0);
+	record("[\"gate\", 64, true, 0]");
+	member<&G::setNoteGate>(g, (int8_t) 67, true, last);
+	record("[\"gate\", 67, true, " + i(last) + "]");
+	member<&G::setKeyPressure>(g, (int8_t) 33, last);
+	record("[\"kp\", 33, " + i(last) + "]");
+	member<&G::setChannelPressure>(g, (int8_t) 20);
+	record("[\"cp\", 20]");
+	member<&G::setChannelPressure>(g, (int8_t) 20);
+	record("[\"cp\", 20]");
+	member<&G::setCc>(g, (int8_t) 5, 74);
+	record("[\"cc\", 5, 74]");
+	member<&G::setModWheel>(g, (int8_t) 64);
+	record("[\"mod\", 64]");
+	member<&G::setVolume>(g, (int8_t) 100);
+	record("[\"vol\", 100]");
+	member<&G::setBalance>(g, (int8_t) 10);
+	record("[\"bal\", 10]");
+	member<&G::setPan>(g, (int8_t) -1);
+	record("[\"pan\", -1]");
+	member<&G::setSustainPedal>(g, (int8_t) 127);
+	record("[\"sus\", 127]");
+	member<&G::setPitchWheel>(g, (int16_t) 12345);
+	record("[\"pw\", 12345]");
+	member<&G::setPitchWheel>(g, (int16_t) -5);
+	record("[\"pw\", -5]");
+	for (const char* which : {"clk", "start", "cont", "stop"}) {
+		for (bool v : {true, true, false}) {
+			std::string w(which);
+			if (w == "clk")
+				member<&G::setClock>(g, v);
+			else if (w == "start")
+				member<&G::setStart>(g, v);
+			else if (w == "cont")
+				member<&G::setContinue>(g, v);
+			else
+				member<&G::setStop>(g, v);
+			record("[\"" + w + "\", " + b(v) + "]");
+		}
+	}
+	member<&G::setNoteGate>(g, (int8_t) 64, false, 0);
+	record("[\"gate\", 64, false, 0]");
+	member<&G::setChannels>(g, (uint8_t) (N > 1 ? 1 : 0));
+	record("[\"channels\", " + i(N > 1 ? 1 : 0) + "]");
+	member<&G::panic>(g);
+	record("[\"panic\"]");
+	member<&G::reset>(g);
+	record("[\"reset\"]");
+	add("generator." + std::to_string(N), {list(ops)}, list(out));
+}
+
+template <uint8_t N>
+std::string parserState(dsp::MidiParser<N>& p) {
+	using P = dsp::MidiParser<N>;
+	std::vector<std::string> notes, gates, vels, afts, pws, mods, retrig, pitch, held, wheels;
+	for (int c = 0; c < N; c++) {
+		notes.push_back(i(p.notes[c]));
+		gates.push_back(b(p.gates[c]));
+		vels.push_back(i(p.velocities[c]));
+		afts.push_back(i(p.aftertouches[c]));
+		pws.push_back(i(p.pws[c]));
+		mods.push_back(i(p.mods[c]));
+		retrig.push_back(f(p.retriggerPulses[c].remaining));
+		pitch.push_back(f(member<&P::getPitchVoltage>(p, (uint8_t) c)));
+	}
+	for (uint8_t note : p.heldNotes)
+		held.push_back(i(note));
+	uint8_t wc = member<&P::getWheelChannels>(p);
+	for (uint8_t c = 0; c < wc; c++)
+		wheels.push_back(list({f(member<&P::getPw>(p, c)), f(member<&P::getMod>(p, c))}));
+	return list({list(notes), list(gates), list(vels), list(afts), list(pws), list(mods), list(held), i(p.rotateIndex), i(p.clock),
+		b(p.pedal), i(member<&P::getChannels>(p)), list(pitch), list(wheels),
+		list({f(p.clockPulse.remaining), f(p.clockDividerPulse.remaining), f(p.startPulse.remaining), f(p.stopPulse.remaining),
+			f(p.continuePulse.remaining)}),
+		list(retrig)});
+}
+
+template <uint8_t N>
+void parser(const char* name, int channels, int poly, int mono) {
+	using P = dsp::MidiParser<N>;
+	P p;
+	std::vector<std::string> ops, out;
+	auto record = [&](const std::string& op) {
+		ops.push_back(op);
+		out.push_back(parserState(p));
+	};
+	member<&P::setChannels>(p, (uint8_t) channels);
+	record("[\"channels\", " + i(channels) + "]");
+	member<&P::setPolyMode>(p, (typename P::PolyMode) poly);
+	record("[\"poly\", " + i(poly) + "]");
+	member<&P::setMonoMode>(p, (typename P::MonoMode) mono);
+	record("[\"mono\", " + i(mono) + "]");
+	p.retriggerOnResume = true;
+	p.releaseVelocityEnabled = true;
+	p.clockDivision = 6;
+	record("[\"flags\", true, true, 6]");
+	std::vector<std::vector<int>> messages = {{0x90, 60, 100}, {0x91, 64, 90}, {0x92, 67, 80}, {0x90, 72, 70}, {0x93, 60, 0},
+		{0x80, 64, 33}, {0xa0, 67, 50}, {0xd2, 77}, {0xe1, 0, 0x50}, {0xe0, 0x7f, 0x7f}, {0xb0, 0x01, 100}, {0xb1, 0x01, 20},
+		{0xb0, 0x40, 127}, {0x81, 67, 10}, {0x90, 65, 60}, {0xb0, 0x40, 0}, {0xf2, 0x10, 0x01}, {0xf8}, {0xf8}, {0xfa}, {0xf8},
+		{0xfb}, {0xfc}, {0x90, 48, 100}, {0x90, 50, 100}, {0x80, 48, 0}, {0xb0, 0x7b, 0}, {0x95, 61, 99}};
+	for (const auto& bytes : messages) {
+		midi::Message m;
+		m.bytes.assign(bytes.begin(), bytes.end());
+		m.frame = 7;
+		member<&P::processMessage>(p, m);
+		std::vector<std::string> bs;
+		for (int x : bytes)
+			bs.push_back(i(x));
+		record("[\"msg\", " + list(bs) + "]");
+		member<&P::processFilters>(p, 1.f / 1000.f);
+		member<&P::processPulses>(p, 1.f / 4000.f);
+		record("[\"step\", " + f(1.f / 1000.f) + ", " + f(1.f / 4000.f) + "]");
+	}
+	json_t* j = member<&P::toJson>(p);
+	char* text = json_dumps(j, JSON_SORT_KEYS | JSON_COMPACT);
+	json_decref(j);
+	std::string json = text;
+	std::free(text);
+	add(std::string("parser.") + name, {list(ops)}, list({list(out), "\"" + [&] {
+		std::string esc;
+		for (char ch : json)
+			esc += (ch == '"' || ch == '\\') ? std::string("\\") + ch : std::string(1, ch);
+		return esc;
+	}() + "\""}));
+}
+
+void midiParsers() {
+	parser<16>("16.mono_last", 1, 0, 0);
+	parser<16>("16.mono_first", 1, 0, 1);
+	parser<16>("16.mono_lowest", 1, 0, 2);
+	parser<16>("16.mono_highest", 1, 0, 3);
+	parser<16>("16.rotate", 4, 0, 0);
+	parser<16>("16.reuse", 4, 1, 0);
+	parser<16>("16.reset", 4, 2, 0);
+	parser<16>("16.mpe", 16, 3, 0);
+	parser<4>("4.rotate", 4, 0, 0);
+	parser<1>("1.mono", 1, 0, 0);
+	// from_json: Rack's keys, including the pre-2.5.3 lastPitch.
+	dsp::MidiParser<16> p;
+	json_t* j = json_loads("{\"channels\": 3, \"monoMode\": 2, \"retriggerOnResume\": true, \"polyMode\": 1, "
+		"\"releaseVelocityEnabled\": true, \"pwRange\": 12.5, \"smooth\": false, \"clockDivision\": 12, \"lastPitch\": 10000, "
+		"\"lastMod\": 64, \"filterLambda\": 5.0}", 0, nullptr);
+	member<&dsp::MidiParser<16>::fromJson>(p, j);
+	json_decref(j);
+	add("parser.from_json", {}, list({parserState(p), i(p.monoMode), i(p.polyMode), b(p.retriggerOnResume),
+		b(p.releaseVelocityEnabled), f(p.pwRange), b(p.smooth), i(p.clockDivision), f(p.pwFilters[0].lambda)}));
+}
+
 }  // namespace
 
 int main() {
@@ -635,6 +850,11 @@ int main() {
 	ode();
 	digital();
 	filters();
+	vumeters();
+	generator<16>();
+	generator<4>();
+	generator<1>();
+	midiParsers();
 	std::printf("{\"cases\": [\n");
 	for (size_t k = 0; k < cases.size(); k++)
 		std::printf("%s%s\n", cases[k].c_str(), k + 1 < cases.size() ? "," : "");

@@ -19,6 +19,8 @@ void bindBasic(py::module_ dsp);
 void bindDigital(py::module_ dsp);
 /** dsp/filter.hpp: RC, exponential, peak and slew filters, IIRFilter and TBiquadFilter (RP-18C). */
 void bindFilter(py::module_ dsp);
+/** dsp/vumeter.hpp and dsp/midi.hpp: VU meters, MidiGenerator and MidiParser (RP-18D). */
+void bindMidi(py::module_ dsp);
 
 /** The largest polynomial (coefficient count N) polyDirect/Horner/Estrin<T, N> are instantiated for. */
 constexpr size_t MAX_POLY_COEFFICIENTS = 32;

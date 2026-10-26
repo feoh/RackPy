@@ -91,3 +91,29 @@ Validation: [rp-18b-validation.md](rp-18b-validation.md).
   per sample over float32 buffers: results equal a loop of `process` calls
   exactly, 20 to 27 times faster (`benchmarks/rp18-dsp-call-cost.json`,
   diagnostic).
+
+**RP-18D — VU meters and the DSP MIDI generator and parser**
+(`tk-rackpy-18d-vu-meters-and-the-dsp-midi-generator--3ba44c`). 115 records
+(114 implemented, 1 planned). Validation: [rp-18d-validation.md](rp-18d-validation.md).
+
+- **VU meters.** `VuMeter2` with its `Mode`; Rack's deprecated `VuMeter`
+  warns on construction (its `dBScaled` starts at 0, where Rack leaves it
+  uninitialized) and the deprecated `VUMeter` typedef warns through the
+  module's `__getattr__`.
+- **Templates.** `MidiGenerator[N]` and `MidiParser[N]` for N = 1 to 16
+  (owner review item); the 16-channel classes are named, the others live in
+  `rackpy.raw.dsp._midi`. One pair of parser mode enums for every
+  instantiation.
+- **onMessage.** An engine-strategy virtual (ADR 003): no Python override (a
+  subclass defining `on_message` raises `TypeError`); RackPy's generator
+  records the messages natively, and `take_messages()` returns them. The
+  record stays `planned` for RP-22's laboratory (agreed with the RP-22 worker:
+  its child RP-22E, blocked by RP-18D, adds the laboratory override).
+- **Refusals.** Out-of-range channel and controller indices, more channels
+  than the template's, MPE messages on channels at or above `MAX_CHANNELS`,
+  a timing clock with `clockDivision` 0, and untrusted `from_json` input with
+  out-of-range channels or enum values.
+- **Views.** Array fields (`Int8Array`, `UInt8Array`, `Int16Array`,
+  `BoolArray`, `ExponentialFilterArray`, `PulseGeneratorArray`, shared in
+  `native/bindings/dsp/arrays.hpp` with RP-18C's) are live; object items and
+  pulse fields are live views.

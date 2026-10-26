@@ -15,6 +15,7 @@ import pytest
 SECTIONS = {
     "digital": ("boolean_trigger.", "schmitt.", "schmitt4.", "pulse.", "timer.", "timer4.", "clock_divider."),
     "filters": ("rc", "smoothers", "deprecated_smoothers", "iir", "biquad"),
+    "midi": ("vumeter", "generator.", "parser."),
 }
 
 
@@ -49,3 +50,8 @@ def digital_cases(reference: list[dict[str, Any]]) -> list[dict[str, Any]]:
 @pytest.fixture(scope="session")
 def filter_cases(reference: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [c for c in reference if section(c["fn"]) == "filters"]
+
+
+@pytest.fixture(scope="session")
+def midi_cases(reference: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [c for c in reference if section(c["fn"]) == "midi"]

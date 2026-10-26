@@ -3,12 +3,12 @@
 Rack's `dsp` headers, family 6 of the [SDK surface](surface/dsp.md)
 (**RP-18**, in slices). **Implemented, Linux x86_64 inside Rack Free 2.6.6:**
 `dsp/common.hpp`, `approx.hpp`, `convert.hpp`, `window.hpp` and `ode.hpp`
-(RP-18A), `dsp/digital.hpp` (RP-18B) and `dsp/filter.hpp` (RP-18C), as
-`rackpy.raw.dsp` and the {py:mod}`rackpy.dsp.basic`,
-{py:mod}`rackpy.dsp.digital` and {py:mod}`rackpy.dsp.filters` imports (see
-the [coverage report](coverage.md)). VU meters and the MIDI processors
-(RP-18D), and FFT, resampling, FIR, MinBLEP and ring buffers (RP-19) are not
-bound yet.
+(RP-18A), `dsp/digital.hpp` (RP-18B), `dsp/filter.hpp` (RP-18C), and
+`dsp/vumeter.hpp` and `dsp/midi.hpp` (RP-18D), as `rackpy.raw.dsp` and the
+{py:mod}`rackpy.dsp.basic`, {py:mod}`rackpy.dsp.digital`,
+{py:mod}`rackpy.dsp.filters` and {py:mod}`rackpy.dsp.midi` imports (see the
+[coverage report](coverage.md)). FFT, resampling, FIR, MinBLEP and ring
+buffers (RP-19) are not bound yet.
 
 Every function runs **Rack's own C++ code**, compiled with the SDK's flags.
 `tests/dsp` replays more than 4,000 cases from a compiled C++ reference
@@ -48,11 +48,15 @@ freely, because C++ instantiates one function per value. RackPy's contract:
 - `IIRFilter<B_ORDER, A_ORDER, T>` is instantiated for both orders from 2 to
   8 ([below](#iir-filters)). Below 2, Rack's `process()` writes past a
   zero-length array, so those orders are refused rather than offered.
+- `MidiGenerator<CHANNELS>` and `MidiParser<MAX_CHANNELS>` are instantiated
+  for 1 to 16 channels, Rack's limit for ports and MIDI channels
+  ([below](#midi-generator)).
 - `Frame<CHANNELS, T>` is plain data, so it is written in Python and takes any
   `CHANNELS` from 1 ([below](#frames)).
 
-**Owner review item:** the `poly*` bound of 32 and the `IIRFilter` orders 2
-to 8 are RackPy's choices, recorded in the manifest. A full-coverage release
+**Owner review item:** the `poly*` bound of 32, the `IIRFilter` orders 2 to
+8 and the MIDI processors' 1 to 16 channels are RackPy's choices, recorded in
+the manifest. A full-coverage release
 needs the owner to confirm them, or to choose another contract
 ([release bar](../coverage.md#release-bar)).
 
@@ -336,3 +340,73 @@ A Python call costs tens of nanoseconds whatever it computes, so
 nothing, reading and writing the caller's buffers. Neither is a way to run
 audio: at 48 kHz Rack calls a module's `process()` every 21 microseconds, on
 its engine thread, where Python never runs ([process audio](../how-to/dsp.md)).
+
+(dsp-vumeter)=
+## VU meters
+
+`VuMeter2` smooths a level for meter lights: `process(delta_time, value)`
+tracks the peak (`Mode.PEAK`, jumping up and decaying) or the mean square
+(`Mode.RMS`) at the inverse time constant `lambda_` (30 per second), in `v`;
+`get_brightness(db_min, db_max)` is 0 at `db_min` and below, 1 at `db_max`
+and above, and linear in dB between; `reset()` zeroes it. Rack suggests
+calling `get_brightness` every few hundred frames, not every frame.
+
+`VuMeter` is Rack's deprecated meter (`set_value(v)`, then
+`get_brightness(i)` for light `i`, with `db_interval` decibels between
+lights), and `VUMeter` its deprecated typedef: both emit `DeprecationWarning`.
+Its `db_scaled` starts at 0, where Rack leaves it uninitialized until
+`set_value`.
+
+(dsp-midi-generator)=
+## MIDI generator
+
+`MidiGenerator[channels]` (`MidiGenerator[16]` is `MidiGenerator_16`) turns
+gates and CV into MIDI messages, as Rack's CV to MIDI does:
+`set_note_gate(note, gate, c)` after `set_velocity(vel, c)`,
+`set_key_pressure`, `set_channel_pressure`, `set_cc(cc, id)` and its
+shortcuts (`set_mod_wheel`, `set_volume`, `set_balance`, `set_pan`,
+`set_sustain_pedal`), `set_pitch_wheel`, the transport (`set_clock`,
+`set_start`, `set_continue`, `set_stop`), `set_frame`, `set_channels`,
+`reset` and `panic`. The setters send a message only when their value
+changes; `panic()` resets and sends a note off for every note. The
+fields (`notes`, `gates`, `ccs`, `pw`, ...) are Rack's, the arrays as live
+views.
+
+Rack hands each message to the virtual `onMessage`, which a C++ subclass
+overrides. It is an engine-thread callback (ADR 003), so Python cannot
+override it: RackPy's generator implements it by keeping the messages, and
+`take_messages()` returns those generated since the last call, as
+`rackpy.raw.midi.Message` objects, oldest first. A subclass that defines
+`on_message` raises `TypeError`, as it would never be called. A Python
+override for non-real-time use is RP-22's laboratory.
+
+Indices are checked: a channel `c` must be below `CHANNELS`, a controller
+`id` below 128, and `set_channels` at most `CHANNELS`, where Rack would
+index past its arrays. Values must fit their C++ types (`OverflowError`).
+
+(dsp-midi-parser)=
+## MIDI parser
+
+`MidiParser[channels]` (`MidiParser_16`, as Rack's MIDI to CV uses) turns
+MIDI messages into gates, CV and pulses: `process_message(msg)` (or
+`process_cc`, `process_system`), then `process_filters(delta_time)` and
+`process_pulses(delta_time)` every frame, and `get_pitch_voltage(c)`,
+`get_pw(c)`, `get_mod(c)`, `gates`, `velocities`, `aftertouches` and the
+pulses (`clock_pulse`, `retrigger_pulses`, ...) to read the result. The modes
+are `MonoMode` (last, first, lowest or highest priority) and `PolyMode`
+(rotate, reuse, reset, MPE), one pair of enums shared by every
+instantiation. `to_json()` and `from_json(json)` save and restore the
+settings with Rack's keys, as Python values.
+
+Rack trusts its inputs here; RackPy refuses what it would get wrong:
+
+- channel indices of `MAX_CHANNELS` or more (`IndexError`), and more channels
+  than `MAX_CHANNELS` (`ValueError`);
+- in polyphonic MPE mode, Rack indexes its arrays by a message's MIDI
+  channel, so with fewer than 16 channels a message on a higher channel
+  raises `ValueError`;
+- a timing clock message while `clock_division` is 0, which Rack would
+  divide by (`clock_division` itself may be 0);
+- in `from_json`, a `channels` above `MAX_CHANNELS`, or a `monoMode` or
+  `polyMode` outside its enum, which would make Rack index past its arrays or
+  build an invalid enum value. Patch JSON is untrusted.

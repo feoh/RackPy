@@ -191,6 +191,13 @@
     },
     {
       "facade": null,
+      "id": "alias:rack::dsp::VUMeter",
+      "kind": "alias",
+      "raw": "rackpy.raw.dsp.VUMeter",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "alias:rack::event::Action",
       "kind": "alias",
       "raw": "rackpy.raw.event.Action",
@@ -768,6 +775,20 @@
       "id": "class_template:rack::dsp::IIRFilter<value, value, type>",
       "kind": "factory",
       "raw": "rackpy.raw.dsp.IIRFilter",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.midi.MidiGenerator",
+      "id": "class_template:rack::dsp::MidiGenerator<value>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.MidiGenerator",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.midi.MidiParser",
+      "id": "class_template:rack::dsp::MidiParser<value>",
+      "kind": "factory",
+      "raw": "rackpy.raw.dsp.MidiParser",
       "status": "implemented"
     },
     {
@@ -1773,6 +1794,20 @@
     },
     {
       "facade": null,
+      "id": "constructor:rack::dsp::MidiGenerator::MidiGenerator<CHANNELS>()",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "constructor:rack::dsp::MidiParser::MidiParser<MAX_CHANNELS>()",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.MidiParser_16",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "constructor:rack::dsp::TBiquadFilter::TBiquadFilter<T>()",
       "kind": "class",
       "raw": "rackpy.raw.dsp.BiquadFilter",
@@ -2508,6 +2543,20 @@
     },
     {
       "facade": null,
+      "id": "enum:rack::dsp::MidiParser::MonoMode",
+      "kind": "enum",
+      "raw": "rackpy.raw.dsp.MidiParser_16.MonoMode",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enum:rack::dsp::MidiParser::PolyMode",
+      "kind": "enum",
+      "raw": "rackpy.raw.dsp.MidiParser_16.PolyMode",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "enum:rack::dsp::TBiquadFilter::Type",
       "kind": "enum",
       "raw": "rackpy.raw.dsp.BiquadFilter.Type",
@@ -2525,6 +2574,13 @@
       "id": "enum:rack::dsp::TSchmittTrigger<float>::State",
       "kind": "enum",
       "raw": "rackpy.raw.dsp.SchmittTrigger.State",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enum:rack::dsp::VuMeter2::Mode",
+      "kind": "enum",
+      "raw": "rackpy.raw.dsp.VuMeter2.Mode",
       "status": "implemented"
     },
     {
@@ -2623,6 +2679,76 @@
       "id": "enumerator:rack::dsp::BooleanTrigger::State::UNINITIALIZED",
       "kind": "enum_member",
       "raw": "rackpy.raw.dsp.BooleanTrigger.State.UNINITIALIZED",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::MidiParser::MonoMode::FIRST_PRIORITY_MODE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.MidiParser_16.MonoMode.FIRST_PRIORITY_MODE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::MidiParser::MonoMode::HIGHEST_PRIORITY_MODE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.MidiParser_16.MonoMode.HIGHEST_PRIORITY_MODE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::MidiParser::MonoMode::LAST_PRIORITY_MODE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.MidiParser_16.MonoMode.LAST_PRIORITY_MODE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::MidiParser::MonoMode::LOWEST_PRIORITY_MODE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.MidiParser_16.MonoMode.LOWEST_PRIORITY_MODE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::MidiParser::MonoMode::NUM_MONO_MODES",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.MidiParser_16.MonoMode.NUM_MONO_MODES",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::MidiParser::PolyMode::MPE_MODE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.MidiParser_16.PolyMode.MPE_MODE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::MidiParser::PolyMode::NUM_POLY_MODES",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.MidiParser_16.PolyMode.NUM_POLY_MODES",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::MidiParser::PolyMode::RESET_MODE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.MidiParser_16.PolyMode.RESET_MODE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::MidiParser::PolyMode::REUSE_MODE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.MidiParser_16.PolyMode.REUSE_MODE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::MidiParser::PolyMode::ROTATE_MODE",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.MidiParser_16.PolyMode.ROTATE_MODE",
       "status": "implemented"
     },
     {
@@ -2735,6 +2861,20 @@
       "id": "enumerator:rack::dsp::TSchmittTrigger<float>::State::UNINITIALIZED",
       "kind": "enum_member",
       "raw": "rackpy.raw.dsp.SchmittTrigger.State.UNINITIALIZED",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::VuMeter2::Mode::PEAK",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.VuMeter2.Mode.PEAK",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "enumerator:rack::dsp::VuMeter2::Mode::RMS",
+      "kind": "enum_member",
+      "raw": "rackpy.raw.dsp.VuMeter2.Mode.RMS",
       "status": "implemented"
     },
     {
@@ -4034,6 +4174,279 @@
     },
     {
       "facade": null,
+      "id": "field:rack::dsp::MidiGenerator::ccs",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.ccs",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiGenerator::channelPressure",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.channel_pressure",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiGenerator::channels",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.channels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiGenerator::clk",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.clk",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiGenerator::cont",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.cont",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiGenerator::frame",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.frame",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiGenerator::gates",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.gates",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiGenerator::keyPressures",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.key_pressures",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiGenerator::notes",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.notes",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiGenerator::pw",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.pw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiGenerator::start",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiGenerator::stop",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.stop",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiGenerator::vels",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.vels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::aftertouches",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.aftertouches",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::channels",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.channels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::clock",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.clock",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::clockDividerPulse",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.clock_divider_pulse",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::clockDivision",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.clock_division",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::clockPulse",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.clock_pulse",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::continuePulse",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.continue_pulse",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::gates",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.gates",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::heldNotes",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.held_notes",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::modFilters",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.mod_filters",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::mods",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.mods",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::monoMode",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.mono_mode",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::notes",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.notes",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::pedal",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.pedal",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::polyMode",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.poly_mode",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::pwFilters",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.pw_filters",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::pwRange",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.pw_range",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::pws",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.pws",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::releaseVelocityEnabled",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.release_velocity_enabled",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::retriggerOnResume",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.retrigger_on_resume",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::retriggerPulses",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.retrigger_pulses",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::rotateIndex",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.rotate_index",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::smooth",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.smooth",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::startPulse",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.start_pulse",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::stopPulse",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.stop_pulse",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::MidiParser::velocities",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.MidiParser_16.velocities",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "field:rack::dsp::PulseGenerator::remaining",
       "kind": "property",
       "raw": "rackpy.raw.dsp.PulseGenerator.remaining",
@@ -4156,6 +4569,41 @@
       "id": "field:rack::dsp::TTimer::time",
       "kind": "property",
       "raw": "rackpy.raw.dsp.TTimer_float_4.time",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::VuMeter2::lambda",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.VuMeter2.lambda_",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::VuMeter2::mode",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.VuMeter2.mode",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::VuMeter2::v",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.VuMeter2.v",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::VuMeter::dBInterval",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.VuMeter.db_interval",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "field:rack::dsp::VuMeter::dBScaled",
+      "kind": "property",
+      "raw": "rackpy.raw.dsp.VuMeter.db_scaled",
       "status": "implemented"
     },
     {
@@ -11650,6 +12098,314 @@
     },
     {
       "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::onMessage(const rack::midi::Message &)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.take_messages",
+      "status": "planned"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::panic()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.panic",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setBalance(int8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_balance",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setCc(int8_t, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_cc",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setChannelPressure(int8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_channel_pressure",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setChannels(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_channels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setClock(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_clock",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setContinue(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_continue",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setFrame(int64_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_frame",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setKeyPressure(int8_t, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_key_pressure",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setModWheel(int8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_mod_wheel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setNoteGate(int8_t, bool, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_note_gate",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setPan(int8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_pan",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setPitchWheel(int16_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_pitch_wheel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setStart(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_start",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setStop(bool)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_stop",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setSustainPedal(int8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_sustain_pedal",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setVelocity(int8_t, int)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_velocity",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiGenerator::setVolume(int8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiGenerator_16.set_volume",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::assignChannel(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.assign_channel",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::fromJson(json_t *)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.from_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::getChannels()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.get_channels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::getMod(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.get_mod",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::getPitchVoltage(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.get_pitch_voltage",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::getPw(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.get_pw",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::getWheelChannels()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.get_wheel_channels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::panic()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.panic",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::pressNote(uint8_t, uint8_t, uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.press_note",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::pressPedal()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.press_pedal",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::processCC(const rack::midi::Message &)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.process_cc",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::processFilters(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.process_filters",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::processMessage(const rack::midi::Message &)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.process_message",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::processPulses(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.process_pulses",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::processSystem(const rack::midi::Message &)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.process_system",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::refreshHeld()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.refresh_held",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::releaseNote(uint8_t, int8_t, int8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.release_note",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::releasePedal()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.release_pedal",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::setChannels(uint8_t)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.set_channels",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::setFilterLambda(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.set_filter_lambda",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::setMonoMode(rack::dsp::MidiParser<$c0>::MonoMode)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.set_mono_mode",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::setPolyMode(rack::dsp::MidiParser<$c0>::PolyMode)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.set_poly_mode",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::MidiParser::toJson()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.MidiParser_16.to_json",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "method:rack::dsp::PulseGenerator::isHigh()",
       "kind": "method",
       "raw": "rackpy.raw.dsp.PulseGenerator.is_high",
@@ -11940,6 +12696,41 @@
       "id": "method:rack::dsp::TTimer::reset()",
       "kind": "method",
       "raw": "rackpy.raw.dsp.TTimer_float_4.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::VuMeter2::getBrightness(float, float)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.VuMeter2.get_brightness",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::VuMeter2::process(float, float)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.VuMeter2.process",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::VuMeter2::reset()",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.VuMeter2.reset",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::VuMeter::getBrightness(int)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.VuMeter.get_brightness",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "method:rack::dsp::VuMeter::setValue(float)",
+      "kind": "method",
+      "raw": "rackpy.raw.dsp.VuMeter.set_value",
       "status": "implemented"
     },
     {
@@ -17159,6 +17950,20 @@
     },
     {
       "facade": null,
+      "id": "record:rack::dsp::VuMeter",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.VuMeter",
+      "status": "implemented"
+    },
+    {
+      "facade": "rackpy.dsp.midi.VuMeter2",
+      "id": "record:rack::dsp::VuMeter2",
+      "kind": "class",
+      "raw": "rackpy.raw.dsp.VuMeter2",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "record:rack::engine::Cable",
       "kind": "class",
       "raw": "rackpy.raw.engine.Cable",
@@ -18803,6 +19608,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "a8c98c4a145870bd",
+  "inputs": "edd20a52c2a72e02",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

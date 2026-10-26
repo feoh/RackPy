@@ -28,6 +28,7 @@
 #include "../simd/simd.hpp"
 #include "../support/overrides.hpp"
 #include "../values/values.hpp"
+#include "arrays.hpp"
 #include "calls.hpp"
 
 namespace rackpy {
@@ -42,62 +43,6 @@ namespace {
 template <typename T>
 constexpr const char* typeName() {
 	return std::is_same<T, float>::value ? "float" : "float_4";
-}
-
-/** A live view of a fixed C++ array field: indexing reads and writes the object, which it keeps alive.
-A float_4 item is itself a live view of its element. */
-template <typename T>
-struct ArrayView {
-	T* data;
-	size_t size;
-	py::object owner;
-	size_t index(int i) const {
-		int n = (int) size;
-		if (i < 0)
-			i += n;
-		if (i < 0 || i >= n)
-			throw py::index_error("index out of range (the array has " + std::to_string(size) + " items)");
-		return (size_t) i;
-	}
-};
-
-template <typename T>
-void bindArrayView(py::module_ m, const char* name) {
-	py::class_<ArrayView<T>>(m, name, "A live view of a fixed array field of a Rack DSP object; it keeps the object alive.")
-		.def("__len__", [](const ArrayView<T>& v) { return v.size; })
-		.def("__getitem__", [](py::object self, int i) -> py::object {
-			auto& v = self.cast<ArrayView<T>&>();
-			T* item = &v.data[v.index(i)];
-			if constexpr (std::is_same<T, float>::value)
-				return py::float_(*item);
-			else
-				return py::cast(item, py::return_value_policy::reference_internal, self);
-		}, py::arg("i"))
-		.def("__setitem__", [](ArrayView<T>& v, int i, const T& x) { v.data[v.index(i)] = x; }, py::arg("i"), py::arg("x"))
-		.def("tolist", [](const ArrayView<T>& v) {
-			py::list out;
-			for (size_t k = 0; k < v.size; k++)
-				out.append(py::cast(T(v.data[k])));
-			return out;
-		}, "Copies of the items.")
-		.def("__repr__", [name](const ArrayView<T>& v) {
-			py::list out;
-			for (size_t k = 0; k < v.size; k++)
-				out.append(py::cast(T(v.data[k])));
-			return std::string(name) + "(" + py::repr(out).cast<std::string>() + ")";
-		});
-}
-
-template <typename T>
-py::object view(py::object self, T* data, size_t n) {
-	return py::cast(ArrayView<T>{data, n, std::move(self)});
-}
-
-template <typename Class>
-void valueCopies(Class& cls) {
-	using F = typename Class::type;
-	cls.def("__copy__", [](const F& f) { return f; }).def("__deepcopy__", [](const F& f, py::dict) { return f; }, py::arg("memo"));
-	cls.attr("__hash__") = py::none();
 }
 
 void deprecatedCall(const char* cls, const char* what, const char* instead) {

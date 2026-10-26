@@ -8,11 +8,14 @@ written here, for any ``CHANNELS`` and for ``T = float`` (the default) or
 ``Frame<4, simd::float_4>``. The samples are float32 storage that the frame
 exposes through the buffer protocol in Rack's memory layout.
 
-This module adds ``Frame`` to the native ``rackpy.raw.dsp``.
+This module adds ``Frame`` to the native ``rackpy.raw.dsp``, Rack's
+deprecated ``VUMeter`` typedef, which warns when used, and the refusal of a
+``MidiGenerator`` subclass that defines ``on_message``.
 """
 
 import array
 import builtins
+import warnings
 from collections.abc import Iterator
 from typing import Any, ClassVar
 
@@ -127,3 +130,30 @@ Frame.__module__ = _MODULE
 Float4Samples.__module__ = _MODULE
 _rackpy_host.raw.dsp.Frame = Frame
 _rackpy_host.raw.dsp.Float4Samples = Float4Samples
+
+
+def _deprecated_alias(name: str) -> Any:
+    if name == "VUMeter":
+        warnings.warn(
+            "rackpy.raw.dsp.VUMeter mirrors Rack's deprecated typedef of VuMeter, itself deprecated; use VuMeter2",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return _rackpy_host.raw.dsp.VuMeter
+    raise AttributeError(f"module 'rackpy.raw.dsp' has no attribute {name!r}")
+
+
+def _refuse_on_message(cls: builtins.type, /, **kwargs: Any) -> None:
+    if "on_message" in vars(cls):
+        raise TypeError(
+            f"{cls.__qualname__} defines on_message: Rack calls MidiGenerator::onMessage where a module generates "
+            "MIDI, on its engine thread, where Python never runs (ADR 003), so a Python override would never be "
+            "called. RackPy's generator records the messages instead: call take_messages()."
+        )
+
+
+for _generator in _rackpy_host.raw.dsp.MidiGenerator.specializations.values():
+    _generator.__init_subclass__ = classmethod(_refuse_on_message)
+
+_rackpy_host.raw.dsp.__getattr__ = _deprecated_alias
+_rackpy_host.raw.dsp.__all__ = [*sorted(n for n in vars(_rackpy_host.raw.dsp) if not n.startswith("_")), "VUMeter"]
