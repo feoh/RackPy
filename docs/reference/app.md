@@ -270,7 +270,7 @@ The host-view API:
 
 - `rackpy.raw.context_get().scene` is a `HostScene`. It has `rack`,
   `rack_scroll`, `menu_bar` and `browser`, `get_mouse_pos()`, and Rack's
-  deprecated `mouse_pos` field.
+  deprecated `mouse_pos` field. Reading or writing that field warns; prefer `get_mouse_pos()`.
 - `HostRackScrollWidget` has `get_zoom()` and `set_zoom(zoom, pivot=)`
   (Rack clamps the zoom to 1/4 to 4), `get_grid_offset()`,
   `set_grid_offset()`, `reset()`, `zoom_to_modules()` and
@@ -293,7 +293,8 @@ The host-view API:
     `get_cable(output, input)`, `get_cables_on_port`, `get_top_cable`,
     `get_top_plug`) and the next cable colour;
   - `get_touched_param()` and `set_touched_param()`, the param Core's
-    MIDI-Map learns. That param needs a module.
+    MIDI-Map learns. That param needs a module. The deprecated `touched_param`
+    field warns on reads and writes; prefer these methods.
 - `add_module(module_widget)` and `add_module_at_mouse(module_widget)` put a
   Python module widget, with its model and module, into the rack, which then
   owns it. `remove_module(module_widget)` takes it out again, disconnecting

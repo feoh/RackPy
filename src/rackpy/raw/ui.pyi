@@ -80,7 +80,7 @@ class SequentialLayout(Widget):
 class Scrollbar(OpaqueWidget):
     vertical: bool
 
-ScrollBar = Scrollbar
+ScrollBar = Scrollbar  # deprecated; access warns
 
 class ScrollWidget(OpaqueWidget):
     @property

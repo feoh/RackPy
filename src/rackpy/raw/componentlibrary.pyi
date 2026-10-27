@@ -201,7 +201,7 @@ LEDBezelLight: AliasTemplate
 LEDSliderLight: AliasTemplate
 LEDLightSlider: AliasTemplate
 VCVLightButton: AliasTemplate
-LEDLightButton: AliasTemplate
+LEDLightButton: AliasTemplate  # deprecated; subscripting warns
 LEDLightBezel: AliasTemplate
 
 class SvgLight(_app.ModuleLightWidget):
@@ -222,7 +222,7 @@ class _LightSlider(_app.SvgSlider):
     light: _app.ModuleLightWidget
     def get_light(self) -> _app.ModuleLightWidget: ...
 
-class LEDSliderGreen(_LightSlider): ...
+class LEDSliderGreen(_LightSlider): ...  # deprecated; construction warns
 class LEDSliderRed(_LightSlider): ...
 class LEDSliderYellow(_LightSlider): ...
 class LEDSliderBlue(_LightSlider): ...

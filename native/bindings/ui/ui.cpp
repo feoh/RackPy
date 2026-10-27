@@ -223,7 +223,6 @@ void bindUi(py::module_ raw) {
 	auto scrollbar = variant<ui::Scrollbar, OW>(mod, "Scrollbar");
 	scrollbar.def_property("vertical", [](py::object self) { return native<ui::Scrollbar>(self).vertical; },
 		[](py::object self, bool v) { native<ui::Scrollbar>(self).vertical = v; });
-	mod.attr("ScrollBar") = scrollbar;
 	using SW = ui::ScrollWidget;
 	variant<SW, OW>(mod, "ScrollWidget")
 		.def_property_readonly("container", [](py::object self) { return wrapper(native<SW>(self).container); },
