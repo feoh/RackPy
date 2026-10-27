@@ -11002,7 +11002,7 @@
       "id": "method:rack::app::PlugWidget::step()",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.step",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
@@ -11128,7 +11128,7 @@
       "id": "method:rack::app::RackScrollWidget::draw(const rack::widget::Widget::DrawArgs &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.draw",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
@@ -11149,28 +11149,28 @@
       "id": "method:rack::app::RackScrollWidget::onButton(const rack::widget::Widget::ButtonEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_button",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackScrollWidget::onHover(const rack::widget::Widget::HoverEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_hover",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackScrollWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_hover_key",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackScrollWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_hover_scroll",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
@@ -11205,7 +11205,7 @@
       "id": "method:rack::app::RackScrollWidget::step()",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.step",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
@@ -11324,7 +11324,7 @@
       "id": "method:rack::app::RackWidget::draw(const rack::widget::Widget::DrawArgs &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.draw",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
@@ -11534,42 +11534,42 @@
       "id": "method:rack::app::RackWidget::onButton(const rack::widget::Widget::ButtonEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_button",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackWidget::onDragEnd(const rack::widget::Widget::DragEndEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_drag_end",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_drag_hover",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackWidget::onDragStart(const rack::widget::Widget::DragStartEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_drag_start",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackWidget::onHover(const rack::widget::Widget::HoverEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_hover",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_hover_key",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
@@ -11716,7 +11716,7 @@
       "id": "method:rack::app::RackWidget::step()",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.step",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
@@ -11751,7 +11751,7 @@
       "id": "method:rack::app::Scene::draw(const rack::widget::Widget::DrawArgs &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.draw",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
@@ -11765,35 +11765,35 @@
       "id": "method:rack::app::Scene::onDragHover(const rack::widget::Widget::DragHoverEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_drag_hover",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::app::Scene::onHover(const rack::widget::Widget::HoverEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_hover",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::app::Scene::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_hover_key",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::app::Scene::onPathDrop(const rack::widget::Widget::PathDropEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_path_drop",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::app::Scene::step()",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.step",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
@@ -12066,49 +12066,49 @@
       "id": "method:rack::audio::Device::getBlockSize()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.get_block_size",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::getBlockSizes()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.get_block_sizes",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::getName()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.get_name",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::getNumInputs()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.get_num_inputs",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::getNumOutputs()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.get_num_outputs",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::getSampleRate()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.get_sample_rate",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::getSampleRates()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.get_sample_rates",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
@@ -12136,84 +12136,84 @@
       "id": "method:rack::audio::Device::setBlockSize(int)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.set_block_size",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::setSampleRate(float)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.set_sample_rate",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::subscribe(rack::audio::Port *)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.subscribe",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Device::unsubscribe(rack::audio::Port *)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Device.unsubscribe",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::getDefaultDeviceId()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.get_default_device_id",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::getDeviceIds()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.get_device_ids",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::getDeviceName(int)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.get_device_name",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::getDeviceNumInputs(int)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.get_device_num_inputs",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::getDeviceNumOutputs(int)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.get_device_num_outputs",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::getName()",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.get_name",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::subscribe(int, rack::audio::Port *)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.subscribe",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::audio::Driver::unsubscribe(int, rack::audio::Port *)",
       "kind": "method",
       "raw": "rackpy.raw.audio.Driver.unsubscribe",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
@@ -15342,84 +15342,84 @@
       "id": "method:rack::midi::Device::getName()",
       "kind": "method",
       "raw": "rackpy.raw.midi.Device.get_name",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::getDefaultInputDeviceId()",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.get_default_input_device_id",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::getDefaultOutputDeviceId()",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.get_default_output_device_id",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::getInputDeviceIds()",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.get_input_device_ids",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::getInputDeviceName(int)",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.get_input_device_name",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::getName()",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.get_name",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::getOutputDeviceIds()",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.get_output_device_ids",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::getOutputDeviceName(int)",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.get_output_device_name",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::subscribeInput(int, rack::midi::Input *)",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.subscribe_input",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::subscribeOutput(int, rack::midi::Output *)",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.subscribe_output",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::unsubscribeInput(int, rack::midi::Input *)",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.unsubscribe_input",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
       "id": "method:rack::midi::Driver::unsubscribeOutput(int, rack::midi::Output *)",
       "kind": "method",
       "raw": "rackpy.raw.midi.Driver.unsubscribe_output",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
@@ -15454,7 +15454,7 @@
       "id": "method:rack::midi::Input::onMessage(const rack::midi::Message &)",
       "kind": "method",
       "raw": "rackpy.raw.midi.Input.on_message",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
@@ -15496,7 +15496,7 @@
       "id": "method:rack::midi::InputQueue::onMessage(const rack::midi::Message &)",
       "kind": "method",
       "raw": "rackpy.raw.midi.InputQueue.on_message",
-      "status": "implemented"
+      "status": "planned"
     },
     {
       "facade": null,
@@ -20623,6 +20623,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "fcb20c47f57f6a98",
+  "inputs": "a450228f1b605d1e",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

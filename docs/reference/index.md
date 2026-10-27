@@ -68,6 +68,7 @@ surface/history
 surface-summary
 surface-schema
 callback-matrix
+callback-paths
 ```
 
 ## The rackpy package

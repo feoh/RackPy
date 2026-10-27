@@ -6,6 +6,14 @@
 one. Modules process audio with [kernels](dsp.md), and plugin settings are
 in [state](state.md).
 
+:::{warning}
+Models and patches cannot create or enable laboratory modules. Python audio
+callbacks are refused in normal `ModuleClass`; use native kernels for audio.
+The explicitly enabled [laboratory](../explanation/callbacks.md) runs only
+offline on the main thread, never Rack's engine or driver threads. Loading
+patch data never opts into executing Python callback code.
+:::
+
 A Rack plugin offers *models*: the entries in Rack's module browser. Each
 model makes *modules*, the instances in a patch. In a RackPy plugin, the
 trusted entry module (named by `entry` in `rackpy-loader.json`) adds its

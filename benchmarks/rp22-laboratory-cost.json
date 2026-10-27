@@ -1,0 +1,567 @@
+{
+  "note": "Offline main-thread Bench diagnostic on a shared desktop; NOT production real-time performance.",
+  "python": "3.14.9 (main, Oct 21 2026, 17:48:02) [Clang 23.1.3 ]",
+  "clock": {
+    "implementation": "clock_gettime(CLOCK_MONOTONIC)",
+    "monotonic": true,
+    "adjustable": false,
+    "resolution": 1e-09
+  },
+  "sample_rate": 48000,
+  "channels": 0,
+  "modules_per_bench": 1,
+  "frames_per_run": 20000,
+  "warmup_frames": 2000,
+  "repetitions": 21,
+  "shuffle_seed": 22,
+  "baseline": "native_module_empty: ordinary RackPy Module, no kernel, parameters, ports or cables, on the same Bench",
+  "method": "One Bench.step(20000) per timed run; native host loop invokes each virtual once per frame. GIL already held. Includes Bench scheduling and callback dispatch/ProcessArgs conversion, not only the Python body. No audio clock, worker threads, GIL contention or device deadlines measured.",
+  "raw_runs_in_execution_order": [
+    {
+      "repetition": 0,
+      "variant": "python_super",
+      "elapsed_ns": 5359149
+    },
+    {
+      "repetition": 0,
+      "variant": "python_empty",
+      "elapsed_ns": 2747937
+    },
+    {
+      "repetition": 0,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61206
+    },
+    {
+      "repetition": 0,
+      "variant": "laboratory_base",
+      "elapsed_ns": 79480
+    },
+    {
+      "repetition": 1,
+      "variant": "laboratory_base",
+      "elapsed_ns": 79402
+    },
+    {
+      "repetition": 1,
+      "variant": "python_empty",
+      "elapsed_ns": 2716254
+    },
+    {
+      "repetition": 1,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61143
+    },
+    {
+      "repetition": 1,
+      "variant": "python_super",
+      "elapsed_ns": 5330382
+    },
+    {
+      "repetition": 2,
+      "variant": "laboratory_base",
+      "elapsed_ns": 91531
+    },
+    {
+      "repetition": 2,
+      "variant": "python_super",
+      "elapsed_ns": 5332773
+    },
+    {
+      "repetition": 2,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61082
+    },
+    {
+      "repetition": 2,
+      "variant": "python_empty",
+      "elapsed_ns": 2702140
+    },
+    {
+      "repetition": 3,
+      "variant": "python_super",
+      "elapsed_ns": 5385885
+    },
+    {
+      "repetition": 3,
+      "variant": "laboratory_base",
+      "elapsed_ns": 91476
+    },
+    {
+      "repetition": 3,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61072
+    },
+    {
+      "repetition": 3,
+      "variant": "python_empty",
+      "elapsed_ns": 2729765
+    },
+    {
+      "repetition": 4,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61097
+    },
+    {
+      "repetition": 4,
+      "variant": "python_super",
+      "elapsed_ns": 5385504
+    },
+    {
+      "repetition": 4,
+      "variant": "python_empty",
+      "elapsed_ns": 2739794
+    },
+    {
+      "repetition": 4,
+      "variant": "laboratory_base",
+      "elapsed_ns": 91475
+    },
+    {
+      "repetition": 5,
+      "variant": "laboratory_base",
+      "elapsed_ns": 91432
+    },
+    {
+      "repetition": 5,
+      "variant": "python_super",
+      "elapsed_ns": 5332241
+    },
+    {
+      "repetition": 5,
+      "variant": "python_empty",
+      "elapsed_ns": 2696297
+    },
+    {
+      "repetition": 5,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61074
+    },
+    {
+      "repetition": 6,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61040
+    },
+    {
+      "repetition": 6,
+      "variant": "python_super",
+      "elapsed_ns": 5369018
+    },
+    {
+      "repetition": 6,
+      "variant": "laboratory_base",
+      "elapsed_ns": 86140
+    },
+    {
+      "repetition": 6,
+      "variant": "python_empty",
+      "elapsed_ns": 2772045
+    },
+    {
+      "repetition": 7,
+      "variant": "python_super",
+      "elapsed_ns": 5389728
+    },
+    {
+      "repetition": 7,
+      "variant": "python_empty",
+      "elapsed_ns": 2724598
+    },
+    {
+      "repetition": 7,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61065
+    },
+    {
+      "repetition": 7,
+      "variant": "laboratory_base",
+      "elapsed_ns": 91409
+    },
+    {
+      "repetition": 8,
+      "variant": "python_super",
+      "elapsed_ns": 5340684
+    },
+    {
+      "repetition": 8,
+      "variant": "laboratory_base",
+      "elapsed_ns": 79161
+    },
+    {
+      "repetition": 8,
+      "variant": "python_empty",
+      "elapsed_ns": 2737114
+    },
+    {
+      "repetition": 8,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61114
+    },
+    {
+      "repetition": 9,
+      "variant": "python_super",
+      "elapsed_ns": 5316173
+    },
+    {
+      "repetition": 9,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61129
+    },
+    {
+      "repetition": 9,
+      "variant": "laboratory_base",
+      "elapsed_ns": 86071
+    },
+    {
+      "repetition": 9,
+      "variant": "python_empty",
+      "elapsed_ns": 2751240
+    },
+    {
+      "repetition": 10,
+      "variant": "python_empty",
+      "elapsed_ns": 2716010
+    },
+    {
+      "repetition": 10,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61173
+    },
+    {
+      "repetition": 10,
+      "variant": "laboratory_base",
+      "elapsed_ns": 86046
+    },
+    {
+      "repetition": 10,
+      "variant": "python_super",
+      "elapsed_ns": 5340137
+    },
+    {
+      "repetition": 11,
+      "variant": "python_super",
+      "elapsed_ns": 5331072
+    },
+    {
+      "repetition": 11,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61087
+    },
+    {
+      "repetition": 11,
+      "variant": "laboratory_base",
+      "elapsed_ns": 86050
+    },
+    {
+      "repetition": 11,
+      "variant": "python_empty",
+      "elapsed_ns": 2713399
+    },
+    {
+      "repetition": 12,
+      "variant": "python_empty",
+      "elapsed_ns": 2717020
+    },
+    {
+      "repetition": 12,
+      "variant": "laboratory_base",
+      "elapsed_ns": 83796
+    },
+    {
+      "repetition": 12,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61050
+    },
+    {
+      "repetition": 12,
+      "variant": "python_super",
+      "elapsed_ns": 5336311
+    },
+    {
+      "repetition": 13,
+      "variant": "python_super",
+      "elapsed_ns": 5349437
+    },
+    {
+      "repetition": 13,
+      "variant": "python_empty",
+      "elapsed_ns": 2711294
+    },
+    {
+      "repetition": 13,
+      "variant": "laboratory_base",
+      "elapsed_ns": 91452
+    },
+    {
+      "repetition": 13,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61050
+    },
+    {
+      "repetition": 14,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61052
+    },
+    {
+      "repetition": 14,
+      "variant": "laboratory_base",
+      "elapsed_ns": 86184
+    },
+    {
+      "repetition": 14,
+      "variant": "python_super",
+      "elapsed_ns": 5336622
+    },
+    {
+      "repetition": 14,
+      "variant": "python_empty",
+      "elapsed_ns": 2663211
+    },
+    {
+      "repetition": 15,
+      "variant": "laboratory_base",
+      "elapsed_ns": 86079
+    },
+    {
+      "repetition": 15,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61202
+    },
+    {
+      "repetition": 15,
+      "variant": "python_empty",
+      "elapsed_ns": 2704415
+    },
+    {
+      "repetition": 15,
+      "variant": "python_super",
+      "elapsed_ns": 5315071
+    },
+    {
+      "repetition": 16,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61102
+    },
+    {
+      "repetition": 16,
+      "variant": "laboratory_base",
+      "elapsed_ns": 86055
+    },
+    {
+      "repetition": 16,
+      "variant": "python_super",
+      "elapsed_ns": 5334120
+    },
+    {
+      "repetition": 16,
+      "variant": "python_empty",
+      "elapsed_ns": 2701547
+    },
+    {
+      "repetition": 17,
+      "variant": "laboratory_base",
+      "elapsed_ns": 91461
+    },
+    {
+      "repetition": 17,
+      "variant": "native_module_empty",
+      "elapsed_ns": 71329
+    },
+    {
+      "repetition": 17,
+      "variant": "python_empty",
+      "elapsed_ns": 2701369
+    },
+    {
+      "repetition": 17,
+      "variant": "python_super",
+      "elapsed_ns": 5361021
+    },
+    {
+      "repetition": 18,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61101
+    },
+    {
+      "repetition": 18,
+      "variant": "laboratory_base",
+      "elapsed_ns": 86120
+    },
+    {
+      "repetition": 18,
+      "variant": "python_super",
+      "elapsed_ns": 5319873
+    },
+    {
+      "repetition": 18,
+      "variant": "python_empty",
+      "elapsed_ns": 2695582
+    },
+    {
+      "repetition": 19,
+      "variant": "laboratory_base",
+      "elapsed_ns": 91463
+    },
+    {
+      "repetition": 19,
+      "variant": "python_empty",
+      "elapsed_ns": 2724624
+    },
+    {
+      "repetition": 19,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61131
+    },
+    {
+      "repetition": 19,
+      "variant": "python_super",
+      "elapsed_ns": 5326357
+    },
+    {
+      "repetition": 20,
+      "variant": "python_empty",
+      "elapsed_ns": 2726843
+    },
+    {
+      "repetition": 20,
+      "variant": "native_module_empty",
+      "elapsed_ns": 61143
+    },
+    {
+      "repetition": 20,
+      "variant": "laboratory_base",
+      "elapsed_ns": 86079
+    },
+    {
+      "repetition": 20,
+      "variant": "python_super",
+      "elapsed_ns": 5306096
+    }
+  ],
+  "results": {
+    "native_module_empty": {
+      "median_ns_per_frame": 3.05505,
+      "runs_ns_per_frame": [
+        3.0603,
+        3.05715,
+        3.0541,
+        3.0536,
+        3.05485,
+        3.0537,
+        3.052,
+        3.05325,
+        3.0557,
+        3.05645,
+        3.05865,
+        3.05435,
+        3.0525,
+        3.0525,
+        3.0526,
+        3.0601,
+        3.0551,
+        3.56645,
+        3.05505,
+        3.05655,
+        3.05715
+      ]
+    },
+    "laboratory_base": {
+      "median_ns_per_frame": 4.306,
+      "runs_ns_per_frame": [
+        3.974,
+        3.9701,
+        4.57655,
+        4.5738,
+        4.57375,
+        4.5716,
+        4.307,
+        4.57045,
+        3.95805,
+        4.30355,
+        4.3023,
+        4.3025,
+        4.1898,
+        4.5726,
+        4.3092,
+        4.30395,
+        4.30275,
+        4.57305,
+        4.306,
+        4.57315,
+        4.30395
+      ]
+    },
+    "python_empty": {
+      "median_ns_per_frame": 135.8127,
+      "runs_ns_per_frame": [
+        137.39685,
+        135.8127,
+        135.107,
+        136.48825,
+        136.9897,
+        134.81485,
+        138.60225,
+        136.2299,
+        136.8557,
+        137.562,
+        135.8005,
+        135.66995,
+        135.851,
+        135.5647,
+        133.16055,
+        135.22075,
+        135.07735,
+        135.06845,
+        134.7791,
+        136.2312,
+        136.34215
+      ]
+    },
+    "python_super": {
+      "median_ns_per_frame": 266.81555,
+      "runs_ns_per_frame": [
+        267.95745,
+        266.5191,
+        266.63865,
+        269.29425,
+        269.2752,
+        266.61205,
+        268.4509,
+        269.4864,
+        267.0342,
+        265.80865,
+        267.00685,
+        266.5536,
+        266.81555,
+        267.47185,
+        266.8311,
+        265.75355,
+        266.706,
+        268.05105,
+        265.99365,
+        266.31785,
+        265.3048
+      ]
+    }
+  },
+  "environment": {
+    "cpu": "Intel(R) Core(TM) i9-14900K",
+    "kernel": "7.3.0-4-cachyos",
+    "governor": "powersave",
+    "load_average_1min": "3.34",
+    "where": "inside Rack Free 2.6.6 (headless), Rack's main thread at plugin start-up, production build",
+    "revision": "7d2c543a30269165f64141982dbb0acfd4902f88",
+    "compiler": "g++ (GCC) 16.2.1 20260810\nCopyright (C) 2026 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+    "machine": "Linux loki 7.3.0-4-cachyos #1 SMP PREEMPT_DYNAMIC Fri, 23 Oct 2026 15:03:58 +0000 x86_64 GNU/Linux",
+    "cpu_affinity": "pid 74277's current affinity list: 0-31",
+    "laboratory_compile_command": "/usr/bin/c++ -Drackpy_host_EXPORTS -I/home/feoh/src/personal/RackPy-rp22d/native/include -I/home/feoh/src/personal/RackPy-rp22d/native/bindings/generated -isystem /home/feoh/.cache/rackpy/sdk/extracted/lin-x64-420da2452def7b19/Rack-SDK/include -isystem /home/feoh/.cache/rackpy/sdk/extracted/lin-x64-420da2452def7b19/Rack-SDK/dep/include -isystem /home/feoh/.cache/rackpy/build-inputs/extracted/dfa4c5a40c47f338/python/include/python3.14 -isystem /home/feoh/src/personal/RackPy-rp22d/.venv/lib/python3.14/site-packages/pybind11/include -std=c++17 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -ffile-prefix-map=/home/feoh/src/personal/RackPy-rp22d/= -fPIC -g -O3 -funsafe-math-optimizations -fno-omit-frame-pointer -march=nehalem -Wall -Wextra -Wno-unused-parameter -Wsuggest-override -fno-gnu-unique -Werror -MD -MT CMakeFiles/rackpy_host.dir/native/laboratory/module.cpp.o -MF CMakeFiles/rackpy_host.dir/native/laboratory/module.cpp.o.d -o CMakeFiles/rackpy_host.dir/native/laboratory/module.cpp.o -c /home/feoh/src/personal/RackPy-rp22d/native/laboratory/module.cpp",
+    "energy_preference": "balance_performance",
+    "turbo_disabled": "0"
+  },
+  "source_sha256": {
+    "tests/laboratory/in_rack_cost/test_callback_cost.py": "5cba87cecd295ac9feaa04cfa9d1ce79d8c1449e6ff3c860f3bac8cb87bfa1ff",
+    "native/laboratory/module.cpp": "3872b4ba7a9ba6e99dd2cc4bc8c21e914bd52e20d3b54b96b55c142226fe8561",
+    "native/laboratory/bench.cpp": "eb4a2525d03b0aee9ce21fb11c22129f7e34e61c23882aeb5ece493ac03e9e64"
+  },
+  "command": "RACKPY_LABORATORY_COST_OUT=benchmarks/rp22-laboratory-cost.json CMAKE_BUILD_PARALLEL_LEVEL=3 flock /tmp/rackpy-host-tests.lock timeout 5400 uv run pytest -m 'host and not dist' -ra --basetemp=build/validation/host -o tmp_path_retention_policy=all"
+}

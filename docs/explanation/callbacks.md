@@ -15,6 +15,41 @@ its speed says anything about production performance. Production modules
 process audio with [native kernels](../how-to/dsp.md).
 :::
 
+## Every public virtual: domain, Python path or blocker
+
+The [generated execution inventory](../reference/callback-paths.md) joins
+**all 434 public virtual declarations** from `bin/callback-matrix` to
+`bindings/manifest.json`: exact upstream ID (including overloads), execution
+domain, Python names, status and per-symbol semantics. Regenerate it with
+`uv run bin/generate_bindings.py generate`; `check` and
+`tests/coverage/test_callback_paths.py` enforce freshness and the unchanged
+denominator. It includes destructors (owner/GC lifetime mappings, not Python
+virtual overrides) and `Exception::what` (a value/exception translation).
+
+A callable wrapper or native adapter is **not** synchronous Python callback
+coverage. The audit keeps these gaps as **full-release blockers**, with
+status `planned`, retaining the existing native implementation and tests:
+
+- **33 driver/device virtuals** have only native configured answers or queued
+  notifications; these cannot replace synchronous return values or callback
+  timing. RP-22F (`tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3`)
+  owns their missing laboratory Python paths. The five `audio::Port` stream
+  virtuals do have synchronous Python overrides on a **Python-driven device**,
+  never on Rack's driver threads; queued Rack notifications are a different
+  path ([audio](../reference/audio.md)).
+- **21 UI virtuals** on `PlugWidget`, `RackScrollWidget`, `RackWidget` and
+  `Scene` have borrowed host-view call wrappers but no Python subclass
+  trampolines. RP-28F
+  (`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`) owns them.
+- The shared trampoline's **same-object reentrant dispatch divergence**
+  described below remains open under
+  `tk-rackpy-trampolines-suppress-same-object-re-entra-0abce9`.
+
+None of these entries disappear from the denominator, and this inventory
+promotes nothing to `verified`. Laboratory paths prove only the documented
+offline semantics, not driver/engine scheduling equivalence or support on
+macOS/Windows.
+
 ## Why Python never runs on Rack's audio threads
 
 Rack calls a module's `process()` once per sample, on its engine threads,
@@ -220,4 +255,49 @@ native generator method that emits a message on the same generator, that
 nested message goes to the native recorder, not back to Python. This
 **differs from C++ virtual dispatch**; `super().on_message` remains the
 explicit, non-virtual recorder call. Fixing the shared trampoline helper
-is a separate follow-up, not a claim of this slice.
+is the open cross-cutting task
+`tk-rackpy-trampolines-suppress-same-object-re-entra-0abce9`, not a claim of
+this slice. This affects other users of the shared override helper too;
+module laboratory dispatch uses its own explicit callback/nesting mechanism.
+
+## Measuring laboratory callback costs
+
+The reproducible benchmark is
+`tests/laboratory/in_rack_cost/test_callback_cost.py`, driven inside actual
+Rack by `tests/laboratory/test_callback_cost.py`. Raw data and exact machine,
+compiler command, source hashes, Python version, randomized execution order
+and native baseline are retained in
+[`benchmarks/rp22-laboratory-cost.json`](../../benchmarks/rp22-laboratory-cost.json).
+See [performance](../performance.md#laboratory-callback-cost-rp-22d) for
+results and reproduction. Each timed `Bench.step(20000)` invokes one virtual
+per frame; it does **not** batch audio across Rack modules to improve timing.
+
+This is an **offline diagnostic**, not production real-time performance:
+Python already holds the GIL on the main thread, there is no competing
+Python thread, no driver or audio clock, and there are no device deadlines.
+It includes Bench scheduling and argument conversion, not just the override
+body. A fast median cannot demonstrate bounded latency, absence of GIL stalls,
+or any production audio budget in ADR 004.
+
+## Crash-isolated failure and shutdown probes
+
+`tests/laboratory/test_races.py` runs each exception, superclass recursion,
+cross-object recursion and close/delete stale-view probe in a separate actual
+Rack process with a watchdog. A signal/crash or timeout fails the outer test,
+not the outer interpreter. Recursion must raise `RecursionError`, unwind the
+native nesting/error-capture state and leave a fresh module usable. Closed or
+deleted modules invalidate retained port/voltage views; stale base callback
+calls and adding closed modules back to a bench are refused.
+
+The shutdown scenario races a Python worker's rejected `Bench.step` attempts
+with main-thread use and the closing hook. It joins that worker while the
+interpreter is usable, but deliberately retains the bench/module/override
+cycle, laboratory quantity, MIDI generator and device through Rack teardown.
+The live-context run also retains a connected MIDI output port (constructing
+one requires Rack's context, which the startup/headless run does not have). In both startup/headless and live-context windowed
+Rack, live native override holders must cause the documented **safe refusal
+to finalize Python**, with a diagnostic and normal Rack exit, never freeing
+Python underneath them (ADR 003). A second variant releases those holders in
+the closing hook and requires `Py_FinalizeEx returned 0`. These are adversarial
+lifetime probes, not a claim to exhaust all schedules or prove sanitizer-clean
+behavior.

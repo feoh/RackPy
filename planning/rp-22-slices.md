@@ -149,4 +149,24 @@ explanation page carries the description.
   by a test, not fixed locally; the cross-cutting follow-up is
   `tk-rackpy-trampolines-suppress-same-object-re-entra-0abce9`.
 
-**RP-22D** is described in its Witan task and is recorded here as it lands.
+**RP-22D — Inventory, measurements and closing probes**
+(`tk-rackpy-22d-callback-inventory-measured-laborator-f8465c`). Validation:
+[rp-22d-validation.md](rp-22d-validation.md). The generated
+[execution inventory](../docs/reference/callback-paths.md) joins every one of
+the 434 public virtual declarations to its domain, Python names and semantics
+or full-release blocker. No status is promoted to verified. Tests detect drift;
+raw laboratory cost measurements are separate from production budgets; failure,
+recursion, stale-view and shutdown probes use isolated actual-Rack subprocesses.
+
+The audit found 33 native-configured/queued driver/device callbacks without a
+synchronous laboratory Python path, plus 21 borrowed-host-view UI callbacks
+without Python subclass trampolines. Supervisor-approved status corrections
+keep them `planned`, retaining native-path names and evidence. Follow-ups:
+
+- **RP-22F** (`tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3`):
+  laboratory Python paths for the 33 driver/device callbacks; blocks RP-22.
+- **RP-28F** (`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`):
+  UI-safe subclass trampolines for the 21 host-view-only callbacks.
+
+These gaps and the shared-helper reentry task above remain full-release
+blockers; closing validation does not imply that RP-22 or full coverage is complete.

@@ -21,10 +21,12 @@ Derived files (never edit them):
                                             the hand-written adapters in
                                             native/bindings/<family>.cpp
   docs/reference/coverage.md                coverage report
+  docs/reference/callback-paths.md          every public virtual's domain and Python path/blocker
 """
 
 import hashlib
 import json
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -49,6 +51,118 @@ def mapped(manifest: dict[str, Any]) -> list[dict[str, Any]]:
 
 def bound(manifest: dict[str, Any]) -> list[dict[str, Any]]:
     return [r for r in manifest["entries"] if r["status"] in bm.BOUND]
+
+
+def callback_execution(record: dict[str, Any], entry: dict[str, Any]) -> str:
+    """Describe execution, not just callability: native adapters are not Python overrides."""
+    strategy = record["callback"]
+    name = entry["name"]
+    python = record["python"] or {}
+    path = python.get("facade") or python.get("raw")
+    if record["status"] not in bm.BOUND:
+        return "**Full-release blocker**: " + (record.get("notes") or "No semantic Python mapping yet.")
+    if strategy == "lifecycle":
+        return "Owner/GC deletion, not a Python destructor override; lifetime mapping: " + str(path)
+    if strategy == "value":
+        return "Exception/value translation, not a Python override: " + str(path)
+    if name.startswith("rack::engine::Module::"):
+        method = name.rsplit("::", 1)[-1]
+        method = re.sub(r"(?<!^)(?=[A-Z])", "_", method).lower()
+        if method in {"to_json", "from_json"}:
+            method = "module_" + method
+        return "Synchronous offline override: rackpy.laboratory.ModuleClass." + method + "; Bench/main thread only."
+    if strategy == "mixed":
+        owner = "ParamQuantity" if "ParamQuantity::" in name else "Quantity"
+        method = str(python["raw"]).rsplit(".", 1)[-1]
+        return f"Synchronous offline override: rackpy.laboratory.{owner}.{method}; main thread only."
+    if strategy == "engine":
+        if "MidiGenerator::" in name:
+            return (
+                "Synchronous offline override: rackpy.laboratory.MidiGenerator[N].on_message; "
+                "same-object reentry blocker (RP-22E follow-up)."
+            )
+        if "OutputDevice::" in name:
+            return (
+                "Synchronous offline override: rackpy.laboratory.MidiOutputDevice.send_message "
+                "via a connected Python-made Output."
+            )
+    if strategy == "driver":
+        if "rack::audio::Port::" in name:
+            return (
+                f"Synchronous override: {path}, only on a Python-driven device; "
+                "Rack threads use native/queued adapters."
+            )
+        return (
+            "**Full-release blocker**: native/queued adapter only; no synchronous laboratory Python override (RP-22F)."
+        )
+    if name.startswith("rack::app::CableWidget::"):
+        method = re.sub(r"(?<!^)(?=[A-Z])", "_", name.rsplit("::", 1)[-1]).lower()
+        return (
+            f"Synchronous UI override: rackpy.raw.app.CableWidget.{method}; "
+            "Python-created subclass, not HostCableWidget."
+        )
+    return (
+        f"Main-thread mapping: {path}; see per-symbol semantics below "
+        "(callable/adapters are not automatically overrides)."
+    )
+
+
+def callback_paths(manifest: dict[str, Any], inputs: bm.Inputs) -> str:
+    """Join the RP-06 classifier's exact denominator to the binding manifest."""
+    records = {r["id"]: r for r in manifest["entries"]}
+    rules = bm.load_json(bm.CALLBACK_RULES)
+    rows = bm.callback_matrix().classify(inputs.inventory["entries"], rules["rules"])
+    out = [
+        "# Public virtual execution paths",
+        "",
+        f"**{GENERATED_NOTE}** Domain classification: `bin/callback-matrix` and `upstream/callback-rules.json`.",
+        "",
+        f"All **{len(rows)} public virtual declarations**, including deprecated overloads, "
+        "destructors and value virtuals.",
+        "The denominator is unchanged. No entry is promoted to verified by this report.",
+        "",
+        "**Laboratory means explicitly enabled, offline and main-thread only, never Rack's engine/driver threads.**",
+        "See [Callbacks and the laboratory](../explanation/callbacks.md) for restrictions, fidelity gaps and the open",
+        "same-object reentry blocker `tk-rackpy-trampolines-suppress-same-object-re-entra-0abce9`.",
+        "Native configured/queued driver adapters without a synchronous Python path remain full-release blockers:",
+        "RP-22F (`tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3`). "
+        "A callable name is not proof of an override.",
+        "Borrowed host widgets without Python subclass trampolines remain blockers under RP-28F "
+        "(`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`).",
+        "Per-symbol semantics below retain the manifest's adapter restrictions; implemented is not verified.",
+        "",
+        "## Execution domains",
+        "",
+        "| Domain | Legitimate Rack execution domain |",
+        "| --- | --- |",
+    ]
+    out += [f"| `{key}` | {value} |" for key, value in rules["strategies"].items()]
+    out += [
+        "",
+        "## Every declaration",
+        "",
+        "| Upstream ID | Domain | Status | Python execution path or blocker | "
+        "Raw / facade names | Manifest semantics |",
+        "| --- | --- | --- | --- | --- | --- |",
+    ]
+
+    def cell(text: str) -> str:
+        return text.replace("|", "\\|").replace("\n", " ")
+
+    for row in rows:
+        record = records[row["id"]]
+        python = record["python"] or {}
+        paths = " / ".join(f"`{p}`" for p in (python.get("raw"), python.get("facade")) if p) or "—"
+        cells = [
+            f"`{row['id']}`",
+            f"`{row['strategy']}`",
+            record["status"],
+            callback_execution(record, inputs.index[row["id"]]),
+            paths,
+            record.get("notes") or "—",
+        ]
+        out.append("| " + " | ".join(cell(c) for c in cells) + " |")
+    return "\n".join(out) + "\n"
 
 
 def generate_files(manifest: dict[str, Any], manifest_text: str, inputs: bm.Inputs, repo: Path) -> dict[Path, str]:
@@ -137,6 +251,7 @@ def generate_files(manifest: dict[str, Any], manifest_text: str, inputs: bm.Inpu
         repo / "native" / "bindings" / "generated" / "registry.hpp": "\n".join(header),
         repo / "native" / "bindings" / "generated" / "registry.cpp": "\n".join(source),
         repo / "docs" / "reference" / "coverage.md": report,
+        repo / "docs" / "reference" / "callback-paths.md": callback_paths(manifest, inputs),
     }
 
 

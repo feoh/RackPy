@@ -102,6 +102,17 @@ it (`port.device`, `input_device`, `output_device`, or a driver's
 (midi-python-drivers)=
 ## Python drivers and devices
 
+:::{warning}
+Native configured answers and queued notifications below do not preserve
+synchronous Python override semantics. Missing driver/device/input laboratory
+paths remain **full-release blockers** under RP-22F
+(`tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3`); see the
+[callback inventory](callback-paths.md). The separate
+[laboratory output device](../explanation/callbacks.md#a-laboratory-midi-output-device)
+provides a synchronous Python `send_message` only offline, on the main thread,
+never on Rack's engine or MIDI driver threads.
+:::
+
 Python implements a MIDI driver as a natively configured `PythonDriver`
 (RP-29C), whose calls native code answers:
 

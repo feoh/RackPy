@@ -9,9 +9,11 @@ LED displays (RP-28D). The [component library](componentlibrary.md) is its
 own page. Python-made cable widgets and the audio and MIDI displays come
 with the rest of RP-28.
 
-Every class is Rack's own and is a [subclassable widget](widgets.md): create
-it on Rack's main thread once the UI exists, set its fields, add it to a
-parent, and override its drawing and event methods in Python if you need to.
+Python-created controls are Rack's own [subclassable widgets](widgets.md):
+create them on Rack's main thread once the UI exists, set their fields, add
+them to a parent, and override drawing and events in Python if needed.
+The borrowed scene/rack/scroll/plug host views below are **not** subclass
+trampolines; their callable wrappers do not supply Python virtual overrides.
 Calling a method such as `on_drag_move(event)` runs Rack's implementation for
 that class.
 
@@ -254,7 +256,14 @@ sets Rack's fields in Rack's order:
 ## The scene and the rack
 
 Rack makes and owns its `Scene`, `RackScrollWidget` and `RackWidget`, so
-Python reaches them as host views (stale once Rack deletes them):
+Python reaches them as host views (stale once Rack deletes them). The 21
+public UI virtuals on these types and `PlugWidget` remain **full-release
+blockers**, not completed callback mappings: RP-28F
+(`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`) owns their
+missing UI-safe Python subclass paths. See the
+[per-virtual execution inventory](callback-paths.md).
+
+The existing host-view API:
 
 - `rackpy.raw.context_get().scene` is a `HostScene`. It has `rack`,
   `rack_scroll`, `menu_bar` and `browser`, `get_mouse_pos()`, and Rack's

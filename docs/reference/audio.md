@@ -77,6 +77,17 @@ lower-level calls, which RackPy undoes with the port.
 (audio-python-drivers)=
 ## Python drivers and devices
 
+:::{warning}
+Native configured answers and queued requests below are not synchronous
+Python virtual overrides. Missing driver/device laboratory paths remain
+**full-release blockers** under RP-22F
+(`tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3`); see the
+[callback inventory](callback-paths.md). The five port stream callbacks do
+have a synchronous path on Python-driven devices only, never Rack's driver
+threads. The [laboratory](../explanation/callbacks.md) is offline,
+explicitly enabled and not production real-time audio.
+:::
+
 Python implements an audio driver as a natively configured `PythonDriver`
 (RP-29C). Rack calls a driver's and a device's methods from driver threads
 and the engine thread; Core's Audio module, for one, reads a device's

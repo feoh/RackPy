@@ -23,6 +23,7 @@ LINKED = (
     "bin",
     "spikes",
     "benchmarks",
+    "planning",
     "native",
     "cmake",
     "LICENSE",

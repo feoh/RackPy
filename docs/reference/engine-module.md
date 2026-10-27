@@ -6,12 +6,20 @@ switch-label views (RP-14B2b1), standalone metadata backreferences (RP-14B2b2),
 unattached and attached standalone quantities (RP-14B2b3/b4), and port/light
 and parameter-quantity class factories (RP-14B2b5/b6), and constructor-scoped
 raw module vectors (RP-14B2b7), module identity (RP-14C1) and engine ownership
-with engine smoothing (RP-14C2), Linux x86_64 inside Rack Free 2.6.6.** This is
-not a registerable instrument yet: nothing public hands a module to Rack's
-engine before RP-16. Native lifecycle event adapters (the rest of RP-14C),
-plugin/model factories (RP-16), DSP (RP-17), the Python callback
-laboratory (RP-22), and expanders (RP-23) remain planned. See the
+with engine smoothing (RP-14C2), Linux x86_64 inside Rack Free 2.6.6.**
+Later slices add [model registration](../how-to/plugins.md), native kernels,
+lifecycle events, expanders and the offline Python callback laboratory
+(documented below). The laboratory is partial, with explicit
+[callback blockers](callback-paths.md); see the
 [coverage report](coverage.md) for declaration-level status.
+
+:::{warning}
+Python `process` overrides are **laboratory only**: explicitly enabled,
+offline, main-thread Bench execution, never Rack's engine or driver threads.
+Normal `ModuleClass` refuses them at class definition, and a patch cannot
+create or enable a laboratory module. Use [native kernels](../how-to/dsp.md)
+for audio; see [callback paths and blockers](callback-paths.md).
+:::
 
 ## Construction transaction
 

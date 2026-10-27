@@ -54,3 +54,60 @@ block-processing optimization cannot pass.
 Use native allocation/GIL hooks, sanitizer jobs where compatible, stale-handle
 tests, queue-overflow tests and a forced-slow-Python-UI test. Never infer
 real-time safety just from low mean CPU usage.
+
+## Laboratory callback cost (RP-22D)
+
+**Not production real-time performance.** This benchmark runs the implemented
+callback laboratory, offline on Rack's main thread at plugin startup, with
+the GIL already held. It measures no audio device, worker scheduling, GIL
+contention, per-frame tail latency or deadline misses. In particular, the
+percentiles of repeated 20,000-frame run averages would not be callback tail
+latencies. ADR 004's contended-GIL experiment remains relevant; this test does
+not supersede it or satisfy a production budget.
+
+Raw data: [`benchmarks/rp22-laboratory-cost.json`](../benchmarks/rp22-laboratory-cost.json).
+The file contains every elapsed time in randomized execution order, all
+per-frame run averages, the exact native baseline, machine/kernel/governor/
+energy policy/affinity/load, bundled Python version, compile command and
+benchmark/native source hashes. This is shared desktop diagnostic evidence,
+not controlled hardware. Linux x86_64 only; no macOS or Windows measurement.
+
+Measured on Intel Core i9-14900K, Linux `7.3.0-4-cachyos`, GCC 16.2.1,
+bundled CPython 3.14.9, Rack Free 2.6.6. Power policy was left as found:
+`powersave`, `balance_performance`, turbo enabled, affinity CPUs 0–31, load
+average 3.34 at collection. Results are **nanoseconds per frame averaged over
+each run**, not individual callback tail latencies:
+
+| Variant | Minimum run average | Median run average | Maximum run average |
+| --- | ---: | ---: | ---: |
+| Native empty RackPy Module on Bench (baseline) | 3.052 | 3.055 | 3.566 |
+| Laboratory module, Rack base process/step | 3.958 | 4.306 | 4.577 |
+| Empty Python process override | 133.161 | 135.813 | 138.602 |
+| Python process calling super().process | 265.305 | 266.816 | 269.486 |
+
+Four otherwise empty one-module benches at 48 kHz, no parameters, channels,
+cables or kernels: an ordinary native RackPy Module (the baseline), a
+laboratory module using Rack's base `process`/`step`, an empty Python override,
+and a Python override calling `super().process`. Each bench warms up for 2,000
+frames; 21 repetitions of 20,000 frames each use seed 22 to shuffle A/B/C/D
+order. One `Bench.step(20000)` call per run drives the native host loop, still
+calling the virtual once per sample; this measures Bench scheduling,
+trampoline/argument conversion and callback body together. It is not an
+isolated C++ virtual-call benchmark and not Rack's real engine.
+
+Reproduce just the benchmark (fresh production build through the standard
+host harness; no device is opened):
+
+```bash
+mkdir -p build/validation
+set -o pipefail
+RACKPY_LABORATORY_COST_OUT=benchmarks/rp22-laboratory-cost.json \
+  CMAKE_BUILD_PARALLEL_LEVEL=3 flock /tmp/rackpy-host-tests.lock \
+  uv run pytest tests/laboratory/test_callback_cost.py -ra \
+  --basetemp=build/validation/cost 2>&1 | tee build/validation/cost.log
+```
+
+The retained run's exact command is in the JSON (the closing full host suite
+also runs this benchmark). See [RP-22D validation](../planning/rp-22d-validation.md)
+for actual command results, failures and remaining gates, and
+[Callbacks and the laboratory](explanation/callbacks.md) for the restrictions.

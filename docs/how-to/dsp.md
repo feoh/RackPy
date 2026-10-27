@@ -18,10 +18,13 @@ and hands it to the module:
 ```{rackpy-example} module_kernel.py
 ```
 
-:::{note}
-To try a `process()` written in Python, for an experiment or a test, use the
-offline [callback laboratory](../explanation/callbacks.md). It never runs in
-Rack's engine and is not real-time audio.
+:::{warning}
+Python `process()` is **laboratory only**, explicitly enabled by trusted code
+for offline experiments and tests on the main thread. The
+[callback laboratory](../explanation/callbacks.md) never runs in Rack's engine
+or driver threads; a model/patch cannot create or enable a laboratory module.
+Normal-mode Python audio overrides are rejected. Neither laboratory timings
+nor the bound DSP helpers make Python production-real-time safe.
 :::
 
 ## Kernels and their fields
