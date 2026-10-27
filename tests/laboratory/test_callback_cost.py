@@ -4,7 +4,9 @@
 import hashlib
 import json
 import os
+import shlex
 import subprocess
+import sys
 from collections.abc import Callable
 from pathlib import Path
 
@@ -58,9 +60,6 @@ def test_laboratory_callback_cost(
             "turbo_disabled": "/sys/devices/system/cpu/intel_pstate/no_turbo",
         }.items():
             data["environment"][name] = Path(path).read_text().strip() if Path(path).exists() else "unknown"
-        data["command"] = (
-            "RACKPY_LABORATORY_COST_OUT=benchmarks/rp22-laboratory-cost.json CMAKE_BUILD_PARALLEL_LEVEL=3 "
-            "flock /tmp/rackpy-host-tests.lock timeout 5400 uv run pytest -m 'host and not dist' -ra "
-            "--basetemp=build/validation/host -o tmp_path_retention_policy=all"
-        )
+        # The invocation that actually ran (benchmarks/rp22-laboratory-cost.json came from the full host suite).
+        data["command"] = f"RACKPY_LABORATORY_COST_OUT={shlex.quote(target)} " + shlex.join(sys.argv)
         Path(target).write_text(json.dumps(data, indent=2) + "\n")
