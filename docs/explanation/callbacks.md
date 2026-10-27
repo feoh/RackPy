@@ -37,10 +37,16 @@ status `planned`, retaining the existing native implementation and tests:
   virtuals do have synchronous Python overrides on a **Python-driven device**,
   never on Rack's driver threads; queued Rack notifications are a different
   path ([audio](../reference/audio.md)).
-- **21 UI virtuals** on `PlugWidget`, `RackScrollWidget`, `RackWidget` and
-  `Scene` have borrowed host-view call wrappers but no Python subclass
-  trampolines. RP-28F
-  (`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`) owns them.
+
+The audit also kept **21 UI virtuals** on `PlugWidget`, `RackScrollWidget`,
+`RackWidget` and `Scene` as blockers, because only borrowed host views
+reached them. RP-28F
+(`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`) found that no
+plugin can override them: the last three have PRIVATE constructors, and only
+`CableWidget`'s constructor makes a usable `PlugWidget`. By a decision
+pending the owner's review ([coverage policy 11](../coverage.md#completeness-policy)),
+the host views' calls on Rack's own instances are their mappings, and the
+records are `implemented` again.
 
 None of these entries disappear from the denominator, and this inventory
 promotes nothing to `verified`. Laboratory paths prove only the documented

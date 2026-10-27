@@ -13,6 +13,7 @@ option (2026-10-25).
 | 28C | The component library, including `createLightParam` and its light buttons; themed widgets switching with `preferDarkPanels` (with RP-30) |
 | 28D | Scene, RackWidget, RackScrollWidget, Rack's cable and plug widgets, and the LED displays |
 | 28E | Python cable widgets and rack cable edits (with RP-24's engine cables), and the audio and MIDI displays and buttons (with RP-29) |
+| 28F | The UI virtuals of `PlugWidget`, `RackScrollWidget`, `RackWidget` and `Scene`, which no plugin can override: mapped as calls on Rack's own instances (decision) |
 
 **RP-28A — app controls, typed host views and widget factory helpers**
 (`tk-rackpy-28a-app-controls-typed-host-views-and-wid-45d11d`). 219 records.
@@ -168,3 +169,52 @@ displays** (`tk-rackpy-28e-python-cable-widgets-rack-cable-edits-7eedc5`).
   `remove_cable` or `remove_from_parent`. `reclaim` now re-owns the
   registered instance as pybind11's own reclaim does (pinned pybind11
   3.1.0).
+
+**RP-28F — host-only app widgets mapped as calls on Rack's instances**
+(`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`). 21 records.
+Validation: [rp-28f-validation.md](rp-28f-validation.md).
+
+The RP-22D callback audit moved these 21 `ui` virtuals to `planned`: their
+only path was RP-28D's borrowed host views, which call Rack's
+implementations but take no Python override. The task was to give them
+Python subclass trampolines, as RP-28E did for `CableWidget`.
+
+- **Decision (supervisor, 2026-10-26; owner review pending).** Public API
+  cannot override a virtual of a class whose usable instances only Rack can
+  make. The call on Rack's own instances is then the mapping, and the record
+  cites the header (and, if needed, Rack's source) lines. Recorded as a
+  clarification of coverage policy 11 ([coverage](../docs/coverage.md)).
+  - `Scene`, `RackScrollWidget` and `RackWidget` have PRIVATE constructors
+    and destructors (`include/app/Scene.hpp:27-28`,
+    `include/app/RackScrollWidget.hpp:19-20`,
+    `include/app/RackWidget.hpp:28-29`), so no plugin can subclass them.
+  - `PlugWidget`'s constructor and destructor are public
+    (`include/app/CableWidget.hpp:20-21`). But Rack's `PlugWidget()` leaves
+    its pimpl's cable and type indeterminate, and its `step()` dereferences
+    the cable (Rack 2.6.6's `src/app/CableWidget.cpp:36-49, 52-103`). Only
+    `CableWidget`'s constructor sets them (`src/app/CableWidget.cpp:140-151`),
+    and it makes its own plugs. So a plugin's subclass can never be a cable's
+    plug, and Rack's `step` on one would dereference that indeterminate
+    pointer. This agrees with RP-28E's decision that Python gets plugs only
+    from a cable widget.
+- **Records.** The 21 records are `implemented` again. Each note starts
+  with the decision and its evidence, and keeps the RP-28D text. The
+  generated [callback paths](../docs/reference/callback-paths.md) say "Call
+  on Rack's own instance" for them (`bin/generate_bindings.py`,
+  `HOST_ONLY_APP_WIDGETS`).
+- **Final views.** `HostScene`, `HostRackScrollWidget`, `HostRackWidget` and
+  `HostPlugWidget` are now final, so a Python subclass that looks like an
+  override is refused when its class is defined. They already had no
+  constructor.
+- **Evidence in Rack's live UI.** The new in-Rack test checks that
+  `rackpy.raw.app` has no class to make these with and that the four views
+  refuse construction and subclassing. It also checks that the views run
+  Rack's implementations on Rack's own instances:
+  - `Scene`: stepping, a path drop, hover and drag-hover positions, Ctrl+0
+    and the held-arrow scroll.
+  - `RackScrollWidget`: paging, scrolling, the fourth mouse button's zoom,
+    hover passed on to the rack, and the step's offset clamp.
+  - `RackWidget`: the drag-selection rectangle, a left click and key
+    propagation.
+  - Drawing all three into a framebuffer, and stepping a cable widget's
+    `HostPlugWidget`.

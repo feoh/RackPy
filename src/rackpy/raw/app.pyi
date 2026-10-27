@@ -283,6 +283,7 @@ SVGPort = SvgPort
 SVGScrew = SvgScrew
 SVGPanel = SvgPanel
 
+@final
 class HostScene(HostWidget):
     """Rack's Scene (Context.scene), a borrowed view."""
 
@@ -297,6 +298,7 @@ class HostScene(HostWidget):
     mouse_pos: Vec
     def get_mouse_pos(self) -> Vec: ...
 
+@final
 class HostRackScrollWidget(HostWidget):
     @property
     def zoom_widget(self) -> HostWidget: ...
@@ -313,6 +315,7 @@ class HostRackScrollWidget(HostWidget):
     def zoom_to_modules(self) -> None: ...
     def zoom_to_bound(self, bound: Rect) -> None: ...
 
+@final
 class HostRackWidget(HostWidget):
     """Rack's RackWidget: modules, cables and selection."""
 
@@ -416,6 +419,7 @@ class HostCableWidget(HostWidget):
     def merge_json(self, data: Any) -> Any: ...
     def from_json(self, data: Any) -> None: ...
 
+@final
 class HostPlugWidget(HostWidget):
     def get_cable(self) -> HostCableWidget | CableWidget | None: ...
     def get_type(self) -> Any: ...

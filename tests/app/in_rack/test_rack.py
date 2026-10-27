@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """RP-28D: Rack's scene, rack and rack scroll widget as host views, and the LED displays, in Rack's live UI.
 
+RP-28F: no plugin can subclass these or make a usable plug of its own, so their
+host views are final and their UI virtuals are calls on Rack's own instances.
+
 Rack's cables, and Python module widgets added to the rack, are tested in
 windowed Rack (tests/app/test_module_browser.py), where a Python model's
 widgets make real cables.
@@ -14,12 +17,17 @@ import pytest
 from _rackpy_host import _testing as HOOKS
 
 from rackpy import raw
-from rackpy.errors import OwnershipError
+from rackpy.errors import OwnershipError, StaleHandleError
 from rackpy.raw import app, ui
 from rackpy.raw import nanovg as nvg
 from rackpy.raw import widget as w
 from rackpy.raw.engine import Module
 from rackpy.raw.math import Rect, Vec
+
+GLFW_RELEASE, GLFW_PRESS = 0, 1
+GLFW_MOUSE_BUTTON_LEFT, GLFW_MOUSE_BUTTON_4 = 0, 3
+GLFW_KEY_0, GLFW_KEY_LEFT, GLFW_KEY_PAGE_DOWN = 48, 263, 267
+RACK_MOD_CTRL = 2  # GLFW_MOD_CONTROL on Linux
 
 
 def scene() -> app.HostScene:
@@ -175,6 +183,143 @@ def test_host_widgets_dispatch_and_draw() -> None:
         assert drawn == ["bar"]
         with pytest.raises(ValueError):
             bar.draw(w.DrawArgs())  # an owned DrawArgs has no live context
+    finally:
+        frame.close()
+
+
+def test_racks_own_scene_rack_and_plugs_are_not_subclassable(probe: Any) -> None:
+    """RP-28F decision: only Rack makes usable ones, so their UI virtuals are calls on Rack's own instances."""
+    for name in ("Scene", "RackScrollWidget", "RackWidget", "PlugWidget"):
+        assert not hasattr(app, name)  # no class to make one with
+    for view in (app.HostScene, app.HostRackScrollWidget, app.HostRackWidget, app.HostPlugWidget):
+        with pytest.raises(TypeError, match="No constructor defined"):
+            view()
+        with pytest.raises(TypeError, match="not an acceptable base type"):
+            type("Override", (view,), {"step": lambda self: None})
+    s = scene()
+    scroll, rack = s.rack_scroll, s.rack
+    zoom, offset, mouse = scroll.get_zoom(), scroll.get_grid_offset(), s.mouse_pos
+    try:
+        scene_calls(s)
+        scroll_calls(scroll, rack)
+        rack_calls(rack, probe)
+        draw_calls(s, scroll, rack)
+    finally:
+        s.on_hover_key(w.HoverKeyEvent(key=GLFW_KEY_LEFT, action=GLFW_RELEASE))
+        scroll.set_zoom(zoom)
+        scroll.set_grid_offset(offset)
+        s.mouse_pos = mouse
+    cable = app.CableWidget()
+    plug = cable.input_plug
+    try:
+        assert isinstance(plug, app.HostPlugWidget) and plug.get_cable() is cable
+        plug.step()  # Rack's PlugWidget::step, on a plug Rack's CableWidget constructor made
+    finally:
+        cable.close()
+    with pytest.raises(StaleHandleError):
+        plug.step()
+
+
+def scene_calls(s: app.HostScene) -> None:
+    stepped: list[bool] = []
+    dropped: list[list[str]] = []
+
+    class Child(w.Widget):
+        def step(self) -> None:
+            stepped.append(True)
+            super().step()
+
+        def on_path_drop(self, event: Any) -> None:
+            dropped.append(list(event.paths))
+            event.consume(self)
+
+    child = Child()
+    child.box = Rect(Vec(), Vec(10, 10))
+    child.attach_to_scene()  # on top of Rack's own children
+    try:
+        s.step()  # Rack's Scene::step steps its children
+        drop = w.PathDropEvent(["/nonexistent/rp28f.txt"], pos=Vec(5, 5), context=w.EventContext())
+        s.on_path_drop(drop)  # not a patch or selection, so Rack's Scene sends it to the widget under it
+        assert stepped and dropped == [["/nonexistent/rp28f.txt"]] and drop.get_target() is child
+    finally:
+        child.remove_from_parent()
+        child.close()
+    s.on_hover(w.HoverEvent(pos=Vec(7, 300)))
+    assert s.get_mouse_pos() == Vec(7, 300)  # Scene::onHover records the mouse
+    s.on_drag_hover(w.DragHoverEvent(button=GLFW_MOUSE_BUTTON_LEFT, pos=Vec(9, 301)))
+    assert s.get_mouse_pos() == Vec(9, 301)
+    s.rack_scroll.set_zoom(0.5)
+    key = w.HoverKeyEvent(key=GLFW_KEY_0, key_name="0", action=GLFW_PRESS, mods=RACK_MOD_CTRL, context=w.EventContext())
+    s.on_hover_key(key)
+    assert s.rack_scroll.get_zoom() == 1 and key.is_consumed()  # Rack's Ctrl+0 command
+    s.rack_scroll.reset()
+    for _ in range(2):
+        s.step()  # Rack's scroll widget settles its offset at this zoom
+    before = s.rack_scroll.get_grid_offset()
+    s.on_hover_key(w.HoverKeyEvent(key=GLFW_KEY_LEFT, action=GLFW_PRESS))
+    s.step()  # Rack's Scene::step scrolls the rack 32 pixels while an arrow key is held
+    assert s.rack_scroll.get_grid_offset().x < before.x - 1
+
+
+def scroll_calls(scroll: app.HostRackScrollWidget, rack: app.HostRackWidget) -> None:
+    scroll.reset()
+    scroll.step()
+    before = scroll.get_grid_offset()
+    scroll.on_hover_key(w.HoverKeyEvent(pos=Vec(10, 10), key=GLFW_KEY_PAGE_DOWN, action=GLFW_PRESS))
+    assert scroll.get_grid_offset().y > before.y  # Rack's ScrollWidget pages down
+    zoom, offset = scroll.get_zoom(), scroll.get_grid_offset()
+    scroll.on_hover_scroll(w.HoverScrollEvent(pos=Vec(10, 10), scroll_delta=Vec(0, -50)))
+    assert (scroll.get_zoom(), scroll.get_grid_offset()) != (zoom, offset)  # scrolls, or zooms (Rack's settings)
+    scroll.set_zoom(1)
+    scroll.on_button(w.ButtonEvent(pos=Vec(10, 10), button=GLFW_MOUSE_BUTTON_4, action=GLFW_PRESS))
+    assert scroll.get_zoom() == pytest.approx(2**-0.5)  # Rack zooms out with the fourth mouse button
+    rack.on_hover(w.HoverEvent(pos=Vec(-12345, -6789)))
+    scroll.on_hover(w.HoverEvent(pos=Vec(10, 10)))
+    assert rack.get_mouse_pos() != Vec(-12345, -6789)  # Rack's scroll widget passes the hover to its rack
+    scroll.set_grid_offset(Vec(1e5, 1e5))
+    scroll.step()  # Rack's RackScrollWidget::step keeps the offset in the rack's area
+    assert scroll.get_grid_offset().x < 1e5
+
+
+def rack_calls(rack: app.HostRackWidget, probe: Any) -> None:
+    box = probe.get_box()
+    start, end = box.pos - Vec(5, 5), box.pos + box.size + Vec(5, 5)
+    rack.deselect_all()
+    rack.on_hover(w.HoverEvent(pos=start))
+    assert rack.get_mouse_pos() == start
+    rack.on_drag_start(w.DragStartEvent(button=GLFW_MOUSE_BUTTON_LEFT))  # Rack starts its selection rectangle
+    rack.on_drag_hover(w.DragHoverEvent(button=GLFW_MOUSE_BUTTON_LEFT, pos=end))
+    assert rack.get_mouse_pos() == end and rack.is_selected(probe)
+    rack.on_drag_end(w.DragEndEvent(button=GLFW_MOUSE_BUTTON_LEFT))
+    rack.on_drag_hover(w.DragHoverEvent(button=GLFW_MOUSE_BUTTON_LEFT, pos=start))
+    assert rack.get_mouse_pos() == start and rack.is_selected(probe)  # the rectangle has ended
+    rack.deselect_all()
+    button = w.ButtonEvent(pos=start, button=GLFW_MOUSE_BUTTON_LEFT, action=GLFW_RELEASE, context=w.EventContext())
+    rack.on_button(button)
+    assert button.is_consumed() and button.get_target() is rack  # Rack's rack is opaque to left clicks
+    key = w.HoverKeyEvent(pos=start, key=GLFW_KEY_PAGE_DOWN, action=GLFW_RELEASE, context=w.EventContext())
+    rack.on_hover_key(key)
+    assert not key.is_propagating()  # RackWidget::onHoverKey (OpaqueWidget's) stops it
+    rack.step()
+
+
+def draw_calls(s: app.HostScene, scroll: app.HostRackScrollWidget, rack: app.HostRackWidget) -> None:
+    drawn: list[str] = []
+
+    class Copy(w.Widget):
+        def draw(self, args: Any) -> None:
+            for view in (s, scroll, rack):
+                view.draw(args)  # Rack's drawing of its own widgets, into this framebuffer
+            drawn.append("rack")
+
+    frame = w.FramebufferWidget()
+    frame.box = Rect(Vec(), Vec(64, 48))
+    copy = Copy()
+    copy.box = frame.box.copy()
+    frame.add_child(copy)
+    try:
+        frame.render()
+        assert drawn == ["rack"]
     finally:
         frame.close()
 

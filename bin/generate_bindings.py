@@ -53,6 +53,11 @@ def bound(manifest: dict[str, Any]) -> list[dict[str, Any]]:
     return [r for r in manifest["entries"] if r["status"] in bm.BOUND]
 
 
+# Scene, RackScrollWidget and RackWidget have PRIVATE constructors, and only CableWidget's constructor
+# makes a usable PlugWidget, so no plugin subclasses them (the manifest notes cite the source lines).
+HOST_ONLY_APP_WIDGETS = ("PlugWidget", "RackScrollWidget", "RackWidget", "Scene")
+
+
 def callback_execution(record: dict[str, Any], entry: dict[str, Any]) -> str:
     """Describe execution, not just callability: native adapters are not Python overrides."""
     strategy = record["callback"]
@@ -95,6 +100,11 @@ def callback_execution(record: dict[str, Any], entry: dict[str, Any]) -> str:
         return (
             "**Full-release blocker**: native/queued adapter only; no synchronous laboratory Python override (RP-22F)."
         )
+    if strategy == "ui" and any(name.startswith(f"rack::app::{owner}::") for owner in HOST_ONLY_APP_WIDGETS):
+        return (
+            f"Call on Rack's own instance: {path} (borrowed host view). No override path: only Rack makes usable "
+            "instances of this class (RP-28F decision, owner review pending; docs/coverage.md policy 11)."
+        )
     if name.startswith("rack::app::CableWidget::"):
         method = re.sub(r"(?<!^)(?=[A-Z])", "_", name.rsplit("::", 1)[-1]).lower()
         return (
@@ -127,8 +137,10 @@ def callback_paths(manifest: dict[str, Any], inputs: bm.Inputs) -> str:
         "Native configured/queued driver adapters without a synchronous Python path remain full-release blockers:",
         "RP-22F (`tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3`). "
         "A callable name is not proof of an override.",
-        "Borrowed host widgets without Python subclass trampolines remain blockers under RP-28F "
-        "(`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`).",
+        "No plugin can subclass Rack's Scene, RackScrollWidget or RackWidget (PRIVATE constructors) or make a "
+        "usable PlugWidget subclass, so their UI virtuals map to calls on Rack's own instances through borrowed "
+        "host views (RP-28F decision, owner review pending: "
+        "`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`).",
         "Per-symbol semantics below retain the manifest's adapter restrictions; implemented is not verified.",
         "",
         "## Execution domains",

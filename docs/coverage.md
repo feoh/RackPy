@@ -173,6 +173,19 @@ in this file.
     path plus a laboratory Python path, or *unresolved*. An unresolved strategy
     blocks the family task. The C ABI hooks from policy 1 are implemented by the
     RackPy host and forward to Python where RP-06 allows it.
+
+    *Classes only Rack can make* (RP-28F decision, 2026-10-26, owner review
+    pending). Public API cannot override a virtual of a class whose
+    constructors are all PRIVATE. The same holds for a class whose public
+    constructor gives an unusable object, because the state its virtuals need
+    is set only through Rack's pimpl. Plugins, in C++ or Python, only call
+    such a virtual on Rack's own instances, so that call, through a borrowed
+    host view, is its mapping. Its record says so and cites the header lines
+    (and, for the pimpl case, Rack's source lines) as evidence. In Rack 2.6.6
+    these classes are `Scene`, `RackScrollWidget` and `RackWidget` (PRIVATE
+    constructors and destructors) and `PlugWidget` (only `CableWidget`'s
+    constructor sets a plug's cable and type). Their host views are final
+    Python classes.
 12. **Platforms.** A conditional declaration has per-platform availability, for
     example `string::UTF16toUTF8` on Windows only, or the macOS value of
     `RACK_MOD_CTRL`. Absent on a platform means *not available there*, recorded

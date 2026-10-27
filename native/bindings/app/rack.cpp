@@ -3,6 +3,10 @@
 // and the LED display widgets (RP-28D). Rack makes and owns the scene and the
 // rack (their constructors are PRIVATE), and the cable and plug widgets of the
 // cables users plug; Python reaches their public API through checked views.
+// No plugin can subclass Scene, RackScrollWidget or RackWidget, and only
+// CableWidget's constructor makes a usable PlugWidget (it sets the plug's
+// pimpl), so those four views are final (RP-28F): their virtuals map to calls
+// on Rack's own instances.
 // Calls that take Rack's engine lock release the GIL (ADR 003, decision 2).
 #include <rack.hpp>
 
@@ -115,7 +119,7 @@ struct TextFieldT : Widget<Base> {
 void bindRack(py::module_ raw, py::module_ appModule) {
 	py::module_ widget = raw.attr("widget").cast<py::module_>();
 
-	py::class_<HostScene, ExternalWidget>(appModule, "HostScene", "Rack's Scene (Context.scene), a borrowed view.")
+	py::class_<HostScene, ExternalWidget>(appModule, "HostScene", py::is_final(), "Rack's Scene (Context.scene), a borrowed view.")
 		.def_property_readonly("rack_scroll", [](const HostScene& h) { return wrapper(hostAs<app::Scene>(h).rackScroll); })
 		.def_property_readonly("rack", [](const HostScene& h) { return wrapper(hostAs<app::Scene>(h).rack); })
 		.def_property_readonly("menu_bar", [](const HostScene& h) { return wrapper(hostAs<app::Scene>(h).menuBar); })
@@ -130,7 +134,7 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 	registerHostView([](W* w) { return dynamic_cast<app::Scene*>(w) != nullptr; },
 		[](const ExternalWidget& e) { return py::cast(HostScene{e}); });
 
-	py::class_<HostRackScroll, ExternalWidget>(appModule, "HostRackScrollWidget", "Rack's RackScrollWidget, a borrowed view.")
+	py::class_<HostRackScroll, ExternalWidget>(appModule, "HostRackScrollWidget", py::is_final(), "Rack's RackScrollWidget, a borrowed view.")
 		.def_property_readonly("zoom_widget", [](const HostRackScroll& h) { return wrapper(hostAs<app::RackScrollWidget>(h).zoomWidget); })
 		.def_property_readonly("rack_widget", [](const HostRackScroll& h) { return wrapper(hostAs<app::RackScrollWidget>(h).rackWidget); })
 		.def("reset", [](const HostRackScroll& h) { hostAs<app::RackScrollWidget>(h).reset(); }, "Rack's: the default zoom and offset.")
@@ -162,7 +166,7 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 		[](const ExternalWidget& e) { return py::cast(HostRackScroll{e}); });
 
 	using RW = app::RackWidget;
-	py::class_<HostRack, ExternalWidget>(appModule, "HostRackWidget", "Rack's RackWidget: modules, cables and selection.")
+	py::class_<HostRack, ExternalWidget>(appModule, "HostRackWidget", py::is_final(), "Rack's RackWidget: modules, cables and selection.")
 		.def_property("touched_param", [](const HostRack& h) { return wrapper(hostAs<RW>(h).touchedParam); },
 			[](const HostRack& h, py::object pw) {
 				auto& rack = hostAs<RW>(h);
@@ -509,7 +513,7 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 		}, py::arg("data"), "Rack's: the cable's colour from its JSON.");
 	registerHostView([](W* w) { return dynamic_cast<CW*>(w) != nullptr; }, [](const ExternalWidget& e) { return py::cast(HostCable{e}); });
 
-	py::class_<HostPlug, ExternalWidget>(appModule, "HostPlugWidget", "A cable end Rack made, a borrowed view.")
+	py::class_<HostPlug, ExternalWidget>(appModule, "HostPlugWidget", py::is_final(), "A cable end Rack made, a borrowed view.")
 		.def("get_cable", [](const HostPlug& h) { return wrapper(hostAs<app::PlugWidget>(h).getCable()); })
 		.def("get_type", [](const HostPlug& h) { return hostAs<app::PlugWidget>(h).getType(); });
 	registerHostView([](W* w) { return dynamic_cast<app::PlugWidget*>(w) != nullptr; },

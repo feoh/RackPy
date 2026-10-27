@@ -11002,7 +11002,7 @@
       "id": "method:rack::app::PlugWidget::step()",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.step",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -11128,7 +11128,7 @@
       "id": "method:rack::app::RackScrollWidget::draw(const rack::widget::Widget::DrawArgs &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.draw",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -11149,28 +11149,28 @@
       "id": "method:rack::app::RackScrollWidget::onButton(const rack::widget::Widget::ButtonEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_button",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackScrollWidget::onHover(const rack::widget::Widget::HoverEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_hover",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackScrollWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_hover_key",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackScrollWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_hover_scroll",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -11205,7 +11205,7 @@
       "id": "method:rack::app::RackScrollWidget::step()",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.step",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -11324,7 +11324,7 @@
       "id": "method:rack::app::RackWidget::draw(const rack::widget::Widget::DrawArgs &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.draw",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -11534,42 +11534,42 @@
       "id": "method:rack::app::RackWidget::onButton(const rack::widget::Widget::ButtonEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_button",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackWidget::onDragEnd(const rack::widget::Widget::DragEndEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_drag_end",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_drag_hover",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackWidget::onDragStart(const rack::widget::Widget::DragStartEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_drag_start",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackWidget::onHover(const rack::widget::Widget::HoverEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_hover",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::app::RackWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_hover_key",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -11716,7 +11716,7 @@
       "id": "method:rack::app::RackWidget::step()",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.step",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -11751,7 +11751,7 @@
       "id": "method:rack::app::Scene::draw(const rack::widget::Widget::DrawArgs &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.draw",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -11765,35 +11765,35 @@
       "id": "method:rack::app::Scene::onDragHover(const rack::widget::Widget::DragHoverEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_drag_hover",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::app::Scene::onHover(const rack::widget::Widget::HoverEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_hover",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::app::Scene::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_hover_key",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::app::Scene::onPathDrop(const rack::widget::Widget::PathDropEvent &)",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.on_path_drop",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
       "id": "method:rack::app::Scene::step()",
       "kind": "method",
       "raw": "rackpy.raw.widget.HostWidget.step",
-      "status": "planned"
+      "status": "implemented"
     },
     {
       "facade": null,
@@ -20630,6 +20630,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "4a292b2fc2736fcf",
+  "inputs": "4a43709f85f0c469",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

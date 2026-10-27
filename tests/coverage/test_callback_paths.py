@@ -46,27 +46,33 @@ def test_native_driver_adapters_remain_release_blockers_without_a_python_path() 
         assert "Python-driven device" in generator.callback_execution(record, {"name": record["id"].split(":", 1)[1]})
 
 
-def test_host_views_without_subclass_trampolines_remain_release_blockers() -> None:
+def test_host_only_app_widgets_map_to_calls_on_racks_own_instances() -> None:
+    """RP-28F decision: no plugin subclasses these, so the borrowed views' calls are their mappings."""
     inputs = bm.load_inputs()
     records = bm.load_json(bm.MANIFEST)["entries"]
+    private = {"RackScrollWidget": "19-20", "RackWidget": "28-29", "Scene": "27-28"}
+    rp28d = "RP-28D (tk-rackpy-28d-scene-rack-scroll-rack-s-cables-and-l-3d7ead): Rack's implementation"
+    in_rack = "tests/app/in_rack/test_rack.py::test_racks_own_scene_rack_and_plugs_are_not_subclassable"
     host_only = [
         r
         for r in records
-        if r["callback"] == "ui"
-        and any(
-            "rack::app::" + owner + "::" in r["id"]
-            for owner in ("PlugWidget", "RackScrollWidget", "RackWidget", "Scene")
-        )
+        if r["callback"] == "ui" and any("rack::app::" + owner + "::" in r["id"] for owner in ("PlugWidget", *private))
     ]
     assert len(host_only) == 21
     for record in host_only:
-        assert record["status"] == "planned"
-        assert record["notes"].startswith(
-            "Responsible task: RP-28F (tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61): "
-            "UI-safe Python override."
+        owner = record["id"].split("rack::app::", 1)[1].split("::", 1)[0]
+        assert record["status"] == "implemented"
+        assert record["notes"].startswith("RP-28F decision (2026-10-26, owner review pending): ")
+        if owner == "PlugWidget":
+            assert "include/app/CableWidget.hpp:20-21" in record["notes"]
+            assert "src/app/CableWidget.cpp:140-151" in record["notes"]
+        else:
+            assert f"PRIVATE (include/app/{owner}.hpp:{private[owner]})" in record["notes"]
+        assert rp28d in record["notes"] and in_rack in record["tests"]
+        assert record["python"]["raw"].startswith("rackpy.raw.widget.HostWidget.") and record["docs"]
+        assert generator.callback_execution(record, inputs.index[record["id"]]).startswith(
+            "Call on Rack's own instance: rackpy.raw.widget.HostWidget."
         )
-        assert record["python"] and record["tests"] and record["docs"]
-        assert "Full-release blocker" in generator.callback_execution(record, inputs.index[record["id"]])
     cables = [r for r in records if r["callback"] == "ui" and "rack::app::CableWidget::" in r["id"]]
     assert len(cables) == 5
     for record in cables:

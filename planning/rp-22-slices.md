@@ -167,7 +167,9 @@ keep them `planned`, retaining native-path names and evidence. Follow-ups:
 - **RP-22F** (`tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3`):
   laboratory Python paths for the 33 driver/device callbacks; blocks RP-22.
 - **RP-28F** (`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`):
-  UI-safe subclass trampolines for the 21 host-view-only callbacks.
+  UI-safe subclass trampolines for the 21 host-view-only callbacks. Resolved
+  by decision instead: no plugin can override them, so the host views' calls
+  are their mappings ([rp-28-slices.md](rp-28-slices.md)).
 
 These gaps remain full-release blockers (the shared-helper reentry task above
 is fixed); closing validation does not imply that RP-22 or full coverage is complete.

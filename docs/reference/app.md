@@ -256,14 +256,17 @@ sets Rack's fields in Rack's order:
 ## The scene and the rack
 
 Rack makes and owns its `Scene`, `RackScrollWidget` and `RackWidget`, so
-Python reaches them as host views (stale once Rack deletes them). The 21
-public UI virtuals on these types and `PlugWidget` remain **full-release
-blockers**, not completed callback mappings: RP-28F
-(`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`) owns their
-missing UI-safe Python subclass paths. See the
+Python reaches them as host views (stale once Rack deletes them). Their
+constructors and destructors are PRIVATE, so no plugin, in C++ or Python,
+can subclass them, and the same holds in effect for `PlugWidget` (see
+[Rack's cables](#app-cables)). Their UI virtuals (`step`, `draw` and the
+event handlers) are therefore calls on Rack's own instances, through the
+host views (an RP-28F decision, pending the owner's review; [coverage
+policy 11](../coverage.md#completeness-policy)). The four views are final:
+Python can neither construct nor subclass them. See the
 [per-virtual execution inventory](callback-paths.md).
 
-The existing host-view API:
+The host-view API:
 
 - `rackpy.raw.context_get().scene` is a `HostScene`. It has `rack`,
   `rack_scroll`, `menu_bar` and `browser`, `get_mouse_pos()`, and Rack's
@@ -322,7 +325,11 @@ The cables users plug are Rack's `CableWidget`s, which reach Python as
 - the `color`, `merge_json()` and `from_json()`;
 - `update_cable()`, which replaces the engine cable.
 
-A `HostPlugWidget` has `get_cable()` and `get_type()`.
+A `HostPlugWidget` has `get_cable()` and `get_type()`. Python gets plugs
+only from a cable widget. Rack's `PlugWidget()` leaves a plug's cable and
+type unset, and only `CableWidget`'s constructor sets them. So no plugin can
+make a usable plug of its own, and `PlugWidget.step` maps to calling Rack's
+step on Rack's plugs.
 
 (app-cable-widgets)=
 ### Cable widgets Python makes
