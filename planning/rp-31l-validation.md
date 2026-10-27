@@ -36,8 +36,25 @@ Linux validation in the follow-up worktree:
 - `uv run pytest -q tests/app/test_app.py tests/services/test_settings.py`:
   timed out during its separate hooks build; no actual-host result obtained.
 
-Remaining: run those actual-host tests and built-package introspection, and
-cover all remaining RP-31L test gaps (logging, menu template subclasses,
-deprecated constructor in a factory, translation fallback). macOS and Windows
-were not validated. This checkpoint does not satisfy the task's acceptance
-criteria.
+## Follow-up: actual-host evidence and remaining test gaps
+
+Added live-Rack assertions for all four logging macros and caller locations,
+menu helper Python subclasses, the deprecated module-widget constructor inside
+its factory (both preview and module), and English translation fallback. The
+manifest records retain their existing test and documentation citations and now
+note this evidence. No coverage status was promoted.
+
+- `uv run pytest -q tests/app/test_app.py tests/services/test_settings.py tests/ui/test_ui.py tests/services/test_utilities.py tests/app/test_module_browser.py tests/coverage/test_introspection.py`:
+  7 passed, 1 failed in 425.60s. The failure was the outer log assertion's
+  assumption that Rack strips the path from the caller filename; the host log
+  recorded all four correct levels, messages and full paths.
+- After correcting that assertion, `uv run pytest -q tests/services/test_utilities.py`
+  passed (1 passed in 4.57s), reusing the identical hooks build from the
+  preceding run through a temporary fixture override, which was removed.
+- The seven passing tests include the app/settings snapshot tests, UI helper
+  tests, browser constructor test, and three built-package introspection tests.
+  The latter include the complete `check_coverage.py check --introspection`
+  invocation against the package running in Rack.
+
+macOS and Windows were not validated. This Linux evidence does not establish
+cross-platform support or a full-coverage release.

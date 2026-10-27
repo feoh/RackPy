@@ -18,4 +18,8 @@ def test_utilities_in_rack(make_hooks_bundle: Callable[[], Path], rack_host: Pat
     assert result.outcomes() and set(result.outcomes().values()) == {"passed"}, result.summary()
     log = (tmp_path / "log.txt").read_text()
     assert "info rackpy_test.py:12 test_logging] rackpy-log marker 5" in log  # Rack's log, with the given location
-    assert "test_utilities.py:" in log and "rackpy-macro warned" in log  # the macro names its Python caller
+    for level, marker in (("debug", "debugged"), ("info", "informed"), ("warn", "warned"), ("fatal", "fatal")):
+        assert any(
+            f" {level} " in line and "/test_utilities.py:" in line and f"test_logging] rackpy-macro {marker}" in line
+            for line in log.splitlines()
+        )

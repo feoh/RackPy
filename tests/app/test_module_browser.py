@@ -69,6 +69,8 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     one = launch(rack_host, tmp_path, plugin, 1)
     assert one["preview_seen"] and one["preview"] == [True, True]  # the browser's preview: no module
     assert one["added_from_browser"]
+    assert [True, True, True] in one["deprecated_constructor"]  # preview
+    assert [False, True, True] in one["deprecated_constructor"]  # module-owned widget
     assert one["cable"] == [1, 0, 1] and one["connected"]  # a cable between two Python modules' factory ports
     views = one["cable_views"]  # RP-28D: Rack's cable through its host views
     assert views["views"] == ["HostCableWidget", "HostPlugWidget"] and views["ports"] == [True, True, True]

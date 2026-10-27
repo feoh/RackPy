@@ -10,6 +10,7 @@ import gc
 import importlib
 import json
 import traceback
+import warnings
 from collections.abc import Callable, Generator
 from pathlib import Path
 from typing import Any
@@ -69,8 +70,12 @@ class Dial(app.Knob):
 
 class VoiceWidget(app.ModuleWidget):
     def __init__(self, module: Module | None) -> None:
-        super().__init__()
-        self.set_module(module)  # as Rack's module widgets do, first
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always", DeprecationWarning)
+            super().__init__(module)  # deprecated constructor, within the factory
+        RESULT.setdefault("deprecated_constructor", []).append(
+            [module is None, self.module is module, any(issubclass(w.category, DeprecationWarning) for w in caught)]
+        )
         RESULT["factory"].append(None if module is None else module.id)
         self.set_panel(raw.create_panel(str(assets.plugin("res/voice.svg"))))
         self.add_param(raw.create_param_centered(Dial, Vec(45, 80), module, 0))
