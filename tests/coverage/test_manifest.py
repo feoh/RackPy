@@ -242,3 +242,20 @@ def test_report_counts_every_declaration_once(mini: Mini) -> None:
     rep = bm.report(mini.inputs(), mini.seeded())
     assert sum(rep["totals"]["lin-x64"].values()) == len(mini.inventory["entries"]) - 1
     assert rep["totals"]["win-x64"] == {"not inventoried": len(mini.inventory["entries"]) - 1}
+
+
+def test_only_macros_and_declared_but_undefined_functions_map_to_nothing(mini: Mini) -> None:
+    mini.write("docs/reference/engine.md", "# Engine\n\n## Port voltages\n")
+    manifest = mini.seeded()
+    record = by_id(manifest)[VOLTAGE]
+    record.update(
+        status="implemented",
+        python={"raw": None, "facade": None, "kind": "no_runtime_meaning", "gil_release": False},
+        docs=["docs/reference/engine.md#port-voltages"],
+        notes="hard to bind",
+    )
+    assert "no-runtime-meaning" in codes(bm.validate(mini.inputs(), manifest, {"objects": {}}))
+    record["notes"] = bm.DECLARED_UNDEFINED + ": declared in Port.hpp, libRack exports no symbol for it"
+    assert "no-runtime-meaning" not in codes(bm.validate(mini.inputs(), manifest, {"objects": {}}))
+    record["python"]["raw"] = "rackpy.raw.engine.Port.get_voltage"
+    assert "no-runtime-meaning" in codes(bm.validate(mini.inputs(), manifest, {"objects": {}}))

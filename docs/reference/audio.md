@@ -63,6 +63,17 @@ is stale from then on. A port Python drops is deleted on the main thread.
 `Port.getDeviceDetail` is declared in Rack 2.6.6's header but defined
 nowhere: libRack has no symbol for it, so no plugin can call it.
 
+(declared-but-undefined)=
+### Declared but undefined
+
+`Port::getDeviceDetail(deviceId, offset)` is declared in Rack 2's
+`audio.hpp`, but Rack 2 never defines it: libRack exports no such function,
+so no plugin can call it, and RackPy does not bind it. It is a leftover of
+Rack 1, where it labelled an RtAudio device for Rack's own audio widget. Rack
+2 builds that label from `get_device_name`, `get_num_inputs`,
+`get_num_outputs` and the port's offsets, which RackPy binds. No published
+plugin calls it either.
+
 (audio-devices)=
 ## Devices
 

@@ -29,8 +29,11 @@ rules behind this are the [coverage contract](coverage.md); the design is
 
 - `id` and `fingerprint` come from the inventory. Never edit them.
 - `python.kind` is `no_runtime_meaning` only for a macro that exists just for
-  the preprocessor or linker; such a record has no Python name, and needs a
-  reason in `notes` and a documentation anchor.
+  the preprocessor or linker, or for a function Rack declares but never
+  defines (notes starting `Declared but never defined`, with the evidence;
+  `tests/native/test_sdk_symbols.py` checks that libRack exports no such
+  symbol). Such a record has no Python name, and needs a reason in `notes`
+  and a documentation anchor.
 - Typed stubs for `rackpy.raw` are hand-written next to it
   (`src/rackpy/raw/<namespace>.pyi`); mypy checks the tests against them.
 - `callback` (the RP-06 strategy of a virtual method) and `locks_engine` are

@@ -190,6 +190,11 @@ in this file.
 14. **Unknowns block.** An entry that cannot be classified stays `unreviewed`
     and blocks a full-coverage release. A failed extraction is an error, never
     an empty report.
+    A declaration Rack's headers carry but Rack never defines (libRack
+    exports no symbol for it, so no plugin can call it) is classified, not
+    unknown: it has no runtime meaning, recorded with the evidence and
+    checked against libRack's exports (owner decision 2026-10-26, first for
+    `audio::Port::getDeviceDetail`, a Rack 1 leftover with no callers).
 
 ## The binding manifest (RP-11)
 

@@ -65,6 +65,9 @@ PYTHON_KINDS = frozenset(
 # Macros that exist only for the preprocessor or linker may be mapped to nothing, with a reviewed
 # reason and a documentation anchor (docs/coverage.md, policy 9: "build configuration").
 MACRO_KINDS = frozenset({"function_macro", "object_macro"})
+# A function Rack declares in its headers but never defines (libRack exports no symbol for it), so no plugin
+# can call it: mapped to nothing, with the evidence (completeness policy 14; tests/native/test_sdk_symbols.py).
+DECLARED_UNDEFINED = "Declared but never defined"
 LOCKS = frozenset({"exclusive", "shared", "none", "caller_holds"})
 ENTRY_FIELDS = (
     "id",
@@ -513,10 +516,16 @@ def validate(inputs: Inputs, manifest: dict[str, Any], introspection: dict[str, 
 
         no_meaning = python is not None and python.get("kind") == "no_runtime_meaning"
         if python is not None and no_meaning:
-            if entry["kind"] not in MACRO_KINDS:
-                add("no-runtime-meaning", ident, "only a macro can be mapped to nothing")
+            undefined = (r.get("notes") or "").startswith(DECLARED_UNDEFINED)
+            if entry["kind"] not in MACRO_KINDS and not undefined:
+                add(
+                    "no-runtime-meaning",
+                    ident,
+                    f"only a macro, or a function whose notes start {DECLARED_UNDEFINED!r} with the evidence, "
+                    "can be mapped to nothing",
+                )
             if python.get("raw") or python.get("facade"):
-                add("no-runtime-meaning", ident, "a macro with no runtime meaning has no Python name")
+                add("no-runtime-meaning", ident, "a declaration with no runtime meaning has no Python name")
             if not r.get("notes"):
                 add("no-runtime-meaning", ident, "say why the macro has no runtime meaning in notes")
         if status in BOUND and no_meaning:
