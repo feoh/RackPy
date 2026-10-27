@@ -64,13 +64,39 @@ def test_displays_rebuild_for_a_port_and_keep_it_alive() -> None:
     gc.collect()
     assert display.driver_choice is not None and display.device_choice is not None
     assert display.sample_rate_choice is not None and display.buffer_size_choice is not None
-    assert display.driver_separator is not None and display.sample_rate_separator is not None
+    assert display.driver_separator is not None and display.device_separator is not None
+    assert display.sample_rate_separator is not None
+    audio_parts = [
+        display.driver_choice,
+        display.driver_separator,
+        display.device_choice,
+        display.device_separator,
+        display.sample_rate_choice,
+        display.sample_rate_separator,
+        display.buffer_size_choice,
+    ]
+    assert all(part is not None and part in display.children for part in audio_parts)
+    assert len({id(part) for part in audio_parts}) == len(audio_parts)
+    assert [display.children.index(part) for part in audio_parts] == sorted(
+        display.children.index(part) for part in audio_parts
+    )
     display.step()  # Rack's choices read the port every frame
     midi_display = app.MidiDisplay()
     midi_display.box.size = Vec(130, 90)
     out = midi.Output()
     midi_display.set_midi_port(out)
-    assert midi_display.channel_choice is not None and midi_display.device_separator is not None
+    midi_parts = [
+        midi_display.driver_choice,
+        midi_display.driver_separator,
+        midi_display.device_choice,
+        midi_display.device_separator,
+        midi_display.channel_choice,
+    ]
+    assert all(part is not None and part in midi_display.children for part in midi_parts)
+    assert len({id(part) for part in midi_parts}) == len(midi_parts)
+    assert [midi_display.children.index(part) for part in midi_parts] == sorted(
+        midi_display.children.index(part) for part in midi_parts
+    )
     midi_display.step()
     display.close()
     midi_display.close()

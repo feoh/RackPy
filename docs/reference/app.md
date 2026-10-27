@@ -195,6 +195,11 @@ setters:
 - `add_frame` and `frames` for switches and buttons;
 - `set_background` for panels.
 
+The themed widgets expose `light_svg` and `dark_svg`. Sliders expose
+`min_handle_pos` and `max_handle_pos`; the deprecated `set_background_svg_legacy`,
+`set_handle_svg_legacy` and `set_svgs` spellings warn. `SvgKnob` and `SvgPort`
+likewise retain a warning `set_svg_legacy` spelling.
+
 `SVGKnob`, `SVGPanel` and the other `SVG*` names are Rack's deprecated
 spellings, and using them warns.
 
@@ -273,7 +278,8 @@ The host-view API:
 - `rackpy.raw.context_get().scene` is a `HostScene`. It has `rack`,
   `rack_scroll`, `menu_bar` and `browser`, `get_mouse_pos()`, and Rack's
   deprecated `mouse_pos` field.
-- `HostRackScrollWidget` has `get_zoom()` and `set_zoom(zoom, pivot=)`
+- `HostRackScrollWidget` exposes `zoom_widget` and `rack_widget` host views,
+  and has `get_zoom()` and `set_zoom(zoom, pivot=)`
   (Rack clamps the zoom to 1/4 to 4), `get_grid_offset()`,
   `set_grid_offset()`, `reset()`, `zoom_to_modules()` and
   `zoom_to_bound(rect)`. The bound must be finite with a positive size,
@@ -384,7 +390,10 @@ Rack's audio and MIDI widgets show a port and open its menus:
   `AudioBlockSizeChoice` and `AudioDeviceMenuChoice`.
 - `MidiDriverChoice`, `MidiDeviceChoice` and `MidiChannelChoice`.
 - `AudioDisplay` and `MidiDisplay`, whose `set_audio_port` and
-  `set_midi_port` rebuild their choices (Rack's widgets).
+  `set_midi_port` rebuild their choices (Rack's widgets). Their read-only
+  `driver_choice`, `driver_separator`, `device_choice` and `device_separator`
+  are host views or `None`. Audio also exposes `sample_rate_choice`,
+  `sample_rate_separator` and `buffer_size_choice`; MIDI has `channel_choice`.
 - `AudioButton` and `MidiButton`, with the component library's
   `AudioButton_ADAT`, `AudioButton_USB_B` and `MidiButton_MIDI_DIN`, which
   use Rack's artwork.

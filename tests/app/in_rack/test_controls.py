@@ -445,7 +445,15 @@ def test_widget_factories(tmp_path: Path) -> None:
 def test_constants_and_deprecated_aliases() -> None:
     assert app.RACK_GRID_WIDTH == 15 and app.RACK_GRID_HEIGHT == 380
     assert Vec(15, 380) == app.RACK_GRID_SIZE and Vec(30000, 38000) == app.RACK_OFFSET
-    for old, new in (("SVGKnob", "SvgKnob"), ("SVGPanel", "SvgPanel"), ("SVGPort", "SvgPort")):
+    for old, new in (
+        ("SVGKnob", "SvgKnob"),
+        ("SVGPanel", "SvgPanel"),
+        ("SVGPort", "SvgPort"),
+        ("SVGButton", "SvgButton"),
+        ("SVGScrew", "SvgScrew"),
+        ("SVGSlider", "SvgSlider"),
+        ("SVGSwitch", "SvgSwitch"),
+    ):
         with pytest.warns(DeprecationWarning, match=new):
             assert getattr(app, old) is getattr(app, new)
 

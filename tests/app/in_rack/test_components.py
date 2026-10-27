@@ -130,12 +130,23 @@ def test_light_templates_are_specializations() -> None:
     assert isinstance(lamp, cl.RedLight)
     assert cl.LargeLight[cl.GreenLight]().box.size.x > lamp.box.size.x > cl.TinyLight[cl.BlueLight]().box.size.x
     assert cl.SmallSimpleLight[cl.YellowLight]().box.size == mm2px(Vec(2, 2))
+    assert cl.TinySimpleLight[cl.BlueLight]().box.size == mm2px(Vec(1, 1))
+    assert cl.LargeSimpleLight[cl.WhiteLight]().box.size == mm2px(Vec(5, 5))
+    small = cl.SmallLight[cl.RedLight]()
+    assert small.sw.svg is not None and small.box.size.x < lamp.box.size.x
+    assert cl.BlueLight().base_colors == [cl.SCHEME_BLUE]
+    assert cl.YellowLight().base_colors == [cl.SCHEME_YELLOW]
+    assert cl.WhiteLight().base_colors == [cl.SCHEME_WHITE]
+    assert cl.SvgLight is cl.TSvgLight.default()
     assert cl.MediumSimpleLight.default()().box.size == mm2px(Vec(3, 3))
     assert cl.PB61303Light[cl.WhiteLight]().box.size == mm2px(Vec(9, 9))
     bezel_light = cl.VCVBezelLight[cl.WhiteLight]()
     assert bezel_light.box.size == Vec(17.545, 17.545) and bezel_light.bg_color.a == 0
     # Rack's alias templates give the aliased specializations themselves.
     assert cl.LEDBezelLight[cl.WhiteLight] is cl.VCVBezelLight[cl.WhiteLight]
+    assert cl.LEDLightBezel[cl.RedLight] is cl.VCVLightBezel[cl.RedLight]
+    assert cl.LEDSliderLight[cl.BlueLight] is cl.VCVSliderLight[cl.BlueLight]
+    assert cl.LEDLightSlider[cl.GreenLight] is cl.VCVLightSlider[cl.GreenLight]
     assert cl.VCVLightButton[cl.RedLight] is cl.LightButton[cl.VCVButton, cl.RedLight] is cl.LEDLightButton[cl.RedLight]
     assert isinstance(lamp, cl.MediumLight) and isinstance(lamp, cl.TSvgLight)  # every specialization is its template's
     with pytest.raises(TypeError, match="class template"):
