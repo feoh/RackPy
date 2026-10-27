@@ -64,6 +64,28 @@ Two runs with the same SDK and toolchain are byte-identical (tested).
 | `summary` | Counts by classification, kind and family |
 | `entries` | The declarations |
 
+## Conditional branch accountability
+
+The manifest checker derives a separate provisional record for every lexical
+`macro NAME` or `function NAME` in `conditional_blocks`, even when an active
+entry with the same name exists. Its ID is
+`conditional:<header>:<first line>:<kind> <name>`; it identifies a branch,
+not a fully parsed declaration. The branch's content hash, condition and
+`skipped_in` variants are fingerprinted, so changed branch contents reset a
+review. These records are additional conservative placeholders, not a claim that
+each name is a supported public API: the scanner cannot establish signatures,
+visibility, or whether an internal declaration should be excluded. Actual
+platform inventories must reconcile each placeholder with its semantic entry;
+until then a placeholder cannot be implemented, verified or excluded.
+
+For a successful extraction, a branch listed as skipped is absent on that
+exact variant; all other availability is `not inventoried`. Thus the Linux
+inventory proves the recorded skipped branches absent on lin-x64; it does not
+prove anything about their macOS or Windows availability. Unresolved availability
+blocks release on the affected platform. RP-40/RP-41 supply the deferred native
+platform evidence. The checker requires the conditional-block list and rejects
+missing placeholder records rather than silently shrinking the denominator.
+
 ## Entry IDs
 
 An ID is `<kind>:<qualified name><template part>(<parameters>)<qualifiers>`.

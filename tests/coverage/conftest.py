@@ -102,6 +102,7 @@ def mini(tmp_path: Path) -> Mini:
             "include/rack.hpp": "0 entry point",
         },
         "extractions": [{"variant": "lin-x64", "status": "ok"}],
+        "conditional_blocks": [],
         "entries": copy.deepcopy(BASE_ENTRIES),
     }
     exclusions = {
