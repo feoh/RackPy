@@ -104,13 +104,13 @@ it (`port.device`, `input_device`, `output_device`, or a driver's
 
 :::{warning}
 Native configured answers and queued notifications below do not preserve
-synchronous Python override semantics. Missing driver/device/input laboratory
-paths remain **full-release blockers** under RP-22F
-(`tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3`); see the
-[callback inventory](callback-paths.md). The separate
-[laboratory output device](../explanation/callbacks.md#a-laboratory-midi-output-device)
-provides a synchronous Python `send_message` only offline, on the main thread,
-never on Rack's engine or MIDI driver threads.
+synchronous Python override semantics. Synchronous Python overrides of the
+driver, device and input virtuals exist only in the
+[laboratory](../explanation/callbacks.md#laboratory-audio-and-midi-drivers)
+(`rackpy.laboratory.MidiDriver`, `MidiInputDevice`, `MidiOutputDevice`,
+`MidiInput`, `MidiInputQueue`), offline, explicitly enabled, on the main
+thread, never on Rack's engine or MIDI driver threads; see the
+[callback inventory](callback-paths.md).
 :::
 
 Python implements a MIDI driver as a natively configured `PythonDriver`

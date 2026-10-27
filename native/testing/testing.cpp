@@ -4,9 +4,12 @@
 #include "../bindings/support/overrides.hpp"
 #include "testing.hpp"
 
+#include "../bindings/audio.hpp"
 #include "../bindings/dsp/dsp.hpp"
 #include "../bindings/engine/components.hpp"
 #include "../bindings/engine/module.hpp"
+#include "../bindings/midi.hpp"
+#include "../laboratory/devices.hpp"
 #include "../bindings/widget/behavior.hpp"
 #include "../bindings/support/hooks.hpp"
 #include "../tests/quantity_reference.hpp"
@@ -808,6 +811,130 @@ void define(py::module_ m) {
 		});
 		worker.join();
 	}, py::arg("generator"), py::arg("message"));
+	// RP-22F: the laboratory's drivers and devices, called as a Rack thread would, were one ever to reach them.
+	m.def("laboratory_audio_on_rack_thread", [](py::handle driver, py::handle device, py::handle port) {
+		auto& d = laboratory::audioDriverForTesting(driver);
+		auto& dev = laboratory::audioDeviceForTesting(device);
+		auto& p = bindings::pythonAudioPort(port);
+		std::string driverName, listedName, deviceName;
+		std::vector<int> ids;
+		int defaultId = -1, listedInputs = 0, listedOutputs = 0, inputs = 0, outputs = 0, blockSize = 0;
+		size_t rates = 0, sizes = 0;
+		float rate = 0.f;
+		bool subscribed = false;
+		{
+			py::gil_scoped_release release;
+			std::thread worker([&] {
+				rack::contextSet(foreignContext());
+				driverName = d.getName();
+				ids = d.getDeviceIds();
+				defaultId = d.getDefaultDeviceId();
+				listedName = d.getDeviceName(defaultId);
+				listedInputs = d.getDeviceNumInputs(defaultId);
+				listedOutputs = d.getDeviceNumOutputs(defaultId);
+				deviceName = dev.getName();
+				inputs = dev.getNumInputs();
+				outputs = dev.getNumOutputs();
+				rates = dev.getSampleRates().size();
+				rate = dev.getSampleRate();
+				sizes = dev.getBlockSizes().size();
+				blockSize = dev.getBlockSize();
+				dev.setSampleRate(rate);
+				dev.setBlockSize(blockSize);
+				subscribed = d.subscribe(defaultId, &p) == &dev;
+				d.unsubscribe(defaultId, &p);
+				dev.subscribe(&p);
+				dev.unsubscribe(&p);
+			});
+			worker.join();
+		}
+		py::dict out;
+		out["driver_name"] = driverName;
+		out["device_ids"] = ids;
+		out["default_device_id"] = defaultId;
+		out["device_name"] = listedName;
+		out["device_num_inputs"] = listedInputs;
+		out["device_num_outputs"] = listedOutputs;
+		out["name"] = deviceName;
+		out["num_inputs"] = inputs;
+		out["num_outputs"] = outputs;
+		out["sample_rates"] = rates;
+		out["sample_rate"] = rate;
+		out["block_sizes"] = sizes;
+		out["block_size"] = blockSize;
+		out["subscribed"] = subscribed;
+		return out;
+	}, py::arg("driver"), py::arg("device"), py::arg("port"),
+		"Every audio Driver and Device virtual of a laboratory driver and its device, on a thread with a Rack context.");
+	m.def("laboratory_midi_on_rack_thread", [](py::handle driver, py::handle inputDevice, py::handle outputDevice,
+		py::handle input, py::handle output) {
+		auto& d = laboratory::midiDriverForTesting(driver);
+		auto& in = laboratory::midiDeviceForTesting(inputDevice);
+		auto& outDevice = laboratory::midiDeviceForTesting(outputDevice);
+		auto* inputPort = dynamic_cast<rack::midi::Input*>(&bindings::pythonMidiPort(input));
+		auto* outputPort = dynamic_cast<rack::midi::Output*>(&bindings::pythonMidiPort(output));
+		if (!inputPort || !outputPort)
+			throw py::type_error("needs an input and an output port");
+		std::string driverName, inputName, outputName, inName, outName;
+		std::vector<int> inputIds, outputIds;
+		int defaultInput = -1, defaultOutput = -1;
+		bool inputSubscribed = false, outputSubscribed = false;
+		{
+			py::gil_scoped_release release;
+			std::thread worker([&] {
+				rack::contextSet(foreignContext());
+				driverName = d.getName();
+				inputIds = d.getInputDeviceIds();
+				defaultInput = d.getDefaultInputDeviceId();
+				inputName = d.getInputDeviceName(defaultInput);
+				inputSubscribed = d.subscribeInput(defaultInput, inputPort) == &in;
+				d.unsubscribeInput(defaultInput, inputPort);
+				outputIds = d.getOutputDeviceIds();
+				defaultOutput = d.getDefaultOutputDeviceId();
+				outputName = d.getOutputDeviceName(defaultOutput);
+				outputSubscribed = d.subscribeOutput(defaultOutput, outputPort) == &outDevice;
+				d.unsubscribeOutput(defaultOutput, outputPort);
+				inName = in.getName();
+				outName = outDevice.getName();
+			});
+			worker.join();
+		}
+		py::dict out;
+		out["driver_name"] = driverName;
+		out["input_device_ids"] = inputIds;
+		out["default_input_device_id"] = defaultInput;
+		out["input_device_name"] = inputName;
+		out["input_subscribed"] = inputSubscribed;
+		out["output_device_ids"] = outputIds;
+		out["default_output_device_id"] = defaultOutput;
+		out["output_device_name"] = outputName;
+		out["output_subscribed"] = outputSubscribed;
+		out["input_name"] = inName;
+		out["output_name"] = outName;
+		return out;
+	}, py::arg("driver"), py::arg("input_device"), py::arg("output_device"), py::arg("input"), py::arg("output"),
+		"Every midi::Driver virtual of a laboratory driver and its devices' getName, on a thread with a Rack context.");
+	m.def("midi_input_on_rack_thread", [](py::handle input, const rack::midi::Message& message) {
+		auto* port = dynamic_cast<rack::midi::Input*>(&bindings::pythonMidiPort(input));
+		if (!port)
+			throw py::type_error("needs a MIDI input port");
+		py::gil_scoped_release release;
+		std::thread worker([&] {
+			rack::contextSet(foreignContext());
+			port->onMessage(message);
+		});
+		worker.join();
+	}, py::arg("input"), py::arg("message"), "Rack's Input::onMessage, as Rack's MIDI driver thread calls it.");
+	m.def("port_targets", [](py::handle port) {
+		// Rack's own fields of a Python-made port, even after RackPy released it (no checks).
+		requireMainThread("port_targets");
+		if (py::isinstance<rack::audio::Port>(port)) {
+			auto& p = port.cast<rack::audio::Port&>();
+			return py::make_tuple(p.driver != nullptr, p.device != nullptr, p.driverId, p.deviceId);
+		}
+		auto& p = port.cast<rack::midi::Port&>();
+		return py::make_tuple(p.driver != nullptr, p.device != nullptr, p.driverId, p.deviceId);
+	}, py::arg("port"), "(has a driver, has a device, driver ID, device ID) of an audio or MIDI port Python made.");
 	m.def("metadata_as_rack", [](const bindings::ModuleRef& r, const std::string& kind, int i) {
 		// As a port or light tooltip would: the module's own slot, on the main
 		// thread without the GIL, so Python overrides go through callPython.

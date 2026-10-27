@@ -401,6 +401,7 @@ void bind(py::module_ host) {
 	bindModules(lab);
 	bindQuantities(lab);
 	bindMidi(lab);
+	bindAudio(lab);
 	bindBench(lab);
 	runtime::onFinalize([] { laboratoryEnabled.store(false); });
 }

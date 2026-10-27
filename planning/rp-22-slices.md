@@ -38,6 +38,7 @@ listed as gaps in `docs/explanation/callbacks.md`.
 | 22C | Laboratory `Quantity`/`ParamQuantity` value methods; the RP-12 base-Quantity inconsistency; `midi::OutputDevice::sendMessage` (5 records, 6 reconciled) |
 | 22D | Callback inventory (all 434 virtuals), measured laboratory costs, subprocess races, RP-22 closing validation |
 | 22E | `dsp::MidiGenerator::onMessage` laboratory override (after RP-18D) |
+| 22F | Laboratory Python paths for the 33 audio/MIDI driver and device virtuals found by 22D |
 
 **RP-22A — Bench, enablement and process trampolines**
 (`tk-rackpy-22a-laboratory-bench-explicit-enablement--8e9285`). Records:
@@ -173,3 +174,37 @@ keep them `planned`, retaining native-path names and evidence. Follow-ups:
 
 These gaps remain full-release blockers (the shared-helper reentry task above
 is fixed); closing validation does not imply that RP-22 or full coverage is complete.
+
+**RP-22F — Laboratory audio and MIDI drivers and devices**
+(`tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3`). Records: the
+33 `driver`-strategy virtuals of `audio::Driver`, `audio::Device`,
+`midi::Driver`, `midi::Device::getName`, `Input::onMessage` and
+`InputQueue::onMessage` move from `planned` back to `implemented`, keeping
+RP-29's native production path in their notes. Validation:
+[rp-22f-validation.md](rp-22f-validation.md); explanation:
+[laboratory audio and MIDI drivers](../docs/explanation/callbacks.md#laboratory-audio-and-midi-drivers).
+Supervisor-approved design (2026-10-26):
+
+- **Classes.** `rackpy.laboratory.AudioDriver`, `AudioDevice`, `MidiDriver`,
+  `MidiInputDevice` and the existing `MidiOutputDevice` (now with a name and
+  `get_name`) are Python-owned, created only after `enable()` and never
+  registered with Rack. `driver.connect(port)` points a Python-made port at
+  one; Rack's own port methods then call the overrides synchronously on the
+  main thread. `super()` is the native configured answer, called
+  non-virtually. A driver keeps its devices alive (GC traverse/clear), and a
+  `subscribe` override must return one of them or `None` (`OwnershipError`).
+- **`audio::Driver::getDefaultDeviceId`.** Rack calls it only from
+  `audio::Port::setDriverId` (`src/audio.cpp`, line 116), which finds drivers
+  by registered ID. `connect` repeats setDriverId's calls for the unlisted
+  driver, as a Bench repeats Rack's engine; registering with `addDriver`
+  would be irreversible and expose the driver to Rack's threads. This one
+  record is reached through RackPy's reproduction, not Rack's own function.
+- **Inputs.** `MidiInput` is a `rackpy.raw.midi.Input` subclass with a native
+  per-instance mark (as RP-22E): synchronous on the main thread, queued on
+  Rack's threads as production. `MidiInputQueue` is a separate native class
+  (raw `InputQueue` is final) whose Python base is `rackpy.raw.midi.Input`.
+- **Teardown runs no Python.** A released port (deleted, context closing)
+  unsubscribes natively and leaves every laboratory device; removing or
+  deleting a device or driver points its Python ports nowhere.
+- **Rack threads.** `callPython` refuses them and the native answer comes
+  back; test-hooks probes call every virtual from a Rack-context thread.

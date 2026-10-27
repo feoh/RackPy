@@ -10,6 +10,11 @@ Python on Rack's main thread the way Rack's engine would. Rack's engine never
 runs a laboratory module, a patch cannot create one, and nothing here is
 real-time audio. See *Callbacks and the laboratory* in the explanations.
 
+The laboratory's audio and MIDI drivers and devices (:class:`AudioDriver`,
+:class:`MidiDriver`, ...) do the same for the driver virtuals that Rack calls on
+its audio and MIDI driver threads: Rack never lists them, so only ports you
+make and connect reach them, on the main thread.
+
 Trusted code must call :func:`enable` first. Available inside Rack only.
 """
 
@@ -33,8 +38,14 @@ from rackpy.raw import midi as _midi
 from rackpy.raw.plugin import Model
 
 __all__ = [
+    "AudioDevice",
+    "AudioDriver",
     "Bench",
+    "MidiDriver",
     "MidiGenerator",
+    "MidiInput",
+    "MidiInputDevice",
+    "MidiInputQueue",
     "MidiOutputDevice",
     "ModuleClass",
     "ParamQuantity",
@@ -49,8 +60,87 @@ __all__ = [
 Bench = _lab.Bench
 ProcessArgs = Module.ProcessArgs
 MidiOutputDevice = _lab.MidiOutputDevice
-"""A MIDI output device whose ``send_message`` a subclass overrides; ``device.connect(output)`` points a
-``rackpy.raw.midi.Output`` you made at it, so Rack's ``Output::sendMessage`` reaches the override."""
+"""A MIDI output device whose ``send_message`` and ``get_name`` a subclass overrides; ``device.connect(output)``
+points a ``rackpy.raw.midi.Output`` you made at it, so Rack's ``Output::sendMessage`` reaches the override. A
+:class:`MidiDriver` can also hold it (``add_output_device``)."""
+
+AudioDriver = _lab.AudioDriver
+"""``rack::audio::Driver`` whose every virtual a subclass may override, offline.
+
+``driver.connect(port)`` points a ``rackpy.raw.audio.Port`` you made at it,
+repeating what Rack's ``Port::setDriverId`` does for a driver Rack lists (Rack
+never lists a laboratory driver): the port leaves its device, takes this
+driver, then subscribes to ``get_default_device_id()``'s device. Rack's own
+port methods then call the driver's ``get_name``, ``get_device_ids``,
+``get_device_name``, ``get_device_num_inputs``, ``get_device_num_outputs``,
+``subscribe`` and ``unsubscribe`` synchronously, and an override's error
+reaches the caller of the port method. ``super()`` answers from the devices
+given to ``add_device``, which the driver keeps; ``subscribe`` must return
+one of them or ``None``. Main thread; creating one needs :func:`enable`.
+"""
+
+AudioDevice = _lab.AudioDevice
+"""``rack::audio::Device`` whose every virtual a subclass may override, offline.
+
+Rack's port methods (``get_sample_rate``, ``set_block_size``, ``to_json``,
+...) call the device of a port connected to an :class:`AudioDriver`
+synchronously; ``super()`` answers with the configured values (``name``,
+``num_inputs``, ``sample_rate``, ...), as a ``rackpy.raw.audio.PythonDevice``
+does. Creating one needs :func:`enable`.
+"""
+
+MidiDriver = _lab.MidiDriver
+"""``rack::midi::Driver`` whose every virtual a subclass may override, offline.
+
+``driver.connect(port)`` points a ``rackpy.raw.midi`` port you made at it, as
+Rack's ``Port::setDriverId`` does for a driver it lists. Rack's own port
+methods (``set_device_id``, ``get_device_ids``, ``get_default_device_id``,
+``get_device_name``) and Rack's MIDI widgets then call the driver's virtuals
+synchronously. ``super()`` answers from the :class:`MidiInputDevice` and
+:class:`MidiOutputDevice` objects added, which the driver keeps. Main thread;
+creating one needs :func:`enable`.
+"""
+
+MidiInputDevice = _lab.MidiInputDevice
+"""``rack::midi::InputDevice`` whose ``get_name`` a subclass may override; ``push_message`` is Rack's
+``InputDevice::onMessage``, which calls each subscribed input's ``on_message``. Creating one needs :func:`enable`."""
+
+MidiInputQueue = _lab.MidiInputQueue
+"""``rack::midi::InputQueue`` whose ``on_message`` a subclass may override, offline.
+
+Rack's ``InputDevice::onMessage`` calls it synchronously on the main thread
+(a :class:`MidiInputDevice`'s ``push_message``, Rack's Loopback driver
+when Python sends); ``super().on_message(message)`` queues the message for
+``try_pop``, as Rack's does. On Rack's threads Python never runs and Rack's
+queue takes the message. It is a ``rackpy.raw.midi.Input``, but not a
+``rackpy.raw.midi.InputQueue``, which is final. Creating one needs
+:func:`enable` and Rack's live context.
+"""
+
+
+class MidiInput(_midi.Input):
+    """``rack::midi::Input`` whose ``on_message`` runs synchronously, offline.
+
+    An ordinary ``rackpy.raw.midi.Input`` gets its messages queued, on the UI
+    thread. A laboratory input's ``on_message`` runs where Rack's
+    ``InputDevice::onMessage`` calls it on the main thread (a
+    :class:`MidiInputDevice`'s ``push_message``, Rack's Loopback driver when
+    Python sends), and its error reaches that caller. On Rack's MIDI driver threads
+    Python never runs: the message is queued, as for an ordinary input. A
+    native mark set by this constructor, after it checks :func:`enable`,
+    gates the synchronous path. Needs Rack's live context.
+    """
+
+    _rackpy_laboratory = True
+
+    def __init__(self) -> None:
+        super().__init__()
+        _lab.mark_midi_input(self)
+
+    def on_message(self, message: _midi.Message) -> None:
+        """Rack's ``Input::onMessage``: does nothing. A subclass receives each message here, an owned copy."""
+        super().on_message(message)
+
 
 # The Rack virtuals a laboratory module may override, by their Python names.
 _OVERRIDES: tuple[str, ...] = _lab.OVERRIDES

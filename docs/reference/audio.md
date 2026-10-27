@@ -90,13 +90,14 @@ lower-level calls, which RackPy undoes with the port.
 
 :::{warning}
 Native configured answers and queued requests below are not synchronous
-Python virtual overrides. Missing driver/device laboratory paths remain
-**full-release blockers** under RP-22F
-(`tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3`); see the
-[callback inventory](callback-paths.md). The five port stream callbacks do
-have a synchronous path on Python-driven devices only, never Rack's driver
-threads. The [laboratory](../explanation/callbacks.md) is offline,
-explicitly enabled and not production real-time audio.
+Python virtual overrides. A Python subclass overrides the driver and device
+virtuals only in the
+[laboratory](../explanation/callbacks.md#laboratory-audio-and-midi-drivers)
+(`rackpy.laboratory.AudioDriver` and `AudioDevice`), which is offline,
+explicitly enabled, main-thread only and not production real-time audio;
+see the [callback inventory](callback-paths.md). The five port stream
+callbacks have a synchronous path on Python-driven devices only, never
+Rack's driver threads.
 :::
 
 Python implements an audio driver as a natively configured `PythonDriver`

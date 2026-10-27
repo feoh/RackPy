@@ -27,16 +27,14 @@ denominator. It includes destructors (owner/GC lifetime mappings, not Python
 virtual overrides) and `Exception::what` (a value/exception translation).
 
 A callable wrapper or native adapter is **not** synchronous Python callback
-coverage. The audit keeps these gaps as **full-release blockers**, with
-status `planned`, retaining the existing native implementation and tests:
-
-- **33 driver/device virtuals** have only native configured answers or queued
-  notifications; these cannot replace synchronous return values or callback
-  timing. RP-22F (`tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3`)
-  owns their missing laboratory Python paths. The five `audio::Port` stream
-  virtuals do have synchronous Python overrides on a **Python-driven device**,
-  never on Rack's driver threads; queued Rack notifications are a different
-  path ([audio](../reference/audio.md)).
+coverage. The 33 audio and MIDI driver/device virtuals (`audio::Driver`,
+`audio::Device`, `midi::Driver`, `midi::Device::getName`, `Input` and
+`InputQueue::onMessage`) have a native production path, natively configured
+answers or queued notifications, plus a laboratory Python path since RP-22F
+([laboratory audio and MIDI drivers](#laboratory-audio-and-midi-drivers)). The five `audio::Port` stream
+virtuals have synchronous Python overrides on a **Python-driven device**,
+never on Rack's driver threads; queued Rack notifications are a different
+path ([audio](../reference/audio.md)).
 
 The audit also kept **21 UI virtuals** on `PlugWidget`, `RackScrollWidget`,
 `RackWidget` and `Scene` as blockers, because only borrowed host views
@@ -227,7 +225,94 @@ Rack's drivers' devices: `device.connect(output)` points a
 `rackpy.raw.midi.Output` you made at it, and Rack's `Output::sendMessage`
 (which applies the port's channel) then calls the override synchronously,
 for example from a laboratory module's `process` on a bench. Deleting the
-device disconnects its ports; a deleted port leaves the device.
+device disconnects its ports; a deleted port leaves the device. It also has
+a configured `name` and an overridable `get_name`, and a
+[laboratory MIDI driver](#laboratory-audio-and-midi-drivers) can hold it.
+
+## Laboratory audio and MIDI drivers
+
+Rack calls an audio or MIDI driver's and device's virtuals from its driver
+threads, and Core's Audio module reads a device's channels and rate on the
+audio thread. So in production, a driver Python configures
+(`rackpy.raw.audio.PythonDriver`, `rackpy.raw.midi.PythonDriver`) answers
+natively, and a Python `Input` gets its messages queued for the UI thread
+([audio](../reference/audio.md#python-drivers-and-devices),
+[MIDI](../reference/midi.md#python-drivers-and-devices)). The laboratory classes let
+a Python subclass override these virtuals instead, offline:
+
+| Class | Rack virtuals it may override |
+| --- | --- |
+| {py:class}`rackpy.laboratory.AudioDriver` | every `audio::Driver` virtual: `get_name`, `get_device_ids`, `get_default_device_id`, `get_device_name`, `get_device_num_inputs`, `get_device_num_outputs`, `subscribe`, `unsubscribe` |
+| {py:class}`rackpy.laboratory.AudioDevice` | every `audio::Device` virtual: `get_name`, channel counts, sample rates and block sizes and their setters, `subscribe`, `unsubscribe` |
+| {py:class}`rackpy.laboratory.MidiDriver` | every `midi::Driver` virtual, for inputs and outputs |
+| {py:class}`rackpy.laboratory.MidiInputDevice`, {py:class}`~rackpy.laboratory.MidiOutputDevice` | `midi::Device::getName` (and the output's `send_message`, above) |
+| {py:class}`rackpy.laboratory.MidiInput`, {py:class}`~rackpy.laboratory.MidiInputQueue` | `Input::onMessage`, `InputQueue::onMessage` |
+
+Rack never lists a laboratory driver: nothing registers it, so Rack's menus,
+patches and driver threads cannot find it. `driver.connect(port)` points a
+`rackpy.raw.audio.Port` or `rackpy.raw.midi` port you made at it. From then
+on, **Rack's own port code calls the overrides synchronously**, on the main
+thread, where it would call a C++ driver's: `Port::setDeviceId` subscribes
+through `subscribe` (and the driver's `super()` calls the device's
+`subscribe`), `Port::getSampleRate` asks the device, `Port::toJson` takes
+the device's name, `Input::getDefaultDeviceId` asks the MIDI driver, and
+Rack's `MidiDriverChoice` and `MidiDeviceChoice` widgets show the names they
+return. Rack's `InputDevice::onMessage`, called by a `MidiInputDevice`'s
+`push_message` or by Rack's Loopback driver when Python sends, calls a
+laboratory input's `on_message` synchronously. An override's error reaches
+the Python caller of the port method, through Rack's code.
+
+One virtual has no Rack caller for a driver Rack does not list:
+`audio::Driver::getDefaultDeviceId`, which Rack 2.6.6 calls only from
+`audio::Port::setDriverId` (`src/audio.cpp`, line 116), after finding the
+driver by its registered ID. `connect` therefore **repeats** what
+`setDriverId` does once it has found a driver: the port leaves its device,
+takes the driver, asks `get_default_device_id()` and subscribes to that
+device through Rack's `Port::setDeviceId`. That call comes from RackPy's
+reproduction of `setDriverId`, not from Rack's own function, as a
+[bench](#the-laboratory-bench) reproduces Rack's engine. Registering the
+driver with Rack's public `addDriver` would be irreversible (Rack has no
+public removal) and would expose it to Rack's UI and driver threads. MIDI
+`connect` repeats `setDriverId` the same way, through the port's virtuals;
+the MIDI default-device virtuals also have Rack's own callers.
+
+`super()` is the native answer, which is the configured behaviour, as for
+the production drivers: the driver's name, the devices given to
+`add_device` (or `add_input_device`/`add_output_device`) and the first as
+the default; a device's `name`, `num_inputs`, `sample_rate` and so on, whose
+setters record requests for `take_requests()`; Rack's `InputQueue` queue.
+Base methods called from Python run that native answer, never the override.
+A driver keeps its devices alive until `remove_device`, so a device that
+`subscribe` returns outlives the call; `subscribe` must return one of the
+driver's own devices, or `None`, else `OwnershipError`. Callbacks receive
+the ports' own Python objects (the lifetime-tracked `rackpy.raw` ports, never
+addresses) and owned `Message` copies.
+
+The rules that keep it contained:
+
+- **Explicit enablement.** Creating any of these classes needs
+  {py:func}`~rackpy.laboratory.enable`, and so does `connect`. A
+  `MidiInput`'s constructor sets a native per-instance mark after checking
+  enablement; an ordinary `rackpy.raw.midi.Input` subclass, or one that
+  bypasses the laboratory constructor, keeps the queued production path.
+  Every `MidiInputQueue` is a laboratory one: its only constructor checks
+  enablement. It is a `rackpy.raw.midi.Input`, but not a
+  `rackpy.raw.midi.InputQueue`, which is final.
+- **Never Rack's threads.** Only ports Python made reach these objects, and
+  Python calls their methods on the main thread. Were a Rack thread ever to
+  call one, RackPy would run no Python (a `refused_rack_thread` diagnostic):
+  the native configured answer would come back, Rack's queue would take an
+  `InputQueue`'s message, and a `MidiInput`'s message would be queued for
+  the UI thread as for any Python input. The test-hooks build checks every
+  virtual that way.
+- **Teardown runs no Python.** When a port is released (deleted, or Rack's
+  context closing), Rack's `~Port` and `setDeviceId(-1)` unsubscribe through
+  the driver natively, and the port is never handed to Python. A released
+  port also leaves every laboratory device natively, so an override that
+  left a subscription inconsistent leaves no dangling port behind. When a
+  device is removed or deleted, or a driver deleted, every Python port using
+  it leaves it and points nowhere; a device view retained from a callback
+  then raises `StaleHandleError`.
 
 ## A laboratory MIDI generator
 

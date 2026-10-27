@@ -25,6 +25,18 @@ NEEDS_RACK = [
     "test_rack_threads_never_run_midi_generator_python",
     "test_racks_output_reaches_a_python_output_device",
     "test_laboratory_midi_device_native_reentry_super_and_recursion_limit",
+    "test_racks_audio_port_calls_a_python_driver_and_device",
+    "test_audio_override_errors_reach_the_port_methods_caller",
+    "test_audio_teardown_runs_no_python_and_leaves_ports_pointing_nowhere",
+    "test_inconsistent_audio_overrides_leave_no_dangling_ports",
+    "test_rack_threads_never_run_laboratory_audio_python",
+    "test_racks_midi_ports_and_widgets_call_a_python_driver_and_devices",
+    "test_a_laboratory_input_receives_messages_synchronously",
+    "test_a_laboratory_input_queue_overrides_racks_queue",
+    "test_midi_override_errors_reach_the_caller",
+    "test_midi_teardown_runs_no_python_and_leaves_ports_pointing_nowhere",
+    "test_inconsistent_midi_overrides_leave_no_dangling_ports",
+    "test_rack_threads_never_run_laboratory_midi_python",
 ]
 NEEDS_NO_RACK = ["test_parameter_events_and_json_need_racks_context"]
 

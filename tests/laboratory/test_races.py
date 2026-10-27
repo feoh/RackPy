@@ -60,6 +60,8 @@ def test_shutdown_with_laboratory_objects_alive(
         assert run.lines(marker), run.tail()
     assert not run.lines("on_context_closing callback"), run.tail()
     assert bool(run.lines("LAB SHUTDOWN output connected in live context")) == live_context, run.tail()
+    disconnected = "LAB SHUTDOWN laboratory drivers disconnected without Python"  # RP-22F
+    assert bool(run.lines(disconnected)) == live_context, run.tail()
     if release_on_close:
         assert run.lines("LAB SHUTDOWN holders released"), run.tail()
         assert run.lines("Py_FinalizeEx returned 0"), run.tail()

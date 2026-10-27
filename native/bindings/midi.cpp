@@ -15,6 +15,11 @@
 // stale from then on. Devices belong to their driver (Rack's RtMidi driver
 // deletes one when its last port leaves), so a device view goes through the
 // port that holds it, at every use.
+//
+// The callback laboratory's drivers and devices (RP-22C, RP-22F, native/
+// laboratory/midi.cpp) are Unlisted ones: Rack never lists them, so only
+// Python's ports reach them, and the ports' teardown here leaves them without
+// running Python.
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -31,6 +36,7 @@
 
 #include <rack.hpp>
 
+#include "../laboratory/laboratory.hpp"
 #include "engine/engine_internal.hpp"
 #include "support/overrides.hpp"
 #include "midi.hpp"
@@ -108,6 +114,7 @@ struct Tracked {
 };
 
 std::vector<Tracked*> ports;  // main thread
+std::vector<m::Device*> unlistedDevices;  // main thread: the laboratory's (UnlistedMidiInputDevice, ...)
 bool closeHooked = false;
 
 void registerPort(Tracked* p) {
@@ -193,18 +200,59 @@ struct TrackedPort : Base, Tracked {
 		}
 		catch (...) {
 		}
+		// Python overrides of a laboratory driver's subscribe may have left this port in a device it does not hold.
+		for (auto* device : unlistedDevices) {
+			if constexpr (isInput) {
+				if (auto* in = dynamic_cast<m::InputDevice*>(device))
+					in->unsubscribe(this);
+			}
+			else if (auto* out = dynamic_cast<m::OutputDevice*>(device))
+				out->unsubscribe(this);
+		}
 		this->driver = nullptr;
 		this->driverId = -1;
 	}
 };
 
-/** A Python Input: on_message runs on the UI thread, from the queue its driver thread fills. */
+/** A Python Input: on_message runs on the UI thread, from the queue its driver thread fills. A laboratory input
+(rackpy.laboratory.MidiInput) runs it synchronously where Python may run, and queues it only on Rack's threads. */
 struct PyInput : TrackedPort<m::Input> {
 	MessageQueue queue;
-	void onMessage(const m::Message& message) override { queue.push(message); }
+	std::atomic<bool> laboratory{false};  // read on driver threads
+	void onMessage(const m::Message& message) override {
+		if (!laboratory.load(std::memory_order_relaxed) || !deliverNow(message))
+			queue.push(message);
+	}
+	/** False where Python may not run (Rack's threads: callPython counts the refusal, before `released` is read). */
+	bool deliverNow(const m::Message& message) {
+		if (!runtime::interpreterAlive())
+			return false;
+		const m::Input* self = this;
+		// Python gets an owned copy: Rack may pass on the caller's own message (a Python object).
+		auto deliver = [&] {
+			if (released)
+				return;
+			if (auto f = rackpy::bindings::pythonOverride(self, "on_message"))
+				f(m::Message(message));
+		};
+		if (PyGILState_Check()) {  // Python called Rack's code: an error reaches it
+			deliver();
+			return true;
+		}
+		return runtime::callPython("on_message", deliver) || runtime::pythonAllowedHere();
+	}
 };
 using PyInputQueue = TrackedPort<m::InputQueue>;
 using PyOutput = TrackedPort<m::Output>;
+
+/** rackpy.laboratory.MidiInputQueue (RP-22F): Rack's InputQueue whose onMessage a Python subclass overrides. Its
+only constructor needs the laboratory. Where Python may not run (Rack's threads), Rack's InputQueue queues. */
+struct LaboratoryInputQueue : TrackedPort<m::InputQueue> {
+	void onMessage(const m::Message& message) override {
+		overrideOrVoid(static_cast<const LaboratoryInputQueue*>(this), "on_message",
+			[this, &message] { m::InputQueue::onMessage(message); }, m::Message(message));  // an owned copy
+	}
+};
 
 /** Runs Python Inputs' on_message for the messages their queues hold. Main thread, from RackPy's UI step. */
 void deliverMessages() noexcept {
@@ -566,17 +614,125 @@ void connectOutputDevice(py::handle output, m::OutputDevice& device) {
 	port->device = port->outputDevice = &device;
 }
 
-void disconnectOutputDevice(m::OutputDevice& device) noexcept {
-	auto subscribed = device.subscribed;
-	for (m::Output* port : subscribed) {
-		if (port->outputDevice == &device)
-			port->device = port->outputDevice = nullptr;
-		device.unsubscribe(port);
-		if (auto* t = dynamic_cast<Tracked*>(static_cast<m::Port*>(port))) {
-			auto& subs = t->deviceSubscriptions;
-			subs.erase(std::remove(subs.begin(), subs.end(), static_cast<m::Device*>(&device)), subs.end());
-		}
+namespace {
+
+/** The port no longer holds its device: Rack's fields point nowhere. */
+void dropDevice(m::Port& port) noexcept {
+	port.device = nullptr;
+	port.deviceId = -1;
+	if (auto* input = dynamic_cast<m::Input*>(&port))
+		input->inputDevice = nullptr;
+	else
+		static_cast<m::Output&>(port).outputDevice = nullptr;
+}
+
+/** Every Python port leaves `device`, natively: whatever Python overrides did, none keeps a pointer to it. */
+void leaveUnlisted(m::Device* device) noexcept {
+	for (auto* t : ports) {
+		m::Port& port = t->port();
+		if (port.device == device)
+			dropDevice(port);
+		auto& subs = t->deviceSubscriptions;
+		subs.erase(std::remove(subs.begin(), subs.end(), device), subs.end());
+		auto& direct = t->driverSubscriptions;
+		direct.erase(std::remove_if(direct.begin(), direct.end(),
+			[device](const Tracked::DriverSubscription& s) { return s.device == device; }), direct.end());
 	}
+}
+
+void forgetUnlisted(m::Device* device) noexcept {
+	unlistedDevices.erase(std::remove(unlistedDevices.begin(), unlistedDevices.end(), device), unlistedDevices.end());
+}
+
+}  // namespace
+
+UnlistedMidiInputDevice::UnlistedMidiInputDevice() {
+	unlistedDevices.push_back(this);
+}
+
+UnlistedMidiInputDevice::~UnlistedMidiInputDevice() {
+	disconnect();
+	forgetUnlisted(this);
+}
+
+void UnlistedMidiInputDevice::disconnect() noexcept {
+	leaveUnlisted(this);
+	subscribed.clear();
+}
+
+UnlistedMidiOutputDevice::UnlistedMidiOutputDevice() {
+	unlistedDevices.push_back(this);
+}
+
+UnlistedMidiOutputDevice::~UnlistedMidiOutputDevice() {
+	disconnect();
+	forgetUnlisted(this);
+}
+
+void UnlistedMidiOutputDevice::disconnect() noexcept {
+	leaveUnlisted(this);
+	subscribed.clear();
+}
+
+UnlistedMidiDriver::~UnlistedMidiDriver() {
+	for (auto* t : ports) {
+		m::Port& port = t->port();
+		if (port.driver != this)
+			continue;
+		// Rack's own unsubscribe: no Python while the driver goes.
+		if (auto* input = dynamic_cast<m::Input*>(&port)) {
+			if (input->inputDevice)
+				input->inputDevice->unsubscribe(input);
+		}
+		else if (auto* output = static_cast<m::Output*>(&port); output->outputDevice)
+			output->outputDevice->unsubscribe(output);
+		dropDevice(port);
+		port.driver = nullptr;
+		port.driverId = -1;
+	}
+}
+
+bool livePythonMidiPort(const m::Port* port) {
+	auto* t = dynamic_cast<const Tracked*>(port);
+	return t && !t->released;
+}
+
+py::object midiPortObject(m::Port* port) {
+	if (!livePythonMidiPort(port))
+		return py::object();
+	return portObject(port);
+}
+
+void connectMidiDriver(py::handle port, UnlistedMidiDriver& driver) {
+	m::Port& p = pythonMidiPort(port);
+	// Rack's Port::setDriverId, for a driver it found, through the port's virtuals (a Python port's overrides run).
+	p.setDeviceId(-1);
+	p.driver = &driver;
+	p.driverId = -1;  // Rack lists no such driver
+	int deviceId = p.getDefaultDeviceId();
+	if (deviceId >= 0)
+		p.setDeviceId(deviceId);
+}
+
+py::list midiSubscribers(py::object owner, m::InputDevice& device) {
+	return subscribers([owner, &device]() -> m::Device& { return device; }, device.subscribed, true);
+}
+
+py::list midiSubscribers(py::object owner, m::OutputDevice& device) {
+	return subscribers([owner, &device]() -> m::Device& { return device; }, device.subscribed, false);
+}
+
+void markLaboratoryInput(py::handle input) {
+	auto* port = py::isinstance<m::Input>(input) ? dynamic_cast<PyInput*>(&input.cast<m::Input&>()) : nullptr;
+	if (!port)
+		throw py::type_error("only a rackpy.raw.midi.Input (not an InputQueue) can be a laboratory input");
+	tracked(*port);
+	port->laboratory.store(true);
+}
+
+bool isLaboratoryInput(py::handle input) {
+	auto* port = py::isinstance<m::Input>(input) ? dynamic_cast<PyInput*>(&input.cast<m::Input&>()) : nullptr;
+	return port && port->laboratory.load();
 }
 
 /** Port has pure virtual methods: Python ports' super path uses the concrete
@@ -1003,6 +1159,34 @@ void bindMidi(py::module_ mod) {
 		runtime::requireMainThread("finding a MIDI driver");
 		return m::getDriver(id) ? py::cast(DriverView{id}) : py::none();
 	}, py::arg("driver_id"), "Rack's: the driver with this ID, or None.");
+}
+
+void bindLaboratoryInputQueue(py::module_ lab) {
+	using Q = LaboratoryInputQueue;
+	py::class_<Q, m::Input, std::unique_ptr<Q, MainThreadDelete<Q>>>(lab, "MidiInputQueue",
+		"Rack's InputQueue whose on_message a Python subclass overrides, offline: Rack's InputDevice::onMessage calls "
+		"it synchronously on the main thread. super().on_message queues, as Rack's does. A rackpy.raw.midi.Input, not "
+		"a rackpy.raw.midi.InputQueue (which is final).")
+		.def(py::init([] {
+			laboratory::requireEnabled("creating a laboratory MIDI input queue");
+			requireLiveContext("laboratory.MidiInputQueue()");
+			return new Q;
+		}))
+		.def("on_message", [](Q& q, const m::Message& message) {
+			checked(q);
+			q.m::InputQueue::onMessage(message);
+		}, py::arg("message"), "Rack's InputQueue::onMessage: queues the message (up to 8192).")
+		.def("try_pop", [](Q& q, int64_t maxFrame) -> py::object {
+			checked(q);
+			m::Message message;
+			if (!q.tryPop(&message, maxFrame))
+				return py::none();
+			return py::cast(message);
+		}, py::arg("max_frame"), "Rack's: the next message if its frame is max_frame or earlier, else None.")
+		.def("size", [](Q& q) {
+			checked(q);
+			return q.size();
+		});
 }
 
 }  // namespace bindings

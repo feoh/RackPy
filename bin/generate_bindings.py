@@ -58,6 +58,17 @@ def bound(manifest: dict[str, Any]) -> list[dict[str, Any]]:
 HOST_ONLY_APP_WIDGETS = ("PlugWidget", "RackScrollWidget", "RackWidget", "Scene")
 
 
+# RP-22F: the laboratory class whose subclass overrides each driver/device virtual, by Rack's class.
+LABORATORY_DRIVERS = {
+    "rack::audio::Driver::": "AudioDriver",
+    "rack::audio::Device::": "AudioDevice",
+    "rack::midi::Driver::": "MidiDriver",
+    "rack::midi::Device::": "MidiInputDevice/MidiOutputDevice",
+    "rack::midi::Input::": "MidiInput",
+    "rack::midi::InputQueue::": "MidiInputQueue",
+}
+
+
 def callback_execution(record: dict[str, Any], entry: dict[str, Any]) -> str:
     """Describe execution, not just callability: native adapters are not Python overrides."""
     strategy = record["callback"]
@@ -97,8 +108,18 @@ def callback_execution(record: dict[str, Any], entry: dict[str, Any]) -> str:
                 f"Synchronous override: {path}, only on a Python-driven device; "
                 "Rack threads use native/queued adapters."
             )
+        laboratory_class = next((c for prefix, c in LABORATORY_DRIVERS.items() if name.startswith(prefix)), None)
+        if laboratory_class is None:
+            return "**Full-release blocker**: native/queued adapter only; no synchronous laboratory Python override."
+        method = str(python["raw"]).rsplit(".", 1)[-1]
+        caller = (
+            "RackPy's repetition of Rack's Port::setDriverId in AudioDriver.connect (src/audio.cpp:116), not Rack's own"
+            if name == "rack::audio::Driver::getDefaultDeviceId"
+            else "Rack's own port code"
+        )
         return (
-            "**Full-release blocker**: native/queued adapter only; no synchronous laboratory Python override (RP-22F)."
+            f"Synchronous offline override: rackpy.laboratory.{laboratory_class}.{method}, called by {caller} for a "
+            "connected Python-made port; main thread only. Production: native configured/queued adapter."
         )
     if strategy == "ui" and any(name.startswith(f"rack::app::{owner}::") for owner in HOST_ONLY_APP_WIDGETS):
         return (
@@ -134,8 +155,8 @@ def callback_paths(manifest: dict[str, Any], inputs: bm.Inputs) -> str:
         "**Laboratory means explicitly enabled, offline and main-thread only, never Rack's engine/driver threads.**",
         "See [Callbacks and the laboratory](../explanation/callbacks.md) for restrictions, fidelity gaps and",
         "re-entrant dispatch (fixed by `tk-rackpy-trampolines-suppress-same-object-re-entra-0abce9`).",
-        "Native configured/queued driver adapters without a synchronous Python path remain full-release blockers:",
-        "RP-22F (`tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3`). "
+        "Native configured/queued driver adapters are production paths; their synchronous Python paths are the",
+        "laboratory drivers and devices of RP-22F (`tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3`). "
         "A callable name is not proof of an override.",
         "No plugin can subclass Rack's Scene, RackScrollWidget or RackWidget (PRIVATE constructors) or make a "
         "usable PlugWidget subclass, so their UI virtuals map to calls on Rack's own instances through borrowed "
