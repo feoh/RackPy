@@ -42,7 +42,7 @@ reached them. RP-28F
 (`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`) found that no
 plugin can override them: the last three have PRIVATE constructors, and only
 `CableWidget`'s constructor makes a usable `PlugWidget`. By a decision
-pending the owner's review ([coverage policy 11](../coverage.md#completeness-policy)),
+the owner approved on 2026-10-26 ([coverage policy 11](../coverage.md#completeness-policy)),
 the host views' calls on Rack's own instances are their mappings, and the
 records are `implemented` again.
 

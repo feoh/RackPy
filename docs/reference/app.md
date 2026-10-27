@@ -261,7 +261,7 @@ constructors and destructors are PRIVATE, so no plugin, in C++ or Python,
 can subclass them, and the same holds in effect for `PlugWidget` (see
 [Rack's cables](#app-cables)). Their UI virtuals (`step`, `draw` and the
 event handlers) are therefore calls on Rack's own instances, through the
-host views (an RP-28F decision, pending the owner's review; [coverage
+host views (an RP-28F decision the owner approved on 2026-10-26; [coverage
 policy 11](../coverage.md#completeness-policy)). The four views are final:
 Python can neither construct nor subclass them. See the
 [per-virtual execution inventory](callback-paths.md).

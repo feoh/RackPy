@@ -124,7 +124,7 @@ def callback_execution(record: dict[str, Any], entry: dict[str, Any]) -> str:
     if strategy == "ui" and any(name.startswith(f"rack::app::{owner}::") for owner in HOST_ONLY_APP_WIDGETS):
         return (
             f"Call on Rack's own instance: {path} (borrowed host view). No override path: only Rack makes usable "
-            "instances of this class (RP-28F decision, owner review pending; docs/coverage.md policy 11)."
+            "instances of this class (RP-28F decision, owner-approved 2026-10-26; docs/coverage.md policy 11)."
         )
     if name.startswith("rack::app::CableWidget::"):
         method = re.sub(r"(?<!^)(?=[A-Z])", "_", name.rsplit("::", 1)[-1]).lower()
@@ -160,7 +160,7 @@ def callback_paths(manifest: dict[str, Any], inputs: bm.Inputs) -> str:
         "A callable name is not proof of an override.",
         "No plugin can subclass Rack's Scene, RackScrollWidget or RackWidget (PRIVATE constructors) or make a "
         "usable PlugWidget subclass, so their UI virtuals map to calls on Rack's own instances through borrowed "
-        "host views (RP-28F decision, owner review pending: "
+        "host views (RP-28F decision, owner-approved 2026-10-26: "
         "`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`).",
         "Per-symbol semantics below retain the manifest's adapter restrictions; implemented is not verified.",
         "",

@@ -179,7 +179,7 @@ only path was RP-28D's borrowed host views, which call Rack's
 implementations but take no Python override. The task was to give them
 Python subclass trampolines, as RP-28E did for `CableWidget`.
 
-- **Decision (supervisor, 2026-10-26; owner review pending).** Public API
+- **Decision (supervisor, 2026-10-26; approved by the owner the same day).** Public API
   cannot override a virtual of a class whose usable instances only Rack can
   make. The call on Rack's own instances is then the mapping, and the record
   cites the header (and, if needed, Rack's source) lines. Recorded as a

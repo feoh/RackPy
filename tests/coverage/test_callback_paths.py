@@ -69,7 +69,7 @@ def test_host_only_app_widgets_map_to_calls_on_racks_own_instances() -> None:
     for record in host_only:
         owner = record["id"].split("rack::app::", 1)[1].split("::", 1)[0]
         assert record["status"] == "implemented"
-        assert record["notes"].startswith("RP-28F decision (2026-10-26, owner review pending): ")
+        assert record["notes"].startswith("RP-28F decision (2026-10-26, owner-approved): ")
         if owner == "PlugWidget":
             assert "include/app/CableWidget.hpp:20-21" in record["notes"]
             assert "src/app/CableWidget.cpp:140-151" in record["notes"]
