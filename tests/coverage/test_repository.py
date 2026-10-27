@@ -138,7 +138,15 @@ def test_quantity_records_are_mapped_with_their_laboratory_path() -> None:
         "getValue()",
         "setValue(float)",
     }
-    assert len(mixed) == 10  # rack::Quantity and rack::engine::ParamQuantity
+    assert len(mixed) == 5  # ParamQuantity remains engine-reachable
+    plain = [
+        r
+        for r in entries
+        if r["id"].startswith("method:rack::Quantity::")
+        and r["id"].rsplit("::", 1)[1]
+        in {"getDefaultValue()", "getMaxValue()", "getMinValue()", "getValue()", "setValue(float)"}
+    ]
+    assert len(plain) == 5 and all(r["callback"] == "ui" and "RP-31G" in r["notes"] for r in plain)
     for record in mixed:
         assert record["status"] == "implemented" and "RP-22C" in record["notes"]
         assert "rackpy.laboratory" in record["notes"]

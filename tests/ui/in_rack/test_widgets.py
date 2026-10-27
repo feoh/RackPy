@@ -9,7 +9,7 @@ from typing import Any
 import pytest
 
 from rackpy.errors import OwnershipError, StaleHandleError, ThreadError
-from rackpy.raw import nanovg, ui
+from rackpy.raw import Quantity, nanovg, ui
 from rackpy.raw import widget as w
 from rackpy.raw.math import Rect, Vec
 from rackpy.types import ValueQuantity
@@ -94,6 +94,43 @@ def test_quantity_fields_keep_their_quantity_alive() -> None:
             widget.close()
     gc.collect()
     assert marker() is None  # the widgets released it when Rack deleted them
+
+
+def test_slider_dispatches_plain_quantity_value_overrides() -> None:
+    calls: list[float] = []
+
+    class Custom(Quantity):
+        def __init__(self) -> None:
+            super().__init__()
+            self.value = 0.25
+
+        def get_value(self) -> float:
+            return self.value
+
+        def set_value(self, value: float) -> None:
+            calls.append(value)
+            self.value = value
+
+        def get_min_value(self) -> float:
+            return -1.0
+
+        def get_max_value(self) -> float:
+            return 3.0
+
+        def get_default_value(self) -> float:
+            return 1.5
+
+    quantity, slider = Custom(), ui.Slider()
+    slider.box = Rect(Vec(), Vec(100, 20))
+    slider.quantity = quantity
+    try:
+        slider.on_drag_move(w.DragMoveEvent(button=0, mouse_delta=Vec(25, 0)))
+        assert calls and quantity.value != 0.25
+        assert quantity.get_range() == 4 and quantity.is_bounded()
+        quantity.reset()
+        assert quantity.value == 1.5
+    finally:
+        slider.close()
 
 
 def test_rack_draws_the_widgets() -> None:

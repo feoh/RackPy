@@ -10,12 +10,12 @@ Every public virtual method in the inventory: **434** entries.
 
 | Strategy | Methods | Meaning |
 | --- | --- | --- |
-| `ui` | 318 | Main (UI) thread with no engine lock held. A Python override may run; the trampoline takes the GIL. |
+| `ui` | 323 | Main (UI) thread with no engine lock held. A Python override may run; the trampoline takes the GIL. |
 | `ui-exclusive` | 19 | Main thread, or whichever thread called the engine method, while Rack holds the engine mutex EXCLUSIVELY and audio processing is stopped. A Python override may run, but must not call any engine method that locks (RackPy refuses it), and its run time stalls audio. |
 | `ui-shared` | 5 | Main thread while Rack holds the engine mutex SHARED, so process() keeps running concurrently. A Python override may run synchronously, but must read module state through atomics or snapshots, never through fields that process() writes. |
 | `engine` | 6 | Engine worker or fallback threads during processing. Production: native code only. Python only in the separately enabled RP-22 laboratory. |
 | `driver` | 42 | Audio or MIDI driver threads (and, for some, the engine thread or UI under the exclusive lock). Native code only; Python receives queued notifications on the UI thread. |
-| `mixed` | 10 | Reachable from both the UI thread and engine threads. Native implementation only; Python may configure the native behaviour but never runs in the call. |
+| `mixed` | 5 | Reachable from both the UI thread and engine threads. Native implementation only; Python may configure the native behaviour but never runs in the call. |
 | `lifecycle` | 33 | Destructor: runs on the thread that deletes the object, which Rack keeps on the main thread for widgets and modules. Trampolines release their Python state with the GIL there; production deletion paths do no Python work. |
 | `unresolved` | 0 | Not yet decided. Blocks the implementation task named in the rule. |
 | `value` | 1 | Not a callback: a virtual on a C++ exception or value type. RackPy translates or wraps it; Python never overrides it. |
@@ -26,8 +26,7 @@ Every public virtual method in the inventory: **434** entries.
 | --- | --- | --- | --- |
 | `*` | `lifecycle` | `~` | 15 |
 | `rack::Exception` | `value` | `what` | 1 |
-| `rack::Quantity` | `mixed` | `getDefaultValue`, `getMaxValue`, `getMinValue`, `getValue`, `setValue` | 10 |
-| `rack::Quantity` | `ui` | `getDescription`, `getDisplayPrecision`, `getDisplayValue`, `getDisplayValueString`, `getLabel`, `getString`, `getUnit`, `setDisplayValue`, `setDisplayValueString` | 18 |
+| `rack::Quantity` | `ui` | `getDefaultValue`, `getDescription`, `getDisplayPrecision`, `getDisplayValue`, `getDisplayValueString`, `getLabel`, `getMaxValue`, `getMinValue`, `getString`, `getUnit`, `getValue`, `setDisplayValue`, `setDisplayValueString`, `setValue` | 23 |
 | `rack::Quantity` | `ui-exclusive` | `randomize`, `reset` | 4 |
 | `rack::audio::Device` | `driver` | `getBlockSize`, `getBlockSizes`, `getName`, `getNumInputs`, `getNumOutputs`, `getSampleRate`, `getSampleRates`, `setBlockSize`, `setSampleRate`, `subscribe`, `unsubscribe` | 11 |
 | `rack::audio::Driver` | `driver` | `getDefaultDeviceId`, `getDeviceIds`, `getDeviceName`, `getDeviceNumInputs`, `getDeviceNumOutputs`, `getName`, `subscribe`, `unsubscribe` | 8 |
@@ -39,6 +38,7 @@ Every public virtual method in the inventory: **434** entries.
 | `rack::engine::Module` | `lifecycle` | `~` | 1 |
 | `rack::engine::Module` | `ui-exclusive` | `dataFromJson`, `fromJson`, `onAdd`, `onBypass`, `onPortChange`, `onRandomize`, `onRemove`, `onReset`, `onUnBypass`, `paramsFromJson` | 14 |
 | `rack::engine::Module` | `ui-shared` | `dataToJson`, `onSave`, `paramsToJson`, `toJson` | 4 |
+| `rack::engine::ParamQuantity` | `mixed` | `getDefaultValue`, `getMaxValue`, `getMinValue`, `getValue`, `setValue` | 5 |
 | `rack::engine::ParamQuantity` | `ui-exclusive` | `fromJson` | 1 |
 | `rack::engine::ParamQuantity` | `ui-shared` | `toJson` | 1 |
 | `rack::engine::PortInfo` | `ui` | `getDescription`, `getName` | 2 |

@@ -22,6 +22,7 @@ HOOK_TESTS = {
     "test_common.py::test_rack_exceptions_arrive_as_rackpy_raw_exception",
     "test_quantity.py::test_an_override_that_raises_never_reaches_rack",
     "test_quantity.py::test_engine_thread_reads_never_touch_python",
+    "test_quantity.py::test_plain_quantity_off_thread_falls_back_without_python",
 }
 
 

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // UI-safe Quantity virtuals shared by standalone and native value quantities.
 #pragma once
+#include <atomic>
 #include <chrono>
+#include <type_traits>
 #include "overrides.hpp"
 #include "rackpy/runtime/diagnostics.hpp"
 
@@ -52,29 +54,43 @@ inline bool quantityTrampoline(rack::Quantity& q, bool engine = false, bool writ
 template <typename Base, typename Guard = UnguardedQuantity>
 struct QuantityTrampoline : Base, LaboratoryQuantity, py::trampoline_self_life_support {
 	using Base::Base;
-	// The mixed value and range methods (RP-06): native, except on a laboratory quantity.
+	// Plain quantities can dispatch values on the UI thread. Parameter quantities
+	// may be called by the engine and retain native production semantics.
+	std::atomic_flag reportedOffThread = ATOMIC_FLAG_INIT;
+	bool dispatchValue(const char* name) {
+		if (laboratoryOverrides)
+			return true;
+		if constexpr (std::is_base_of<rack::engine::ParamQuantity, Base>::value)
+			return false;
+		if (rt::isMainThread())
+			return true;
+		// A single bounded diagnostic per object, without touching Python on Rack threads.
+		if (!reportedOffThread.test_and_set(std::memory_order_relaxed))
+			rt::detail::noteRefused(name);
+		return false;
+	}
 	float getValue() override {
-		if (!laboratoryOverrides)
+		if (!dispatchValue("Quantity.get_value"))
 			return Base::getValue();
 		return overrideOr<float>(static_cast<const Base*>(this), "get_value", [this] { return Base::getValue(); });
 	}
 	void setValue(float v) override {
-		if (!laboratoryOverrides)
+		if (!dispatchValue("Quantity.set_value"))
 			return Base::setValue(v);
 		overrideOrVoid(static_cast<const Base*>(this), "set_value", [this, v] { Base::setValue(v); }, v);
 	}
 	float getMinValue() override {
-		if (!laboratoryOverrides)
+		if (!dispatchValue("Quantity.get_min_value"))
 			return Base::getMinValue();
 		return overrideOr<float>(static_cast<const Base*>(this), "get_min_value", [this] { return Base::getMinValue(); });
 	}
 	float getMaxValue() override {
-		if (!laboratoryOverrides)
+		if (!dispatchValue("Quantity.get_max_value"))
 			return Base::getMaxValue();
 		return overrideOr<float>(static_cast<const Base*>(this), "get_max_value", [this] { return Base::getMaxValue(); });
 	}
 	float getDefaultValue() override {
-		if (!laboratoryOverrides)
+		if (!dispatchValue("Quantity.get_default_value"))
 			return Base::getDefaultValue();
 		return overrideOr<float>(static_cast<const Base*>(this), "get_default_value",
 			[this] { return Base::getDefaultValue(); });

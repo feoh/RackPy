@@ -103,7 +103,7 @@
       "evidence": "Module::onReset/onRandomize default handlers reset and randomize ParamQuantities under the exclusive lock; menu actions go through the engine."
     },
     {
-      "family": "rack::Quantity",
+      "family": "rack::engine::ParamQuantity",
       "methods": [
         "getValue",
         "setValue",
@@ -113,6 +113,18 @@
       ],
       "strategy": "mixed",
       "evidence": "Core MIDI-Map's process() calls ParamQuantity isBounded/getScaledValue/fromScaled on the engine thread (core/MIDIMap.cpp:101-131); widgets call them on the UI thread."
+    },
+    {
+      "family": "rack::Quantity",
+      "methods": [
+        "getValue",
+        "setValue",
+        "getMinValue",
+        "getMaxValue",
+        "getDefaultValue"
+      ],
+      "strategy": "ui",
+      "evidence": "Plain Quantity values are used by UI Button, ProgressBar and Slider; ParamQuantity's engine-thread paths have a separate mixed rule. RackPy refuses Python dispatch from non-main threads."
     },
     {
       "family": "rack::Quantity",

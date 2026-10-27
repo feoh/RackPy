@@ -9,10 +9,9 @@
 // - ui-exclusive: reset, randomize. Python may override them; Rack can call
 //   them with audio stopped, so time spent there is measured against ADR 004's
 //   1 ms budget.
-// - mixed: getValue, setValue, getMinValue, getMaxValue, getDefaultValue. Rack
-//   also calls them on the engine thread (Core MIDI-Map), so they have no
-//   Python path: the trampoline does not override them, and rackpy.raw refuses
-//   a subclass that defines them. ValueQuantity serves them natively instead.
+// - value/range methods on plain quantities dispatch Python only on the main
+//   thread; elsewhere the native base answers with a bounded diagnostic.
+//   ParamQuantity's engine-reachable methods retain their native path.
 #include <atomic>
 #include <mutex>
 #include <string>

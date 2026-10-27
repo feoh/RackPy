@@ -132,14 +132,17 @@ where Rack calls each method ([callback matrix](callback-matrix.md)):
 | --- | --- | --- |
 | `get_display_value`, `set_display_value`, `get_display_precision`, `get_display_value_string`, `set_display_value_string`, `get_label`, `get_unit`, `get_string` | on the UI thread | override freely |
 | `reset`, `randomize` | sometimes with audio stopped | override, but keep it brief (ADR 004: 1 ms) |
-| `get_value`, `set_value`, `get_min_value`, `get_max_value`, `get_default_value` | also on the **engine thread** (Core MIDI-Map) | **cannot** be overridden: a subclass that defines one raises `TypeError` |
+| `get_value`, `set_value`, `get_min_value`, `get_max_value`, `get_default_value` | plain quantities: UI; parameter quantities: also **engine thread** (Core MIDI-Map) | plain `Quantity` and `ValueQuantity` subclasses may override on the main thread; `ParamQuantity` subclasses defining them raise `TypeError` |
 
-Outside the [callback laboratory](../explanation/callbacks.md#laboratory-quantities),
-whose `rackpy.laboratory.Quantity` lets an offline experiment override them,
-the value methods cannot be Python, so use
-{py:class}`rackpy.types.ValueQuantity`: RackPy's own Quantity, which keeps its
-value, bounds and default natively, so Rack can read them from any thread,
-while Python sets them and overrides the display methods. Like Rack's
+When Rack calls a plain quantity's value method off the main thread, RackPy
+never invokes Python: it uses the C++ base answer and records one bounded
+refusal diagnostic per object. The result may therefore differ from the Python
+override. Do not use such overrides for production audio. Parameter quantities
+can use Python value overrides only in the separately enabled
+[callback laboratory](../explanation/callbacks.md#laboratory-quantities).
+
+{py:class}`rackpy.types.ValueQuantity` keeps its value, bounds and default
+natively, so Rack can read the base values from any thread. Like Rack's
 `ParamQuantity`, it clamps a new value to its bounds with `clamp_safe`. Because
 `fmin(NaN, max)` is `max`, a NaN becomes the **maximum**. `set_display_value_string` accepts Rack's formula
 language (`"c4"`, `"1+1"`, `"dbtogain(-6)"`) and leaves the value unchanged if
