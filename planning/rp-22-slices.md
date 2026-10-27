@@ -208,3 +208,10 @@ Supervisor-approved design (2026-10-26):
   deleting a device or driver points its Python ports nowhere.
 - **Rack threads.** `callPython` refuses them and the native answer comes
   back; test-hooks probes call every virtual from a Rack-context thread.
+- **Review fixes.** A synchronous `on_message` runs inside Rack's loop over
+  a device's subscribers: during it, subscription changes raise
+  `LaboratoryError`, and the delivered port and the laboratory drivers and
+  devices are kept alive until the Python call that delivered returns (Rack's
+  own main-thread deliveries: the next UI step). A `subscribe` override that
+  removes its device leaves the port pointing nowhere, and a driver detaches
+  its ports before releasing its devices.

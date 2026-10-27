@@ -75,6 +75,9 @@ struct UnlistedAudioDevice : ConfiguredDevice {
 leaves its device and points nowhere, natively. Main thread. */
 struct UnlistedAudioDriver : rack::audio::Driver {
 	~UnlistedAudioDriver() override;
+	/** Every Python port using this driver leaves its device and points nowhere, natively. A derived driver's
+	destructor calls it before it lets its devices go, so that nothing reaches it half destroyed. */
+	void detach() noexcept;
 };
 
 /** Whether `port` is a port Python made that is not being released: only such a port may be handed to Python. Main thread. */

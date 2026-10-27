@@ -37,6 +37,12 @@ NEEDS_RACK = [
     "test_midi_teardown_runs_no_python_and_leaves_ports_pointing_nowhere",
     "test_inconsistent_midi_overrides_leave_no_dangling_ports",
     "test_rack_threads_never_run_laboratory_midi_python",
+    "test_a_subscribe_override_that_removes_its_device_leaves_the_port_pointing_nowhere",
+    "test_audio_driver_teardown_detaches_ports_before_its_devices_go",
+    "test_subscriptions_cannot_change_during_a_synchronous_delivery",
+    "test_objects_dropped_during_a_delivery_go_after_it",
+    "test_a_delivery_that_raises_still_releases_what_it_kept",
+    "test_midi_driver_teardown_detaches_ports_before_its_devices_go",
 ]
 NEEDS_NO_RACK = ["test_parameter_events_and_json_need_racks_context"]
 

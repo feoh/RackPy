@@ -33,6 +33,32 @@ struct UnlistedMidiOutputDevice : rack::midi::OutputDevice {
 leaves its device and points nowhere, natively. Main thread. */
 struct UnlistedMidiDriver : rack::midi::Driver {
 	~UnlistedMidiDriver() override;
+	/** Every Python port using this driver leaves its device and points nowhere, natively. A derived driver's
+	destructor calls it before it lets its devices go, so that nothing reaches it half destroyed. */
+	void detach() noexcept;
+};
+
+/** Synchronous MIDI delivery (RP-22F): a laboratory input's on_message runs inside Rack's InputDevice::onMessage,
+which iterates the device's `subscribed` set. While one runs on this thread (nesting counts), operations that
+change a subscriber set raise LaboratoryError (refuseDuringMidiDelivery), and the delivered port and every
+laboratory MIDI driver and device are kept alive, so that dropping one cannot free what Rack's loop uses. What
+was kept is released once no delivery is in progress: when the Python call that delivered returns
+(MidiDeliveryCall), at the next UI step, or at context close. Main thread; needs the GIL. */
+struct SynchronousMidiDelivery {
+	explicit SynchronousMidiDelivery(pybind11::object port);
+	~SynchronousMidiDelivery();
+	SynchronousMidiDelivery(const SynchronousMidiDelivery&) = delete;
+	SynchronousMidiDelivery& operator=(const SynchronousMidiDelivery&) = delete;
+};
+/** Throws LaboratoryError while a synchronous MIDI delivery is in progress on this thread. */
+void refuseDuringMidiDelivery(const char* what);
+/** Wraps a Python call into Rack's code that may deliver MIDI synchronously (push_message, send_message, ...):
+when it ends outside every delivery, what deliveries kept alive is released. Needs the GIL. */
+struct MidiDeliveryCall {
+	MidiDeliveryCall() = default;
+	~MidiDeliveryCall();
+	MidiDeliveryCall(const MidiDeliveryCall&) = delete;
+	MidiDeliveryCall& operator=(const MidiDeliveryCall&) = delete;
 };
 
 /** Whether `port` is a port Python made that is not being released: only such a port may be handed to Python. Main thread. */

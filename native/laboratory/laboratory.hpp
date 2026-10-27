@@ -12,6 +12,7 @@
 
 #include <array>
 #include <cstddef>
+#include <vector>
 
 #include "../module/module.hpp"
 #include "rackpy/runtime/python.hpp"
@@ -113,6 +114,10 @@ struct Module : module::Module {
 inline Module* laboratoryModule(module::Module& m) {
 	return m.laboratory ? static_cast<Module*>(&m) : nullptr;
 }
+
+/** The Python objects of every live laboratory MIDI driver and device (rackpy.laboratory.MidiDriver,
+MidiInputDevice, MidiOutputDevice), appended to `out`: a synchronous MIDI delivery keeps them alive. Needs the GIL. */
+void liveMidiObjects(std::vector<py::object>& out);
 
 /** _rackpy_host.laboratory: enablement, laboratory modules and the Bench. */
 void bind(py::module_ host);

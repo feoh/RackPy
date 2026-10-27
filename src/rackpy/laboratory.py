@@ -114,7 +114,8 @@ when Python sends); ``super().on_message(message)`` queues the message for
 ``try_pop``, as Rack's does. On Rack's threads Python never runs and Rack's
 queue takes the message. It is a ``rackpy.raw.midi.Input``, but not a
 ``rackpy.raw.midi.InputQueue``, which is final. Creating one needs
-:func:`enable` and Rack's live context.
+:func:`enable` and Rack's live context. As for :class:`MidiInput`, no MIDI
+subscription may change while ``on_message`` runs.
 """
 
 
@@ -129,6 +130,12 @@ class MidiInput(_midi.Input):
     Python never runs: the message is queued, as for an ordinary input. A
     native mark set by this constructor, after it checks :func:`enable`,
     gates the synchronous path. Needs Rack's live context.
+
+    Rack is iterating the device's subscribers while ``on_message`` runs, so
+    until the call that delivered the message returns, changing any MIDI
+    subscription (``set_device_id``, ``connect``, removing a device, making a
+    port, ...) raises :class:`~rackpy.errors.LaboratoryError`, and objects
+    dropped meanwhile are kept alive until then.
     """
 
     _rackpy_laboratory = True

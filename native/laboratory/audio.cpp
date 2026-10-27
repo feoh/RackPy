@@ -94,6 +94,12 @@ struct AudioDriver : bindings::UnlistedAudioDriver {
 	int nextId = 0;
 	int defaultId = -1;
 
+	~AudioDriver() override {
+		detach();  // the ports first: a device's __del__ may query them while the devices go
+		auto drop = std::move(devices);
+		devices.clear();
+	}
+
 	AudioDevice* find(int id) {
 		auto it = devices.find(id);
 		return it == devices.end() ? nullptr : it->second.device;
@@ -138,8 +144,8 @@ struct AudioDriver : bindings::UnlistedAudioDriver {
 		auto* d = find(id);
 		if (!d)
 			return nullptr;  // Rack's port keeps no device
-		d->subscribe(port);
-		return d;
+		d->subscribe(port);  // virtual: a Python override may remove the device, which may then be gone
+		return find(id) == d ? d : nullptr;  // IDs are never reused
 	}
 	void unsubscribe(int id, a::Port* port) override {
 		if (auto* d = find(id))

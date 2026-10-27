@@ -11,6 +11,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <algorithm>
 #include <map>
 #include <string>
 #include <utility>
@@ -31,8 +32,23 @@ namespace {
 
 namespace m = rack::midi;
 
+struct InputDevice;
+struct OutputDevice;
+struct MidiDriver;
+// Every live laboratory MIDI object, for liveMidiObjects (main thread).
+std::vector<InputDevice*> inputDevices;
+std::vector<OutputDevice*> outputDevices;
+std::vector<MidiDriver*> drivers;
+
+template <class T>
+void forget(std::vector<T*>& all, T* object) {
+	all.erase(std::remove(all.begin(), all.end(), object), all.end());
+}
+
 struct InputDevice : bindings::UnlistedMidiInputDevice {
 	std::string name;
+	InputDevice() { inputDevices.push_back(this); }
+	~InputDevice() override { forget(inputDevices, this); }
 	std::string getName() override { return name; }
 };
 
@@ -46,6 +62,8 @@ struct PyInputDevice : InputDevice, py::trampoline_self_life_support {
 
 struct OutputDevice : bindings::UnlistedMidiOutputDevice {
 	std::string name;
+	OutputDevice() { outputDevices.push_back(this); }
+	~OutputDevice() override { forget(outputDevices, this); }
 	std::string getName() override { return name; }
 };
 
@@ -112,6 +130,7 @@ struct Devices {
 		return id;
 	}
 	void remove(py::handle object) {
+		bindings::refuseDuringMidiDelivery("removing a laboratory MIDI device");
 		for (auto it = entries.begin(); it != entries.end(); ++it)
 			if (it->second.object.is(object)) {
 				it->second.device->disconnect();
@@ -127,6 +146,16 @@ struct MidiDriver : bindings::UnlistedMidiDriver {
 	std::string name;
 	Devices<InputDevice> inputs;
 	Devices<OutputDevice> outputs;
+
+	MidiDriver() { drivers.push_back(this); }
+	~MidiDriver() override {
+		forget(drivers, this);
+		detach();  // the ports first: a device's __del__ may query them while the devices go
+		auto dropInputs = std::move(inputs.entries);
+		auto dropOutputs = std::move(outputs.entries);
+		inputs.entries.clear();
+		outputs.entries.clear();
+	}
 
 	std::string getName() override { return name; }
 	std::vector<int> getInputDeviceIds() override { return inputs.ids(); }
@@ -235,8 +264,10 @@ MidiDriver& driver(MidiDriver& d) {
 	return d;
 }
 
+/** A Python port to subscribe or unsubscribe (`what`): refused during a synchronous delivery. */
 template <class Port>
 Port& port(py::handle value, const char* what) {
+	bindings::refuseDuringMidiDelivery(what);
 	auto* p = dynamic_cast<Port*>(&bindings::pythonMidiPort(value));
 	if (!p)
 		throw py::type_error(std::string(what) + " takes a RackPy MIDI port of the right direction");
@@ -274,6 +305,22 @@ int clearDriver(PyObject* self) {
 }
 
 }  // namespace
+
+template <class T>
+void appendLive(const std::vector<T*>& all, std::vector<py::object>& out) {
+	auto* info = py::detail::get_type_info(typeid(T));
+	if (!info)
+		return;
+	for (T* object : all)
+		if (py::handle h = py::detail::get_object_handle(object, info))  // none while it is being deallocated
+			out.push_back(py::reinterpret_borrow<py::object>(h));
+}
+
+void liveMidiObjects(std::vector<py::object>& out) {
+	appendLive(drivers, out);
+	appendLive(inputDevices, out);
+	appendLive(outputDevices, out);
+}
 
 #ifdef RACKPY_TEST_HOOKS
 m::Driver& midiDriverForTesting(py::handle driver) {
@@ -313,6 +360,7 @@ void bindMidi(py::module_ lab) {
 		}, "Rack's subscribers: the Python inputs subscribed to this device.")
 		.def("push_message", [](InputDevice& d, const m::Message& message) {
 			requireLiveContext("push_message");
+			bindings::MidiDeliveryCall call;
 			d.onMessage(message);
 		}, py::arg("message"),
 			"Rack's InputDevice::onMessage, as driver code calls it when a message arrives: each subscribed input's "

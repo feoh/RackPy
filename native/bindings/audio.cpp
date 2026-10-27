@@ -518,6 +518,10 @@ void UnlistedAudioDevice::disconnect() noexcept {
 }
 
 UnlistedAudioDriver::~UnlistedAudioDriver() {
+	detach();
+}
+
+void UnlistedAudioDriver::detach() noexcept {
 	for (auto* p : ports) {
 		if (p->driver != this)
 			continue;

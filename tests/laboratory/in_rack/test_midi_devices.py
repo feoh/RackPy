@@ -489,3 +489,183 @@ def test_rack_threads_never_run_laboratory_midi_python() -> None:
     assert listener.dropped == 0  # queued for the UI thread, as for any Python input
     got_message = queue.try_pop(10)  # Rack's InputQueue took it
     assert got_message is not None and got_message.get_note() == 2
+
+
+# Rack's InputDevice::onMessage iterates the device's subscribers while a laboratory on_message runs.
+
+REFUSED = "synchronous MIDI delivery"
+
+
+def through_each_route() -> list[tuple[str, Any]]:
+    """The two ways Rack delivers to a laboratory input on the main thread: a laboratory device's push_message,
+    and Rack's own Loopback driver when a Python port sends. Each route connects `connect`'s ports and sends."""
+    driver = MidiDriver()
+    device = MidiInputDevice("keys")
+    driver.add_input_device(device)
+    sender = midi.Output()
+    sender.set_driver_id(LOOPBACK)
+    sender.set_device_id(9)
+
+    def push(port: midi.Input) -> Any:
+        driver.connect(port)
+        return lambda: device.push_message(message(0x90, 60, 1))
+
+    def loopback(port: midi.Input) -> Any:
+        port.set_driver_id(LOOPBACK)
+        port.set_device_id(9)
+        return lambda: sender.send_message(message(0x90, 60, 1))
+
+    return [("push_message", push), ("loopback", loopback)]
+
+
+@needs_ports
+def test_subscriptions_cannot_change_during_a_synchronous_delivery() -> None:
+    lab_driver = MidiDriver()
+    spare_device = MidiInputDevice("spare")
+    lab_driver.add_input_device(spare_device)
+    out_device = MidiOutputDevice()
+    spare_output = midi.Output()
+    spare_input = midi.Input()
+    outcomes: dict[str, str] = {}
+
+    attempts: list[tuple[str, Any]] = [
+        ("set_device_id", lambda port: port.set_device_id(-1)),
+        ("set_driver_id", lambda port: port.set_driver_id(LOOPBACK)),
+        ("reset", lambda port: port.reset()),
+        ("from_json", lambda port: port.from_json({"driver": LOOPBACK})),
+        ("connect", lambda port: lab_driver.connect(spare_input)),
+        ("output connect", lambda port: out_device.connect(spare_output)),
+        ("lab subscribe", lambda port: lab_driver.subscribe_input(0, port)),
+        ("lab unsubscribe", lambda port: lab_driver.unsubscribe_input(0, port)),
+        ("rack subscribe", lambda port: midi.get_driver(LOOPBACK).subscribe_input(3, port)),  # type: ignore[union-attr]
+        ("device subscribe", lambda port: port.input_device.subscribe(spare_input)),
+        ("remove device", lambda port: lab_driver.remove_input_device(spare_device)),
+        ("new port", lambda port: midi.Input()),
+        ("new queue", lambda port: MidiInputQueue()),
+    ]
+
+    class Meddler(MidiInput):
+        def on_message(self, message: midi.Message) -> None:
+            for name, attempt in attempts:
+                try:
+                    attempt(self)
+                    outcomes[name] = "ran"
+                except LaboratoryError as e:
+                    outcomes[name] = str(e)
+
+    for route, connect in through_each_route():
+        outcomes.clear()
+        port = Meddler()
+        send = connect(port)
+        device = port.input_device
+        assert device is not None
+        send()
+        assert set(outcomes) == {name for name, _ in attempts}, route
+        for name, outcome in outcomes.items():
+            assert REFUSED in outcome, (route, name, outcome)
+        assert port.input_device is not None and port in port.input_device.subscribed  # nothing changed
+        assert lab_driver.get_input_device(0) is spare_device
+        port.set_device_id(-1)  # after the delivery, allowed again
+        assert port.input_device is None
+
+    class Raising(MidiInput):
+        def on_message(self, message: midi.Message) -> None:
+            self.set_device_id(-1)
+
+    for _, connect in through_each_route():
+        raising = Raising()
+        send = connect(raising)
+        with pytest.raises(LaboratoryError, match=REFUSED):
+            send()  # the error reaches the Python caller, through Rack's loop
+        assert raising.get_device_id() >= 0
+        raising.set_device_id(-1)
+
+
+def drop_during_a_delivery(route: str, connect: Any) -> None:
+    doomed_driver = MidiDriver("doomed")
+    doomed_driver.add_input_device(MidiInputDevice("doomed device"))
+    bystander = midi.Input()
+    doomed_driver.connect(bystander)
+    refs: dict[str, weakref.ref[Any]] = {"driver": weakref.ref(doomed_driver)}
+    held: dict[str, Any] = {"driver": doomed_driver}
+    del doomed_driver
+    inside: dict[str, bool] = {}
+    delivered: list[str] = []
+
+    class Dropping(MidiInput):
+        def on_message(self, message: midi.Message) -> None:
+            delivered.append("dropping")
+            held.clear()  # the last references to this port and to a driver: kept until the delivery ends
+            gc.collect()
+            inside["port"] = refs["port"]() is not None
+            inside["driver"] = refs["driver"]() is not None
+
+    class Other(MidiInput):
+        def on_message(self, message: midi.Message) -> None:
+            delivered.append("other")
+
+    dropping, other = Dropping(), Other()
+    send = connect(dropping)
+    connect(other)
+    refs["port"] = weakref.ref(dropping)
+    device = other.input_device  # a device view holds its port: not the dropping one's
+    assert device is not None and dropping in device.subscribed
+    held["port"] = dropping
+    del dropping
+    send()  # Rack's loop goes on to the other subscriber after the dropped one
+    assert inside == {"port": True, "driver": True}, route
+    assert sorted(delivered) == ["dropping", "other"], route
+    gc.collect()
+    assert refs["port"]() is None and refs["driver"]() is None, route  # released when the call returned
+    assert bystander.get_driver() is None and bystander.device is None, route  # the driver's teardown ran
+    assert [p for p in device.subscribed if p is not other] == [], route
+    other.set_device_id(-1)
+
+
+@needs_ports
+def test_objects_dropped_during_a_delivery_go_after_it() -> None:
+    for route, connect in through_each_route():
+        drop_during_a_delivery(route, connect)
+
+
+@needs_ports
+def test_a_delivery_that_raises_still_releases_what_it_kept() -> None:
+    held: dict[str, Any] = {}
+
+    class Failing(MidiInput):
+        def on_message(self, message: midi.Message) -> None:
+            held.clear()
+            raise ValueError("after dropping itself")
+
+    driver = MidiDriver()
+    device = MidiInputDevice()
+    driver.add_input_device(device)
+    port = Failing()
+    driver.connect(port)
+    ref = weakref.ref(port)
+    held["port"] = port
+    del port
+    with pytest.raises(ValueError, match="after dropping itself"):
+        device.push_message(message(0x90, 1, 1))
+    gc.collect()
+    assert ref() is None and device.subscribed == []
+
+
+@needs_ports
+def test_midi_driver_teardown_detaches_ports_before_its_devices_go() -> None:
+    port = midi.Input()
+    seen: list[tuple[list[int], int, bool]] = []
+
+    def query(_: object) -> None:  # during the driver's teardown: Rack's port asks its driver
+        seen.append((port.get_device_ids(), port.get_default_device_id(), port.device is None))
+
+    driver = MidiDriver()
+    device = MidiInputDevice("watched")
+    watcher = weakref.ref(device, query)
+    driver.add_input_device(device)
+    del device
+    driver.connect(port)
+    assert port.get_device_id() == 0
+    del driver
+    gc.collect()
+    assert watcher() is None and seen == [([], -1, True)]

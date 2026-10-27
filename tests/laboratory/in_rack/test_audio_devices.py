@@ -384,3 +384,41 @@ def test_rack_threads_never_run_laboratory_audio_python() -> None:
     }
     assert first.take_requests() == [("sample_rate", 48000.0), ("block_size", 256.0)]
     assert first.subscribed == []
+
+
+@needs_ports
+def test_a_subscribe_override_that_removes_its_device_leaves_the_port_pointing_nowhere() -> None:
+    gone: list[weakref.ref[AudioDevice]] = []
+    driver = AudioDriver()
+
+    class Vanishing(AudioDevice):
+        def subscribe(self, port: audio.Port) -> None:
+            super().subscribe(port)
+            gone.append(weakref.ref(self))
+            driver.remove_device(self)  # the driver held the only other reference
+
+    driver.add_device(Vanishing("vanishing"))
+    port = audio.Port()
+    driver.connect(port)  # Rack's setDeviceId: the driver's subscribe, then the device's
+    gc.collect()
+    assert [r() for r in gone] == [None]  # freed once the override returned
+    assert port.device is None and port.get_device_id() == -1 and port.get_sample_rate() == 0.0
+    assert driver.get_device_ids() == []
+
+
+@needs_ports
+def test_audio_driver_teardown_detaches_ports_before_its_devices_go() -> None:
+    port = audio.Port()
+    seen: list[tuple[list[int], str, bool]] = []
+
+    class Watched(AudioDevice):
+        def __del__(self) -> None:  # during the driver's teardown: Rack's port asks its driver
+            seen.append((port.get_device_ids(), port.get_driver_name(), port.device is None))
+
+    driver = AudioDriver("going")
+    driver.add_device(Watched("watched"))
+    driver.connect(port)
+    assert port.get_device_id() == 0
+    del driver
+    gc.collect()
+    assert seen == [([], "", True)]

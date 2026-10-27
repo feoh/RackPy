@@ -312,7 +312,21 @@ The rules that keep it contained:
   left a subscription inconsistent leaves no dangling port behind. When a
   device is removed or deleted, or a driver deleted, every Python port using
   it leaves it and points nowhere; a device view retained from a callback
-  then raises `StaleHandleError`.
+  then raises `StaleHandleError`. A driver detaches its ports before it
+  lets its devices go, so a device's `__del__` or weakref callback that
+  asks a port about its driver finds none.
+- **No subscription changes during a delivery.** A laboratory input's
+  `on_message` runs inside Rack's `InputDevice::onMessage`, which is
+  iterating the device's subscribers. Until the Python call that delivered
+  the message (`push_message`, `send_message` through Rack's Loopback
+  driver, ...) returns, anything that would change a subscriber set raises
+  `LaboratoryError`: a port's `set_device_id`, `set_driver_id`, `reset` and
+  `from_json`, making a MIDI port, `connect`, the drivers' and devices'
+  `subscribe_*`/`unsubscribe_*`, and removing a device. Objects dropped
+  meanwhile (the delivered port itself, a laboratory driver or device) are
+  kept alive and go when that call returns; Rack's own main-thread
+  deliveries (its computer keyboard driver) release them at the next UI
+  step.
 
 ## A laboratory MIDI generator
 

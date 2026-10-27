@@ -1,9 +1,20 @@
 # RP-22F validation (Linux x86_64)
 
-Date 2026-10-26/27, branch `rp22f-driver-lab`, based on `origin/main`
-`4ef82b2` (RP-22D, its review fix, the trampoline re-entrancy fix and its
-integration evidence). GCC 16.2.1, bundled CPython 3.14, pinned Rack
-Free/SDK 2.6.6; pinned inputs as in [rp-27a-validation.md](rp-27a-validation.md).
+Date 2026-10-26/27, branch `rp22f-driver-lab`. GCC 16.2.1, bundled CPython
+3.14, pinned Rack Free/SDK 2.6.6; pinned inputs as in
+[rp-27a-validation.md](rp-27a-validation.md).
+
+**Commits.** RP-22F was written and first validated on `4ef82b2` (commits
+`c500e86`/`749f00e`, history below). The supervisor then rebased it onto
+`465b22d` (`getDeviceDetail` recorded as declared but never defined) and
+`9d954d1` (RP-28F: its 21 UI records implemented as calls on Rack's
+instances); the RP-22F commit became `ebb9438`, a conflict-resolved replay
+whose generated files, generator and `callbacks.md` were resolved by the
+supervisor, followed by `fa0f391` (docs only). An independent review of
+`ebb9438` requested changes; the review fixes are the commit
+"RP-22F review: delivery guard, subscription and teardown order" on top of
+`fa0f391`. **Every check below was rerun on that final tree** (the section
+"Commands and outcomes"); the earlier runs are kept as history.
 This worktree's own `build/` only; every host run is serialized with
 `flock /tmp/rackpy-host-tests.lock` and keeps its log under
 `build/validation/`. No audio or MIDI device is opened. No push.
@@ -123,40 +134,108 @@ Supervisor-approved test-hooks additions (compiled only with
 `laboratory_midi_on_rack_thread`, `midi_input_on_rack_thread` and
 `port_targets`.
 
-## Found and fixed while validating
+## Review fixes (on `fa0f391`)
 
-- **Messages were not owned copies.** The first targeted live run failed
-  `test_a_laboratory_input_receives_messages_synchronously` (62 passed,
-  1 failed, 1 skipped): Rack's `InputDevice::onMessage` passes the caller's
-  own message on when its frame is set, and pybind11 then handed Python the
-  caller's registered `Message` object. Laboratory inputs, input queues and
-  (also through `OutputDeviceView.send_message`) the laboratory output
-  device now pass an explicit copy; the tests check identity.
-- A laboratory input's mark is read on driver threads, so it is atomic, and
-  its released flag is read only where Python may run.
-- The shutdown scenario reused the name `stop` (its worker's `Event`) for the
-  wrapped bootstrap hook; strict typing caught it before any run.
-- The first docs build had three warnings: two `(label)=` page links (MyST
-  page links need heading anchors, as RP-22C found) and a `:meth:` role to an
-  undocumented native method; fixed, then 0 warnings.
+The independent review of `ebb9438` requested changes; all four are fixed.
 
-## Commands and outcomes
+- **P1, synchronous delivery inside Rack's loop.** A laboratory input's
+  `on_message` runs inside Rack's `InputDevice::onMessage`
+  (`src/midi.cpp:52-53`, `for (Input* input : subscribed)`), so an override
+  that changed a subscriber set, or dropped its own port or a driver, could
+  invalidate Rack's iterator or free what it uses.
+  - `bindings::SynchronousMidiDelivery` (RAII, thread-local depth, nesting
+    counts) wraps every synchronous Python `on_message` of a laboratory
+    `MidiInput` or `MidiInputQueue`, including the bound method's release.
+  - While it is active, everything that changes a subscriber set raises
+    `LaboratoryError` naming the rule: `Port.set_device_id`,
+    `set_driver_id`, `from_json`, `Input.reset`/`Output.reset`, making a
+    MIDI port (`Input()`, `InputQueue()`, `Output()`,
+    `laboratory.MidiInputQueue()`; Rack's constructor subscribes it),
+    `connect` (laboratory driver and output device), every
+    `subscribe_*`/`unsubscribe_*` and device `subscribe`/`unsubscribe` (Rack's
+    drivers' views and the laboratory's), and `remove_*_device` (laboratory
+    and `PythonDriver`).
+  - Deferral instead of refusal where nothing can be refused (dropping a
+    reference): at the outermost entry the guard keeps every live
+    laboratory MIDI driver and device alive, and each entry keeps its
+    delivered port alive (`runtime::PyRef`s). A driver's destruction would
+    unsubscribe its ports, possibly Rack's current element, and a device's
+    would clear the iterated set, so neither may happen mid-loop; deleting
+    another, non-current port only erases a non-current set element, which
+    leaves Rack's iterator valid.
+  - Release: the guard's own end is still inside Rack's loop, so the kept
+    objects go only when no delivery is in progress, at the end of the
+    Python call that started Rack's loop (`MidiDeliveryCall` in
+    `push_message` of both input devices, `Output.send_message`,
+    `OutputDevice.send_message`, `InputDevice.on_message`). That is the
+    first point known to be after Rack's loop, so objects dropped in
+    `on_message` are gone when the caller gets control back. Rack's own
+    main-thread deliveries (its computer keyboard driver) have no such
+    call, so a UI-step hook releases what they kept; context closing and
+    finalization release the rest. The release loop tolerates destructors
+    that deliver again.
+- **P2, a `subscribe` override removing its device.** The native
+  `AudioDriver::subscribe` returns `find(id) == d ? d : nullptr` after the
+  possibly-Python `d->subscribe(port)` (IDs are never reused).
+- **P2, teardown order.** `AudioDriver` and `MidiDriver` now have
+  destructors that first detach their ports (`Unlisted*Driver::detach()`,
+  also called by the base destructors) and then release their devices with
+  `auto drop = std::move(devices)`, so a device's `__del__` or weakref
+  callback that queries a port finds no driver instead of a half-destroyed
+  map.
+- **P1, this record.** Rewritten for the committed tree: counts, commits and
+  gates below.
+
+New in-Rack tests (live context; they need MIDI or audio ports, so they skip
+in the production startup run, which `test_laboratory.py` requires):
+
+- `test_midi_devices.py::test_subscriptions_cannot_change_during_a_synchronous_delivery`:
+  through a laboratory `push_message` and through Rack's Loopback driver
+  (`Output.send_message`), 13 subscription-changing operations inside
+  `on_message` each raise `LaboratoryError`; nothing changed afterwards and
+  the same operations work once the call returned; an uncaught refusal
+  reaches the Python caller through Rack's loop.
+- `test_objects_dropped_during_a_delivery_go_after_it`: through both routes,
+  `on_message` drops the last references to its own port and to a
+  laboratory driver used by another port; both are alive for the rest of the
+  delivery (checked after `gc.collect()` inside it), Rack's loop still
+  reaches the second subscriber, and after the call returns both are
+  collected and the other driver's port points nowhere.
+- `test_a_delivery_that_raises_still_releases_what_it_kept`.
+- `test_midi_driver_teardown_detaches_ports_before_its_devices_go`
+  (weakref callback calling `get_device_ids`/`get_default_device_id`).
+- `test_audio_devices.py::test_a_subscribe_override_that_removes_its_device_leaves_the_port_pointing_nowhere`
+  and `test_audio_driver_teardown_detaches_ports_before_its_devices_go`
+  (`__del__` calling `get_device_ids`/`get_driver_name`).
+
+The manifest cites them on the 22 affected records (the two `onMessage`
+records also describe the delivery rule); generated files regenerated.
+
+**Not run: AddressSanitizer.** The plugin is not built with sanitizers
+(only standalone native benchmarks are), and Rack loads the production
+`plugin.so`; no ASan reproduction of the iteration hazard was run. The new
+tests show refusal and deferral behaviour in actual Rack, not memory-safety
+under a sanitizer.
+
+## Commands and outcomes (final tree)
+
+Run on the review-fix tree (the commit's content, apart from the full-suite
+section of this file), after `uv sync --frozen`:
 
 | Command | Result |
 | --- | --- |
-| `uv sync --frozen` | Pass, first command in this worktree |
-| `bin/rackpy-dev build --werror --test-hooks` | Pass, CTest 6/6, on the final sources (`build-final.log`) |
-| `uv run pytest -m unit` | Pass: 100 passed, 201 deselected |
-| `uv run pytest -m "native and not host"` | Pass: 32 passed, 269 deselected, 254.73 s (`native-tests.log`) |
-| `prek run --all-files` | Pass, all hooks (first run: one ruff-format change in `tests/coverage/test_callback_paths.py`, fixed) |
-| `bin/rackpy-dev typecheck` | Pass, strict mypy |
+| `bin/rackpy-dev build --werror --test-hooks` | Pass, CTest 6/6 (`review-build.log`) |
+| `uv run pytest -m unit` | Pass: 101 passed, 202 deselected |
+| `uv run pytest -m "native and not host"` | Pass: 33 passed, 270 deselected, 211.06 s (`review-native.log`) |
+| `prek run --all-files` | Pass, all hooks |
+| `bin/rackpy-dev typecheck` | Pass: strict mypy, 266 source files plus the CLI checks |
 | `bin/planning-check` | Pass: 45 tasks, 114 dependencies, acyclic |
-| `uv run bin/generate_bindings.py check` | Pass, after `generate` (generated files never hand-edited) |
-| `uv run bin/check_coverage.py check --without-built-package` | Before (base manifest): absent 2, excluded_internal 111, implemented 2890, planned 54, unreviewed 1. After: absent 2, excluded_internal 111, implemented 2923, planned 21, unreviewed 1. Zero verified before and after; the denominator is unchanged. The 21 planned are RP-28F's UI virtuals |
-| `uv run sphinx-build -W --keep-going -n -b html docs build/docs/html` (serial) | Pass, 0 warnings (`docs-build.log`) |
-| `uv run pytest -m "docs and not host"` | Pass: 15 passed, 286 deselected, 151.63 s (`docs-tests.log`) |
-| `flock … uv run pytest -m "host and not dist" tests/laboratory/test_laboratory.py -ra --basetemp=build/validation/lab1` | **Failed** (the copy bug above): 1 passed, 1 failed, 445.24 s (`lab1.log`) |
-| `flock … uv run pytest -m "host and not dist" tests/laboratory/test_laboratory.py tests/laboratory/test_races.py -k "laboratory_in or live_rack or shutdown" -ra --basetemp=build/validation/lab2` | Pass: 6 passed, 4 deselected, 451.32 s (`lab2.log`). In Rack: production 43 passed, 18 skipped (exactly the live-context tests); live context 63 passed, 1 skipped (the no-context test). All four shutdown variants passed; both live-context ones logged the disconnect marker |
+| `uv run bin/generate_bindings.py check` | Pass, after `generate` |
+| `uv run bin/check_coverage.py check --without-built-package` | Before RP-22F (`9d954d1`): absent 2, excluded_internal 111, implemented 2912, planned 33. After (`ebb9438`, `fa0f391` and this tree): absent 2, excluded_internal 111, implemented 2945, planned 0, unreviewed 0. Zero verified; the 3058-record denominator is unchanged |
+| `uv run sphinx-build -W --keep-going -n -b html docs build/docs/html` (serial) | Pass, 0 warnings (`review-docs-build.log`) |
+| `uv run pytest -m "docs and not host"` | Pass: 15 passed, 288 deselected, 132.55 s |
+| `flock … uv run pytest -m "host and not dist" tests/laboratory/test_laboratory.py -ra --basetemp=build/validation/review-lab1` | **Failed**, a test bug: 1 passed, 1 failed. `test_objects_dropped_during_a_delivery_go_after_it` kept a device view of the dropping port, and a view holds its port, so the port outlived the call. The test now takes the view from the other port. In Rack: production 43 passed, 24 skipped; live context 68 passed, 1 skipped, 1 failed |
+| `flock … uv run pytest -m "host and not dist" tests/laboratory/test_laboratory.py tests/laboratory/test_races.py -ra --basetemp=build/validation/review-lab2` | Pass: 10 passed, 446.61 s. In Rack: production 43 passed, 24 skipped (exactly the tests needing the live context); live context 69 passed, 1 skipped (the no-context test). Shutdown variants: retaining ones refuse to finalize as designed, releasing ones `Py_FinalizeEx returned 0`, both live-context ones log `LAB SHUTDOWN laboratory drivers disconnected without Python` |
 
 ## RP-22 closing validation: the full host suite
 
@@ -164,21 +243,21 @@ RP-22F is RP-22's last open child, so the supervisor moved RP-22's closing
 full-suite run here (the RP-22D full run had failed on a shutdown-scenario
 setup error, corrected and re-run there as a targeted run only).
 
-`CMAKE_BUILD_PARALLEL_LEVEL=8 flock /tmp/rackpy-host-tests.lock timeout 5400 uv run pytest -m "host and not dist" -ra --basetemp=build/validation/host-full -o tmp_path_retention_policy=all`,
-on commit `c500e86` (the tree of this commit, apart from this section of
-this file): **123 passed, 178 deselected, 0 failed, 0 skipped, 758.71 s
-(12m39s), exit 0** (`host-full.log`, `host-full.exit`). The `-ra` summary
-reports nothing (no skip, xfail or xpass). The outer 5400-second timeout was
-not reached.
+`CMAKE_BUILD_PARALLEL_LEVEL=8 flock /tmp/rackpy-host-tests.lock timeout 5400 uv run pytest -m "host and not dist" -ra --basetemp=build/validation/review-host-full -o tmp_path_retention_policy=all`,
+on commit `5cce50c` (the review-fix commit before this section was added;
+this file is the only difference): **123 passed, 180 deselected, 0 failed,
+0 skipped, 744.17 s (12m24s), exit 0** (`review-host-full.log`,
+`review-host-full.exit`). The `-ra` summary reports nothing (no skip,
+xfail or xpass), no Rack log records a fatal signal, and the outer
+5400-second timeout was not reached.
 
-- In Rack, the laboratory suites gave the same counts as the targeted run:
-  production 43 passed, 18 skipped (exactly the live-context tests); live
-  context 63 passed, 1 skipped (the no-context test); each
-  `in_rack_result.json` reports exit 0.
+- In Rack, the laboratory suites: production 43 passed, 24 skipped
+  (exactly the tests needing the live context); live context 69 passed,
+  1 skipped (the no-context test); each `in_rack_result.json` reports exit 0.
 - The four shutdown variants passed: the two retaining variants log the
-  designed refusal to finalize (`RackPy did not finalize the interpreter: 3
-  Python reference(s) are still held by native objects`), the two releasing
-  variants `Py_FinalizeEx returned 0`, and both live-context variants log
+  designed refusal to finalize (`RackPy did not finalize the interpreter`),
+  the two releasing variants `Py_FinalizeEx returned 0`, and both
+  live-context variants log
   `LAB SHUTDOWN laboratory drivers disconnected without Python`.
 - The intentional deadlock probe
   `tests/integration/test_lifecycle_probe.py::test_unsafe_worker_deadlocks_and_is_caught_by_the_watchdog`
@@ -186,14 +265,41 @@ not reached.
   (`returncode is None`), after `onReset` took the engine lock without the
   GIL. That kill is the test's expected outcome, not a failure; no other
   watchdog fired.
-- The serial docs build was repeated on the committed state: 0 warnings
-  (`docs-build-final.log`).
+
+## History: the first validation, on `4ef82b2`
+
+Before the rebase and the review, on `c500e86`: build, unit (100 passed),
+native (32 passed), prek, typecheck, planning-check, generate check,
+`check_coverage` (implemented 2923, planned 21, unreviewed 1: RP-28F's 21
+were still planned then), sphinx (0 warnings), docs (15 passed); a first
+targeted laboratory run failed on messages that were not owned copies
+(fixed, below); the second passed (6 passed); the full host suite passed
+(123 passed, 0 skipped, 758.71 s). That tree is not the committed one, so
+none of it is claimed for it.
+
+Found and fixed then:
+
+- **Messages were not owned copies.** Rack's `InputDevice::onMessage`
+  passes the caller's own message on when its frame is set, and pybind11
+  then handed Python the caller's registered `Message` object. Laboratory
+  inputs, input queues and the laboratory output device pass an explicit
+  copy; the tests check identity.
+- A laboratory input's mark is read on driver threads, so it is atomic, and
+  its released flag is read only where Python may run.
+- The shutdown scenario reused the name `stop` for the wrapped bootstrap
+  hook; strict typing caught it before any run.
+- Three docs warnings: two `(label)=` page links and a `:meth:` role to an
+  undocumented native method.
 
 ## Remaining gates
 
 Linux x86_64 only. macOS, Windows, Rack Pro, real audio/MIDI hardware and
 actual driver-thread scheduling are not exercised; the Rack-thread probes
-establish the refusal guard, not real-time behaviour. A laboratory path
-proves only the documented offline semantics. RP-28F's 21 UI virtuals
-remain full-release blockers; no record is `verified`. No distribution
-build, release or push.
+establish the refusal guard, not real-time behaviour, and no sanitizer run
+covers the delivery guard. A laboratory path proves only the documented
+offline semantics. No record is `verified`; with RP-28F's records
+implemented, no record is `planned` or `unreviewed`, which is not a
+full-coverage claim (`verified` needs review). A laboratory driver or device
+whose last Python reference is dropped on a Python-started thread is
+destroyed there, off the main thread (pre-existing, not changed here). No
+distribution build, release or push.
