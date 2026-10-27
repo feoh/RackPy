@@ -259,3 +259,46 @@ def test_only_macros_and_declared_but_undefined_functions_map_to_nothing(mini: M
     assert "no-runtime-meaning" not in codes(bm.validate(mini.inputs(), manifest, {"objects": {}}))
     record["python"]["raw"] = "rackpy.raw.engine.Port.get_voltage"
     assert "no-runtime-meaning" in codes(bm.validate(mini.inputs(), manifest, {"objects": {}}))
+
+
+def test_an_open_owner_review_item_blocks_a_release_and_is_reported(mini: Mini) -> None:
+    manifest = mini.seeded()
+    objects: dict[str, Any] = {}
+    for record in manifest["entries"]:
+        if record["status"] == "excluded_internal":
+            continue
+        raw = "rackpy.raw.x" + str(len(objects))
+        bind(record, mini, raw=raw, gil_release=True)
+        record.update(status="verified", reviewer="test")
+        objects[raw] = {}
+    record = by_id(manifest)[VOLTAGE]
+    record["notes"] = "Mapped for channels 0 to 15. Open owner review item: the channel bound of 16. Linux only."
+    assert bm.validate(mini.inputs(), manifest, {"objects": objects}) == []  # check passes: partial coverage
+    problems = bm.release_problems(mini.inputs(), manifest, "lin-x64", {"objects": objects})
+    assert [(p.code, p.id) for p in problems] == [("owner-review", VOLTAGE)]  # even though it is verified
+    assert "the channel bound of 16" in problems[0].message
+    rep = bm.report(mini.inputs(), manifest)
+    assert rep["open_owner_reviews"] == {VOLTAGE: ["the channel bound of 16"]}
+    text = bm.markdown_report(rep)
+    assert "**Open owner review items** (each blocks a release until the owner decides): 1" in text
+    assert f"- `{VOLTAGE}`: the channel bound of 16" in text
+    record["notes"] = "Owner-approved 2026-10-27: the channel bound of 16."
+    assert bm.release_problems(mini.inputs(), manifest, "lin-x64", {"objects": objects}) == []
+    assert bm.report(mini.inputs(), manifest)["open_owner_reviews"] == {}
+
+
+@pytest.mark.parametrize(
+    "notes",
+    [
+        "RackPy's bounded contract, an owner review item.",  # the pre-RP-31K wording: unreadable by the gate
+        "open owner review item: lower case",
+        "Owner Review Item: the bound",
+        "Open owner review item:",  # names no item
+        "Open owner review item: .",
+    ],
+)
+def test_an_owner_review_item_the_gate_cannot_read_fails_the_check(mini: Mini, notes: str) -> None:
+    manifest = mini.seeded()
+    by_id(manifest)[VOLTAGE]["notes"] = notes
+    assert "owner-review-marker" in codes(bm.validate(mini.inputs(), manifest, {"objects": {}}))
+    assert bm.open_owner_reviews(by_id(manifest)[VOLTAGE]) == []

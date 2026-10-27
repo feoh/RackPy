@@ -57,6 +57,27 @@ rules behind this are the [coverage contract](coverage.md); the design is
 A full-coverage release needs every record `verified` or `excluded_internal`
 on each advertised platform. Nothing promotes a record automatically.
 
+## Open owner review items
+
+Some mappings need an owner decision first: a template contract for an
+unbounded parameter space ([policy 10](coverage.md#completeness-policy)), or
+a scope question. While one is open, every record it affects says so in its
+`notes`, in exactly these words, followed by the item:
+
+```text
+Open owner review item: the poly* bound of 1 to 32 coefficients.
+```
+
+The marker is case-sensitive, and the item runs to the next `.` or `;`. Such
+a record can still be `implemented`, and `bin/check_coverage.py check`
+passes, but it is a release blocker: `bin/check_coverage.py release` reports
+it as `owner-review` even when it is `verified`, and the generated
+[coverage report](reference/coverage.md) lists it under *Needs attention*.
+Any other mention of an "owner review item" in `notes` (another spelling, or
+the marker without an item) fails the check, so an open item cannot sit
+where the gate does not read it. When the owner decides, replace the marker
+with the decision and its date, for example `owner-approved 2026-10-27`.
+
 ## The workflow
 
 1. Claim the family task. Read its records:

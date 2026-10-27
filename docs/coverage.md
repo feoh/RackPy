@@ -167,7 +167,20 @@ in this file.
     - If a template's parameter space cannot be represented faithfully (for
       example arbitrary `T` and size in `RingBuffer<T, S>`), propose a precise
       generic contract to the owner. The release stays blocked until the owner
-      decides ([release bar](#release-bar)).
+      decides ([release bar](#release-bar)). While it is open, each affected
+      record's notes say `Open owner review item:` and name it, and
+      `bin/check_coverage.py release` counts it as a blocker
+      ([Adding bindings](contributing-bindings.md#open-owner-review-items)).
+    - Bounded contracts the owner accepted: the ring buffers, `MinBlepGenerator`,
+      `Decimator`, `Upsampler` and `SampleRateConverter` (2026-10-26), and
+      `IIRFilter`, `MidiGenerator`, `MidiParser` and `polyDirect`/`polyEstrin`/
+      `polyHorner` (2026-10-27), with the instantiation sets in the
+      [DSP reference](reference/dsp.md#templates). The integer templates of `math.hpp`
+      take `int64_t` and `uint64_t`, and `sgn` also `float` and `double`
+      ([values](reference/values.md#scalar-functions)). `SharedLock<TMutex>` takes
+      any object with `lock_shared()` and `unlock_shared()`, and `WeakPtr<T>`
+      any widget, `Widget` being Rack's only `WeakBase`
+      ([services](reference/services.md#sharedlock-over-any-tmutex)) (2026-10-27).
 11. **Virtual methods and callbacks.** Every virtual method is an entry with a
     callback strategy from RP-06: a UI-safe Python override, a native production
     path plus a laboratory Python path, or *unresolved*. An unresolved strategy
@@ -186,6 +199,12 @@ in this file.
     constructors and destructors) and `PlugWidget` (only `CableWidget`'s
     constructor sets a plug's cable and type). Their host views are final
     Python classes.
+
+    The same reasoning maps `WeakHandle(void*)` (owner decision, 2026-10-27):
+    only Rack's `WeakPtr<T>::set()` makes a usable handle, for the object it
+    points at, so `WeakPtr(widget)` reaches the constructor, and
+    `rackpy.raw.WeakHandle` is a view of Rack's handles that Python cannot
+    construct ([services](reference/services.md#the-widget-contract)).
 12. **Platforms.** A conditional declaration has per-platform availability, for
     example `string::UTF16toUTF8` on Windows only, or the macOS value of
     `RACK_MOD_CTRL`. Absent on a platform means *not available there*, recorded

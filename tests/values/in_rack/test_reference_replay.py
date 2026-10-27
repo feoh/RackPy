@@ -15,6 +15,7 @@ from typing import Any
 
 import rackpy.raw.math as m
 from rackpy.raw import color
+from rackpy.raw import random as rr
 from rackpy.raw.math import Rect, Vec
 from rackpy.raw.nanovg import NVGcolor
 from rackpy.types import ValueQuantity
@@ -25,11 +26,22 @@ def f32(bits: str) -> float:
     return value
 
 
+class F64(float):
+    """A C++ double from the reference, compared as 64 bits rather than as a float's 32."""
+
+
+def f64(bits: str) -> F64:
+    value: float = struct.unpack("<d", struct.pack("<Q", int(bits, 16)))[0]
+    return F64(value)
+
+
 def decode(value: Any) -> Any:
     """The C++ reference's JSON encoding of a value, as the Python value the bindings take."""
     if isinstance(value, dict):
         if "f" in value:
             return f32(value["f"])
+        if "d" in value:
+            return f64(value["d"])
         if "vec" in value:
             return Vec(*map(decode, value["vec"]))
         if "rect" in value:
@@ -54,7 +66,8 @@ def same_float(actual: float, expected: float, signed_zeros: bool) -> bool:
         return math.isnan(actual)
     if expected == 0.0 and not signed_zeros:
         return actual == 0.0
-    return struct.pack("<f", actual) == struct.pack("<f", expected)
+    width = "<d" if isinstance(expected, F64) else "<f"
+    return struct.pack(width, actual) == struct.pack(width, expected)
 
 
 def same(actual: Any, expected: Any, signed_zeros: bool = False) -> bool:
@@ -122,6 +135,17 @@ def q_from_max(action: Callable[[ValueQuantity], object]) -> Callable[..., float
     return run
 
 
+def random_get(s0: int, s1: int, type: str) -> list[Any]:
+    """Eight draws of get(type) from Rack's own generator, seeded as the reference seeds it; its state is restored."""
+    generator = rr.local()
+    saved = generator.state
+    try:
+        generator.seed(s0, s1)
+        return [rr.get(type) for _ in range(8)]
+    finally:
+        generator.state = saved
+
+
 CALLS: dict[str, Callable[..., Any]] = {
     "clamp_f": m.clamp,
     "clamp_safe_f": m.clamp_safe,
@@ -145,6 +169,9 @@ CALLS: dict[str, Callable[..., Any]] = {
     "is_odd": m.is_odd,
     "is_pow2": m.is_pow2,
     "sgn_i": m.sgn,
+    "sgn_d": lambda x: m.sgn(x, type="double"),
+    "sgn_f_of_d": m.sgn,
+    "random.get": random_get,
     "vec.neg": Vec.neg,
     "vec.arg": Vec.arg,
     "vec.norm": Vec.norm,

@@ -159,6 +159,124 @@ def test_shared_mutex() -> None:
     m.unlock()
 
 
+class ReadLock:
+    """A TMutex of Python's own: Rack's SharedLock<TMutex> needs only lock_shared() and unlock_shared()."""
+
+    def __init__(self) -> None:
+        self.calls: list[str] = []
+        self.fail: set[str] = set()
+
+    def lock_shared(self) -> None:
+        self.calls.append("lock")
+        if "lock" in self.fail:
+            raise RuntimeError("lock_shared failed")
+
+    def unlock_shared(self) -> None:
+        self.calls.append("unlock")
+        if "unlock" in self.fail:
+            raise RuntimeError("unlock_shared failed")
+
+
+def test_shared_lock_takes_any_object_with_lock_shared() -> None:
+    m = ReadLock()
+    with raw.SharedLock(m) as lock:
+        assert held(lock) and lock.m is m and m.calls == ["lock"]
+    assert not held(lock) and m.calls == ["lock", "unlock"]
+    lock.release()  # once, as Rack's destructor runs once
+    assert m.calls == ["lock", "unlock"]
+    for wrong in (object(), 3, type("OnlyLock", (), {"lock_shared": lambda self: None})()):
+        with pytest.raises(TypeError, match="lock_shared"):
+            raw.SharedLock(wrong)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="lock_shared"):
+        raw.SharedLock(type("NotCallable", (), {"lock_shared": 1, "unlock_shared": 2})())
+
+
+def test_shared_lock_propagates_errors_from_lock_shared_and_unlock_shared() -> None:
+    m = ReadLock()
+    m.fail = {"lock"}
+    with pytest.raises(RuntimeError, match="lock_shared failed"):
+        raw.SharedLock(m)  # no lock is made
+    m.fail = {"unlock"}
+    lock = raw.SharedLock(m)
+    with pytest.raises(RuntimeError, match="unlock_shared failed"):
+        lock.release()
+    assert held(lock)  # unlock_shared failed, so m still counts as held
+    m.fail = set()
+    lock.release()
+    assert not held(lock) and m.calls == ["lock", "lock", "unlock", "unlock"]
+    m.fail = {"unlock"}
+    with pytest.raises(RuntimeError, match="unlock_shared failed"), raw.SharedLock(m) as failing:
+        pass
+    m.fail = set()
+    failing.release()
+
+
+def test_shared_lock_dropped_while_held(monkeypatch: pytest.MonkeyPatch) -> None:
+    unraisable: list[str] = []
+    monkeypatch.setattr("sys.unraisablehook", lambda u: unraisable.append(f"{u.exc_type.__name__}: {u.exc_value}"))
+    m = ReadLock()
+    lock = raw.SharedLock(m)
+    del lock  # on the thread that locked it: unlock_shared, as C++ RAII would
+    assert m.calls == ["lock", "unlock"] and not unraisable
+    m.fail = {"unlock"}
+    lock = raw.SharedLock(m)
+    del lock
+    assert unraisable == ["RuntimeError: unlock_shared failed"]
+    m.fail, m.calls = set(), []
+    box = [raw.SharedLock(m)]
+    dropper = threading.Thread(target=box.clear)  # dropped on a thread that did not lock it: no Python runs
+    dropper.start()
+    dropper.join()
+    assert m.calls == ["lock"] and len(unraisable) == 2 and "did not lock it" in unraisable[1]
+
+
+def test_shared_lock_on_a_python_subclass_of_shared_mutex() -> None:
+    class Counting(raw.SharedMutex):
+        def __init__(self) -> None:
+            super().__init__()
+            self.reads = 0
+
+        def lock_shared(self) -> None:
+            self.reads += 1
+            super().lock_shared()
+
+    c = Counting()
+    with raw.SharedLock(c) as lock:
+        writer: list[bool] = []
+        probe = threading.Thread(target=lambda: writer.append(c.try_lock()))
+        probe.start()
+        probe.join()
+        assert c.reads == 1 and held(lock) and writer == [False]  # Rack's rwlock, held for reading
+        with pytest.raises(ValueError, match="holds the mutex already"):
+            raw.SharedLock(c)  # RackPy's misuse refusal still applies
+    assert not held(lock) and c.try_lock()
+    c.unlock()
+
+
+def test_shared_lock_waits_on_a_python_lock_without_holding_a_native_one() -> None:
+    gate = threading.Lock()
+    gate.acquire()
+
+    class Gated:
+        def lock_shared(self) -> None:
+            gate.acquire()  # blocks; Python's lock lets the GIL go while it waits
+
+        def unlock_shared(self) -> None:
+            gate.release()
+
+    def opener() -> None:
+        time.sleep(0.05)  # needs the GIL to run
+        gate.release()
+
+    t = threading.Thread(target=opener)
+    t.start()
+    lock = raw.SharedLock(Gated())  # waits for opener
+    t.join(2)
+    assert not t.is_alive() and held(lock)
+    lock.release()
+    assert not gate.locked()
+
+
 def test_waiting_releases_the_gil() -> None:
     m = raw.SharedMutex()
     held = threading.Event()
@@ -196,3 +314,32 @@ def test_weak_pointers() -> None:
     assert scene_ptr.get() == host.scene and host.scene.get_weak_count() >= 1
     scene_ptr.set(None)
     assert scene_ptr.get() is None
+
+
+def weak_handle(widget: w.Widget) -> raw.WeakHandle | None:
+    handle: raw.WeakHandle | None = widget.weak_handle  # a call, so type checkers do not narrow it across changes
+    return handle
+
+
+def test_weak_handle_is_made_by_weak_ptr() -> None:
+    # Rack's WeakPtr<T>::set runs WeakHandle(void*) for an object without a handle (weakptr.hpp:80-83) and deletes
+    # the handle with its last WeakPtr (weakptr.hpp:66-77); that is how RackPy reaches the constructor.
+    widget = w.Widget()
+    p = raw.WeakPtr()
+    assert weak_handle(widget) is None
+    p.set(widget)  # WeakHandle(widget): ptr is the widget, count 1
+    handle = weak_handle(widget)
+    assert handle is not None and handle.ptr is widget and handle.count == 2  # p and the view
+    assert p.weak_handle is not None and p.weak_handle.ptr is widget
+    del handle
+    assert widget.get_weak_count() == 1
+    p.set(None)  # the last WeakPtr: Rack deletes the handle and clears the widget's
+    assert weak_handle(widget) is None and widget.get_weak_count() == 0
+    again = raw.WeakPtr(widget)  # a new handle for the same widget
+    assert again.get() is widget and widget.get_weak_count() == 1
+    with pytest.raises(TypeError):
+        raw.WeakHandle(widget)  # type: ignore[call-arg]
+    with pytest.raises(RuntimeError, match="Widget"):
+        raw.WeakPtr(object())  # WeakPtr<T> needs a WeakBase, and Widget is Rack's only one
+    widget.close()
+    assert again.get() is None

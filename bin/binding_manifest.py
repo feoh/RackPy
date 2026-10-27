@@ -68,6 +68,13 @@ MACRO_KINDS = frozenset({"function_macro", "object_macro"})
 # A function Rack declares in its headers but never defines (libRack exports no symbol for it), so no plugin
 # can call it: mapped to nothing, with the evidence (completeness policy 14; tests/native/test_sdk_symbols.py).
 DECLARED_UNDEFINED = "Declared but never defined"
+# A record whose notes name an open owner review item blocks a full-coverage release until the owner decides
+# (docs/coverage.md, policy 10 and the release bar): its notes say "Open owner review item: <the item>." in exactly
+# these words. Any other mention of an "owner review item" fails the check, so an open item cannot sit in prose
+# the release gate does not read (docs/contributing-bindings.md).
+OWNER_REVIEW_OPEN = "Open owner review item:"
+OWNER_REVIEW_MENTION = re.compile(r"owner\s+review\s+item", re.IGNORECASE)
+OWNER_REVIEW_ITEM = re.compile(re.escape(OWNER_REVIEW_OPEN) + r" ([^.;]*[^.;\s])")
 LOCKS = frozenset({"exclusive", "shared", "none", "caller_holds"})
 ENTRY_FIELDS = (
     "id",
@@ -573,6 +580,9 @@ def validate(inputs: Inputs, manifest: dict[str, Any], introspection: dict[str, 
                         add("not-implemented", ident, f"{value} reports itself as not implemented")
         if status == "verified" and not r.get("reviewer"):
             add("reviewer", ident, "verified needs a reviewer")
+        marker = owner_review_marker_problem(r)
+        if marker:
+            add("owner-review-marker", ident, marker)
 
     for ident, ex in sorted(inputs.exclusions.items()):
         entry = index.get(ident)
@@ -583,6 +593,22 @@ def validate(inputs: Inputs, manifest: dict[str, Any], introspection: dict[str, 
         if not ex.get("reviewer") or not ex.get("reason"):
             add("bogus-exclusion", ident, "allowlist entries need a reason and a reviewer")
     return sorted(problems)
+
+
+def open_owner_reviews(record: dict[str, Any]) -> list[str]:
+    """The open owner review items a record's notes name (OWNER_REVIEW_OPEN), in order."""
+    return OWNER_REVIEW_ITEM.findall(record.get("notes") or "")
+
+
+def owner_review_marker_problem(record: dict[str, Any]) -> str | None:
+    """Why a record's notes mention an owner review item in a form the release gate cannot read, if they do."""
+    notes = record.get("notes") or ""
+    mentions = len(OWNER_REVIEW_MENTION.findall(notes))
+    if mentions != notes.count(OWNER_REVIEW_OPEN):
+        return f"notes mention an owner review item; an open one is written {OWNER_REVIEW_OPEN!r} <the item>"
+    if mentions != len(open_owner_reviews(record)):
+        return f"{OWNER_REVIEW_OPEN!r} must be followed by the item it names"
+    return None
 
 
 # --- reports ---------------------------------------------------------------------
@@ -597,6 +623,7 @@ def report(inputs: Inputs, manifest: dict[str, Any]) -> dict[str, Any]:
     unknown = sorted(i for i, e in index.items() if counted(e) and i not in records)
     unrepresentable = sorted(i for i, r in records.items() if r["status"] == "unrepresentable")
     unresolved = sorted(i for i, r in records.items() if r["callback"] == "unresolved")
+    owner_reviews = {i: items for i, r in sorted(records.items()) if (items := open_owner_reviews(r))}
     for ident, entry in sorted(index.items()):
         if not counted(entry):
             continue
@@ -612,6 +639,7 @@ def report(inputs: Inputs, manifest: dict[str, Any]) -> dict[str, Any]:
         "unknown": unknown,
         "unrepresentable": unrepresentable,
         "unresolved_callbacks": unresolved,
+        "open_owner_reviews": owner_reviews,
     }
 
 
@@ -639,6 +667,8 @@ def release_problems(
         status = records.get(ident, {}).get("status", "unknown")
         if status not in FINAL:
             problems.append(Problem("incomplete", ident, f"{status} on {platform}"))
+        for item in open_owner_reviews(records.get(ident, {})):
+            problems.append(Problem("owner-review", ident, f"open owner review item, until the owner decides: {item}"))
     return sorted(set(problems))
 
 
@@ -666,9 +696,14 @@ def markdown_report(rep: dict[str, Any]) -> str:
     lines.append(f"- **Unknown** (in the inventory, not in the manifest): {len(rep['unknown'])}")
     lines.append(f"- **Unrepresentable** (awaiting an owner decision): {len(rep['unrepresentable'])}")
     lines.append(f"- **Unresolved callback strategy** (ADR 003): {len(rep['unresolved_callbacks'])}")
+    reviews = rep["open_owner_reviews"]
+    lines.append(f"- **Open owner review items** (each blocks a release until the owner decides): {len(reviews)}")
     for title, items in (("Unknown", rep["unknown"]), ("Unrepresentable", rep["unrepresentable"])):
         if items:
             lines += ["", f"### {title}", ""] + [f"- `{i}`" for i in items]
+    if reviews:
+        lines += ["", "### Open owner review items", ""]
+        lines += [f"- `{i}`: " + "; ".join(items) for i, items in reviews.items()]
     lines += [
         "",
         "## By family (lin-x64)",

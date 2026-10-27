@@ -2,10 +2,11 @@
 // Differential reference for the family 1 bindings (RP-12): evaluates Rack's
 // own math, color and Quantity code over edge-case inputs, compiled with the
 // SDK's flags, and prints every case as JSON. tests/values replays each case
-// through rackpy.raw inside Rack and compares results bit for bit.
+// through rackpy.raw inside Rack and compares results bit for bit. It also
+// covers random::get<T> for every T RackPy maps (RP-31K), from fixed seeds.
 //
-// Floats are written as their 32-bit patterns ("0x3f800000"), so NaN payloads,
-// signed zeros and denormals survive the trip.
+// Floats are written as their 32-bit patterns ("0x3f800000") and doubles as
+// their 64-bit ones, so NaN payloads, signed zeros and denormals survive the trip.
 #include <rack.hpp>
 
 #include <cinttypes>
@@ -30,7 +31,19 @@ std::string f(float x) {
 	return std::string("{\"f\": \"") + buf + "\"}";
 }
 
+std::string d(double x) {
+	uint64_t bits;
+	std::memcpy(&bits, &x, sizeof bits);
+	char buf[24];
+	std::snprintf(buf, sizeof buf, "0x%016" PRIx64, bits);
+	return std::string("{\"d\": \"") + buf + "\"}";
+}
+
 std::string i(long long x) {
+	return std::to_string(x);
+}
+
+std::string u(uint64_t x) {
 	return std::to_string(x);
 }
 
@@ -79,6 +92,13 @@ const std::vector<float> FLOATS = {0.f, -0.f, 1.f, -1.f, 0.5f, -0.5f, 2.5f, -2.5
 	1e-45f, 3.4e38f, -3.4e38f, INF, -INF, NAN_};
 const std::vector<int> INTS = {0, 1, -1, 2, -2, 3, 7, -7, 10, -10, 255, 1024, -1024, INT32_MAX, INT32_MIN};
 const std::vector<long long> INT64S = {0, 1, -1, 2, 3, 4, 6, 8, 1023, 1024, -1024, INT64_MAX, INT64_MIN, 1LL << 62};
+// Above INT64_MAX, where Python's int takes the uint64_t instantiation.
+const std::vector<uint64_t> UINT64S = {1ull << 63, (1ull << 63) + 1, (1ull << 63) + 2, 3ull << 62, UINT64_MAX - 1,
+	UINT64_MAX};
+// 1e-50 and 1e-300 are normal doubles that a float cannot hold; 1e-310 is a denormal double.
+const std::vector<double> DOUBLES = {0., -0., 1., -1., 2.5, -2.5, 1e-50, -1e-50, 1e-300, -1e-300, 1e-310, 1e300, -1e300,
+	std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity(),
+	std::numeric_limits<double>::quiet_NaN()};
 const std::vector<std::pair<float, float>> BOUNDS = {{0.f, 1.f}, {1.f, 0.f}, {-2.f, 2.f}, {NAN_, 1.f}, {0.f, INF}, {-INF, INF}};
 const std::vector<std::pair<int, int>> IBOUNDS = {{0, 1}, {1, 0}, {-2, 2}, {-100, 100}, {INT32_MIN, INT32_MAX}};
 
@@ -146,6 +166,43 @@ void scalars() {
 		add("is_pow2", {i(x)}, b(math::isPow2<int64_t>(x)));
 		add("sgn_i", {i(x)}, i(math::sgn<int64_t>(x)));
 	}
+	for (uint64_t x : UINT64S) {
+		add("is_even", {u(x)}, b(math::isEven<uint64_t>(x)));
+		add("is_odd", {u(x)}, b(math::isOdd<uint64_t>(x)));
+		add("is_pow2", {u(x)}, b(math::isPow2<uint64_t>(x)));
+	}
+	for (double x : DOUBLES) {
+		add("sgn_d", {d(x)}, d(math::sgn<double>(x)));
+		add("sgn_f_of_d", {d(x)}, f(math::sgn<float>((float) x)));  // a Python float through the float overload
+	}
+}
+
+/** Eight draws of get<T> from Rack's generator, seeded; T by the name rackpy.raw.random.get takes. */
+std::vector<std::string> draws(const std::string& type, uint64_t s0, uint64_t s1) {
+	random::local().seed(s0, s1);
+	std::vector<std::string> out;
+	for (int k = 0; k < 8; k++) {
+		if (type == "uint64") out.push_back(u(random::get<uint64_t>()));
+		else if (type == "uint32") out.push_back(i(random::get<uint32_t>()));
+		else if (type == "uint16") out.push_back(i(random::get<uint16_t>()));
+		else if (type == "uint8") out.push_back(i(random::get<uint8_t>()));
+		else if (type == "int64") out.push_back(i(random::get<int64_t>()));
+		else if (type == "int32") out.push_back(i(random::get<int32_t>()));
+		else if (type == "int16") out.push_back(i(random::get<int16_t>()));
+		else if (type == "int8") out.push_back(i(random::get<int8_t>()));
+		else if (type == "bool") out.push_back(b(random::get<bool>()));
+		else if (type == "float") out.push_back(f(random::get<float>()));
+		else if (type == "double") out.push_back(d(random::get<double>()));
+	}
+	return out;
+}
+
+void randoms() {
+	const std::vector<std::pair<uint64_t, uint64_t>> seeds = {{1, 2}, {0x9e3779b97f4a7c15ull, 42}, {UINT64_MAX, 7}};
+	for (auto seed : seeds)
+		for (const char* type : {"uint64", "uint32", "uint16", "uint8", "int64", "int32", "int16", "int8", "bool", "float",
+				 "double"})
+			add("random.get", {u(seed.first), u(seed.second), s(type)}, list(draws(type, seed.first, seed.second)));
 }
 
 void vectors() {
@@ -330,6 +387,7 @@ int main() {
 	vectors();
 	colors();
 	quantities();
+	randoms();
 	std::printf("{\"rack_version\": %s, \"cases\": [\n", s(APP_VERSION).c_str());
 	for (size_t k = 0; k < cases.size(); k++)
 		std::printf("%s%s\n", cases[k].c_str(), k + 1 < cases.size() ? "," : "");

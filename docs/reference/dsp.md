@@ -70,10 +70,11 @@ freely, because C++ instantiates one function per value. RackPy's contract:
 channels, the MinBLEP, decimator and upsampler sizes, and the ring buffers'
 element types and sizes.
 
-**Owner review item:** the `poly*` bound of 32, the `IIRFilter` orders 2 to
-8 and the MIDI processors' 1 to 16 channels are RackPy's choices, recorded
-in the manifest. A full-coverage release needs the owner to confirm them, or
-to choose another contract ([release bar](../coverage.md#release-bar)).
+**Approved by the owner (2026-10-27):** the `poly*` bound of 1 to 32
+coefficients for `float` and `float_4`, the `IIRFilter` orders 2 to 8 for
+`float` and `float_4`, and the MIDI processors' 1 to 16 channels. These
+instantiation sets are the contracts for coverage policy 10
+([release bar](../coverage.md#release-bar)).
 
 (dsp-common)=
 ## Constants, conversions and scalings

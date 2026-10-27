@@ -30,12 +30,30 @@ def test_int_and_float_overloads_are_reached_by_argument_type() -> None:
 def test_int_overloads_refuse_values_outside_the_cpp_type() -> None:
     with pytest.raises(OverflowError, match="does not fit the C\\+\\+ type int"):
         m.clamp(2**40, 0, 10)
-    with pytest.raises(OverflowError, match="int64_t"):
-        m.is_even(2**70)
+    with pytest.raises(OverflowError, match="uint64_t"):
+        m.is_even(2**64)
+    with pytest.raises(OverflowError, match=" int64_t"):
+        m.is_pow2(-(2**63) - 1)
     with pytest.raises(TypeError):
         m.is_even(2.0)  # type: ignore[arg-type]
     with pytest.raises(TypeError):
         m.log2("8")  # type: ignore[arg-type]
+
+
+def test_integer_templates_take_uint64_above_int64() -> None:
+    # isEven/isOdd/isPow2<uint64_t> for 2**63 to 2**64 - 1 (int64_t below); Rack's results are in the replay.
+    assert m.is_pow2(2**63) and not m.is_pow2(2**63 + 2) and not m.is_pow2(2**64 - 1)
+    assert m.is_even(2**64 - 2) and m.is_odd(2**64 - 1) and not m.is_odd(2**63)
+    assert m.is_pow2(2**62) and not m.is_pow2(-(2**63))
+
+
+def test_sgn_float_and_double() -> None:
+    # sgn<float> converts to a C++ float first, where 1e-50 is 0; sgn<double> keeps its sign.
+    assert m.sgn(1e-50) == 0.0 and m.sgn(1e-50, type="float") == 0.0
+    assert m.sgn(1e-50, type="double") == 1.0 and m.sgn(-1e-300, type="double") == -1.0
+    assert m.sgn(-2.5, type="double") == -1.0 and isinstance(m.sgn(3, type="double"), float)
+    with pytest.raises(ValueError, match=r"\"float\" or \"double\""):
+        m.sgn(1.0, type="int")  # type: ignore[call-overload]
 
 
 def test_preconditions_rack_only_documents_are_checked() -> None:

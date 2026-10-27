@@ -39,6 +39,25 @@ int64_t i64(const py::int_& v, const char* what) {
 	return toInt<int64_t>(v, what, "int64_t");
 }
 
+/** Calls f<int64_t> for x in int64_t's range and f<uint64_t> from 2**63 to 2**64 - 1, as C++ would for each type. */
+template <typename F>
+bool intOrUint64(const py::int_& x, const char* what, F f) {
+	int overflow = 0;
+	long long v = PyLong_AsLongLongAndOverflow(x.ptr(), &overflow);
+	if (v == -1 && PyErr_Occurred())
+		throw py::error_already_set();
+	if (!overflow)
+		return f((int64_t) v);
+	if (overflow < 0)
+		raiseOverflow(what, "int64_t");
+	unsigned long long u = PyLong_AsUnsignedLongLong(x.ptr());
+	if (u == (unsigned long long) -1 && PyErr_Occurred()) {
+		PyErr_Clear();
+		raiseOverflow(what, "uint64_t");
+	}
+	return f((uint64_t) u);
+}
+
 int positive(const py::int_& v, const char* what) {
 	int b = cint(v, what);
 	if (b <= 0)
@@ -62,10 +81,12 @@ void bindMath(py::module_ raw) {
 	py::module_ m = raw.def_submodule("math", "rack::math: scalar helpers and the 2D Vec and Rect types (math.hpp).");
 
 	// --- integers -----------------------------------------------------------------
-	m.def("is_even", [](const py::int_& x) { return rack::math::isEven<int64_t>(i64(x, "is_even")); }, py::arg("x"),
-		"True if x is even (isEven<T>, T = int64_t).");
-	m.def("is_odd", [](const py::int_& x) { return rack::math::isOdd<int64_t>(i64(x, "is_odd")); }, py::arg("x"),
-		"True if x is odd (isOdd<T>, T = int64_t).");
+	m.def("is_even", [](const py::int_& x) {
+		return intOrUint64(x, "is_even", [](auto v) { return rack::math::isEven(v); });
+	}, py::arg("x"), "True if x is even (isEven<T>: T = int64_t, or uint64_t from 2**63 to 2**64 - 1).");
+	m.def("is_odd", [](const py::int_& x) {
+		return intOrUint64(x, "is_odd", [](auto v) { return rack::math::isOdd(v); });
+	}, py::arg("x"), "True if x is odd (isOdd<T>: T = int64_t, or uint64_t from 2**63 to 2**64 - 1).");
 	m.def("clamp", [](const py::int_& x, const py::int_& a, const py::int_& b) {
 		return rack::math::clamp(cint(x, "clamp"), cint(a, "clamp"), cint(b, "clamp"));
 	}, py::arg("x"), py::arg("a"), py::arg("b"), "Limits x between a and b; if b < a, returns a (int overload).");
@@ -90,14 +111,22 @@ void bindMath(py::module_ raw) {
 			throw py::value_error("log2: n must not be negative");
 		return rack::math::log2(v);
 	}, py::arg("n"), "floor(log2(n)); 0 for n == 0 or 1. n must not be negative.");
-	m.def("is_pow2", [](const py::int_& n) { return rack::math::isPow2<int64_t>(i64(n, "is_pow2")); }, py::arg("n"),
-		"True if n is a power of 2 (isPow2<T>, T = int64_t).");
+	m.def("is_pow2", [](const py::int_& n) {
+		return intOrUint64(n, "is_pow2", [](auto v) { return rack::math::isPow2(v); });
+	}, py::arg("n"), "True if n is a power of 2 (isPow2<T>: T = int64_t, or uint64_t from 2**63 to 2**64 - 1).");
 	m.def("sgn", [](const py::int_& x) { return rack::math::sgn<int64_t>(i64(x, "sgn")); }, py::arg("x"),
 		"1, -1 or 0 by the sign of x (sgn<T>, T = int64_t).");
 
 	// --- floats -------------------------------------------------------------------
-	m.def("sgn", [](float x) { return rack::math::sgn<float>(x); }, py::arg("x"),
-		"1.0, -1.0 or 0.0 by the sign of x (sgn<T>, T = float).");
+	m.def("sgn", [](double x, const std::string& type) {
+		if (type == "float")
+			return (double) rack::math::sgn<float>((float) x);
+		if (type == "double")
+			return rack::math::sgn<double>(x);
+		throw py::value_error("sgn: type must be \"float\" or \"double\" (sgn<T>'s T for a Python float)");
+	}, py::arg("x"), py::arg("type") = "float",
+		"1.0, -1.0 or 0.0 by the sign of x (sgn<T>, T = float, or double with type=\"double\"). As a C++ float, a "
+		"nonzero x too small for float has sign 0.");
 	m.def("clamp", [](float x, float a, float b) { return rack::math::clamp(x, a, b); }, py::arg("x"), py::arg("a") = 0.f,
 		py::arg("b") = 1.f, "Limits x between a and b (default 0 and 1); if b < a, returns a (float overload).");
 	m.def("clamp_safe", [](float x, float a, float b) { return rack::math::clampSafe(x, a, b); }, py::arg("x"),

@@ -104,9 +104,20 @@ the bounded contracts for `MinBlepGenerator`, `Decimator`, `Upsampler` and
 contract for coverage policy 10 ([RP-19C](rp-19-slices.md)); ADR 004's graph
 plan budget of 1.5 ns per frame per plan; and keeping the compiled graph tier
 bit-identical to the interpreter at about 0.25 ns over that budget on
-sine→gain ([RP-21C](rp-21-slices.md#rp-21c-decisions)). Still open: RP-18's
-`poly*`, `IIRFilter` and MIDI channel bounds, and ADR 004's `ui-exclusive`
-budget.
+sine→gain ([RP-21C](rp-21-slices.md#rp-21c-decisions)). Still open then:
+RP-18's `poly*`, `IIRFilter` and MIDI channel bounds (closed 2026-10-27,
+below), and ADR 004's `ui-exclusive` budget.
+
+**2026-10-27: RP-18's template bounds approved.** The owner accepted the
+documented instantiation sets as the policy 10 contracts: `polyDirect`,
+`polyEstrin` and `polyHorner` for 1 to 32 coefficients, `IIRFilter` for
+orders 2 to 8, each for `float` and `float_4`, and `MidiGenerator` and
+`MidiParser` for 1 to 16 channels ([RP-31K](rp-31-slices.md#decisions);
+[DSP reference](../docs/reference/dsp.md#templates)). The same decision
+closed the integer and float template gaps, set the weak-pointer and
+`SharedLock` contracts, and added a release gate for records that name an
+open owner review item ([Adding bindings](../docs/contributing-bindings.md#open-owner-review-items)).
+Still open: ADR 004's `ui-exclusive` budget.
 
 ## Witan project and recovery history
 

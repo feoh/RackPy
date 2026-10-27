@@ -72,6 +72,14 @@ and the other `get_*`, `buffer(out)` (it fills a writable byte buffer) and
 `vector(len)` draw from it. For reproducible numbers, make a generator of
 your own.
 
+`get(type)` is Rack's `get<T>`, with `T` named as a string: Rack's
+specializations `uint64` (the default), `uint32`, `uint16`, `uint8` (the top
+bits), `bool`, `float` and `double`, and, through Rack's primary template,
+`int64`, `int32`, `int16` and `int8`: the next 64-bit number converted to the
+signed type, so its low bits, as GCC converts. Any other name raises
+`ValueError`. Seeded draws of every type match Rack's own (the compiled
+reference in `tests/values`).
+
 (services-logger)=
 ## The log: `rackpy.raw.logger`
 
@@ -188,8 +196,33 @@ Rack writes the settings to `settings_path` when it quits.
 `SharedMutex` is Rack's read-write lock: many readers, or one writer. It
 has Rack's `lock`, `try_lock`, `unlock`, `lock_shared`, `try_lock_shared`
 and `unlock_shared`, and `with mutex:` holds it for writing.
-`SharedLock(mutex)` is Rack's `SharedLock`: it holds the mutex shared from
+`SharedLock(m)` is Rack's `SharedLock<TMutex>`: it holds `m` shared from
 construction until `release()`, or until its `with` block ends.
+
+(services-shared-lock)=
+### `SharedLock` over any `TMutex`
+
+Rack's `SharedLock<TMutex>` only calls `m.lock_shared()` when it is made and
+`m.unlock_shared()` when it ends, so `m` can be any object with those two
+methods, not only a `SharedMutex`:
+
+- **A `SharedMutex`** (exactly that class) is held natively, with the
+  misuse checks and the GIL released while it waits, below.
+- **Any other object**, a Python subclass of `SharedMutex` included, has its
+  `lock_shared()` and `unlock_shared()` called from Python, with the GIL
+  held and no native lock held, so a Python lock that waits (and lets the
+  GIL go) cannot deadlock with it. An object without both methods raises
+  `TypeError`.
+- **Errors propagate.** If `lock_shared()` raises, no lock is made. If
+  `unlock_shared()` raises in `release()` or at the end of a `with` block,
+  the error propagates and the lock still counts as held, so `release()`
+  can try again; a successful `release()` happens once.
+- **Dropped while held,** a lock calls `unlock_shared()`, as C++ would at the
+  end of its scope, but only on the thread that made it; an error there is
+  reported through `sys.unraisablehook`. On another thread, or while Python
+  shuts down, it calls no Python: `unlock_shared()` is not called, the drop
+  is reported as unraisable (at shutdown, in Rack's log), and the object
+  stays as it was. Release a lock explicitly to let go of it reliably.
 
 Rack's mutex asserts on every pthread error, which would stop Rack. RackPy
 records which threads hold the mutex and raises `ValueError` before pthread
@@ -216,6 +249,35 @@ In the `rack.hpp` closure, Rack's `WeakBase` is a base of `Widget`. So a
 `WeakPtr` points at a widget, RackPy's or Rack's own, and `get()` returns
 `None` once Rack deletes it. Weak pointers work on the main thread only,
 because Rack's are not thread-safe.
+
+(services-weakptr-contract)=
+### The widget contract
+
+This is the contract for `WeakPtr<T>`, `WeakBase` and `WeakHandle`
+(owner decision, 2026-10-27):
+
+- **`T` is any widget.** `WeakPtr<T>` needs `T` to derive from `WeakBase`
+  (Rack's `set()` uses `T::weakHandle`, `weakptr.hpp:64-88`), and in Rack
+  2.6.6 `Widget` is the only `WeakBase` subclass (`widget/Widget.hpp:21`).
+  So the instantiations are `WeakPtr<Widget>` and its subclasses, as Rack's
+  own `WeakPtr<ModuleWidget>`, `WeakPtr<PortWidget>` and
+  `WeakPtr<TextField>` are. One `WeakPtr` class covers them: `get()`
+  returns the widget's own Python object or host view, so no subclass's type
+  is lost. Anything that is not a widget (or `None`) is refused.
+- **`WeakBase` is `Widget`'s base.** Its `weakHandle` field and
+  `getWeakCount()` are `Widget.weak_handle` and `Widget.get_weak_count()`, and
+  `~WeakBase` runs when a widget is deleted, which clears its handle's
+  pointer (`get()` turns `None`). A plugin's own non-widget C++ class
+  deriving from `WeakBase` is that plugin's code, not Rack's API; Python
+  objects have `weakref` for that.
+- **`WeakHandle(void*)` runs inside `WeakPtr`.** Rack's `WeakPtr::set()` makes
+  an object's handle with `new WeakHandle(ptr)` when it has none
+  (`weakptr.hpp:80-83`) and deletes it with its last pointer
+  (`weakptr.hpp:66-77`), as `WeakPtr(widget)` and `set(widget)` do here. A
+  handle made any other way belongs to no object and no pointer, so only
+  Rack makes usable ones, as with the classes only Rack can make
+  ([coverage policy 11](../coverage.md#completeness-policy)); `WeakHandle`
+  is a view, and Python cannot construct one.
 
 - **Rack's members.** `WeakPtr()`, `WeakPtr(widget)`, `get()`, `set()`,
   truth testing, and `__copy__` (Rack's copy). `weak_handle` is the

@@ -124,6 +124,22 @@ def test_random() -> None:
     rr.init()  # reseeds Rack's generator
 
 
+def test_random_get_signed_types() -> None:
+    # Rack's primary get<T> converts the next 64-bit number to T; seeded draws are compared with Rack's own in
+    # tests/values/in_rack/test_reference_replay.py.
+    generator = rr.local()
+    saved = generator.state
+    try:
+        for type, bits in (("int64", 64), ("int32", 32), ("int16", 16), ("int8", 8)):
+            generator.seed(5, 9)
+            expected = rr.Xoroshiro128Plus(5, 9)()  # the same next number, unconverted
+            value = rr.get(type)
+            assert isinstance(value, int) and -(2 ** (bits - 1)) <= value < 2 ** (bits - 1)
+            assert value % 2**bits == expected % 2**bits  # the low bits, as C++'s conversion keeps them
+    finally:
+        generator.state = saved
+
+
 def test_logging() -> None:
     logger.log(logger.Level.INFO_LEVEL, "rackpy_test.py", 12, "test_logging", "rackpy-log %s %d", "marker", 5)
     macros.WARN("rackpy-macro %s", "warned")

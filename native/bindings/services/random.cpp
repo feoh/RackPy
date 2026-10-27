@@ -57,10 +57,16 @@ void bindRandom(py::module_ m) {
 		if (kind == "uint32") return py::int_(r::get<uint32_t>());
 		if (kind == "uint16") return py::int_(r::get<uint16_t>());
 		if (kind == "uint8") return py::int_(r::get<uint8_t>());
+		// Rack's primary template: the next 64-bit number converted to T (modulo 2**N, as GCC defines it).
+		if (kind == "int64") return py::int_(r::get<int64_t>());
+		if (kind == "int32") return py::int_(r::get<int32_t>());
+		if (kind == "int16") return py::int_(r::get<int16_t>());
+		if (kind == "int8") return py::int_(r::get<int8_t>());
 		if (kind == "bool") return py::bool_(r::get<bool>());
 		if (kind == "float") return py::float_(r::get<float>());
 		if (kind == "double") return py::float_(r::get<double>());
-		throw py::value_error("Rack's get<T> takes uint64, uint32, uint16, uint8, bool, float or double");
+		throw py::value_error(
+			"Rack's get<T> takes uint64, uint32, uint16, uint8, int64, int32, int16, int8, bool, float or double");
 	}, py::arg("type") = "uint64", "Rack's get<T> from its generator, by the C++ type's name.");
 	m.def("get_uint32", [] { return r::get<uint32_t>(); }, "Rack's get<uint32_t>: the top 32 bits.");
 	m.def("get_uint16", [] { return r::get<uint16_t>(); });

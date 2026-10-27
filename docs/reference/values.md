@@ -47,9 +47,25 @@ The low-level names are in `rackpy.raw` (C++ namespace for namespace:
 `clamp`, `clamp_safe`, `euc_mod`, `sgn` and the other helpers keep every C++
 overload. Python picks one by argument type: all-`int` arguments reach the
 `int` overload, anything else the `float` one, so `clamp(15, 0, 10)` is the
-integer `10` and `clamp(1.5)` uses the float defaults 0 and 1. The template
-helpers `is_even`, `is_odd`, `is_pow2` and `sgn` are mapped for `int64_t`
-(and `sgn` also for `float`), which covers every Python integer up to 64 bits.
+integer `10` and `clamp(1.5)` uses the float defaults 0 and 1.
+
+The template helpers take these instantiations (RP-31K, at the owner's
+request of 2026-10-27):
+
+| Function | `T` | Outside it |
+| --- | --- | --- |
+| `is_even`, `is_odd`, `is_pow2` | `int64_t` for −2⁶³ to 2⁶³ − 1, `uint64_t` for 2⁶³ to 2⁶⁴ − 1 | `OverflowError` |
+| `sgn(x)` for an `int` | `int64_t` | `OverflowError` |
+| `sgn(x)` for a `float` | `float`, or `double` with `type="double"` | `ValueError` for another `type` |
+
+For a value that several C++ integer types can hold, every one of them gives
+the same result, so these two reach every result Rack's integer `T` can; a
+Python float is a C++ double, which a `long double` holds exactly, so `float`
+and `double` do the same for floating-point `T`. `is_pow2(2**63)` is `True`,
+as `isPow2<uint64_t>(1ull << 63)` is in C++.
+`sgn` converts its argument to a C++ float unless `type="double"`: a float
+cannot hold 1e-50, so `sgn(1e-50)` is `0.0` and `sgn(1e-50, type="double")`
+is `1.0`.
 
 Where Rack only documents a precondition, RackPy checks it, because breaking
 it in C++ would crash or hang Rack:

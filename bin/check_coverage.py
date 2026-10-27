@@ -14,8 +14,9 @@ check    fail on any inconsistency: missing or orphaned records, stale
          not exist. Partial coverage passes; false claims do not.
 report   print coverage by family and platform (Markdown or JSON).
 release  the full-coverage release bar for one platform: zero records that
-         are not verified or excluded_internal, a real inventory for the
-         platform, and introspection of the built package.
+         are not verified or excluded_internal, none naming an open owner
+         review item, a real inventory for the platform, and introspection
+         of the built package.
 
 --introspection takes the JSON that tests/coverage/test_introspection.py
 writes from inside Rack (rackpy._introspect). Records that claim bound
@@ -78,8 +79,10 @@ def check(
         problems = [p for p in problems if p.code != "missing-runtime-artifact"]
     if problems:
         fail(problems, limit)
-    totals = bm.report(inputs, data)["totals"]["lin-x64"]
-    print("ok: " + ", ".join(f"{k} {v}" for k, v in sorted(totals.items())))
+    rep = bm.report(inputs, data)
+    print("ok: " + ", ".join(f"{k} {v}" for k, v in sorted(rep["totals"]["lin-x64"].items())))
+    if rep["open_owner_reviews"]:
+        print(f"note: {len(rep['open_owner_reviews'])} record(s) name an open owner review item; each blocks a release")
     if without_built_package and any(r["status"] in bm.BOUND for r in data["entries"]):
         print("note: Python names were NOT checked against the built package (--without-built-package)")
 

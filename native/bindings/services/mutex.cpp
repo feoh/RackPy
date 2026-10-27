@@ -4,8 +4,10 @@
 // the thread does not hold, or locking it again for writing, would stop
 // Rack. So RackPy's mutex records which threads hold it, refuses those
 // misuses before pthread sees them, and releases the GIL while it waits (a
-// Python thread holding it may need the GIL to let go). Locks are never for
-// Rack's audio path; Python never runs there.
+// Python thread holding it may need the GIL to let go). SharedLock<TMutex>
+// takes RackPy's SharedMutex natively or, for any other TMutex, an object
+// with lock_shared() and unlock_shared(), called with the GIL and no native
+// lock held. Locks are never for Rack's audio path; Python never runs there.
 #include <pybind11/pybind11.h>
 
 #include <map>
@@ -117,20 +119,62 @@ struct MutexDelete {
 
 /** Rack's SharedLock: holds the mutex shared from construction until release (or the with block's end). */
 struct PySharedLock {
-	std::shared_ptr<TrackedMutex> mutex;
-	py::object owner;
+	std::shared_ptr<TrackedMutex> mutex;  // RackPy's SharedMutex, held natively; null for any other object
+	py::object owner;  // the object it holds: the SharedMutex, or the object with lock_shared/unlock_shared
+	std::thread::id locker;  // the thread that locked owner
 	bool held = false;
-	PySharedLock(std::shared_ptr<TrackedMutex> m, py::object o) : mutex(std::move(m)), owner(std::move(o)), held(true) {}
+	PySharedLock(std::shared_ptr<TrackedMutex> m, py::object o)
+		: mutex(std::move(m)), owner(std::move(o)), locker(std::this_thread::get_id()), held(true) {}
 	PySharedLock(const PySharedLock&) = delete;
 	PySharedLock& operator=(const PySharedLock&) = delete;
-	// Dropped while held: let go as C++ RAII would at scope end, if this thread holds it.
+	void release() {
+		if (!held)
+			return;
+		if (mutex) {
+			mutex->unlockShared();
+			held = false;
+			return;
+		}
+		// Released before the call, so another thread's release() while unlock_shared runs is a no-op.
+		held = false;
+		try {
+			owner.attr("unlock_shared")();
+		}
+		catch (...) {
+			held = true;  // unlock_shared failed: the object still counts as held
+			throw;
+		}
+	}
+	// Dropped while held: let go as C++ RAII would at scope end, if this thread holds it. Python runs here
+	// (with the GIL, from the collector) only on the locking thread and never while the interpreter finalizes.
 	~PySharedLock() {
-		if (held && mutex) {
+		if (!held)
+			return;
+		if (mutex) {
 			try {
 				mutex->unlockShared();
 			}
 			catch (...) {
 			}
+			return;
+		}
+		if (Py_IsFinalizing()) {
+			WARN("RackPy: a SharedLock was dropped while held during Python's shutdown; unlock_shared was not called");
+			return;
+		}
+		if (locker != std::this_thread::get_id()) {
+			PyErr_SetString(PyExc_RuntimeError,
+				"a SharedLock was dropped while held on a thread that did not lock it; unlock_shared was not called");
+			PyErr_WriteUnraisable(owner.ptr());
+			return;
+		}
+		try {
+			owner.attr("unlock_shared")();
+		}
+		catch (py::error_already_set& e) {
+			e.discard_as_unraisable(owner);
+		}
+		catch (...) {
 		}
 	}
 };
@@ -155,28 +199,29 @@ void bindMutex(py::module_ raw) {
 		.def("__exit__", [](TrackedMutex& m, py::args) { m.unlock(); }, "with mutex: holds it for writing in the block.");
 
 	py::class_<PySharedLock, std::unique_ptr<PySharedLock>>(raw, "SharedLock",
-		"Rack's SharedLock<TMutex>: holds a SharedMutex shared from construction until release() or the with block's end "
-		"(C++ RAII, made explicit).")
-		.def(py::init([](py::object mutex) {
-			auto m = mutex.cast<std::shared_ptr<TrackedMutex>>();
-			m->lockShared();
-			return new PySharedLock(m, mutex);
+		"Rack's SharedLock<TMutex>: holds m shared from construction until release() or the with block's end "
+		"(C++ RAII, made explicit). m is a SharedMutex or any object with lock_shared() and unlock_shared().")
+		.def(py::init([](py::object m) {
+			if (py::type::of(m).is(py::type::of<TrackedMutex>())) {
+				auto tracked = m.cast<std::shared_ptr<TrackedMutex>>();
+				tracked->lockShared();
+				return new PySharedLock(tracked, m);
+			}
+			// Any other TMutex, a Python subclass of SharedMutex included: Rack's m.lock_shared(), in Python.
+			py::object lock = py::getattr(m, "lock_shared", py::none());
+			py::object unlock = py::getattr(m, "unlock_shared", py::none());
+			if (!PyCallable_Check(lock.ptr()) || !PyCallable_Check(unlock.ptr()))
+				throw py::type_error("SharedLock takes a SharedMutex or an object with lock_shared() and unlock_shared(), not " +
+					py::str(py::type::of(m).attr("__qualname__")).cast<std::string>());
+			lock();
+			return new PySharedLock(nullptr, m);
 		}), py::arg("m"))
 		.def_property_readonly("m", [](const PySharedLock& l) { return l.owner; }, "Rack's: the mutex it holds.")
 		.def_property_readonly("held", [](const PySharedLock& l) { return l.held; })
-		.def("release", [](PySharedLock& l) {
-			if (!l.held)
-				return;
-			l.mutex->unlockShared();
-			l.held = false;
-		}, "Rack's ~SharedLock: lets the mutex go (once).")
+		.def("release", &PySharedLock::release,
+			"Rack's ~SharedLock: lets the mutex go (once). An error from unlock_shared propagates and m stays held.")
 		.def("__enter__", [](py::object self) { return self; })
-		.def("__exit__", [](PySharedLock& l, py::args) {
-			if (l.held) {
-				l.mutex->unlockShared();
-				l.held = false;
-			}
-		});
+		.def("__exit__", [](PySharedLock& l, py::args) { l.release(); });
 }
 
 }  // namespace services

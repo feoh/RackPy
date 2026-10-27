@@ -21,6 +21,7 @@ extracted for that platform yet, which blocks a release there.
 - **Unknown** (in the inventory, not in the manifest): 0
 - **Unrepresentable** (awaiting an owner decision): 0
 - **Unresolved callback strategy** (ADR 003): 0
+- **Open owner review items** (each blocks a release until the owner decides): 0
 
 ## By family (lin-x64)
 
