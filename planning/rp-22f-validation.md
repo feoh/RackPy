@@ -423,3 +423,32 @@ unchanged). The refcount-0 guard in the shared resolver is reasoned from
 pybind11 3.x's and CPython 3.14's deallocation order and tested through
 `__dict__` clearing; no sanitizer build covers it. No distribution build,
 release or push.
+
+## Final review and RP-22 closing validation (supervisor)
+
+A final read-only review of 84ed90d found every earlier finding closed, and
+one new P1: a Python thread's laboratory call (refused later as the wrong
+thread) ran `~LaboratoryCall` and released what the main thread kept while
+it was inside Rack's keyboard-delivery loop, because the delivery depth is
+per thread. 643f2f9 makes `LaboratoryCall` and `SubscriptionDispatch` count
+only on the main thread and keeps/releases only there, extends the
+keyboard-route test with a Python thread calling into a port during the
+delivery (it must be refused and release nothing), and documents the shared
+resolver's rule for objects being deallocated in
+`docs/explanation/callbacks.md`.
+
+On 643f2f9: `bin/rackpy-dev build --werror --test-hooks` (CTest 6/6),
+`uv run pytest -m unit` (101 passed), `uv run pytest -m "native and not host"`
+(33 passed), `prek run --all-files`, `bin/rackpy-dev typecheck`,
+`bin/planning-check`, `uv run bin/generate_bindings.py check`,
+`uv run bin/check_coverage.py check --without-built-package` (implemented
+2945, planned 0, unreviewed 0, excluded_internal 111, absent 2), the sphinx
+`-W` build, `uv run pytest -m "docs and not host"` (15 passed), and, as
+RP-22's closing validation, the full
+`flock /tmp/rackpy-host-tests.lock uv run pytest -m "host and not dist" -ra`:
+124 passed, 180 deselected, 732 s.
+
+Tracked on RP-38 rather than blocking: an ASan/UBSan plugin build over
+`tests/laboratory`, a non-laboratory test of the refcount-0 resolver rule,
+a direct test of the keyboard route's depth hold around `drainReleases()`,
+and the existing leak of Python-made ports dropped off the main thread.
