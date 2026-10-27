@@ -9,11 +9,16 @@ Rack declares but never defines (see the [coverage report](coverage.md)).
 ## Rack's drivers
 
 `get_driver_ids()` lists Rack's audio drivers, and `get_driver(driver_id)`
-returns one as a `Driver`, which lives until Rack quits. Rack Free on Linux
-has RtAudio's ALSA, PulseAudio and JACK. A driver lists its devices, their
-names, its default device and their channel counts. `subscribe(device_id,
-port)` makes a Python port a subscriber of a device, apart from the port's
-own device. RackPy undoes it when the port dies or the context closes.
+returns one as a `Driver`, a view by ID. Python never deletes a driver:
+Rack deletes every one, its own and Python's, in its `audio::destroy()` as
+it quits, after closing its context and before the plugins' `destroy()`.
+A {ref}`destroy callback <plugin-hooks>` therefore finds a
+`PythonDriver` handle and its devices stale; a test in Rack checks this.
+Rack Free on Linux has RtAudio's ALSA, PulseAudio and JACK. A driver lists
+its devices, their names, its default device and their channel counts.
+`subscribe(device_id, port)` makes a Python port a subscriber of a device,
+apart from the port's own device. RackPy undoes it when the port dies or
+the context closes.
 Rack's RtAudio driver raises Rack's `Exception` for a device it cannot open.
 
 RackPy's tests isolate Rack from the machine's sound servers and devices, so
@@ -30,6 +35,10 @@ has Rack's methods:
 - `set_driver_id` falls back to Rack's first driver for an unknown ID.
 - `set_device_id` takes a device; a device the driver cannot open is logged
   and left unset, as Rack does.
+- `get_driver`, `get_driver_id` and `get_driver_name` return the port's
+  driver, its ID and its name; `get_device_id` returns its device's ID (-1:
+  none) and `get_device` the `Device` view, or `None`. The properties
+  `driver_id`, `device_id` and `device` are the same.
 - `get_device_ids`, `get_device_name`, `get_device_num_inputs` and
   `get_device_num_outputs`.
 - `get_sample_rates` and `get_block_sizes` return sorted lists, and
@@ -128,8 +137,8 @@ thread:
   and a Python port's overrides run synchronously.
 - `remove_device(device)` unplugs it: its stream stops and Rack's lists no
   longer show it. Rack's ports keep it until they choose another device, as
-  with RtAudio, and it is deleted when the last one leaves. A removed device
-  refuses to stream.
+  with RtAudio, and it is deleted when the last one leaves: its `alive` is
+  then false. A removed device refuses to stream.
 
 The `rackpy.audio` facade finds drivers by name (`drivers`, `find_driver`),
 opens ports (`open_port(driver, device, kind=...)`), makes and registers a

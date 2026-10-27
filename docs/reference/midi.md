@@ -27,7 +27,11 @@ are Rack's:
 ## Rack's drivers
 
 `get_driver_ids()` lists Rack's MIDI drivers, and `get_driver(driver_id)`
-returns one as a `Driver`, which lives until Rack quits. Rack Free has these:
+returns one as a `Driver`, a view by ID. Python never deletes a driver:
+Rack deletes every one, its own and Python's, in its `midi::destroy()` as
+it quits, after closing its context and before the plugins' `destroy()`, so
+a {ref}`destroy callback <plugin-hooks>` finds a `PythonDriver` handle
+stale; a test in Rack checks this. Rack Free has these:
 
 - Loopback (-12), whose 16 devices pass what is sent on device N to the
   inputs on device N.
@@ -53,6 +57,12 @@ has Rack's methods:
 - `set_driver_id` falls back to Rack's first driver for an unknown ID, then
   takes its default device.
 - `set_device_id` takes a device, and -1 means none.
+- `get_driver` and `get_driver_id` return the port's driver and its ID;
+  `get_device_id` returns its device's ID (-1: none) and `get_device` the
+  device's view, or `None`. The properties `driver_id`, `device_id` and
+  `device` are the same, and an `Input`'s `input_device` and an `Output`'s
+  `output_device` are Rack's typed fields: an `InputDevice` or an
+  `OutputDevice` view.
 - `get_device_ids`, `get_device_name`, `get_channels`,
   `get_channel_name`, `to_json`, and `from_json`, which finds the saved
   device by name.
@@ -95,9 +105,12 @@ it (`port.device`, `input_device`, `output_device`, or a driver's
   as the driver does when one arrives.
 - `OutputDevice.send_message(message)` sends it as it is, without applying
   any channel.
-- `subscribe` and `unsubscribe` are Rack's lower-level calls, which Rack
-  says are not meant for plugins. RackPy undoes them with the port, as it
-  does a driver's.
+- `subscribe(port)` and `unsubscribe(port)` are Rack's lower-level calls,
+  which Rack says are not meant for plugins: a subscribed input hears the
+  device as well as its own, until it unsubscribes. `unsubscribe` takes back
+  only a subscription that `subscribe` made, and raises `OwnershipError`
+  otherwise (for the port's own device, say). RackPy undoes them with the
+  port, as it does a driver's.
 
 (midi-python-drivers)=
 ## Python drivers and devices
@@ -128,7 +141,8 @@ Python implements a MIDI driver as a natively configured `PythonDriver`
   [laboratory](../explanation/callbacks.md#a-laboratory-midi-output-device).
 - `remove_input_device`/`remove_output_device` unplug a device. Rack's lists
   no longer show it, the ports that hold it keep it until they move, and it
-  is deleted when the last one leaves. A removed input refuses pushes.
+  is deleted when the last one leaves: its `alive` is then false. A removed
+  input refuses pushes.
 - `add_driver(driver_id, driver)` gives the driver to Rack, which owns it
   until it quits. Taken IDs are refused.
 

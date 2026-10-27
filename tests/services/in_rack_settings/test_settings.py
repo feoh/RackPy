@@ -4,15 +4,19 @@
 import math
 import threading
 import time
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
+from typing import Any
 
 import pytest
+from _rackpy_host import _testing as HOOKS
 
 from rackpy import raw
 from rackpy.raw import app
 from rackpy.raw import settings as rset
+from rackpy.raw import string as rstring
 from rackpy.raw import widget as w
 from rackpy.raw.math import Vec
+from rackpy.raw.nanovg import NVGcolor
 from rackpy.raw.window import Svg
 
 S = rset.settings
@@ -78,6 +82,200 @@ def test_settings_read_and_write(restore: None) -> None:
         assert getattr(S, name) is not None
 
 
+def plain(value: object) -> object:
+    """A comparable form of a setting's value, from Python's property or from the native fixture (NaN equals NaN)."""
+    if isinstance(value, Vec):
+        return (plain(value.x), plain(value.y))
+    if isinstance(value, NVGcolor):
+        return tuple(plain(c) for c in value.rgba)
+    if isinstance(value, (rset.KnobMode, rset.BrowserSort)):
+        return int(value)
+    if isinstance(value, rset.ModuleInfo):
+        return ("ModuleInfo", value.enabled, value.favorite, value.added, plain(value.last_added))
+    if isinstance(value, rset.PluginWhitelist):
+        return ("PluginWhitelist", value.subscribed, tuple(sorted(value.module_slugs)))
+    if isinstance(value, float) and math.isnan(value):
+        return "nan"
+    if isinstance(value, dict):
+        return {k: plain(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [plain(v) for v in value]
+    return value
+
+
+def differing(a: dict[str, object], b: dict[str, object]) -> list[str]:
+    """The keys whose values differ: names only, so that a failure never prints the login token."""
+    return sorted(k for k in a.keys() | b.keys() if a.get(k) != b.get(k))
+
+
+def rack_now() -> dict[str, object]:
+    """Rack's settings globals now, read by the native fixture, in plain form."""
+    return {name: plain(value) for name, value in HOOKS.rack_settings().items()}
+
+
+def flip(current: bool) -> bool:
+    return not current
+
+
+def other(*candidates: Any) -> Callable[[Any], Any]:
+    """The first candidate that differs from the current value (floats exact in float32)."""
+    return lambda current: next(c for c in candidates if plain(c) != plain(current))
+
+
+def module_info(added: int) -> rset.ModuleInfo:
+    info = rset.ModuleInfo()
+    info.favorite, info.added, info.last_added = True, added, 1.5e9
+    return info
+
+
+def plugin_whitelist() -> rset.PluginWhitelist:
+    whitelist = rset.PluginWhitelist()
+    whitelist.module_slugs = {"RP31E-Module"}
+    return whitelist
+
+
+# Every rack::settings variable: its Python property, the C++ global and a distinct, valid new value given
+# the current one. headless and is_plugin are read-only.
+SETTINGS: list[tuple[str, str, Callable[[Any], Any] | None]] = [
+    ("settings_path", "settingsPath", lambda v: v + ".rp31e"),
+    ("dev_mode", "devMode", flip),
+    ("headless", "headless", None),
+    ("is_plugin", "isPlugin", None),
+    ("restart", "restart", flip),
+    ("language", "language", lambda v: next(x for x in rstring.get_languages() if x != v)),
+    ("safe_mode", "safeMode", flip),
+    ("token", "token", lambda v: v + "rp31e"),
+    ("window_maximized", "windowMaximized", flip),
+    ("window_size", "windowSize", lambda v: Vec(v.x + 16, v.y + 8)),
+    ("window_pos", "windowPos", other(Vec(13, 29), Vec(17, 31))),
+    ("invert_zoom", "invertZoom", flip),
+    ("mouse_wheel_zoom", "mouseWheelZoom", flip),
+    ("pixel_ratio", "pixelRatio", other(2.0, 1.5)),
+    ("ui_theme", "uiTheme", other("light", "hcdark")),
+    ("cable_opacity", "cableOpacity", other(0.75, 0.25)),
+    ("cable_tension", "cableTension", other(0.25, 0.75)),
+    ("rack_brightness", "rackBrightness", other(0.5, 0.75)),
+    ("spotlight_brightness", "spotlightBrightness", other(0.5, 0.75)),
+    ("spotlight_radius", "spotlightRadius", other(150.0, 200.0)),
+    ("halo_brightness", "haloBrightness", other(0.5, 0.75)),
+    ("allow_cursor_lock", "allowCursorLock", flip),
+    ("knob_mode", "knobMode", other(*rset.KnobMode.__members__.values())),
+    ("knob_scroll", "knobScroll", flip),
+    ("knob_linear_sensitivity", "knobLinearSensitivity", other(2.0**-10, 2.0**-9)),
+    ("knob_scroll_sensitivity", "knobScrollSensitivity", other(2.0**-9, 2.0**-10)),
+    ("sample_rate", "sampleRate", other(48000.0, 96000.0)),
+    ("thread_count", "threadCount", other(2, 1)),
+    ("tooltips", "tooltips", flip),
+    ("cpu_meter", "cpuMeter", flip),
+    ("lock_modules", "lockModules", flip),
+    ("squeeze_modules", "squeezeModules", flip),
+    ("prefer_dark_panels", "preferDarkPanels", flip),
+    ("frame_rate_limit", "frameRateLimit", other(30.0, 120.0)),
+    ("autosave_interval", "autosaveInterval", other(30.0, 60.0)),
+    ("skip_load_on_launch", "skipLoadOnLaunch", flip),
+    ("last_patch_directory", "lastPatchDirectory", lambda v: v + "/rp31e-patches"),
+    ("last_selection_directory", "lastSelectionDirectory", lambda v: v + "/rp31e-selections"),
+    ("recent_patch_paths", "recentPatchPaths", lambda v: ["/tmp/rp31e.vcv", *v]),
+    ("cable_auto_rotate", "cableAutoRotate", flip),
+    ("cable_colors", "cableColors", lambda v: [raw.nanovg.rgb(17, 34, 51 + i) for i in range(max(len(v), 1))]),
+    ("cable_labels", "cableLabels", lambda v: [f"rp31e {i}" for i in range(max(len(v), 1))]),
+    ("auto_check_updates", "autoCheckUpdates", flip),
+    ("verify_https_certs", "verifyHttpsCerts", flip),
+    ("show_tips_on_launch", "showTipsOnLaunch", flip),
+    ("tip_index", "tipIndex", lambda v: v + 1),
+    ("browser_sort", "browserSort", other(*rset.BrowserSort.__members__.values())),
+    ("browser_zoom", "browserZoom", other(0.5, 1.0)),
+    ("plugin_settings", "pluginSettingsJ", lambda v: {**(v or {}), "RP31E": {"n": 1}}),
+    ("module_infos", "moduleInfos", lambda v: {**v, "RP31E-Plugin": {"RP31E-Module": module_info(7)}}),
+    ("module_whitelist", "moduleWhitelist", lambda v: {**v, "RP31E-Plugin": plugin_whitelist()}),
+]
+
+
+@pytest.fixture
+def rack_globals() -> Iterator[dict[str, object]]:
+    """Rack's settings globals as they were (plain), restored natively afterwards, whatever the test did.
+
+    restart and safe_mode matter most: left set, Rack would run again after quitting, or delete its autosave
+    as its patch manager goes."""
+    saved = HOOKS.rack_settings()
+    before = {name: plain(value) for name, value in saved.items()}
+    yield before
+    for name, value in saved.items():
+        if name not in {"headless", "isPlugin"}:
+            HOOKS.set_rack_setting(name, value)
+    assert differing(before, rack_now()) == []
+
+
+def native_value(value: object) -> object:
+    return int(value) if isinstance(value, (rset.KnobMode, rset.BrowserSort)) else value
+
+
+def test_each_setting_is_its_rack_global(rack_globals: dict[str, object]) -> None:
+    """Each property writes, and reads, its own rack::settings global and no other (so swapping two fails)."""
+    properties = {n for n in dir(rset.Settings) if isinstance(getattr(rset.Settings, n), property)}
+    assert {py for py, _, _ in SETTINGS} == properties
+    assert {cpp for _, cpp, _ in SETTINGS} == set(rack_globals)
+    before = rack_globals
+    python_before = {py: plain(getattr(S, py)) for py, _, _ in SETTINGS}
+    assert all(python_before[py] == before[cpp] for py, cpp, _ in SETTINGS)
+    for py, cpp, change in SETTINGS:
+        if change is None:  # read-only
+            with pytest.raises(AttributeError):
+                setattr(S, py, python_before[py])
+            continue
+        original = HOOKS.rack_settings()[cpp]
+        value = change(getattr(S, py))
+        assert plain(value) != before[cpp], py
+        try:
+            setattr(S, py, value)  # Python writes; the fixture reads Rack's globals
+            after = rack_now()
+            reached = after[cpp] == plain(value)
+            assert reached, f"{py} did not write {cpp}"
+            assert differing(before, after) == [cpp], f"{py} wrote another global"
+        finally:
+            HOOKS.set_rack_setting(cpp, original)
+        try:
+            HOOKS.set_rack_setting(cpp, native_value(value))  # the fixture writes Rack's global; Python reads
+            seen = {name: plain(getattr(S, name)) for name, _, _ in SETTINGS}
+            read = seen[py] == plain(value)
+            assert read, f"{py} did not read {cpp}"
+            assert differing(python_before, seen) == [py], f"{cpp} reached another property"
+        finally:
+            HOOKS.set_rack_setting(cpp, original)
+        assert differing(before, rack_now()) == []
+
+
+def test_knob_modes_and_browser_sorts_by_name_and_value(rack_globals: dict[str, object]) -> None:
+    native = HOOKS.rack_settings_enumerators()  # Rack's enumerators, from C++
+    assert native == {
+        "KNOB_MODE_LINEAR": 0,
+        "KNOB_MODE_SCALED_LINEAR": 1,
+        "KNOB_MODE_ROTARY_ABSOLUTE": 2,
+        "KNOB_MODE_ROTARY_RELATIVE": 3,
+        "BROWSER_SORT_UPDATED": 0,
+        "BROWSER_SORT_LAST_USED": 1,
+        "BROWSER_SORT_MOST_USED": 2,
+        "BROWSER_SORT_BRAND": 3,
+        "BROWSER_SORT_NAME": 4,
+        "BROWSER_SORT_RANDOM": 5,
+    }
+    enums = (
+        ("KNOB_MODE_", rset.KnobMode, "knob_mode", "knobMode"),
+        ("BROWSER_SORT_", rset.BrowserSort, "browser_sort", "browserSort"),
+    )
+    for prefix, enum, field, cpp in enums:
+        assert sorted(enum.__members__) == sorted(n for n in native if n.startswith(prefix))
+        for name, value in native.items():
+            if not name.startswith(prefix):
+                continue
+            member = getattr(enum, name)
+            assert member is getattr(rset, name) and member.name == name and int(member) == value
+            setattr(S, field, member)
+            assert HOOKS.rack_settings()[cpp] == value  # Rack's global holds this enumerator
+            HOOKS.set_rack_setting(cpp, value)
+            assert getattr(S, field) == member and getattr(S, field).name == name
+
+
 def test_module_infos(restore: None) -> None:
     info = rset.ModuleInfo()
     assert info.enabled and not info.favorite and info.added == 0 and math.isnan(info.last_added)
@@ -88,10 +286,28 @@ def test_module_infos(restore: None) -> None:
     view.added = 4  # writes Rack's
     assert S.module_infos["RackPy"]["RuntimeProbe"].added == 4
     assert rset.get_module_info("RackPy", "NoSuchModule") is None
+    view.favorite, view.last_added = False, 1.5e9  # a Unix time
+    native = HOOKS.rack_settings()["moduleInfos"]["RackPy"]["RuntimeProbe"]
+    assert not native.favorite and native.last_added == 1.5e9 and native.added == 4
+
+
+def test_plugin_whitelist(rack_globals: dict[str, object]) -> None:
     whitelist = rset.PluginWhitelist()
+    assert not whitelist.subscribed and whitelist.module_slugs == set()
     whitelist.module_slugs = {"RuntimeProbe"}
-    assert isinstance(rset.is_module_whitelisted("RackPy", "RuntimeProbe"), bool)
-    assert isinstance(S.module_whitelist, dict)
+    S.module_whitelist = {"RackPy": whitelist}
+    assert rset.is_module_whitelisted("RackPy", "RuntimeProbe") and not rset.is_module_whitelisted("RackPy", "Other")
+    assert rset.is_module_whitelisted("OtherPlugin", "Any")  # Rack's: no entry, every module
+    native = HOOKS.rack_settings()["moduleWhitelist"]["RackPy"]
+    assert not native.subscribed and native.module_slugs == {"RuntimeProbe"}
+    whitelist.subscribed = True  # subscribed to the whole plugin
+    S.module_whitelist = {"RackPy": whitelist}
+    assert (
+        rset.is_module_whitelisted("RackPy", "Other") and HOOKS.rack_settings()["moduleWhitelist"]["RackPy"].subscribed
+    )
+    slugs = S.module_whitelist["RackPy"].module_slugs
+    slugs.add("Changed")  # a set copy: Rack's is unchanged
+    assert S.module_whitelist["RackPy"].module_slugs == {"RuntimeProbe"}
 
 
 def test_prefer_dark_panels_rerenders_themed_widgets(restore: None) -> None:

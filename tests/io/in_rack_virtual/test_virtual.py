@@ -6,6 +6,7 @@ import gc
 from array import array
 from typing import Any
 
+import _rackpy_host
 import pytest
 
 from rackpy import audio as fa
@@ -84,6 +85,10 @@ def test_python_ports_on_a_python_device() -> None:
     _, device = STATE["audio"]
     port = fa.open_port(AUDIO_ID, "Fake 1", kind=Recorder)
     assert port.device is not None and port.device.get_name() == "Fake 1" and port in device.subscribed
+    held = port.get_device()  # Rack's getters, on a port that holds a device
+    assert held is not None and held.get_name() == "Fake 1" and held.get_num_inputs() == 2
+    assert port.get_device_id() == device.id == 0 and port.get_driver_id() == AUDIO_ID
+    assert port.get_driver_name() == "RackPy Test Audio"
     assert port.log == []  # Rack's setDeviceId called on_start_stream off Python's driving: queued for the UI step
     device.start_stream()  # on Python's driving thread: synchronous
     assert port.log == ["start"]
@@ -99,6 +104,10 @@ def test_python_ports_on_a_python_device() -> None:
         device.process_buffer(data, 2, out, 2, frames * 4)  # buffers too short
     with pytest.raises(ValueError, match="stride"):
         device.process_buffer(data, 1, out, 2, 8)
+    device.stop_stream()  # Rack's Device::onStopStream, as driver code calls it: each port's on_stop_stream
+    assert port.log[-1] == "stop"
+    device.start_stream()
+    assert port.log[-1] == "start"
     STATE["port"] = port
 
 
@@ -147,6 +156,7 @@ def test_active_stream_module_deletion_and_hotplug() -> None:
 
 def test_a_python_midi_driver() -> None:
     driver = fm.virtual_driver(MIDI_ID, "RackPy Test MIDI", inputs=("Fake In",), outputs=("Fake Out",))
+    STATE["midi"] = driver
     assert driver.registered_id == MIDI_ID and fm.find_driver(MIDI_ID).get_name() == "RackPy Test MIDI"
     fin, fout = driver.add_input_device("Fake In 2"), driver.add_output_device("Fake Out 2")
     view = midi.get_driver(MIDI_ID)
@@ -237,3 +247,24 @@ def test_audio_same_port_native_stream_reentry_and_nonvirtual_super() -> None:
         assert calls == 65
     finally:
         port.set_device_id(-1)
+
+
+def test_rack_deletes_python_drivers_as_it_quits() -> None:
+    """Rack's midi::destroy() and audio::destroy() delete every driver (its virtual ~Driver) before the plugin's
+    destroy(), so a destroy callback finds the Python drivers' handles stale. The outer test reads Rack's log."""
+    audio_driver, _ = STATE["audio"]
+    midi_driver = STATE["midi"]
+    spare = audio_driver.get_device(1)  # "Fake 2", plugged in by test_active_stream_module_deletion_and_hotplug
+    assert spare is not None and spare.alive
+    assert audio_driver.name == "RackPy Test Audio" and midi_driver.name == "RackPy Test MIDI"
+
+    @raw.plugin.on_destroy
+    def deleted() -> None:
+        for kind, driver in (("audio", audio_driver), ("midi", midi_driver)):
+            try:
+                name = driver.name
+            except StaleHandleError as e:
+                _rackpy_host.log_info(f"rp31e {kind} driver deleted: {e}")
+            else:
+                _rackpy_host.log_info(f"rp31e {kind} driver still alive: {name}")
+        _rackpy_host.log_info(f"rp31e audio device alive: {spare.alive}")  # the driver's devices go with it

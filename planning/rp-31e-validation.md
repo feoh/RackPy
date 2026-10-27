@@ -1,0 +1,76 @@
+# RP-31E validation (Linux x86_64): WIP checkpoint, not validated
+
+Date 2026-10-27, branch `rp31e` from fc4aa6d. The session ended early, at the
+supervisor's request, before the final validation. This commit is a checkpoint:
+one host test fails (below), the swap-mutation check was not run, and no host
+run was made on the committed tree. Logs are in `build/validation/rp31e-*.log`,
+which git ignores.
+
+Records: the 65 `services_io` entries of
+[rp-31-audit/evidence.json](rp-31-audit/evidence.json) with weak or missing
+tests or missing docs, plus the settings records of
+[P1-4](rp-31-audit/qualitative-adapters-transitive.md) (the existence-only
+`token`, `uiTheme`, `lastPatchDirectory`, `tooltips`, `cpuMeter`,
+`frameRateLimit`, `tipIndex`). The manifest's `tests`, `docs` and `notes`
+fields changed for 101 records; no status or other field changed (checked by
+diffing against fc4aa6d). Nothing was promoted.
+
+## Commands run (on the working tree, before the commit)
+
+| Command | Result |
+| --- | --- |
+| `uv sync --frozen` | ok |
+| `bin/rackpy-dev build --werror --test-hooks` | builds, including the new `native/testing/testing.cpp` fixture; CTest 100% of 6 pass |
+| `bin/rackpy-dev typecheck` | strict mypy: no issues (269 source files, and each `bin/` script) |
+| `prek run --all-files` | all hooks pass |
+| `uv run pytest -m unit` | 106 passed, 203 deselected |
+| `bin/planning-check` | 45 tasks, 114 dependencies, acyclic |
+| `uv run bin/generate_bindings.py check` | generated files match the manifest |
+| `uv run bin/check_coverage.py check --without-built-package` | absent 2, excluded_internal 111, implemented 2945 (unchanged) |
+| `uv run sphinx-build -W --keep-going -n -b html docs build/docs/html` (serial, fresh output) | 0 warnings |
+| `uv run pytest -q -m "docs and not host"` | 15 passed |
+| `flock /tmp/rackpy-host-tests.lock uv run pytest -q -rA tests/services/test_settings.py tests/services/test_utilities.py tests/services/test_system.py tests/io/test_audio.py tests/io/test_virtual.py "tests/io/test_midi.py::test_midi_in_live_rack"` | **5 passed, 1 failed** (260 s): `test_system_and_network_in_rack` |
+
+Not run: `tests/coverage/test_introspection.py` against the built package,
+the mutation check (swap two `RACKPY_SETTING` lines, two enum values and two
+log levels, rebuild, and see the new tests fail), and any host run on the
+committed tree.
+
+## The failure: Rack's `METHOD_PUT` sends POST
+
+`test_json_requests` now sends `put_json(url, {"y": "z"})` and
+`request_json(METHOD_PUT, ...)` to the loopback server, which echoes the
+method. The server saw `POST`. Rack 2.6.6 (`src/network.cpp:128-148`) sets
+`CURLOPT_UPLOAD` for `METHOD_PUT` and then `CURLOPT_POSTFIELDS` for the body,
+and curl then sends POST. So with a body, `METHOD_PUT` is indistinguishable
+from `METHOD_POST`, and the facade's `put_json` does not PUT. Without a body,
+curl uploads from its default read function, stdin. **Needs a decision**:
+document Rack's behaviour and change the test to expect it (and warn in
+`put_json`, or have the facade refuse or fix it), or something else. The test
+was left as written, failing, for the next session.
+
+## Per-record changes
+
+| Records | Test change | Docs change |
+| --- | --- | --- |
+| all 49 `variable:rack::settings::*` | new `test_each_setting_is_its_rack_global`: for each property, writes a distinct valid value through Python and reads every global through the new native hook `_testing.rack_settings()` (C++ names, `rack::settings::X` read directly), then writes through `_testing.set_rack_setting` and reads every Python property; each step must change exactly that one global or property, so swapped macros fail, bools included. Every value is restored at once, and by the `rack_globals` fixture. Citations of `test_settings_read_and_write` dropped where it never names the setting | `services.md#services-settings`: the name rule, and the effects of `restart`, `safe_mode`, `dev_mode`, `verify_https_certs`, `window_*`, `settings_path`, `sample_rate` |
+| `KnobMode`, `BrowserSort` and their 10 enumerators | new `test_knob_modes_and_browser_sorts_by_name_and_value`: names and values against Rack's C++ enumerators (`_testing.rack_settings_enumerators`), each written through the setting to Rack's global | new `#services-settings-values` |
+| `ModuleInfo` and its 4 fields | `test_module_infos` reads `favorite` and `last_added` back from Rack's `moduleInfos` natively | `#services-settings-values` |
+| `PluginWhitelist` and its 2 fields, `isModuleWhitelisted` | new `test_plugin_whitelist`: Rack's three cases, both fields read back natively, `module_slugs` a set copy | `#services-settings-values` |
+| `Level::DEBUG/INFO/WARN/FATAL_LEVEL`, macros `DEBUG/INFO/WARN/FATAL` | new `test_every_log_level`; the outer test finds each message in `log.txt` under Rack's label (`debug`, `info`, `warn`, `fatal`) with the Python caller | `services.md#services-logger` names the levels and labels |
+| `METHOD_PUT` | `test_json_requests` PUTs (fails, above) | `Method` listed in `#services-network` |
+| `audio::Device` record, `Port::getDevice/getDeviceId/getDriverId/getDriverName` | `test_python_ports_on_a_python_device` reads them on a port holding a Python device | the getters added to `audio.md#audio-ports` |
+| `audio::Device::onStopStream` | `test_python_ports_on_a_python_device` calls `stop_stream` and sees `on_stop_stream` | already documented |
+| `~Driver` (audio, MIDI) | new `test_rack_deletes_python_drivers_as_it_quits`: an `on_destroy` callback finds both `PythonDriver` handles stale; the outer test reads it in Rack's log after "Destroying MIDI", "Destroying audio", "Destroying plugins" (passed) | disposition in `audio.md#audio-drivers`, `midi.md#midi-drivers`, and the records' notes |
+| `~Device` (audio, MIDI) | cite `test_active_stream_module_deletion_and_hotplug` and the quit test (audio), `test_a_python_midi_driver` (MIDI) | `alive` after deletion documented; disposition in notes |
+| `midi::Input::inputDevice`, `Port::getDevice/getDeviceId/getDriverId`, `InputDevice`/`OutputDevice` `subscribe`/`unsubscribe` | new `test_port_getters_and_device_subscriptions`: getters across two loopback devices; a subscribed input hears the device until it unsubscribes; `OwnershipError` for subscriptions `subscribe` did not make (passed) | `midi.md#midi-ports`, `#midi-devices` |
+
+## Left, and next steps
+
+1. Decide the `METHOD_PUT` question above, then fix the test or the facade
+   and the docs accordingly.
+2. Run the mutation check and record it.
+3. Run `tests/coverage/test_introspection.py` and the targeted host runs above
+   on the committed tree, serialized with the lock.
+4. Squash into one commit titled "RP-31E: evidence for settings, services and
+   audio/MIDI I/O records" and replace this file with the final record.

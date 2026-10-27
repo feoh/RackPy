@@ -140,6 +140,53 @@ def test_json_and_devices(loop: tuple[midi.Output, midi.InputQueue]) -> None:
     assert not sent.alive and other.device is None
 
 
+def test_port_getters_and_device_subscriptions(loop: tuple[midi.Output, midi.InputQueue]) -> None:
+    out, queue = loop
+    queue.set_device_id(2)
+    assert queue.get_driver_id() == LOOPBACK and queue.get_device_id() == 2 == queue.device_id
+    held = queue.get_device()
+    assert held is not None and held.get_name() == "Loopback 3"
+    assert queue.input_device is not None and queue.input_device.get_name() == "Loopback 3"  # Rack's Input::inputDevice
+    queue.set_device_id(0)
+    assert queue.input_device is not None and queue.input_device.get_name() == "Loopback 1"
+
+    listener = midi.InputQueue()  # on another loopback device; subscribes to device 0 as well
+    listener.set_driver_id(LOOPBACK)
+    listener.set_device_id(5)
+    device = queue.input_device
+    assert device is not None
+    try:
+        device.subscribe(listener)
+        assert listener in device.subscribed
+        out.send_message(note_on(0, 50, 1))  # on loopback device 0
+        assert listener.size() == 1 and queue.size() == 1
+        device.unsubscribe(listener)
+        assert listener not in device.subscribed
+        out.send_message(note_on(0, 51, 1))
+        assert listener.size() == 1 and queue.size() == 2  # the listener no longer hears device 0
+        with pytest.raises(OwnershipError):
+            device.unsubscribe(listener)  # not subscribed any more
+        with pytest.raises(OwnershipError):
+            device.unsubscribe(queue)  # its own device: not a subscription InputDevice.subscribe made
+    finally:
+        listener.set_device_id(-1)
+
+    sender = midi.Output()
+    sender.set_driver_id(LOOPBACK)
+    sender.set_device_id(5)
+    output_device = out.output_device
+    assert output_device is not None and output_device.get_name() == "Loopback 1"
+    try:
+        output_device.subscribe(sender)
+        assert sender in output_device.subscribed
+        output_device.unsubscribe(sender)
+        assert sender not in output_device.subscribed and out in output_device.subscribed
+        with pytest.raises(OwnershipError):
+            output_device.unsubscribe(sender)
+    finally:
+        sender.set_device_id(-1)
+
+
 def test_ports_need_the_live_context() -> None:
     with pytest.raises(TypeError):
         midi.Port()  # Rack's abstract port

@@ -130,3 +130,13 @@ def test_logging() -> None:
     assert isinstance(logger.get_log_path(), str)
     with pytest.raises(TypeError):
         logger.log(logger.Level.INFO_LEVEL, "f", 1, "g", "%d")
+
+
+def test_every_log_level() -> None:
+    # The outer test finds each message in Rack's log.txt under the label Rack's logger gives its level.
+    for line, level in enumerate(("DEBUG_LEVEL", "INFO_LEVEL", "WARN_LEVEL", "FATAL_LEVEL"), start=21):
+        logger.log(getattr(logger.Level, level), "rp31e_levels.py", line, "levels", "rp31e-level %s", level)
+    macros.DEBUG("rp31e-macro %s", "DEBUG")
+    macros.INFO("rp31e-macro %s", "INFO")
+    macros.WARN("rp31e-macro %s", "WARN")
+    macros.FATAL("rp31e-macro %s", "FATAL")  # as Rack's macro, it does not stop Rack
