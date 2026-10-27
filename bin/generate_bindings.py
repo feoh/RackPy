@@ -279,12 +279,25 @@ def generate_files(manifest: dict[str, Any], manifest_text: str, inputs: bm.Inpu
     source += ["}", "", "}  // namespace bindings", "}  // namespace rackpy", ""]
 
     report = bm.markdown_report(bm.report(inputs, manifest))
+    boundary = [entry for entry in inputs.inventory["entries"] if entry["kind"] == "boundary_constant"]
+    declarations = [f"// {GENERATED_NOTE}"]
+    stubs: dict[str, list[str]] = {"glfw": [], "blendish": []}
+    for entry in boundary:
+        name = entry["name"]
+        namespace = "glfw" if entry["boundary"] == "input" else "blendish"
+        declarations.append(f'{namespace}.attr("{name}") = py::int_(static_cast<int>({name}));')
+        stubs[namespace].append(f"{name}: int")
     return {
         repo / "bindings" / "generated" / "mapping.json": json.dumps(mapping, indent=2, sort_keys=True) + "\n",
         repo / "native" / "bindings" / "generated" / "registry.hpp": "\n".join(header),
         repo / "native" / "bindings" / "generated" / "registry.cpp": "\n".join(source),
         repo / "docs" / "reference" / "coverage.md": report,
         repo / "docs" / "reference" / "callback-paths.md": callback_paths(manifest, inputs),
+        repo / "native" / "bindings" / "generated" / "boundary_constants.inc": "\n".join(declarations) + "\n",
+        **{
+            repo / "src" / "rackpy" / "raw" / f"{module}.pyi": (f"# {GENERATED_NOTE}\n" + "\n".join(names) + "\n")
+            for module, names in stubs.items()
+        },
     }
 
 

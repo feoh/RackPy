@@ -16,7 +16,8 @@ from rackpy.raw import widget as w
 from rackpy.raw.engine import Module
 from rackpy.raw.math import Rect, Vec
 
-GLFW_PRESS, GLFW_RELEASE, GLFW_KEY_A, GLFW_MOUSE_BUTTON_LEFT = 1, 0, 65, 0
+GLFW_PRESS, GLFW_RELEASE = raw.glfw.GLFW_PRESS, raw.glfw.GLFW_RELEASE
+GLFW_KEY_A, GLFW_MOUSE_BUTTON_LEFT = raw.glfw.GLFW_KEY_A, raw.glfw.GLFW_MOUSE_BUTTON_LEFT
 
 
 class Pad(w.OpaqueWidget):

@@ -7,11 +7,13 @@ from rackpy.raw import _types as _types
 from rackpy.raw import app as app
 from rackpy.raw import asset as asset
 from rackpy.raw import audio as audio
+from rackpy.raw import blendish as blendish
 from rackpy.raw import color as color
 from rackpy.raw import componentlibrary as componentlibrary
 from rackpy.raw import dsp as dsp
 from rackpy.raw import engine as engine
 from rackpy.raw import event as event
+from rackpy.raw import glfw as glfw
 from rackpy.raw import history as history
 from rackpy.raw import literals as literals
 from rackpy.raw import logger as logger

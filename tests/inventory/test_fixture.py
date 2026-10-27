@@ -78,6 +78,27 @@ def test_enums_aliases_macros_and_imports(minisdk: Path, build: Build) -> None:
     assert imp["classification"] == "import"
 
 
+def test_dependency_event_constants_are_counted_only_when_reached(minisdk: Path, build: Build) -> None:
+    dep = minisdk / "dep" / "include"
+    (dep / "GLFW").mkdir(parents=True)
+    (dep / "GLFW" / "glfw3.h").write_text(
+        "#define GLFW_KEY_A 65\n#define GLFW_KEY_LAST GLFW_KEY_A\n#define GLFW_PRESS 1\n#define GLFW_OTHER 7\n"
+    )
+    (dep / "blendish.h").write_text(
+        'extern "C" { typedef enum BNDcornerFlags { BND_CORNER_NONE = 0, BND_CORNER_TOP = 3 } BNDcornerFlags; }\n'
+    )
+    before = by_id(build(minisdk))
+    assert "boundary_constant:GLFW_KEY_A" not in before
+    with (minisdk / "include" / "rack.hpp").open("a") as rack:
+        rack.write("\n#include <GLFW/glfw3.h>\n#include <blendish.h>\n")
+    after = by_id(build(minisdk))
+    assert after["boundary_constant:GLFW_KEY_A"]["body"] == "65"
+    assert after["boundary_constant:GLFW_KEY_LAST"]["body"] == "GLFW_KEY_A"
+    assert after["boundary_constant:GLFW_PRESS"]["header"] == "dep/include/GLFW/glfw3.h"
+    assert after["boundary_constant:BND_CORNER_TOP"]["value"] == 3
+    assert "boundary_constant:GLFW_OTHER" not in after
+
+
 def test_platform_branch_is_recorded_not_dropped(minisdk: Path, build: Build) -> None:
     doc = build(minisdk)
     e = by_id(doc)

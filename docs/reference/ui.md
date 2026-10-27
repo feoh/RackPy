@@ -4,6 +4,18 @@
 inside Rack Free 2.6.6**, for every record in `include/ui/`, the menu helpers
 and Rack's input dispatcher (see the [coverage report](coverage.md)).
 
+(ui-boundary-constants)=
+## Input and menu constants
+
+`rackpy.raw.glfw` exposes the GLFW key, mouse-button, modifier and action
+constants used by Rack events, retaining their upstream names (for example,
+`GLFW_KEY_A`, `GLFW_MOUSE_BUTTON_LEFT`, and `GLFW_PRESS`).
+`rackpy.raw.blendish` exposes the `BND_CORNER_*` flags accepted by
+`Menu.corner_flags`. These are integers taken from the SDK headers at build
+time; bitwise combinations can be assigned to `corner_flags`. They do not
+expose the GLFW or Blendish APIs generally. Linux x86_64 is the tested target;
+macOS and Windows have not been validated.
+
 (ui-widgets)=
 ## Widgets
 

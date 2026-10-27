@@ -150,6 +150,9 @@ void focusField(py::classh<ui::TextField, OW, TextFieldWidget<ui::TextField>>& c
 }  // namespace
 
 void bindUi(py::module_ raw) {
+	py::module_ glfw = raw.def_submodule("glfw", "GLFW input constants used by Rack events.");
+	py::module_ blendish = raw.def_submodule("blendish", "Blendish corner flags used by Rack menus.");
+#include "../generated/boundary_constants.inc"
 	py::module_ mod = raw.def_submodule("ui", "rack::ui: Rack's UI widgets, menus and theme (RP-26A).");
 
 	// --- Label --------------------------------------------------------------------
