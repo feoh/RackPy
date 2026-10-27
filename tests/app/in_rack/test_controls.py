@@ -23,7 +23,7 @@ from rackpy.raw.engine import Module, Port
 from rackpy.raw.math import Rect, Vec
 from rackpy.raw.window import Svg
 
-LEFT, PRESS, RELEASE = 0, 1, 0
+LEFT, PRESS, RELEASE = raw.glfw.GLFW_MOUSE_BUTTON_LEFT, raw.glfw.GLFW_PRESS, raw.glfw.GLFW_RELEASE
 # Original test artwork.
 KNOB_SVG = (
     '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30">'
