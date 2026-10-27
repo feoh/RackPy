@@ -237,3 +237,32 @@ def test_racks_output_reaches_a_python_output_device() -> None:
     gc.collect()
     assert [out.output_device] == [None]
     out.send_message(note)  # no device: Rack sends nothing
+
+
+@pytest.mark.skipif(not LIVE, reason="needs Rack's live context: MIDI ports")
+def test_laboratory_midi_device_native_reentry_super_and_recursion_limit() -> None:
+    calls = 0
+    recursive = False
+    out = raw.midi.Output()
+
+    class Reentrant(MidiOutputDevice):
+        def send_message(self, message: raw.midi.Message) -> None:
+            nonlocal calls
+            calls += 1
+            super().send_message(message)  # OutputDevice's no-op, exactly once
+            if recursive or calls == 1:
+                out.send_message(message)
+
+    device = Reentrant()
+    device.connect(out)
+    message = raw.midi.Message()
+    message.bytes = [0x90, 60, 100]
+    out.send_message(message)
+    assert calls == 2
+    calls, recursive = 0, True
+    with pytest.raises(RecursionError, match="overrides nested more than 64"):
+        out.send_message(message)
+    assert calls == 64
+    recursive = False
+    out.send_message(message)
+    assert calls == 65

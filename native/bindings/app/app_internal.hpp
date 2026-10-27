@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Shared by rackpy.raw.app's controls (app.cpp) and module widgets (module_widget.cpp).
 #pragma once
+#include "../support/overrides.hpp"
 #include <rack.hpp>
 
 #include "../widget/variants.hpp"
@@ -31,7 +32,7 @@ void appendMenu(Self* self, rack::ui::Menu* menu, rack::app::ParamWidget* touche
 	bool answered = false;
 	runtime::callPython("append_context_menu", [&] {
 		checked(self->lifetime);
-		if (auto f = py::get_override(static_cast<const Base*>(self), "append_context_menu")) {
+		if (auto f = rackpy::bindings::pythonOverride(static_cast<const Base*>(self), "append_context_menu")) {
 			CallbackGuard guard;
 			answered = true;
 			f(wrapper(menu));

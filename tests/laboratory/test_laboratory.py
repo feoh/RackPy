@@ -24,6 +24,7 @@ NEEDS_RACK = [
     "test_rack_threads_never_run_laboratory_python",
     "test_rack_threads_never_run_midi_generator_python",
     "test_racks_output_reaches_a_python_output_device",
+    "test_laboratory_midi_device_native_reentry_super_and_recursion_limit",
 ]
 NEEDS_NO_RACK = ["test_parameter_events_and_json_need_racks_context"]
 

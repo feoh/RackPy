@@ -34,7 +34,20 @@ runs); were it to, callPython would refuse and Rack's implementation would answe
 struct LaboratoryQuantity {
 	virtual ~LaboratoryQuantity() = default;
 	bool laboratoryOverrides = false;
+	virtual void checkAccess(bool = false) const {}
+	virtual void checkValueWrite() const { checkAccess(true); }
 };
+
+/** Base bindings bypass Python aliases only, never another plugin's C++ override.
+Keep access checks which would otherwise have run in the trampoline. */
+inline bool quantityTrampoline(rack::Quantity& q, bool engine = false, bool writing = false) {
+	if (auto* alias = dynamic_cast<LaboratoryQuantity*>(&q)) {
+		if (writing) alias->checkValueWrite();
+		else alias->checkAccess(engine);
+		return true;
+	}
+	return false;
+}
 
 template <typename Base, typename Guard = UnguardedQuantity>
 struct QuantityTrampoline : Base, LaboratoryQuantity, py::trampoline_self_life_support {
@@ -68,7 +81,7 @@ struct QuantityTrampoline : Base, LaboratoryQuantity, py::trampoline_self_life_s
 	}
 	// Standalone attached quantities additionally guard engine-dependent UI
 	// calls. The default preserves Quantity/ValueQuantity's existing domain.
-	virtual void checkAccess(bool = false) const { Guard::check(); }
+	void checkAccess(bool = false) const override { Guard::check(); }
 	float getDisplayValue() override {
 		checkAccess(true);
 		return overrideOr<float>(static_cast<const Base*>(this), "get_display_value", [this] { return Base::getDisplayValue(); });

@@ -2,6 +2,7 @@
 // rack::ui -> rackpy.raw.ui (RP-26A): Rack's UI widgets as subclassable Python
 // classes on RP-25's managed Widget machinery. Main thread only; Python
 // overrides are contained; each widget has one native owner.
+#include "../support/overrides.hpp"
 #include <rack.hpp>
 
 #include "../widget/variants.hpp"
@@ -82,7 +83,7 @@ struct MenuItemWidget : Widget<Base> {
 		bool answered = false;
 		runtime::callPython("MenuItem.create_child_menu", [&] {
 			checked(this->lifetime);
-			if (auto f = py::get_override(static_cast<const Base*>(this), "create_child_menu")) {
+			if (auto f = rackpy::bindings::pythonOverride(static_cast<const Base*>(this), "create_child_menu")) {
 				answered = true;
 				FactoryScope factory;  // building the new, detached menu is allowed here
 				menu = handOver(f());

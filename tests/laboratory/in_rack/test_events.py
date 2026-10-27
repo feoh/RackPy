@@ -297,3 +297,24 @@ def test_driver_and_engine_events_have_no_python_path_outside_the_laboratory() -
 
         with pytest.raises(TypeError, match="unexpected event"):
             Module.create(install)
+
+
+def test_same_module_native_json_reentry_and_nonvirtual_super() -> None:
+    seen: list[str] = []
+
+    class Reentrant(ModuleClass):
+        def configure(self) -> None:
+            self.module.config(0, 0, 0, 0)
+
+        def data_to_json(self) -> Any:
+            seen.append("params")
+            if len(seen) == 1:
+                assert self.module.data_to_json() is None
+            return super().data_to_json()
+
+    instance = Reentrant.create()
+    try:
+        assert instance.module.data_to_json() is None
+        assert seen == ["params", "params"]
+    finally:
+        instance.module.close()

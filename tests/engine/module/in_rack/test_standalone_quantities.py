@@ -87,7 +87,7 @@ def test_standalone_native_reference(reference: dict[str, Any]) -> None:
 
 @pytest.mark.parametrize("quantity_class", [ParamQuantity, SwitchQuantity])
 def test_ui_virtuals_base_calls_and_errors(quantity_class: type[ParamQuantity]) -> None:
-    # Call through bound base descriptors, not merely Python method lookup.
+    # Explicit base descriptors run the declared base implementation, not the Python override.
     for name, result, args in [
         ("get_display_value", 7.0, ()),
         ("set_display_value", None, (4.0,)),
@@ -111,28 +111,33 @@ def test_ui_virtuals_base_calls_and_errors(quantity_class: type[ParamQuantity]) 
 
         cls = type("Custom", (quantity_class,), {name: answer})
         q = cls()
-        # Quantity's descriptor, ParamQuantity's own binding of the SDK override
-        # and, for display strings, SwitchQuantity's: all dispatch to Python.
+        # Each descriptor is its own C++ base, including intermediate classes.
+        # Actual native virtual dispatch is covered for every case by
+        # tests/trampolines/in_rack/test_reentry.py (including callback errors).
         bases: list[type] = [ParamQuantity] if name == "get_description" else [Quantity, ParamQuantity]
         if quantity_class is SwitchQuantity and "display_value_string" in name:
             bases.append(SwitchQuantity)
         for base in bases:
-            assert getattr(base, name)(q, *args) == result
-        assert calls == [args] * len(bases)
+            assert getattr(base, name)(q, *args) == getattr(base, name)(quantity_class(), *args)
+        assert calls == []
+        assert getattr(q, name)(*args) == result
+        assert calls == [args]
 
         def fail(self: object, *values: object) -> object:
             raise ValueError("callback failure")
 
         cls = type("Failing", (quantity_class,), {name: fail})
         for base in bases:
-            with pytest.raises(ValueError, match="callback failure"):
-                getattr(base, name)(cls(), *args)
+            assert getattr(base, name)(cls(), *args) == getattr(base, name)(quantity_class(), *args)
+        with pytest.raises(ValueError, match="callback failure"):
+            getattr(cls(), name)(*args)
 
     class Labeled(quantity_class):  # type: ignore[misc, valid-type]
         def get_label(self) -> str:
             return super().get_label() + " suffix"  # type: ignore[no-any-return]
 
-    assert Quantity.get_label(Labeled()) == "#0 suffix"
+    assert Quantity.get_label(Labeled()) == ""  # explicitly Quantity's base, not ParamQuantity's
+    assert Labeled().get_string().split(":", 1)[0] == "#0 suffix"  # SwitchQuantity omits an empty display
 
     class Formatted(quantity_class):  # type: ignore[misc, valid-type]
         def get_label(self) -> str:
@@ -145,8 +150,11 @@ def test_ui_virtuals_base_calls_and_errors(quantity_class: type[ParamQuantity]) 
     formatted.param_id, formatted.min_value = 2**31 - 1, math.nan
     # Native overflow guards protect the SDK fallback, not Python overrides
     # that deliberately handle raw/unbounded metadata themselves.
-    assert Quantity.get_label(formatted) == "Safe label"
-    assert Quantity.get_display_value_string(formatted) == "Safe display"
+    assert formatted.get_string() == "Safe label: Safe display"  # native virtual calls still reach Python
+    assert Quantity.get_label(formatted) == ""
+    assert Quantity.get_display_value_string(formatted) == "0"
+    with pytest.raises(ValueError, match="overflows Rack's default label"):
+        ParamQuantity.get_label(formatted)
     for name in ("get_value", "set_value", "get_min_value", "get_max_value", "get_default_value"):
         with pytest.raises(TypeError, match="engine thread"):
             type("Forbidden", (quantity_class,), {name: lambda self: 1.0})

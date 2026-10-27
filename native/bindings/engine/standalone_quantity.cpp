@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // RP-14B2b3/b4: owned SDK quantities with weak module links. RP-14B2b6: the
 // same objects transferred into module slots by the class factories.
+#include "../support/overrides.hpp"
 #include "quantity.hpp"
 #include "components.hpp"
 #include "metadata.hpp"
@@ -61,12 +62,13 @@ struct StandaloneQuantity : QuantityTrampoline<Base, StandaloneGuard>, SlotTrans
 		// Keep the GIL: these UI-only objects can invoke Python virtuals. No
 		// other thread can close/reassign their main-thread-only owners here.
 	}
-	void setValue(float value) override {
+	void checkValueWrite() const override {
 		checkAccess(true);
-		// Rack cannot reach an unregistered module's slot, so a Rack caller
-		// here implies an engine-owned module (RP-16), where smoothing is safe.
 		if (!this->rackCaller() && this->module && this->smoothEnabled && !module::smoothingAllowed(this->module))
 			throw runtime::Ownership("smoothing targets require engine-owned modules; use set_immediate_value");
+	}
+	void setValue(float value) override {
+		checkValueWrite();
 		Trampoline::setValue(value);
 	}
 	float getValue() override { checkAccess(true); return Trampoline::getValue(); }
@@ -109,7 +111,7 @@ struct StandaloneQuantity : QuantityTrampoline<Base, StandaloneGuard>, SlotTrans
 		checkAccess(true);
 		json_t* result = nullptr;
 		runPythonHook("ParamQuantity.to_json", [&] {
-			if (py::function f = py::get_override(static_cast<const Base*>(this), "to_json")) {
+			if (auto f = rackpy::bindings::pythonOverride(static_cast<const Base*>(this), "to_json")) {
 				py::object value = f();
 				if (!PyDict_Check(value.ptr()))
 					throw py::type_error(std::string("ParamQuantity.to_json must return a dict (Rack adds the parameter's "
@@ -123,7 +125,7 @@ struct StandaloneQuantity : QuantityTrampoline<Base, StandaloneGuard>, SlotTrans
 		checkAccess(true);
 		bool handled = false;
 		runPythonHook("ParamQuantity.from_json", [&] {
-			if (py::function f = py::get_override(static_cast<const Base*>(this), "from_json")) {
+			if (auto f = rackpy::bindings::pythonOverride(static_cast<const Base*>(this), "from_json")) {
 				f(runtime::fromJson(rootJ));
 				handled = true;
 			}
@@ -231,47 +233,53 @@ void bindStandaloneQuantities(py::module_ engine) {
 		})
 		.def("get_immediate_value", [](Q& q) { return standalone(q, [](auto& a) { return a.immediate(); }); })
 		.def("set_immediate_value", [](Q& q, float value) { standalone(q, [value](auto& a) { a.immediate(value); }); }, py::arg("value"))
-		.def("get_description", [](Q& q) { return q.getDescription(); })
+		.def("get_description", [](Q& q) { return quantityTrampoline(q, false) ? q.Q::getDescription() : q.getDescription(); })
 		// ParamQuantity's own overrides of Quantity's UI virtuals, bound on this
-		// class so the mapping names the SDK declaration; dispatch reaches a
-		// Python override or ParamQuantity's implementation.
-		.def("get_label", [](Q& q) { return q.getLabel(); })
-		.def("get_unit", [](Q& q) { return q.getUnit(); })
-		.def("get_display_precision", [](Q& q) { return q.getDisplayPrecision(); })
-		.def("get_display_value", [](Q& q) { return q.getDisplayValue(); })
-		.def("set_display_value", [](Q& q, float value) { q.setDisplayValue(value); }, py::arg("display_value"))
-		.def("get_display_value_string", [](Q& q) { return q.getDisplayValueString(); })
-		.def("set_display_value_string", [](Q& q, std::string s) { q.setDisplayValueString(std::move(s)); }, py::arg("s"))
-		.def("reset", [](Q& q) { q.reset(); })
+		// class so super() reaches this SDK declaration without redispatching. Native
+		// subclasses still dispatch virtually.
+		.def("get_label", [](Q& q) {
+			if (!quantityTrampoline(q)) return q.getLabel();
+			if (q.name.empty() && q.paramId == std::numeric_limits<int>::max())
+				throw std::invalid_argument("parameter ID overflows Rack's default label");
+			return q.Q::getLabel();
+		})
+		.def("get_unit", [](Q& q) { return quantityTrampoline(q, false) ? q.Q::getUnit() : q.getUnit(); })
+		.def("get_display_precision", [](Q& q) { return quantityTrampoline(q, false) ? q.Q::getDisplayPrecision() : q.getDisplayPrecision(); })
+		.def("get_display_value", [](Q& q) { return quantityTrampoline(q, true) ? q.Q::getDisplayValue() : q.getDisplayValue(); })
+		.def("set_display_value", [](Q& q, float value) { quantityTrampoline(q, true) ? q.Q::setDisplayValue(value) : q.setDisplayValue(value); }, py::arg("display_value"))
+		.def("get_display_value_string", [](Q& q) { return quantityTrampoline(q, true) ? q.Q::getDisplayValueString() : q.getDisplayValueString(); })
+		.def("set_display_value_string", [](Q& q, std::string s) { quantityTrampoline(q, true) ? q.Q::setDisplayValueString(std::move(s)) : q.setDisplayValueString(std::move(s)); }, py::arg("s"))
+		.def("reset", [](Q& q) { quantityTrampoline(q, true) ? q.Q::reset() : q.reset(); })
 		// The mixed value and range methods: ParamQuantity's implementations
 		// (value through Rack's engine), or a laboratory subclass's override (RP-22C).
-		.def("get_value", [](Q& q) { return q.getValue(); })
-		.def("set_value", [](Q& q, float value) { q.setValue(value); }, py::arg("value"))
-		.def("get_min_value", [](Q& q) { return q.getMinValue(); })
-		.def("get_max_value", [](Q& q) { return q.getMaxValue(); })
-		.def("get_default_value", [](Q& q) { return q.getDefaultValue(); })
+		.def("get_value", [](Q& q) { return quantityTrampoline(q, true) ? q.Q::getValue() : q.getValue(); })
+		.def("set_value", [](Q& q, float value) { quantityTrampoline(q, true, true) ? q.Q::setValue(value) : q.setValue(value); }, py::arg("value"))
+		.def("get_min_value", [](Q& q) { return quantityTrampoline(q, false) ? q.Q::getMinValue() : q.getMinValue(); })
+		.def("get_max_value", [](Q& q) { return quantityTrampoline(q, false) ? q.Q::getMaxValue() : q.getMaxValue(); })
+		.def("get_default_value", [](Q& q) { return quantityTrampoline(q, false) ? q.Q::getDefaultValue() : q.getDefaultValue(); })
 		.def("to_json", [](Q& q) {
 			ErrorCapture capture;
-			std::unique_ptr<json_t, decltype(&json_decref)> json(q.toJson(), json_decref);
+			std::unique_ptr<json_t, decltype(&json_decref)> json(quantityTrampoline(q, true) ? q.Q::toJson() : q.toJson(), json_decref);
 			capture.rethrow();
 			return runtime::fromJson(json.get());
 		}, "Rack's ParamQuantity::toJson, or a Python override's dict. Needs Rack's live bound UI context when attached.")
 		.def("from_json", [](Q& q, py::handle data) {
 			std::unique_ptr<json_t, decltype(&json_decref)> json(runtime::toJson(data), json_decref);
 			ErrorCapture capture;
-			q.fromJson(json.get());
+			if (quantityTrampoline(q, true)) q.Q::fromJson(json.get());
+			else q.fromJson(json.get());
 			capture.rethrow();
 		}, py::arg("data"))
-		.def("randomize", [](Q& q) { q.randomize(); })
+		.def("randomize", [](Q& q) { quantityTrampoline(q, true) ? q.Q::randomize() : q.randomize(); })
 		.def("set_smooth_value", [](Q& q, float value) {
 			guard(q);
 			deprecated("set_smooth_value is deprecated in Rack; use set_value");
-			q.setValue(value);
+			quantityTrampoline(q, true, true) ? q.Q::setValue(value) : q.setValue(value);
 		}, py::arg("value"))
 		.def("get_smooth_value", [](Q& q) {
 			guard(q);
 			deprecated("get_smooth_value is deprecated in Rack; use get_value");
-			return q.getValue();
+			return quantityTrampoline(q, true) ? q.Q::getValue() : q.getValue();
 		});
 	cls.def_property("param_id", [](Q& q) { guard(q); return q.paramId; }, [](Q& q, int id) {
 		standalone(q, [](auto& alias) { alias.guard(); alias.requireIdentityEdit(); });
@@ -295,8 +303,14 @@ void bindStandaloneQuantities(py::module_ engine) {
 	py::classh<S, Q, StandaloneQuantity<S>>(engine, "SwitchQuantity",
 		"rack::engine::SwitchQuantity: mutable labels, weak module link, UI-safe overrides; transferable to a module slot.")
 		.def(py::init_alias<>())
-		.def("get_display_value_string", [](S& q) { return q.getDisplayValueString(); })
-		.def("set_display_value_string", [](S& q, std::string s) { q.setDisplayValueString(std::move(s)); }, py::arg("s"))
+		.def("get_display_value_string", [](S& q) {
+			if (!quantityTrampoline(q, true)) return q.getDisplayValueString();
+			double index = std::floor(q.getValue() - q.getMinValue());
+			if (!std::isfinite(index) || index < std::numeric_limits<int>::min() || index > std::numeric_limits<int>::max())
+				throw std::invalid_argument("switch label index cannot be represented as an integer");
+			return q.S::getDisplayValueString();
+		})
+		.def("set_display_value_string", [](S& q, std::string s) { quantityTrampoline(q, true) ? q.S::setDisplayValueString(std::move(s)) : q.setDisplayValueString(std::move(s)); }, py::arg("s"))
 		.def_property("labels", [](py::object self) {
 			guard(self.cast<S&>());
 			return ownedSwitchLabels(self);

@@ -30,7 +30,8 @@ assert quantity.module is module and quantity.get_param() is module.params[0]
 quantity.module = None
 module.close()
 assert quantity.get_param() is None
-assert Quantity.get_label(quantity) == "Pitch (preview)"  # native virtual dispatch
+assert Quantity.get_label(quantity) == ""  # explicitly Quantity's base implementation
+assert quantity.get_string() == "Pitch (preview): 0 V"  # native getString dispatches to the label override
 assert quantity.get_description().startswith("An unattached")
 
 switch = SwitchQuantity()

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
+#include "../support/overrides.hpp"
 #include "managed.hpp"
 #include <functional>
 #include <string>
@@ -164,7 +165,7 @@ void trampolineEvent(const Base* self, const std::shared_ptr<State>& state, cons
 	bool answered = false;
 	runtime::callPython(name, [&] {
 		checked(state);
-		if (auto f = py::get_override(self, name)) {
+		if (auto f = rackpy::bindings::pythonOverride(self, name)) {
 			auto scope = std::make_shared<Scope>();
 			scope->context = state->token->context;
 			ScopeEnd end{scope};

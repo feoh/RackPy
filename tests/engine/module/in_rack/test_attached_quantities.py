@@ -243,9 +243,15 @@ def test_attached_ui_override_reentry_and_base_errors() -> None:
     q = Closing()
     q.module, q.param_id = m, 0
     with pytest.raises(ValueError, match="callback failed"):
-        ParamQuantity.get_description(q)
+        q.get_description()
+    assert ParamQuantity.get_description(q) == ""  # explicit base does not invoke the failing override
     assert q.module is m
-    assert Quantity.get_label(q) == "#1 detached"
+    if _rackpy_host.bound_context_generation() is not None:
+        assert q.get_string() == "#1 detached: 0"  # Rack's getString invokes the label virtual
+    else:
+        # The no-context startup run cannot call attached value/display code.
+        # Live-Rack coverage above proves native dispatch; this still checks teardown.
+        assert q.get_label() == "#1 detached"
     assert owner_of(q) is None and q.get_value() == 0
 
     if _rackpy_host.bound_context_generation() is not None:
@@ -258,5 +264,5 @@ def test_attached_ui_override_reentry_and_base_errors() -> None:
 
         display = ClosingDisplay()
         display.module, display.param_id = m, 0
-        Quantity.set_display_value(display, 0.5)
+        Quantity.set_display_value_string(display, "0.5")  # Rack's parser calls virtual setDisplayValue
         assert owner_of(display) is None and display.get_value() == 0

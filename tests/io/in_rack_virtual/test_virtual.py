@@ -205,3 +205,35 @@ def test_runnable_virtual_audio_snippet() -> None:
     scope: dict[str, Any] = {}
     exec(compile(path.read_text(), str(path), "exec"), scope)
     assert scope["render"](4) == [0.0, 0.25, 0.5, 0.75]
+
+
+def test_audio_same_port_native_stream_reentry_and_nonvirtual_super() -> None:
+    driver = audio.PythonDriver("Reentrant audio")
+    device = driver.add_device("Offline", 0, 0)
+    audio.add_driver(4331, driver)
+    calls = 0
+    recursive = False
+
+    class Reentrant(audio.Port):
+        def on_start_stream(self) -> None:
+            nonlocal calls
+            calls += 1
+            super().on_start_stream()  # no-op, not virtual redispatch
+            if recursive or calls == 1:
+                device.start_stream()
+
+    port = Reentrant()
+    port.set_driver_id(4331)
+    port.set_device_id(device.id)
+    try:
+        device.start_stream()
+        assert calls == 2
+        calls, recursive = 0, True
+        with pytest.raises(RecursionError, match="overrides nested more than 64"):
+            device.start_stream()
+        assert calls == 64
+        recursive = False
+        device.start_stream()
+        assert calls == 65
+    finally:
+        port.set_device_id(-1)

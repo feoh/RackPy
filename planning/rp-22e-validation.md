@@ -50,23 +50,23 @@ release claim. Decisions: [rp-22-slices.md](rp-22-slices.md); explanation:
   drivers. Like laboratory quantities, disabling the laboratory prevents
   new laboratory construction; it does not revoke existing generators.
 
-## Known dispatch limitation (separate follow-up)
+## Dispatch limitation found in RP-22E; subsequently corrected
 
-The shared `overrideOrVoid` helper calls pybind11's `get_override`, whose
-same-object/same-name Python-frame check suppresses reentrant dispatch.
-When a Python `on_message` causes another native generator method to call
-`onMessage` on that same generator, the nested message goes to the native
-recorder, **not** to the Python override as it would in C++.
+The original RP-22E tests pinned a divergence: pybind11's `get_override`
+Python-frame check suppressed same-object/same-name native reentry and sent
+the nested generator message to the recorder instead of the Python override.
+That was an explicitly documented limitation of this historical slice, not
+C++-equivalent behavior.
 
-The supervisor explicitly required keeping the shared helper rather than
-introducing a MidiGenerator-only dispatch policy. The in-Rack test
-`test_reentrant_same_generator_uses_the_recorder_known_pybind11_limitation`
-pins this divergence: Python receives the note-on once, and the nested CC
-message is recorded natively. The manifest notes and explanation state the
-limitation. The cross-cutting fix is tracked separately as
-`tk-rackpy-trampolines-suppress-same-object-re-entra-0abce9` (affecting other
-trampolines too). This slice does not claim exact C++ reentrant callback
-semantics or a fix for that follow-up.
+The cross-family follow-up
+`tk-rackpy-trampolines-suppress-same-object-re-entra-0abce9` replaces that
+resolver and audits every super path. The pinned test is now
+`test_reentrant_same_generator_dispatches_as_cpp`: Python receives both the
+note-on and the nested controller message; explicit `super()` records each
+once, in callback completion order. Unbounded native reentry raises
+`RecursionError` at 64 live override calls. See
+[the follow-up audit and validation](trampoline-reentry-validation.md) for
+fresh evidence; the original counts below are historical, not rerun counts.
 
 ## Commands and outcomes
 
@@ -124,15 +124,15 @@ The new generator suite covers:
 - Synchronous generation from a laboratory module's three Bench frames.
 - Disabled construction and normal-mode/mixin refusal, plus the native
   opt-in bypass regressions described above.
-- Rack-thread refusal with native fallback, and the explicitly pinned
-  reentrant dispatch limitation.
+- Rack-thread refusal with native fallback, and the originally pinned
+  reentrant dispatch limitation (now corrected by the follow-up above).
 
 Only Linux x86_64 is exercised. macOS, Windows, Rack Pro, real audio/MIDI
 hardware and actual driver-thread scheduling are not tested. The
 Rack-context worker probe establishes the refusal guard, not a hardware
 or real-time performance claim. No full unbounded deadlock-probe host
 suite, distribution/toolchain build, release publication or push was run.
-The separate shared-helper reentry follow-up remains open.
+The shared-helper reentry correction is recorded separately above.
 
 ## After integration onto RP-23A
 

@@ -1,5 +1,6 @@
 #pragma once
 // SPDX-License-Identifier: GPL-3.0-or-later
+#include "../support/overrides.hpp"
 #include "events.hpp"
 #include "drawing.hpp"
 #include <optional>
@@ -61,7 +62,7 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 		std::optional<Result> value;
 		runtime::callPython(name, [&] {
 			checked(lifetime);
-			if (auto f = py::get_override(static_cast<const Base*>(this), name)) {
+			if (auto f = rackpy::bindings::pythonOverride(static_cast<const Base*>(this), name)) {
 				CallbackGuard guard;
 				value = f(std::forward<Args>(args)...).template cast<Result>();
 			}
@@ -83,7 +84,7 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 		std::optional<rack::math::Vec> valueOut;
 		runtime::callPython("Widget.get_relative_offset", [&] {
 			checked(lifetime);
-			if (auto f = py::get_override(static_cast<const Base*>(this), "get_relative_offset")) {
+			if (auto f = rackpy::bindings::pythonOverride(static_cast<const Base*>(this), "get_relative_offset")) {
 				CallbackGuard guard;
 				valueOut = f(value, wrapper(ancestor)).template cast<rack::math::Vec>();
 			}
@@ -98,7 +99,7 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 		std::optional<float> zoom;
 		runtime::callPython("Widget.get_relative_zoom", [&] {
 			checked(lifetime);
-			if (auto f = py::get_override(static_cast<const Base*>(this), "get_relative_zoom")) {
+			if (auto f = rackpy::bindings::pythonOverride(static_cast<const Base*>(this), "get_relative_zoom")) {
 				CallbackGuard guard;
 				zoom = f(wrapper(ancestor)).template cast<float>();
 			}
@@ -116,7 +117,7 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 		bool answered = false;
 		runtime::callPython("draw_vg", [&] {
 			checked(lifetime);
-			if (auto f = py::get_override(static_cast<const Base*>(this), "draw_vg")) {
+			if (auto f = rackpy::bindings::pythonOverride(static_cast<const Base*>(this), "draw_vg")) {
 				auto scope = std::make_shared<Scope>();
 				scope->context = lifetime->token->context;
 				ScopeEnd end{scope};
@@ -133,7 +134,7 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 	void drawLayer(const W::DrawArgs& args, int layer) override { drawImpl(args, layer, true); }
 	void drawImpl(const W::DrawArgs& args, int layer, bool layered) noexcept {
 		pyDraw(layered ? "draw_layer" : "draw", args,
-			[&](py::function& f, py::object value) { if (layered) f(value, layer); else f(value); },
+			[&](auto& f, py::object value) { if (layered) f(value, layer); else f(value); },
 			[&] {
 				if (layered) Base::drawLayer(args, layer);
 				else { validateNativeDraw(*this, args); Base::draw(args); }
@@ -150,7 +151,7 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 		bool answered = false;
 		runtime::callPython(name, [&] {
 			checked(lifetime);
-			if (auto f = py::get_override(static_cast<const Base*>(this), name)) {
+			if (auto f = rackpy::bindings::pythonOverride(static_cast<const Base*>(this), name)) {
 				auto scope = std::make_shared<Scope>();
 				scope->context = lifetime->token->context;
 				ScopeEnd end{scope};
@@ -173,7 +174,7 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 		bool answered = false;
 		runtime::callPython(name, [&] {
 			checked(lifetime);
-			if (auto f = py::get_override(static_cast<const Base*>(this), name)) {
+			if (auto f = rackpy::bindings::pythonOverride(static_cast<const Base*>(this), name)) {
 				CallbackGuard guard;
 				answered = true;
 				f(std::forward<Args>(args)...);
@@ -192,7 +193,7 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 		runtime::callPython("Widget.step", [&] {
 			checked(lifetime);
 			CallbackGuard guard(lifetime.get());
-			if (auto f = py::get_override(static_cast<const Base*>(this), "step")) {
+			if (auto f = rackpy::bindings::pythonOverride(static_cast<const Base*>(this), "step")) {
 				overridden = true;
 				f();
 			}
@@ -213,7 +214,7 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 			bool answered = false;
 			runtime::callPython("draw_framebuffer", [&] {
 				checked(lifetime);
-				if (auto f = py::get_override(static_cast<const Base*>(this), "draw_framebuffer")) {
+				if (auto f = rackpy::bindings::pythonOverride(static_cast<const Base*>(this), "draw_framebuffer")) {
 					CallbackGuard guard;
 					answered = true;
 					f();

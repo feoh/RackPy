@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // RuntimeProbe: a module, a widget and a transferable child widget that let
 // tests exercise the runtime in Rack. Test hooks only; see testing.hpp.
+#include "../bindings/support/overrides.hpp"
 #include "testing.hpp"
 
 #include "../bindings/dsp/dsp.hpp"
 #include "../bindings/engine/components.hpp"
 #include "../bindings/engine/module.hpp"
-#include "../bindings/widget/managed.hpp"
+#include "../bindings/widget/behavior.hpp"
+#include "../bindings/support/hooks.hpp"
 #include "../tests/quantity_reference.hpp"
 #include "../plugin/model.hpp"
 #include "../bindings/plugin.hpp"
@@ -178,11 +180,17 @@ struct ProbeChild : rack::widget::Widget {
 	}
 };
 
+/** A foreign/native subclass, deliberately NOT a RackPy trampoline. */
+struct NativeQuantity : rack::Quantity {
+	float getValue() override { return 0.75f; }
+	std::string getLabel() override { return "native subclass"; }
+};
+
 struct PyProbeChild : ProbeChild, py::trampoline_self_life_support {
 	void onRemoved() override {
 		// Rack calls this on the main thread; take the GIL like any Rack-to-Python call.
 		callPython("ProbeChild.on_removed", [this] {
-			if (py::function f = py::get_override(static_cast<const ProbeChild*>(this), "on_removed"))
+			if (auto f = rackpy::bindings::pythonOverride(static_cast<const ProbeChild*>(this), "on_removed"))
 				f();
 		});
 	}
@@ -252,8 +260,92 @@ void define(py::module_ m) {
 
 	py::classh<ProbeChild, PyProbeChild>(m, "ProbeChild")
 		.def(py::init<>())
-		.def("on_removed", &ProbeChild::onRemoved)
+		.def("on_removed", [](ProbeChild& c) {
+			if (dynamic_cast<PyProbeChild*>(&c)) c.ProbeChild::onRemoved();
+			else c.onRemoved();
+		})
 		.def_property_readonly("alive", [](const ProbeChild& c) { return c.token->alive(); });
+
+	m.def("native_quantity", []() -> std::unique_ptr<rack::Quantity> { return std::make_unique<NativeQuantity>(); });
+	// Explicit representative virtuals only: not a reflective entry point or production API.
+	m.def("call_virtual", [](py::object object, const std::string& name, py::args args) -> py::object {
+		if (py::isinstance<rack::Quantity>(object)) {
+			auto& q = object.cast<rack::Quantity&>();
+			if (name == "get_label") return py::cast(q.getLabel());
+			if (name == "reset") { q.reset(); return py::none(); }
+			if (name == "randomize") { q.randomize(); return py::none(); }
+			if (name == "get_display_value") return py::cast(q.getDisplayValue());
+			if (name == "set_display_value") { q.setDisplayValue(args[0].cast<float>()); return py::none(); }
+			if (name == "get_display_precision") return py::cast(q.getDisplayPrecision());
+			if (name == "get_display_value_string") return py::cast(q.getDisplayValueString());
+			if (name == "set_display_value_string") { q.setDisplayValueString(args[0].cast<std::string>()); return py::none(); }
+			if (name == "get_unit") return py::cast(q.getUnit());
+			if (name == "get_string") return py::cast(q.getString());
+			if (name == "get_description") {
+				auto* p = dynamic_cast<rack::engine::ParamQuantity*>(&q);
+				if (!p) throw py::type_error("get_description needs ParamQuantity");
+				return py::cast(p->getDescription());
+			}
+			if (name == "to_json") {
+				auto* p = dynamic_cast<rack::engine::ParamQuantity*>(&q);
+				if (!p) throw py::type_error("to_json needs ParamQuantity");
+				bindings::ErrorCapture capture;
+				std::unique_ptr<json_t, decltype(&json_decref)> data(p->toJson(), json_decref);
+				capture.rethrow();
+				return fromJson(data.get());
+			}
+		}
+		if (py::isinstance<rack::engine::PortInfo>(object) && name == "get_name")
+			return py::cast(object.cast<rack::engine::PortInfo&>().getName());
+		if (py::isinstance<rack::engine::LightInfo>(object) && name == "get_name")
+			return py::cast(object.cast<rack::engine::LightInfo&>().getName());
+		if (py::isinstance<rack::history::Action>(object)) {
+			auto& a = object.cast<rack::history::Action&>();
+			if (name == "undo") { a.undo(); return py::none(); }
+			if (name == "redo") { a.redo(); return py::none(); }
+		}
+		if (py::isinstance<rack::midi::Port>(object) && name == "get_device_ids")
+			return py::cast(object.cast<rack::midi::Port&>().getDeviceIds());
+		if (py::isinstance<ProbeChild>(object) && name == "on_removed") {
+			object.cast<ProbeChild&>().onRemoved(); return py::none();
+		}
+		if (py::isinstance<rack::widget::Widget>(object)) {
+			auto& w = widgets::checked(widgets::state(object));
+			if (name == "step") { w.step(); return py::none(); }
+			if (name == "draw") {
+				auto ref = widgets::eventData(args[0]);
+				w.draw(widgets::nativeEvent<rack::widget::Widget::DrawArgs>(ref, "DrawArgs"));
+				return py::none();
+			}
+			if (name == "draw_framebuffer") {
+				auto* frame = dynamic_cast<rack::widget::FramebufferWidget*>(&w);
+				if (!frame || !frame->getFramebuffer()) throw py::value_error("render a framebuffer first");
+				frame->drawFramebuffer(); return py::none();
+			}
+			if (name == "on_dirty") {
+				rack::widget::Widget::DirtyEvent e;
+				w.onDirty(e); return py::none();
+			}
+			if (name == "get_relative_zoom") return py::cast(w.getRelativeZoom(nullptr));
+			if (name == "create_child_menu") {
+				auto* item = dynamic_cast<rack::ui::MenuItem*>(&w);
+				if (!item) throw py::type_error("create_child_menu needs MenuItem");
+				std::unique_ptr<rack::ui::Menu> menu(item->createChildMenu());
+				return py::bool_(bool(menu));
+			}
+			if (name == "get_text_position") {
+				auto* field = dynamic_cast<rack::ui::TextField*>(&w);
+				if (!field) throw py::type_error("get_text_position needs TextField");
+				return py::cast(field->getTextPosition(args[0].cast<rack::math::Vec>()));
+			}
+			if (name == "init_param_quantity") {
+				auto* p = dynamic_cast<rack::app::ParamWidget*>(&w);
+				if (!p) throw py::type_error("init_param_quantity needs ParamWidget");
+				p->initParamQuantity(); return py::none();
+			}
+		}
+		throw py::value_error("unsupported call_virtual object/method");
+	}, py::arg("object"), py::arg("name"));
 
 	m.def("set_step_callback", [](py::object f) {
 		requireMainThread("set_step_callback");

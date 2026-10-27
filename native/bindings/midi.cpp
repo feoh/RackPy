@@ -26,6 +26,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include <rack.hpp>
@@ -222,7 +223,7 @@ void deliverMessages() noexcept {
 			for (auto& message : due) {
 				if (std::find(ports.begin(), ports.end(), p) == ports.end())
 					return;
-				py::function f = py::get_override(self, "on_message");
+				auto f = rackpy::bindings::pythonOverride(self, "on_message");
 				if (!f)
 					return;  // nothing to deliver to
 				f(message);
@@ -578,6 +579,18 @@ void disconnectOutputDevice(m::OutputDevice& device) noexcept {
 	}
 }
 
+/** Port has pure virtual methods: Python ports' super path uses the concrete
+Input/Output implementation. Native ports still dispatch through their vtable. */
+template<class Base, class Virtual>
+auto portImplementation(m::Port& p, Base base, Virtual virtualCall) {
+	checked(p);
+	if (dynamic_cast<Tracked*>(&p)) {
+		if (auto* input = dynamic_cast<m::Input*>(&p)) return base(*input);
+		return base(static_cast<m::Output&>(p));
+	}
+	return virtualCall(p);
+}
+
 void bindMidi(py::module_ mod) {
 	py::class_<m::Message>(mod, "Message",
 		"Rack's MIDI message: its bytes (3 zeros at first) and the engine frame it belongs to (-1: now). The "
@@ -769,12 +782,32 @@ void bindMidi(py::module_ mod) {
 			return deviceObject(self, p.getDevice(), dynamic_cast<m::Input*>(&p) != nullptr);
 		})
 		.def("get_device_id", [](m::Port& p) { return checked(p).getDeviceId(); })
-		.def("set_device_id", [](m::Port& p, int id) { checked(p).setDeviceId(id); }, py::arg("device_id"),
+		.def("set_device_id", [](m::Port& p, int id) {
+			return portImplementation(p,
+				[id](auto& value) { using T = std::decay_t<decltype(value)>; return value.T::setDeviceId(id); },
+				[id](m::Port& value) { return value.setDeviceId(id); });
+		}, py::arg("device_id"),
 			"Rack's: subscribes to the driver's device (-1: none).")
-		.def("get_device_ids", [](m::Port& p) { return checked(p).getDeviceIds(); })
-		.def("get_default_device_id", [](m::Port& p) { return checked(p).getDefaultDeviceId(); })
-		.def("get_device_name", [](m::Port& p, int id) { return checked(p).getDeviceName(id); }, py::arg("device_id"))
-		.def("get_channels", [](m::Port& p) { return checked(p).getChannels(); })
+		.def("get_device_ids", [](m::Port& p) {
+			return portImplementation(p,
+				[](auto& value) { using T = std::decay_t<decltype(value)>; return value.T::getDeviceIds(); },
+				[](m::Port& value) { return value.getDeviceIds(); });
+		})
+		.def("get_default_device_id", [](m::Port& p) {
+			return portImplementation(p,
+				[](auto& value) { using T = std::decay_t<decltype(value)>; return value.T::getDefaultDeviceId(); },
+				[](m::Port& value) { return value.getDefaultDeviceId(); });
+		})
+		.def("get_device_name", [](m::Port& p, int id) {
+			return portImplementation(p,
+				[id](auto& value) { using T = std::decay_t<decltype(value)>; return value.T::getDeviceName(id); },
+				[id](m::Port& value) { return value.getDeviceName(id); });
+		}, py::arg("device_id"))
+		.def("get_channels", [](m::Port& p) {
+			return portImplementation(p,
+				[](auto& value) { using T = std::decay_t<decltype(value)>; return value.T::getChannels(); },
+				[](m::Port& value) { return value.getChannels(); });
+		})
 		.def("get_channel", [](m::Port& p) { return checked(p).getChannel(); })
 		.def("set_channel", [](m::Port& p, int channel) { checked(p).setChannel(channel); }, py::arg("channel"))
 		.def("get_channel_name", [](m::Port& p, int channel) { return checked(p).getChannelName(channel); },

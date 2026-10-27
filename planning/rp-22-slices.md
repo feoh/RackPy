@@ -142,12 +142,13 @@ explanation page carries the description.
   bypass enablement. Rack never holds these Python-owned generators; a call
   without the GIL goes through `callPython`, which refuses Rack's threads.
 
-- **Known dispatch divergence.** The shared `overrideOrVoid` helper uses
-  pybind11's same-object/same-name frame check. Reentry through a different
-  native generator method from `on_message` records the nested message,
-  rather than invoking Python again as a C++ override would. This is pinned
-  by a test, not fixed locally; the cross-cutting follow-up is
-  `tk-rackpy-trampolines-suppress-same-object-re-entra-0abce9`.
+- **Dispatch divergence corrected by the shared follow-up.** RP-22E
+  originally pinned pybind11's suppression of same-object/same-name native
+  reentry. `tk-rackpy-trampolines-suppress-same-object-re-entra-0abce9` now
+  dispatches the nested message to Python as C++ would, after auditing all
+  trampoline super paths. Unbounded native-to-Python nesting is limited to
+  64 calls; `super().on_message` remains the nonvirtual recorder. See the
+  [cross-family audit and validation](trampoline-reentry-validation.md).
 
 **RP-22D — Inventory, measurements and closing probes**
 (`tk-rackpy-22d-callback-inventory-measured-laborator-f8465c`). Validation:
@@ -168,5 +169,5 @@ keep them `planned`, retaining native-path names and evidence. Follow-ups:
 - **RP-28F** (`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`):
   UI-safe subclass trampolines for the 21 host-view-only callbacks.
 
-These gaps and the shared-helper reentry task above remain full-release
-blockers; closing validation does not imply that RP-22 or full coverage is complete.
+These gaps remain full-release blockers (the shared-helper reentry task above
+is fixed); closing validation does not imply that RP-22 or full coverage is complete.

@@ -173,7 +173,8 @@ def test_quantity_json_overrides() -> None:
         assert tagged.to_json() == {"value": 4, "tag": "kept"}
         tagged.from_json({"value": 7})
         assert calls == [{"value": 7}] and m.params[0].value == 7
-        assert ParamQuantity.to_json(tagged) == {"value": 7, "tag": "kept"}
+        assert ParamQuantity.to_json(tagged) == {"value": 7}  # explicitly the C++ base, no tag
+        assert tagged.to_json() == {"value": 7, "tag": "kept"}
         with pytest.raises(ValueError, match="quantity to_json failed"):
             m.params_to_json()  # Rack's paramsToJson reached the failing override
         with pytest.raises(ValueError, match="quantity to_json failed"):

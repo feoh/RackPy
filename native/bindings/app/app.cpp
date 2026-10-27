@@ -210,14 +210,14 @@ void requireLights(rack::engine::Module& m, int first, size_t colors) {
 template <class Base>
 struct LightWidgetT : Widget<Base> {
 	void drawBackground(const W::DrawArgs& args) override {
-		this->pyDraw("draw_background", args, [](py::function& f, py::object v) { f(v); },
+		this->pyDraw("draw_background", args, [](auto& f, py::object v) { f(v); },
 			[this, &args] { Base::drawBackground(args); });
 	}
 	void drawLight(const W::DrawArgs& args) override {
-		this->pyDraw("draw_light", args, [](py::function& f, py::object v) { f(v); }, [this, &args] { Base::drawLight(args); });
+		this->pyDraw("draw_light", args, [](auto& f, py::object v) { f(v); }, [this, &args] { Base::drawLight(args); });
 	}
 	void drawHalo(const W::DrawArgs& args) override {
-		this->pyDraw("draw_halo", args, [](py::function& f, py::object v) { f(v); }, [this, &args] { Base::drawHalo(args); });
+		this->pyDraw("draw_halo", args, [](auto& f, py::object v) { f(v); }, [this, &args] { Base::drawHalo(args); });
 	}
 };
 

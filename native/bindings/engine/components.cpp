@@ -145,9 +145,15 @@ void identityField(py::classh<Info, InfoTrampoline<Info>>& cls, const char* name
 		});
 }
 
-template <typename Info, typename R>
-void infoMethod(py::classh<Info, InfoTrampoline<Info>>& cls, const char* name, R (Info::*method)(), const char* doc = "") {
-	cls.def(name, [method](Info& info) { infoAlias(info).check(); return (info.*method)(); }, doc);
+template <typename Info, typename R, typename Base>
+void infoMethod(py::classh<Info, InfoTrampoline<Info>>& cls, const char* name, R (Info::*method)(), Base base, const char* doc = "") {
+	cls.def(name, [method, base](Info& info) {
+		if (auto* alias = dynamic_cast<InfoTrampoline<Info>*>(&info)) {
+			alias->check();
+			return base(info);
+		}
+		return (info.*method)();
+	}, doc);
 }
 
 template <typename Info>
@@ -395,9 +401,9 @@ void bindComponents(py::module_ m) {
 	identityField(portInfo, "port_id", &PortInfo::portId);
 	infoField(portInfo, "name", &PortInfo::name);
 	infoField(portInfo, "description", &PortInfo::description);
-	infoMethod(portInfo, "get_name", &PortInfo::getName);
-	infoMethod(portInfo, "get_full_name", &PortInfo::getFullName, "get_name() with \" input\" or \" output\" appended.");
-	infoMethod(portInfo, "get_description", &PortInfo::getDescription);
+	infoMethod(portInfo, "get_name", &PortInfo::getName, [](PortInfo& info) { return info.PortInfo::getName(); });
+	infoMethod(portInfo, "get_full_name", &PortInfo::getFullName, [](PortInfo& info) { return info.PortInfo::getFullName(); }, "get_name() with \" input\" or \" output\" appended.");
+	infoMethod(portInfo, "get_description", &PortInfo::getDescription, [](PortInfo& info) { return info.PortInfo::getDescription(); });
 	auto lightInfo = py::classh<LightInfo, InfoTrampoline<LightInfo>>(m, "LightInfo",
 		"rack::engine::LightInfo: a light's name and description. A class factory may transfer it into a module slot.");
 	lightInfo.def(py::init_alias<>())
@@ -407,8 +413,8 @@ void bindComponents(py::module_ m) {
 	identityField(lightInfo, "light_id", &LightInfo::lightId);
 	infoField(lightInfo, "name", &LightInfo::name);
 	infoField(lightInfo, "description", &LightInfo::description);
-	infoMethod(lightInfo, "get_name", &LightInfo::getName);
-	infoMethod(lightInfo, "get_description", &LightInfo::getDescription);
+	infoMethod(lightInfo, "get_name", &LightInfo::getName, [](LightInfo& info) { return info.LightInfo::getName(); });
+	infoMethod(lightInfo, "get_description", &LightInfo::getDescription, [](LightInfo& info) { return info.LightInfo::getDescription(); });
 }
 
 }  // namespace bindings

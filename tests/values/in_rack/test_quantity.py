@@ -154,3 +154,26 @@ def test_reset_and_randomize_may_be_overridden() -> None:
     assert calls == ["reset"] and q.get_value() == 0.25
     q.randomize()
     assert 0.0 <= q.get_value() <= 1.0
+
+
+def test_same_quantity_reentry_through_racks_get_string_and_super() -> None:
+    seen: list[str] = []
+
+    class Reentrant(ValueQuantity):
+        def get_label(self) -> str:
+            seen.append("label")
+            if len(seen) == 1:
+                assert self.get_string() == "Base: 0"
+            return super().get_label()
+
+    q = Reentrant(0, 1, 0, "Base", "")
+    assert q.get_string() == "Base: 0" and seen == ["label", "label"]
+
+
+def test_same_quantity_unbounded_reentry_is_a_python_error() -> None:
+    class Recursive(ValueQuantity):
+        def get_label(self) -> str:
+            return self.get_string()
+
+    with pytest.raises(RecursionError, match="overrides nested more than 64"):
+        Recursive().get_string()

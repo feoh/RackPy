@@ -107,7 +107,7 @@ struct PyAudioPort : a::Port {
 		if (!pythonDriving || !runtime::interpreterAlive())
 			return;
 		py::gil_scoped_acquire gil;
-		if (py::function f = py::get_override(static_cast<const a::Port*>(this), "process_buffer")) {
+		if (auto f = rackpy::bindings::pythonOverride(static_cast<const a::Port*>(this), "process_buffer")) {
 			py::object in = floatArray(input, inputSpan(inputStride, count));
 			py::object out = floatArray(output, outputSpan(outputStride, count));
 			f(in, inputStride, out, outputStride, count);
@@ -119,7 +119,7 @@ struct PyAudioPort : a::Port {
 		if (!pythonDriving || !runtime::interpreterAlive())
 			return;
 		py::gil_scoped_acquire gil;
-		if (py::function f = py::get_override(static_cast<const a::Port*>(this), "process_input"))
+		if (auto f = rackpy::bindings::pythonOverride(static_cast<const a::Port*>(this), "process_input"))
 			f(floatArray(input, inputSpan(inputStride, count)), inputStride, count);
 	}
 	void processOutput(float* output, int outputStride, int count) override {
@@ -127,7 +127,7 @@ struct PyAudioPort : a::Port {
 		if (!pythonDriving || !runtime::interpreterAlive())
 			return;
 		py::gil_scoped_acquire gil;
-		if (py::function f = py::get_override(static_cast<const a::Port*>(this), "process_output")) {
+		if (auto f = rackpy::bindings::pythonOverride(static_cast<const a::Port*>(this), "process_output")) {
 			py::object out = floatArray(output, outputSpan(outputStride, count));
 			f(out, outputStride, count);
 			copyBack(out, output, outputSpan(outputStride, count));
@@ -149,7 +149,7 @@ struct PyAudioPort : a::Port {
 	void stream(StreamEvent event) {
 		if (pythonDriving && runtime::interpreterAlive()) {  // on Python's thread: synchronously
 			py::gil_scoped_acquire gil;
-			if (py::function f = py::get_override(static_cast<const a::Port*>(this),
+			if (auto f = rackpy::bindings::pythonOverride(static_cast<const a::Port*>(this),
 					event == StreamEvent::Start ? "on_start_stream" : "on_stop_stream"))
 				f();
 			return;
@@ -181,7 +181,7 @@ void deliverEvents() noexcept {
 			for (StreamEvent event : due) {
 				if (std::find(ports.begin(), ports.end(), p) == ports.end())
 					return;
-				if (py::function f = py::get_override(self, event == StreamEvent::Start ? "on_start_stream" : "on_stop_stream"))
+				if (auto f = rackpy::bindings::pythonOverride(self, event == StreamEvent::Start ? "on_start_stream" : "on_stop_stream"))
 					f();
 			}
 		});

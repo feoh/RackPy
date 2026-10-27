@@ -180,17 +180,49 @@ def test_inherited_callbacks_and_late_monkeypatches_do_not_bypass_enablement() -
     assert seen == []
 
 
-def test_reentrant_same_generator_uses_the_recorder_known_pybind11_limitation() -> None:
-    """Known divergence from C++: get_override suppresses same-self/same-name frame reentry."""
+def test_reentrant_same_generator_dispatches_as_cpp() -> None:
+    """Native same-object reentry invokes Python again; super records each message once."""
     base: Any = laboratory.MidiGenerator[1]
     seen: list[list[int]] = []
 
     class Reentrant(base):  # type: ignore[misc]
         def on_message(self, message: Message) -> None:
             seen.append(message.bytes)
-            self.set_cc(12, 74)  # native code calls onMessage on this same object again
+            if message.get_status() == 0x9:
+                self.set_cc(12, 74)  # native code calls onMessage on this same object again
+            super().on_message(message)
 
     g = Reentrant()
     g.set_note_gate(60, True, 0)
-    assert seen == [[0x90, 60, 100]]  # C++ would dispatch the nested controller message here too
-    assert [m.bytes for m in g.take_messages()] == [[0xB0, 74, 12]]  # shared helper falls back to the recorder
+    assert seen == [[0x90, 60, 100], [0xB0, 74, 12]]
+    assert [m.bytes for m in g.take_messages()] == [[0xB0, 74, 12], [0x90, 60, 100]]
+
+
+def test_unbounded_generator_reentry_raises_recursion_error_and_recovers() -> None:
+    base: Any = laboratory.MidiGenerator[1]
+    seen = 0
+    recursive = True
+
+    class Recursive(base):  # type: ignore[misc]
+        def on_message(self, message: Message) -> None:
+            nonlocal seen
+            seen += 1
+            if recursive:
+                self.set_frame(seen)
+                self.set_clock(False)
+                self.set_clock(True)  # a new rising edge emits again
+            super().on_message(message)
+
+    g = Recursive()
+    with pytest.raises(RecursionError, match="overrides nested more than 64"):
+        g.set_clock(True)
+    assert seen == 64 and g.take_messages() == []
+    recursive = False
+    g.set_clock(False)
+    g.set_clock(True)
+    assert seen == 65 and len(g.take_messages()) == 1
+
+
+def test_private_virtual_test_hooks_are_absent_in_production() -> None:
+    if not _rackpy_host.TEST_HOOKS:
+        assert not hasattr(_rackpy_host, "_testing")

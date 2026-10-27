@@ -79,7 +79,7 @@ def callback_execution(record: dict[str, Any], entry: dict[str, Any]) -> str:
         if "MidiGenerator::" in name:
             return (
                 "Synchronous offline override: rackpy.laboratory.MidiGenerator[N].on_message; "
-                "same-object reentry blocker (RP-22E follow-up)."
+                "same-object reentry dispatches as in C++ (shared resolver, 64-call bound)."
             )
         if "OutputDevice::" in name:
             return (
@@ -122,8 +122,8 @@ def callback_paths(manifest: dict[str, Any], inputs: bm.Inputs) -> str:
         "The denominator is unchanged. No entry is promoted to verified by this report.",
         "",
         "**Laboratory means explicitly enabled, offline and main-thread only, never Rack's engine/driver threads.**",
-        "See [Callbacks and the laboratory](../explanation/callbacks.md) for restrictions, fidelity gaps and the open",
-        "same-object reentry blocker `tk-rackpy-trampolines-suppress-same-object-re-entra-0abce9`.",
+        "See [Callbacks and the laboratory](../explanation/callbacks.md) for restrictions, fidelity gaps and",
+        "re-entrant dispatch (fixed by `tk-rackpy-trampolines-suppress-same-object-re-entra-0abce9`).",
         "Native configured/queued driver adapters without a synchronous Python path remain full-release blockers:",
         "RP-22F (`tk-rackpy-22f-laboratory-python-paths-for-audio-and-65ccf3`). "
         "A callable name is not proof of an override.",

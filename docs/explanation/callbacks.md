@@ -41,9 +41,6 @@ status `planned`, retaining the existing native implementation and tests:
   `Scene` have borrowed host-view call wrappers but no Python subclass
   trampolines. RP-28F
   (`tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61`) owns them.
-- The shared trampoline's **same-object reentrant dispatch divergence**
-  described below remains open under
-  `tk-rackpy-trampolines-suppress-same-object-re-entra-0abce9`.
 
 None of these entries disappear from the denominator, and this inventory
 promotes nothing to `verified`. Laboratory paths prove only the documented
@@ -248,17 +245,41 @@ the native recorder answers; the test-hooks build probes that fallback.
 As with laboratory quantities, `enable()` gates creation; disabling the
 laboratory is not a revocation of already-created generators.
 
-**Known reentry limitation.** The shared trampoline helper uses pybind11's
-`get_override`, which suppresses dispatch when the current Python frame is
-already that same object's `on_message`. If an override calls another
-native generator method that emits a message on the same generator, that
-nested message goes to the native recorder, not back to Python. This
-**differs from C++ virtual dispatch**; `super().on_message` remains the
-explicit, non-virtual recorder call. Fixing the shared trampoline helper
-is the open cross-cutting task
-`tk-rackpy-trampolines-suppress-same-object-re-entra-0abce9`, not a claim of
-this slice. This affects other users of the shared override helper too;
-module laboratory dispatch uses its own explicit callback/nesting mechanism.
+## Re-entrant virtual calls and `super()`
+
+Native code that calls the same virtual again on the same Python object runs
+its Python override again, just as C++ virtual dispatch would. For example,
+an `on_message` override that calls a generator method which emits another
+message receives that nested message synchronously too. It is not silently
+sent to the native recorder. `super().on_message(message)` remains the
+explicit, non-virtual recorder call.
+
+For Python subclasses, a native base binding reached through `super()` or
+an explicit `Base.method(instance)` runs that **base implementation**, not
+the override. This applies across quantities, metadata, history, MIDI ports,
+widgets, UI and app controls. Native C++ subclasses (Rack's own, or another
+plugin's) still dispatch virtually when called through a base binding.
+Previously some bindings relied on pybind11's current-frame heuristic to
+avoid recursive `super()` calls; those explicit base calls could redispatch
+when made outside the override. They now consistently mean the base method
+for Python subclasses. Base implementations can themselves call *other*
+virtuals, which still reach Python normally.
+
+A shared per-thread guard allows at most **64 live native-to-Python override
+calls** (including argument/result conversion), across trampoline families, to bound C++ frames invisible to
+Python's recursion counter. Exceeding it raises `RecursionError` to a Python
+caller, or is contained/reported with that family's normal native fallback
+when Rack called. Attribute lookup itself is bounded too; lookup errors
+preserve pybind11's defaulted-attribute policy (no override, native fallback),
+rather than the invocation's error policy. The counter unwinds after an
+error, so subsequent calls still work. After overflow, an exhaustion latch
+refuses retries until the whole chain unwinds; this also bounds numeric
+casters that clear a conversion error and retry. Such return-conversion
+errors keep pybind11's normal outer `RuntimeError` instead of exposing the
+inner `RecursionError`. Laboratory module callbacks use their existing, separate
+200-level guard. Neither guard makes re-entering Rack's engine locks or a
+laboratory Bench safe; those operations remain refused. The source audit and validation are recorded in
+`planning/trampoline-reentry-validation.md`.
 
 ## Measuring laboratory callback costs
 

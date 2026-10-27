@@ -38,7 +38,8 @@ void bindMidi(py::module_ lab) {
 		}))
 		.def("send_message", [](OutputDevice& d, const m::Message& message) {
 			runtime::requireMainThread("using a laboratory MIDI device");
-			d.sendMessage(message);
+			if (dynamic_cast<PyOutputDevice*>(&d)) d.OutputDevice::sendMessage(message);
+			else d.sendMessage(message);
 		}, py::arg("message"), "Rack's OutputDevice::sendMessage: does nothing; a subclass receives each message here.")
 		.def("connect", [](OutputDevice& d, py::object output) {
 			requireEnabled("connecting a laboratory MIDI device");

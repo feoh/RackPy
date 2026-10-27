@@ -15,6 +15,7 @@
 // adds the engine cable before the cable widget throws for a missing port.
 // The trampolines check those first and otherwise do nothing, as Rack does for
 // a missing module.
+#include "../support/overrides.hpp"
 #include "history.hpp"
 
 #include <pybind11/pybind11.h>
@@ -134,7 +135,7 @@ struct ActionT : Base, PyAction, py::trampoline_self_life_support {
 		}
 		const Base* self = this;
 		if (PyGILState_Check()) {  // from Python: an override's errors reach the caller
-			if (py::function f = py::get_override(self, name)) {
+			if (auto f = rackpy::bindings::pythonOverride(self, name)) {
 				f();
 				return;
 			}
@@ -144,7 +145,7 @@ struct ActionT : Base, PyAction, py::trampoline_self_life_support {
 		// From Rack (its undo menu or keys): errors are reported, and a failed override is not followed by Rack's code.
 		bool overridden = false;
 		runtime::callPython(name, [&] {
-			if (py::function f = py::get_override(self, name)) {
+			if (auto f = rackpy::bindings::pythonOverride(self, name)) {
 				overridden = true;
 				f();
 			}
@@ -260,11 +261,15 @@ std::shared_ptr<runtime::ContextToken> liveToken(const char* what) {
 
 /** A bound undo or redo from Python. */
 template <class T>
+void rackRun(T& a, bool redo);
+
+template <class T>
 void pythonRun(T& a, bool redo) {
 	runtime::requireMainThread(redo ? "redoing an action" : "undoing an action");
 	liveToken(redo ? "redo" : "undo");
 	runtime::refuseEngineReentry(redo ? "redo" : "undo");
-	redo ? a.redo() : a.undo();
+	if (dynamic_cast<PyAction*>(&a)) rackRun(a, redo);
+	else redo ? a.redo() : a.undo();
 }
 
 /** Rack's own code for the type, checked: for InverseAction and Python overrides that extend Rack's. */
@@ -283,7 +288,7 @@ void rackRun(T& a, bool redo) {
 template <class T, class Cls>
 void actionMethods(Cls& cls) {
 	cls.def(py::init_alias<>())
-		.def("undo", [](T& a) { pythonRun(a, false); }, "Rack's undo for this action (checked), or a Python override.")
+		.def("undo", [](T& a) { pythonRun(a, false); }, "Rack's undo for this action (checked); super() runs this base implementation.")
 		.def("redo", [](T& a) { pythonRun(a, true); })
 		.def("_rack_undo", [](T& a) { rackRun(a, false); }, "Rack's own undo for this type, never a Python override.")
 		.def("_rack_redo", [](T& a) { rackRun(a, true); })
