@@ -20,6 +20,50 @@ GLFW_PRESS, GLFW_RELEASE = raw.glfw.GLFW_PRESS, raw.glfw.GLFW_RELEASE
 GLFW_KEY_A, GLFW_MOUSE_BUTTON_LEFT = raw.glfw.GLFW_KEY_A, raw.glfw.GLFW_MOUSE_BUTTON_LEFT
 
 
+@pytest.mark.parametrize(
+    ("alias", "target"),
+    [
+        ("Base", "BaseEvent"),
+        ("PositionBase", "PositionBaseEvent"),
+        ("KeyBase", "KeyBaseEvent"),
+        ("TextBase", "TextBaseEvent"),
+        ("Hover", "HoverEvent"),
+        ("Button", "ButtonEvent"),
+        ("DoubleClick", "DoubleClickEvent"),
+        ("HoverKey", "HoverKeyEvent"),
+        ("HoverText", "HoverTextEvent"),
+        ("HoverScroll", "HoverScrollEvent"),
+        ("Enter", "EnterEvent"),
+        ("Leave", "LeaveEvent"),
+        ("Select", "SelectEvent"),
+        ("Deselect", "DeselectEvent"),
+        ("SelectKey", "SelectKeyEvent"),
+        ("SelectText", "SelectTextEvent"),
+        ("DragBase", "DragBaseEvent"),
+        ("DragStart", "DragStartEvent"),
+        ("DragEnd", "DragEndEvent"),
+        ("DragMove", "DragMoveEvent"),
+        ("DragHover", "DragHoverEvent"),
+        ("DragEnter", "DragEnterEvent"),
+        ("DragLeave", "DragLeaveEvent"),
+        ("DragDrop", "DragDropEvent"),
+        ("PathDrop", "PathDropEvent"),
+        ("Action", "ActionEvent"),
+        ("Change", "ChangeEvent"),
+        ("Dirty", "DirtyEvent"),
+        ("Reposition", "RepositionEvent"),
+        ("Resize", "ResizeEvent"),
+        ("Add", "AddEvent"),
+        ("Remove", "RemoveEvent"),
+        ("Show", "ShowEvent"),
+        ("Hide", "HideEvent"),
+    ],
+)
+def test_every_deprecated_event_alias_warns_and_preserves_identity(alias: str, target: str) -> None:
+    with pytest.warns(DeprecationWarning, match=alias):
+        assert getattr(raw.event, alias) is getattr(w, target)
+
+
 class Pad(w.OpaqueWidget):
     """A target in Rack's scene that records what Rack dispatches to it."""
 

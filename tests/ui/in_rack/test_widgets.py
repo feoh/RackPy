@@ -42,10 +42,20 @@ def test_fields_round_trip() -> None:
         label.alignment = ui.Label.CENTER_ALIGNMENT
         assert (label.text, label.font_size, label.line_height) == ("λ Level", 14.0, 1.5)
         assert label.alignment == ui.Label.Alignment.CENTER_ALIGNMENT and label.color.r == pytest.approx(10 / 255)
+        for alignment in (ui.Label.Alignment.LEFT_ALIGNMENT, ui.Label.Alignment.RIGHT_ALIGNMENT):
+            label.alignment = alignment
+            assert label.alignment == alignment
+        assert ui.Label.LEFT_ALIGNMENT != ui.Label.RIGHT_ALIGNMENT
         layout.orientation = ui.SequentialLayout.VERTICAL_ORIENTATION
+        assert layout.orientation == ui.SequentialLayout.Orientation.VERTICAL_ORIENTATION
         layout.alignment = ui.SequentialLayout.MIDDLE_ALIGNMENT
         layout.wrap, layout.margin, layout.spacing = False, Vec(2, 3), Vec(4, 5)
         assert ui.SequentialLayout.MIDDLE_ALIGNMENT == ui.SequentialLayout.CENTER_ALIGNMENT  # Rack's aliases
+        assert ui.SequentialLayout.TOP_ALIGNMENT == ui.SequentialLayout.LEFT_ALIGNMENT
+        assert ui.SequentialLayout.BOTTOM_ALIGNMENT == ui.SequentialLayout.RIGHT_ALIGNMENT
+        assert ui.SequentialLayout.LEFT_ALIGNMENT != ui.SequentialLayout.RIGHT_ALIGNMENT
+        layout.orientation = ui.SequentialLayout.HORIZONTAL_ORIENTATION
+        assert layout.orientation == ui.SequentialLayout.Orientation.HORIZONTAL_ORIENTATION
         assert (layout.wrap, layout.margin, layout.spacing) == (False, Vec(2, 3), Vec(4, 5))
         tooltip.text = "tip"
         assert tooltip.text == "tip"
