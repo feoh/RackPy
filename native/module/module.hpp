@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "../engine/expanders.hpp"
+#include "../io/endpoints.hpp"
 #include "lifecycle.hpp"
 #include "../dsp/runtime/runtime.hpp"
 #include "rackpy/runtime/context.hpp"
@@ -119,7 +120,7 @@ void releaseFromSlot(Info* info) {
 		delete info;
 }
 
-struct Module : rack::engine::Module, engine::ExpanderChannels {
+struct Module : rack::engine::Module, engine::ExpanderChannels, io::Endpoints {
 	std::shared_ptr<runtime::ObjectToken> token = std::make_shared<runtime::ObjectToken>(nullptr);
 	// A callback-laboratory module (RP-22, native/laboratory): runs only on a
 	// laboratory Bench, never in Rack's engine.
@@ -150,7 +151,16 @@ struct Module : rack::engine::Module, engine::ExpanderChannels {
 	// alive as long as the module, as Rack expects a module to own its buffers. Main thread. The
 	// channels they form are published in the engine::ExpanderChannels base, for native code.
 	std::vector<std::shared_ptr<engine::MessageBuffer>> expanderMessages;
-	void process(const ProcessArgs& args) override { kernels.process(*this, args); }
+	// The module's audio port and MIDI inputs (RP-31J), in the io::Endpoints base: a frame of them around the kernel.
+	void process(const ProcessArgs& args) override {
+		if (__builtin_expect(io::Endpoints::active, 0)) {
+			beginFrame(args.frame);
+			kernels.process(*this, args);
+			endFrame();
+			return;
+		}
+		kernels.process(*this, args);
+	}
 	json_t* dataToJson() override;
 	void dataFromJson(json_t* rootJ) override;
 
@@ -207,6 +217,8 @@ struct Module : rack::engine::Module, engine::ExpanderChannels {
 		return link;
 	}
 	~Module() override {
+		// First, while the module is whole: its audio port no longer reaches it, and it is not Rack's master.
+		io::Endpoints::detach();
 		for (auto& weak : backreferences)
 			if (auto link = weak.lock())
 				link->clear();

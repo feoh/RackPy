@@ -9,6 +9,7 @@ from typing import Any, final, overload
 from _rackpy_host import dsp as _dsp
 
 from rackpy.raw import Quantity
+from rackpy.raw import audio as _audio
 from rackpy.raw import plugin as _plugin
 from rackpy.raw.nanovg import NVGcolor
 from rackpy.raw.simd import float_4
@@ -397,6 +398,12 @@ class Module:
     def kernel(self) -> _dsp.Kernel | None: ...
     @property
     def kernel_failed(self) -> bool: ...
+    # Audio-port I/O (RP-31J): Core Audio's buffering between the port's driver and the kernel, natively.
+    def set_audio_port(self, port: _audio.Port | None, inputs: int = 2, outputs: int = 2) -> None: ...
+    @property
+    def audio_port(self) -> _audio.Port | None: ...
+    @property
+    def audio_stats(self) -> dict[str, int] | None: ...
     # JSON (RP-15A). JSON values: None, bool, int, float, str, list, tuple, dict.
     def set_data_handlers(
         self,

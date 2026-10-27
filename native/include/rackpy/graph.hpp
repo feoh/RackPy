@@ -15,6 +15,8 @@
 #pragma once
 #include <rack.hpp>
 
+#include "rackpy/io.hpp"
+
 #include <algorithm>
 #include <cmath>
 #include <functional>
@@ -225,6 +227,126 @@ inline void readLane(Signal& out, float* lane) {
 		out.v[c] = lane[1 + c];
 	lane[0] = 0.f;
 }
+
+// --- Audio-port and MIDI-input I/O (RP-31J) --------------------------------------------------
+// A module's audio port and MIDI inputs reach its graph through the Frame RackPy publishes before the
+// graph runs (rackpy/io.hpp, docs/how-to/graphs.md#audio-and-midi).
+
+/** Rack's Port::getVoltageSum: the channels' sum, from 0, in channel order (0 for no channel). */
+inline float voltageSum(const Signal& s) {
+	float sum = 0.f;
+	for (int c = 0; c < s.channels; c++)
+		sum += s.v[c];
+	return sum;
+}
+
+/** Device input `channel` this frame (0 when there is none). */
+inline float audioInput(const io::Frame* f, int channel) {
+	return f && channel < f->audioInputs ? f->audioInput[channel] : 0.f;
+}
+
+/** Sends `s`'s voltage sum to device output `channel`, as Core Audio sends an input's. */
+inline void audioOutput(const io::Frame* f, int channel, const Signal& s) {
+	if (f && channel < f->audioOutputs)
+		f->audioOutput[channel] = voltageSum(s);
+}
+
+/** Core MIDI-CV's outputs, in its order (src/core/MIDI_CV.cpp): what a midi_cv node gives. */
+enum MidiCvOutput {
+	MIDI_PITCH,
+	MIDI_GATE,
+	MIDI_VELOCITY,
+	MIDI_AFTERTOUCH,
+	MIDI_PITCH_WHEEL,
+	MIDI_MOD_WHEEL,
+	MIDI_RETRIGGER,
+	MIDI_CLOCK,
+	MIDI_CLOCK_DIVIDER,
+	MIDI_START,
+	MIDI_STOP,
+	MIDI_CONTINUE,
+	MIDI_CV_OUTPUTS
+};
+
+/** Core MIDI-CV's processing of one MIDI input: Rack's dsp::MidiParser<16>, fed the frame's due messages. */
+struct MidiCV {
+	rack::dsp::MidiParser<MAX_CHANNELS> parser;
+	/** Reused for every message: it holds 3 bytes, so filling it never allocates. */
+	rack::midi::Message message;
+	int input = 0;
+	MidiCvOutput output = MIDI_PITCH;
+
+	MidiCV() {
+		// Each held note appears once, and a note is a byte: room for all, so pressing one never allocates.
+		parser.heldNotes.reserve(256);
+	}
+	/** MIDI-CV's menu settings: polyphony channels (1 to 16), mono and poly modes (MidiParser's enums), pitch bend
+	range in semitones, wheel smoothing, the CLK/N division in 24 PPQN clocks, retrigger on legato release, and
+	release velocity. */
+	void configure(int channels, int monoMode, int polyMode, float pwRange, bool smooth, uint32_t clockDivision,
+		bool retriggerOnResume, bool releaseVelocity) {
+		parser.setChannels((uint8_t) channels);
+		parser.setMonoMode((decltype(parser.monoMode)) monoMode);
+		parser.setPolyMode((decltype(parser.polyMode)) polyMode);
+		parser.pwRange = pwRange;
+		parser.smooth = smooth;
+		parser.clockDivision = clockDivision;
+		parser.retriggerOnResume = retriggerOnResume;
+		parser.releaseVelocityEnabled = releaseVelocity;
+	}
+	/** Rack's reset (the module's Initialize): the performance state starts over, as MIDI-CV's panic; the settings stay. */
+	void reset() { parser.panic(); }
+	/** One frame, as MIDI_CV::process: the frame's messages, the wheels' filters, then `output`, then the pulses. */
+	void process(Signal& out, const io::Frame* f, float sampleTime) {
+		if (f)
+			for (int i = 0; i < f->midiCount[input]; i++) {
+				io::toMessage(f->midi[input][i], message);
+				parser.processMessage(message);
+			}
+		parser.processFilters(sampleTime);
+		int n = parser.channels;
+		switch (output) {
+			case MIDI_PITCH:
+				out.channels = n;
+				for (int c = 0; c < n; c++)
+					out.v[c] = parser.getPitchVoltage((uint8_t) c);
+				break;
+			case MIDI_GATE:
+				out.channels = n;
+				for (int c = 0; c < n; c++)
+					out.v[c] = parser.gates[c] ? 10.f : 0.f;
+				break;
+			case MIDI_VELOCITY:
+				out.channels = n;
+				for (int c = 0; c < n; c++)
+					out.v[c] = parser.velocities[c] / 127.f * 10.f;
+				break;
+			case MIDI_AFTERTOUCH:
+				out.channels = n;
+				for (int c = 0; c < n; c++)
+					out.v[c] = parser.aftertouches[c] / 127.f * 10.f;
+				break;
+			case MIDI_RETRIGGER:
+				out.channels = n;
+				for (int c = 0; c < n; c++)
+					out.v[c] = parser.retriggerPulses[c].isHigh() ? 10.f : 0.f;
+				break;
+			case MIDI_PITCH_WHEEL:
+			case MIDI_MOD_WHEEL:
+				out.channels = parser.getWheelChannels();
+				for (int c = 0; c < out.channels; c++)
+					out.v[c] = output == MIDI_PITCH_WHEEL ? parser.getPw((uint8_t) c) * 5.f : parser.getMod((uint8_t) c) * 10.f;
+				break;
+			case MIDI_CLOCK: mono(out, parser.clockPulse.isHigh() ? 10.f : 0.f); break;
+			case MIDI_CLOCK_DIVIDER: mono(out, parser.clockDividerPulse.isHigh() ? 10.f : 0.f); break;
+			case MIDI_START: mono(out, parser.startPulse.isHigh() ? 10.f : 0.f); break;
+			case MIDI_STOP: mono(out, parser.stopPulse.isHigh() ? 10.f : 0.f); break;
+			case MIDI_CONTINUE: mono(out, parser.continuePulse.isHigh() ? 10.f : 0.f); break;
+			default: out.channels = 0; break;
+		}
+		parser.processPulses(sampleTime);
+	}
+};
 
 // --- Native extension node types (from kernel libraries) ------------------------------------
 

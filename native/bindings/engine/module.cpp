@@ -7,6 +7,7 @@
 
 #include "expander.hpp"
 #include "../dsp/kernel.hpp"
+#include "../audio.hpp"
 #include "../plugin.hpp"
 #include "components.hpp"
 #include "metadata.hpp"
@@ -779,6 +780,21 @@ void bindModule(py::module_ engine) {
 			runtime::requireMainThread("reading a module's kernel");
 			return r.get().kernels.failed();
 		}, "True after the kernel reported a failure: the module's outputs are silent until set_kernel or a reset.");
+	// Audio-port I/O (RP-31J): native production paths between a port's driver and the module's kernel.
+	cls.def("set_audio_port", [](const ModuleRef& r, py::object port, int inputs, int outputs) {
+		attachAudioPort(r.get(), port, inputs, outputs);
+	}, py::arg("port"), py::arg("inputs") = 2, py::arg("outputs") = 2,
+		"Make `port` (a rackpy.raw.audio.Port, or None to remove it) this module's audio port, with `inputs` device "
+		"inputs and `outputs` device outputs (0 to 16; the port's max_inputs and max_outputs). Rack's driver thread "
+		"then buffers its blocks natively as Core Audio does, and the kernel reads and writes a frame of them every "
+		"frame (rackpy.AudioInterface, Graph.audio_input, Graph.audio_output). In the constructor callback, or while "
+		"Python owns the module. Main thread.")
+		.def_property_readonly("audio_port", [](const ModuleRef& r) { return moduleAudioPort(r.get()); },
+			"The module's audio port while it lives, or None.")
+		.def_property_readonly("audio_stats", [](const ModuleRef& r) { return moduleAudioStats(r.get()); },
+			"The audio port's counters (blocks, stepped_frames, dropped_frames, empty_frames, clears, "
+			"resampler_misses), the device's channels as the driver last saw them, and the frames waiting each way; "
+			"None without an audio port.");
 	cls.def("set_event_handlers", [](const ModuleRef& r, py::kwargs handlers) {
 		r.state->requireConstruction();
 		using K = module::LifecycleKind;

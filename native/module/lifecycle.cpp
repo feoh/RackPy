@@ -98,6 +98,7 @@ void Module::onSampleRateChange(const SampleRateChangeEvent& e) {
 	runtime::ExclusiveScope exclusive;
 	rack::engine::Module::onSampleRateChange(e);
 	kernels.sampleRateChange(e.sampleRate, e.sampleTime);
+	sampleRateChanged();  // Core Audio's: the audio port's rings start over (RP-31J)
 	LifecycleRecord record = recordOf(LifecycleKind::SampleRateChange);
 	record.sampleRate = e.sampleRate;
 	record.sampleTime = e.sampleTime;

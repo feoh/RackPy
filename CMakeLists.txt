@@ -45,7 +45,7 @@ target_link_libraries(rackpy_loader PRIVATE rackpy_sdk_plugin)
 
 # The runtime's native-only parts, shared by the host and the native unit tests.
 set(RACKPY_RUNTIME_CORE native/runtime/threads.cpp native/runtime/diagnostics.cpp native/runtime/context.cpp
-  native/engine/expanders.cpp)
+  native/engine/expanders.cpp native/io/audio_bridge.cpp native/io/endpoints.cpp native/io/midi_queue.cpp)
 # The kernel runtime (RP-17A): Python-free, and the production audio path.
 set(RACKPY_DSP_RUNTIME native/dsp/runtime/runtime.cpp native/dsp/runtime/builtin.cpp native/dsp/graph/plan.cpp)
 
@@ -123,6 +123,13 @@ if(RACKPY_BUILD_TESTS)
   target_include_directories(rackpy_graph_tests PRIVATE native/include)
   target_link_libraries(rackpy_graph_tests PRIVATE rackpy_sdk_program)
   add_test(NAME graph_plans COMMAND rackpy_graph_tests)
+  # RP-31J: audio-port and MIDI-queue I/O against Core Audio's and Rack's InputQueue's own code.
+  add_executable(rackpy_io_tests native/tests/test_io.cpp native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE}
+    ${RACKPY_DSP_RUNTIME})
+  set_target_properties(rackpy_io_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_include_directories(rackpy_io_tests PRIVATE native/include)
+  target_link_libraries(rackpy_io_tests PRIVATE rackpy_sdk_program)
+  add_test(NAME io_paths COMMAND rackpy_io_tests)
   # RP-23C: expander exchange under stress (tests/engine/test_expander_stress.py), once with ASan and UBSan,
   # once with TSan; libRack is not instrumented.
   foreach(_variant asan tsan)
@@ -140,6 +147,18 @@ if(RACKPY_BUILD_TESTS)
   # the expander snapshot does not.
   target_compile_options(rackpy_expander_stress_tsan PRIVATE -fsanitize=thread -fno-omit-frame-pointer -Wno-tsan)
   target_link_options(rackpy_expander_stress_tsan PRIVATE -fsanitize=thread)
+  # RP-31J: a module's audio port and MIDI inputs under stress (tests/io/test_io_native.py), the same two ways.
+  foreach(_variant asan tsan)
+    add_executable(rackpy_io_stress_${_variant} native/tests/io_stress.cpp ${RACKPY_RUNTIME_CORE})
+    set_target_properties(rackpy_io_stress_${_variant} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+    target_include_directories(rackpy_io_stress_${_variant} PRIVATE native/include)
+    target_link_libraries(rackpy_io_stress_${_variant} PRIVATE rackpy_sdk_program)
+  endforeach()
+  target_compile_options(rackpy_io_stress_asan PRIVATE -fsanitize=address,undefined -fno-sanitize-recover=undefined
+    -fno-omit-frame-pointer)
+  target_link_options(rackpy_io_stress_asan PRIVATE -fsanitize=address,undefined)
+  target_compile_options(rackpy_io_stress_tsan PRIVATE -fsanitize=thread -fno-omit-frame-pointer -Wno-tsan)
+  target_link_options(rackpy_io_stress_tsan PRIVATE -fsanitize=thread)
   # The RP-07 audio-path guard, preloaded by tests/dsp/test_runtime.py around rackpy_kernel_guard.
   add_library(rackpy_audio_guard MODULE native/testing/audio_guard.c)
   set_target_properties(rackpy_audio_guard PROPERTIES PREFIX "" OUTPUT_NAME audio_guard C_STANDARD 11)

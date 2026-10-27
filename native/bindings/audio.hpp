@@ -12,6 +12,10 @@
 #include <rack.hpp>
 
 namespace rackpy {
+namespace module {
+struct Module;
+}
+
 namespace bindings {
 
 /** rackpy.raw.audio (RP-29B). */
@@ -92,6 +96,16 @@ Python overrides run. */
 void connectAudioDriver(pybind11::handle port, UnlistedAudioDriver& driver);
 /** A device's subscribers, as PythonDevice.subscribed lists them; `owner` keeps the device alive. Needs the GIL. */
 pybind11::list audioSubscribers(pybind11::object owner, rack::audio::Device& device);
+
+/** Module.set_audio_port (RP-31J): `port` (a Python-made audio.Port, or None) becomes the module's audio port, with
+`inputs` and `outputs` device channels each way. Main thread, while Rack's engine does not run the module. */
+void attachAudioPort(module::Module& module, pybind11::handle port, int inputs, int outputs);
+/** Module.audio_port: the port, or None. */
+pybind11::object moduleAudioPort(module::Module& module);
+/** Module.audio_stats: the bridge's counters, or None without an audio port. */
+pybind11::object moduleAudioStats(module::Module& module);
+/** What RackPy's UI step does for modules' audio ports: prepare converters, free retired ones. Main thread. */
+void maintainAudioPorts() noexcept;
 
 }  // namespace bindings
 }  // namespace rackpy

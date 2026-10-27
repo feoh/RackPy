@@ -1095,6 +1095,11 @@ void define(py::module_ m) {
 	m.def("engine_set_sample_rate", [engineCall](float rate) {
 		engineCall("engine_set_sample_rate", [&] { APP->engine->setSuggestedSampleRate(rate); });
 	});
+	// RP-31J: what RackPy's UI step does for modules' audio ports, now (a test runs inside one UI step).
+	m.def("maintain_audio_ports", [] {
+		requireMainThread("maintain_audio_ports");
+		bindings::maintainAudioPorts();
+	});
 	m.def("engine_set_master", [engineCall, owned](py::object module) {
 		module::Module* mod = module.is_none() ? nullptr : &owned(module.cast<const bindings::ModuleRef&>());
 		engineCall("engine_set_master", [&] { APP->engine->setMasterModule(mod); });
