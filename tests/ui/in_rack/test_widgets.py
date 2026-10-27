@@ -8,6 +8,7 @@ from typing import Any
 
 import pytest
 
+from rackpy import raw
 from rackpy.errors import OwnershipError, StaleHandleError, ThreadError
 from rackpy.raw import glfw, nanovg, ui
 from rackpy.raw import widget as w
@@ -262,6 +263,37 @@ def test_text_field_position_override_drives_drag_selection() -> None:
         finally:
             plain.close()
     finally:
+        field.close()
+
+
+def test_text_field_context_menu_intercepts_clicks() -> None:
+    hits: list[int] = []
+
+    class Target(w.OpaqueWidget):
+        def on_button(self, event: Any) -> None:
+            hits.append(event.action)
+            event.consume(self)
+
+    context = raw.context_get()
+    assert context is not None and context.event is not None and context.scene is not None
+    state = context.event
+    field, target = ui.TextField(), Target()
+    target.box = Rect(Vec(200, 200), Vec(80, 80))
+    target.attach_to_scene()
+    try:
+        state.handle_button(Vec(240, 240), glfw.GLFW_MOUSE_BUTTON_LEFT, glfw.GLFW_PRESS, 0)
+        assert hits == [glfw.GLFW_PRESS]
+        hits.clear()
+        context.scene.mouse_pos = Vec(20, 20)
+        field.create_context_menu()
+        state.handle_button(Vec(240, 240), glfw.GLFW_MOUSE_BUTTON_LEFT, glfw.GLFW_PRESS, 0)
+        assert hits == []  # Rack's menu overlay intercepts this outside click
+        context.scene.step()  # delete the dismissed overlay
+        state.handle_button(Vec(240, 240), glfw.GLFW_MOUSE_BUTTON_LEFT, glfw.GLFW_PRESS, 0)
+        assert hits == [glfw.GLFW_PRESS]
+    finally:
+        target.remove_from_parent()
+        target.close()
         field.close()
 
 

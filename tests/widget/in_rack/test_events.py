@@ -145,6 +145,60 @@ def test_owned_records_path_lifetimes_nullable_targets_and_fields() -> None:
     assert not base.is_consumed() and base.is_propagating()
 
 
+@pytest.mark.parametrize(
+    ("event_name", "handler"),
+    [
+        ("HoverEvent", "on_hover"),
+        ("ButtonEvent", "on_button"),
+        ("DoubleClickEvent", "on_double_click"),
+        ("HoverKeyEvent", "on_hover_key"),
+        ("HoverTextEvent", "on_hover_text"),
+        ("HoverScrollEvent", "on_hover_scroll"),
+        ("EnterEvent", "on_enter"),
+        ("LeaveEvent", "on_leave"),
+        ("SelectEvent", "on_select"),
+        ("DeselectEvent", "on_deselect"),
+        ("SelectKeyEvent", "on_select_key"),
+        ("SelectTextEvent", "on_select_text"),
+        ("DragStartEvent", "on_drag_start"),
+        ("DragEndEvent", "on_drag_end"),
+        ("DragMoveEvent", "on_drag_move"),
+        ("DragHoverEvent", "on_drag_hover"),
+        ("DragEnterEvent", "on_drag_enter"),
+        ("DragLeaveEvent", "on_drag_leave"),
+        ("DragDropEvent", "on_drag_drop"),
+        ("PathDropEvent", "on_path_drop"),
+        ("ActionEvent", "on_action"),
+        ("ChangeEvent", "on_change"),
+        ("DirtyEvent", "on_dirty"),
+        ("RepositionEvent", "on_reposition"),
+        ("ResizeEvent", "on_resize"),
+        ("AddEvent", "on_add"),
+        ("RemoveEvent", "on_remove"),
+        ("ShowEvent", "on_show"),
+        ("HideEvent", "on_hide"),
+        ("ContextCreateEvent", "on_context_create"),
+        ("ContextDestroyEvent", "on_context_destroy"),
+    ],
+)
+def test_each_handler_dispatches_the_matching_native_event(event_name: str, handler: str) -> None:
+    received: list[tuple[str, bool]] = []
+    event_type = getattr(w, event_name)
+
+    def receive(self: w.Widget, event: Any) -> None:
+        received.append((handler, isinstance(event, event_type)))
+
+    child_type = type("EventChild", (w.Widget,), {handler: receive})
+    root, child = w.Widget(), child_type()
+    root.add_child(child)
+    received.clear()  # add_child itself delivers AddEvent
+    try:
+        root.recurse_event(getattr(w.Widget, handler), event_type(context=w.EventContext()))
+        assert received == [(handler, True)]
+    finally:
+        root.close()
+
+
 @pytest.mark.parametrize("event_type", [w.DragHoverEvent, w.DragEnterEvent, w.DragLeaveEvent, w.DragDropEvent])
 def test_drag_origin_is_nullable_and_invalidated(event_type: Any) -> None:
     origin = w.Widget()

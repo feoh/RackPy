@@ -81,6 +81,8 @@ def test_transparent_opaque_and_zoom_event_base_semantics() -> None:
 @pytest.mark.parametrize(
     ("event_name", "handler"),
     [
+        ("HoverEvent", "on_hover"),
+        ("ButtonEvent", "on_button"),
         ("HoverKeyEvent", "on_hover_key"),
         ("HoverTextEvent", "on_hover_text"),
         ("HoverScrollEvent", "on_hover_scroll"),
@@ -112,7 +114,7 @@ def test_position_event_base_dispatch(event_name: str, handler: str, parent_type
         else:
             assert seen == [Vec(20, 30)]
             assert event.is_propagating() is (parent_type is w.Widget)
-            if parent_type is w.OpaqueWidget and event_name == "DragHoverEvent":
+            if parent_type is w.OpaqueWidget and event_name in ("HoverEvent", "ButtonEvent", "DragHoverEvent"):
                 assert event.is_consumed() and event.get_target() is parent
     finally:
         parent.close()

@@ -1,4 +1,4 @@
-# RP-31B checkpoint (incomplete)
+# RP-31B validation
 
 This checkpoint tests every `rack::event` alias individually in actual Rack for
 its exact target identity and DeprecationWarning, and adds a repository unit
@@ -58,7 +58,26 @@ manifest changes. `prek run --all-files`, `bin/rackpy-dev typecheck`,
 `uv run sphinx-build -q -W -n -b html docs build/docs/html`, and
 `uv run pytest -q -m 'docs and not host'` (15 passed) also passed.
 
-**Remaining:** RP-31B is open. Complete the remaining audit, including text
-context menus and any other unexercised bindings/citations; do not treat the
-missing `SVGWidget` warning as resolved until RP-31F lands. Revalidate before
-closing. macOS and Windows were not tested.
+## Final audit and validation
+
+Added real-host tests for the TextField context menu intercepting input and
+all 31 named Widget event handlers dispatching the matching native event type.
+The latter checks callback routing, not distinct behavior for Rack's no-op
+base methods. Extended the typed-base position tests to hover and button;
+replaced unrelated managed/round-trip citations and linked the new SVG and
+framebuffer documentation anchors. The original audit entries for enum values
+were addressed by the previous `test_fields_round_trip` extension.
+
+After the final edits, `bin/rackpy-dev build --build-dir
+/tmp/rackpy-rp31b-tests/hooks-build0 --werror --test-hooks` passed all six
+CTests. The widget and UI outer host tests passed against this build with a
+temporary `hooks_build` fixture override, removed after the run. The built
+package introspection snapshot from the same source was checked again against
+the final manifest. Generator check, prek, strict typing, the unit suite
+(109 passed), and Sphinx warnings-as-errors passed. The non-host docs suite
+(15 passed) passed in the preceding validation round.
+
+The `SVGWidget` alias identity is tested, but its missing deprecation warning
+remains a separate RP-31F gap; RP-31F has a checkpoint addressing it on its own
+branch and was notified. No entry was promoted to verified. macOS and Windows
+were not tested; this does not establish release coverage on either platform.

@@ -38,8 +38,9 @@ belongs to Python. Each widget has exactly one native owner:
   same children, and `copy()` takes a tuple snapshot. Iterating walks the
   children present when the loop starts. It has no `append` or `remove`:
   change the list with the methods above, which keep each child's single
-  owner. Once the parent is deleted the view raises `StaleHandleError`; it
-  does not keep the parent alive.
+  owner. `has_child(child)` checks direct membership, and `get_parent()`
+  returns the current parent or `None`. Once the parent is deleted the view
+  raises `StaleHandleError`; it does not keep the parent alive.
 - `close()` deletes a detached widget and its subtree. Closing a widget that
   has a parent raises `OwnershipError`; remove it first.
 - When Rack deletes a widget (its parent is closed or cleared, or a parent's
@@ -54,6 +55,9 @@ Widgets that RackPy did not create, such as Rack's scene, appear as
 `HostWidget`: a checked, nonowning handle with `alive`, `parent` and
 `get_box()`. It can be passed where Rack takes a widget pointer (an ancestor,
 an event target) but never owned or deleted.
+
+`get_position()` returns the widget's box position in its parent's coordinates;
+its box can also be accessed directly through the checked `box` view.
 
 All access is main-thread only (`ThreadError`), and widgets of another
 context are refused. When Rack's context closes, RackPy deletes every widget

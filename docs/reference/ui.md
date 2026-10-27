@@ -74,6 +74,7 @@ owned views. `Scrollbar` (alias `ScrollBar`) has `vertical`.
 
 A menu is a `MenuOverlay` that covers the scene and holds one or more `Menu`s
 of `MenuItem`s, `MenuLabel`s and `MenuSeparator`s, all `MenuEntry` widgets.
+`MenuEntry()` constructs the shared, directly subclassable base for menu entries.
 `Menu.corner_flags` accepts Blendish corner flags. A `MenuItem` subclass
 overrides `on_action(event)`. Rack consumes the event and then closes the
 menu; call `event.unconsume()` to keep it open. `do_action()` triggers the
