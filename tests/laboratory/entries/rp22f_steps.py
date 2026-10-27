@@ -18,7 +18,7 @@ from typing import Any
 from _rackpy_host import _testing
 
 from rackpy import laboratory
-from rackpy.errors import LaboratoryError
+from rackpy.errors import LaboratoryError, ThreadError
 from rackpy.raw import app, audio, midi, ui
 from rackpy.raw import widget as w
 
@@ -55,6 +55,21 @@ def keyboard_route() -> Generator[None]:
                 inside["refused"] = False
             except LaboratoryError:
                 inside["refused"] = True
+
+            # A Python thread's laboratory call, refused as the wrong thread, must not release what the main
+            # thread keeps while it is inside Rack's loop (the delivery depth is per thread).
+            def from_another_thread() -> None:
+                try:
+                    bystander.to_json()
+                    inside["thread"] = "ran"
+                except ThreadError:
+                    inside["thread"] = "refused"
+
+            worker = threading.Thread(target=from_another_thread)
+            worker.start()
+            worker.join()
+            gc.collect()
+            inside["alive_after_thread"] = [refs["port"]() is not None, refs["driver"]() is not None]
 
     dropping, other = Dropping(), midi.Input()
     for port in (dropping, other):

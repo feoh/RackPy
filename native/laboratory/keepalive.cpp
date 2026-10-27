@@ -76,6 +76,8 @@ void hook() {
 }  // namespace
 
 void keepLaboratoryObjectsAlive(py::object extra) {
+	if (!runtime::isMainThread())
+		return;  // overrides run only on the main thread; `kept` is the main thread's
 	hook();
 	std::vector<py::object> live;
 	liveMidiObjects(live);
@@ -87,6 +89,9 @@ void keepLaboratoryObjectsAlive(py::object extra) {
 }
 
 void releaseKeptLaboratoryObjects() noexcept {
+	// Only the main thread keeps and releases: the counters that say whether Rack's code is running there are its.
+	if (!runtime::isMainThread())
+		return;
 	// Destructors may run Python that keeps more alive: release that too, while nothing is in progress.
 	while (!busy() && !kept.empty()) {
 		std::vector<runtime::PyRef> drop;
@@ -95,21 +100,26 @@ void releaseKeptLaboratoryObjects() noexcept {
 	}
 }
 
-LaboratoryCall::LaboratoryCall() {
-	++calls;
+LaboratoryCall::LaboratoryCall() : counted(runtime::isMainThread()) {
+	if (counted)
+		++calls;
 }
 
 LaboratoryCall::~LaboratoryCall() {
+	if (!counted)
+		return;
 	--calls;
 	releaseKeptLaboratoryObjects();
 }
 
-SubscriptionDispatch::SubscriptionDispatch() {
-	++dispatching;
+SubscriptionDispatch::SubscriptionDispatch() : counted(runtime::isMainThread()) {
+	if (counted)
+		++dispatching;
 }
 
 SubscriptionDispatch::~SubscriptionDispatch() {
-	--dispatching;  // still inside Rack's port code: what was kept is released later
+	if (counted)
+		--dispatching;  // still inside Rack's port code: what was kept is released later
 }
 
 void deleteOnMainThreadLater(std::function<void()> deleter) {

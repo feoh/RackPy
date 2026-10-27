@@ -389,6 +389,12 @@ when made outside the override. They now consistently mean the base method
 for Python subclasses. Base implementations can themselves call *other*
 virtuals, which still reach Python normally.
 
+An object Python is already deallocating (its last reference gone, for
+example while a weak reference's callback runs) has no override: in every
+trampoline family, the native implementation answers instead, because calling
+the Python method would bring the dying object back. During `__del__` an
+object is still alive, so its overrides run as usual.
+
 A shared per-thread guard allows at most **64 live native-to-Python override
 calls** (including argument/result conversion), across trampoline families, to bound C++ frames invisible to
 Python's recursion counter. Exceeding it raises `RecursionError` to a Python

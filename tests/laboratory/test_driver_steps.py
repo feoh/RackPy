@@ -34,7 +34,12 @@ def test_releases_and_off_main_thread_teardown_at_racks_ui_step(
     assert "error" not in result, result["error"]
 
     # Rack's keyboard route: the delivered port and a dropped driver live until the next UI step.
-    assert result["keyboard_inside"] == {"alive": [True, True], "refused": True}
+    assert result["keyboard_inside"] == {
+        "alive": [True, True],
+        "refused": True,
+        "thread": "refused",
+        "alive_after_thread": [True, True],  # a refused call on another thread released nothing
+    }
     assert result["keyboard_after_call"] == [True, True]
     assert result["keyboard_after_step"] == [False, False]
     assert result["keyboard_bystander"] == [False, False, -1, -1]  # the dropped driver's teardown ran

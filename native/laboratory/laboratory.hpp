@@ -136,19 +136,24 @@ void keepLaboratoryObjectsAlive(py::object extra = py::object());
 void releaseKeptLaboratoryObjects() noexcept;
 
 /** Wraps a Python call into Rack's port, device or driver code that may reach laboratory overrides (a port's
-set_device_id, a device's push_message, ...): what overrides kept alive goes when the outermost call returns. */
+set_device_id, a device's push_message, ...): what overrides kept alive goes when the outermost call returns.
+It counts only on the main thread: a call from another Python thread (refused later as the wrong thread) must
+not release what the main thread keeps while it is inside Rack's code, such as a keyboard delivery. */
 struct LaboratoryCall {
 	LaboratoryCall();
 	~LaboratoryCall();
+	const bool counted;
 	LaboratoryCall(const LaboratoryCall&) = delete;
 	LaboratoryCall& operator=(const LaboratoryCall&) = delete;
 };
 
 /** Held while a laboratory override runs on a subscription path (subscribe, unsubscribe): nothing kept is
-released until Rack's port code, which called it, has returned. */
+released until Rack's port code, which called it, has returned. Counts only on the main thread (Rack's own
+threads, and the test hooks' probes, reach it too, and are refused before any Python runs). */
 struct SubscriptionDispatch {
 	SubscriptionDispatch();
 	~SubscriptionDispatch();
+	const bool counted;
 	SubscriptionDispatch(const SubscriptionDispatch&) = delete;
 	SubscriptionDispatch& operator=(const SubscriptionDispatch&) = delete;
 };
