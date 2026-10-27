@@ -49,6 +49,57 @@ def test_seed_keeps_reviews_resets_changed_declarations_and_reports_removed(mini
     assert changes.reset == [VOLTAGE] and changes.removed == [ALIAS] and changes.added == []
 
 
+def test_conditional_branch_declarations_need_separate_records(mini: Mini) -> None:
+    mini.inventory["conditional_blocks"] = [
+        {
+            "header": "include/arch.hpp",
+            "lines": [12, 14],
+            "condition": "#if defined _WIN32",
+            "sha256": "a",
+            "skipped_in": ["lin-x64"],
+            "declarations": ["macro ARCH_WIN"],
+        },
+        {
+            "header": "include/common.hpp",
+            "lines": [31, 33],
+            "condition": "#ifndef PRIVATE",
+            "sha256": "b",
+            "skipped_in": ["lin-x64-simde"],
+            "declarations": ["macro PRIVATE"],
+        },
+    ]
+    manifest = mini.seeded()
+    win = "conditional:include/arch.hpp:12:macro ARCH_WIN"
+    unknown = "conditional:include/common.hpp:31:macro PRIVATE"
+    assert by_id(manifest)[win]["status"] == "unreviewed"
+    assert bm.availability(mini.inventory, mini.inputs().index[win]) == {
+        "lin-x64": "no",
+        "mac-x64": "not inventoried",
+        "mac-arm64": "not inventoried",
+        "win-x64": "not inventoried",
+    }
+    assert bm.availability(mini.inventory, mini.inputs().index[unknown])["lin-x64"] == "not inventoried"
+    assert "not-inventoried" in codes(bm.release_problems(mini.inputs(), manifest, "lin-x64", {"objects": {}}))
+    by_id(manifest)[unknown]["status"] = "verified"
+    assert "conditional-unresolved" in codes(bm.validate(mini.inputs(), manifest))
+    by_id(manifest)[unknown]["status"] = "unreviewed"
+    mini.inventory["conditional_blocks"][0]["sha256"] = "changed"
+    assert win in {p.id for p in bm.validate(mini.inputs(), manifest) if p.code == "stale-signature"}
+    mini.inventory["conditional_blocks"][0]["sha256"] = "a"
+    manifest["entries"] = [r for r in manifest["entries"] if r["id"] != win]
+    assert win in {p.id for p in bm.validate(mini.inputs(), manifest) if p.code == "missing"}
+    mini.inventory["conditional_blocks"][0]["declarations"].append("function future")
+    assert "conditional:include/arch.hpp:12:function future" in {
+        p.id for p in bm.validate(mini.inputs(), manifest) if p.code == "missing"
+    }
+
+
+def test_inventory_without_conditional_blocks_is_refused(mini: Mini) -> None:
+    del mini.inventory["conditional_blocks"]
+    with pytest.raises(bm.ManifestError, match="conditional_blocks"):
+        mini.seeded()
+
+
 def test_a_missing_overload_is_unknown(mini: Mini) -> None:
     manifest = mini.seeded()
     manifest["entries"] = [r for r in manifest["entries"] if r["id"] != VOLTAGE0]
