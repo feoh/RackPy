@@ -120,7 +120,8 @@ def test_owned_records_path_lifetimes_nullable_targets_and_fields() -> None:
     assert key.is_key_command(65)
     assert not key.is_key_command(66)
     assert key.key == 65 and key.scancode == 12 and key.action == 1
-    assert w.HoverTextEvent(codepoint=0x1F642).codepoint == 0x1F642
+    text_event = w.HoverTextEvent(codepoint=0x1F642)
+    assert isinstance(text_event, w.TextBaseEvent) and text_event.codepoint == 0x1F642
     context = w.EventContext()
     base = w.BaseEvent(context=context)
     base.consume(None)
@@ -129,9 +130,34 @@ def test_owned_records_path_lifetimes_nullable_targets_and_fields() -> None:
     base.unconsume()
     context.propagating = True
     assert not base.is_consumed() and base.is_propagating()
+    target = w.Widget()
+    try:
+        base.set_target(target)
+        assert base.get_target() is target and not base.is_consumed()
+        base.stop_propagating()
+        assert not base.is_propagating() and not base.is_consumed()
+        base.set_target(None)
+        assert base.get_target() is None
+    finally:
+        target.close()
     base.context = None
     base.consume(None)
     assert not base.is_consumed() and base.is_propagating()
+
+
+@pytest.mark.parametrize("event_type", [w.DragHoverEvent, w.DragEnterEvent, w.DragLeaveEvent, w.DragDropEvent])
+def test_drag_origin_is_nullable_and_invalidated(event_type: Any) -> None:
+    origin = w.Widget()
+    event = event_type(origin=origin, button=2)
+    assert event.origin is origin and event.button == 2
+    event.origin = None
+    assert event.origin is None
+    event.origin = origin
+    origin.close()
+    with pytest.raises(StaleHandleError):
+        _ = event.origin
+    event.origin = None
+    assert event.origin is None
 
 
 def test_callback_exception_is_not_replayed_and_mutation_is_guarded() -> None:

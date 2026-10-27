@@ -9,7 +9,7 @@ from typing import Any
 import pytest
 
 from rackpy.errors import OwnershipError, StaleHandleError, ThreadError
-from rackpy.raw import nanovg, ui
+from rackpy.raw import glfw, nanovg, ui
 from rackpy.raw import widget as w
 from rackpy.raw.math import Rect, Vec
 from rackpy.types import ValueQuantity
@@ -79,6 +79,19 @@ def test_sequential_layout_positions_its_children() -> None:
         layout.close()
 
 
+def test_list_positions_children_vertically() -> None:
+    layout = ui.List()
+    first, second = w.Widget(), w.Widget()
+    try:
+        first.box, second.box = Rect(Vec(), Vec(10, 12)), Rect(Vec(), Vec(20, 18))
+        layout.add_child(first)
+        layout.add_child(second)
+        layout.step()
+        assert first.get_position() == Vec(0, 0) and second.get_position() == Vec(0, 12)
+    finally:
+        layout.close()
+
+
 def test_quantity_fields_keep_their_quantity_alive() -> None:
     button, slider, bar = ui.Button(), ui.Slider(), ui.ProgressBar()
     try:
@@ -104,6 +117,54 @@ def test_quantity_fields_keep_their_quantity_alive() -> None:
             widget.close()
     gc.collect()
     assert marker() is None  # the widgets released it when Rack deleted them
+
+
+def test_button_radio_and_menu_drop_actions() -> None:
+    calls: list[str] = []
+
+    class Button(ui.Button):
+        def on_action(self, event: Any) -> None:
+            calls.append("button")
+
+    class Radio(ui.RadioButton):
+        def on_action(self, event: Any) -> None:
+            calls.append("radio")
+
+    class Item(ui.MenuItem):
+        def on_action(self, event: Any) -> None:
+            calls.append("item")
+
+    button, radio, item, other = Button(), Radio(), Item(), w.Widget()
+    quantity = ValueQuantity(0, 1, 0)
+    try:
+        radio.quantity = quantity
+        for widget in (button, radio, item):
+            widget.on_drag_drop(w.DragDropEvent(origin=other))
+        assert calls == [] and quantity.get_value() == 0
+        button.on_drag_drop(w.DragDropEvent(origin=button))
+        radio.on_drag_drop(w.DragDropEvent(origin=radio))
+        item.on_drag_drop(w.DragDropEvent(origin=item))
+        assert calls == ["button", "radio", "item"] and quantity.get_value() == 1
+        item.disabled = True
+        item.on_drag_drop(w.DragDropEvent(origin=item))
+        assert calls == ["button", "radio", "item"]
+    finally:
+        for owned in (button, radio, item, other):
+            owned.close()
+
+
+def test_slider_double_click_resets_quantity() -> None:
+    slider = ui.Slider()
+    quantity = ValueQuantity(0, 10, 3)
+    try:
+        slider.quantity = quantity
+        quantity.set_value(8)
+        slider.on_double_click(w.DoubleClickEvent())
+        assert quantity.get_value() == 3
+        slider.on_drag_move(w.DragMoveEvent(mouse_delta=Vec(100, 0)))
+        assert quantity.get_value() == pytest.approx(4)
+    finally:
+        slider.close()
 
 
 def test_rack_draws_the_widgets() -> None:
@@ -156,6 +217,54 @@ def test_text_field_editing_and_focus_fields() -> None:
         field.close()
 
 
+def test_text_cursor_clipboard_and_selected_input() -> None:
+    field = ui.TextField()
+    try:
+        field.set_text("alpha beta")
+        field.cursor_to_line_start()
+        assert field.cursor == 0
+        field.cursor_to_next_word()
+        assert 0 < field.cursor < len(field.text)
+        field.cursor_to_line_end()
+        assert field.cursor == len(field.text)
+        field.cursor_to_prev_word()
+        assert 0 < field.cursor < len(field.text)
+        field.select_all()
+        field.copy_clipboard()
+        field.cut_clipboard()
+        assert field.get_text() == ""
+        field.paste_clipboard()
+        assert field.get_text() == "alpha beta"
+        field.select_all()
+        field.on_select_text(w.SelectTextEvent(codepoint=ord("Z"), context=w.EventContext()))
+        assert field.get_text() == "Z"
+        key = w.SelectKeyEvent(key=glfw.GLFW_KEY_BACKSPACE, action=glfw.GLFW_PRESS, context=w.EventContext())
+        field.on_select_key(key)
+        assert field.get_text() == "" and key.is_consumed()
+    finally:
+        field.close()
+
+
+def test_text_field_position_override_drives_drag_selection() -> None:
+    class Field(ui.TextField):
+        def get_text_position(self, mouse_pos: Vec) -> int:
+            return 2
+
+    field = Field()
+    try:
+        field.set_text("abcd")
+        field.on_drag_hover(w.DragHoverEvent(origin=field, pos=Vec(5, 5), context=w.EventContext()))
+        assert field.cursor == 2 and field.selection == 4
+        plain = ui.TextField()
+        try:
+            plain.set_text("abcd")
+            assert 0 <= plain.get_text_position(Vec(0, 0)) <= 4
+        finally:
+            plain.close()
+    finally:
+        field.close()
+
+
 def test_scroll_widget_container_and_offsets() -> None:
     scroll = ui.ScrollWidget()
     try:
@@ -172,11 +281,42 @@ def test_scroll_widget_container_and_offsets() -> None:
         assert scroll.get_scroll_offset() == scroll.offset and scroll.offset.y > 0
         assert isinstance(scroll.get_container_offset_bound(), Rect) and not scroll.is_scrolling()
         assert scroll.vertical_scrollbar is not None and scroll.horizontal_scrollbar is not None
+        assert scroll.container_box.size.x > 0 and scroll.container_box.size.y > 0
+        handle_size, handle_offset = scroll.get_handle_size(), scroll.get_handle_offset()
+        assert 0 < handle_size.x < 1 and 0 < handle_size.y < 1
+        assert 0 <= handle_offset.x <= 1 and 0 <= handle_offset.y <= 1
+        before = scroll.offset
+        scroll.on_drag_move(w.DragMoveEvent(mouse_delta=Vec(4, 6)))
+        assert scroll.offset == before.minus(Vec(4, 6))
+        scroll.on_hover_scroll(w.HoverScrollEvent(scroll_delta=Vec(0, -5), context=w.EventContext()))
+        assert scroll.is_scrolling()
+        scroll.on_hover(w.HoverEvent(mouse_delta=Vec(1, 0), context=w.EventContext()))
+        assert not scroll.is_scrolling()
         scroll.hide_scrollbars = True
         assert scroll.hide_scrollbars
     finally:
         scroll.close()
     assert not content.alive
+
+
+def test_scrollbar_drag_uses_its_orientation() -> None:
+    scroll, bar = ui.ScrollWidget(), ui.Scrollbar()
+    try:
+        scroll.box = Rect(Vec(), Vec(50, 50))
+        scroll.container_box = Rect(Vec(), Vec(200, 300))
+        bar.box = Rect(Vec(), Vec(100, 100))
+        scroll.add_child(bar)
+        bar.vertical = True
+        assert bar.vertical
+        bar.on_drag_move(w.DragMoveEvent(mouse_delta=Vec(7, 10)))
+        assert scroll.offset.x == 0 and scroll.offset.y == pytest.approx(30)
+        scroll.offset = Vec()
+        bar.vertical = False
+        assert not bar.vertical
+        bar.on_drag_move(w.DragMoveEvent(mouse_delta=Vec(10, 7)))
+        assert scroll.offset.y == 0 and scroll.offset.x == pytest.approx(20)
+    finally:
+        scroll.close()
 
 
 def test_menus_child_menus_and_actions() -> None:

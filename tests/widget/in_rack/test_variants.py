@@ -2,6 +2,7 @@
 """Typed widget variants use real SDK bases and preserve subclass identity."""
 
 import math
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -77,6 +78,46 @@ def test_transparent_opaque_and_zoom_event_base_semantics() -> None:
             parent.close()
 
 
+@pytest.mark.parametrize(
+    ("event_name", "handler"),
+    [
+        ("HoverKeyEvent", "on_hover_key"),
+        ("HoverTextEvent", "on_hover_text"),
+        ("HoverScrollEvent", "on_hover_scroll"),
+        ("DragHoverEvent", "on_drag_hover"),
+        ("PathDropEvent", "on_path_drop"),
+    ],
+)
+@pytest.mark.parametrize("parent_type", [w.Widget, w.TransparentWidget, w.OpaqueWidget, w.ZoomWidget])
+def test_position_event_base_dispatch(event_name: str, handler: str, parent_type: type[w.Widget]) -> None:
+    seen: list[Vec] = []
+
+    def receive(self: w.Widget, event: Any) -> None:
+        seen.append(event.pos)
+
+    child_type = type("EventChild", (w.Widget,), {handler: receive})
+    parent, child = parent_type(), child_type()
+    child.box = Rect(Vec(), Vec(100, 100))
+    parent.add_child(child)
+    if isinstance(parent, w.ZoomWidget):
+        parent.zoom = 2
+        assert parent.get_zoom() == 2
+    event = getattr(w, event_name)(pos=Vec(20, 30), context=w.EventContext())
+    try:
+        getattr(parent, handler)(event)
+        if parent_type is w.TransparentWidget:
+            assert seen == [] and event.is_propagating()
+        elif parent_type is w.ZoomWidget:
+            assert seen == [Vec(10, 15)] and event.is_propagating()
+        else:
+            assert seen == [Vec(20, 30)]
+            assert event.is_propagating() is (parent_type is w.Widget)
+            if parent_type is w.OpaqueWidget and event_name == "DragHoverEvent":
+                assert event.is_consumed() and event.get_target() is parent
+    finally:
+        parent.close()
+
+
 def test_transform_array_write_through_copy_math_and_invalidation() -> None:
     root = w.TransformWidget()
     matrix = root.transform
@@ -140,6 +181,22 @@ def test_raw_field_geometry_interoperability_and_eventful_setters() -> None:
         pos.norm()
 
 
+def test_svg_file_cache_and_geometry_counts(tmp_path: Path) -> None:
+    path = tmp_path / "original.svg"
+    path.write_text(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="17" height="23">'
+        '<rect width="17" height="23" fill="red"/>'
+        '<path d="M 0 0 L 10 0 L 10 10 Z" fill="blue"/></svg>'
+    )
+    own = Svg()
+    own.load_file(str(path))
+    assert own.get_size() == Vec(17, 23)
+    assert (own.get_num_shapes(), own.get_num_paths(), own.get_num_points()) == (2, 2, 7)
+    cached = Svg.load(str(path))
+    assert cached is not None and cached is Svg.load(str(path))
+    assert cached.get_size() == Vec(17, 23) and cached.get_num_points() == 7
+
+
 def test_svg_and_framebuffer_fields_lifetimes_and_native_render() -> None:
     # Original test artwork, not Rack or Fundamental panel graphics.
     svg = Svg()
@@ -150,7 +207,9 @@ def test_svg_and_framebuffer_fields_lifetimes_and_native_render() -> None:
     node = w.SvgWidget()
     frame = w.FramebufferWidget()
     try:
-        node.set_svg(svg)
+        assert w.SVGWidget is w.SvgWidget
+        with pytest.warns(DeprecationWarning, match="set_svg_legacy"):
+            node.set_svg_legacy(svg)
         assert node.svg is svg and node.get_size() == Vec(17, 23)
         node.svg = None
         assert node.get_size() == Vec(17, 23)  # raw field does not wrap

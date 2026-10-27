@@ -33,11 +33,32 @@ On Linux x86_64 the following passed in this worktree:
 - `uv run sphinx-build -q -W -n -b html docs build/docs/html` and
   `uv run pytest -q -m 'docs and not host'` (15 tests).
 
-**Remaining:** RP-31B is open. The audit has many other widget, event, window
-and UI evidence gaps, including unrelated widget handler citations, drag/drop,
-text editing, and SVG operations. The audit's proposed recitation of
-`OpaqueWidget::onHoverKey`, `onHoverText`, and `onHoverScroll` to the UI test
-needs additional evidence: `Pad` overrides those handlers without calling
-`super()`, so that test alone does not exercise the base implementations.
-Complete the audit and rerun validation before closing. macOS and Windows were
-not tested.
+## Behavioral test checkpoint
+
+Added parameterized tests of five position events on Widget, TransparentWidget,
+OpaqueWidget and ZoomWidget, checking child dispatch, scaled coordinates,
+propagation and drag-hover consumption. This directly tests the base methods,
+unlike the earlier suggested UI recitation. Added drag-origin invalidation,
+EventState drag/focus/drop/dirty dispatch, text cursor and clipboard operations,
+key and text input, widget drag actions, scroll and scrollbar behavior, list
+layout, and SVG file/cache/geometry tests. Manifest entries cite the behavioral
+nodes and real-host wrappers; unrelated handler citations were replaced for
+those position events. `SVGWidget` currently does not warn: RP-31F was notified.
+
+Linux x86_64: warnings-as-errors test-hooks build and CTests passed as part of
+`uv run pytest -q --basetemp /tmp/rackpy-rp31b-tests
+ tests/widget/test_tree.py::test_widget_live_ui tests/ui/test_ui.py
+ tests/coverage/test_introspection.py`. The initial combined run exposed a bad
+expected SVG point count, subsequently corrected. Both widget and UI host suites
+were rerun successfully using a temporary fixture pointing to that same build;
+the fixture was removed. The introspection artifact from that run passed
+`uv run bin/check_coverage.py check --introspection <artifact>` after the final
+manifest changes. `prek run --all-files`, `bin/rackpy-dev typecheck`,
+`uv run pytest -m unit -q` (109 passed), generator/coverage checks,
+`uv run sphinx-build -q -W -n -b html docs build/docs/html`, and
+`uv run pytest -q -m 'docs and not host'` (15 passed) also passed.
+
+**Remaining:** RP-31B is open. Complete the remaining audit, including text
+context menus and any other unexercised bindings/citations; do not treat the
+missing `SVGWidget` warning as resolved until RP-31F lands. Revalidate before
+closing. macOS and Windows were not tested.

@@ -110,7 +110,7 @@ values you keep stay valid.
 
 `EventContext` carries the state that propagation shares: `propagating`,
 `consumed` and `target`. `BaseEvent.consume(widget)`, `stop_propagating()`,
-`set_target()`, `get_target()` and `is_consumed()` are Rack's; without a
+`set_target()`, `get_target()`, `is_consumed()` and `is_propagating()` are Rack's; without a
 context they do nothing, as in Rack. A target that Rack later deletes raises
 `StaleHandleError` instead of dangling. `PathDropEvent.paths` is a list of
 strings; `HoverKeyEvent.is_key_command(key, mods)` is Rack's check.
@@ -156,7 +156,9 @@ frame loop. It refuses to nest inside a draw call (`OwnershipError`), an
 Rack's integer range. `get_framebuffer()` returns a checked handle that
 becomes stale when the widget re-renders, deletes its framebuffer, or Rack's
 graphics context goes away; `get_image_handle()` is Rack's NanoVG image ID
-(-1 before rendering), not an address.
+(-1 before rendering), not an address. `get_framebuffer_size()` returns the
+current framebuffer dimensions, and `delete_framebuffer()` frees it and
+invalidates existing framebuffer handles.
 
 When Rack destroys its graphics context (the window closes), RackPy deletes
 the framebuffers of every widget it manages, even if a Python
@@ -170,8 +172,9 @@ scene, as a host that recreates its window would.
 
 - `TransparentWidget` ignores position events (hover, button, key and text
   while hovered, scroll, drag hover, path drops): neither it nor its children
-  see them. `OpaqueWidget` delivers them to its children, stops their
-  propagation and consumes them itself unless a child did.
+  see them. `OpaqueWidget` delivers them to its children and stops their
+  propagation. It also consumes hover, drag-hover and left-button events if a
+  child did not; other position events are stopped without being consumed.
 - `ZoomWidget` scales its children: `zoom` is the raw field, `set_zoom()` is
   Rack's setter, and positions and offsets go through the zoom.
 - `TransformWidget.transform` is a live, checked view of Rack's six-float
@@ -179,7 +182,8 @@ scene, as a host that recreates its window would.
   and `rotate(angle, origin)` are Rack's.
 - `SvgWidget.svg` is the raw field: assigning it does not resize the widget,
   while `set_svg()` and `wrap()` do. `SVGWidget` and `set_svg_legacy()` are
-  Rack's deprecated spellings. `rackpy.raw.window.Svg` loads SVGs
+  Rack's deprecated spellings. `set_svg_legacy()` warns; the `SVGWidget`
+  alias currently does not, a known deprecation-coverage gap. `rackpy.raw.window.Svg` loads SVGs
   (`load_string`, `load_file`, `Svg.load`; see [SVGs](window.md#svgs)).
 - `FramebufferWidget` has Rack's `dirty`, `bypassed`, `oversample`,
   `dirty_on_subpixel_change` and a checked `viewport_margin` view.
