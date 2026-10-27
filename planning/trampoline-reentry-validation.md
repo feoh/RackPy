@@ -337,3 +337,22 @@ re-extraction, performance benchmarking, CI and release/publication were not
 run. The refusal probes establish guard behavior, not real-time safety or
 hardware performance. Independent supervisor/reviewer acceptance remains a
 separate gate. No push or Witan task/workflow mutation was performed here.
+
+## After integration onto RP-23C
+
+Rebased by the supervisor onto `f2020d3` (RP-23C): RP-22D, its review fix
+(the benchmark records its actual invocation) and the trampoline re-entrancy
+fix, in that order, with generated files regenerated from the merged
+manifest (implemented 2890, planned 54, unreviewed 1, excluded_internal 111,
+absent 2) and the re-entrancy limitation text in
+`docs/explanation/callbacks.md` and the callback-paths generator replaced by
+the fixed behaviour. Independent read-only reviews: RP-22D approved with one
+provenance nit (fixed), the re-entrancy fix approved with no findings. On the
+combined state: `bin/rackpy-dev build --werror --test-hooks` (CTest 6/6),
+`uv run pytest -m unit` (100 passed), `prek run --all-files`,
+`bin/rackpy-dev typecheck`, `bin/planning-check`,
+`uv run bin/generate_bindings.py check`, the sphinx `-W` build,
+`uv run pytest -m "docs and not host"` (15 passed),
+`uv run pytest -m "native and not host"` (32 passed) and the full
+`flock /tmp/rackpy-host-tests.lock uv run pytest -m "host and not dist"`
+(123 passed, 178 deselected, 821 s) all pass.
