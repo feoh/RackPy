@@ -5,27 +5,33 @@ tests/dsp/test_runtime.py stages the example library and several broken ones;
 only the example's types may appear. RP-21C: the example's graph node types
 too, used from Python graphs, and the "graphs" library that bin/rackpy-graph
 compiled from graphs.py, each kernel checked against the plan interpreter.
+RP-23C: compiled expander nodes in Rack's own engine, and the "levels"
+library exchanging messages under a schema of its own.
 """
 
+import contextlib
 import math
 import random
 import runpy
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from pathlib import Path
 
 import pytest
 from _rackpy_host import _testing as HOOKS
 
+from rackpy import raw
 from rackpy.dsp.graph import Graph, Signal, node_types
-from rackpy.dsp.graph_reference import f32
+from rackpy.dsp.graph_reference import f32, run_pair
 from rackpy.dsp.kernel import kernel_types, load
-from rackpy.raw.engine import Module
+from rackpy.engine.expanders import allocate_messages, graph_messages
+from rackpy.raw.engine import Engine, Module
 
 # The graphs bin/rackpy-graph compiled into the "graphs" kernel library (tests/dsp/kernel_library/graphs.cpp).
 _GRAPHS = runpy.run_path(str(Path(__file__).with_name("graphs.py")))
 GRAPHS: dict[str, Graph] = _GRAPHS["GRAPHS"]
 CONFIG: dict[str, tuple[int, int, int, int]] = _GRAPHS["CONFIG"]
+PAIRS: dict[tuple[str, str], tuple[tuple[int, int], tuple[int, int]]] = _GRAPHS["PAIRS"]
 
 
 def until(condition: Callable[[], bool], seconds: float = 2.0) -> bool:
@@ -40,7 +46,8 @@ def until(condition: Callable[[], bool], seconds: float = 2.0) -> bool:
 def test_only_the_valid_library_registered_types() -> None:
     names = {t.name for t in kernel_types()}
     assert "example.Fold" in names
-    for refused in ("wrongabi.Never", "throws.Partial", "badname.Good", "rackpy.Gain2"):
+    refused_types = ("wrongabi.Never", "throws.Partial", "badname.Good", "rackpy.Gain2")
+    for refused in (*refused_types, "expanderabi.Kept", "expanderpart.Kept"):
         assert refused not in names
     fold = load("example.Fold")
     assert fold.controls == ("gain", "limit") and [f[0] for f in fold.fields] == ["input", "output", "gain", "limit"]
@@ -197,3 +204,133 @@ def test_compiled_kernels_match_the_plan_interpreter(name: str) -> None:
 def test_compiled_kernels_refuse_unwired_fields() -> None:
     with pytest.raises(ValueError, match=r"graphs\.Vca: input\[0\] must be wired"):
         load("graphs.Vca")(**{"input[0]": -1})
+
+
+# --- RP-23C: expanders in kernel libraries ----------------------------------------------------
+
+
+@contextlib.contextmanager
+def stepped_by_the_test() -> Iterator[Engine]:
+    """Rack's engine, stepped only by Engine.step_block from here (a RackPy master module stops its thread)."""
+    context = raw.context_get()
+    assert context is not None and context.engine is not None
+    e = context.engine
+    previous = e.get_master_module()
+    clock = Module.create(lambda m: m.config(0, 0, 0, 0))
+    HOOKS.engine_adopt(clock)
+    e.set_master_module(clock)
+    try:
+        frame = e.get_frame()
+        for _ in range(100):  # until Rack's own engine thread is idle
+            time.sleep(0.01)
+            if e.get_frame() == frame:
+                break
+            frame = e.get_frame()
+        else:
+            pytest.fail("Rack's engine kept stepping after a RackPy module became its master")
+        yield e
+    finally:
+        e.set_master_module(previous)
+        HOOKS.engine_delete(clock)
+
+
+def adjacent(left: Module, right: Module) -> None:
+    HOOKS.rack_set_expander_id(left, 1, right.id)
+    HOOKS.rack_set_expander_id(right, 0, left.id)
+
+
+def outputs(m: Module) -> list[list[float]]:
+    return [[o.get_voltage(c) for c in range(max(1, o.get_channels()))] for o in m.outputs]
+
+
+def pair(compiled: bool) -> tuple[Module, Module]:
+    (left, right), ((left_side, left_lanes), (right_side, right_lanes)) = next(iter(PAIRS.items()))
+    made = []
+    for name, side, lanes in ((left, left_side, left_lanes), (right, right_side, right_lanes)):
+        params, ins, outs, lights = CONFIG[name]
+
+        def configure(m: Module, p: int = params, i: int = ins, o: int = outs, li: int = lights) -> None:
+            m.config(p, i, o, li)
+
+        m = Module.create(configure)
+        graph_messages(m.get_expander(side), lanes)
+        m.get_expander(side).snapshots = True
+        m.set_kernel(load(f"graphs.{name}")() if compiled else GRAPHS[name].compile())
+        made.append(m)
+    return made[0], made[1]
+
+
+def test_compiled_expander_graphs_match_the_interpreter_in_racks_engine() -> None:
+    """graphs.Sender | graphs.Echo, compiled and interpreted, side by side in Rack's engine, frame for frame."""
+    frames = 64
+    (left, right), _ = next(iter(PAIRS.items()))
+    a, b = run_pair(GRAPHS[left], GRAPHS[right], frames)
+    reference = [([a.outputs[0][n]], [b.outputs[0][n], b.outputs[1][n]]) for n in range(frames)]
+    with stepped_by_the_test() as e:
+        compiled, interpreted = pair(True), pair(False)
+        modules = [*compiled, *interpreted]
+        for m in modules:
+            HOOKS.engine_adopt(m)
+        try:
+            adjacent(*compiled)
+            adjacent(*interpreted)
+            seen: list[tuple[int, list[float]] | None] = []
+            for n in range(frames):
+                e.step_block(1)
+                got = (outputs(compiled[0]), outputs(compiled[1]))
+                assert got == (outputs(interpreted[0]), outputs(interpreted[1])), n
+                assert got == reference[n], n
+                # Snapshots of what each receiver got this frame, the same in both tiers.
+                snapshots = [compiled[0].right_expander.snapshot(), compiled[1].left_expander.snapshot()]
+                assert snapshots == [interpreted[0].right_expander.snapshot(), interpreted[1].left_expander.snapshot()]
+                seen.append(snapshots[1])
+            counters = [s[1][18] for s in seen if s is not None]  # lane 1, channel 0 of the right module's message
+            assert counters[-5:] == [float(n) for n in range(frames - 5, frames)]
+        finally:
+            for m in modules:
+                HOOKS.engine_delete(m)
+
+
+def test_a_library_exchanges_under_its_own_schema() -> None:
+    """levels.Send | levels.Receive in Rack's engine: one frame for the cable, one for the expander."""
+    send, receive = load("levels.Send"), load("levels.Receive")
+    source = Module.create(lambda m: m.config(0, 0, 1, 0))
+    sender = Module.create(lambda m: m.config(0, 1, 0, 0))
+    sender.set_kernel(send(input=0))
+    receiver = Module.create(lambda m: m.config(0, 0, 1, 0))
+    allocate_messages(receiver.left_expander, "levels.Levels", 17)
+    receiver.set_kernel(receive(output=0))
+    other = Module.create(lambda m: m.config(0, 0, 1, 0))
+    graph_messages(other.left_expander)  # "rackpy.graph", not "levels.Levels": nothing is written into it
+    other.set_kernel(receive(output=0))
+    for m in (receiver, other):
+        m.outputs[0].channels = 1  # patched, so that Rack's setChannels keeps the received count
+
+    def drive(n: int) -> list[float]:
+        return [float(n), n + 0.5, -float(n)]
+
+    with stepped_by_the_test() as e:
+        modules = [source, sender, receiver, other]
+        for m in modules:
+            HOOKS.engine_adopt(m)
+        cable = HOOKS.engine_connect(source, 0, sender, 0)
+        try:
+            adjacent(sender, receiver)
+            for n in range(12):
+                out = source.outputs[0]
+                out.set_channels(3)
+                for c, v in enumerate(drive(n)):
+                    out.set_voltage(v, c)
+                e.step_block(1)
+                expected = drive(n - 2) if n >= 2 else [0.0]
+                assert outputs(receiver) == [expected], n
+            adjacent(sender, other)  # the sender now faces a module with the wrong schema
+            HOOKS.rack_set_expander_id(receiver, 0, -1)
+            e.step_block(2)
+            assert outputs(other) == [[0.0]] and outputs(receiver) == [[0.0]]
+        finally:
+            HOOKS.engine_disconnect(cable)
+            for m in modules:
+                HOOKS.engine_delete(m)
+    with pytest.raises(ValueError, match=r"levels\.Send: input must be wired"):
+        send(input=-1)  # the library's own check, as ValueError

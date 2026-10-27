@@ -17,4 +17,4 @@ def test_expanders_in_rack(make_hooks_bundle: Callable[[], Path], rack_host: Pat
     assert result.exit == 0, result.summary()
     outcomes = result.outcomes()
     assert outcomes and set(outcomes.values()) == {"passed"}, result.summary()
-    assert len(outcomes) >= 18  # 7 RP-23A tests, 9 rate/thread pairs and 2 more RP-23B tests
+    assert len(outcomes) >= 20  # 7 RP-23A tests, 9 rate/thread pairs and 2 more RP-23B tests, 2 RP-23C tests

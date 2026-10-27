@@ -297,7 +297,7 @@ struct GraphKernel final : Kernel {
 				}
 				case Op::EXPANDER_RECEIVE: {
 					size_t end = (size_t) (r.index + LANE);
-					if (float* message = engine::receiveBuffer(m, r.side, schema, end, links[r.state], links[r.state + 1u]))
+					if (float* message = engine::receiveBuffer(m, r.side, schema, end, args.frame, links[r.state], links[r.state + 1u]))
 						readLane(out, message + r.index);
 					else
 						out.channels = 0;

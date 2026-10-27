@@ -6,7 +6,8 @@ tests/dsp/kernel_library/graphs.cpp from GRAPHS (tests/dsp/test_graph.py
 checks that it is current); the hooks build compiles it as the kernel
 library ``graphs``. test_libraries.py runs each compiled kernel against the
 plan interpreter inside Rack, and native/tests/graph_bench.cpp times them.
-CONFIG gives each graph's module: (params, inputs, outputs, lights).
+CONFIG gives each graph's module: (params, inputs, outputs, lights); PAIRS the
+graphs that exchange expander messages side by side (RP-23C).
 """
 
 from rackpy.dsp.graph import Graph
@@ -53,11 +54,44 @@ def vca() -> Graph:
     return g
 
 
-GRAPHS = {"Tutorial": tutorial(), "Everything": everything(), "Sine": sine(False), "SineGain": sine(True), "Vca": vca()}
+def sender() -> Graph:
+    """RP-23C: sends input 0 and a counter to the right (lanes 0 and 1); outputs what comes back on lane 0."""
+    g = Graph()
+    count = g.delay(1.0)
+    count.feed(count + 1)
+    g.expander_send(1, g.input(0))
+    g.expander_send(1, count, lane=1)
+    g.output(0, g.expander_receive(1))
+    return g
+
+
+def echo() -> Graph:
+    """RP-23C: outputs both lanes from the left and sends lane 0 back to the left, doubled."""
+    g = Graph()
+    got = g.expander_receive(0)
+    g.output(0, got)
+    g.output(1, g.expander_receive(0, lane=1))
+    g.expander_send(0, got * 2)
+    return g
+
+
+GRAPHS = {
+    "Tutorial": tutorial(),
+    "Everything": everything(),
+    "Sine": sine(False),
+    "SineGain": sine(True),
+    "Vca": vca(),
+    "Sender": sender(),
+    "Echo": echo(),
+}
 CONFIG = {
     "Tutorial": (1, 1, 1, 1),
     "Everything": (1, 2, 6, 1),
     "Sine": (0, 1, 1, 0),
     "SineGain": (1, 1, 1, 0),
     "Vca": (1, 1, 1, 0),
+    "Sender": (0, 1, 1, 0),
+    "Echo": (0, 0, 2, 0),
 }
+# Graphs that run side by side, (left, right), with the "rackpy.graph" lanes each receives: (side, lanes).
+PAIRS = {("Sender", "Echo"): ((1, 1), (0, 2))}

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Kernel libraries that RackPy must refuse (RP-17B tests), one per VARIANT_*.
 #include <rack.hpp>
+#include <rackpy/expanders.hpp>
 #include <rackpy/graph.hpp>
 #include <rackpy/kernel.hpp>
 
@@ -55,6 +56,17 @@ RACKPY_GRAPH_NODES(registrar) {
 		return std::unique_ptr<rackpy::graph::Node>();
 	}});
 }
+#elif defined(VARIANT_EXPANDER_WRONG_ABI)
+RACKPY_KERNEL_LIBRARY("expanderabi", registrar) {
+	registrar.add(type("Kept"));  // must not be registered: the library fails as a whole
+}
+extern "C" __attribute__((visibility("default"))) int rackpy_expander_abi() { return 999; }
+extern "C" __attribute__((visibility("default"))) void rackpy_set_expander_services(rackpy::expander::Services*) {}
+#elif defined(VARIANT_EXPANDER_PARTIAL)
+RACKPY_KERNEL_LIBRARY("expanderpart", registrar) {
+	registrar.add(type("Kept"));
+}
+extern "C" __attribute__((visibility("default"))) int rackpy_expander_abi() { return rackpy::expander::EXPANDER_ABI; }
 #else
 #error "build broken.cpp with one VARIANT_* definition"
 #endif

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Kernel libraries (RP-17B): plugin-shipped native code that adds kernel
-// types, and graph node types (RP-21C) if it defines RACKPY_GRAPH_NODES.
+// types, and graph node types (RP-21C) if it defines RACKPY_GRAPH_NODES. A
+// library that defines RACKPY_EXPANDERS gets RackPy's expander services (RP-23C).
 // Trusted like the rest of the plugin, but confined to its folder, checked
 // against the kernel and graph ABIs, and loaded all-or-nothing per library.
 #include <dlfcn.h>
@@ -9,6 +10,7 @@
 #include <set>
 #include <stdexcept>
 
+#include "../../engine/expanders.hpp"
 #include "../graph/plan.hpp"
 #include "runtime.hpp"
 
@@ -90,6 +92,15 @@ void loadLibrary(const std::string& pluginDir, const std::string& relative) {
 				std::to_string(graph::GRAPH_ABI) + "; rebuild it against this RackPy's rackpy/graph.hpp");
 		registration([&] { registerNodes(nodes); });
 	}
+	auto expanderAbi = (int (*)()) dlsym(handle, "rackpy_expander_abi");
+	auto setServices = (void (*)(expander::Services*)) dlsym(handle, "rackpy_set_expander_services");
+	if (expanderAbi || setServices) {
+		if (!expanderAbi || !setServices)
+			throw std::runtime_error("it defines only part of RACKPY_EXPANDERS");
+		if (expanderAbi() != expander::EXPANDER_ABI)
+			throw std::runtime_error("it was built for expander ABI " + std::to_string(expanderAbi()) + ", but RackPy has " +
+				std::to_string(expander::EXPANDER_ABI) + "; rebuild it against this RackPy's rackpy/expanders.hpp");
+	}
 	std::set<std::string> nodeNames;
 	for (auto& type : nodes.types) {
 		if (!identifier(type.name))
@@ -116,6 +127,9 @@ void loadLibrary(const std::string& pluginDir, const std::string& relative) {
 		if (!type.create)
 			throw std::runtime_error("kernel type " + type.name + " has no create function");
 	}
+	// Before any of its kernels can be made (Python makes them later, on the main thread).
+	if (setServices)
+		setServices(&engine::hostServices());
 	for (auto& type : collected.types) {
 		std::string name = type.name;
 		registerType(std::move(type));

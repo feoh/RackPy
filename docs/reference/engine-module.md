@@ -741,15 +741,36 @@ without locks, that the neighbour is a RackPy module whose messages fit.
 ```{rackpy-example} expanders.py
 ```
 
-Established (RP-23B): graph nodes exchange messages in Rack's own engine
-exactly one frame apart, at 44.1, 48 and 96 kHz with 1, 2 and 4 engine
-threads, and give silence on removal, reordering and a schema mismatch.
-Not yet established (RP-23C): snapshots for Python while the engine runs,
-sanitizer stress runs, the compiled tier for expander nodes, and the
-contract by which C++ kernel libraries exchange messages with custom
-schemas. Until then, Python cannot interpret a foreign plugin's message:
-those `void*` semantics stay open in the coverage records of
-`producerMessage` and `consumerMessage`.
+**Snapshots.** While Rack's engine runs a module, Python sees what native
+code receives through snapshots instead: set `expander.snapshots = True` (at
+any time, on a RackPy module) and `expander.snapshot()` returns `(frame,
+values)`, a consistent copy of the message as native code received it in
+that frame, or `None` before the first. Native code copies it at most once
+per frame, before marking anything read, and only while snapshots are on; a
+sequence lock keeps the copy whole, so Python may read it while Rack's
+engine thread writes. Snapshots exist for RackPy messages that native code
+receives (graph nodes and kernels through `rackpy/expanders.hpp`).
+
+**Native code.** DSP graphs exchange lanes of `"rackpy.graph"` messages
+([graph expanders](../how-to/graphs.md#expanders)), and C++ kernel libraries
+exchange messages under schemas of their own through RackPy's expander
+services ([from C++](../how-to/dsp.md#exchange-expander-messages-from-c)),
+which check the neighbour, its back link and the buffers without locks or
+reading foreign memory. That contract is how a `void*` message gets a
+meaning in RackPy: for RackPy buffers, from their schema, in Python and in
+native code alike; for another plugin's pointer, only from native code that
+checks that plugin's model, as Rack prescribes. Python never reinterprets a
+foreign pointer.
+
+Established: Rack's own engine delivers each message exactly one frame
+later at 44.1, 48 and 96 kHz with 1, 2 and 4 engine threads, in both graph
+tiers and for a library's own schema; removal, reordering and a schema
+mismatch give silence; Python reads whole snapshots while Rack's engine
+thread runs; and a stress run of hot removal, insertion, reordering,
+foreign and mismatched neighbours, snapshot toggling and concurrent
+snapshot reads is clean under AddressSanitizer, UndefinedBehaviorSanitizer,
+LeakSanitizer and ThreadSanitizer (Rack's engine reproduced, libRack not
+instrumented).
 
 ## Remaining proof gates
 

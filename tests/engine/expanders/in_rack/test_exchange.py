@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""RP-23B: DSP graph kernels exchange expander messages in Rack's own engine (live UI, test hooks).
+"""RP-23B/C: DSP graph kernels exchange expander messages in Rack's own engine (live UI, test hooks).
 
 Two RackPy modules side by side in Rack's engine run graph kernels that send
 to and receive from each other through ``"rackpy.graph"`` messages. Rack's
@@ -22,6 +22,7 @@ from rackpy import laboratory, raw
 from rackpy.dsp import graph_reference
 from rackpy.dsp.graph import Graph, Signal
 from rackpy.engine.expanders import allocate_messages, graph_messages
+from rackpy.errors import OwnershipError
 from rackpy.laboratory import Bench
 from rackpy.raw import settings as rset
 from rackpy.raw.engine import Engine, Module
@@ -197,3 +198,60 @@ def test_removal_reordering_and_a_schema_mismatch_give_silence_or_the_new_neighb
         finally:
             HOOKS.engine_delete(a)
             HOOKS.engine_delete(b)
+
+
+def test_python_reads_snapshots_while_racks_engine_runs() -> None:
+    """RP-23C: Rack's own engine thread runs the pair; Python reads consistent snapshots meanwhile."""
+    a, b = module(left_graph(), 1, (1,)), module(right_graph(), 2, (0,))
+    assert b.left_expander.snapshot() is None and not b.left_expander.snapshots
+    b.left_expander.snapshots = True
+    HOOKS.engine_adopt(a)
+    HOOKS.engine_adopt(b)
+    try:
+        adjacent(a, b)  # Rack's engine thread follows the IDs at its next block
+        e = engine()
+        start = e.get_frame()
+        offsets: set[float] = set()
+        frames: list[int] = []
+        deadline = time.monotonic() + 10
+        while len(frames) < 200 and time.monotonic() < deadline:
+            snapshot = b.left_expander.snapshot()  # while the engine thread may be writing it
+            if snapshot is not None:
+                frame, values = snapshot
+                assert len(values) == 17 and values[0] == 1.0  # one channel: a's counter
+                offsets.add(values[1] - frame)  # its counter of the frame before: a constant offset
+                frames.append(frame)
+            time.sleep(0.001)
+        assert len(frames) == 200, "Rack's engine did not run the pair"
+        assert frames == sorted(frames) and frames[-1] > frames[0] >= start
+        assert len(offsets) == 1, offsets  # never a torn or mixed snapshot
+        b.left_expander.snapshots = False
+        held = b.left_expander.snapshot()
+        time.sleep(0.05)
+        assert b.left_expander.snapshot() == held  # off: no longer written
+        with pytest.raises(OwnershipError, match="engine runs this module"):
+            b.left_expander.consumer_message  # noqa: B018 - the property raises
+    finally:
+        HOOKS.engine_delete(a)
+        HOOKS.engine_delete(b)
+
+
+def test_snapshots_are_a_rackpy_modules() -> None:
+    handle = HOOKS.add_probe_module()
+    try:
+        context = raw.context_get()
+        assert context is not None and context.engine is not None
+        probe = context.engine.get_module(handle.module_id)
+        assert probe is not None
+        with pytest.raises(OwnershipError, match="only a RackPy module's expander has snapshots"):
+            probe.left_expander.snapshot()
+        with pytest.raises(OwnershipError, match="only a RackPy module's expander has snapshots"):
+            probe.left_expander.snapshots = True
+    finally:
+        HOOKS.remove_probe_module(handle)
+    m = Module.create(lambda m: m.config(0, 0, 0, 0))
+    try:
+        m.right_expander.snapshots = True  # no messages yet: nothing to snapshot
+        assert m.right_expander.snapshots and m.right_expander.snapshot() is None
+    finally:
+        m.close()

@@ -14,15 +14,19 @@
 // Each RackPy module instead publishes, per side, the schema, size and two
 // buffers its slots hold (a Channel), on the main thread while Rack's engine
 // does not run it; native code finds a neighbour's channels by a cross-cast
-// that only succeeds for RackPy modules (RP-23B).
+// that only succeeds for RackPy modules (RP-23B). Kernel libraries reach the
+// same checks through rackpy/expanders.hpp's Services (RP-23C).
 #pragma once
 #include <rack.hpp>
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 
+#include "rackpy/expanders.hpp"
 #include "rackpy/runtime/context.hpp"
 
 namespace rackpy {
@@ -30,16 +34,20 @@ namespace module {
 struct Module;
 }
 
+namespace expander {
+/** See rackpy/expanders.hpp: two messages have the same schema exactly when they point to the same Schema. */
+struct Schema {
+	const std::string name;
+};
+}  // namespace expander
+
 namespace engine {
 
 /** The most float32 values a RackPy expander message holds. */
 constexpr size_t MAX_MESSAGE_SIZE = 65536;
 
-/** A schema name, interned: two messages have the same schema exactly when they point to the same Schema.
-Never freed, so engine-thread code may keep and compare the pointer. */
-struct Schema {
-	const std::string name;
-};
+/** A schema name, interned. Never freed, so engine-thread code may keep and compare the pointer. */
+using Schema = expander::Schema;
 
 /** Checks the name (1 to 64 characters: letters, digits, '_', '.', '-') and interns it. Throws
 std::invalid_argument. Main thread. */
@@ -85,33 +93,78 @@ struct Channel {
 	bool holds(const void* pointer) const { return pointer && (pointer == buffers[0] || pointer == buffers[1]); }
 };
 
+/** The last message a side received, for Python to read while Rack's engine runs the module (RP-23C): a
+sequence lock, written by the engine thread at most once per frame, read on the main thread. */
+struct Snapshot {
+	explicit Snapshot(size_t size) : size(size), values(new std::atomic<float>[size]) {
+		for (size_t i = 0; i < size; i++)
+			values[i].store(0.f, std::memory_order_relaxed);
+	}
+	const size_t size;
+	std::atomic<uint32_t> sequence{0};  // odd while being written
+	std::atomic<int64_t> frame{-1};  // the frame it was received in; -1 for none yet
+	std::unique_ptr<std::atomic<float>[]> values;
+
+	/** Engine thread: copies `message` once per frame. The values are release stores after the odd
+	sequence store, so a reader that sees any of them also sees the sequence change (no fences, which
+	ThreadSanitizer does not model). */
+	void write(const float* message, int64_t at) noexcept {
+		if (frame.load(std::memory_order_relaxed) == at)
+			return;
+		uint32_t s = sequence.load(std::memory_order_relaxed);
+		sequence.store(s + 1, std::memory_order_relaxed);
+		for (size_t i = 0; i < size; i++)
+			values[i].store(message[i], std::memory_order_release);
+		frame.store(at, std::memory_order_release);
+		sequence.store(s + 2, std::memory_order_release);
+	}
+	/** Main thread: a consistent copy, or false if the engine thread kept writing through `attempts` tries.
+	Acquire loads keep the second sequence load after the values. */
+	bool read(int64_t& at, std::vector<float>& out, int attempts = 1000) const {
+		out.resize(size);
+		for (int k = 0; k < attempts; k++) {
+			uint32_t before = sequence.load(std::memory_order_acquire);
+			if (before & 1u)
+				continue;
+			for (size_t i = 0; i < size; i++)
+				out[i] = values[i].load(std::memory_order_acquire);
+			at = frame.load(std::memory_order_acquire);
+			if (sequence.load(std::memory_order_relaxed) == before)
+				return true;
+		}
+		return false;
+	}
+};
+
 /** The channels a RackPy module publishes, one per side. RackPy's Module derives from it, so a cross-cast
 from rack::engine::Module finds it for RackPy modules only. Written on the main thread while Rack's engine
 does not run the module (RP-23A refuses slot changes otherwise), read on the engine thread. */
 struct ExpanderChannels {
 	Channel channels[2];
+	/** Whether Python asked for snapshots of each side (main thread writes, engine thread reads). */
+	std::atomic<bool> snapshotsWanted[2] = {{false}, {false}};
+	/** Allocated with the channel, replaced only while Rack's engine does not run the module. */
+	std::unique_ptr<Snapshot> snapshots[2];
 };
 
 /** Republishes `side` of `module` from its slots: a channel when both hold registered buffers of the same
-schema and size, else none. Main thread, while Rack's engine does not run the module. */
+schema and size, else none, with a new snapshot when the channel changed. Main thread, while Rack's engine
+does not run the module. */
 void publishChannel(rack::engine::Module& module, ExpanderChannels& channels, uint8_t side);
 
-/** A cached cross-cast to a module's channels: recomputed only when the module pointer or its ID changes,
-since a deleted module's address can be reused. Engine thread, lock-free and allocation-free. */
-struct Link {
-	const rack::engine::Module* module = nullptr;
-	int64_t id = -1;
-	ExpanderChannels* channels = nullptr;
+/** A cached neighbour lookup (rackpy/expanders.hpp's Link, filled in here). */
+using Link = expander::Link;
 
-	ExpanderChannels* resolve(rack::engine::Module* m) noexcept {
-		if (m != module || (m && m->id != id)) {
-			module = m;
-			id = m ? m->id : -1;
-			channels = m ? dynamic_cast<ExpanderChannels*>(m) : nullptr;
-		}
-		return channels;
+/** The channels of `m` through `link`'s cross-cast, recomputed only when the module pointer or its ID
+changes, since a deleted module's address can be reused. Engine thread, lock-free and allocation-free. */
+inline ExpanderChannels* resolve(Link& link, rack::engine::Module* m) noexcept {
+	if (m != link.module || (m && m->id != link.id)) {
+		link.module = m;
+		link.id = m ? m->id : -1;
+		link.channels = m ? dynamic_cast<ExpanderChannels*>(m) : nullptr;
 	}
-};
+	return static_cast<ExpanderChannels*>(link.channels);
+}
 
 /** Where `self` sends to its neighbour on `side`: the neighbour's producer buffer for the opposite side.
 Only if the neighbour is a RackPy module whose expander on that side is `self` and whose channel there has
@@ -120,7 +173,7 @@ otherwise. Engine thread. */
 inline float* sendBuffer(rack::engine::Module& self, uint8_t side, const Schema* schema, size_t end, Link& link,
 	rack::engine::Module::Expander*& flip) noexcept {
 	rack::engine::Module* neighbour = self.getExpander(side).module;
-	ExpanderChannels* theirs = link.resolve(neighbour);
+	ExpanderChannels* theirs = resolve(link, neighbour);
 	if (!theirs)
 		return nullptr;
 	uint8_t back = side ? 0 : 1;
@@ -133,20 +186,28 @@ inline float* sendBuffer(rack::engine::Module& self, uint8_t side, const Schema*
 }
 
 /** What `self` receives on `side`: its own consumer buffer there, if its neighbour on that side is a RackPy
-module and its own channel has `schema` and at least `end` values. Null otherwise. Engine thread. */
-inline float* receiveBuffer(rack::engine::Module& self, uint8_t side, const Schema* schema, size_t end, Link& neighbour,
-	Link& own) noexcept {
+module and its own channel has `schema` and at least `end` values. Null otherwise. When Python asked for
+snapshots of the side, the message is copied to its snapshot the first time in frame `frame`, before the
+caller marks anything read. Engine thread. */
+inline float* receiveBuffer(rack::engine::Module& self, uint8_t side, const Schema* schema, size_t end, int64_t frame,
+	Link& neighbour, Link& own) noexcept {
 	rack::engine::Module::Expander& e = self.getExpander(side);
-	if (!neighbour.resolve(e.module))
+	if (!resolve(neighbour, e.module))
 		return nullptr;
-	ExpanderChannels* mine = own.resolve(&self);
+	ExpanderChannels* mine = resolve(own, &self);
 	if (!mine)
 		return nullptr;
 	const Channel& c = mine->channels[side];
 	if (c.schema != schema || c.size < end || !c.holds(e.consumerMessage))
 		return nullptr;
-	return static_cast<float*>(e.consumerMessage);
+	float* message = static_cast<float*>(e.consumerMessage);
+	if (mine->snapshotsWanted[side].load(std::memory_order_relaxed) && mine->snapshots[side])
+		mine->snapshots[side]->write(message, frame);
+	return message;
 }
+
+/** RackPy's implementation of rackpy/expanders.hpp's Services, which kernel libraries receive. */
+expander::Services& hostServices();
 
 // --- The graph schema (RP-23B) ---------------------------------------------------------------
 

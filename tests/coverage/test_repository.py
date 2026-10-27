@@ -77,7 +77,8 @@ def test_every_module_gap_retains_a_responsible_task() -> None:
         for r in manifest["entries"]
         if r["id"].split(":", 1)[1].startswith("rack::engine::Module") and r["status"] not in bm.BOUND | bm.FINAL
     ]
-    assert records
+    # RP-23C bound the last two (Module::Expander::producerMessage and consumerMessage); a gap that opens
+    # again must name the task responsible for it.
     for record in records:
         assert record["status"] in {"planned", "unreviewed"}
         assert record["notes"].startswith("Responsible task: RP-"), record["id"]

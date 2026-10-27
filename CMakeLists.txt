@@ -123,6 +123,23 @@ if(RACKPY_BUILD_TESTS)
   target_include_directories(rackpy_graph_tests PRIVATE native/include)
   target_link_libraries(rackpy_graph_tests PRIVATE rackpy_sdk_program)
   add_test(NAME graph_plans COMMAND rackpy_graph_tests)
+  # RP-23C: expander exchange under stress (tests/engine/test_expander_stress.py), once with ASan and UBSan,
+  # once with TSan; libRack is not instrumented.
+  foreach(_variant asan tsan)
+    add_executable(rackpy_expander_stress_${_variant} native/tests/expander_stress.cpp native/module/lifecycle.cpp
+      ${RACKPY_RUNTIME_CORE} ${RACKPY_DSP_RUNTIME})
+    set_target_properties(rackpy_expander_stress_${_variant} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+    target_include_directories(rackpy_expander_stress_${_variant} PRIVATE native/include)
+    target_link_libraries(rackpy_expander_stress_${_variant} PRIVATE rackpy_sdk_program)
+    set_property(TARGET rackpy_expander_stress_${_variant} PROPERTY JOB_POOL_COMPILE rackpy_heavy)
+  endforeach()
+  target_compile_options(rackpy_expander_stress_asan PRIVATE -fsanitize=address,undefined -fno-sanitize-recover=undefined
+    -fno-omit-frame-pointer)
+  target_link_options(rackpy_expander_stress_asan PRIVATE -fsanitize=address,undefined)
+  # -Wno-tsan: the diagnostics ring (native/runtime/diagnostics.cpp) uses fences, which TSan does not model;
+  # the expander snapshot does not.
+  target_compile_options(rackpy_expander_stress_tsan PRIVATE -fsanitize=thread -fno-omit-frame-pointer -Wno-tsan)
+  target_link_options(rackpy_expander_stress_tsan PRIVATE -fsanitize=thread)
   # The RP-07 audio-path guard, preloaded by tests/dsp/test_runtime.py around rackpy_kernel_guard.
   add_library(rackpy_audio_guard MODULE native/testing/audio_guard.c)
   set_target_properties(rackpy_audio_guard PROPERTIES PREFIX "" OUTPUT_NAME audio_guard C_STANDARD 11)
@@ -153,7 +170,8 @@ if(RACKPY_BUILD_TESTS)
   set(_rackpy_kernel_libraries example:fold.cpp:NONE wrong_abi:broken.cpp:VARIANT_WRONG_ABI
     throws:broken.cpp:VARIANT_THROWS duplicate:broken.cpp:VARIANT_DUPLICATE reserved:broken.cpp:VARIANT_RESERVED
     bad_name:broken.cpp:VARIANT_BAD_NAME graph_wrong_abi:broken.cpp:VARIANT_GRAPH_WRONG_ABI
-    graph_bad_node:broken.cpp:VARIANT_GRAPH_BAD_NODE graphs:graphs.cpp:NONE)
+    graph_bad_node:broken.cpp:VARIANT_GRAPH_BAD_NODE graphs:graphs.cpp:NONE levels:levels.cpp:NONE
+    expander_wrong_abi:broken.cpp:VARIANT_EXPANDER_WRONG_ABI expander_partial:broken.cpp:VARIANT_EXPANDER_PARTIAL)
   foreach(_entry IN LISTS _rackpy_kernel_libraries)
     string(REPLACE ":" ";" _parts "${_entry}")
     list(GET _parts 0 _name)

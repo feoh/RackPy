@@ -119,3 +119,35 @@ leave `planned`.
   that writes the expander IDs as `RackWidget::updateExpanders` does (on the
   main thread, without a lock), only while Rack's engine is stepped by the
   test.
+
+## RP-23C decisions
+
+- **A C++ services table, not RTTI.** `rackpy/expanders.hpp` declares an
+  abstract `Services` (schema interning on the main thread; `send` and
+  `receive` on the engine thread) that RackPy implements with the same
+  checks as the plan interpreter and hands to a library defining
+  `RACKPY_EXPANDERS` when it loads it, with its own `EXPANDER_ABI`. Only
+  virtual calls cross into the library, as with `Kernel`; RackPy does the
+  cross-cast in its own code. `send` requests the flip itself, so a library
+  never touches a RackPy module's flags or slots.
+- **Compiled tier.** Generated kernels call those services and keep the
+  interpreter's semantics exactly; a graph that exchanges takes only the
+  polyphonic path, because a received lane's channel count is known only
+  when it is read. Generated libraries define `RACKPY_EXPANDERS` only when a
+  graph exchanges.
+- **Snapshots.** Per module side, on request (`Expander.snapshots`), native
+  code copies the received message once per frame, before anything marks
+  it read, into a sequence lock of float atomics that Python reads on the
+  main thread at any time. Release stores and acquire loads instead of
+  fences, which ThreadSanitizer does not model; the snapshot is reallocated
+  only when the side's channel changes, which happens only while Rack's
+  engine does not run the module.
+- **Records.** `producerMessage` and `consumerMessage` are `implemented`:
+  a RackPy buffer's `void*` has the meaning its schema gives it in Python
+  and in native code; another plugin's pointer has only the meaning its
+  owner gives it, which native code may use after checking that plugin's
+  model (Rack's own rule), and Python sees it as an opaque handle.
+- **Stress, not a host.** The sanitizer runs reproduce Rack's engine
+  (workers between barriers, flips on the engine thread, changes only while
+  the workers are parked, as under Rack's exclusive lock) in a native
+  program built with ASan/UBSan and with TSan; libRack is not instrumented.

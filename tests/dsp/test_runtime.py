@@ -31,6 +31,9 @@ LIBRARIES = [
     "graph_wrong_abi",
     "graph_bad_node",
     "graphs",
+    "levels",
+    "expander_wrong_abi",
+    "expander_partial",
 ]
 
 
@@ -116,6 +119,7 @@ def test_kernel_libraries_load_and_bad_ones_are_skipped(
     assert log.lines("kernel type example.Fold from kernels/kernels_example.so")
     assert log.lines("graph node type example.Hold from kernels/kernels_example.so")
     assert log.lines("kernel type graphs.Tutorial from kernels/kernels_graphs.so")
+    assert log.lines("kernel type levels.Send from kernels/kernels_levels.so")
     expected = {
         "kernels_wrong_abi.so": "built for kernel ABI 999",
         "kernels_throws.so": "registration raised: kernel-library-intentional-error",
@@ -124,6 +128,8 @@ def test_kernel_libraries_load_and_bad_ones_are_skipped(
         "kernels_bad_name.so": 'kernel type name "not.good" is not an identifier',
         "kernels_graph_wrong_abi.so": "built for graph ABI 999",
         "kernels_graph_bad_node.so": "graph node type graphbad.Wide reads 9 signals; at most 8",
+        "kernels_expander_wrong_abi.so": "built for expander ABI 999",
+        "kernels_expander_partial.so": "defines only part of RACKPY_EXPANDERS",
         "missing.so": "no such file",
         "../RackPy/kernels/kernels_example.so": 'without ".."',
         "escape.so": "resolves outside the plugin folder",

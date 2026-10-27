@@ -66,13 +66,25 @@ def test_what_cannot_be_compiled_is_refused() -> None:
     extended.output(0, extended.node("example.Fold", extended.input(0), drive=1.0, limit=5.0))
     with pytest.raises(GraphError, match=r"native extension nodes \(example\.Fold\).*Graph\.compile\(\)"):
         emit({"Folded": extended}, "mine")
-    neighbourly = Graph()
-    neighbourly.expander_send(1, neighbourly.input(0))
-    with pytest.raises(GraphError, match=r"uses expander_send.*RP-23C.*Graph\.compile\(\)"):
-        emit({"Neighbourly": neighbourly}, "mine")
     looped = Graph()
     f = looped.forward()
     f.bind(f * 2)
     looped.output(0, f)
     with pytest.raises(GraphError, match="cycle with no delay"):
         emit({"Looped": looped}, "mine")
+
+
+def test_expander_nodes_compose_through_rackpys_services() -> None:
+    """RP-23C: a graph that exchanges takes the polyphonic path and asks RackPy for its services."""
+    neighbourly = Graph()
+    neighbourly.expander_send(1, neighbourly.input(0), lane=2)
+    neighbourly.output(0, neighbourly.expander_receive(0))
+    source = emit({"Neighbourly": neighbourly}, "mine")
+    assert "#include <rackpy/expanders.hpp>" in source and source.rstrip().endswith("RACKPY_EXPANDERS")
+    assert 'rackpy::expander::schema("rackpy.graph")' in source and "no expander services" in source
+    assert "rackpy::expander::send(m, 1, schema, 51, l" in source and "writeLane(e + 34, p" in source
+    assert "rackpy::expander::receive(m, 0, schema, 17, args.frame, l" in source and "readLane(p" in source
+    assert "getChannels() <= 1" not in source  # no single-channel path
+    plain = Graph()
+    plain.output(0, plain.input(0))
+    assert "RACKPY_EXPANDERS" not in emit({"Plain": plain}, "mine")  # only libraries that exchange define it

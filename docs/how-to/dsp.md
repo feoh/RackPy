@@ -140,3 +140,57 @@ The rules:
   reason, none of its types appear, and the other libraries still load.
 - Libraries stay loaded until Rack exits. They are trusted code from your
   plugin, like your Python.
+
+## Exchange expander messages from C++
+
+A kernel (or a graph node) in a library can exchange messages with the
+modules beside it through Rack's [expanders](../reference/engine-module.md#expanders),
+under a message layout of its own: a **schema**, named in your library's
+namespace, whose size and meaning you define. RackPy does the checks Rack
+leaves to every module, before your code touches a neighbour's buffer: that
+the neighbour is a RackPy module, that it points back, and that its buffers
+have your schema and are big enough. Include `rackpy/expanders.hpp`, define
+`RACKPY_EXPANDERS` once, and RackPy gives your library its expander services
+when it loads it. This library is RackPy's tested example:
+
+```{literalinclude} ../../tests/dsp/kernel_library/levels.cpp
+:language: c++
+```
+
+In Python, the receiving module owns the messages of the side it receives on,
+as in Rack: give it two buffers of your schema with
+`allocate_messages(module.left_expander, "levels.Levels", 17)`
+({py:mod}`rackpy.engine.expanders`) before Rack's engine runs the module, and
+use the kernels like any others: `load("levels.Send")(input=0)`. RackPy's
+test `tests/dsp/in_rack_libraries/test_libraries.py` runs this pair in Rack's
+own engine.
+
+The contract:
+
+- `schema(name)` runs on the main thread, in a kernel's constructor; it
+  returns null when RackPy gave the library no services (throw, as the
+  example does, so that Python gets `ValueError`). A name is 1 to 64
+  letters, digits, `_`, `.` or `-`; use your namespace as a prefix.
+- `send(module, side, schema, size, link)` returns the neighbour's producer
+  buffer and requests the flip; `receive(module, side, schema, size, frame,
+  neighbour, own)` returns this module's consumer buffer. Either returns
+  null when the check fails: write or read nothing then. Both run on Rack's
+  engine thread without locks or allocation. Keep the `Link`s in your kernel,
+  one per call site; RackPy uses them to check a neighbour only when it
+  changes. Pass `ProcessArgs::frame` to `receive`, so that RackPy can copy
+  the message for Python's snapshots before you change anything.
+- A message arrives one frame after it was written, whatever the order and
+  the number of engine threads, because Rack swaps the two buffers after
+  every module of the frame has run. Mark what you have read (the example
+  zeroes its count), or a neighbour that stops sending is heard again.
+- The buffers belong to the receiving RackPy module. Never assign a RackPy
+  module's expander slots, flip flags or buffers yourself, never keep a
+  buffer pointer past the frame, and write only within `size` values.
+- Rack's own expander API stays available for another plugin's modules:
+  check `neighbour->model` first, then interpret its `void*` as that
+  plugin documents, as Rack's manual describes. RackPy cannot check that
+  for you, and Python never sees such a pointer except as an opaque
+  `ForeignMessage`.
+- A library built for another `rackpy::expander::EXPANDER_ABI`, or that
+  defines only part of `RACKPY_EXPANDERS`, is skipped as a whole, with the
+  reason in Rack's log.

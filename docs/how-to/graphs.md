@@ -5,8 +5,8 @@ native node types: ports, parameters and controls in, arithmetic,
 oscillators and Rack's own triggers in between, outputs and lights out.
 Python only describes it; nothing in a graph runs Python per sample.
 
-**Implemented (RP-21A, RP-21B, RP-21C; expander nodes RP-23B), Linux
-x86_64 inside Rack Free 2.6.6.** {py:mod}`rackpy.dsp.graph` builds, validates and lowers graphs.
+**Implemented (RP-21A, RP-21B, RP-21C; expander nodes RP-23B and
+RP-23C), Linux x86_64 inside Rack Free 2.6.6.** {py:mod}`rackpy.dsp.graph` builds, validates and lowers graphs.
 {py:meth}`~rackpy.dsp.graph.Graph.compile` turns one into a native
 [kernel](dsp.md) that the **plan interpreter** runs on Rack's engine
 thread, straight from Python. The **compiled tier**
@@ -201,14 +201,19 @@ frame:
 - **Lanes.** Each lane of each side is sent by one node and received by one
   node at most; a graph that only sends is valid.
 
-Two RackPy graphs exchange directly; exchanging with another plugin's
-modules, or with custom message layouts from C++ kernel libraries, is the
-native schema contract of RP-23C, as is the compiled tier for these nodes
-(`graph_codegen` refuses them for now; use `compile()`).
+Both tiers compose these nodes: the compiled tier
+({py:mod}`rackpy.dsp.graph_codegen`) calls RackPy's expander services, which
+RackPy gives the generated library when it loads it, and takes the
+polyphonic path for a graph that exchanges, since a received lane's channel
+count is known only when it is read. Graphs exchange with RackPy modules
+only; a C++ kernel library can define [message layouts of its
+own](dsp.md#exchange-expander-messages-from-c). To watch what arrives while
+Rack's engine runs, turn on `expander.snapshots` and read
+`expander.snapshot()` ([snapshots](../reference/engine-module.md#expanders)).
 {py:func}`rackpy.dsp.graph_reference.run_pair` evaluates two graphs side by
 side, one frame apart, and the live-Rack tests check Rack's own engine
 against it frame for frame, at 44.1, 48 and 96 kHz with 1, 2 and 4 engine
-threads.
+threads, for both tiers.
 
 ## The offline reference
 

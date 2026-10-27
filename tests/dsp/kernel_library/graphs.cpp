@@ -2,6 +2,7 @@
 // The compiled tier of RackPy's DSP graphs (RP-21C): each kernel composes the
 // node types of rackpy/graph.hpp statically, as the plan interpreter runs them.
 #include <rack.hpp>
+#include <rackpy/expanders.hpp>
 #include <rackpy/graph.hpp>
 #include <rackpy/kernel.hpp>
 
@@ -543,6 +544,114 @@ struct Vca final : rackpy::Kernel {
 	}
 };
 
+/** Graph Sender: 8 nodes, composed statically. */
+struct Sender final : rackpy::Kernel {
+	const rackpy::expander::Schema* schema;  // rackpy.graph
+	int f0;  // input[0]
+	int f1;  // output[0]
+	Delay n0;
+	Signal p0;  // delay, on the polyphonic path
+	Signal p1;  // constant, on the polyphonic path
+	Signal p2;  // add, on the polyphonic path
+	Signal p3;  // input, on the polyphonic path
+	rackpy::expander::Link l4;  // expander_send: side 1, lane 0
+	rackpy::expander::Link l5;  // expander_send: side 1, lane 1
+	rackpy::expander::Link l6;  // expander_receive: side 1, lane 0
+	rackpy::expander::Link o6;
+	Signal p6;  // expander_receive, on the polyphonic path
+
+	explicit Sender(const std::vector<double>& v) {
+		(void) v;
+		schema = rackpy::expander::schema("rackpy.graph");
+		if (!schema)
+			throw std::invalid_argument("graphs.Sender: RackPy gave this library no expander services");
+		f0 = (int) v[0];
+		if (f0 < 0)
+			throw std::invalid_argument("graphs.Sender: input[0] must be wired");
+		f1 = (int) v[1];
+		if (f1 < 0)
+			throw std::invalid_argument("graphs.Sender: output[0] must be wired");
+		n0.initial = 0x1.0000000000000p+0f /* 1.0 */;
+		reset();
+	}
+
+	bool process(rack::engine::Module& m, const rack::engine::Module::ProcessArgs& args) noexcept override {
+		(void) args;
+		n0.process(p0); settle(p0);  // 0: delay
+		mono(p1, 0x1.0000000000000p+0f /* 1.0 */); settle(p1);  // 1: constant
+		map2(p2, p0, p1, [](float x, float y) { return rackpy::graph::add(x, y); }); settle(p2);  // 2: add
+		readInput(p3, m.inputs[f0]); settle(p3);  // 3: input
+		if (float* e = rackpy::expander::send(m, 1, schema, 17, l4)) writeLane(e + 0, p3);  // 4: expander_send
+		if (float* e = rackpy::expander::send(m, 1, schema, 34, l5)) writeLane(e + 17, p0);  // 5: expander_send
+		if (float* e = rackpy::expander::receive(m, 1, schema, 17, args.frame, l6, o6)) readLane(p6, e + 0); else p6.channels = 0; settle(p6);  // 6: expander_receive
+		writeOutput(m.outputs[f1], p6);  // 7: output
+		n0.latch(p2);  // latch 0
+		return true;
+	}
+
+	void reset() noexcept override {
+		n0.reset();
+	}
+
+	void setControl(int slot, double value) noexcept override {
+		switch (slot) {
+			default: break;
+		}
+	}
+};
+
+/** Graph Echo: 7 nodes, composed statically. */
+struct Echo final : rackpy::Kernel {
+	const rackpy::expander::Schema* schema;  // rackpy.graph
+	int f0;  // output[0]
+	int f1;  // output[1]
+	rackpy::expander::Link l0;  // expander_receive: side 0, lane 0
+	rackpy::expander::Link o0;
+	Signal p0;  // expander_receive, on the polyphonic path
+	rackpy::expander::Link l2;  // expander_receive: side 0, lane 1
+	rackpy::expander::Link o2;
+	Signal p2;  // expander_receive, on the polyphonic path
+	Signal p4;  // constant, on the polyphonic path
+	Signal p5;  // mul, on the polyphonic path
+	rackpy::expander::Link l6;  // expander_send: side 0, lane 0
+
+	explicit Echo(const std::vector<double>& v) {
+		(void) v;
+		schema = rackpy::expander::schema("rackpy.graph");
+		if (!schema)
+			throw std::invalid_argument("graphs.Echo: RackPy gave this library no expander services");
+		f0 = (int) v[0];
+		if (f0 < 0)
+			throw std::invalid_argument("graphs.Echo: output[0] must be wired");
+		f1 = (int) v[1];
+		if (f1 < 0)
+			throw std::invalid_argument("graphs.Echo: output[1] must be wired");
+		reset();
+	}
+
+	bool process(rack::engine::Module& m, const rack::engine::Module::ProcessArgs& args) noexcept override {
+		(void) args;
+		if (float* e = rackpy::expander::receive(m, 0, schema, 17, args.frame, l0, o0)) readLane(p0, e + 0); else p0.channels = 0; settle(p0);  // 0: expander_receive
+		writeOutput(m.outputs[f0], p0);  // 1: output
+		if (float* e = rackpy::expander::receive(m, 0, schema, 34, args.frame, l2, o2)) readLane(p2, e + 17); else p2.channels = 0; settle(p2);  // 2: expander_receive
+		writeOutput(m.outputs[f1], p2);  // 3: output
+		mono(p4, 0x1.0000000000000p+1f /* 2.0 */); settle(p4);  // 4: constant
+		map2(p5, p0, p4, [](float x, float y) { return rackpy::graph::mul(x, y); }); settle(p5);  // 5: mul
+		if (float* e = rackpy::expander::send(m, 0, schema, 17, l6)) writeLane(e + 0, p5);  // 6: expander_send
+		return true;
+	}
+
+	void reset() noexcept override {
+
+	}
+
+	void setControl(int slot, double value) noexcept override {
+		switch (slot) {
+			default: break;
+		}
+	}
+};
+
 }  // namespace
 
 RACKPY_KERNEL_LIBRARY("graphs", registrar) {
@@ -610,4 +719,27 @@ RACKPY_KERNEL_LIBRARY("graphs", registrar) {
 		{},
 		[](const std::vector<double>& v) { return std::make_unique<Vca>(v); },
 	});
+	registrar.add(rackpy::KernelType{
+		"Sender",
+		"Graph Sender, compiled by bin/rackpy-graph: 8 nodes.",
+		{
+			{"input[0]", rackpy::Field::INPUT, 0, false, "wired by the graph (defaults to its own index)"},
+			{"output[0]", rackpy::Field::OUTPUT, 0, false, "wired by the graph (defaults to its own index)"},
+		},
+		{},
+		[](const std::vector<double>& v) { return std::make_unique<Sender>(v); },
+	});
+	registrar.add(rackpy::KernelType{
+		"Echo",
+		"Graph Echo, compiled by bin/rackpy-graph: 7 nodes.",
+		{
+			{"output[0]", rackpy::Field::OUTPUT, 0, false, "wired by the graph (defaults to its own index)"},
+			{"output[1]", rackpy::Field::OUTPUT, 1, false, "wired by the graph (defaults to its own index)"},
+		},
+		{},
+		[](const std::vector<double>& v) { return std::make_unique<Echo>(v); },
+	});
 }
+
+// RackPy's expander services, for the graphs that exchange with neighbours (RP-23C).
+RACKPY_EXPANDERS

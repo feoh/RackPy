@@ -94,6 +94,14 @@ py::object messageObject(void* pointer) {
 	return py::cast(ForeignMessage{pointer});
 }
 
+/** The channels of a view's RackPy module, for snapshots: refused for another plugin's module. */
+engine::ExpanderChannels& ownChannels(const ExpanderView& v, const char* what) {
+	Target t = v.target();
+	if (!t.own)
+		throw runtime::Ownership(std::string(what) + ": only a RackPy module's expander has snapshots");
+	return *t.own;
+}
+
 /** Takes `buffer` out of module `m`'s keeping, if it is there and no slot of `m` still holds it. */
 void release(module::Module& m, MessageBuffer* buffer) {
 	if (!buffer || buffer->liveOwner() != &m)
@@ -309,6 +317,31 @@ void bindExpanders(py::module_ engine, py::class_<ModuleRef>& module) {
 			refuseWhileEngineRuns(t, "request_message_flip");
 			v.expander(t).requestMessageFlip();
 		}, "Rack's requestMessageFlip, while Rack's engine does not run the module (a laboratory Bench swaps them).")
+		.def_property("snapshots", [](const ExpanderView& v) {
+			return ownChannels(v, "snapshots").snapshotsWanted[v.side].load(std::memory_order_relaxed);
+		}, [](const ExpanderView& v, bool wanted) {
+			ownChannels(v, "snapshots").snapshotsWanted[v.side].store(wanted, std::memory_order_relaxed);
+		}, "Whether native code copies what this side receives for snapshot(), once per frame (RP-23C). A RackPy "
+			"module only; settable at any time on the main thread, even while Rack's engine runs the module.")
+		.def("snapshot", [](const ExpanderView& v) -> py::object {
+			engine::ExpanderChannels& c = ownChannels(v, "snapshot()");
+			const engine::Snapshot* snapshot = c.snapshots[v.side].get();
+			int64_t frame = -1;
+			std::vector<float> values;
+			if (!snapshot)
+				return py::none();
+			bool consistent;
+			{
+				py::gil_scoped_release release;  // a few retries at most, while the engine thread writes
+				consistent = snapshot->read(frame, values);
+			}
+			if (!consistent)
+				throw std::runtime_error("snapshot(): Rack's engine thread kept writing the snapshot; try again");
+			if (frame < 0)
+				return py::none();
+			return py::make_tuple(frame, values);
+		}, "The last message native code received on this side while snapshots were on, as (frame, values): a "
+			"consistent copy, safe to take while Rack's engine runs the module. None before the first one.")
 		.def("__repr__", [](const ExpanderView& v) { return std::string("<Module.Expander ") + sideName(v.side) + ">"; });
 
 	bindAccessors(module, [](py::object self, uint8_t side) {

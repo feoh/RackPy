@@ -8,7 +8,10 @@
 // controls set through the queue and the plan replaced while it runs; RP-21C
 // the same for a compiled graph kernel (tests/dsp/kernel_library/graphs.cpp),
 // alternating single-channel and 16-channel input to cover both its paths.
+// RP-23C adds expander exchange: an interpreted and a compiled pair sending
+// and receiving lanes every frame, with snapshots on, and Rack's flips.
 #include "../dsp/graph/plan.hpp"
+#include "../engine/expanders.hpp"
 #include "../module/module.hpp"
 
 #include <dlfcn.h>
@@ -179,6 +182,118 @@ std::string runCompiled(module::Module& m, Compiled& compiled, int frames) {
 	return text;
 }
 
+/** Gives `side` of `m` two "rackpy.graph" buffers of `lanes` lanes, as Python's graph_messages() does. */
+void giveMessages(module::Module& m, uint8_t side, size_t lanes) {
+	auto a = engine::allocateMessage(engine::GRAPH_SCHEMA, lanes * graph::LANE);
+	auto b = engine::allocateMessage(engine::GRAPH_SCHEMA, lanes * graph::LANE);
+	m.getExpander(side).producerMessage = a->data;
+	m.getExpander(side).consumerMessage = b->data;
+	m.expanderMessages.push_back(a);
+	m.expanderMessages.push_back(b);
+	engine::publishChannel(m, m, side);
+	m.snapshotsWanted[side].store(true);
+}
+
+std::unique_ptr<dsp::Hosted> plan(const graph::PlanSpec& spec) {
+	auto type = graph::planType(spec);
+	auto hosted = std::make_unique<dsp::Hosted>();
+	hosted->type = type.get();
+	hosted->ownedType = type;
+	hosted->values = graph::planDefaults(*type);
+	hosted->kernel = type->create(hosted->values);
+	return hosted;
+}
+
+/** The interpreted twins of graphs.Sender and graphs.Echo (tests/dsp/in_rack_libraries/graphs.py). */
+graph::PlanSpec senderPlan() {
+	graph::PlanSpec spec;
+	auto node = [&](const char* op, std::vector<long long> inputs = {}, std::vector<double> args = {}) {
+		spec.nodes.push_back({op, std::move(inputs), std::move(args), {}});
+		return (long long) spec.nodes.size() - 1;
+	};
+	long long count = node("delay", {}, {1});
+	spec.latches.emplace_back(count, node("add", {count, node("constant", {}, {1})}));
+	node("expander_send", {node("input", {}, {0})}, {1, 0});
+	node("expander_send", {count}, {1, 1});
+	node("output", {node("expander_receive", {}, {1, 0})}, {0});
+	return spec;
+}
+
+graph::PlanSpec echoPlan() {
+	graph::PlanSpec spec;
+	auto node = [&](const char* op, std::vector<long long> inputs = {}, std::vector<double> args = {}) {
+		spec.nodes.push_back({op, std::move(inputs), std::move(args), {}});
+		return (long long) spec.nodes.size() - 1;
+	};
+	long long got = node("expander_receive", {}, {0, 0});
+	node("output", {got}, {0});
+	node("output", {node("expander_receive", {}, {0, 1})}, {1});
+	node("expander_send", {node("mul", {got, node("constant", {}, {2})})}, {0, 0});
+	return spec;
+}
+
+void place(rack::engine::Module& left, rack::engine::Module& right) {
+	left.rightExpander.moduleId = right.id;
+	left.rightExpander.module = &right;
+	right.leftExpander.moduleId = left.id;
+	right.leftExpander.module = &left;
+}
+
+bool exchanged = false;
+
+std::string runExpanders(Compiled& compiled, int frames) {
+	module::Module a, b, c, d;  // a -> b interpreted, c -> d compiled
+	module::Module* all[] = {&a, &b, &c, &d};
+	for (int k = 0; k < 4; k++) {
+		all[k]->id = 100 + k;
+		all[k]->config(0, k % 2 ? 0 : 1, k % 2 ? 2 : 1, 0);
+		for (auto& o : all[k]->outputs)
+			o.channels = 1;
+	}
+	a.inputs[0].channels = c.inputs[0].channels = 16;
+	giveMessages(a, 1, 1);
+	giveMessages(b, 0, 2);
+	giveMessages(c, 1, 1);
+	giveMessages(d, 0, 2);
+	place(a, b);
+	place(c, d);
+	a.kernels.attach(plan(senderPlan()), true);
+	b.kernels.attach(plan(echoPlan()), true);
+	c.kernels.attach(compiled.make("Sender"), true);
+	d.kernels.attach(compiled.make("Echo"), true);
+	resetCounts();
+	rack::engine::Module::ProcessArgs args;
+	args.sampleRate = 48000.f;
+	args.sampleTime = 1.f / 48000.f;
+	for (int n = 0; n < frames; n++) {
+		args.frame = n;
+		for (int ch = 0; ch < 16; ch++) {
+			a.inputs[0].setVoltage((float) ((n + ch) % 11) / 5.f - 1.f, ch);
+			c.inputs[0].setVoltage((float) ((n + ch) % 11) / 5.f - 1.f, ch);
+		}
+		enter();
+		for (module::Module* m : all)
+			m->process(args);
+		for (module::Module* m : all)  // Engine_stepFrame's flips
+			for (rack::engine::Module::Expander* e : {&m->leftExpander, &m->rightExpander})
+				if (e->messageFlipRequested) {
+					std::swap(e->producerMessage, e->consumerMessage);
+					e->messageFlipRequested = false;
+				}
+		leave();
+		if (n % 100 == 0)
+			for (module::Module* m : all)
+				m->kernels.reclaim();
+	}
+	char text[512];
+	report(text, sizeof text);
+	// The pairs did exchange: the last frame received the counter of the frame before, in both tiers alike.
+	exchanged = b.outputs[1].getVoltage() == (float) (frames - 1) && d.outputs[1].getVoltage() == (float) (frames - 1) &&
+		a.outputs[0].getVoltage() == c.outputs[0].getVoltage() && b.outputs[0].getChannels() == 16 &&
+		d.outputs[0].getChannels() == 16;
+	return text;
+}
+
 }  // namespace
 
 int main() {
@@ -228,7 +343,12 @@ int main() {
 		o.channels = 1;
 	composed.kernels.attach(compiled.make("Everything"), true);
 	std::string compiledRun = runCompiled(composed, compiled, frames);
-	std::printf("{\"frames\": %d, \"production\": %s, \"failure\": %s, \"inject\": %s, \"graph\": %s, \"compiled\": %s}\n",
-		frames, production.c_str(), failure.c_str(), inject.c_str(), graphRun.c_str(), compiledRun.c_str());
+	// The compiled library is linked in here, so it shares RackPy's expander services directly.
+	expander::services() = &engine::hostServices();
+	std::string expanderRun = runExpanders(compiled, frames);
+	std::printf("{\"frames\": %d, \"production\": %s, \"failure\": %s, \"inject\": %s, \"graph\": %s, \"compiled\": %s, "
+		"\"expanders\": %s, \"exchanged\": %s}\n",
+		frames, production.c_str(), failure.c_str(), inject.c_str(), graphRun.c_str(), compiledRun.c_str(), expanderRun.c_str(),
+		exchanged ? "true" : "false");
 	return 0;
 }
