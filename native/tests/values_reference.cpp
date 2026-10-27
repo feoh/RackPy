@@ -167,9 +167,14 @@ void vectors() {
 		add("vec.is_finite", {v(a)}, b(a.isFinite()));
 		for (float angle : {0.f, 1.5707964f, -0.5f, 3.f})
 			add("vec.rotate", {v(a), f(angle)}, v(a.rotate(angle)));
-		for (float sc : {0.f, 2.f, -0.5f, INF})
+		for (float sc : {0.f, 2.f, -0.5f, INF}) {
 			add("vec.mult_s", {v(a), f(sc)}, v(a.mult(sc))), add("vec.div_s", {v(a), f(sc)}, v(a.div(sc))),
 				add("vec.rmul", {f(sc), v(a)}, v(sc * a));
+			add("vec.op_mul_s", {v(a), f(sc)}, v(a * sc)), add("vec.op_div_s", {v(a), f(sc)}, v(a / sc));
+			Vec m = a, d = a;
+			m *= sc, d /= sc;
+			add("vec.op_imul_s", {v(a), f(sc)}, v(m)), add("vec.op_idiv_s", {v(a), f(sc)}, v(d));
+		}
 		for (Rect bound : rs) {
 			add("vec.clamp", {v(a), r(bound)}, v(a.clamp(bound)));
 			add("vec.clamp_safe", {v(a), r(bound)}, v(a.clampSafe(bound)));
@@ -182,6 +187,17 @@ void vectors() {
 			add("vec.minus", {v(a), v(bb)}, v(a.minus(bb)));
 			add("vec.mult_v", {v(a), v(bb)}, v(a.mult(bb)));
 			add("vec.div_v", {v(a), v(bb)}, v(a.div(bb)));
+			// The operators are separate declarations from the methods; each gets its own cases.
+			add("vec.op_plus", {v(a), v(bb)}, v(a + bb));
+			add("vec.op_minus", {v(a), v(bb)}, v(a - bb));
+			add("vec.op_mul_v", {v(a), v(bb)}, v(a * bb));
+			add("vec.op_div_v", {v(a), v(bb)}, v(a / bb));
+			Vec sum = a, diff = a, prod = a, quot = a;
+			sum += bb, diff -= bb, prod *= bb, quot /= bb;
+			add("vec.op_iadd", {v(a), v(bb)}, v(sum));
+			add("vec.op_isub", {v(a), v(bb)}, v(diff));
+			add("vec.op_imul_v", {v(a), v(bb)}, v(prod));
+			add("vec.op_idiv_v", {v(a), v(bb)}, v(quot));
 			add("vec.dot", {v(a), v(bb)}, f(a.dot(bb)));
 			add("vec.min", {v(a), v(bb)}, v(a.min(bb)));
 			add("vec.max", {v(a), v(bb)}, v(a.max(bb)));
@@ -207,12 +223,18 @@ void vectors() {
 			add("rect.shrink", {r(a), v(d)}, r(a.shrink(d)));
 			add("rect.interpolate", {r(a), v(d)}, v(a.interpolate(d)));
 		}
-		for (Vec p : vs)
+		for (Vec p : vs) {
 			add("rect.contains_v", {r(a), v(p)}, b(a.contains(p)));
+			add("rect.is_containing", {r(a), v(p)}, b(a.isContaining(p)));
+		}
 		for (Rect o : rs) {
 			add("rect.contains_r", {r(a), r(o)}, b(a.contains(o)));
 			add("rect.intersects", {r(a), r(o)}, b(a.intersects(o)));
+			add("rect.is_intersecting", {r(a), r(o)}, b(a.isIntersecting(o)));
 			add("rect.equals", {r(a), r(o)}, b(a.equals(o)));
+			add("rect.is_equal", {r(a), r(o)}, b(a.isEqual(o)));
+			add("rect.op_eq", {r(a), r(o)}, b(a == o));
+			add("rect.op_ne", {r(a), r(o)}, b(a != o));
 			add("rect.clamp", {r(a), r(o)}, r(a.clamp(o)));
 			add("rect.nudge", {r(a), r(o)}, r(a.nudge(o)));
 			add("rect.expand", {r(a), r(o)}, r(a.expand(o)));

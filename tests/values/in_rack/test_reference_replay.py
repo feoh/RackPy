@@ -8,6 +8,7 @@ re-implementation that could drift.
 """
 
 import math
+import operator
 import struct
 from collections import Counter
 from collections.abc import Callable
@@ -122,6 +123,16 @@ def q_from_max(action: Callable[[ValueQuantity], object]) -> Callable[..., float
     return run
 
 
+def in_place(op: Callable[[Any, Any], Any]) -> Callable[[Any, Any], Any]:
+    """A compound assignment, which must change its left operand itself (Python would fall back to a copy)."""
+
+    def run(a: Any, b: Any) -> Any:
+        result = op(a, b)
+        return result if result is a else None
+
+    return run
+
+
 CALLS: dict[str, Callable[..., Any]] = {
     "clamp_f": m.clamp,
     "clamp_safe_f": m.clamp_safe,
@@ -162,12 +173,25 @@ CALLS: dict[str, Callable[..., Any]] = {
     "vec.mult_s": lambda a, s: a.mult(s),
     "vec.div_s": lambda a, s: a.div(s),
     "vec.rmul": lambda s, a: s * a,
+    "vec.op_mul_s": operator.mul,
+    "vec.op_div_s": operator.truediv,
+    "vec.op_imul_s": in_place(operator.imul),
+    "vec.op_idiv_s": in_place(operator.itruediv),
     "vec.clamp": Vec.clamp,
     "vec.clamp_safe": Vec.clamp_safe,
-    "vec.plus": lambda a, b: a + b,
-    "vec.minus": lambda a, b: a - b,
-    "vec.mult_v": lambda a, b: a * b,
-    "vec.div_v": lambda a, b: a / b,
+    # The methods, called as methods: the operators below are other declarations, with their own cases.
+    "vec.plus": lambda a, b: a.plus(b),
+    "vec.minus": lambda a, b: a.minus(b),
+    "vec.mult_v": lambda a, b: a.mult(b),
+    "vec.div_v": lambda a, b: a.div(b),
+    "vec.op_plus": operator.add,
+    "vec.op_minus": operator.sub,
+    "vec.op_mul_v": operator.mul,
+    "vec.op_div_v": operator.truediv,
+    "vec.op_iadd": in_place(operator.iadd),
+    "vec.op_isub": in_place(operator.isub),
+    "vec.op_imul_v": in_place(operator.imul),
+    "vec.op_idiv_v": in_place(operator.itruediv),
     "vec.dot": Vec.dot,
     "vec.min": Vec.min,
     "vec.max": Vec.max,
@@ -189,9 +213,14 @@ CALLS: dict[str, Callable[..., Any]] = {
     "rect.shrink": Rect.shrink,
     "rect.interpolate": Rect.interpolate,
     "rect.contains_v": Rect.contains,
+    "rect.is_containing": Rect.is_containing,
     "rect.contains_r": Rect.contains,
     "rect.intersects": Rect.intersects,
+    "rect.is_intersecting": Rect.is_intersecting,
     "rect.equals": Rect.equals,
+    "rect.is_equal": Rect.is_equal,
+    "rect.op_eq": operator.eq,
+    "rect.op_ne": operator.ne,
     "rect.clamp": Rect.clamp,
     "rect.nudge": Rect.nudge,
     "rect.expand": Rect.expand,

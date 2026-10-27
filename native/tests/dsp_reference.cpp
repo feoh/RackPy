@@ -83,6 +83,29 @@ std::string floats(const float* x, size_t n) {
 	return list(items);
 }
 
+/** A name, such as an enumerator's: plain identifiers, so nothing needs escaping. */
+std::string str(const std::string& x) {
+	return "\"" + x + "\"";
+}
+
+/** An enum's enumerators by name, in declaration order: the replay checks each Python name and value. */
+using Enumerators = std::vector<std::pair<std::string, int>>;
+
+int valueOf(const Enumerators& table, const std::string& name) {
+	for (const auto& e : table)
+		if (e.first == name)
+			return e.second;
+	std::fprintf(stderr, "no enumerator %s\n", name.c_str());
+	std::abort();
+}
+
+std::string enumerators(const Enumerators& table) {
+	std::vector<std::string> out;
+	for (const auto& e : table)
+		out.push_back(list({str(e.first), i(e.second)}));
+	return list(out);
+}
+
 std::vector<std::string> cases;
 
 void add(const std::string& fn, const std::vector<std::string>& args, const std::string& result) {
@@ -513,7 +536,7 @@ void singlePole(const char* suffix) {
 			out.push_back(list({enc(a), enc(b2), enc(c2), enc(d2)}));
 		}
 		add(std::string("smoothers") + suffix, {list(inputs<T>(1)), f(lambda), f(tau), f(rise), f(fall), f(riseTau), f(fallTau), f(step)},
-			list(out));
+			list({list(out), enc(xs.riseLambda), enc(xs.fallLambda)}));
 	}
 	// The deprecated forms: process(in) is process(1, in); PeakFilter's peak() and setRate().
 	{
@@ -580,6 +603,14 @@ void iir(const char* suffix) {
 }
 
 template <typename T>
+Enumerators biquadTypes() {
+	using F = dsp::TBiquadFilter<T>;
+	return {{"LOWPASS_1POLE", F::LOWPASS_1POLE}, {"HIGHPASS_1POLE", F::HIGHPASS_1POLE}, {"LOWPASS", F::LOWPASS},
+		{"HIGHPASS", F::HIGHPASS}, {"LOWSHELF", F::LOWSHELF}, {"HIGHSHELF", F::HIGHSHELF}, {"BANDPASS", F::BANDPASS},
+		{"PEAK", F::PEAK}, {"NOTCH", F::NOTCH}, {"NUM_TYPES", F::NUM_TYPES}};
+}
+
+template <typename T>
 void biquads(const char* suffix) {
 	using F = dsp::TBiquadFilter<T>;
 	using Base = dsp::IIRFilter<3, 3, T>;  // the bindings call the inherited methods on the base, as here
@@ -588,10 +619,12 @@ void biquads(const char* suffix) {
 		Base& base = fresh;
 		add(std::string("biquad_default") + suffix, {}, list({enc(fresh.b[0]), enc(fresh.a[0]), enc(member<&Base::process>(base, T(1.f)))}));
 	}
-	for (int type = 0; type <= (int) F::NUM_TYPES; type++)
+	add(std::string("biquad_types") + suffix, {}, enumerators(biquadTypes<T>()));
+	// Each type by name, so the replay reaches each Python enumerator by its name.
+	for (const auto& type : biquadTypes<T>())
 		for (auto p : std::vector<std::array<float, 3>>{{0.1f, 0.707f, 1.f}, {0.01f, 2.f, 4.f}, {0.3f, 0.5f, 0.25f}, {0.49f, 10.f, 1.f}}) {
 			F filter;
-			member<&F::setParameters>(filter, (typename F::Type) type, p[0], p[1], p[2]);
+			member<&F::setParameters>(filter, (typename F::Type) type.second, p[0], p[1], p[2]);
 			std::vector<std::string> coefficients = {enc(filter.b[0]), enc(filter.b[1]), enc(filter.b[2]), enc(filter.a[0]), enc(filter.a[1])};
 			Base& base = filter;
 			std::vector<std::string> impulse;
@@ -602,7 +635,7 @@ void biquads(const char* suffix) {
 				frequencies.push_back(f(fr));
 				magnitudes.push_back(enc(member<&Base::getFrequencyResponse>(base, T(fr))));
 			}
-			add(std::string("biquad") + suffix, {i(type), f(p[0]), f(p[1]), f(p[2]), list(frequencies)},
+			add(std::string("biquad") + suffix, {str(type.first), f(p[0]), f(p[1]), f(p[2]), list(frequencies)},
 				list({list(coefficients), list(impulse), list(magnitudes)}));
 		}
 }
@@ -681,7 +714,11 @@ void generator() {
 		for (const auto& m : rec.sent)
 			msgs.push_back(message(m));
 		rec.sent.clear();
-		out.push_back(list(msgs));
+		// The fields the pressure setters compare against, after each op.
+		std::vector<std::string> keyPressures;
+		for (int c = 0; c < N; c++)
+			keyPressures.push_back(i(g.keyPressures[c]));
+		out.push_back(list({list(msgs), list(keyPressures), i(g.channelPressure)}));
 	};
 	int last = N - 1;
 	member<&G::setFrame>(g, (int64_t) 100);
@@ -744,8 +781,9 @@ void generator() {
 template <uint8_t N>
 std::string parserState(dsp::MidiParser<N>& p) {
 	using P = dsp::MidiParser<N>;
-	std::vector<std::string> notes, gates, vels, afts, pws, mods, retrig, pitch, held, wheels;
+	std::vector<std::string> notes, gates, vels, afts, pws, mods, retrig, pitch, held, wheels, filters;
 	for (int c = 0; c < N; c++) {
+		filters.push_back(list({f(p.pwFilters[c].out), f(p.pwFilters[c].lambda), f(p.modFilters[c].out), f(p.modFilters[c].lambda)}));
 		notes.push_back(i(p.notes[c]));
 		gates.push_back(b(p.gates[c]));
 		vels.push_back(i(p.velocities[c]));
@@ -764,11 +802,51 @@ std::string parserState(dsp::MidiParser<N>& p) {
 		b(p.pedal), i(member<&P::getChannels>(p)), list(pitch), list(wheels),
 		list({f(p.clockPulse.remaining), f(p.clockDividerPulse.remaining), f(p.startPulse.remaining), f(p.stopPulse.remaining),
 			f(p.continuePulse.remaining)}),
-		list(retrig)});
+		list(retrig), list(filters),
+		list({i(p.monoMode), i(p.polyMode), b(p.retriggerOnResume), b(p.releaseVelocityEnabled), f(p.pwRange), b(p.smooth),
+			i(p.clockDivision)})});
+}
+
+// The modes by name: the scripts set them by name, so the replay reaches each Python enumerator by its name.
+const Enumerators MONO_MODES = {{"LAST_PRIORITY_MODE", dsp::MidiParser<16>::LAST_PRIORITY_MODE},
+	{"FIRST_PRIORITY_MODE", dsp::MidiParser<16>::FIRST_PRIORITY_MODE}, {"LOWEST_PRIORITY_MODE", dsp::MidiParser<16>::LOWEST_PRIORITY_MODE},
+	{"HIGHEST_PRIORITY_MODE", dsp::MidiParser<16>::HIGHEST_PRIORITY_MODE}, {"NUM_MONO_MODES", dsp::MidiParser<16>::NUM_MONO_MODES}};
+const Enumerators POLY_MODES = {{"ROTATE_MODE", dsp::MidiParser<16>::ROTATE_MODE}, {"REUSE_MODE", dsp::MidiParser<16>::REUSE_MODE},
+	{"RESET_MODE", dsp::MidiParser<16>::RESET_MODE}, {"MPE_MODE", dsp::MidiParser<16>::MPE_MODE},
+	{"NUM_POLY_MODES", dsp::MidiParser<16>::NUM_POLY_MODES}};
+
+/** Rack's toJson, as JSON text inside the case's JSON. */
+template <uint8_t N>
+std::string parserJson(dsp::MidiParser<N>& p) {
+	json_t* j = member<&dsp::MidiParser<N>::toJson>(p);
+	char* text = json_dumps(j, JSON_SORT_KEYS | JSON_COMPACT);
+	json_decref(j);
+	std::string esc = "\"";
+	for (const char* ch = text; *ch; ch++)
+		esc += (*ch == '"' || *ch == '\\') ? std::string("\\") + *ch : std::string(1, *ch);
+	std::free(text);
+	return esc + "\"";
+}
+
+midi::Message messageOf(const std::vector<int>& bytes) {
+	midi::Message m;
+	// Byte by byte: GCC 16 misreads an assign() from ints into Message's 3-byte default as an overflow.
+	m.bytes.clear();
+	for (int x : bytes)
+		m.bytes.push_back((uint8_t) x);
+	m.frame = 7;
+	return m;
+}
+
+std::string bytesOf(const std::vector<int>& bytes) {
+	std::vector<std::string> bs;
+	for (int x : bytes)
+		bs.push_back(i(x));
+	return list(bs);
 }
 
 template <uint8_t N>
-void parser(const char* name, int channels, int poly, int mono) {
+void parser(const char* name, int channels, const char* poly, const char* mono) {
 	using P = dsp::MidiParser<N>;
 	P p;
 	std::vector<std::string> ops, out;
@@ -778,10 +856,10 @@ void parser(const char* name, int channels, int poly, int mono) {
 	};
 	member<&P::setChannels>(p, (uint8_t) channels);
 	record("[\"channels\", " + i(channels) + "]");
-	member<&P::setPolyMode>(p, (typename P::PolyMode) poly);
-	record("[\"poly\", " + i(poly) + "]");
-	member<&P::setMonoMode>(p, (typename P::MonoMode) mono);
-	record("[\"mono\", " + i(mono) + "]");
+	member<&P::setPolyMode>(p, (typename P::PolyMode) valueOf(POLY_MODES, poly));
+	record("[\"poly\", " + str(poly) + "]");
+	member<&P::setMonoMode>(p, (typename P::MonoMode) valueOf(MONO_MODES, mono));
+	record("[\"mono\", " + str(mono) + "]");
 	p.retriggerOnResume = true;
 	p.releaseVelocityEnabled = true;
 	p.clockDivision = 6;
@@ -791,42 +869,136 @@ void parser(const char* name, int channels, int poly, int mono) {
 		{0xb0, 0x40, 127}, {0x81, 67, 10}, {0x90, 65, 60}, {0xb0, 0x40, 0}, {0xf2, 0x10, 0x01}, {0xf8}, {0xf8}, {0xfa}, {0xf8},
 		{0xfb}, {0xfc}, {0x90, 48, 100}, {0x90, 50, 100}, {0x80, 48, 0}, {0xb0, 0x7b, 0}, {0x95, 61, 99}};
 	for (const auto& bytes : messages) {
-		midi::Message m;
-		m.bytes.assign(bytes.begin(), bytes.end());
-		m.frame = 7;
-		member<&P::processMessage>(p, m);
-		std::vector<std::string> bs;
-		for (int x : bytes)
-			bs.push_back(i(x));
-		record("[\"msg\", " + list(bs) + "]");
+		member<&P::processMessage>(p, messageOf(bytes));
+		record("[\"msg\", " + bytesOf(bytes) + "]");
 		member<&P::processFilters>(p, 1.f / 1000.f);
 		member<&P::processPulses>(p, 1.f / 4000.f);
 		record("[\"step\", " + f(1.f / 1000.f) + ", " + f(1.f / 4000.f) + "]");
 	}
-	json_t* j = member<&P::toJson>(p);
-	char* text = json_dumps(j, JSON_SORT_KEYS | JSON_COMPACT);
-	json_decref(j);
-	std::string json = text;
-	std::free(text);
-	add(std::string("parser.") + name, {list(ops)}, list({list(out), "\"" + [&] {
-		std::string esc;
-		for (char ch : json)
-			esc += (ch == '"' || ch == '\\') ? std::string("\\") + ch : std::string(1, ch);
-		return esc;
-	}() + "\""}));
+	add(std::string("parser.") + name, {list(ops)}, list({list(out), parserJson(p)}));
+}
+
+/** One step of a script that calls the parser's methods and writes its fields directly, not through processMessage. */
+struct ParserOp {
+	std::string op;
+	std::vector<int> args = {};
+	std::string name = "";
+	float x = 0.f;
+};
+
+template <uint8_t N>
+void parserMethods(const char* name, const std::vector<ParserOp>& script) {
+	using P = dsp::MidiParser<N>;
+	P p;
+	std::vector<std::string> ops, out;
+	for (const ParserOp& s : script) {
+		const std::vector<int>& a = s.args;
+		std::string text;
+		if (s.op == "assign") {
+			// assignChannel returns the channel; record it with the state.
+			uint8_t channel = member<&P::assignChannel>(p, (uint8_t) a[0]);
+			ops.push_back("[\"assign\", " + i(a[0]) + "]");
+			out.push_back(list({i(channel), parserState(p)}));
+			continue;
+		}
+		if (s.op == "channels" || s.op == "rotate_index") {
+			if (s.op == "channels")
+				member<&P::setChannels>(p, (uint8_t) a[0]);
+			else
+				p.rotateIndex = (int8_t) a[0];
+			text = i(a[0]);
+		}
+		else if (s.op == "poly" || s.op == "mono") {
+			if (s.op == "poly")
+				member<&P::setPolyMode>(p, (typename P::PolyMode) valueOf(POLY_MODES, s.name));
+			else
+				member<&P::setMonoMode>(p, (typename P::MonoMode) valueOf(MONO_MODES, s.name));
+			text = str(s.name);
+		}
+		else if (s.op == "flags") {
+			p.retriggerOnResume = a[0], p.releaseVelocityEnabled = a[1], p.clockDivision = (uint32_t) a[2];
+			text = b(a[0]) + ", " + b(a[1]) + ", " + i(a[2]);
+		}
+		else if (s.op == "press" || s.op == "release") {
+			if (s.op == "press")
+				member<&P::pressNote>(p, (uint8_t) a[0], (uint8_t) a[1], (uint8_t) a[2]);
+			else
+				member<&P::releaseNote>(p, (uint8_t) a[0], (int8_t) a[1], (int8_t) a[2]);
+			text = i(a[0]) + ", " + i(a[1]) + ", " + i(a[2]);
+		}
+		else if (s.op == "press_pedal")
+			member<&P::pressPedal>(p);
+		else if (s.op == "release_pedal")
+			member<&P::releasePedal>(p);
+		else if (s.op == "refresh")
+			member<&P::refreshHeld>(p);
+		else if (s.op == "pedal") {
+			p.pedal = a[0];
+			text = b(a[0]);
+		}
+		else if (s.op == "held") {
+			p.heldNotes.assign(a.begin(), a.end());
+			text = bytesOf(a);
+		}
+		else if (s.op == "cc" || s.op == "sys") {
+			if (s.op == "cc")
+				member<&P::processCC>(p, messageOf(a));
+			else
+				member<&P::processSystem>(p, messageOf(a));
+			text = bytesOf(a);
+		}
+		else if (s.op == "lambda" || s.op == "pw_range") {
+			if (s.op == "lambda")
+				member<&P::setFilterLambda>(p, s.x);
+			else
+				p.pwRange = s.x;
+			text = f(s.x);
+		}
+		else if (s.op == "step") {
+			member<&P::processFilters>(p, 1.f / 1000.f);
+			member<&P::processPulses>(p, 1.f / 4000.f);
+			text = f(1.f / 1000.f) + ", " + f(1.f / 4000.f);
+		}
+		else {
+			std::fprintf(stderr, "no parser op %s\n", s.op.c_str());
+			std::abort();
+		}
+		ops.push_back("[" + str(s.op) + (text.empty() ? "" : ", " + text) + "]");
+		out.push_back(parserState(p));
+	}
+	add(std::string("parser.") + name, {list(ops)}, list({list(out), parserJson(p)}));
 }
 
 void midiParsers() {
-	parser<16>("16.mono_last", 1, 0, 0);
-	parser<16>("16.mono_first", 1, 0, 1);
-	parser<16>("16.mono_lowest", 1, 0, 2);
-	parser<16>("16.mono_highest", 1, 0, 3);
-	parser<16>("16.rotate", 4, 0, 0);
-	parser<16>("16.reuse", 4, 1, 0);
-	parser<16>("16.reset", 4, 2, 0);
-	parser<16>("16.mpe", 16, 3, 0);
-	parser<4>("4.rotate", 4, 0, 0);
-	parser<1>("1.mono", 1, 0, 0);
+	add("parser.enums", {}, list({enumerators(MONO_MODES), enumerators(POLY_MODES)}));
+	parser<16>("16.mono_last", 1, "ROTATE_MODE", "LAST_PRIORITY_MODE");
+	parser<16>("16.mono_first", 1, "ROTATE_MODE", "FIRST_PRIORITY_MODE");
+	parser<16>("16.mono_lowest", 1, "ROTATE_MODE", "LOWEST_PRIORITY_MODE");
+	parser<16>("16.mono_highest", 1, "ROTATE_MODE", "HIGHEST_PRIORITY_MODE");
+	parser<16>("16.rotate", 4, "ROTATE_MODE", "LAST_PRIORITY_MODE");
+	parser<16>("16.reuse", 4, "REUSE_MODE", "LAST_PRIORITY_MODE");
+	parser<16>("16.reset", 4, "RESET_MODE", "LAST_PRIORITY_MODE");
+	parser<16>("16.mpe", 16, "MPE_MODE", "LAST_PRIORITY_MODE");
+	parser<4>("4.rotate", 4, "ROTATE_MODE", "LAST_PRIORITY_MODE");
+	parser<1>("1.mono", 1, "ROTATE_MODE", "LAST_PRIORITY_MODE");
+	// The methods processMessage calls, called directly, and the fields written directly.
+	parserMethods<16>("16.methods_poly", {{"channels", {4}}, {"poly", {}, "ROTATE_MODE"}, {"flags", {1, 1, 6}}, {"press", {60, 0, 100}},
+		{"press", {64, 0, 90}}, {"assign", {67}}, {"press", {67, 3, 80}}, {"press_pedal"}, {"release", {60, 0, 33}},
+		{"release_pedal"}, {"held", {64}}, {"refresh"}, {"release", {64, -1, -1}}, {"cc", {0xb0, 0x01, 100}},
+		{"cc", {0xb0, 0x40, 127}}, {"release", {67, 0, 12}}, {"cc", {0xb0, 0x40, 0}}, {"sys", {0xf2, 0x10, 0x01}}, {"sys", {0xf8}},
+		{"sys", {0xf8}}, {"sys", {0xfa}}, {"sys", {0xfb}}, {"sys", {0xfc}}, {"lambda", {}, "", 5.f}, {"step"}, {"step"},
+		{"pw_range", {}, "", 7.5f}, {"cc", {0xb0, 0x7b, 1}}, {"rotate_index", {2}}, {"assign", {70}}, {"press", {70, 0, 64}},
+		{"pedal", {1}}, {"release", {70, 0, 5}}, {"pedal", {0}}, {"poly", {}, "REUSE_MODE"}, {"press", {72, 0, 50}},
+		{"assign", {72}}, {"assign", {74}}, {"poly", {}, "RESET_MODE"}, {"press", {48, 0, 30}}, {"assign", {50}},
+		{"cc", {0xb0, 0x7b, 0}}});
+	parserMethods<16>("16.methods_mono", {{"mono", {}, "LOWEST_PRIORITY_MODE"}, {"flags", {1, 0, 24}}, {"press", {62, 0, 100}},
+		{"press", {60, 0, 90}}, {"press", {65, 0, 80}}, {"step"}, {"release", {60, 0, 20}}, {"held", {65, 62, 58}}, {"refresh"},
+		{"assign", {70}}, {"mono", {}, "HIGHEST_PRIORITY_MODE"}, {"press", {50, 0, 40}}, {"press", {55, 0, 41}},
+		{"press", {52, 0, 42}}, {"release", {55, -1, -1}}, {"mono", {}, "FIRST_PRIORITY_MODE"}, {"press", {40, 0, 1}},
+		{"press", {41, 0, 2}}, {"held", {}}, {"refresh"}, {"step"}});
+	parserMethods<16>("16.methods_mpe", {{"channels", {16}}, {"poly", {}, "MPE_MODE"}, {"flags", {0, 1, 3}}, {"press", {60, 5, 100}},
+		{"press", {61, 9, 99}}, {"assign", {62}}, {"release", {61, 9, 40}}, {"cc", {0xb3, 0x01, 77}}, {"lambda", {}, "", 200.f},
+		{"step"}, {"step"}, {"release", {60, 4, 10}}, {"release", {60, 5, -1}}});
 	// from_json: Rack's keys, including the pre-2.5.3 lastPitch.
 	dsp::MidiParser<16> p;
 	json_t* j = json_loads("{\"channels\": 3, \"monoMode\": 2, \"retriggerOnResume\": true, \"polyMode\": 1, "
@@ -916,7 +1088,7 @@ void firs() {
 				outputs.push_back(floats(out.data(), block));
 			}
 			add("convolver", {i(block), floats(kernel.data(), length), list(inputs)},
-				list({list(outputs), i(conv.kernelBlocks), i(conv.inputPos)}));
+				list({list(outputs), i(conv.kernelBlocks), i(conv.inputPos), floats(conv.inputFfts, block * 2 * conv.kernelBlocks)}));
 		}
 }
 
@@ -965,13 +1137,18 @@ void minBleps() {
 	}
 }
 
+/** With refreshIn and refreshOut, the rate fields are then assigned and the state rebuilt with refreshState. */
 template <int N>
-void converter(int inRate, int outRate, int quality, int channels, int frames, int outCapacity) {
+void converter(int inRate, int outRate, int quality, int channels, int frames, int outCapacity, int refreshIn = 0, int refreshOut = 0) {
 	using S = dsp::SampleRateConverter<N>;
 	std::unique_ptr<S> s(calls::make<S>());
 	member<&S::setChannels>(*s, channels);
 	member<&S::setQuality>(*s, quality);
 	member<&S::setRates>(*s, inRate, outRate);
+	if (refreshIn) {
+		s->inRate = refreshIn, s->outRate = refreshOut;
+		member<&S::refreshState>(*s);
+	}
 	std::vector<std::string> chunks;
 	std::vector<std::string> inputs;
 	for (int chunk = 0; chunk < 3; chunk++) {
@@ -984,8 +1161,10 @@ void converter(int inRate, int outRate, int quality, int channels, int frames, i
 		inputs.push_back(floats(in.data(), in.size()));
 		chunks.push_back(list({i(inFrames), i(outFrames), floats(out.data(), out.size())}));
 	}
-	add("src." + std::to_string(N), {i(inRate), i(outRate), i(quality), i(channels), i(frames), i(outCapacity), list(inputs)},
-		list(chunks));
+	std::vector<std::string> args = {i(inRate), i(outRate), i(quality), i(channels), i(frames), i(outCapacity), list(inputs)};
+	if (refreshIn)
+		args.push_back(i(refreshIn)), args.push_back(i(refreshOut));
+	add("src." + std::to_string(N) + (refreshIn ? ".refresh" : ""), args, list(chunks));
 }
 
 template <int OS, int Q, typename T>
@@ -1007,8 +1186,11 @@ void decimator() {
 		outs.push_back(enc(member<&D::process>(*dec, p)));
 		ins.push_back(list(enc4));
 	}
+	std::vector<std::string> inBuffer;
+	for (int k = 0; k < OS * Q; k++)
+		inBuffer.push_back(enc(dec->inBuffer[k]));
 	add(std::string("decimator") + (std::is_same<T, float>::value ? "" : "4") + "." + std::to_string(OS) + "." + std::to_string(Q),
-		{list(ins)}, list({list(outs), floats(dec->kernel, OS * Q), i(dec->inIndex)}));
+		{list(ins)}, list({list(outs), floats(dec->kernel, OS * Q), i(dec->inIndex), list(inBuffer)}));
 }
 
 template <int OS, int Q>
@@ -1023,7 +1205,8 @@ void upsampler() {
 		ins.push_back(f(x));
 		outs.push_back(floats(out, OS));
 	}
-	add("upsampler." + std::to_string(OS) + "." + std::to_string(Q), {list(ins)}, list({list(outs), i(up->inIndex)}));
+	add("upsampler." + std::to_string(OS) + "." + std::to_string(Q), {list(ins)},
+		list({list(outs), i(up->inIndex), floats(up->inBuffer, Q)}));
 }
 
 void resamplers() {
@@ -1032,6 +1215,7 @@ void resamplers() {
 	converter<2>(48000, 48000, 4, 2, 64, 40);  // equal rates: Rack copies
 	converter<1>(96000, 44100, 0, 1, 100, 50);
 	converter<16>(44100, 88200, 4, 3, 32, 70);  // 3 of 16 channels
+	converter<2>(44100, 48000, 4, 2, 64, 80, 48000, 32000);  // the fields changed, then refreshState
 	decimator<4, 8, float>();
 	decimator<8, 16, float_4>();
 	upsampler<4, 8>();

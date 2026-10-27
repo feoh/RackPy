@@ -90,12 +90,22 @@ def min_blep(z: int, o: int, vector: bool) -> Callable[[list[Any]], list[Any]]:
 
 def converter(n: int) -> Callable[..., list[Any]]:
     def run(
-        in_rate: int, out_rate: int, quality: int, channels: int, frames: int, capacity: int, inputs: list[list[float]]
+        in_rate: int,
+        out_rate: int,
+        quality: int,
+        channels: int,
+        frames: int,
+        capacity: int,
+        inputs: list[list[float]],
+        *refresh: int,
     ) -> Any:
         s = dsp.SampleRateConverter[n]()
         s.set_channels(channels)
         s.set_quality(quality)
         s.set_rates(in_rate, out_rate)
+        if refresh:  # assign the rate fields, then rebuild the state from them
+            s.in_rate, s.out_rate = refresh
+            s.refresh_state()
         chunks = []
         for x in inputs:
             out = floats(capacity * n)
@@ -110,7 +120,7 @@ def decimator(oversample: int, quality: int, vector: bool) -> Callable[[list[lis
     def run(inputs: list[list[Any]]) -> list[Any]:
         d = dsp.Decimator[oversample, quality, float_4 if vector else float](0.9)
         outs = [d.process(x if vector else array.array("f", x)) for x in inputs]
-        return [outs, d.kernel.tolist(), d.in_index]
+        return [outs, d.kernel.tolist(), d.in_index, d.in_buffer.tolist()]
 
     return run
 
@@ -123,7 +133,7 @@ def upsampler(oversample: int, quality: int) -> Callable[[list[float]], list[Any
             out = floats(oversample)
             u.process(x, out)
             outs.append(out.tolist())
-        return [outs, u.in_index]
+        return [outs, u.in_index, u.in_buffer.tolist()]
 
     return run
 
@@ -135,6 +145,7 @@ CALLS: dict[str, Callable[..., Any]] = {
     "src.1": converter(1),
     "src.2": converter(2),
     "src.16": converter(16),
+    "src.2.refresh": converter(2),
     "decimator.4.8": decimator(4, 8, False),
     "decimator4.8.16": decimator(8, 16, True),
     "upsampler.4.8": upsampler(4, 8),
@@ -202,6 +213,10 @@ def test_sample_rate_converter() -> None:
     assert s.channels == 2 and s.quality == 4 and s.in_rate == s.out_rate == 44100 and not s.st  # equal rates: no state
     s.set_rates(44100, 48000)
     assert s.st and s.st == s.st
+    s.out_rate = 44100  # a field: the state stays until refresh_state rebuilds it
+    assert s.st
+    s.refresh_state()
+    assert not s.st  # the rates are equal now, and Rack only copies
     with pytest.raises(AttributeError):
         s.channels = 1  # speexdsp's state is sized by it
     for bad in (3, -1):
@@ -237,8 +252,9 @@ def test_sample_rate_converter() -> None:
 
 def test_decimator_and_upsampler() -> None:
     d = dsp.Decimator[4, 8]()
-    assert len(d.kernel) == 32 and d.in_index == 0
-    assert isinstance(d.process(array.array("f", [1.0, 0.0, 0.0, 0.0])), float) and d.in_index == 4
+    assert len(d.kernel) == 32 and d.in_index == 0 and d.in_buffer.tolist() == [0.0] * 32
+    assert isinstance(d.process(array.array("f", [1.0, 2.0, 3.0, 4.0])), float) and d.in_index == 4
+    assert d.in_buffer.tolist()[:5] == [1.0, 2.0, 3.0, 4.0, 0.0]  # a live view of Rack's history
     with pytest.raises(ValueError, match="at least 4"):
         d.process(array.array("f", [1.0, 2.0]))
     d.in_index = 28
@@ -251,7 +267,7 @@ def test_decimator_and_upsampler() -> None:
     u = dsp.Upsampler[4, 8]()
     out = floats(4)
     u.process(1.0, out)
-    assert u.in_index == 1
+    assert u.in_index == 1 and u.in_buffer.tolist() == [4.0] + [0.0] * 7  # zero-stuffed: oversample * in
     with pytest.raises(ValueError, match="at least 4"):
         u.process(1.0, floats(3))
     with pytest.raises(ValueError, match="0 to 7"):

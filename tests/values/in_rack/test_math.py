@@ -100,6 +100,10 @@ def test_vec_operators_are_racks() -> None:
     assert b / a == Vec(3, 2.5) and b / 2 == Vec(1.5, 2.5)
     assert a != b and (a == b) is False
     assert a.is_equal(Vec(1, 2)) and a.equals(Vec(1, 2))
+    # The methods with a Vec are separate overloads from the operators and from the float methods.
+    assert a.plus(b) == Vec(4, 7) and b.minus(a) == Vec(2, 3)
+    assert a.mult(b) == Vec(3, 10) and a.mult(2) == Vec(2, 4)
+    assert b.div(a) == Vec(3, 2.5) and b.div(2) == Vec(1.5, 2.5)
 
 
 def test_vec_in_place_operators_change_the_value_itself() -> None:
@@ -132,7 +136,8 @@ def test_rect_fields_are_live_views() -> None:
     r.pos.x = 10  # a view: writes through to r, as in C++
     size = r.size
     size.y = 40
-    assert r == Rect(10, 2, 3, 40)
+    assert (r == Rect(10, 2, 3, 40)) is True and (r != Rect(10, 2, 3, 40)) is False
+    assert (r != Rect(10, 2, 3, 41)) is True and (r == Rect(10, 2, 3, 41)) is False
     del r
     assert size.y == 40  # the view keeps its rectangle alive
     s = Rect(Vec(1, 2), Vec(3, 4))
