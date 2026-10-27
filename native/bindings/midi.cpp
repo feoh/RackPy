@@ -114,6 +114,9 @@ struct Tracked {
 };
 
 std::vector<Tracked*> ports;  // main thread
+// Synchronous MIDI deliveries in progress on this thread. Touched only where Python may run: thread-local
+// storage of a dlopen()ed library may allocate on first use, which Rack's driver threads must not do.
+thread_local int deliveries = 0;
 std::vector<m::Device*> unlistedDevices;  // main thread: the laboratory's (UnlistedMidiInputDevice, ...)
 bool closeHooked = false;
 
@@ -159,6 +162,9 @@ struct TrackedPort : Base, Tracked {
 			Base::setDeviceId(deviceId);
 			return;
 		}
+		// Every subscription change of this port passes here, from Python or from Rack's code (its menus,
+		// setDriverId, fromJson, reset); Rack's destructors and release() call the base implementation.
+		refuseDuringMidiDelivery("Port.setDeviceId");
 		overrideOrVoid(static_cast<const Base*>(this), "set_device_id", [this, deviceId] { Base::setDeviceId(deviceId); },
 			deviceId);
 	}
@@ -224,9 +230,11 @@ bool deliverSynchronously(const Self* self, Tracked& port, const m::Message& mes
 	if (!runtime::interpreterAlive())
 		return false;
 	auto deliver = [&] {
-		if (port.released)
+		// Released, or being deallocated (refcount 0, e.g. while its __dict__ is cleared): no delivery.
+		py::handle object = port.released ? py::handle() : livePythonObject(&port.port());
+		if (!object)
 			return;
-		SynchronousMidiDelivery delivery(midiPortObject(&port.port()));
+		SynchronousMidiDelivery delivery(py::reinterpret_borrow<py::object>(object));
 		// Declared after the guard, so the bound method (which may hold the last reference) goes first.
 		if (auto f = rackpy::bindings::pythonOverride(self, "on_message")) {
 			f(m::Message(message));  // an owned copy: Rack may pass on the caller's own message (a Python object)
@@ -237,7 +245,16 @@ bool deliverSynchronously(const Self* self, Tracked& port, const m::Message& mes
 		deliver();
 		return true;
 	}
-	return runtime::callPython("on_message", deliver) || runtime::pythonAllowedHere();
+	if (!runtime::pythonAllowedHere())
+		return runtime::callPython("on_message", deliver);  // refused, and counted
+	// Rack's own main-thread delivery (its computer keyboard driver): callPython also drains queued releases
+	// after `deliver`, still inside Rack's loop, so the delivery counts until it returns.
+	++deliveries;
+	struct Leave {
+		~Leave() { --deliveries; }
+	} leave;
+	runtime::callPython("on_message", deliver);
+	return true;
 }
 
 /** A Python Input: on_message runs on the UI thread, from the queue its driver thread fills. A laboratory input
@@ -711,33 +728,10 @@ void UnlistedMidiDriver::detach() noexcept {
 	}
 }
 
-namespace {
-
-thread_local int deliveries = 0;  // synchronous MIDI deliveries in progress on this thread
-std::vector<runtime::PyRef> keptAlive;  // main thread: what deliveries keep alive
-
-/** Releases what deliveries kept alive, unless one is in progress. Destructors may run Python, which may deliver
-again and keep more alive: that is released too, by the next turn. Needs the GIL. */
-void releaseKeptAlive() noexcept {
-	while (deliveries == 0 && !keptAlive.empty()) {
-		std::vector<runtime::PyRef> drop;
-		drop.swap(keptAlive);
-		drop.clear();
-	}
-}
-
-}  // namespace
-
 SynchronousMidiDelivery::SynchronousMidiDelivery(py::object port) {
-	if (deliveries == 0) {
-		// Rack's loop iterates a device's set: no laboratory driver or device may be destroyed until it returns.
-		std::vector<py::object> live;
-		laboratory::liveMidiObjects(live);
-		for (auto& object : live)
-			keptAlive.emplace_back(std::move(object));
-	}
-	if (port)
-		keptAlive.emplace_back(std::move(port));  // Rack's loop holds the delivered port as its current element
+	// Rack's loop iterates a device's set, and holds the delivered port as its current element: neither that
+	// port nor any laboratory driver or device may be destroyed until the loop returns.
+	laboratory::keepLaboratoryObjectsAlive(std::move(port));
 	++deliveries;
 }
 
@@ -752,19 +746,19 @@ void refuseDuringMidiDelivery(const char* what) {
 			"call that delivered the message returns");
 }
 
-MidiDeliveryCall::~MidiDeliveryCall() {
-	releaseKeptAlive();
+bool midiDeliveryInProgress() {
+	return deliveries > 0;
 }
 
 bool livePythonMidiPort(const m::Port* port) {
 	auto* t = dynamic_cast<const Tracked*>(port);
-	return t && !t->released;
+	return t && !t->released && livePythonObject(static_cast<const void*>(port));
 }
 
 py::object midiPortObject(m::Port* port) {
 	if (!livePythonMidiPort(port))
 		return py::object();
-	return portObject(port);
+	return portObject(port);  // alive (livePythonMidiPort): this reference resurrects nothing
 }
 
 void connectMidiDriver(py::handle port, UnlistedMidiDriver& driver) {
@@ -813,16 +807,6 @@ auto portImplementation(m::Port& p, Base base, Virtual virtualCall) {
 }
 
 void bindMidi(py::module_ mod) {
-	// What synchronous deliveries kept alive goes once none is in progress: here, if no Python call into Rack's
-	// code released it already (Rack's own main-thread deliveries, such as its computer keyboard driver's).
-	runtime::onUiStep([] {
-		if (!keptAlive.empty())
-			runtime::callPython("releasing what MIDI deliveries kept alive", [] { releaseKeptAlive(); });
-	});
-	runtime::onContextClosing([] {
-		runtime::callPython("releasing what MIDI deliveries kept alive", [] { releaseKeptAlive(); });
-	});
-	runtime::onFinalize([] { releaseKeptAlive(); });
 	py::class_<m::Message>(mod, "Message",
 		"Rack's MIDI message: its bytes (3 zeros at first) and the engine frame it belongs to (-1: now). The "
 		"accessors are Rack's: setters mask to 7 bits and ignore missing bytes.")
@@ -941,7 +925,7 @@ void bindMidi(py::module_ mod) {
 		}, py::arg("input"))
 		.def("on_message", [](const InputDeviceView& v, const m::Message& message) {
 			requireLiveContext("InputDevice.on_message");
-			MidiDeliveryCall call;
+			laboratory::LaboratoryCall call;
 			static_cast<m::InputDevice&>(v.get()).onMessage(message);
 		}, py::arg("message"),
 			"Rack's: delivers the message to the device's subscribers, as the driver does when one arrives (an unset "
@@ -970,7 +954,7 @@ void bindMidi(py::module_ mod) {
 		}, py::arg("output"))
 		.def("send_message", [](const OutputDeviceView& v, const m::Message& message) {
 			requireLiveContext("OutputDevice.send_message");
-			MidiDeliveryCall call;  // Rack's Loopback delivers it now
+			laboratory::LaboratoryCall call;  // Rack's Loopback delivers it now
 			static_cast<m::OutputDevice&>(v.get()).sendMessage(message);
 		}, py::arg("message"), "Rack's: sends the message to the device as it is (no channel is applied).");
 
@@ -1010,6 +994,7 @@ void bindMidi(py::module_ mod) {
 		.def("get_driver_id", [](m::Port& p) { return checked(p).getDriverId(); })
 		.def("set_driver_id", [](m::Port& p, int id) {
 			refuseDuringMidiDelivery("Port.set_driver_id");
+			laboratory::LaboratoryCall call;  // a laboratory driver's overrides may drop it while Rack still uses it
 			checked(p).setDriverId(id);
 		}, py::arg("driver_id"),
 			"Rack's: the driver (an unknown ID falls back to Rack's first), then its default device.")
@@ -1020,6 +1005,7 @@ void bindMidi(py::module_ mod) {
 		.def("get_device_id", [](m::Port& p) { return checked(p).getDeviceId(); })
 		.def("set_device_id", [](m::Port& p, int id) {
 			refuseDuringMidiDelivery("Port.set_device_id");
+			laboratory::LaboratoryCall call;
 			return portImplementation(p,
 				[id](auto& value) { using T = std::decay_t<decltype(value)>; return value.T::setDeviceId(id); },
 				[id](m::Port& value) { return value.setDeviceId(id); });
@@ -1050,12 +1036,14 @@ void bindMidi(py::module_ mod) {
 		.def("get_channel_name", [](m::Port& p, int channel) { return checked(p).getChannelName(channel); },
 			py::arg("channel"))
 		.def("to_json", [](m::Port& p) {
+			laboratory::LaboratoryCall call;
 			json_t* data = checked(p).toJson();
 			std::unique_ptr<json_t, decltype(&json_decref)> held(data, json_decref);
 			return runtime::fromJson(data);
 		})
 		.def("from_json", [](m::Port& p, py::handle data) {
 			refuseDuringMidiDelivery("Port.from_json");
+			laboratory::LaboratoryCall call;
 			checked(p);
 			std::unique_ptr<json_t, decltype(&json_decref)> json(runtime::toJson(data), json_decref);
 			p.fromJson(json.get());
@@ -1076,6 +1064,7 @@ void bindMidi(py::module_ mod) {
 		})
 		.def("reset", [](m::Input& p) {
 			refuseDuringMidiDelivery("Input.reset");
+			laboratory::LaboratoryCall call;
 			checked(p);
 			p.reset();
 		}, "Rack's: Rack's first driver and its default device, all channels.")
@@ -1125,13 +1114,14 @@ void bindMidi(py::module_ mod) {
 		})
 		.def("reset", [](m::Output& p) {
 			refuseDuringMidiDelivery("Output.reset");
+			laboratory::LaboratoryCall call;
 			checked(p);
 			p.reset();
 		}, "Rack's: Rack's first driver and its default device, channel 1.")
 		.def("send_message", [](m::Output& p, const m::Message& message) {
 			checked(p);
 			requireLiveContext("Output.send_message");
-			MidiDeliveryCall call;  // Rack's Loopback delivers it now
+			laboratory::LaboratoryCall call;  // Rack's Loopback delivers it now
 			p.sendMessage(message);
 		}, py::arg("message"), "Rack's: sends to the port's device, with the port's channel unless it is -1.");
 
@@ -1161,7 +1151,7 @@ void bindMidi(py::module_ mod) {
 		}, "Rack's subscribers: Python's own ports, and PortViews of the others (modules' ports).")
 		.def("push_message", [](const PythonMidiInput& d, const m::Message& message) {
 			requireLiveContext("push_message");
-			MidiDeliveryCall call;
+			laboratory::LaboratoryCall call;
 			d.get().onMessage(message);
 		}, py::arg("message"),
 			"Rack's InputDevice::onMessage, as driver code calls it when a message arrives: each subscribed input gets "

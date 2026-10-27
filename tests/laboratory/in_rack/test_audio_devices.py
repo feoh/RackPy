@@ -422,3 +422,43 @@ def test_audio_driver_teardown_detaches_ports_before_its_devices_go() -> None:
     del driver
     gc.collect()
     assert seen == [([], "", True)]
+
+
+@needs_ports
+def test_an_audio_driver_an_override_drops_inside_racks_port_code_goes_after_it() -> None:
+    holder: dict[str, AudioDriver] = {}
+
+    class DropsOnUnsubscribe(AudioDevice):
+        def unsubscribe(self, port: audio.Port) -> None:
+            super().unsubscribe(port)
+            holder.clear()  # the last reference: Rack's setDeviceId then subscribes through the driver
+
+    class DropsOnSubscribe(AudioDevice):
+        def subscribe(self, port: audio.Port) -> None:
+            super().subscribe(port)
+            holder.clear()  # the native AudioDriver::subscribe that called this still uses the driver
+
+    driver = AudioDriver()
+    driver.add_device(DropsOnUnsubscribe("first"))
+    driver.add_device(AudioDevice("second"))
+    port = audio.Port()
+    driver.connect(port)
+    gone = weakref.ref(driver)
+    holder["driver"] = driver
+    del driver
+    port.set_device_id(1)
+    gc.collect()
+    assert gone() is None and port.device is None and port.get_device_id() == -1
+
+    driver = AudioDriver()
+    driver.add_device(DropsOnSubscribe("subscribing"))
+    driver.default_device_id = -1
+    port = audio.Port()
+    driver.connect(port)  # no default device: nothing subscribed yet
+    assert port.device is None
+    gone = weakref.ref(driver)
+    holder["driver"] = driver
+    del driver
+    port.set_device_id(0)
+    gc.collect()
+    assert gone() is None and port.device is None and port.get_device_id() == -1

@@ -315,6 +315,21 @@ The rules that keep it contained:
   then raises `StaleHandleError`. A driver detaches its ports before it
   lets its devices go, so a device's `__del__` or weakref callback that
   asks a port about its driver finds none.
+- **Teardown happens on the main thread only.** Rack's UI reads a port's
+  driver and device on the main thread without the GIL, so a laboratory
+  driver or device is never destroyed anywhere else. If its last reference
+  goes on a Python thread, its Python object goes there, but the native
+  driver or device (which answers Rack's calls natively meanwhile) is
+  destroyed at the next UI step, or at context close, and its ports point
+  nowhere from then on. (Python-made ports dropped on another thread are
+  leaked with a warning, as before.)
+- **Kept alive while Rack's port code uses them.** Rack's `Port::setDeviceId`
+  unsubscribes and then subscribes through the same driver, so an override
+  of `subscribe` or `unsubscribe` that drops the last reference to its
+  driver or device cannot free it under Rack: whenever such an override
+  runs, every laboratory driver and device is kept alive until the Python
+  port call (`set_device_id`, `connect`, ...) returns, or, when Rack's own
+  code called (its menu items), until the next UI step.
 - **No subscription changes during a delivery.** A laboratory input's
   `on_message` runs inside Rack's `InputDevice::onMessage`, which is
   iterating the device's subscribers. Until the Python call that delivered
@@ -322,11 +337,15 @@ The rules that keep it contained:
   driver, ...) returns, anything that would change a subscriber set raises
   `LaboratoryError`: a port's `set_device_id`, `set_driver_id`, `reset` and
   `from_json`, making a MIDI port, `connect`, the drivers' and devices'
-  `subscribe_*`/`unsubscribe_*`, and removing a device. Objects dropped
+  `subscribe_*`/`unsubscribe_*`, and removing a device, and Rack's own code
+  that would change a Python port's subscription (its MIDI menu items,
+  through `Port::setDeviceId`). A port, driver or device that Python is
+  deallocating (its reference count is 0, for example while its attributes
+  are cleared) gets no delivery and is never kept alive. Objects dropped
   meanwhile (the delivered port itself, a laboratory driver or device) are
   kept alive and go when that call returns; Rack's own main-thread
   deliveries (its computer keyboard driver) release them at the next UI
-  step.
+  step, and count as a delivery until Rack's loop returns.
 
 ## A laboratory MIDI generator
 

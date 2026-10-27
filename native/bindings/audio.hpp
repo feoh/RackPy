@@ -80,7 +80,8 @@ struct UnlistedAudioDriver : rack::audio::Driver {
 	void detach() noexcept;
 };
 
-/** Whether `port` is a port Python made that is not being released: only such a port may be handed to Python. Main thread. */
+/** Whether `port` is a port Python made that is neither being released nor deallocated: only such a port may be
+handed to Python. Main thread; needs the GIL. */
 bool livePythonAudioPort(const rack::audio::Port* port);
 /** The Python object of a live Python-made port (see livePythonAudioPort). Needs the GIL. */
 pybind11::object audioPortObject(rack::audio::Port* port);

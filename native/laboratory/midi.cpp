@@ -217,7 +217,7 @@ struct PyMidiDriver : MidiDriver, py::trampoline_self_life_support {
 			[id](const Override& f) { return f(id).cast<std::string>(); });
 	}
 	m::InputDevice* subscribeInput(int id, m::Input* input) override {
-		return dispatch<m::InputDevice*>(self(), "subscribe_input",
+		return dispatchSubscription<m::InputDevice*>(self(), "subscribe_input",
 			[input] { return bindings::livePythonMidiPort(input); },
 			[this, id, input] { return MidiDriver::subscribeInput(id, input); },
 			[this, id, input](const Override& f) {
@@ -225,7 +225,7 @@ struct PyMidiDriver : MidiDriver, py::trampoline_self_life_support {
 			});
 	}
 	void unsubscribeInput(int id, m::Input* input) override {
-		dispatchVoid(self(), "unsubscribe_input", [input] { return bindings::livePythonMidiPort(input); },
+		dispatchSubscriptionVoid(self(), "unsubscribe_input", [input] { return bindings::livePythonMidiPort(input); },
 			[this, id, input] { MidiDriver::unsubscribeInput(id, input); },
 			[id, input](const Override& f) { f(id, bindings::midiPortObject(input)); });
 	}
@@ -244,7 +244,7 @@ struct PyMidiDriver : MidiDriver, py::trampoline_self_life_support {
 			[id](const Override& f) { return f(id).cast<std::string>(); });
 	}
 	m::OutputDevice* subscribeOutput(int id, m::Output* output) override {
-		return dispatch<m::OutputDevice*>(self(), "subscribe_output",
+		return dispatchSubscription<m::OutputDevice*>(self(), "subscribe_output",
 			[output] { return bindings::livePythonMidiPort(output); },
 			[this, id, output] { return MidiDriver::subscribeOutput(id, output); },
 			[this, id, output](const Override& f) {
@@ -253,7 +253,7 @@ struct PyMidiDriver : MidiDriver, py::trampoline_self_life_support {
 			});
 	}
 	void unsubscribeOutput(int id, m::Output* output) override {
-		dispatchVoid(self(), "unsubscribe_output", [output] { return bindings::livePythonMidiPort(output); },
+		dispatchSubscriptionVoid(self(), "unsubscribe_output", [output] { return bindings::livePythonMidiPort(output); },
 			[this, id, output] { MidiDriver::unsubscribeOutput(id, output); },
 			[id, output](const Override& f) { f(id, bindings::midiPortObject(output)); });
 	}
@@ -295,6 +295,10 @@ int traverseDriver(PyObject* self, visitproc visit, void* arg) {
 }
 
 int clearDriver(PyObject* self) {
+	// Off the main thread (a Python thread's collection), Rack's UI may be reading the driver: leave the cycle to
+	// its other members' clearing, or to a collection on the main thread.
+	if (!runtime::isMainThread())
+		return 0;
 	if (auto* d = constructed<MidiDriver>(self)) {
 		auto inputs = std::move(d->inputs.entries);  // a device that goes disconnects its ports
 		auto outputs = std::move(d->outputs.entries);
@@ -311,9 +315,13 @@ void appendLive(const std::vector<T*>& all, std::vector<py::object>& out) {
 	auto* info = py::detail::get_type_info(typeid(T));
 	if (!info)
 		return;
-	for (T* object : all)
-		if (py::handle h = py::detail::get_object_handle(object, info))  // none while it is being deallocated
+	for (T* object : all) {
+		// None once pybind11 deregistered it; refcount 0 while it is being deallocated (its __dict__ cleared,
+		// running Python): a new reference would resurrect it.
+		py::handle h = py::detail::get_object_handle(object, info);
+		if (h && Py_REFCNT(h.ptr()) > 0)
 			out.push_back(py::reinterpret_borrow<py::object>(h));
+	}
 }
 
 void liveMidiObjects(std::vector<py::object>& out) {
@@ -339,7 +347,7 @@ void bindMidi(py::module_ lab) {
 		.def(py::init([](std::string name) {
 			requireEnabled("creating a laboratory MIDI device");
 			runtime::requireMainThread("creating a laboratory MIDI device");
-			auto d = std::make_unique<PyInputDevice>();
+			std::unique_ptr<PyInputDevice, MainThreadDeleteLater<PyInputDevice>> d(new PyInputDevice);
 			d->name = std::move(name);
 			return d;
 		}), py::arg("name") = "")
@@ -360,7 +368,7 @@ void bindMidi(py::module_ lab) {
 		}, "Rack's subscribers: the Python inputs subscribed to this device.")
 		.def("push_message", [](InputDevice& d, const m::Message& message) {
 			requireLiveContext("push_message");
-			bindings::MidiDeliveryCall call;
+			LaboratoryCall call;
 			d.onMessage(message);
 		}, py::arg("message"),
 			"Rack's InputDevice::onMessage, as driver code calls it when a message arrives: each subscribed input's "
@@ -373,7 +381,7 @@ void bindMidi(py::module_ lab) {
 		.def(py::init([](std::string name) {
 			requireEnabled("creating a laboratory MIDI device");
 			runtime::requireMainThread("creating a laboratory MIDI device");
-			auto d = std::make_unique<PyOutputDevice>();
+			std::unique_ptr<PyOutputDevice, MainThreadDeleteLater<PyOutputDevice>> d(new PyOutputDevice);
 			d->name = std::move(name);
 			return d;
 		}), py::arg("name") = "")
@@ -411,7 +419,7 @@ void bindMidi(py::module_ lab) {
 		.def(py::init([](std::string name) {
 			requireEnabled("creating a laboratory MIDI driver");
 			runtime::requireMainThread("creating a laboratory MIDI driver");
-			auto d = std::make_unique<PyMidiDriver>();
+			std::unique_ptr<PyMidiDriver, MainThreadDeleteLater<PyMidiDriver>> d(new PyMidiDriver);
 			d->name = std::move(name);
 			return d;
 		}), py::arg("name") = "")
@@ -441,6 +449,7 @@ void bindMidi(py::module_ lab) {
 		}, py::arg("device_id"))
 		.def("connect", [](MidiDriver& d, py::object p) {
 			requireEnabled("connecting a laboratory MIDI driver");
+			LaboratoryCall call;
 			bindings::connectMidiDriver(p, driver(d));
 		}, py::arg("port"),
 			"Point a rackpy.raw.midi Input, InputQueue or Output you made at this driver, as Rack's Port::setDriverId "

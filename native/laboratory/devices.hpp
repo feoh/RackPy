@@ -12,6 +12,7 @@
 
 #include <rack.hpp>
 
+#include "laboratory.hpp"
 #include "../bindings/support/overrides.hpp"
 #include "rackpy/runtime/python.hpp"
 
@@ -55,6 +56,29 @@ void dispatchVoid(const Self* self, const char* name, Eligible eligible, Base ba
 		call(f);
 		return true;
 	});
+}
+
+/** dispatch for a subscription virtual (subscribe, unsubscribe): Rack's port code calls the same driver again
+after it returns (Port::setDeviceId unsubscribes, then subscribes), so when Python runs, every laboratory driver and
+device is kept alive until that code has returned (laboratory.hpp). */
+template <typename T, typename Self, typename Eligible, typename Base, typename Call>
+T dispatchSubscription(const Self* self, const char* name, Eligible eligible, Base base, Call call) {
+	SubscriptionDispatch subscription;
+	return dispatch<T>(self, name, [&] {
+		if (!eligible())
+			return false;
+		keepLaboratoryObjectsAlive();
+		return true;
+	}, base, call);
+}
+
+template <typename Self, typename Eligible, typename Base, typename Call>
+void dispatchSubscriptionVoid(const Self* self, const char* name, Eligible eligible, Base base, Call call) {
+	dispatchSubscription<bool>(self, name, eligible, [&] { base(); return true; },
+		[&](const bindings::PythonOverride& f) {
+			call(f);
+			return true;
+		});
 }
 
 template <typename T>

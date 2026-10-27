@@ -215,3 +215,8 @@ Supervisor-approved design (2026-10-26):
   own main-thread deliveries: the next UI step). A `subscribe` override that
   removes its device leaves the port pointing nowhere, and a driver detaches
   its ports before releasing its devices.
+- **Re-review fixes.** Rack's own code is refused too (the check is in the
+  Python port's `setDeviceId`); nothing being deallocated is delivered to or
+  kept alive; laboratory drivers and devices that an override drops inside
+  Rack's port code stay alive until that code returns; and they are
+  destroyed on the main thread only (dropped elsewhere: at the next UI step).

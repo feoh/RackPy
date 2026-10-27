@@ -77,6 +77,8 @@ port methods then call the driver's ``get_name``, ``get_device_ids``,
 reaches the caller of the port method. ``super()`` answers from the devices
 given to ``add_device``, which the driver keeps; ``subscribe`` must return
 one of them or ``None``. Main thread; creating one needs :func:`enable`.
+Its native part is destroyed on the main thread only: dropped on another
+thread, at the next UI step.
 """
 
 AudioDevice = _lab.AudioDevice
@@ -98,7 +100,8 @@ methods (``set_device_id``, ``get_device_ids``, ``get_default_device_id``,
 ``get_device_name``) and Rack's MIDI widgets then call the driver's virtuals
 synchronously. ``super()`` answers from the :class:`MidiInputDevice` and
 :class:`MidiOutputDevice` objects added, which the driver keeps. Main thread;
-creating one needs :func:`enable`.
+creating one needs :func:`enable`. Its native part is destroyed on the main
+thread only: dropped on another thread, at the next UI step.
 """
 
 MidiInputDevice = _lab.MidiInputDevice

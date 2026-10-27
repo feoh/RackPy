@@ -925,6 +925,17 @@ void define(py::module_ m) {
 		});
 		worker.join();
 	}, py::arg("input"), py::arg("message"), "Rack's Input::onMessage, as Rack's MIDI driver thread calls it.");
+	m.def("deliver_as_racks_keyboard", [](py::handle input, const rack::midi::Message& message) {
+		// As Rack's computer keyboard driver delivers (src/keyboard.cpp): InputDevice::onMessage on the main thread,
+		// without the GIL and outside any Python call into Rack's code. The port's device is a Rack driver's.
+		requireMainThread("deliver_as_racks_keyboard");
+		auto* port = dynamic_cast<rack::midi::Input*>(&bindings::pythonMidiPort(input));
+		if (!port || !port->inputDevice)
+			throw py::type_error("needs a MIDI input port with a device");
+		rack::midi::InputDevice* device = port->inputDevice;
+		py::gil_scoped_release release;
+		device->onMessage(message);
+	}, py::arg("input"), py::arg("message"));
 	m.def("port_targets", [](py::handle port) {
 		// Rack's own fields of a Python-made port, even after RackPy released it (no checks).
 		requireMainThread("port_targets");

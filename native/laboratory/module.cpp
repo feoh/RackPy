@@ -403,6 +403,7 @@ void bind(py::module_ host) {
 	bindMidi(lab);
 	bindAudio(lab);
 	bindBench(lab);
+	bindKeepAlive();
 	runtime::onFinalize([] { laboratoryEnabled.store(false); });
 }
 

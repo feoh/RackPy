@@ -12,6 +12,7 @@
 
 #include <array>
 #include <cstddef>
+#include <functional>
 #include <vector>
 
 #include "../module/module.hpp"
@@ -116,8 +117,54 @@ inline Module* laboratoryModule(module::Module& m) {
 }
 
 /** The Python objects of every live laboratory MIDI driver and device (rackpy.laboratory.MidiDriver,
-MidiInputDevice, MidiOutputDevice), appended to `out`: a synchronous MIDI delivery keeps them alive. Needs the GIL. */
+MidiInputDevice, MidiOutputDevice), appended to `out`, skipping any being deallocated. Needs the GIL. */
 void liveMidiObjects(std::vector<py::object>& out);
+/** The same for the laboratory audio drivers and devices (AudioDriver, AudioDevice). */
+void liveAudioObjects(std::vector<py::object>& out);
+
+// Keeping the laboratory's drivers and devices alive while Rack's code uses them (RP-22F). Rack's port code
+// calls a driver or device again after an override ran (Port::setDeviceId unsubscribes, then subscribes through
+// the same driver; InputDevice::onMessage iterates its subscribers), and an override may drop the last reference
+// to that driver or device. So whenever a laboratory override runs on a subscription path or a synchronous MIDI
+// delivery, every live laboratory driver and device is kept alive (keepLaboratoryObjectsAlive), and released
+// only when no such Rack code can still be running on the main thread: at the end of the outermost
+// LaboratoryCall, at the next UI step, at context close or at finalization. Main thread; needs the GIL.
+
+/** Keep every live laboratory driver and device, and `extra` (if any), alive until released. */
+void keepLaboratoryObjectsAlive(py::object extra = py::object());
+/** Release what was kept, unless a LaboratoryCall, a subscription dispatch or a MIDI delivery is in progress. */
+void releaseKeptLaboratoryObjects() noexcept;
+
+/** Wraps a Python call into Rack's port, device or driver code that may reach laboratory overrides (a port's
+set_device_id, a device's push_message, ...): what overrides kept alive goes when the outermost call returns. */
+struct LaboratoryCall {
+	LaboratoryCall();
+	~LaboratoryCall();
+	LaboratoryCall(const LaboratoryCall&) = delete;
+	LaboratoryCall& operator=(const LaboratoryCall&) = delete;
+};
+
+/** Held while a laboratory override runs on a subscription path (subscribe, unsubscribe): nothing kept is
+released until Rack's port code, which called it, has returned. */
+struct SubscriptionDispatch {
+	SubscriptionDispatch();
+	~SubscriptionDispatch();
+	SubscriptionDispatch(const SubscriptionDispatch&) = delete;
+	SubscriptionDispatch& operator=(const SubscriptionDispatch&) = delete;
+};
+
+/** Run `deleter` now on the main thread; from another thread (a Python thread dropping the last reference),
+at the main thread's next UI step, context close or finalization, under the GIL: Rack's UI reads the
+laboratory drivers and devices on the main thread without the GIL, so none may be destroyed elsewhere. */
+void deleteOnMainThreadLater(std::function<void()> deleter);
+
+/** The deleter of every laboratory driver and device (the factories' unique_ptr). */
+template <class T>
+struct MainThreadDeleteLater {
+	void operator()(T* object) const noexcept {
+		deleteOnMainThreadLater([object] { delete object; });
+	}
+};
 
 /** _rackpy_host.laboratory: enablement, laboratory modules and the Bench. */
 void bind(py::module_ host);
@@ -126,6 +173,8 @@ void bindQuantities(py::module_ lab);
 void bindMidi(py::module_ lab);
 void bindAudio(py::module_ lab);
 void bindBench(py::module_ lab);
+/** The keep-alive and deferred-destruction hooks (keepalive.cpp). */
+void bindKeepAlive();
 
 }  // namespace laboratory
 }  // namespace rackpy

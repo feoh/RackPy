@@ -11,6 +11,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <algorithm>
 #include <map>
 #include <string>
 #include <utility>
@@ -29,8 +30,22 @@ namespace {
 
 namespace a = rack::audio;
 
+struct AudioDevice;
+struct AudioDriver;
+// Every live laboratory audio object, for liveAudioObjects (main thread).
+std::vector<AudioDevice*> audioDevices;
+std::vector<AudioDriver*> audioDrivers;
+
+template <class T>
+void forget(std::vector<T*>& all, T* object) {
+	all.erase(std::remove(all.begin(), all.end(), object), all.end());
+}
+
 /** rackpy.laboratory.AudioDevice: its native answers are the values Python configured. */
-struct AudioDevice : bindings::UnlistedAudioDevice {};
+struct AudioDevice : bindings::UnlistedAudioDevice {
+	AudioDevice() { audioDevices.push_back(this); }
+	~AudioDevice() override { forget(audioDevices, this); }
+};
 
 struct PyAudioDevice : AudioDevice, py::trampoline_self_life_support {
 	const AudioDevice* self() const { return this; }
@@ -71,12 +86,12 @@ struct PyAudioDevice : AudioDevice, py::trampoline_self_life_support {
 			[size](const bindings::PythonOverride& f) { f(size); });
 	}
 	void subscribe(a::Port* port) override {
-		dispatchVoid(self(), "subscribe", [port] { return bindings::livePythonAudioPort(port); },
+		dispatchSubscriptionVoid(self(), "subscribe", [port] { return bindings::livePythonAudioPort(port); },
 			[this, port] { AudioDevice::subscribe(port); },
 			[port](const bindings::PythonOverride& f) { f(bindings::audioPortObject(port)); });
 	}
 	void unsubscribe(a::Port* port) override {
-		dispatchVoid(self(), "unsubscribe", [port] { return bindings::livePythonAudioPort(port); },
+		dispatchSubscriptionVoid(self(), "unsubscribe", [port] { return bindings::livePythonAudioPort(port); },
 			[this, port] { AudioDevice::unsubscribe(port); },
 			[port](const bindings::PythonOverride& f) { f(bindings::audioPortObject(port)); });
 	}
@@ -94,7 +109,9 @@ struct AudioDriver : bindings::UnlistedAudioDriver {
 	int nextId = 0;
 	int defaultId = -1;
 
+	AudioDriver() { audioDrivers.push_back(this); }
 	~AudioDriver() override {
+		forget(audioDrivers, this);
 		detach();  // the ports first: a device's __del__ may query them while the devices go
 		auto drop = std::move(devices);
 		devices.clear();
@@ -181,12 +198,12 @@ struct PyAudioDriver : AudioDriver, py::trampoline_self_life_support {
 			[id](const bindings::PythonOverride& f) { return f(id).cast<int>(); });
 	}
 	a::Device* subscribe(int id, a::Port* port) override {
-		return dispatch<a::Device*>(self(), "subscribe", [port] { return bindings::livePythonAudioPort(port); },
+		return dispatchSubscription<a::Device*>(self(), "subscribe", [port] { return bindings::livePythonAudioPort(port); },
 			[this, id, port] { return AudioDriver::subscribe(id, port); },
 			[this, id, port](const bindings::PythonOverride& f) { return own(f(id, bindings::audioPortObject(port))); });
 	}
 	void unsubscribe(int id, a::Port* port) override {
-		dispatchVoid(self(), "unsubscribe", [port] { return bindings::livePythonAudioPort(port); },
+		dispatchSubscriptionVoid(self(), "unsubscribe", [port] { return bindings::livePythonAudioPort(port); },
 			[this, id, port] { AudioDriver::unsubscribe(id, port); },
 			[id, port](const bindings::PythonOverride& f) { f(id, bindings::audioPortObject(port)); });
 	}
@@ -218,6 +235,10 @@ int traverseDriver(PyObject* self, visitproc visit, void* arg) {
 }
 
 int clearDriver(PyObject* self) {
+	// Off the main thread (a Python thread's collection), Rack's UI may be reading the driver: leave the cycle to
+	// its other members' clearing, or to a collection on the main thread.
+	if (!runtime::isMainThread())
+		return 0;
 	if (auto* d = constructed<AudioDriver>(self)) {
 		auto devices = std::move(d->devices);  // a device that goes disconnects its ports
 		d->devices.clear();
@@ -226,6 +247,23 @@ int clearDriver(PyObject* self) {
 }
 
 }  // namespace
+
+template <class T>
+void appendLive(const std::vector<T*>& all, std::vector<py::object>& out) {
+	auto* info = py::detail::get_type_info(typeid(T));
+	if (!info)
+		return;
+	for (T* object : all) {
+		py::handle h = py::detail::get_object_handle(object, info);  // refcount 0: being deallocated
+		if (h && Py_REFCNT(h.ptr()) > 0)
+			out.push_back(py::reinterpret_borrow<py::object>(h));
+	}
+}
+
+void liveAudioObjects(std::vector<py::object>& out) {
+	appendLive(audioDrivers, out);
+	appendLive(audioDevices, out);
+}
 
 #ifdef RACKPY_TEST_HOOKS
 a::Driver& audioDriverForTesting(py::handle driver) {
@@ -245,7 +283,7 @@ void bindAudio(py::module_ lab) {
 			runtime::requireMainThread("creating a laboratory audio device");
 			if (numInputs < 0 || numOutputs < 0 || !(rate > 0.f) || size < 1)
 				throw std::invalid_argument("channel counts are not negative, and the rate and block size are positive");
-			auto d = std::make_unique<PyAudioDevice>();
+			std::unique_ptr<PyAudioDevice, MainThreadDeleteLater<PyAudioDevice>> d(new PyAudioDevice);
 			d->name = std::move(name);
 			d->numInputs.store(numInputs);
 			d->numOutputs.store(numOutputs);
@@ -335,7 +373,7 @@ void bindAudio(py::module_ lab) {
 		.def(py::init([](std::string name) {
 			requireEnabled("creating a laboratory audio driver");
 			runtime::requireMainThread("creating a laboratory audio driver");
-			auto d = std::make_unique<PyAudioDriver>();
+			std::unique_ptr<PyAudioDriver, MainThreadDeleteLater<PyAudioDriver>> d(new PyAudioDriver);
 			d->name = std::move(name);
 			return d;
 		}), py::arg("name") = "")
@@ -375,6 +413,7 @@ void bindAudio(py::module_ lab) {
 		}, py::arg("device_id"), "The device with this ID, or None.")
 		.def("connect", [](AudioDriver& d, py::object port) {
 			requireEnabled("connecting a laboratory audio driver");
+			LaboratoryCall call;
 			bindings::connectAudioDriver(port, driver(d));
 		}, py::arg("port"),
 			"Point a rackpy.raw.audio.Port you made at this driver, as Rack's Port::setDriverId does for a driver it "

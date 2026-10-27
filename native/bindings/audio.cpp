@@ -36,6 +36,7 @@
 #include <rack.hpp>
 
 #include "audio.hpp"
+#include "../laboratory/laboratory.hpp"
 #include "engine/engine_internal.hpp"
 #include "rackpy/runtime/context.hpp"
 #include "rackpy/runtime/errors.hpp"
@@ -536,7 +537,7 @@ void UnlistedAudioDriver::detach() noexcept {
 
 bool livePythonAudioPort(const a::Port* port) {
 	auto* p = dynamic_cast<const PyAudioPort*>(port);
-	return p && !p->released;
+	return p && !p->released && livePythonObject(static_cast<const void*>(port));
 }
 
 py::object audioPortObject(a::Port* port) {
@@ -686,16 +687,25 @@ void bindAudio(py::module_ mod) {
 			checked(p);
 			return py::module_::import("rackpy.raw").attr("context_get")();
 		}, "Rack's context the port was made in (the live one: other contexts' ports are refused).")
-		.def("reset", [](a::Port& p) { checked(p).reset(); }, "Rack's: Rack's first driver and its default device.")
+		.def("reset", [](a::Port& p) {
+			laboratory::LaboratoryCall call;
+			checked(p).reset();
+		}, "Rack's: Rack's first driver and its default device.")
 		.def("get_driver", [](a::Port& p) { return checked(p).getDriver() ? driverObject(p.getDriverId()) : py::none(); })
 		.def("get_driver_id", [](a::Port& p) { return checked(p).getDriverId(); })
-		.def("set_driver_id", [](a::Port& p, int id) { checked(p).setDriverId(id); }, py::arg("driver_id"),
+		.def("set_driver_id", [](a::Port& p, int id) {
+			laboratory::LaboratoryCall call;  // a laboratory driver's overrides may drop it while Rack still uses it
+			checked(p).setDriverId(id);
+		}, py::arg("driver_id"),
 			"Rack's: the driver (an unknown ID falls back to Rack's first), then its default device.")
 		.def("get_driver_name", [](a::Port& p) { return checked(p).getDriverName(); })
 		.def("get_device", [](py::object self) { return deviceObject(self, checked(self.cast<a::Port&>()).getDevice()); })
 		.def("get_device_ids", [](a::Port& p) { return checked(p).getDeviceIds(); })
 		.def("get_device_id", [](a::Port& p) { return checked(p).getDeviceId(); })
-		.def("set_device_id", [](a::Port& p, int id) { checked(p).setDeviceId(id); }, py::arg("device_id"),
+		.def("set_device_id", [](a::Port& p, int id) {
+			laboratory::LaboratoryCall call;
+			checked(p).setDeviceId(id);
+		}, py::arg("device_id"),
 			"Rack's: subscribes to the driver's device, which may open its stream (-1: none).")
 		.def("get_device_num_inputs", [](a::Port& p, int id) { return checked(p).getDeviceNumInputs(id); },
 			py::arg("device_id"))
@@ -720,6 +730,7 @@ void bindAudio(py::module_ mod) {
 			"Rack's: the port's active inputs, after input_offset and max_inputs.")
 		.def("get_num_outputs", [](a::Port& p) { return checked(p).getNumOutputs(); })
 		.def("to_json", [](a::Port& p) {
+			laboratory::LaboratoryCall call;
 			json_t* data = checked(p).toJson();
 			std::unique_ptr<json_t, decltype(&json_decref)> held(data, json_decref);
 			return runtime::fromJson(data);
@@ -727,6 +738,7 @@ void bindAudio(py::module_ mod) {
 		.def("from_json", [](a::Port& p, py::handle data) {
 			checked(p);
 			std::unique_ptr<json_t, decltype(&json_decref)> json(runtime::toJson(data), json_decref);
+			laboratory::LaboratoryCall call;
 			p.fromJson(json.get());
 		}, py::arg("data"), "Rack's: the driver, the device with the saved name, its rate and block size, and the offsets.")
 		.def("process_buffer", [](a::Port& p, py::object, int, py::object, int, int) { checked(p); },

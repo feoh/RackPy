@@ -38,30 +38,8 @@ struct UnlistedMidiDriver : rack::midi::Driver {
 	void detach() noexcept;
 };
 
-/** Synchronous MIDI delivery (RP-22F): a laboratory input's on_message runs inside Rack's InputDevice::onMessage,
-which iterates the device's `subscribed` set. While one runs on this thread (nesting counts), operations that
-change a subscriber set raise LaboratoryError (refuseDuringMidiDelivery), and the delivered port and every
-laboratory MIDI driver and device are kept alive, so that dropping one cannot free what Rack's loop uses. What
-was kept is released once no delivery is in progress: when the Python call that delivered returns
-(MidiDeliveryCall), at the next UI step, or at context close. Main thread; needs the GIL. */
-struct SynchronousMidiDelivery {
-	explicit SynchronousMidiDelivery(pybind11::object port);
-	~SynchronousMidiDelivery();
-	SynchronousMidiDelivery(const SynchronousMidiDelivery&) = delete;
-	SynchronousMidiDelivery& operator=(const SynchronousMidiDelivery&) = delete;
-};
-/** Throws LaboratoryError while a synchronous MIDI delivery is in progress on this thread. */
-void refuseDuringMidiDelivery(const char* what);
-/** Wraps a Python call into Rack's code that may deliver MIDI synchronously (push_message, send_message, ...):
-when it ends outside every delivery, what deliveries kept alive is released. Needs the GIL. */
-struct MidiDeliveryCall {
-	MidiDeliveryCall() = default;
-	~MidiDeliveryCall();
-	MidiDeliveryCall(const MidiDeliveryCall&) = delete;
-	MidiDeliveryCall& operator=(const MidiDeliveryCall&) = delete;
-};
-
-/** Whether `port` is a port Python made that is not being released: only such a port may be handed to Python. Main thread. */
+/** Whether `port` is a port Python made that is neither being released nor deallocated: only such a port may be
+handed to Python. Main thread; needs the GIL. */
 bool livePythonMidiPort(const rack::midi::Port* port);
 /** The Python object of a live Python-made port (see livePythonMidiPort). Needs the GIL. */
 pybind11::object midiPortObject(rack::midi::Port* port);
@@ -72,6 +50,22 @@ void connectMidiDriver(pybind11::handle port, UnlistedMidiDriver& driver);
 /** A device's subscribers, as PythonInputDevice.subscribed lists them; `owner` keeps the device alive. Needs the GIL. */
 pybind11::list midiSubscribers(pybind11::object owner, rack::midi::InputDevice& device);
 pybind11::list midiSubscribers(pybind11::object owner, rack::midi::OutputDevice& device);
+
+/** Synchronous MIDI delivery (RP-22F): a laboratory input's on_message runs inside Rack's InputDevice::onMessage,
+which iterates the device's `subscribed` set. While one runs on this thread (nesting counts), operations that
+change a subscriber set raise LaboratoryError (refuseDuringMidiDelivery), and the delivered port and every
+laboratory driver and device are kept alive (laboratory::keepLaboratoryObjectsAlive), so that dropping one cannot
+free what Rack's loop uses. Main thread; needs the GIL. */
+struct SynchronousMidiDelivery {
+	explicit SynchronousMidiDelivery(pybind11::object port);
+	~SynchronousMidiDelivery();
+	SynchronousMidiDelivery(const SynchronousMidiDelivery&) = delete;
+	SynchronousMidiDelivery& operator=(const SynchronousMidiDelivery&) = delete;
+};
+/** Throws LaboratoryError while a synchronous MIDI delivery is in progress on this thread. */
+void refuseDuringMidiDelivery(const char* what);
+/** Whether a synchronous MIDI delivery is in progress on this thread. */
+bool midiDeliveryInProgress();
 
 /** Mark a Python-made rackpy.raw.midi.Input as the laboratory's (rackpy.laboratory.MidiInput, RP-22F): its
 on_message then runs synchronously where Rack calls it on the main thread. The caller checks enablement. */

@@ -11,7 +11,8 @@ import pytest
 from rackpy import laboratory
 from rackpy.errors import LaboratoryError, OwnershipError, StaleHandleError
 from rackpy.laboratory import MidiDriver, MidiInput, MidiInputDevice, MidiInputQueue, MidiOutputDevice
-from rackpy.raw import app, midi
+from rackpy.raw import app, midi, ui
+from rackpy.raw import widget as w
 from rackpy.raw.math import Vec
 
 LIVE = _rackpy_host.bound_context_generation() is not None
@@ -669,3 +670,102 @@ def test_midi_driver_teardown_detaches_ports_before_its_devices_go() -> None:
     del driver
     gc.collect()
     assert watcher() is None and seen == [([], -1, True)]
+
+
+@needs_ports
+def test_racks_own_menu_items_cannot_change_a_subscription_during_a_delivery() -> None:
+    refused: list[str] = []
+
+    class Clicker(MidiInput):
+        def on_message(self, message: midi.Message) -> None:
+            menu = ui.Menu()
+            app.append_midi_menu(menu, self)  # Rack's driver and device items for this port
+            try:
+                for child in menu.children:
+                    try:
+                        child.on_action(w.ActionEvent())  # Rack's MidiDriverValueItem/MidiDeviceValueItem::onAction
+                    except LaboratoryError as e:
+                        refused.append(str(e))
+            finally:
+                menu.close()
+
+    for _, connect in through_each_route():
+        refused.clear()
+        port = Clicker()
+        send = connect(port)
+        device = port.input_device
+        assert device is not None
+        send()
+        assert len(refused) >= 2 and all("Port.setDeviceId" in r and REFUSED in r for r in refused), refused
+        assert port.input_device is not None and port in port.input_device.subscribed  # nothing changed
+        port.set_device_id(-1)
+
+
+@needs_ports
+def test_a_delivery_started_while_a_laboratory_object_is_deallocated_does_not_resurrect_it() -> None:
+    keys = MidiInputDevice("keys")
+    host = MidiDriver()
+    host.add_input_device(keys)
+    heard: list[int] = []
+
+    class Listener(MidiInput):
+        def on_message(self, message: midi.Message) -> None:
+            heard.append(message.get_note())
+
+    class DyingDriver(MidiDriver):
+        token: object
+
+    class DyingDevice(MidiInputDevice):
+        token: object
+
+    class DyingInput(MidiInput):
+        token: object
+
+        def on_message(self, message: midi.Message) -> None:
+            heard.append(-1)  # never: it is being deallocated
+
+    class Token:
+        pass
+
+    def push(_: object) -> None:  # while the token's owner is deallocated (refcount 0, clearing its __dict__)
+        keys.push_message(message(0x90, len(heard) + 1, 1))
+
+    listener = Listener()
+    host.connect(listener)
+    for make in (DyingDriver, DyingDevice, DyingInput):
+        doomed: Any = make()
+        if isinstance(doomed, MidiInput):
+            host.connect(doomed)
+        token = Token()
+        doomed.token = token
+        watch = weakref.ref(token, push)
+        gone = weakref.ref(doomed)
+        del token, doomed
+        gc.collect()
+        assert gone() is None and watch() is None, make
+    assert heard == [1, 2, 3]  # each delivery reached the listener, none the dying input
+    assert keys.subscribed == [listener]
+
+
+@needs_ports
+def test_a_driver_an_override_drops_inside_racks_port_code_goes_after_it() -> None:
+    holder: dict[str, MidiDriver] = {}
+
+    class Dropping(MidiDriver):
+        def unsubscribe_input(self, device_id: int, input: midi.Input) -> None:
+            super().unsubscribe_input(device_id, input)
+            holder.clear()  # the last reference: Rack's setDeviceId then subscribes through this driver
+
+    driver = Dropping()
+    second = MidiInputDevice("second")
+    driver.add_input_device(MidiInputDevice("first"))
+    driver.add_input_device(second)
+    port = midi.Input()
+    driver.connect(port)
+    gone = weakref.ref(driver)
+    holder["driver"] = driver
+    del driver
+    port.set_device_id(1)  # unsubscribe 0 (the override drops the driver), then subscribe 1 through it
+    gc.collect()
+    assert gone() is None  # kept while Rack's code used it, released when set_device_id returned
+    assert port.device is None and port.get_device_id() == -1 and second.subscribed == []

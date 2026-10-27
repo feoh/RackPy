@@ -72,12 +72,28 @@ PythonOverride pythonOverride(const Self* self, const char* name) {
 		OverrideDepth lookup;
 		auto* info = py::detail::get_type_info(typeid(Self));
 		py::handle object = info ? py::detail::get_object_handle(self, info) : py::handle();
-		if (!object) return {};
+		// Refcount 0: pybind11 is deallocating it (clearing its __dict__ can run Python); a bound method would
+		// resurrect it. Its native implementation answers.
+		if (!object || Py_REFCNT(object.ptr()) == 0) return {};
 		f = py::getattr(object, name, py::function());
 		if (!f || f.is_cpp_function()) return {};
 	}
 	// C++17 guaranteed prvalue elision: the nonmovable guard lives at the call site.
 	return PythonOverride(std::move(f));
+}
+
+/** The Python object pybind11 registered for the C++ object at `address`, borrowed; null if there is none, or while
+it is being deallocated (refcount 0: a new reference would resurrect it). Needs the GIL. */
+inline py::handle livePythonObject(const void* address) {
+	return py::detail::with_instance_map(address, [&](py::detail::instance_map& instances) {
+		auto range = instances.equal_range(address);
+		for (auto it = range.first; it != range.second; ++it) {
+			auto* object = reinterpret_cast<PyObject*>(it->second);
+			if (Py_REFCNT(object) > 0)
+				return py::handle(object);
+		}
+		return py::handle();
+	});
 }
 
 /** `self` must be the most-derived *bound* C++ type: pybind11 finds the Python object by exact type. */
