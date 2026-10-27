@@ -34,7 +34,8 @@ reference count.
 
 A `Port` has up to `PORT_MAX_CHANNELS` (16, read from the pinned SDK) voltages
 and a channel count: 0 means disconnected, 1 monophonic, more polyphonic.
-`Input` and `Output` are `Port`s.
+`Input` and `Output` are `Port`s. `Port.Type.INPUT` and `Port.Type.OUTPUT`
+identify the corresponding port types.
 
 - `get_voltage(channel=0)`, `set_voltage(voltage, channel=0)`,
   `get_poly_voltage(channel)` (channel 0's voltage on a monophonic port),
@@ -47,7 +48,8 @@ and a channel count: 0 means disconnected, 1 monophonic, more polyphonic.
 - `set_channels(n)` follows Rack's rules: it does nothing on a disconnected port,
   turns 0 into 1, and clears the channels above `n`.
 - Facade properties: `voltage` (channel 0), `channel_count`, `connected`,
-  `monophonic`, `polyphonic`.
+  `monophonic`, `polyphonic`. The last three wrap Rack's `is_connected()`,
+  `is_monophonic()` and `is_polyphonic()` methods.
 
 RackPy checks what Rack does not. A channel outside 0 to 15 raises `IndexError`
 before Rack indexes its array. A channel count above 16, which would make

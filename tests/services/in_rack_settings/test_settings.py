@@ -157,6 +157,18 @@ def test_shared_mutex() -> None:
         assert writer == [False]  # a reader excludes writers
     assert not held(lock) and m.try_lock()
     m.unlock()
+    lock = raw.SharedLock(m)
+    assert held(lock)
+    lock.release()
+    assert not held(lock)
+    assert m.try_lock()
+    lock.release()  # a second release must not unlock an unrelated acquisition
+    blocked: list[bool] = []
+    probe3 = threading.Thread(target=lambda: blocked.append(m.try_lock()))
+    probe3.start()
+    probe3.join()
+    assert blocked == [False]
+    m.unlock()
 
 
 class ReadLock:

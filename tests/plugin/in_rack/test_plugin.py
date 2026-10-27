@@ -19,11 +19,17 @@ def test_this_plugin_after_initialization() -> None:
     assert this.alive and this.slug == "RackPy" and this.version == "2.0.0"
     assert this.license == "GPL-3.0-or-later" and this.brand == "RackPy" == this.get_brand()
     assert this.source_url == "https://github.com/feoh/RackPy" and this.path.endswith("RackPy")
+    assert this.author == "RackPy contributors" and this.author_email == "test@example.invalid"
+    assert this.author_url == "https://example.invalid/author"
+    assert this.plugin_url == "https://example.invalid/plugin"
+    assert this.donate_url == "https://example.invalid/donate"
+    assert this.changelog_url == "https://example.invalid/changelog"
     assert isinstance(this.modified_timestamp, float)
     probe = this.get_model("RuntimeProbe")
     assert probe is not None and probe in this.models and probe is rp.get_model("RackPy", "RuntimeProbe")
     assert probe.plugin is this and probe.slug == "RuntimeProbe"
     assert probe.name == "Runtime probe" and probe.description == "RackPy test hook"  # from plugin.json
+    assert probe.modular_grid_url == "https://example.invalid/grid"
     assert probe.get_full_name() == "RackPy Runtime probe"
     assert probe.get_factory_preset_directory().endswith("presets/RuntimeProbe")
     assert "RackPy" in probe.get_user_preset_directory() and probe.get_manual_url() == this.manual_url

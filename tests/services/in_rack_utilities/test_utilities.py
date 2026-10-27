@@ -113,6 +113,9 @@ def test_random() -> None:
     assert shared is rr.local() or shared.state == rr.local().state  # Rack's one generator
     for _ in range(20):
         assert 0.0 <= rr.uniform() < 1.0 and 0 <= rr.get_uint8() <= 255 and 0 <= rr.u32() < 2**32
+        assert 0.0 <= rr.get_float() < 1.0 and 0.0 <= rr.get_double() < 1.0
+        assert 0 <= rr.get_uint16() < 2**16 and 0 <= rr.get_uint32() < 2**32
+        assert isinstance(rr.get_bool(), bool) and 0 <= rr.u64() < 2**64
     assert isinstance(rr.normal(), float) and isinstance(rr.get("bool"), bool) and 0 <= rr.get() < 2**64
     with pytest.raises(ValueError, match="takes"):
         rr.get("int")

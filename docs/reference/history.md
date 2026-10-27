@@ -40,7 +40,7 @@ or from Rack's cable widget. `is_cable` compares a cable widget's ports.
 
 `ComplexAction` batches actions. `push(action)` appends an action that
 Python owns, which the ComplexAction then owns, and Rack undoes the batch
-backwards. `InverseAction[T]` is Rack's `InverseAction<T>`: a cached
+backwards. `is_empty()` reports whether the batch has any actions. `InverseAction[T]` is Rack's `InverseAction<T>`: a cached
 subclass of `T` whose `undo` runs `T`'s redo and whose `redo` runs `T`'s
 undo, using Rack's code for Rack's types (`ModuleRemove` is
 `InverseAction<ModuleAdd>` in Rack) and the Python methods for Python's.

@@ -52,7 +52,24 @@ def stage_entry(bundle: Path, user: Path, entry: str, config: dict[str, Any], sl
 
 @pytest.mark.gui
 def test_plugin_api_in_live_ui(make_hooks_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path) -> None:
-    result = run_pytest_in_rack(make_hooks_bundle(), rack_host, tmp_path, SUITE, during_ui=True)
+    bundle = make_hooks_bundle()
+    manifest_file = bundle / "plugin.json"
+    manifest = json.loads(manifest_file.read_text())
+    manifest.update(
+        {
+            "author": "RackPy contributors",
+            "authorEmail": "test@example.invalid",
+            "authorUrl": "https://example.invalid/author",
+            "pluginUrl": "https://example.invalid/plugin",
+            "donateUrl": "https://example.invalid/donate",
+            "changelogUrl": "https://example.invalid/changelog",
+        }
+    )
+    next(m for m in manifest["modules"] if m["slug"] == "RuntimeProbe")["modularGridUrl"] = (
+        "https://example.invalid/grid"
+    )
+    manifest_file.write_text(json.dumps(manifest))
+    result = run_pytest_in_rack(bundle, rack_host, tmp_path, SUITE, during_ui=True)
     assert result.exit == 0, result.summary()
     assert result.outcomes() and set(result.outcomes().values()) == {"passed"}, result.summary()
 
