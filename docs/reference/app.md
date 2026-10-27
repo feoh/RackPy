@@ -172,7 +172,9 @@ Rack's cable behaviour.
   override any of them.
 - `MultiLightWidget` mixes `base_colors` by brightness: `add_base_color()`,
   `get_num_colors()`, and `set_brightnesses()`, which needs one brightness
-  per colour.
+  per colour. Reading `base_colors` returns a list copy, including copied
+  colors; mutating it does not update Rack. Assign a list back to replace the
+  colors, or use `add_base_color()`.
 - `ModuleLightWidget` follows the module's lights `first_light_id` onward,
   one per colour, each frame (Rack takes the square root of each
   brightness). It also has `get_light(color_id)`, `get_light_info()` and a

@@ -2,6 +2,7 @@
 """rack::settings: Rack's settings."""
 
 import enum
+from collections.abc import Sequence, Set
 from typing import Any, final
 
 from rackpy.raw.math import Vec
@@ -48,7 +49,10 @@ class ModuleInfoView:
 
 class PluginWhitelist:
     subscribed: bool
-    module_slugs: set[str]
+    @property
+    def module_slugs(self) -> Set[str]: ...
+    @module_slugs.setter
+    def module_slugs(self, slugs: set[str]) -> None: ...
     def __init__(self) -> None: ...
 
 @final
@@ -95,9 +99,18 @@ class Settings:
     skip_load_on_launch: bool
     last_patch_directory: str
     last_selection_directory: str
-    recent_patch_paths: list[str]
-    cable_colors: list[NVGcolor]
-    cable_labels: list[str]
+    @property
+    def recent_patch_paths(self) -> Sequence[str]: ...
+    @recent_patch_paths.setter
+    def recent_patch_paths(self, paths: list[str]) -> None: ...
+    @property
+    def cable_colors(self) -> Sequence[NVGcolor]: ...
+    @cable_colors.setter
+    def cable_colors(self, colors: list[NVGcolor]) -> None: ...
+    @property
+    def cable_labels(self) -> Sequence[str]: ...
+    @cable_labels.setter
+    def cable_labels(self, labels: list[str]) -> None: ...
     cable_auto_rotate: bool
     auto_check_updates: bool
     verify_https_certs: bool

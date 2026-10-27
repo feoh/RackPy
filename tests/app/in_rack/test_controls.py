@@ -252,6 +252,10 @@ def test_module_lights_follow_the_engine(module: Module) -> None:
     try:
         light.base_colors = [nvg.rgb(255, 0, 0)]
         assert light.get_num_colors() == 1
+        colors = light.base_colors
+        assert isinstance(colors, list)
+        colors.clear()
+        assert light.get_num_colors() == 1
         light.module = module
         with pytest.raises(ValueError, match="out of range"):
             light.base_colors = [nvg.rgb(255, 0, 0)] * 3  # only two lights from 0

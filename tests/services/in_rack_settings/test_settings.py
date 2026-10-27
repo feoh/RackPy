@@ -33,6 +33,7 @@ def restore() -> Iterator[None]:
             "rack_brightness",
             "window_size",
             "cable_colors",
+            "cable_labels",
             "recent_patch_paths",
             "knob_mode",
             "plugin_settings",
@@ -64,6 +65,19 @@ def test_settings_read_and_write(restore: None) -> None:
     assert len(S.cable_colors) > 1 and len(S.cable_labels) == len(S.cable_colors)
     S.recent_patch_paths = ["/a.vcv", "/b.vcv"]
     assert S.recent_patch_paths == ["/a.vcv", "/b.vcv"]
+    paths = S.recent_patch_paths
+    assert isinstance(paths, list)
+    paths.append("/c.vcv")
+    assert S.recent_patch_paths == ["/a.vcv", "/b.vcv"]
+    S.cable_labels = ["original"]
+    labels = S.cable_labels
+    assert isinstance(labels, list)
+    labels.append("copy")
+    assert S.cable_labels == ["original"]
+    colors = S.cable_colors
+    assert isinstance(colors, list)
+    colors.clear()
+    assert len(S.cable_colors) > 1
     S.knob_mode = rset.KnobMode.KNOB_MODE_ROTARY_ABSOLUTE
     assert S.knob_mode == rset.KNOB_MODE_ROTARY_ABSOLUTE
     S.browser_sort = rset.BrowserSort.BROWSER_SORT_NAME
@@ -90,6 +104,10 @@ def test_module_infos(restore: None) -> None:
     assert rset.get_module_info("RackPy", "NoSuchModule") is None
     whitelist = rset.PluginWhitelist()
     whitelist.module_slugs = {"RuntimeProbe"}
+    slugs = whitelist.module_slugs
+    assert isinstance(slugs, set)
+    slugs.add("CopyOnly")
+    assert whitelist.module_slugs == {"RuntimeProbe"}
     assert isinstance(rset.is_module_whitelisted("RackPy", "RuntimeProbe"), bool)
     assert isinstance(S.module_whitelist, dict)
 
