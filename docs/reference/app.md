@@ -334,7 +334,8 @@ The host-view API:
     `get_incomplete_cables`, deprecated `get_incomplete_cable`,
     `get_cable(id)`, `get_cable(output, input)`, `get_cables_on_port`,
     `get_complete_cables_on_port`, `get_top_cable`, `get_top_plug`) and the
-    next cable colour. `get_next_cable_color()` selects the current palette
+    next cable colour. `get_incomplete_cable()` warns and returns the last
+    incomplete cable, or `None`; use the plural lookup for all of them. `get_next_cable_color()` selects the current palette
     entry, advancing and wrapping its ID when `cable_auto_rotate` is enabled;
     `get_next_cable_color_id()` and `set_next_cable_color_id()` access that ID;
   - `get_touched_param()`, `set_touched_param()` and `touched_param`, the

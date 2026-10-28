@@ -195,6 +195,10 @@ def phase1() -> Frames:
     incomplete = rack().get_incomplete_cables()
     assert len(incomplete) == 1
     dragging = incomplete[0]
+    with warnings.catch_warnings(record=True) as deprecated:
+        warnings.simplefilter("always", DeprecationWarning)
+        single = rack().get_incomplete_cable()
+    RESULT["incomplete_lookup"] = [single is dragging, len(deprecated) == 1]
     RESULT["hovered_cable"] = [
         dragging.hovered_input_port is inp,
         dragging.get_hovered_port(Port.Type.INPUT) is inp,

@@ -144,6 +144,9 @@ scene-level actual-Rack `RackWidget.clear()` scenario now verifies that a
 Rack-owned module is live before clear and invalidated afterward, while
 engine-only modules remain until `Engine.clear()`; both engine-ops host runs
 passed. The manifest cites this test and the reference states the distinction.
+The browser scenario also compares Rack's plural and deprecated singular
+incomplete-cable lookups with the real dragged cable and checks the warning;
+both normal and dialog-interposed actual-Rack runs passed.
 
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
