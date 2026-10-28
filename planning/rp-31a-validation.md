@@ -108,6 +108,14 @@ randomize/undo/redo, deletion/undo, and module JSON paste/undo checked in
 actual Rack. Randomization retries up to three times if Rack happens to pick
 the existing parameter value.
 
+A continuation added direct, actual-Rack behavioral tests for
+`Knob.on_drag_move` (right button ignored, left linear drag changes the
+parameter) and `Knob.on_action` (a short click calls a Python override and
+its Rack base; a 20-pixel drag does not). The relevant manifest records cite
+them and the app reference explains the behavior. The Linux test-hooks build
+with `--werror` and 6/6 CTests passed, and `tests/app/test_app.py` passed using
+a temporary fixture pointing to that build; the fixture was restored.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing

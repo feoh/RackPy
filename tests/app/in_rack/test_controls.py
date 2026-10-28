@@ -181,6 +181,46 @@ def test_knob_scroll_leave_records_undo(module: Module) -> None:
         settings.knob_scroll, settings.knob_scroll_sensitivity = old_scroll, old_sensitivity
 
 
+def test_knob_direct_drag_move_changes_value_only_for_left_button(module: Module) -> None:
+    settings = raw.settings.settings
+    old_sensitivity = settings.knob_linear_sensitivity
+    settings.knob_linear_sensitivity = 0.01
+    knob = raw.create_param(app.Knob, Vec(), module, 0)
+    knob.force_linear = True
+    try:
+        quantity = module.param_quantities[0]
+        before = quantity.get_value()
+        knob.on_drag_move(w.DragMoveEvent(button=1, mouse_delta=Vec(0, -10)))
+        assert quantity.get_value() == before
+        knob.on_drag_move(w.DragMoveEvent(button=LEFT, mouse_delta=Vec(0, -10)))
+        assert quantity.get_value() > before
+    finally:
+        knob.close()
+        settings.knob_linear_sensitivity = old_sensitivity
+
+
+def test_knob_dispatches_action_for_a_click_but_not_a_drag(module: Module) -> None:
+    actions: list[str] = []
+
+    class PushKnob(app.Knob):
+        def on_action(self, event: w.ActionEvent) -> None:
+            actions.append("action")
+            super().on_action(event)  # Rack's base implementation is empty
+
+    click = raw.create_param(PushKnob, Vec(), module, 0)
+    drag = raw.create_param(PushKnob, Vec(), module, 0)
+    try:
+        click.on_drag_end(w.DragEndEvent(button=LEFT))
+        assert actions == ["action"]
+        drag.force_linear = True
+        drag.on_drag_move(w.DragMoveEvent(button=LEFT, mouse_delta=Vec(0, -20)))
+        drag.on_drag_end(w.DragEndEvent(button=LEFT))
+        assert actions == ["action"]
+    finally:
+        click.close()
+        drag.close()
+
+
 def test_svg_button_drag_drop_does_not_dispatch_a_second_action() -> None:
     actions: list[str] = []
 
