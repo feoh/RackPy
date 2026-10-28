@@ -114,6 +114,22 @@ def test_racks_components_load_racks_artwork() -> None:
             widget.close()
 
 
+def test_base_knob_constructors_build_racks_layers() -> None:
+    for cls in (cl.RoundKnob, cl.Davies1900hKnob, cl.Rogan):
+        knob = cls()
+        try:
+            assert type(knob) is cls
+            assert knob.min_angle == pytest.approx(-0.83 * math.pi)
+            assert knob.max_angle == pytest.approx(0.83 * math.pi)
+            assert isinstance(knob.bg, w.HostSvgWidget) and knob.bg.parent is knob.fb
+            assert knob.bg.svg is None
+            if isinstance(knob, cl.Rogan):
+                assert isinstance(knob.fg, w.HostSvgWidget) and knob.fg.parent is knob.fb
+                assert knob.fg.svg is None
+        finally:
+            knob.close()
+
+
 def test_scheme_colors_match_the_pinned_sdk() -> None:
     # componentlibrary.hpp defines distinct RGBA values, not interchangeable aliases.
     expected = {
