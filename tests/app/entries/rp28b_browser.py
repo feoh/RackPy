@@ -9,6 +9,7 @@ A script advances one step per frame from the RuntimeProbe's step().
 import gc
 import importlib
 import json
+import os
 import traceback
 import warnings
 from collections.abc import Callable, Generator
@@ -368,6 +369,38 @@ def actions(module_id: int) -> Frames:
     mw.save_template_dialog()  # Rack saves immediately when no template exists
     found["template_dialog_created"] = mw.has_template()
     mw.clear_template()
+    if os.environ.get("RACKPY_DIALOG_STUB"):
+        checks: list[bool] = []
+        dialog_preset = preset.with_name("dialog-preset.vcvm")
+        os.environ["RACKPY_DIALOG_FILE"] = ""
+        mw.save_dialog()
+        mw.load_dialog()
+        checks.append(not dialog_preset.exists() and module.params[0].value == 5.0)
+        os.environ["RACKPY_DIALOG_FILE"] = str(dialog_preset)
+        mw.save_dialog()
+        checks.append(dialog_preset.is_file())
+        module.params[0].value = 3.0
+        mw.load_dialog()
+        checks.append(module.params[0].value == 5.0)
+        _testing.history_undo()
+        module.params[0].value = 5.0
+        mw.save_template()
+        os.environ["RACKPY_DIALOG_RESPONSE"] = "cancel"
+        mw.clear_template_dialog()
+        checks.append(mw.has_template())
+        module.params[0].value = 3.0
+        mw.save_template_dialog()
+        mw.load_template()
+        checks.append(module.params[0].value == 5.0)
+        os.environ["RACKPY_DIALOG_RESPONSE"] = "accept"
+        module.params[0].value = 4.0
+        mw.save_template_dialog()
+        mw.load_template()
+        checks.append(module.params[0].value == 4.0)
+        mw.clear_template_dialog()
+        checks.append(not mw.has_template())
+        module.params[0].value = 5.0
+        found["dialog_checks"] = checks
     mw.copy_clipboard()
     module.params[0].value = 3.0
     found["paste"] = [mw.paste_clipboard_action(), module.params[0].value]
@@ -375,6 +408,22 @@ def actions(module_id: int) -> Frames:
     module.params[0].value = 7.0
     rack().deselect_all()
     rack().select(mw)
+    if os.environ.get("RACKPY_DIALOG_STUB"):
+        selection_path = preset.with_name("dialog-selection.vcvs")
+        os.environ["RACKPY_DIALOG_FILE"] = ""
+        rack().save_selection_dialog()
+        rack().load_selection_dialog()
+        found["dialog_checks"].append(not selection_path.exists())
+        os.environ["RACKPY_DIALOG_FILE"] = str(selection_path)
+        rack().save_selection_dialog()
+        found["dialog_checks"].append(selection_path.is_file())
+        count = len(rack().get_modules())
+        rack().load_selection_dialog()
+        found["dialog_checks"].append(len(rack().get_modules()) == count + 1)
+        _testing.history_undo()
+        found["dialog_checks"].append(len(rack().get_modules()) == count)
+        rack().deselect_all()
+        rack().select(mw)
     rack().reset_selection_action()
     found["selection_reset"] = module.params[0].value
     _testing.history_undo()

@@ -128,8 +128,15 @@ scenario calls `ModuleWidget.on_drag_move` directly on a Rack-owned module,
 checks that a right-button move does nothing and a left-button move beyond
 Rack's threshold moves it, and restores the original position. The
 `save_template_dialog` binding is exercised with no existing template: it
-saves immediately in actual Rack without showing a dialog. The overwrite
-confirmation path remains a manual dialog gate.
+saves immediately in actual Rack without showing a dialog.
+
+For the dialog paths, a Linux test-only `LD_PRELOAD` interposer replaces only
+`osdialog_file` and `osdialog_message` and logs calls; the surrounding Rack
+code and Python bindings run unchanged in the real Rack host. The browser
+scenario checks preset and selection load/save cancellation and chosen paths,
+selection-load undo, template-overwrite cancel/accept and clear cancel/accept.
+Both the ordinary and interposed host runs passed. The native OS dialog UI
+itself was not exercised; the six records explicitly state that limitation.
 
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
