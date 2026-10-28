@@ -182,6 +182,13 @@ def phase1() -> Frames:
         dragging.output_plug.get_cable() is dragging,
         dragging.output_plug.get_type() == Port.Type.OUTPUT,
     ]
+    # Call the Python bindings themselves, not only Rack's EventState dispatch.
+    inp.on_drag_leave(w.DragLeaveEvent(button=LEFT, origin=out))
+    left = dragging.hovered_input_port is None
+    inp.on_drag_enter(w.DragEnterEvent(button=LEFT, origin=out))
+    entered = dragging.hovered_input_port is inp
+    inp.on_drag_drop(w.DragDropEvent(button=LEFT, origin=out))
+    RESULT["direct_port_drag"] = [left, entered, dragging.input_port is inp and dragging.is_complete()]
     state.handle_button(end, LEFT, RELEASE, 0)
     RESULT["cable"] = list(_testing.rack_cables())
     gate = b.module

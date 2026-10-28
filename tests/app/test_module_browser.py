@@ -74,6 +74,7 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     assert all(one["hovered_output"])  # input-first drag, while both ports are unconnected
     assert one["clear_cables"] == [[1, 0, 1], [0, 0, 0], True]
     assert all(one["hovered_cable"])  # live incomplete cable, hovered input and output plug
+    assert all(one["direct_port_drag"])  # leave, enter, and drop called through Python
     assert one["cable"] == [1, 0, 1] and one["connected"]  # two Python modules' factory ports
     assert one["cable_removals"] == [
         [0, 0, 0],

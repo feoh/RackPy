@@ -173,7 +173,9 @@ invariants for cabled ports:
   loading find ports through the widget and fail if one is missing.
 
 A port added any other way still runs its Python drag overrides, but not
-Rack's cable behaviour.
+Rack's cable behaviour. During a cable drag, `on_drag_enter` marks the
+compatible incomplete cable as hovering this port, `on_drag_leave` clears
+that hover, and `on_drag_drop` completes the connection when permitted.
 
 (app-lights)=
 ## Lights

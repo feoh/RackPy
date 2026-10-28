@@ -119,6 +119,12 @@ further live-Rack test checks `on_drag_leave`: a different origin does not
 activate rotary dragging, but leaving the originating knob does. Its manifest
 record and the reference were updated.
 
+The actual-Rack module-browser scenario now directly calls each of the
+`PortWidget` drag-leave, drag-enter and drag-drop Python bindings on a live
+incomplete cable, asserting cleared hover, restored hover and completed cable.
+`tests/app/test_module_browser.py` passed using the test-hooks build; the
+manifest and port reference cite and explain the paths.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing
