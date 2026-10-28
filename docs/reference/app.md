@@ -71,7 +71,9 @@ creates take part in cables (see [Ports](#app-ports)).
   context menu, so a subclass may add items. The menu is closed if the
   widget dies.
 - `get_grid_position()`, `set_grid_position(pos)`, `get_grid_size()` and
-  `get_grid_box()` are rack grid coordinates.
+  `get_grid_box()` are rack grid coordinates. `on_drag_move` moves a rack-owned
+  module after the left-button drag passes Rack's grid-width threshold; other
+  buttons do not move it.
 - `ModuleWidget(module)` is Rack's deprecated constructor, and warns.
 
 Calls that take Rack's engine lock (the JSON, preset and clipboard calls,

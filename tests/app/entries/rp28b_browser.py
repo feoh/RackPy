@@ -143,6 +143,26 @@ def phase1() -> Frames:
     second = _testing.browser_add_module("RackPy", "PyVoice")
     yield from wait(3)
     a, b = VOICES[first], VOICES[second]
+    # Call the ModuleWidget binding directly while Rack owns the widget.
+    rw = rack()
+    rw.deselect_all()
+    before_pos = Vec(a.box.pos.x, a.box.pos.y)  # a.box.pos is a live view
+    old_squeeze = raw.settings.settings.squeeze_modules
+    raw.settings.settings.squeeze_modules = False
+    try:
+        start_pos = before_pos.plus(Vec(0, 190))
+        rw.on_hover(w.HoverEvent(pos=start_pos))
+        a.on_drag_start(w.DragStartEvent(button=LEFT))
+        a.on_drag_move(w.DragMoveEvent(button=LEFT))  # records the initial rack position
+        rw.on_hover(w.HoverEvent(pos=start_pos.plus(Vec(150, 0))))
+        a.on_drag_move(w.DragMoveEvent(button=1))
+        right_ignored = a.box.pos == before_pos
+        a.on_drag_move(w.DragMoveEvent(button=LEFT))
+        RESULT["direct_module_drag"] = [right_ignored, a.box.pos != before_pos]
+        a.on_drag_end(w.DragEndEvent(button=LEFT))
+        rw.set_module_pos_nearest(a, before_pos)
+    finally:
+        raw.settings.settings.squeeze_modules = old_squeeze
     out, inp = a.get_output(0), b.get_input(0)
     assert isinstance(out, app.PortWidget) and isinstance(inp, app.PortWidget)
     # Exercise output hover while both ports are initially unconnected.
