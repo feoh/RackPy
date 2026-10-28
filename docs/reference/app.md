@@ -119,7 +119,8 @@ the model's own code makes the module and the widget (**RP-24D**):
   enabled, Rack's `on_leave` commits a changed scroll value to history for
   undo. `SliderKnob` is the slider version.
 - `Switch` steps through its values on each click. With `momentary` set, it
-  holds the maximum while pressed.
+  holds the maximum while pressed. Double-click resets a `ParamWidget` to its
+  default, but Rack's `Switch` deliberately does not reset on double-click.
 - `init_param_quantity()` is Rack's per-kind set-up of the parameter's
   quantity: a `Knob` turns smoothing on unless it snaps, and a `Switch` turns
   snapping on and smoothing off. Override it in a subclass, and Rack's

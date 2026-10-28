@@ -99,6 +99,10 @@ SVGs on themed screw/panel, and Rack's module-position squeeze behavior.
 `RoundKnob`, `Davies1900hKnob` and `Rogan`, their angle limits and native
 background/foreground child layers; their constructor records cite the test.
 
+`uv run pytest -q tests/app/test_app.py` passed with Rack's contrasting
+parameter and switch double-click behavior tested against actual values;
+the two records cite that test.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing

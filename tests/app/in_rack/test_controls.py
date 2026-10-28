@@ -143,6 +143,21 @@ def test_control_tooltips_follow_create_destroy_and_enter_leave(module: Module) 
         settings.tooltips = old_tooltips
 
 
+def test_double_click_resets_param_but_not_switch(module: Module) -> None:
+    param = raw.create_param(app.ParamWidget, Vec(), module, 0)
+    switch = raw.create_param(app.Switch, Vec(), module, 1)
+    try:
+        module.param_quantities[0].set_value(8)
+        module.param_quantities[1].set_value(1)
+        param.on_double_click(w.DoubleClickEvent())
+        switch.on_double_click(w.DoubleClickEvent())
+        assert module.param_quantities[0].get_value() == 5
+        assert module.param_quantities[1].get_value() == 1
+    finally:
+        param.close()
+        switch.close()
+
+
 def test_knob_scroll_leave_records_undo(module: Module) -> None:
     settings = raw.settings.settings
     old_scroll, old_sensitivity = settings.knob_scroll, settings.knob_scroll_sensitivity
