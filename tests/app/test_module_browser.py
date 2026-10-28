@@ -74,7 +74,15 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     assert all(one["hovered_output"])  # input-first drag, while both ports are unconnected
     assert one["clear_cables"] == [[1, 0, 1], [0, 0, 0], True]
     assert all(one["hovered_cable"])  # live incomplete cable, hovered input and output plug
-    assert one["cable"] == [1, 0, 1] and one["connected"]  # a cable between two Python modules' factory ports
+    assert one["cable"] == [1, 0, 1] and one["connected"]  # two Python modules' factory ports
+    assert one["cable_removals"] == [
+        [0, 0, 0],
+        [1, 0, 1],
+        [0, 0, 0],
+        [1, 0, 1],
+        [0, 0, 0],
+        True,
+    ]  # undoable actions vs. direct per-port clearing
     views = one["cable_views"]  # RP-28D: Rack's cable through its host views
     assert views["views"] == ["HostCableWidget", "HostPlugWidget"] and views["ports"] == [True, True, True]
     assert all(views["plug"]) and all(views["lookups"]) and views["positions"] and views["json"]
@@ -92,6 +100,7 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     assert actions["to_json"] == ["PyVoice", "RackPy"] and actions["from_json"] == 5.0
     assert actions["preset"] == [True, 5.0] and actions["template"] and actions["template_loaded"] == 5.0
     assert actions["template_cleared"] and actions["paste"] == [True, 5.0] and actions["paste_json"]
+    assert actions["selection_reset"] == 5.0 and actions["selection_reset_undo"] == 7.0
     assert actions["reset"] == 5.0 and actions["bypassed"] and actions["cloned"]
     # The clone copies the cable into its input too (Rack's Duplicate with cables): two cables, then none.
     assert actions["disconnected"][2] < actions["reconnected"][2]

@@ -187,6 +187,22 @@ def phase1() -> Frames:
     gate = b.module
     RESULT["connected"] = gate is not None and gate.inputs[0].is_connected()
     yield from cable_views(out, inp)
+    inp.delete_top_cable_action()
+    deleted = list(_testing.rack_cables())
+    _testing.history_undo()
+    restored_delete = list(_testing.rack_cables())
+    rack().clear_cables_action()
+    cleared = list(_testing.rack_cables())
+    _testing.history_undo()
+    restored_clear = list(_testing.rack_cables())
+    context = raw.context_get()
+    assert context is not None and context.history is not None
+    history_index = context.history.action_index
+    rack().clear_cables_on_port(inp)
+    port_cleared = list(_testing.rack_cables())
+    unchanged_history = context.history.action_index == history_index
+    drag(scene_pos(out), scene_pos(inp))
+    RESULT["cable_removals"] = [deleted, restored_delete, cleared, restored_clear, port_cleared, unchanged_history]
 
     # Rack's Delete, then undo and redo: Rack recreates the widget with the Python factory.
     removes = len(RESULT["removes"])
@@ -321,6 +337,13 @@ def actions(module_id: int) -> Frames:
     found["paste"] = [mw.paste_clipboard_action(), module.params[0].value]
     found["paste_json"] = mw.paste_json_action(data)
     module.params[0].value = 7.0
+    rack().deselect_all()
+    rack().select(mw)
+    rack().reset_selection_action()
+    found["selection_reset"] = module.params[0].value
+    _testing.history_undo()
+    found["selection_reset_undo"] = module.params[0].value
+    rack().deselect_all()
     mw.reset_action()
     found["reset"] = module.params[0].value
     mw.randomize_action()

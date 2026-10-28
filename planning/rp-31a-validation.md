@@ -61,6 +61,12 @@ and undo checked against Rack's history, and a knob scroll/leave test proving
 Rack records an undoable parameter change. Settings are restored after the
 knob test.
 
+`uv run pytest -q tests/app/test_module_browser.py` passed with live cable
+removal, undo and reconnection checks for `delete_top_cable_action()`,
+`clear_cables_action()` and `clear_cables_on_port()`. It also verifies that
+`reset_selection_action()` resets the selected parameter and Rack history
+undo restores the prior value.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing
