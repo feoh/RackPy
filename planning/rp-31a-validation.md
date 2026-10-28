@@ -126,7 +126,10 @@ incomplete cable, asserting cleared hover, restored hover and completed cable.
 manifest and port reference cite and explain the paths. The same host
 scenario calls `ModuleWidget.on_drag_move` directly on a Rack-owned module,
 checks that a right-button move does nothing and a left-button move beyond
-Rack's threshold moves it, and restores the original position.
+Rack's threshold moves it, and restores the original position. The
+`save_template_dialog` binding is exercised with no existing template: it
+saves immediately in actual Rack without showing a dialog. The overwrite
+confirmation path remains a manual dialog gate.
 
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to

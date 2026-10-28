@@ -65,8 +65,9 @@ creates take part in cables (see [Ports](#app-ports)).
   a widget callback.
 - `disconnect()` also needs the widget in Rack's rack, but removes its cables
   **without an undo step**. Use `disconnect_action()` for an undoable removal.
-- `load_dialog`, `save_dialog`, `save_template_dialog` and
-  `clear_template_dialog` open Rack's dialogs and wait for the user.
+- `load_dialog`, `save_dialog` and `clear_template_dialog` open Rack's
+  dialogs and wait for the user. `save_template_dialog` saves immediately
+  if no template exists; otherwise it asks before overwriting.
 - `append_context_menu(menu)` is called by Rack at the end of its module
   context menu, so a subclass may add items. The menu is closed if the
   widget dies.

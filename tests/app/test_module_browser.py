@@ -102,7 +102,8 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     assert actions["to_json"] == ["PyVoice", "RackPy"] and actions["from_json"] == 5.0
     assert actions["preset"] == [True, 5.0] and actions["template"] and actions["template_loaded"] == 5.0
     assert actions["load_action"] == 5.0 and actions["load_action_undo"] == 2.0
-    assert actions["template_cleared"] and actions["paste"] == [True, 5.0] and actions["paste_json"]
+    assert actions["template_cleared"] and actions["template_dialog_created"]
+    assert actions["paste"] == [True, 5.0] and actions["paste_json"]
     assert actions["selection_reset"] == 5.0 and actions["selection_reset_undo"] == 7.0
     assert 0 <= actions["selection_randomized"] <= 10 and actions["selection_randomized"] != 7.0
     assert actions["selection_randomize_undo"] == 7.0

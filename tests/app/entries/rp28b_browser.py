@@ -365,6 +365,9 @@ def actions(module_id: int) -> Frames:
     found["template_loaded"] = module.params[0].value
     mw.clear_template()
     found["template_cleared"] = not mw.has_template()
+    mw.save_template_dialog()  # Rack saves immediately when no template exists
+    found["template_dialog_created"] = mw.has_template()
+    mw.clear_template()
     mw.copy_clipboard()
     module.params[0].value = 3.0
     found["paste"] = [mw.paste_clipboard_action(), module.params[0].value]
