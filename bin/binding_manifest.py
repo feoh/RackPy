@@ -33,6 +33,7 @@ REPO = Path(__file__).resolve().parent.parent
 INVENTORY = REPO / "upstream" / "api-surface.json"
 MANIFEST = REPO / "bindings" / "manifest.json"
 EXCLUSIONS = REPO / "bindings" / "exclusions.json"
+DEPRECATION_EVIDENCE = REPO / "bindings" / "deprecation-evidence.json"
 ENGINE_LOCKS = REPO / "upstream" / "engine-locks.json"
 CALLBACK_RULES = REPO / "upstream" / "callback-rules.json"
 CALLBACK_MATRIX = REPO / "bin" / "callback-matrix"
@@ -239,6 +240,7 @@ class Inputs:
     exclusions: dict[str, dict[str, Any]]
     strategies: dict[str, str | None]
     locks: dict[str, str]
+    deprecation_evidence: dict[str, str] = field(default_factory=dict)
     repo: Path = REPO
 
     @property
@@ -251,6 +253,7 @@ def load_inputs(
     exclusions: Path = EXCLUSIONS,
     rules: Path = CALLBACK_RULES,
     locks: Path = ENGINE_LOCKS,
+    deprecation_evidence: Path = DEPRECATION_EVIDENCE,
     repo: Path = REPO,
 ) -> Inputs:
     inv = load_json(inventory)
@@ -262,6 +265,7 @@ def load_inputs(
         exclusions={e["id"]: e for e in excl["entries"]},
         strategies=callback_strategies(inv, load_json(rules)),
         locks=engine_locks(load_json(locks)),
+        deprecation_evidence=load_json(deprecation_evidence)["entries"],
         repo=repo,
     )
 
@@ -583,6 +587,12 @@ def validate(inputs: Inputs, manifest: dict[str, Any], introspection: dict[str, 
             for node in tests:
                 if not test_exists(repo, node):
                     add("tests", ident, f"test {node} does not exist")
+            if entry.get("deprecated") or entry.get("comment_deprecated"):
+                warning_test = inputs.deprecation_evidence.get(ident)
+                if not isinstance(warning_test, str) or not warning_test:
+                    add("deprecation-evidence", ident, "deprecated binding needs a warning test")
+                elif warning_test not in tests or not test_exists(repo, warning_test):
+                    add("deprecation-evidence", ident, "warning test must exist and be cited in the manifest")
             docs = r.get("docs") or []
             if not docs:
                 add("docs", ident, f"{status} needs documentation anchors")
@@ -610,6 +620,11 @@ def validate(inputs: Inputs, manifest: dict[str, Any], introspection: dict[str, 
                         add("not-implemented", ident, f"{value} reports itself as not implemented")
         if status == "verified" and not r.get("reviewer"):
             add("reviewer", ident, "verified needs a reviewer")
+
+    for ident in sorted(inputs.deprecation_evidence):
+        entry = index.get(ident)
+        if entry is None or not (entry.get("deprecated") or entry.get("comment_deprecated")):
+            add("deprecation-evidence", ident, "warning evidence does not identify a deprecated declaration")
 
     for ident, ex in sorted(inputs.exclusions.items()):
         entry = index.get(ident)

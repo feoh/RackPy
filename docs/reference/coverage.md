@@ -11,7 +11,7 @@ availability is unresolved, which blocks a release there.
 
 | Platform | unreviewed | planned | implemented | verified | unrepresentable | excluded_internal | unknown | absent | not inventoried |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lin-x64 | 0 | 0 | 3098 | 0 | 0 | 111 | 0 | 15 | 0 |
+| lin-x64 | 0 | 5 | 3093 | 0 | 0 | 111 | 0 | 15 | 0 |
 | mac-arm64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3224 |
 | mac-x64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3224 |
 | win-x64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3224 |
@@ -28,7 +28,7 @@ availability is unresolved, which blocks a release there.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 0 entry point | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 0 |
 | 1 common/value | 0 | 0 | 336 | 0 | 0 | 3 | 0 | 8 | 0 |
-| 2 engine | 0 | 0 | 276 | 0 | 0 | 22 | 0 | 0 | 0 |
+| 2 engine | 0 | 5 | 271 | 0 | 0 | 22 | 0 | 0 | 0 |
 | 3 plugin/model/assets/helpers | 0 | 0 | 90 | 0 | 0 | 4 | 0 | 0 | 0 |
 | 4 widgets/ui/app/componentlibrary | 0 | 0 | 1379 | 0 | 0 | 50 | 0 | 2 | 0 |
 | 5 window/rendering/context | 0 | 0 | 73 | 0 | 0 | 12 | 0 | 0 | 0 |

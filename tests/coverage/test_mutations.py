@@ -40,6 +40,23 @@ def problems_for(inputs: bm.Inputs, manifest: dict[str, Any], introspection: dic
     return {(p.code, p.id) for p in bm.validate(inputs, manifest, introspection)}
 
 
+def test_deprecation_warning_evidence_is_required(real: tuple[bm.Inputs, dict[str, Any]]) -> None:
+    inputs, manifest = real
+    victim = "alias:rack::widget::SVGWidget"
+    mutated_inputs = copy.deepcopy(inputs)
+    del mutated_inputs.deprecation_evidence[victim]
+    assert ("deprecation-evidence", victim) in problems_for(mutated_inputs, manifest, exported(manifest))
+
+    mutated = copy.deepcopy(manifest)
+    record = next(r for r in mutated["entries"] if r["id"] == victim)
+    record["tests"].remove(inputs.deprecation_evidence[victim])
+    assert ("deprecation-evidence", victim) in problems_for(inputs, mutated, exported(manifest))
+
+    mutated_inputs = copy.deepcopy(inputs)
+    mutated_inputs.deprecation_evidence[victim] = "tests/no_such_warning_test.py::test_missing"
+    assert ("deprecation-evidence", victim) in problems_for(mutated_inputs, manifest, exported(manifest))
+
+
 def overload_groups(manifest: dict[str, Any]) -> list[list[dict[str, Any]]]:
     """Python names that map several C++ overloads (bound records only), largest first."""
     groups: dict[str, list[dict[str, Any]]] = collections.defaultdict(list)

@@ -119,7 +119,10 @@ in this file.
    guesses their definitions. Operations on them are not supported API.
 5. **Deprecation and instability.** Attribute-deprecated and comment-only
    deprecated declarations are both mapped and emit `DeprecationWarning`. The
-   inventory records both kinds. Members documented as "Unstable API"
+   inventory records both kinds. [`bindings/deprecation-evidence.json`](../bindings/deprecation-evidence.json)
+   maps each bound deprecated declaration to a warning test cited by its manifest
+   record; the checker requires that evidence. The in-Rack matrix checks its
+   cases against the inventory, including overload-specific calls. Members documented as "Unstable API"
    (`Param::value`, `Light::value`, `Port::voltages`, `Port::value`,
    `Port::channels`, `Port::active`) are mapped and documented as unstable.
 6. **Overloads, defaults and aliases.** Each overload is its own entry, and
