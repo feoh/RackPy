@@ -203,6 +203,23 @@ def test_rectangle_lights_draw_with_racks_code() -> None:
     assert g >= 0xC7 - 4 and r >= 0x90 - 4 and b >= 0x3E - 4 and g > r > b and a == 255, pixel(holder_image, 5, 3)
 
 
+def test_coloured_led_sliders_have_their_own_light() -> None:
+    for slider_cls, light_cls, color in (
+        (cl.LEDSliderRed, cl.RedLight, cl.SCHEME_RED),
+        (cl.LEDSliderYellow, cl.YellowLight, cl.SCHEME_YELLOW),
+        (cl.LEDSliderGreen, cl.GreenLight, cl.SCHEME_GREEN),
+        (cl.LEDSliderBlue, cl.BlueLight, cl.SCHEME_BLUE),
+        (cl.LEDSliderWhite, cl.WhiteLight, cl.SCHEME_WHITE),
+    ):
+        slider = slider_cls()
+        try:
+            light = slider.get_light()
+            assert isinstance(light, cl.VCVSliderLight[light_cls])
+            assert light.base_colors == [color]
+        finally:
+            slider.close()
+
+
 def test_light_sliders_and_buttons(module: Module) -> None:
     slider = cl.LEDSliderGreen()
     try:

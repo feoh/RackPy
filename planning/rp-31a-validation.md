@@ -67,6 +67,10 @@ removal, undo and reconnection checks for `delete_top_cable_action()`,
 `reset_selection_action()` resets the selected parameter and Rack history
 undo restores the prior value.
 
+`uv run pytest -q tests/app/test_app.py` passed with all five colored
+`LEDSlider` classes checked against their respective light specializations and
+colors; the five manifest entries cite the new behavioral test.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing
