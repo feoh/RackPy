@@ -149,7 +149,10 @@ meanwhile. Both block in curl, which allows 30 seconds to connect and sets
 no overall limit, with the GIL released.
 
 - `Method` has `METHOD_GET`, `METHOD_POST`, `METHOD_PUT` and
-  `METHOD_DELETE`, the HTTP methods of the same names.
+  `METHOD_DELETE`. In Rack 2.6.6, `METHOD_PUT` with JSON data actually sends
+  POST because of Rack's curl options; without data it can read stdin. Do not
+  use it for PUT. The `services.network.put_json` facade raises
+  `NotImplementedError` rather than sending an unintended request.
 - `request_json` sends `data` as the query for `METHOD_GET` (string values
   only, as Rack does) or as the JSON body otherwise. It returns the parsed
   answer, or `None` on any failure: no connection, a malformed URL, or a

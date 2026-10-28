@@ -200,10 +200,11 @@ def test_json_requests(server: str) -> None:
     assert (
         posted["method"] == "POST" and json.loads(posted["body"]) == {"x": [1, 2]} and posted["cookie"] == "token=abc;"
     )
-    put = net.put_json(server + "/api", {"y": "z"})  # METHOD_PUT
-    assert put["method"] == "PUT" and json.loads(put["body"]) == {"y": "z"}
+    with pytest.raises(NotImplementedError, match="cannot safely send"):
+        net.put_json(server + "/api", {"y": "z"})
+    # Rack 2.6.6 sets CURLOPT_POSTFIELDS after CURLOPT_UPLOAD, causing curl to POST.
     raw_put = rn.request_json(rn.Method.METHOD_PUT, server + "/api", [1], {})
-    assert raw_put["method"] == "PUT" and json.loads(raw_put["body"]) == [1]
+    assert raw_put["method"] == "POST" and json.loads(raw_put["body"]) == [1]
     assert net.delete_json(server + "/api")["method"] == "DELETE"
     assert net.get_json(server + "/text") is None  # not JSON
     assert net.get_json("http://127.0.0.1:1/") is None  # nothing listens: refused at once

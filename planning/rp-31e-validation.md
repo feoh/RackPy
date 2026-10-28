@@ -44,10 +44,13 @@ method. The server saw `POST`. Rack 2.6.6 (`src/network.cpp:128-148`) sets
 `CURLOPT_UPLOAD` for `METHOD_PUT` and then `CURLOPT_POSTFIELDS` for the body,
 and curl then sends POST. So with a body, `METHOD_PUT` is indistinguishable
 from `METHOD_POST`, and the facade's `put_json` does not PUT. Without a body,
-curl uploads from its default read function, stdin. **Needs a decision**:
-document Rack's behaviour and change the test to expect it (and warn in
-`put_json`, or have the facade refuse or fix it), or something else. The test
-was left as written, failing, for the next session.
+curl uploads from its default read function, stdin. The raw binding preserves Rack's behavior and documents it. The higher-level
+`put_json` now raises `NotImplementedError` instead of making an unintended
+POST (or reading stdin); the host test checks both. On the updated tree the
+werror test-hooks build and 6 CTests, targeted services/audio/MIDI host tests
+and built-package introspection passed (9 outer tests). The tests used temporary
+fixture overrides to select the existing test-hooks build; the fixture was
+restored. The mutation check and final validation remain.
 
 ## Per-record changes
 
@@ -67,9 +70,7 @@ was left as written, failing, for the next session.
 
 ## Left, and next steps
 
-1. Decide the `METHOD_PUT` question above, then fix the test or the facade
-   and the docs accordingly.
-2. Run the mutation check and record it.
+1. Run the mutation check and record it.
 3. Run `tests/coverage/test_introspection.py` and the targeted host runs above
    on the committed tree, serialized with the lock.
 4. Squash into one commit titled "RP-31E: evidence for settings, services and
