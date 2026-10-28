@@ -166,6 +166,38 @@ def test_knob_scroll_leave_records_undo(module: Module) -> None:
         settings.knob_scroll, settings.knob_scroll_sensitivity = old_scroll, old_sensitivity
 
 
+def test_svg_controls_apply_change_to_native_children(module: Module) -> None:
+    knob = raw.create_param(app.SvgKnob, Vec(), module, 0)
+    slider = raw.create_param(app.SvgSlider, Vec(), module, 0)
+    switch = raw.create_param(app.SvgSwitch, Vec(), module, 1)
+    first, second = svg(), svg(FRAME_SVG)
+    try:
+        knob.set_svg(first)
+        knob.min_angle, knob.max_angle = -1.0, 1.0
+        slider.set_handle_pos(Vec(1, 2), Vec(11, 22))
+        switch.add_frame(first)
+        switch.add_frame(second)
+        module.param_quantities[0].set_value(0)
+        knob.on_change(w.ChangeEvent())
+        slider.on_change(w.ChangeEvent())
+        low_transform = knob.tw.transform
+        assert slider.handle.get_box().pos == Vec(1, 2)
+        module.param_quantities[0].set_value(10)
+        knob.on_change(w.ChangeEvent())
+        slider.on_change(w.ChangeEvent())
+        assert knob.tw.transform != low_transform
+        assert slider.handle.get_box().pos == Vec(11, 22)
+        module.param_quantities[1].set_value(0)
+        switch.on_change(w.ChangeEvent())
+        assert switch.sw.svg is first
+        module.param_quantities[1].set_value(1)
+        switch.on_change(w.ChangeEvent())
+        assert switch.sw.svg is second
+    finally:
+        for control in (knob, slider, switch):
+            control.close()
+
+
 def test_knob_switch_and_slider_fields_and_param_quantity_setup(module: Module) -> None:
     knob, switch = app.Knob(), app.Switch()
     knob.speed, knob.snap, knob.smooth, knob.horizontal, knob.force_linear = 2.0, False, True, True, True

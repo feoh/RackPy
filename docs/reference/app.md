@@ -193,7 +193,9 @@ Rack's cable behaviour.
 ## SVG controls, screws and panels
 
 `SvgKnob`, `SvgSlider`, `SvgSwitch`, `SvgButton`, `SvgPort`, `SvgScrew` and
-`SvgPanel` draw SVGs and cache them in a framebuffer. The `ThemedSvgPort`,
+`SvgPanel` draw SVGs and cache them in a framebuffer. Rack's `on_change`
+updates the knob's rotation, slider's handle position or switch's frame from
+its parameter value. The `ThemedSvgPort`,
 `ThemedSvgScrew` and `ThemedSvgPanel` versions take a light and a dark SVG,
 and show the dark one while Rack prefers dark panels. Each has Rack's
 setters:

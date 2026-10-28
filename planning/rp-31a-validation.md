@@ -71,6 +71,11 @@ undo restores the prior value.
 `LEDSlider` classes checked against their respective light specializations and
 colors; the five manifest entries cite the new behavioral test.
 
+`uv run pytest -q tests/app/test_app.py` passed with `SvgKnob`, `SvgSlider`
+and `SvgSwitch` change handlers checked against their native child transform,
+handle position and SVG frame at different parameter values. Their manifest
+records cite the new test.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing
