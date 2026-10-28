@@ -199,6 +199,36 @@ def test_knob_direct_drag_move_changes_value_only_for_left_button(module: Module
         settings.knob_linear_sensitivity = old_sensitivity
 
 
+def test_knob_rotary_drag_starts_only_after_pointer_leaves_origin(module: Module) -> None:
+    settings = raw.settings.settings
+    old_mode = settings.knob_mode
+    context = raw.context_get()
+    assert context is not None and context.scene is not None
+    scene = context.scene
+    old_mouse = scene.mouse_pos
+    knob = raw.create_param(app.Knob, Vec(), module, 0)
+    other = app.Knob()
+    try:
+        settings.knob_mode = raw.settings.KNOB_MODE_ROTARY_ABSOLUTE
+        scene.mouse_pos = Vec(100, 0)
+        quantity = module.param_quantities[0]
+        before = quantity.get_value()
+        knob.on_drag_start(w.DragStartEvent(button=LEFT))
+        move = w.DragMoveEvent(button=LEFT, mouse_delta=Vec(1, 0))
+        knob.on_drag_leave(w.DragLeaveEvent(button=LEFT, origin=other))
+        knob.on_drag_move(move)
+        assert quantity.get_value() == before
+        knob.on_drag_leave(w.DragLeaveEvent(button=LEFT, origin=knob))
+        knob.on_drag_move(move)
+        assert quantity.get_value() != before
+        knob.on_drag_end(w.DragEndEvent(button=LEFT))
+    finally:
+        knob.close()
+        other.close()
+        scene.mouse_pos = old_mouse
+        settings.knob_mode = old_mode
+
+
 def test_knob_dispatches_action_for_a_click_but_not_a_drag(module: Module) -> None:
     actions: list[str] = []
 

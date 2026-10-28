@@ -114,7 +114,10 @@ parameter) and `Knob.on_action` (a short click calls a Python override and
 its Rack base; a 20-pixel drag does not). The relevant manifest records cite
 them and the app reference explains the behavior. The Linux test-hooks build
 with `--werror` and 6/6 CTests passed, and `tests/app/test_app.py` passed using
-a temporary fixture pointing to that build; the fixture was restored.
+a temporary fixture pointing to that build; the fixture was restored. A
+further live-Rack test checks `on_drag_leave`: a different origin does not
+activate rotary dragging, but leaving the originating knob does. Its manifest
+record and the reference were updated.
 
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to

@@ -118,8 +118,10 @@ the model's own code makes the module and the widget (**RP-24D**):
   `speed`, `force_linear`, `min_angle` and `max_angle`. With knob scrolling
   enabled, Rack's `on_leave` commits a changed scroll value to history for
   undo. A left-button drag changes the parameter; another button does not.
-  A short click dispatches `on_action`, whose Rack base is empty, while a
-  drag of at least 16 pixels does not. `SliderKnob` is the slider version.
+  In rotary mode, Rack waits until the pointer leaves the originating knob
+  before changing its value. A short click dispatches `on_action`, whose
+  Rack base is empty, while a drag of at least 16 pixels does not.
+  `SliderKnob` is the slider version.
 - `Switch` steps through its values on each click. With `momentary` set, it
   holds the maximum while pressed. Double-click resets a `ParamWidget` to its
   default, but Rack's `Switch` deliberately does not reset on double-click.
