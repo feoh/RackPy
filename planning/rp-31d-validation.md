@@ -58,6 +58,10 @@ the test-hooks build was restored afterward. No macOS or Windows run was made.
 
 **Still open:** complete the per-record audit before closing. In particular,
 `plugin::Plugin::~Plugin()` cites a test of the plugin `destroy()` hook, not
-an observation of `~Plugin`; determine a defensible destructor proof and
-mapping instead of treating that hook as evidence. Re-run applicable checks
-on the final changes.
+an observation of `~Plugin`. Rack 2.6.6 `src/plugin/Plugin.cpp:14-20` clears
+`model->plugin` for each attached model without deleting the models. RackPy's
+`PluginHandle` is borrowed (`native/bindings/plugin.cpp`), so the cited Python
+test cannot exercise that effect. Determine a defensible destructor proof and
+mapping instead of treating the hook as evidence. The record is now `planned`;
+RP-31M is responsible and blocks RP-31D. Re-run applicable checks on the final
+changes.

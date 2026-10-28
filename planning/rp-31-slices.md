@@ -60,3 +60,4 @@ manifest audit and an independent review focused on scope cheats.
 | RP-31J | `tk-rackpy-31j-native-production-i-o-paths-for-audio-8ba798` | native audio-port and MIDI-queue nodes for kernels and graphs |
 | RP-31K | `tk-rackpy-31k-settle-template-weak-pointer-and-lock-e4976c` | template, weak-pointer and lock contracts; an owner-review gate |
 | RP-31L | `tk-rackpy-31l-note-typing-and-small-test-cleanups-f-df6aa2` | notes, container typing and small test gaps |
+| RP-31M | `tk-rackpy-31m-faithfully-map-and-prove-plugin-destr-37b2a4` | Plugin destructor and attached-model lifetime semantics; blocks RP-31D |
