@@ -115,8 +115,9 @@ the model's own code makes the module and the widget (**RP-24D**):
   `create_context_menu()`. Rack's enter and leave handlers manage the tooltip
   on hover.
 - `Knob` adds Rack's drag behaviour, with `horizontal`, `smooth`, `snap`,
-  `speed`, `force_linear`, `min_angle` and `max_angle`. `SliderKnob` is the
-  slider version.
+  `speed`, `force_linear`, `min_angle` and `max_angle`. With knob scrolling
+  enabled, Rack's `on_leave` commits a changed scroll value to history for
+  undo. `SliderKnob` is the slider version.
 - `Switch` steps through its values on each click. With `momentary` set, it
   holds the maximum while pressed.
 - `init_param_quantity()` is Rack's per-kind set-up of the parameter's

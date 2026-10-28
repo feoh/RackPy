@@ -56,6 +56,11 @@ menu omits the channel; the first test expectation incorrectly included it and
 was corrected against `src/app/MidiDisplay.cpp`. All ten manifest records cite
 the new test.
 
+`uv run pytest -q tests/app/test_app.py` also passed with selection bypass
+and undo checked against Rack's history, and a knob scroll/leave test proving
+Rack records an undoable parameter change. Settings are restored after the
+knob test.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing

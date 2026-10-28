@@ -92,6 +92,13 @@ def test_modules_selection_and_positions(probe: Any) -> None:
     data = rack.selection_to_json()
     assert [m["model"] for m in data["modules"]] == ["RuntimeProbe"]
     assert not rack.is_selection_bypassed()
+    context = raw.context_get()
+    assert context is not None and context.history is not None
+    history_index = context.history.action_index
+    rack.bypass_selection_action(True)
+    assert rack.is_selection_bypassed() and context.history.action_index == history_index + 1
+    context.history.undo()
+    assert not rack.is_selection_bypassed() and context.history.action_index == history_index
     assert rack.request_selection_pos(Vec(600, 0))
     assert probe.get_box().pos == pos.plus(Vec(600, 0))
     rack.set_selection_pos_nearest(Vec(-600, 0))

@@ -143,6 +143,29 @@ def test_control_tooltips_follow_create_destroy_and_enter_leave(module: Module) 
         settings.tooltips = old_tooltips
 
 
+def test_knob_scroll_leave_records_undo(module: Module) -> None:
+    settings = raw.settings.settings
+    old_scroll, old_sensitivity = settings.knob_scroll, settings.knob_scroll_sensitivity
+    settings.knob_scroll, settings.knob_scroll_sensitivity = True, 0.01
+    knob = raw.create_param(app.Knob, Vec(), module, 0)
+    context = raw.context_get()
+    assert context is not None and context.history is not None
+    history = context.history
+    try:
+        quantity = module.param_quantities[0]
+        before = quantity.get_value()
+        index = history.action_index
+        knob.on_hover_scroll(w.HoverScrollEvent(scroll_delta=Vec(0, 10), context=w.EventContext()))
+        assert quantity.get_value() > before
+        knob.on_leave(w.LeaveEvent())
+        assert history.action_index == index + 1
+        history.undo()
+        assert quantity.get_value() == pytest.approx(before)
+    finally:
+        knob.close()
+        settings.knob_scroll, settings.knob_scroll_sensitivity = old_scroll, old_sensitivity
+
+
 def test_knob_switch_and_slider_fields_and_param_quantity_setup(module: Module) -> None:
     knob, switch = app.Knob(), app.Switch()
     knob.speed, knob.snap, knob.smooth, knob.horizontal, knob.force_linear = 2.0, False, True, True, True
