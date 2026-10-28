@@ -1,14 +1,13 @@
-# RP-31K validation (Linux x86_64) — checkpoint, not fully validated
+# RP-31K validation (Linux x86_64)
 
 Date 2026-10-27, branch `rp31k` (from `fc4aa6d`). GCC on the host toolchain,
 bundled CPython 3.14, pinned Rack Free/SDK 2.6.6. This worktree's own
 `build/` only; logs under `build/validation/`. Host runs serialized with
 `flock /tmp/rackpy-host-tests.lock`. No push, no Witan calls.
 
-**Status: WIP checkpoint.** The session ended (owner switching models)
-before the final host run on the committed tree. Every non-host check below
-passed on the committed code; the host run passed except one test of this
-task, which was then fixed and **has not been rerun in Rack**.
+The original checkpoint was not fully validated. The follow-up validation
+below reran the fixed test in Rack and checked both production and test-hooks
+builds.
 
 Task: `tk-rackpy-31k-settle-template-weak-pointer-and-lock-e4976c`, owner
 decisions of 2026-10-27 ([rp-31-slices.md](rp-31-slices.md#decisions)).
@@ -90,17 +89,30 @@ Before the commit, on the same code except one test fix (`*-pre.log`):
 
 The failure was `test_shared_lock_on_a_python_subclass_of_shared_mutex`, a
 test bug: it called `try_lock` on the thread that already held the lock,
-which RackPy refuses. The fix probes from another thread. **The fix has not
-been run in Rack.**
+which RackPy refuses. The fix probes from another thread and passed in Rack
+in the follow-up validation.
 
-## Left / next steps
+## Follow-up validation (2026-10-28)
 
-- Rerun the host tests on this tree:
-  `flock /tmp/rackpy-host-tests.lock uv run pytest tests/services/test_settings.py tests/values/test_values_in_rack.py tests/services/test_utilities.py tests/coverage/test_introspection.py`.
-- Rerun the following after this commit: native, docs, `sphinx -W`, unit
-  and prek.
-- If everything passes, reword the commit to "RP-31K: template, weak-pointer
-  and lock contracts; owner-review gate".
+- Host-toolchain `rackpy-dev build --werror --test-hooks` and the production
+  `--no-test-hooks` build each passed 6/6 CTests. The test-hooks build was
+  restored afterward.
+- With temporary fixture overrides reusing those corresponding builds, host
+  tests under `flock /tmp/rackpy-host-tests.lock` passed: settings, utilities,
+  test-hooks values and built-package introspection (6 tests); production
+  values and built-package introspection (4 tests). The temporary overrides
+  were removed. The production introspection checks the manifest against the
+  names exported by an actual Rack process.
+- `uv run pytest -m unit -q`: 112 passed; `native and not host`: 33 passed;
+  `docs and not host`: 15 passed. The native suite initially failed its bundle
+  layout test when mistakenly pointed at the test-hooks build; it passed in
+  full when rerun against the production build.
+- `prek run --all-files`, `rackpy-dev typecheck`, `generate_bindings.py check`,
+  `check_coverage.py check --without-built-package` and Sphinx `-W -n` passed.
+  macOS and Windows remain untested.
+
+## Follow-up outside this slice
+
 - Open, outside this task:
   - `docs/coverage.md` policy 11 still says the RP-28F decision is "owner
     review pending", but the records and `docs/reference/app.md` say it was
