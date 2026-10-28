@@ -153,6 +153,29 @@ def test_containers_cables_colours_and_menus() -> None:
         menu.close()
 
 
+def test_cable_color_sequence_and_rotation_settings() -> None:
+    rack = scene().rack
+    settings = raw.settings.settings
+    old_colors = list(settings.cable_colors)
+    old_rotate = settings.cable_auto_rotate
+    old_id = rack.get_next_cable_color_id()
+    try:
+        settings.cable_colors = [nvg.rgb(20, 40, 60), nvg.rgb(120, 140, 160)]
+        settings.cable_auto_rotate = True
+        rack.set_next_cable_color_id(0)
+        assert raw.color.to_hex_string(rack.get_next_cable_color()) == "#14283c"
+        assert rack.get_next_cable_color_id() == 1
+        assert raw.color.to_hex_string(rack.get_next_cable_color()) == "#788ca0"
+        assert rack.get_next_cable_color_id() == 0
+        settings.cable_auto_rotate = False
+        assert raw.color.to_hex_string(rack.get_next_cable_color()) == "#14283c"
+        assert rack.get_next_cable_color_id() == 0
+    finally:
+        settings.cable_colors = old_colors
+        settings.cable_auto_rotate = old_rotate
+        rack.set_next_cable_color_id(old_id)
+
+
 def configure(m: Module) -> None:
     m.config(1, 0, 0, 0)
     m.config_param(0, 0, 1, 0, "Touch")

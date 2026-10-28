@@ -333,7 +333,9 @@ The host-view API:
     `get_incomplete_cables`, deprecated `get_incomplete_cable`,
     `get_cable(id)`, `get_cable(output, input)`, `get_cables_on_port`,
     `get_complete_cables_on_port`, `get_top_cable`, `get_top_plug`) and the
-    next cable colour;
+    next cable colour. `get_next_cable_color()` selects the current palette
+    entry, advancing and wrapping its ID when `cable_auto_rotate` is enabled;
+    `get_next_cable_color_id()` and `set_next_cable_color_id()` access that ID;
   - `get_touched_param()`, `set_touched_param()` and `touched_param`, the
     param Core's MIDI-Map learns. That param needs a module.
 - `add_module(module_widget)` and `add_module_at_mouse(module_widget)` put a

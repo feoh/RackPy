@@ -137,6 +137,9 @@ scenario checks preset and selection load/save cancellation and chosen paths,
 selection-load undo, template-overwrite cancel/accept and clear cancel/accept.
 Both the ordinary and interposed host runs passed. The native OS dialog UI
 itself was not exercised; the six records explicitly state that limitation.
+A live-Rack palette test also checks two distinct cable colors, ID rotation,
+wraparound and disabled rotation, restoring settings afterward. Its three
+records cite the test and the reference explains those semantics.
 
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
