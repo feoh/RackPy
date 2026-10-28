@@ -145,8 +145,29 @@ def phase1() -> Frames:
     a, b = VOICES[first], VOICES[second]
     out, inp = a.get_output(0), b.get_input(0)
     assert isinstance(out, app.PortWidget) and isinstance(inp, app.PortWidget)
-    start, end = scene_pos(out), scene_pos(inp)
+    # Exercise output hover while both ports are initially unconnected.
+    start, end = scene_pos(inp), scene_pos(out)
     state = events()
+    state.handle_hover(start, Vec())
+    state.handle_button(start, LEFT, PRESS, 0)
+    state.handle_hover(end, end.minus(start))
+    incomplete = rack().get_incomplete_cables()
+    assert len(incomplete) == 1
+    dragging = incomplete[0]
+    RESULT["hovered_output"] = [
+        dragging.hovered_output_port is out,
+        dragging.get_hovered_port(Port.Type.OUTPUT) is out,
+        dragging.hovered_input_port is None,
+        dragging.get_hovered_port(Port.Type.INPUT) is None,
+    ]
+    state.handle_button(end, LEFT, RELEASE, 0)
+    context = raw.context_get()
+    assert context is not None and context.history is not None
+    before_clear = list(_testing.rack_cables())
+    history_index = context.history.action_index
+    rack().clear_cables()
+    RESULT["clear_cables"] = [before_clear, list(_testing.rack_cables()), context.history.action_index == history_index]
+    start, end = scene_pos(out), scene_pos(inp)
     state.handle_hover(start, Vec())
     state.handle_button(start, LEFT, PRESS, 0)
     state.handle_hover(end, end.minus(start))

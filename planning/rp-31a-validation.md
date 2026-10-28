@@ -36,8 +36,17 @@ rejection and re-selection from Rack's active drag rectangle. The app
 reference now names selection and container queries. `uv run pytest -q
  tests/app/test_module_browser.py` passed with assertions against the hovered
 input and output plug of a cable during a real drag. An attempted reverse drag
-was not reliable in the existing fixture and was removed; the non-null hovered
-output path still needs evidence.
+after cloning was not reliable in the existing fixture and was removed. A
+subsequent run starts the input-first drag before cloning, and
+`uv run pytest -q tests/app/test_module_browser.py` passed with non-null
+hovered-output evidence and `clear_cables()` removal without a history entry.
+
+Tooltip evidence: `uv run pytest -q tests/app/test_app.py` rebuilt with test
+hooks and passed. A test-only helper counts public `ui::Tooltip` instances in
+Rack's scene; actual Rack tests verify create/destroy, idempotent creation and
+enter/leave for param, port and module-light controls. The twelve corresponding
+manifest entries cite this test and the reference documents tooltip behavior.
+No private Rack API is accessed.
 
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to

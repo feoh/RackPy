@@ -634,6 +634,16 @@ void define(py::module_ m) {
 		liveContext();
 		return widgets::wrapper(APP->scene->rack->touchedParam);
 	});
+	m.def("scene_tooltip_count", [] {
+		// Count public Tooltip base instances, without inspecting Rack's private widget state.
+		requireMainThread("scene_tooltip_count");
+		liveContext();
+		size_t count = 0;
+		for (auto* child : APP->scene->children)
+			if (dynamic_cast<rack::ui::Tooltip*>(child))
+				++count;
+		return count;
+	});
 	m.def("rack_cables", [] {
 		// (complete, incomplete) CableWidgets in Rack's rack, and the engine's cable count.
 		requireMainThread("rack_cables");

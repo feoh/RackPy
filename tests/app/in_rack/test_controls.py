@@ -114,6 +114,35 @@ def test_module_fields_take_only_engine_modules_with_valid_ids(module: Module) -
     Module.create(constructing).close()
 
 
+def test_control_tooltips_follow_create_destroy_and_enter_leave(module: Module) -> None:
+    settings = raw.settings.settings
+    old_tooltips = settings.tooltips
+    settings.tooltips = True
+    controls: list[app.ParamWidget | app.PortWidget | app.ModuleLightWidget] = [
+        raw.create_param(app.ParamWidget, Vec(), module, 0),
+        raw.create_input(app.PortWidget, Vec(), module, 0),
+        raw.create_light(app.ModuleLightWidget, Vec(), module, 0),
+    ]
+    try:
+        for control in controls:
+            before = HOOKS.scene_tooltip_count()
+            control.create_tooltip()
+            assert HOOKS.scene_tooltip_count() == before + 1
+            control.create_tooltip()  # Rack does not add a second tooltip
+            assert HOOKS.scene_tooltip_count() == before + 1
+            control.destroy_tooltip()
+            assert HOOKS.scene_tooltip_count() == before
+            control.on_enter(w.EnterEvent())
+            assert HOOKS.scene_tooltip_count() == before + 1
+            control.on_leave(w.LeaveEvent())
+            assert HOOKS.scene_tooltip_count() == before
+    finally:
+        for control in controls:
+            control.destroy_tooltip()
+            control.close()
+        settings.tooltips = old_tooltips
+
+
 def test_knob_switch_and_slider_fields_and_param_quantity_setup(module: Module) -> None:
     knob, switch = app.Knob(), app.Switch()
     knob.speed, knob.snap, knob.smooth, knob.horizontal, knob.force_linear = 2.0, False, True, True, True

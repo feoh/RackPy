@@ -111,7 +111,9 @@ the model's own code makes the module and the widget (**RP-24D**):
 
 - `ParamWidget` is a control of one module parameter: `module` and
   `param_id`, `get_param_quantity()`, `reset_action()` (Rack's reset, with
-  an undo step), the tooltip and `create_context_menu()`.
+  an undo step), `create_tooltip()`, `destroy_tooltip()` and
+  `create_context_menu()`. Rack's enter and leave handlers manage the tooltip
+  on hover.
 - `Knob` adds Rack's drag behaviour, with `horizontal`, `smooth`, `snap`,
   `speed`, `force_linear`, `min_angle` and `max_angle`. `SliderKnob` is the
   slider version.
@@ -151,6 +153,9 @@ open context menu, since Rack's menu items point at the control.
 `PortWidget` has `module`, `type` (`rackpy.raw.engine.Port.Type`) and
 `port_id`; `get_port()` and `get_port_info()` return the module's port and
 its metadata. `delete_top_cable_action()` and the context menu are Rack's.
+`create_tooltip()` and `destroy_tooltip()` open and remove its tooltip;
+Rack's `on_enter` and `on_leave` handlers do the same. Tooltips must be
+enabled in Rack's settings, and the port needs a module.
 
 A Python port takes part in cables only when its module widget's factory
 created it, and only while it is inside that widget. Rack keeps two
@@ -180,7 +185,8 @@ Rack's cable behaviour.
 - `ModuleLightWidget` follows the module's lights `first_light_id` onward,
   one per colour, each frame (Rack takes the square root of each
   brightness). It also has `get_light(color_id)`, `get_light_info()` and a
-  tooltip.
+  tooltip. `create_tooltip()` and `destroy_tooltip()` manage it directly;
+  Rack's enter and leave handlers do so on hover.
 
 (app-svg)=
 ## SVG controls, screws and panels
@@ -304,7 +310,9 @@ The host-view API:
     owner;
   - paste: `paste_json_action`, `paste_module_json_action` and
     `paste_clipboard_action`;
-  - `clear()` and cable clearing;
+  - `clear()` and cable clearing: `clear_cables()` removes all cables
+    without an undo step; `clear_cables_action()` records an undo step, and
+    `clear_cables_on_port(port)` removes those on one port;
   - Rack's child containers: `get_module_container()`,
     `get_cable_container()` and `get_plug_container()` return host views;
   - cable lookups (`get_cables`, `get_complete_cables`,
