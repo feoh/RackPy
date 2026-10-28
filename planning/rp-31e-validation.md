@@ -50,7 +50,15 @@ POST (or reading stdin); the host test checks both. On the updated tree the
 werror test-hooks build and 6 CTests, targeted services/audio/MIDI host tests
 and built-package introspection passed (9 outer tests). The tests used temporary
 fixture overrides to select the existing test-hooks build; the fixture was
-restored. The mutation check and final validation remain.
+restored. Three independent mutation experiments on the updated tree swapped
+`invert_zoom`/`mouse_wheel_zoom`, two `KnobMode` bindings, and the DEBUG/INFO
+logger enum bindings. The respective actual-Rack settings tests failed at
+`test_each_setting_is_its_rack_global` and
+`test_knob_modes_and_browser_sorts_by_name_and_value`; the logger host test
+failed (its earlier existing log assertion), and its log also showed the new
+level markers labeled `info` for DEBUG and `debug` for INFO, contradicting the
+new level assertions. Each experiment restored its source and rebuilt the
+unmutated binary. Final validation remains.
 
 ## Per-record changes
 
@@ -70,8 +78,6 @@ restored. The mutation check and final validation remain.
 
 ## Left, and next steps
 
-1. Run the mutation check and record it.
-3. Run `tests/coverage/test_introspection.py` and the targeted host runs above
-   on the committed tree, serialized with the lock.
-4. Squash into one commit titled "RP-31E: evidence for settings, services and
-   audio/MIDI I/O records" and replace this file with the final record.
+1. Repeat final validation on the unmutated tree, including the full target
+   host runs and built-package introspection, and reconcile every audit record.
+2. Replace this WIP record with final validation evidence.
