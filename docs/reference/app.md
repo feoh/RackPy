@@ -37,7 +37,9 @@ form is `create_model(..., widget_factory=)`). As in Rack's C++, the widget
 calls `set_module(module)` first. The widget then *owns* the module: Rack
 deletes the module with it. So `set_module` takes only the module Rack
 passed the factory, once, and nothing replaces or drops it. Rack then sets
-the widget's `model` and takes the widget.
+the widget's `model` and takes the widget. `set_model(model)` exposes Rack's
+setter for a widget that has no model yet; a second assignment raises
+`OwnershipError`. Factory-created widgets already have their model set by Rack.
 
 If the factory raises, or returns something that is not a new
 `ModuleWidget` with that module, RackPy logs the error. It leaves the module

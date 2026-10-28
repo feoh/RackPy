@@ -192,6 +192,23 @@ def test_light_templates_are_specializations() -> None:
             cl.MediumLight[bad]  # type: ignore[index]
 
 
+def test_colour_light_templates_apply_to_a_custom_base() -> None:
+    class CustomBase(app.ModuleLightWidget):
+        pass
+
+    for template, color in (
+        (cl.TBlueLight, cl.SCHEME_BLUE),
+        (cl.TWhiteLight, cl.SCHEME_WHITE),
+        (cl.TYellowLight, cl.SCHEME_YELLOW),
+    ):
+        light = template[CustomBase]()
+        try:
+            assert isinstance(light, CustomBase)
+            assert light.base_colors == [color]
+        finally:
+            light.close()
+
+
 class Rack(w.Widget):
     """Composes layers as Rack's RackWidget does: layer 0, then the self-lit layer 1."""
 
