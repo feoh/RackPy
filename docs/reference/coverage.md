@@ -21,7 +21,11 @@ availability is unresolved, which blocks a release there.
 - **Unknown** (in the inventory, not in the manifest): 0
 - **Unrepresentable** (awaiting an owner decision): 0
 - **Unresolved callback strategy** (ADR 003): 0
-- **Open owner review items** (each blocks a release until the owner decides): 0
+- **Open owner review items** (each blocks a release until the owner decides): 1
+
+### Open owner review items
+
+- `destructor:rack::plugin::Plugin::~Plugin()`: allow an isolated owned Plugin and detached-model attachment despite the existing this-plugin-only add_model contract
 
 ## By family (lin-x64)
 
