@@ -76,6 +76,10 @@ and `SvgSwitch` change handlers checked against their native child transform,
 handle position and SVG frame at different parameter values. Their manifest
 records cite the new test.
 
+`uv run pytest -q tests/app/test_app.py` passed with an `SvgButton` subclass
+checking that mouse-down dispatches one action and drag-drop does not dispatch a
+second. The drag-drop record cites the actual-host test.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing

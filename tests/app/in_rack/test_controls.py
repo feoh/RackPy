@@ -166,6 +166,23 @@ def test_knob_scroll_leave_records_undo(module: Module) -> None:
         settings.knob_scroll, settings.knob_scroll_sensitivity = old_scroll, old_sensitivity
 
 
+def test_svg_button_drag_drop_does_not_dispatch_a_second_action() -> None:
+    actions: list[str] = []
+
+    class Button(app.SvgButton):
+        def on_action(self, event: Any) -> None:
+            actions.append("action")
+
+    button = Button()
+    try:
+        button.on_button(w.ButtonEvent(button=LEFT, action=PRESS))
+        assert actions == ["action"]
+        button.on_drag_drop(w.DragDropEvent(button=LEFT, origin=button))
+        assert actions == ["action"]  # Rack already dispatched on mouse down
+    finally:
+        button.close()
+
+
 def test_svg_controls_apply_change_to_native_children(module: Module) -> None:
     knob = raw.create_param(app.SvgKnob, Vec(), module, 0)
     slider = raw.create_param(app.SvgSlider, Vec(), module, 0)
