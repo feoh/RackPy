@@ -58,11 +58,13 @@ creates take part in cables (see [Ports](#app-ports)).
   templates).
 - `paste_json_action`, `paste_clipboard_action`, `load_action`,
   `reset_action`, `randomize_action`, `bypass_action`, `clone_action`,
-  `disconnect_action`, `disconnect`, `remove_action` and
-  `create_context_menu` need the widget in Rack's rack. They are Rack's menu
-  actions, with undo steps. `remove_action` deletes the widget (the Python
-  object is stale afterwards) and, like the other actions that change the
-  widget tree, is refused inside a widget callback.
+  `disconnect_action`, `remove_action` and `create_context_menu` need the
+  widget in Rack's rack. The modifying menu actions have undo steps.
+  `remove_action` deletes the widget (the Python object is stale afterwards)
+  and, like the other actions that change the widget tree, is refused inside
+  a widget callback.
+- `disconnect()` also needs the widget in Rack's rack, but removes its cables
+  **without an undo step**. Use `disconnect_action()` for an undoable removal.
 - `load_dialog`, `save_dialog`, `save_template_dialog` and
   `clear_template_dialog` open Rack's dialogs and wait for the user.
 - `append_context_menu(menu)` is called by Rack at the end of its module

@@ -14,6 +14,13 @@ assertions. `uv run pytest -m unit -q` passed 106 tests. `uv run prek run
 --all-files` (including strict typing), generator check, non-introspecting
 coverage check and Sphinx warnings-as-errors passed. Temporary fixtures were removed.
 
+A later documentation-only checkpoint corrected the undo distinction between
+`ModuleWidget.disconnect()` and `disconnect_action()` against their native
+binding wrappers. In the RP-31A worktree, `uv run prek run --all-files`
+(including strict mypy) and `uv run sphinx-build -W -n -b html docs
+build/docs/html` passed. No new host behavior test was run; the `disconnect()`
+behavioral evidence remains outstanding.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing
