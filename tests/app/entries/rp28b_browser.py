@@ -349,6 +349,18 @@ def actions(module_id: int) -> Frames:
     found["selection_reset"] = module.params[0].value
     _testing.history_undo()
     found["selection_reset_undo"] = module.params[0].value
+    # Retry the vanishingly rare case that Rack randomly picks the existing value.
+    for _ in range(3):
+        rack().randomize_selection_action()
+        randomized = module.params[0].value
+        _testing.history_undo()
+        if randomized != 7.0:
+            break
+    found["selection_randomized"] = randomized
+    found["selection_randomize_undo"] = module.params[0].value
+    _testing.history_redo()
+    found["selection_randomize_redo"] = module.params[0].value
+    _testing.history_undo()
     before_selection_disconnect = list(_testing.rack_cables())
     rack().disconnect_selection_action()
     after_selection_disconnect = list(_testing.rack_cables())
@@ -372,6 +384,10 @@ def actions(module_id: int) -> Frames:
     modules_before = len(rack().get_modules())
     rack().load_selection(str(selection_path))
     found["selection_loaded"] = len(rack().get_modules()) - modules_before
+    rack().delete_selection_action()
+    found["selection_delete_count"] = len(rack().get_modules()) - modules_before
+    _testing.history_undo()
+    found["selection_delete_undo"] = len(rack().get_modules()) - modules_before
     _testing.history_undo()
     found["selection_load_undo"] = len(rack().get_modules()) == modules_before
     rack().deselect_all()
@@ -381,6 +397,10 @@ def actions(module_id: int) -> Frames:
     found["selection_paste_count"] = len(rack().get_modules()) - modules_before
     _testing.history_undo()
     found["selection_paste_undo"] = len(rack().get_modules()) == modules_before
+    rack().paste_module_json_action(data)
+    found["module_paste_count"] = len(rack().get_modules()) - modules_before
+    _testing.history_undo()
+    found["module_paste_undo"] = len(rack().get_modules()) == modules_before
     rack().deselect_all()
     mw.reset_action()
     found["reset"] = module.params[0].value

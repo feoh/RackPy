@@ -103,6 +103,11 @@ background/foreground child layers; their constructor records cite the test.
 parameter and switch double-click behavior tested against actual values;
 the two records cite that test.
 
+`uv run pytest -q tests/app/test_module_browser.py` passed with selection
+randomize/undo/redo, deletion/undo, and module JSON paste/undo checked in
+actual Rack. Randomization retries up to three times if Rack happens to pick
+the existing parameter value.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing
