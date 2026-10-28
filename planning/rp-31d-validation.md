@@ -22,3 +22,26 @@ particular, finish the remaining cited-test corrections, behavioral tests and
 documentation gaps; validate the full slice, including built-package
 introspection and relevant host suites, before closing.
 macOS and Windows were not tested.
+
+## 2026-10-28 additional checkpoint
+
+Added an actual-Rack test for `Quantity.set_display_value`, including Rack's
+parser dispatching to a Python override and `super()`; added individual macro
+level/caller assertions, including DEBUG even when Rack filters debug output.
+The manifest now cites those tests and the existing metadata tests that actually
+exercise `LightInfo.description`, `PortInfo.description` and `PortInfo.port_id`.
+No coverage status was promoted.
+
+On Linux x86_64: `CMAKE_BUILD_PARALLEL_LEVEL=2 uv run python bin/rackpy-dev
+build --werror --test-hooks` passed 6/6 CTests; targeted Rack tests
+`tests/services/test_utilities.py` and the test-hooks case in
+`tests/values/test_values_in_rack.py` passed using temporary fixture overrides
+pointing at that build (removed afterward). `uv run pytest -m unit -q` passed
+108; `prek run --all-files`, `rackpy-dev typecheck`, generator check,
+non-introspecting coverage check and Sphinx warnings-as-errors passed. These
+checks preceded the final small macro-test extension; re-run them on the final
+tree. Built-package introspection and other host suites remain to be run.
+
+The `WeakHandle(void*)` disposition belongs to RP-31K's separate WIP branch;
+do not close RP-31D until it is reconciled. Complete the remaining audit and
+full validation on the integrated tree.

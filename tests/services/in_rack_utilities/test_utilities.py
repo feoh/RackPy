@@ -143,9 +143,29 @@ def test_random_get_signed_types() -> None:
         generator.state = saved
 
 
+def test_logging_macro_levels(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[tuple[object, ...]] = []
+    monkeypatch.setattr(logger, "log", lambda *args: calls.append(args))
+    for macro in (macros.DEBUG, macros.INFO, macros.WARN, macros.FATAL):
+        macro("level %d", 7)
+    assert [call[0] for call in calls] == [
+        logger.Level.DEBUG_LEVEL,
+        logger.Level.INFO_LEVEL,
+        logger.Level.WARN_LEVEL,
+        logger.Level.FATAL_LEVEL,
+    ]
+    assert all(
+        str(call[1]).endswith("test_utilities.py") and call[3:] == ("test_logging_macro_levels", "level %d", 7)
+        for call in calls
+    )
+
+
 def test_logging() -> None:
     logger.log(logger.Level.INFO_LEVEL, "rackpy_test.py", 12, "test_logging", "rackpy-log %s %d", "marker", 5)
+    macros.DEBUG("rackpy-macro %s", "debugged")
+    macros.INFO("rackpy-macro %s", "informed")
     macros.WARN("rackpy-macro %s", "warned")
+    macros.FATAL("rackpy-macro %s", "fatal")
     assert isinstance(logger.get_log_path(), str)
     with pytest.raises(TypeError):
         logger.log(logger.Level.INFO_LEVEL, "f", 1, "g", "%d")

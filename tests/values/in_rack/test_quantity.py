@@ -63,6 +63,24 @@ def test_python_overrides_ui_methods() -> None:
     assert q.get_display_value_string() == "440" and q.get_string() == "Cutoff: 440 Hz"
 
 
+def test_display_value_setter_and_virtual_override() -> None:
+    q = ValueQuantity(0, 10, 0)
+    q.set_display_value(3.5)
+    assert q.get_value() == 3.5
+
+    seen: list[float] = []
+
+    class Scaled(ValueQuantity):
+        def set_display_value(self, value: float) -> None:
+            seen.append(value)
+            super().set_display_value(value / 2)
+
+    scaled = Scaled(0, 10, 0)
+    # Rack's parser calls the C++ virtual, not just Python attribute lookup.
+    scaled.set_display_value_string("8")
+    assert seen == [8.0] and scaled.get_value() == 4.0
+
+
 def test_python_may_not_define_engine_thread_methods() -> None:
     with pytest.raises(TypeError, match=r"get_value.*engine thread"):
 
