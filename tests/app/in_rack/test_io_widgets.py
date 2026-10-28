@@ -3,8 +3,10 @@
 Rack's live UI (Rack's audio drivers are isolated in tests and list no devices)."""
 
 import gc
+from typing import Any
 
 import pytest
+from _rackpy_host import _testing as HOOKS
 
 from rackpy import raw
 from rackpy.errors import OwnershipError
@@ -55,6 +57,36 @@ def test_choices_show_their_ports() -> None:
     assert names[0] == "Loopback" and names[1] == "Loopback 3"
     with pytest.raises(TypeError):
         choice.port = loop  # type: ignore[assignment]  # an audio choice takes an audio port
+
+
+def test_choices_and_buttons_open_their_rack_menus() -> None:
+    audio_port, midi_port = audio.Port(), midi.InputQueue()
+    audio_controls: list[tuple[Any, list[str]]] = [
+        (app.AudioDriverChoice(), ["Audio driver"]),
+        (app.AudioDeviceChoice(), ["Audio device"]),
+        (app.AudioSampleRateChoice(), ["Sample rate"]),
+        (app.AudioBlockSizeChoice(), ["Block size"]),
+        (app.AudioDeviceMenuChoice(), ["Audio driver", "Audio device", "Sample rate", "Block size"]),
+        (app.AudioButton(), ["Audio driver", "Audio device", "Sample rate", "Block size"]),
+    ]
+    midi_controls: list[tuple[Any, list[str]]] = [
+        (app.MidiDriverChoice(), ["MIDI driver"]),
+        (app.MidiDeviceChoice(), ["MIDI device"]),
+        (app.MidiChannelChoice(), ["MIDI channel"]),
+        (app.MidiButton(), ["MIDI driver", "MIDI device"]),  # Rack's combined menu omits channel
+    ]
+    try:
+        for control, expected in audio_controls:
+            control.port = audio_port
+            control.on_action(w.ActionEvent())
+            assert HOOKS.take_scene_menu_labels() == expected
+        for control, expected in midi_controls:
+            control.port = midi_port
+            control.on_action(w.ActionEvent())
+            assert HOOKS.take_scene_menu_labels() == expected
+    finally:
+        for control, _ in audio_controls + midi_controls:
+            control.close()
 
 
 def test_displays_rebuild_for_a_port_and_keep_it_alive() -> None:

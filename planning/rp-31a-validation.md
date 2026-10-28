@@ -48,6 +48,14 @@ enter/leave for param, port and module-light controls. The twelve corresponding
 manifest entries cite this test and the reference documents tooltip behavior.
 No private Rack API is accessed.
 
+Menu-action evidence: `uv run pytest -q tests/app/test_app.py` passed after
+rebuilding the test hooks. A test-only helper inspects and dismisses the Rack
+menu overlay through public widget types. It checks ten audio/MIDI choice and
+button actions against their actual menu labels. Rack 2.6.6's combined MIDI
+menu omits the channel; the first test expectation incorrectly included it and
+was corrected against `src/app/MidiDisplay.cpp`. All ten manifest records cite
+the new test.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing
