@@ -91,6 +91,10 @@ clipboard copy/paste, disconnect and clone actions and history undo, checked
 against Rack's widget and cable counts. Rack's clipboard paste action returns
 `None`; its behavior is checked through the added module instead.
 
+`uv run pytest -q tests/app/test_app.py` passed with exact centered slider
+positions, the legacy SVG setters' warning and write-through effects, both
+SVGs on themed screw/panel, and Rack's module-position squeeze behavior.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing

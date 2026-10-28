@@ -118,6 +118,9 @@ def test_modules_selection_and_positions(probe: Any) -> None:
     rack.set_module_pos_force(probe, pos)
     assert probe.get_box().pos == pos
     rack.set_module_pos_nearest(probe, pos)
+    rack.set_module_pos_squeeze(probe, far)
+    assert probe.get_box().pos == far
+    rack.set_module_pos_force(probe, pos)
     with pytest.raises(ValueError):
         rack.request_module_pos(probe, Vec(math.nan, 0))
     with pytest.raises(OwnershipError, match="not in Rack's rack"):

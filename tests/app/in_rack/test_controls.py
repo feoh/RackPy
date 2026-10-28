@@ -481,9 +481,18 @@ def test_switches_buttons_sliders_ports_screws_and_panels() -> None:
         slider.set_handle_pos(Vec(0, 10), Vec(0, 0))
         assert slider.min_handle_pos == Vec(0, 10) and slider.max_handle_pos == Vec(0, 0)
         slider.set_handle_pos_centered(Vec(6, 20), Vec(6, 4))
+        assert slider.min_handle_pos == Vec(-9, 5) and slider.max_handle_pos == Vec(-9, -11)
+        assert slider.handle.get_box().pos == Vec(-9, -11)
         assert isinstance(slider.background, w.HostSvgWidget) and isinstance(slider.handle, w.HostSvgWidget)
         with pytest.warns(DeprecationWarning):
+            slider.set_background_svg_legacy(light)
+        assert slider.background.svg is light
+        with pytest.warns(DeprecationWarning):
+            slider.set_handle_svg_legacy(dark)
+        assert slider.handle.svg is dark
+        with pytest.warns(DeprecationWarning):
             slider.set_svgs(dark, light)
+        assert slider.background.svg is dark and slider.handle.svg is light
         port.set_svg(light)
         assert port.box.size == Vec(30, 30)
         themed_port.set_svg(light, dark)
@@ -491,12 +500,13 @@ def test_switches_buttons_sliders_ports_screws_and_panels() -> None:
         assert themed_port.sw.svg is light  # Rack shows the light SVG unless dark panels are preferred
         screw.set_svg(light)
         themed_screw.set_svg(light, dark)
+        assert themed_screw.light_svg is light and themed_screw.dark_svg is dark
         assert themed_screw.sw.svg is light
         panel.set_background(dark)
         assert panel.svg is dark and isinstance(panel.panel_border, w.HostWidget)
         assert panel.box.size == Vec(15, 0) or panel.box.size.x > 0  # Rack rounds panels to the rack grid
         themed_panel.set_background(light, dark)
-        assert themed_panel.light_svg is light and themed_panel.svg is light
+        assert themed_panel.light_svg is light and themed_panel.dark_svg is dark and themed_panel.svg is light
         for cls in (app.RailWidget, app.PanelBorder, app.CircularShadow):
             cls().close()
         shadow = app.CircularShadow()
