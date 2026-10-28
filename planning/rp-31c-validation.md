@@ -1,14 +1,11 @@
-# RP-31C validation (Linux x86_64): checkpoint, not complete
+# RP-31C validation (Linux x86_64)
 
 Date 2026-10-27, branch `rp31c` from fc4aa6d. Pinned inputs as in
 [rp-27a-validation.md](rp-27a-validation.md). Host runs serialized with
 `flock /tmp/rackpy-host-tests.lock`; logs in `build/validation/` (not in git).
 
-**Status: WIP checkpoint.** The session was stopped by the supervisor before
-the full validation list was finished. The changes are complete for every
-record below, and the targeted host runs passed on the working tree that this
-commit records (no code changed after them). prek, sphinx `-W`, the docs
-tests and the full native marker set were **not run**. No record was promoted;
+**Status:** The earlier session stopped at a WIP checkpoint; the continuation
+below reran its validation on the committed source. No record was promoted;
 all stay `implemented`.
 
 ## Commands run
@@ -26,17 +23,27 @@ all stay `implemented`.
 | `bin/planning-check` | 45 tasks, acyclic |
 | `uv run bin/check_coverage.py check --without-built-package` | ok: absent 2, excluded_internal 111, implemented 2945 (Python names not checked against the built package) |
 
-## Not run (left)
+## Continuation validation (2026-10-28)
 
-- `prek run --all-files`
-- `uv run sphinx-build -W --keep-going -n -b html docs build/docs/html` and
-  `uv run pytest -m "docs and not host"` (docs pages changed: `values.md`,
-  `dsp.md`)
-- `uv run pytest -m "native and not host"` as a whole (only
-  `tests/dsp/test_advanced.py` ran)
-- `tests/coverage/test_introspection.py` (check against the built package)
-- the targeted host runs again on the committed state (the tree did not change
-  after them, so this is a formality)
+On `rp31c` at `bbd08d9`, with the pinned SDK and Linux x86_64:
+
+- `uv run prek run --all-files`: passed, including strict mypy, manifest,
+  callback and generated-file checks.
+- `CMAKE_BUILD_PARALLEL_LEVEL=2 uv run bin/rackpy-dev build --werror
+  --test-hooks`: passed, 6/6 CTests. A separate production build with
+  `--build-dir build/production --werror` also passed 6/6 CTests.
+- `uv run pytest -m unit -q`: 106 passed; `uv run pytest -m 'native and not
+  host' -q`: 33 passed; `uv run pytest -m docs -q`: 17 passed.
+- The targeted actual-Rack DSP, values, widget rotation and built-package
+  introspection tests passed (8 outer tests), using `flock -n
+  /tmp/rackpy-host-tests.lock`.
+- `uv run sphinx-build -q -W -n -b html docs build/docs/html`, generator
+  check and source-only coverage check passed. Introspection also checked
+  the manifest against the production package inside actual Rack.
+
+The pytest runs temporarily selected the existing production and test-hooks
+build directories through `tests/conftest.py`; that tracked file was restored
+immediately afterward. macOS and Windows were not tested.
 
 ## What changed
 
