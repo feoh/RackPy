@@ -1,4 +1,4 @@
-# RP-31A checkpoint (incomplete)
+# RP-31A validation (Linux x86_64)
 
 This checkpoint builds on RP-31L and adds actual-Rack tests for the remaining
 SVG aliases, several light template specializations and aliases, and the ordered
@@ -152,9 +152,23 @@ a custom Python base and checks the corresponding distinct scheme colour;
 `tests/app/test_app.py` passed in actual Rack. The reference also clarifies
 `ModuleWidget.set_model()` and its one-assignment ownership rule.
 
-**Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
-many still require behavioral tests or documentation. Compare every record to
-`planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing
-evidence and validate the complete slice, unit suite, built-package coverage
-introspection and remaining host paths before closing. macOS and Windows were not
-tested.
+## Final Linux validation
+
+The audit entries in `planning/rp-31-audit/evidence.json` were reconciled with
+RP-31L and the behavioral evidence described above. Checks on the final tree:
+
+- `CMAKE_BUILD_PARALLEL_LEVEL=2 uv run bin/rackpy-dev build --werror
+  --test-hooks`: passed, 6/6 CTests.
+- Actual Rack, serialized with `flock -n /tmp/rackpy-host-tests.lock`: app
+  widgets, module-browser normal and dialog-interposed runs, engine-ops and
+  built-package introspection all passed (8 outer tests).
+- `uv run pytest -m unit -q`: 106 passed; `uv run pytest -m docs -q`:
+  17 passed. Host and documentation runs used temporary fixture overrides to
+  select the existing test-hooks build; `tests/conftest.py` was restored.
+- `uv run prek run --all-files` (including strict mypy and coverage/generator
+  checks) and `uv run sphinx-build -q -W -n -b html docs build/docs/html`
+  passed.
+
+No records were promoted to verified. The dialog interposer checks Rack's
+reactions, not the real OS dialog UI. macOS and Windows were not tested; no
+fresh production-host build was made in this continuation.
