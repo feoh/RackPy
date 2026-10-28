@@ -80,6 +80,12 @@ records cite the new test.
 checking that mouse-down dispatches one action and drag-drop does not dispatch a
 second. The drag-drop record cites the actual-host test.
 
+`uv run pytest -q tests/app/test_module_browser.py` passed with preset
+`load_action()` and history undo, plus selection file save/load and undo.
+The selection-load test counts Rack's actual module widgets: the loaded
+widget's factory sees an initial module ID of -1, so the fixture's
+ID-indexed `VOICES` dictionary cannot count it reliably at construction time.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing

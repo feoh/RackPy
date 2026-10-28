@@ -325,6 +325,12 @@ def actions(module_id: int) -> Frames:
     module.params[0].value = 1.0
     mw.load(str(preset))
     found["preset"] = [preset.is_file(), module.params[0].value]
+    module.params[0].value = 2.0
+    mw.load_action(str(preset))
+    found["load_action"] = module.params[0].value
+    _testing.history_undo()
+    found["load_action_undo"] = module.params[0].value
+    module.params[0].value = 5.0
     mw.save_template()
     found["template"] = mw.has_template()
     module.params[0].value = 2.0
@@ -343,6 +349,15 @@ def actions(module_id: int) -> Frames:
     found["selection_reset"] = module.params[0].value
     _testing.history_undo()
     found["selection_reset_undo"] = module.params[0].value
+    selection_path = Path(CONFIG["result"]).with_name("selection.vcvs")
+    rack().save_selection(str(selection_path))
+    selection = json.loads(selection_path.read_text())
+    found["selection_saved"] = [m["model"] for m in selection["modules"]]
+    modules_before = len(rack().get_modules())
+    rack().load_selection(str(selection_path))
+    found["selection_loaded"] = len(rack().get_modules()) - modules_before
+    _testing.history_undo()
+    found["selection_load_undo"] = len(rack().get_modules()) == modules_before
     rack().deselect_all()
     mw.reset_action()
     found["reset"] = module.params[0].value
