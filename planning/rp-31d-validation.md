@@ -42,6 +42,22 @@ non-introspecting coverage check and Sphinx warnings-as-errors passed. These
 checks preceded the final small macro-test extension; re-run them on the final
 tree. Built-package introspection and other host suites remain to be run.
 
-The `WeakHandle(void*)` disposition belongs to RP-31K's separate WIP branch;
-do not close RP-31D until it is reconciled. Complete the remaining audit and
-full validation on the integrated tree.
+## Integrated follow-up
+
+RP-31K's owner-approved `WeakHandle(void*)` disposition is now integrated from
+main. On the rebased tree, the test-hooks build passed 6/6 CTests. Actual-Rack
+history, plugin metadata, settings, utilities, values, live engine-module and
+built-package introspection tests passed (10 outer tests); temporary fixture
+overrides reused that build and were removed. Unit tests: 114 passed. The
+generator check, non-introspecting coverage check, prek and Sphinx `-W -n`
+passed. The production build also passed 6/6 CTests, production values and
+built-package introspection passed (4 outer tests), the non-host native suite
+passed 33 tests, and the non-host docs suite passed 15. Production and
+host runs reused their corresponding builds with temporary fixture overrides;
+the test-hooks build was restored afterward. No macOS or Windows run was made.
+
+**Still open:** complete the per-record audit before closing. In particular,
+`plugin::Plugin::~Plugin()` cites a test of the plugin `destroy()` hook, not
+an observation of `~Plugin`; determine a defensible destructor proof and
+mapping instead of treating that hook as evidence. Re-run applicable checks
+on the final changes.
