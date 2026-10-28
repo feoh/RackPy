@@ -86,6 +86,11 @@ The selection-load test counts Rack's actual module widgets: the loaded
 widget's factory sees an initial module ID of -1, so the fixture's
 ID-indexed `VOICES` dictionary cannot count it reliably at construction time.
 
+`uv run pytest -q tests/app/test_module_browser.py` passed with selection
+clipboard copy/paste, disconnect and clone actions and history undo, checked
+against Rack's widget and cable counts. Rack's clipboard paste action returns
+`None`; its behavior is checked through the added module instead.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing

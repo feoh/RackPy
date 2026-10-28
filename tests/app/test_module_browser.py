@@ -102,8 +102,12 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     assert actions["load_action"] == 5.0 and actions["load_action_undo"] == 2.0
     assert actions["template_cleared"] and actions["paste"] == [True, 5.0] and actions["paste_json"]
     assert actions["selection_reset"] == 5.0 and actions["selection_reset_undo"] == 7.0
+    assert actions["selection_disconnect"] == [[1, 0, 1], [0, 0, 0], [1, 0, 1]]
+    assert actions["selection_clone_count"] == 1 and actions["selection_clone_undo"]
     assert actions["selection_saved"] == ["PyVoice"] and actions["selection_loaded"] == 1
     assert actions["selection_load_undo"]
+    assert actions["selection_pasted"] is None  # Rack's void paste action
+    assert actions["selection_paste_count"] == 1 and actions["selection_paste_undo"]
     assert actions["reset"] == 5.0 and actions["bypassed"] and actions["cloned"]
     # The clone copies the cable into its input too (Rack's Duplicate with cables): two cables, then none.
     assert actions["disconnected"][2] < actions["reconnected"][2]

@@ -349,6 +349,22 @@ def actions(module_id: int) -> Frames:
     found["selection_reset"] = module.params[0].value
     _testing.history_undo()
     found["selection_reset_undo"] = module.params[0].value
+    before_selection_disconnect = list(_testing.rack_cables())
+    rack().disconnect_selection_action()
+    after_selection_disconnect = list(_testing.rack_cables())
+    _testing.history_undo()
+    found["selection_disconnect"] = [
+        before_selection_disconnect,
+        after_selection_disconnect,
+        list(_testing.rack_cables()),
+    ]
+    before_selection_clone = len(rack().get_modules())
+    rack().clone_selection_action(False)
+    found["selection_clone_count"] = len(rack().get_modules()) - before_selection_clone
+    _testing.history_undo()
+    found["selection_clone_undo"] = len(rack().get_modules()) == before_selection_clone
+    rack().deselect_all()
+    rack().select(mw)
     selection_path = Path(CONFIG["result"]).with_name("selection.vcvs")
     rack().save_selection(str(selection_path))
     selection = json.loads(selection_path.read_text())
@@ -358,6 +374,13 @@ def actions(module_id: int) -> Frames:
     found["selection_loaded"] = len(rack().get_modules()) - modules_before
     _testing.history_undo()
     found["selection_load_undo"] = len(rack().get_modules()) == modules_before
+    rack().deselect_all()
+    rack().select(mw)
+    rack().copy_clipboard_selection()
+    found["selection_pasted"] = rack().paste_clipboard_action()
+    found["selection_paste_count"] = len(rack().get_modules()) - modules_before
+    _testing.history_undo()
+    found["selection_paste_undo"] = len(rack().get_modules()) == modules_before
     rack().deselect_all()
     mw.reset_action()
     found["reset"] = module.params[0].value
