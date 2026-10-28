@@ -11,6 +11,7 @@ The RackPy port times its frames exactly as Core Audio does.
 """
 
 import gc
+import importlib
 import random
 from array import array
 from collections.abc import Iterator
@@ -21,11 +22,12 @@ from _rackpy_host import _testing as HOOKS
 
 from rackpy import audio as fa
 from rackpy import raw
-from rackpy.dsp.kernel import AudioInterface
 from rackpy.errors import OwnershipError
 from rackpy.raw import audio
 from rackpy.raw import settings as rset
 from rackpy.raw.engine import Cable, Engine, EngineModule, Module
+
+runner: Any = importlib.import_module("rackpy_in_rack_pytest")
 
 AUDIO_ID = 4351
 BLOCK = 256
@@ -49,12 +51,15 @@ def patch_to_itself(module: Module | EngineModule) -> list[Cable]:
 
 
 def interface(port: audio.Port) -> Module:
-    def configure(m: Module) -> None:
-        m.config(0, 2, 2, 0)
-        m.set_audio_port(port, inputs=2, outputs=2)
-        m.set_kernel(AudioInterface(input=0, output=0, channels=2))
-
-    return Module.create(configure)
+    runner.port = port
+    model = raw.plugin.get_model("RackPy", "IOProbe")
+    assert model is not None
+    try:
+        module = model.create_module()
+    finally:
+        runner.port = None
+    assert isinstance(module, Module)
+    return module
 
 
 @pytest.fixture(scope="module")
@@ -76,7 +81,9 @@ def rig() -> Iterator[dict[str, Any]]:
     port.input_offset = port.output_offset = 2
     module = interface(port)
     e.add_module(module)
-    cables = patch_to_itself(core) + patch_to_itself(module)
+    # Test-only cables are removed before the foreign reference module is deleted.
+    core_cables = [HOOKS.engine_reference_loopback(core.id, i) for i in (0, 1)]
+    cables = patch_to_itself(module)
     rig = {"driver": driver, "device": device, "core": core, "port": port, "module": module, "cables": cables}
     STATE.update(rig)
     yield rig
@@ -85,7 +92,10 @@ def rig() -> Iterator[dict[str, Any]]:
     for m in (module, core):
         if e.get_master_module() == m:
             e.set_master_module(None)
-        e.remove_module(m)
+    e.remove_module(module)
+    for cable_id in core_cables:
+        HOOKS.engine_disconnect(cable_id)
+    e.remove_module(core)
 
 
 def blocks(device: audio.PythonDevice, count: int, seed: int) -> list[tuple[list[float], list[float]]]:

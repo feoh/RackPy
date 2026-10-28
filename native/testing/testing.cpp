@@ -1114,6 +1114,20 @@ void define(py::module_ m) {
 		engineCall("engine_connect", [&] { APP->engine->addCable(cable); });
 		return cable->id;
 	});
+	// Test-only Core reference loopback: the caller must disconnect before deleting the module.
+	m.def("engine_reference_loopback", [engineCall](int64_t id, int port) {
+		return engineCall("engine_reference_loopback", [&] {
+			auto* mod = APP->engine->getModule(id);
+			if (!mod)
+				throw std::invalid_argument("no such module");
+			auto cable = std::make_unique<rack::engine::Cable>();
+			cable->outputModule = cable->inputModule = mod;
+			cable->outputId = module::Construction::index(port, mod->outputs.size());
+			cable->inputId = module::Construction::index(port, mod->inputs.size());
+			APP->engine->addCable(cable.get());
+			return cable.release()->id;
+		});
+	});
 	m.def("engine_disconnect", [engineCall](int64_t id) {
 		engineCall("engine_disconnect", [&] {
 			rack::engine::Cable* cable = APP->engine->getCable(id);
