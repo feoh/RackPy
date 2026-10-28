@@ -291,19 +291,29 @@ The host-view API:
     `set_module_pos_nearest`, `set_module_pos_force` and
     `set_module_pos_squeeze` for a module widget in the rack;
   - Rack's selection and its actions: `select`, `select_all`,
-    `deselect_all`, `get_selected`, `selection_to_json`, load and save,
-    clipboard, reset, randomize, disconnect, clone, bypass and delete;
+    `deselect_all`, `has_selection`, `is_selected`, `get_selected`,
+    `is_selection_bypassed`, `selection_to_json`, load and save, clipboard,
+    reset, randomize, disconnect, clone, bypass and delete. Use
+    `append_selection_context_menu(menu)` to add Rack's selection menu items.
+    `update_selection_from_rect()` updates the selection from Rack's current
+    selection rectangle; `request_selection_pos(delta)` moves the selection
+    if the new positions do not overlap other modules, while
+    `set_selection_pos_nearest(delta)` searches nearby grid positions;
   - patch JSON: `merge_json` and `from_json`. `from_json` refuses modules or
     cables that already have widgets, because Rack would give them a second
     owner;
   - paste: `paste_json_action`, `paste_module_json_action` and
     `paste_clipboard_action`;
   - `clear()` and cable clearing;
-  - cable lookups (`get_cables`, `get_cable(id)`,
-    `get_cable(output, input)`, `get_cables_on_port`, `get_top_cable`,
-    `get_top_plug`) and the next cable colour;
-  - `get_touched_param()` and `set_touched_param()`, the param Core's
-    MIDI-Map learns. That param needs a module.
+  - Rack's child containers: `get_module_container()`,
+    `get_cable_container()` and `get_plug_container()` return host views;
+  - cable lookups (`get_cables`, `get_complete_cables`,
+    `get_incomplete_cables`, deprecated `get_incomplete_cable`,
+    `get_cable(id)`, `get_cable(output, input)`, `get_cables_on_port`,
+    `get_complete_cables_on_port`, `get_top_cable`, `get_top_plug`) and the
+    next cable colour;
+  - `get_touched_param()`, `set_touched_param()` and `touched_param`, the
+    param Core's MIDI-Map learns. That param needs a module.
 - `add_module(module_widget)` and `add_module_at_mouse(module_widget)` put a
   Python module widget, with its model and module, into the rack, which then
   owns it. `remove_module(module_widget)` takes it out again, disconnecting

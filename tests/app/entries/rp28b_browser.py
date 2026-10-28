@@ -145,7 +145,23 @@ def phase1() -> Frames:
     a, b = VOICES[first], VOICES[second]
     out, inp = a.get_output(0), b.get_input(0)
     assert isinstance(out, app.PortWidget) and isinstance(inp, app.PortWidget)
-    drag(scene_pos(out), scene_pos(inp))
+    start, end = scene_pos(out), scene_pos(inp)
+    state = events()
+    state.handle_hover(start, Vec())
+    state.handle_button(start, LEFT, PRESS, 0)
+    state.handle_hover(end, end.minus(start))
+    incomplete = rack().get_incomplete_cables()
+    assert len(incomplete) == 1
+    dragging = incomplete[0]
+    RESULT["hovered_cable"] = [
+        dragging.hovered_input_port is inp,
+        dragging.get_hovered_port(Port.Type.INPUT) is inp,
+        dragging.hovered_output_port is None,
+        dragging.get_hovered_port(Port.Type.OUTPUT) is None,
+        dragging.output_plug.get_cable() is dragging,
+        dragging.output_plug.get_type() == Port.Type.OUTPUT,
+    ]
+    state.handle_button(end, LEFT, RELEASE, 0)
     RESULT["cable"] = list(_testing.rack_cables())
     gate = b.module
     RESULT["connected"] = gate is not None and gate.inputs[0].is_connected()

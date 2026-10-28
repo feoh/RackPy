@@ -30,6 +30,15 @@ The scheme records now cite the behavioral test; no status was promoted.
 `uv run pytest -m unit -q` (106 passed), and `uv run sphinx-build -q -W -n
 -b html docs build/docs/html` passed after these changes.
 
+Further actual-Rack evidence: `uv run pytest -q tests/app/test_app.py`
+passed with selection delta movement, nearest-grid movement, finite-value
+rejection and re-selection from Rack's active drag rectangle. The app
+reference now names selection and container queries. `uv run pytest -q
+ tests/app/test_module_browser.py` passed with assertions against the hovered
+input and output plug of a cable during a real drag. An attempted reverse drag
+was not reliable in the existing fixture and was removed; the non-null hovered
+output path still needs evidence.
+
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to
 `planning/rp-31-audit/evidence.json`, including RP-31L's prior work; add missing

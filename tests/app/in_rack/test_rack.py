@@ -92,6 +92,14 @@ def test_modules_selection_and_positions(probe: Any) -> None:
     data = rack.selection_to_json()
     assert [m["model"] for m in data["modules"]] == ["RuntimeProbe"]
     assert not rack.is_selection_bypassed()
+    assert rack.request_selection_pos(Vec(600, 0))
+    assert probe.get_box().pos == pos.plus(Vec(600, 0))
+    rack.set_selection_pos_nearest(Vec(-600, 0))
+    assert probe.get_box().pos == pos
+    with pytest.raises(ValueError):
+        rack.request_selection_pos(Vec(math.nan, 0))
+    with pytest.raises(ValueError):
+        rack.set_selection_pos_nearest(Vec(math.inf, 0))
     rack.deselect_all()
     assert not rack.has_selection()
     rack.select_all()
@@ -291,6 +299,10 @@ def rack_calls(rack: app.HostRackWidget, probe: Any) -> None:
     rack.on_drag_start(w.DragStartEvent(button=GLFW_MOUSE_BUTTON_LEFT))  # Rack starts its selection rectangle
     rack.on_drag_hover(w.DragHoverEvent(button=GLFW_MOUSE_BUTTON_LEFT, pos=end))
     assert rack.get_mouse_pos() == end and rack.is_selected(probe)
+    rack.deselect_all()
+    assert not rack.is_selected(probe)
+    rack.update_selection_from_rect()
+    assert rack.is_selected(probe)  # Rack reselects modules intersecting the active rectangle
     rack.on_drag_end(w.DragEndEvent(button=GLFW_MOUSE_BUTTON_LEFT))
     rack.on_drag_hover(w.DragHoverEvent(button=GLFW_MOUSE_BUTTON_LEFT, pos=start))
     assert rack.get_mouse_pos() == start and rack.is_selected(probe)  # the rectangle has ended
