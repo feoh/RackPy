@@ -324,8 +324,9 @@ The host-view API:
     owner;
   - paste: `paste_json_action`, `paste_module_json_action` and
     `paste_clipboard_action`;
-  - `clear()` and cable clearing: `clear_cables()` removes all cables
-    without an undo step; `clear_cables_action()` records an undo step, and
+  - `clear()` deletes Rack's module widgets and their modules and cables;
+    it does not clear modules separately added to the engine without widgets.
+    For cable clearing, `clear_cables()` removes all cables without an undo step; `clear_cables_action()` records an undo step, and
     `clear_cables_on_port(port)` removes those on one port;
   - Rack's child containers: `get_module_container()`,
     `get_cable_container()` and `get_plug_container()` return host views;

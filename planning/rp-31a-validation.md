@@ -139,7 +139,11 @@ Both the ordinary and interposed host runs passed. The native OS dialog UI
 itself was not exercised; the six records explicitly state that limitation.
 A live-Rack palette test also checks two distinct cable colors, ID rotation,
 wraparound and disabled rotation, restoring settings afterward. Its three
-records cite the test and the reference explains those semantics.
+records cite the test and the reference explains those semantics. The
+scene-level actual-Rack `RackWidget.clear()` scenario now verifies that a
+Rack-owned module is live before clear and invalidated afterward, while
+engine-only modules remain until `Engine.clear()`; both engine-ops host runs
+passed. The manifest cites this test and the reference states the distinction.
 
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to

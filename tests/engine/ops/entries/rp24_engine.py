@@ -167,8 +167,10 @@ def clear(state: dict[str, Any]) -> None:
     a, c, h = state["a"], state["cable"], state["handle"]
     context = raw.context_get()
     assert context is not None and context.scene is not None
+    owned = state["owned"]
+    owned_before = owned.alive
     context.scene.rack.clear()  # Rack's module widgets (and their modules and cables) go
-    RESULT["rack_cleared"] = [h.in_engine, h.module is None, c.alive, a.alive]
+    RESULT["rack_cleared"] = [h.in_engine, h.module is None, c.alive, a.alive, owned_before, owned.alive]
     e.clear()  # the rack is empty now; Rack deletes what Python added, and removes the handles
     RESULT["engine_cleared"] = [h.in_engine, c.alive, a.alive, e.get_num_modules(), e.get_num_cables()]
     RESULT["remove_after_clear"] = refused(lambda: e.remove_param_handle(h))  # Rack would assert
