@@ -1,10 +1,8 @@
-# RP-31E validation (Linux x86_64): WIP checkpoint, not validated
+# RP-31E validation (Linux x86_64)
 
-Date 2026-10-27, branch `rp31e` from fc4aa6d. The session ended early, at the
-supervisor's request, before the final validation. This commit is a checkpoint:
-one host test fails (below), the swap-mutation check was not run, and no host
-run was made on the committed tree. Logs are in `build/validation/rp31e-*.log`,
-which git ignores.
+Branch `rp31e` from fc4aa6d. The 2026-10-27 checkpoint had a failing PUT test
+and incomplete validation; the subsequent work and final checks are recorded
+below. Earlier logs are in `build/validation/rp31e-*.log`, which git ignores.
 
 Records: the 65 `services_io` entries of
 [rp-31-audit/evidence.json](rp-31-audit/evidence.json) with weak or missing
@@ -31,10 +29,8 @@ diffing against fc4aa6d). Nothing was promoted.
 | `uv run pytest -q -m "docs and not host"` | 15 passed |
 | `flock /tmp/rackpy-host-tests.lock uv run pytest -q -rA tests/services/test_settings.py tests/services/test_utilities.py tests/services/test_system.py tests/io/test_audio.py tests/io/test_virtual.py "tests/io/test_midi.py::test_midi_in_live_rack"` | **5 passed, 1 failed** (260 s): `test_system_and_network_in_rack` |
 
-Not run: `tests/coverage/test_introspection.py` against the built package,
-the mutation check (swap two `RACKPY_SETTING` lines, two enum values and two
-log levels, rebuild, and see the new tests fail), and any host run on the
-committed tree.
+At that checkpoint, built-package introspection, mutation checks and a host
+run on the committed tree had not yet run; the later checks are below.
 
 ## The failure: Rack's `METHOD_PUT` sends POST
 
@@ -58,7 +54,7 @@ logger enum bindings. The respective actual-Rack settings tests failed at
 failed (its earlier existing log assertion), and its log also showed the new
 level markers labeled `info` for DEBUG and `debug` for INFO, contradicting the
 new level assertions. Each experiment restored its source and rebuilt the
-unmutated binary. Final validation remains.
+unmutated binary.
 
 ## Per-record changes
 
@@ -76,8 +72,21 @@ unmutated binary. Final validation remains.
 | `~Device` (audio, MIDI) | cite `test_active_stream_module_deletion_and_hotplug` and the quit test (audio), `test_a_python_midi_driver` (MIDI) | `alive` after deletion documented; disposition in notes |
 | `midi::Input::inputDevice`, `Port::getDevice/getDeviceId/getDriverId`, `InputDevice`/`OutputDevice` `subscribe`/`unsubscribe` | new `test_port_getters_and_device_subscriptions`: getters across two loopback devices; a subscribed input hears the device until it unsubscribes; `OwnershipError` for subscriptions `subscribe` did not make (passed) | `midi.md#midi-ports`, `#midi-devices` |
 
-## Left, and next steps
+## Final checks after restoring mutations
 
-1. Repeat final validation on the unmutated tree, including the full target
-   host runs and built-package introspection, and reconcile every audit record.
-2. Replace this WIP record with final validation evidence.
+- Werror test-hooks build and 6 CTests passed; the restored binary was rebuilt
+  after the mutations.
+- Actual Rack services, settings, utilities, audio, virtual audio/MIDI, MIDI
+  and built-package introspection: 9 outer tests passed, serialized with the
+  host lock. `pytest -m unit`: 106 passed; `pytest -m docs`: 17 passed.
+- Actual Rack values/reference suite on the test-hooks build passed. A second
+  test expecting a *production* build failed because the temporary fixture
+  override incorrectly supplied that same test-hooks build, so its expected
+  test-hooks skips were absent; this was a fixture-selection error, not a
+  production-build validation. The override was restored.
+- `prek run --all-files`, `rackpy-dev typecheck`, generator and source
+  coverage checks, and Sphinx with warnings as errors passed. Built-package
+  names were checked separately by the introspection host test.
+
+No records were promoted to verified. This is Linux x86_64 evidence only;
+macOS and Windows and a fresh production build were not tested here.
