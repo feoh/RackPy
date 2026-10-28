@@ -186,9 +186,8 @@ class ModuleClass(_plugin.ModuleClass):
     ``super()`` runs it (Rack's, with RackPy's lifecycle snapshot and data
     handlers), as in a C++ subclass of ``rack::engine::Module``. So an
     :meth:`on_reset` that does not call ``super()`` resets no parameters.
-    Rack's deprecated no-argument events (``onAdd()``, ``onReset()``, ...)
-    run through Rack's default event methods, but cannot yet be independently
-    overridden in Python. Those legacy virtuals remain planned (RP-31F).
+    Rack's deprecated no-argument events have separate ``on_*_legacy``
+    override slots. Rack's default modern events invoke them.
     Create one with :meth:`create`, never through a model: Rack cannot
     create it.
     """
@@ -197,12 +196,48 @@ class ModuleClass(_plugin.ModuleClass):
 
     def __init_subclass__(cls, **kwargs: object) -> None:
         super().__init_subclass__(**kwargs)
+        for name in (
+            "on_add_legacy",
+            "on_remove_legacy",
+            "on_reset_legacy",
+            "on_randomize_legacy",
+            "on_sample_rate_change_legacy",
+        ):
+            if name in vars(cls):
+                warnings.warn(f"{cls.__qualname__} overrides deprecated {name}()", DeprecationWarning, stacklevel=2)
         if "step" in vars(cls):
             warnings.warn(
                 f"{cls.__qualname__} overrides step(), which Rack deprecates: override process(args) instead",
                 DeprecationWarning,
                 stacklevel=2,
             )
+
+    def on_add_legacy(self) -> None:
+        """Rack's deprecated no-argument event; the default implementation does nothing."""
+        warnings.warn("Module.on_add() without an event is deprecated in Rack", DeprecationWarning, stacklevel=2)
+        _lab.base_on_add_legacy(self.module)
+
+    def on_remove_legacy(self) -> None:
+        """Rack's deprecated no-argument event; the default implementation does nothing."""
+        warnings.warn("Module.on_remove() without an event is deprecated in Rack", DeprecationWarning, stacklevel=2)
+        _lab.base_on_remove_legacy(self.module)
+
+    def on_reset_legacy(self) -> None:
+        """Rack's deprecated no-argument event; the default implementation does nothing."""
+        warnings.warn("Module.on_reset() without an event is deprecated in Rack", DeprecationWarning, stacklevel=2)
+        _lab.base_on_reset_legacy(self.module)
+
+    def on_randomize_legacy(self) -> None:
+        """Rack's deprecated no-argument event; the default implementation does nothing."""
+        warnings.warn("Module.on_randomize() without an event is deprecated in Rack", DeprecationWarning, stacklevel=2)
+        _lab.base_on_randomize_legacy(self.module)
+
+    def on_sample_rate_change_legacy(self) -> None:
+        """Rack's deprecated no-argument event; the default implementation does nothing."""
+        warnings.warn(
+            "Module.on_sample_rate_change() without an event is deprecated in Rack", DeprecationWarning, stacklevel=2
+        )
+        _lab.base_on_sample_rate_change_legacy(self.module)
 
     def process(self, args: ProcessArgs) -> None:
         """Advance the module by one sample. Rack's implementation calls :meth:`step`."""

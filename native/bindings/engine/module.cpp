@@ -448,9 +448,19 @@ void dispatch(const ModuleRef& r, F handler) {
 	auto context = runtime::binding().current();
 	if (!context || rack::contextGet() != context->context || !context->context->engine)
 		throw runtime::WrongContext("module events need Rack's live bound UI context");
-	py::gil_scoped_release release;
-	runtime::EngineLease lease(*context);
-	handler(m);
+	if (m.laboratory) {
+		// Laboratory callbacks are synchronous on the main thread. Retain the
+		// GIL and propagate errors to the Python caller, as Bench does.
+		ErrorCapture capture;
+		runtime::EngineLease lease(*context);
+		handler(m);
+		capture.rethrow();
+	}
+	else {
+		py::gil_scoped_release release;
+		runtime::EngineLease lease(*context);
+		handler(m);
+	}
 }
 
 /** Python callables for Rack's dataToJson/dataFromJson (owner decision 2026-10-23). */

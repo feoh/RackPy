@@ -48,6 +48,11 @@ enum class Override : size_t {
 	OnSetMaster,
 	OnUnsetMaster,
 	OnExpanderChange,
+	OnAddLegacy,
+	OnRemoveLegacy,
+	OnResetLegacy,
+	OnRandomizeLegacy,
+	OnSampleRateChangeLegacy,
 	ModuleToJson,
 	ModuleFromJson,
 	ParamsToJson,
@@ -93,11 +98,11 @@ struct Module : module::Module {
 	void paramsFromJson(json_t* rootJ) override;
 	json_t* dataToJson() override;
 	void dataFromJson(json_t* rootJ) override;
-	using module::Module::onAdd;
-	using module::Module::onRemove;
-	using module::Module::onReset;
-	using module::Module::onRandomize;
-	using module::Module::onSampleRateChange;
+	void onAdd() override;
+	void onRemove() override;
+	void onReset() override;
+	void onRandomize() override;
+	void onSampleRateChange() override;
 
 	/** The Python references it holds, for its handle's garbage-collector traversal. */
 	template <typename Visit>

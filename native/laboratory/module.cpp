@@ -33,6 +33,11 @@ const char* const OVERRIDE_NAMES[(size_t) Override::Count] = {
 	"on_set_master",
 	"on_unset_master",
 	"on_expander_change",
+	"on_add_legacy",
+	"on_remove_legacy",
+	"on_reset_legacy",
+	"on_randomize_legacy",
+	"on_sample_rate_change_legacy",
 	"module_to_json",
 	"module_from_json",
 	"params_to_json",
@@ -185,6 +190,21 @@ RACKPY_LAB_EVENT(onUnsetMaster, UnsetMasterEvent, OnUnsetMaster)
 RACKPY_LAB_EVENT(onExpanderChange, ExpanderChangeEvent, OnExpanderChange)
 #undef RACKPY_LAB_EVENT
 
+// Rack's default modern events dispatch these separate legacy virtuals.
+#define RACKPY_LAB_LEGACY_EVENT(Method, Kind) \
+	void Module::Method() { \
+		if (const auto& f = override(Override::Kind)) \
+			dispatch(Override::Kind, [&] { f.get()(); }); \
+		else \
+			rack::engine::Module::Method(); \
+	}
+RACKPY_LAB_LEGACY_EVENT(onAdd, OnAddLegacy)
+RACKPY_LAB_LEGACY_EVENT(onRemove, OnRemoveLegacy)
+RACKPY_LAB_LEGACY_EVENT(onReset, OnResetLegacy)
+RACKPY_LAB_LEGACY_EVENT(onRandomize, OnRandomizeLegacy)
+RACKPY_LAB_LEGACY_EVENT(onSampleRateChange, OnSampleRateChangeLegacy)
+#undef RACKPY_LAB_LEGACY_EVENT
+
 // JSON: synchronous, as Rack requires. An override returns JSON-compatible
 // data, or None for Rack's NULL; it receives Rack's JSON converted.
 namespace {
@@ -317,6 +337,26 @@ void bindModules(py::module_ lab) {
 		"earlier ones.");
 
 	// The superclass implementations a Python override reaches with super().
+	lab.def("base_on_add_legacy", [](const bindings::ModuleRef& r) {
+		Module& m = laboratoryHandle(r);
+		forPython([&] { m.rack::engine::Module::onAdd(); });
+	}, py::arg("module"));
+	lab.def("base_on_remove_legacy", [](const bindings::ModuleRef& r) {
+		Module& m = laboratoryHandle(r);
+		forPython([&] { m.rack::engine::Module::onRemove(); });
+	}, py::arg("module"));
+	lab.def("base_on_reset_legacy", [](const bindings::ModuleRef& r) {
+		Module& m = laboratoryHandle(r);
+		forPython([&] { m.rack::engine::Module::onReset(); });
+	}, py::arg("module"));
+	lab.def("base_on_randomize_legacy", [](const bindings::ModuleRef& r) {
+		Module& m = laboratoryHandle(r);
+		forPython([&] { m.rack::engine::Module::onRandomize(); });
+	}, py::arg("module"));
+	lab.def("base_on_sample_rate_change_legacy", [](const bindings::ModuleRef& r) {
+		Module& m = laboratoryHandle(r);
+		forPython([&] { m.rack::engine::Module::onSampleRateChange(); });
+	}, py::arg("module"));
 	lab.def("base_process", [](const bindings::ModuleRef& r, const M::ProcessArgs& args) {
 		Module& m = laboratoryHandle(r);
 		forPython([&] { m.rack::engine::Module::process(args); });

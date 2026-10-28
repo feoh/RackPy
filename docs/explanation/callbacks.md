@@ -173,6 +173,13 @@ handler that `data_to_json`'s `super()` calls). Rack's `toJson` and
 values go through Rack's engine, so parameter JSON, reset and randomize of a
 module with parameters need Rack's live context (`ContextError` otherwise).
 
+The five deprecated no-argument Module events have distinct `on_add_legacy`,
+`on_remove_legacy`, `on_reset_legacy`, `on_randomize_legacy`, and
+`on_sample_rate_change_legacy` override slots. Defining one or explicitly
+calling its base warns. Rack's default modern event dispatches the legacy
+virtual; a modern override suppresses it unless it calls `super()`. This
+internal dispatch alone does not issue a deprecation warning.
+
 The rules that keep it contained:
 
 - **Never in Rack's engine.** `Engine.add_module` refuses a laboratory
