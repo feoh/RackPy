@@ -298,6 +298,12 @@ def actions(module_id: int) -> Frames:
     found["disconnected"] = list(_testing.rack_cables())
     _testing.history_undo()
     found["reconnected"] = list(_testing.rack_cables())
+    context = raw.context_get()
+    assert context is not None and context.history is not None
+    history = context.history
+    before_disconnect = history.action_index
+    mw.disconnect()
+    found["plain_disconnect"] = [list(_testing.rack_cables()), history.action_index == before_disconnect]
     mw.create_context_menu()  # Rack's module menu; it closes when the next click lands elsewhere
     yield from wait(1)
     events().handle_button(Vec(2, 2), LEFT, PRESS, 0)

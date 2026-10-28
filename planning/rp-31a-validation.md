@@ -18,8 +18,17 @@ A later documentation-only checkpoint corrected the undo distinction between
 `ModuleWidget.disconnect()` and `disconnect_action()` against their native
 binding wrappers. In the RP-31A worktree, `uv run prek run --all-files`
 (including strict mypy) and `uv run sphinx-build -W -n -b html docs
-build/docs/html` passed. No new host behavior test was run; the `disconnect()`
-behavioral evidence remains outstanding.
+build/docs/html` passed. At that checkpoint no new host behavior test was run.
+
+Additional Linux actual-host evidence: `uv run pytest -q
+ tests/app/test_module_browser.py` passed (1 test), including cable removal by
+`disconnect()` with unchanged history index. `uv run pytest -q
+ tests/app/test_app.py` passed (1 outer test), including exact pinned SDK RGBA
+values for all component scheme constants and cable colour ID round-tripping.
+The scheme records now cite the behavioral test; no status was promoted.
+`uv run bin/generate_bindings.py generate`, `uv run prek run --all-files`,
+`uv run pytest -m unit -q` (106 passed), and `uv run sphinx-build -q -W -n
+-b html docs build/docs/html` passed after these changes.
 
 **Remaining:** RP-31A is open: the static audit lists 149 relevant entries and
 many still require behavioral tests or documentation. Compare every record to

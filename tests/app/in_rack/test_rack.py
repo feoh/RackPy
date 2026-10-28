@@ -123,6 +123,7 @@ def test_containers_cables_colours_and_menus() -> None:
         assert rack.get_incomplete_cable() is None
     colour = rack.get_next_cable_color_id()
     rack.set_next_cable_color_id(colour + 1)
+    assert rack.get_next_cable_color_id() == colour + 1
     assert isinstance(rack.get_next_cable_color(), nvg.NVGcolor)
     rack.set_next_cable_color_id(colour)
     assert rack.get_mouse_pos().is_finite()

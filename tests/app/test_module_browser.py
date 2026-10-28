@@ -92,6 +92,8 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     assert actions["reset"] == 5.0 and actions["bypassed"] and actions["cloned"]
     # The clone copies the cable into its input too (Rack's Duplicate with cables): two cables, then none.
     assert actions["disconnected"][2] < actions["reconnected"][2]
+    assert actions["plain_disconnect"][0][2] < actions["reconnected"][2]
+    assert actions["plain_disconnect"][1]  # no history action, unlike disconnect_action
     assert one["blink"] == [True, ["PyBlink", False], True]  # the documentation's module widget, in Rack
 
     two = launch(rack_host, tmp_path, plugin, 2)

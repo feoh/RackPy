@@ -114,6 +114,26 @@ def test_racks_components_load_racks_artwork() -> None:
             widget.close()
 
 
+def test_scheme_colors_match_the_pinned_sdk() -> None:
+    # componentlibrary.hpp defines distinct RGBA values, not interchangeable aliases.
+    expected = {
+        "BLACK_TRANSPARENT": (0x00, 0x00, 0x00, 0x00),
+        "BLACK": (0x00, 0x00, 0x00, 0xFF),
+        "WHITE": (0xFF, 0xFF, 0xFF, 0xFF),
+        "RED": (0xED, 0x2C, 0x24, 0xFF),
+        "ORANGE": (0xF2, 0xB1, 0x20, 0xFF),
+        "YELLOW": (0xFF, 0xD7, 0x14, 0xFF),
+        "GREEN": (0x90, 0xC7, 0x3E, 0xFF),
+        "CYAN": (0x22, 0xE6, 0xEF, 0xFF),
+        "BLUE": (0x29, 0xB2, 0xEF, 0xFF),
+        "PURPLE": (0xD5, 0x2B, 0xED, 0xFF),
+        "LIGHT_GRAY": (0xE6, 0xE6, 0xE6, 0xFF),
+        "DARK_GRAY": (0x17, 0x17, 0x17, 0xFF),
+    }
+    for name, rgba in expected.items():
+        assert getattr(cl, f"SCHEME_{name}") == nvg.rgba(*rgba), name
+
+
 def test_light_templates_are_specializations() -> None:
     red = cl.RedLight()
     assert red.base_colors == [cl.SCHEME_RED] and red.bg_color == nvg.rgba(0x33, 0x33, 0x33, 0xFF)
