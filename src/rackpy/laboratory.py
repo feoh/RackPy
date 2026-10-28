@@ -187,7 +187,8 @@ class ModuleClass(_plugin.ModuleClass):
     handlers), as in a C++ subclass of ``rack::engine::Module``. So an
     :meth:`on_reset` that does not call ``super()`` resets no parameters.
     Rack's deprecated no-argument events (``onAdd()``, ``onReset()``, ...)
-    are reached through ``super()`` and need no override of their own.
+    run through Rack's default event methods, but cannot yet be independently
+    overridden in Python. Those legacy virtuals remain planned (RP-31F).
     Create one with :meth:`create`, never through a model: Rack cannot
     create it.
     """

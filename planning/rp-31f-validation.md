@@ -47,3 +47,17 @@ changes were removed. macOS and Windows were not tested.
 virtuals without warning on modern callbacks, or otherwise resolve their full
 public semantics. Re-run relevant final validation and do not close RP-31F or
 claim full coverage until the gap is resolved.
+
+## 2026-10-28 investigation
+
+Corrected `ModuleClass`'s docstring: the legacy events do not yet have their
+own Python override. Rack's `Module.hpp:376-379` and `:407-410` dispatch the
+legacy no-argument virtual from the default modern event implementation;
+`Reset` and `Randomize` are out-of-line. `native/laboratory/module.cpp`
+currently registers only the modern callbacks, while `module::Module` calls
+Rack's modern implementation before recording a snapshot. A candidate fix
+needs distinct legacy override slots and explicit base methods, preserving
+modern override suppression and `super()` reentry without Python on a
+production/audio thread. Validate every path in real Rack, including warnings
+for defining/calling legacy methods and no warnings for modern ones. The
+candidate remains unimplemented; the five records remain `planned`.

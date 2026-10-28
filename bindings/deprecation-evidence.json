@@ -95,4 +95,3 @@
     "record:rack::dsp::VuMeter": "tests/coverage/in_rack/test_deprecated_operations.py::test_deprecated_operation_warns"
   }
 }
-
