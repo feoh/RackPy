@@ -202,6 +202,8 @@ def test_json_requests(server: str) -> None:
     )
     with pytest.raises(NotImplementedError, match="cannot safely send"):
         net.put_json(server + "/api", {"y": "z"})
+    # These names are distinct in Rack's enum even though its curl PUT path sends POST.
+    assert rn.Method.METHOD_PUT.value == 2 and rn.METHOD_PUT is rn.Method.METHOD_PUT
     # Rack 2.6.6 sets CURLOPT_POSTFIELDS after CURLOPT_UPLOAD, causing curl to POST.
     raw_put = rn.request_json(rn.Method.METHOD_PUT, server + "/api", [1], {})
     assert raw_put["method"] == "POST" and json.loads(raw_put["body"]) == [1]

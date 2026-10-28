@@ -42,7 +42,8 @@ and curl then sends POST. So with a body, `METHOD_PUT` is indistinguishable
 from `METHOD_POST`, and the facade's `put_json` does not PUT. Without a body,
 curl uploads from its default read function, stdin. The raw binding preserves Rack's behavior and documents it. The higher-level
 `put_json` now raises `NotImplementedError` instead of making an unintended
-POST (or reading stdin); the host test checks both. On the updated tree the
+POST (or reading stdin); the host test checks both and asserts Rack's PUT enum
+value, so swapping it with POST cannot pass just because their requests match. On the updated tree the
 werror test-hooks build and 6 CTests, targeted services/audio/MIDI host tests
 and built-package introspection passed (9 outer tests). The tests used temporary
 fixture overrides to select the existing test-hooks build; the fixture was
