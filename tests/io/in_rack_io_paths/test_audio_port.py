@@ -79,6 +79,9 @@ def rig() -> Iterator[dict[str, Any]]:
     e.module_from_json(core, {"plugin": "Core", "model": "AudioInterface2", "data": data})
     port: audio.Port = fa.open_port(AUDIO_ID, "IO 4")
     port.input_offset = port.output_offset = 2
+    # Match the device before either port receives input: otherwise Rack's
+    # master changes the rate mid-callback and clears a previously-fed port.
+    HOOKS.engine_set_sample_rate(48000.0)
     module = interface(port)
     e.add_module(module)
     # Test-only cables are removed before the foreign reference module is deleted.
@@ -172,7 +175,13 @@ def test_the_device_hears_the_same_as_through_core_audio(rig: dict[str, Any], ma
         after = module.audio_stats
         assert after is not None
         assert e.get_master_module() == rig[master]
-        assert same_as_core(got)
+        differences = [
+            (block, i, x, y)
+            for block, (a, b) in enumerate(got)
+            for i, (x, y) in enumerate(zip(a, b, strict=True))
+            if x != y
+        ]
+        assert same_as_core(got), f"{len(differences)} mismatches; first: {differences[:8]}"
         assert after["blocks"] - before["blocks"] == 24 and after["resampler_misses"] == 0
         stepped = after["stepped_frames"] - before["stepped_frames"]
         assert stepped == (24 * BLOCK if master == "module" else 0)  # a master steps Rack's engine by each block

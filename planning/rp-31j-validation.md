@@ -12,12 +12,19 @@ connect Core's foreign module without bypassing production ownership checks.
 Loopbacks are disconnected before deleting the module. The temporary test
 fixture override selecting the existing hooks build was restored.
 
-The host suite now reaches the differential: 8 inner tests pass, but
-`test_the_device_hears_the_same_as_through_core_audio[1-core]` fails. The first
-block has a one-frame startup difference between Core and the bridge; later
-blocks shown in the failure match. Do not waive or weaken this comparison:
-investigate whether the discrepancy is initialization or real audio timing,
-and prove any fix against Core. Timed MIDI live-Rack differential, interpreter
-and compiled graph paths, audio-path guard, sanitizer/stress, documentation,
-manifest and full task validation remain. The checkpoint is not evidence that
-the production I/O paths are correct or real-time safe.
+The host suite reached the differential but initially failed
+`test_the_device_hears_the_same_as_through_core_audio[1-core]`. Instrumentation
+showed **512 sample mismatches**, not just one frame: the bridge was silent
+for the first block while Core produced audio. Setting Rack's suggested engine
+rate to the device's 48 kHz before starting the comparison made all nine
+inner tests pass, including the entire first block. The likely explanation is
+that a master changes the engine rate while processing device inputs, clearing
+an already-fed secondary port; that explanation has not yet been isolated
+against two Core ports. The comparison is therefore evidence for the
+preconfigured-rate case only, not proof of startup/rate-change equivalence.
+The existing separate rate-change test checks resampling and missed converters.
+
+Timed MIDI live-Rack differential, interpreter and compiled graph paths,
+audio-path guard, sanitizer/stress, documentation, manifest and full task
+validation remain. This checkpoint is not evidence that the production I/O
+paths are correct or real-time safe.
