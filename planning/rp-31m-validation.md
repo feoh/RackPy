@@ -1,30 +1,47 @@
-# RP-31M investigation — incomplete
+# RP-31M — Plugin destructor and model lifetimes
 
-Rack 2.6.6 `src/plugin/Plugin.cpp:14-20` shows `Plugin::~Plugin()` clears
-`model->plugin` for each model and does not delete the models. RackPy exposes
-loaded plugins as borrowed `PluginHandle` objects only; `Model.plugin` is
-observable, but a Python caller cannot destroy the plugin. The existing
-`on_destroy` test covers a different C hook, not this destructor.
+## Contract and implementation
 
-One possible mapping is an isolated, Python-owned plugin with explicit close,
-which calls the real destructor while retaining its models until their
-back-pointers have been cleared. Model handles need identity, lifetime and
-thread checks, including when models outlive the plugin or are dropped before
-it. This must not register the isolated plugin in Rack or change loaded
-plugins. It is not yet implemented or tested.
+Rack 2.6.6 `Plugin::~Plugin()` clears each attached model's `plugin`
+back-pointer; it does not delete those models. Loaded Rack plugins remain
+Rack-owned and Python cannot close them. `rackpy.raw.plugin.Plugin()` now
+creates an isolated plugin, not registered with Rack, which can attach only
+unattached RackPy models. Its explicit, idempotent main-thread `close()` runs
+the Rack destructor before releasing its retained model ownership. Surviving
+Python model handles stay live with `model.plugin is None` and can be
+reattached to another isolated plugin. A main-thread context-shutdown hook
+closes any isolated plugins left open. Python GC alone never closes one: the
+registry deliberately retains plugins and their models until close or shutdown.
 
-The user subsequently authorized proceeding with recommended decisions, so
-the isolated-plugin exception no longer awaits an interactive choice. A
-separate existing hazard remains: a module or widget made from a detached or
-staged RackPy model stores a raw model pointer even though the model can be
-freed when its Python handle is dropped or registration fails. As a WIP safety
-restriction, `create_module` and `create_module_widget` now require a committed
-model; tests cover detached and staged refusals. This also prevents those
-escapes while an eventual isolated plugin owns detached models. It is a
-restriction, not yet a complete Plugin destructor mapping.
+An isolated, detached, or staged model cannot create a module or widget:
+those retain a raw `Model*`, which could otherwise outlive that model. Rack's
+committed models and foreign loaded models retain their existing creation
+paths. Attachment reserves the retaining vector before Rack's `addModel`, and
+restores the back-pointer if list allocation fails. Pointer identities for
+isolated plugins carry a generation to avoid reusing an old wrapper after
+address reuse.
 
-`native/bindings/plugin.cpp` compiled with Werror, generated files and `prek`
-(including mypy) passed. The fresh hooks build timed out after 36/235 steps;
-the new host tests have **not** been run. No Plugin construction/destruction
-implementation or host proof exists yet, and the destructor record remains
-planned. The build may be resumed in `build/dev`; macOS and Windows are untested.
+This isolated-plugin exception to the previous this-plugin-only `add_model`
+policy was selected after the user authorized proceeding with recommended
+decisions. The corresponding destructor manifest entry is implemented, not
+verified; no records were promoted to verified.
+
+## Linux validation
+
+- Linux x86_64, Rack Free 2.6.6: Werror test-hooks build and all 6 CTests
+  passed. Actual-Rack `tests/plugin/test_plugin.py`, built-package
+  introspection and documentation-snippet tests: 17 outer tests passed. The
+  in-Rack plugin suite covers real destructor back-pointer clearing, surviving
+  model and factory lifetimes, repeated close, reattachment, dropped handles,
+  model reacquisition, rejection of duplicate attachment and module/widget
+  escapes, main-thread restrictions, and refusal to close Rack-owned plugins.
+  It deliberately leaves one isolated plugin open; the host exits cleanly
+  through context shutdown (this is not an independent destructor counter).
+- `tests/unit`: 26 passed. Sphinx `-W`, `prek run --all-files` (including
+  strict mypy), generated-file checks and source-only coverage checks passed.
+  The host introspection test checked Python names using the hooks artifact.
+- The host runs were serialized with `/tmp/rackpy-host-tests.lock` and used a
+  temporary `tests/conftest.py` override pointing the build fixtures to the
+  existing `build/dev` test-hooks artifact; the override was restored after
+  each run. This is not a fresh production-build validation. macOS and
+  Windows have not been tested in this continuation.

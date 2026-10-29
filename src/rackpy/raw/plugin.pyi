@@ -22,6 +22,10 @@ class PluginList(Sequence[Plugin]):
 
 @final
 class Plugin:
+    def __init__(self) -> None:
+        """Make an isolated plugin, not registered with Rack; close it on the main thread."""
+    def close(self) -> None:
+        """Destroy an isolated plugin; loaded Rack plugins cannot be closed from Python."""
     @property
     def alive(self) -> bool: ...
     @property
