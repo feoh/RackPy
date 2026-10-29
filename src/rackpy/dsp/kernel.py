@@ -13,7 +13,17 @@ try:
 except ImportError as e:
     raise ImportError("rackpy.dsp.kernel is available only inside Rack, in a RackPy plugin") from e
 
-__all__ = ["CONTROL_CAPACITY", "AudioInterface", "Gain", "Kernel", "KernelType", "Sine", "kernel_types", "load"]
+__all__ = [
+    "CONTROL_CAPACITY",
+    "AudioInterface",
+    "Gain",
+    "Kernel",
+    "KernelType",
+    "MidiToCV",
+    "Sine",
+    "kernel_types",
+    "load",
+]
 
 Kernel = _dsp.Kernel
 KernelType = _dsp.KernelType
@@ -25,6 +35,9 @@ Gain: KernelType = _dsp.kernel_type("rackpy.Gain")
 
 Sine: KernelType = _dsp.kernel_type("rackpy.Sine")
 """``Sine(output=, pitch_input=-1, pitch_param=-1, amplitude=5.0)``: a V/oct sine per pitch channel (0 V is C4)."""
+
+MidiToCV: KernelType = _dsp.kernel_type("rackpy.MidiToCV")
+"""``MidiToCV(midi_input=0, output=0, ...)``: convert a module's timed MIDI input to CV."""
 
 AudioInterface: KernelType = _dsp.kernel_type("rackpy.AudioInterface")
 """``AudioInterface(input=-1, output=-1, channels=2)``: Core Audio's processing around the module's audio port

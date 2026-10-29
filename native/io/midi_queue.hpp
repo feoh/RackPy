@@ -65,6 +65,7 @@ private:
 	std::unique_ptr<Cell[]> cells;
 	std::atomic<size_t> enqueuePos{0};
 	std::atomic<size_t> dequeuePos{0};  // advanced by the engine thread only
+	std::atomic<size_t> outstanding{0};  // reservations across producers, ring and pending
 	// The engine thread's (frame, arrival)-ordered buffer, from `begin`, `count` long; the first `dueEnd` are due.
 	std::unique_ptr<MidiMessage[]> pending;
 	size_t begin = 0, count = 0, dueEnd = 0;

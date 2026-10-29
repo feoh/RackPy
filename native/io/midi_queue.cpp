@@ -20,11 +20,16 @@ void MidiQueue::push(const rack::midi::Message& message) noexcept {
 		stats.droppedLong.fetch_add(1, std::memory_order_relaxed);
 		return;
 	}
-	// Rack's limit counts everything not yet delivered: what is queued, and what waits in order.
-	size_t queued = enqueuePos.load(std::memory_order_relaxed) - dequeuePos.load(std::memory_order_acquire);
-	if (queued + held.load(std::memory_order_relaxed) >= MIDI_QUEUE_CAPACITY) {
-		stats.droppedFull.fetch_add(1, std::memory_order_relaxed);
-		return;
+	// Reserve against the total, not separate snapshots of the ring and held
+	// messages: concurrent producers must not jointly exceed Rack's limit.
+	size_t used = outstanding.load(std::memory_order_relaxed);
+	for (;;) {
+		if (used >= MIDI_QUEUE_CAPACITY) {
+			stats.droppedFull.fetch_add(1, std::memory_order_relaxed);
+			return;
+		}
+		if (outstanding.compare_exchange_weak(used, used + 1, std::memory_order_relaxed))
+			break;
 	}
 	size_t pos = enqueuePos.load(std::memory_order_relaxed);
 	for (;;) {
@@ -43,6 +48,7 @@ void MidiQueue::push(const rack::midi::Message& message) noexcept {
 			}
 		}
 		else if (diff < 0) {
+			outstanding.fetch_sub(1, std::memory_order_relaxed);
 			stats.droppedFull.fetch_add(1, std::memory_order_relaxed);
 			return;
 		}
@@ -92,8 +98,10 @@ void MidiQueue::collect(int64_t frame) noexcept {
 	while (dueEnd < count && first[dueEnd].frame <= frame)
 		dueEnd++;
 	held.store(count - dueEnd, std::memory_order_relaxed);
-	if (dueEnd)
+	if (dueEnd) {
+		outstanding.fetch_sub(dueEnd, std::memory_order_relaxed);
 		stats.delivered.fetch_add(dueEnd, std::memory_order_relaxed);
+	}
 }
 
 }  // namespace io

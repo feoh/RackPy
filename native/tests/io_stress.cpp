@@ -16,6 +16,7 @@
 // shows. A secondary's frames cross threads at the engine's pace, so there
 // every sample must only be one the driver could have sent.
 #include "../io/audio_bridge.hpp"
+#include "../io/midi_queue.hpp"
 
 #include <atomic>
 #include <cmath>
@@ -127,12 +128,39 @@ void run(bool master, int blocks) {
 	CHECK(threadFailures.load() == 0);
 }
 
+void midiCapacity() {
+	io::MidiQueue queue;
+	rack::midi::Message message;
+	message.bytes = {0x90, 60, 100};
+	message.frame = 100;
+	std::atomic<bool> start{false};
+	std::vector<std::thread> producers;
+	for (int p = 0; p < 4; p++)
+		producers.emplace_back([&] {
+			while (!start.load(std::memory_order_acquire))
+				std::this_thread::yield();
+			for (size_t n = 0; n < io::MIDI_QUEUE_CAPACITY; n++)
+				queue.push(message);
+		});
+	start.store(true, std::memory_order_release);
+	for (auto& thread : producers)
+		thread.join();
+	CHECK(queue.stats.received.load() == io::MIDI_QUEUE_CAPACITY);
+	CHECK(queue.stats.droppedFull.load() == 3 * io::MIDI_QUEUE_CAPACITY);
+	queue.collect(100);
+	CHECK(queue.dueCount() == (int) io::MIDI_QUEUE_CAPACITY);
+	queue.push(message);  // delivery frees a reservation
+	queue.collect(100);
+	CHECK(queue.dueCount() == 1);
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
 	int blocks = argc > 1 ? std::atoi(argv[1]) : 2000;
 	run(true, blocks);
 	run(false, blocks);
+	midiCapacity();
 	if (failures)
 		std::fprintf(stderr, "%d check(s) failed\n", failures);
 	else

@@ -33,7 +33,19 @@ rate-change test checks resampling and missed converters.
 hooks build: native audio differential, the instrumented audio guard,
 30,000-block ASan/UBSan and TSan stress, and object-level Python symbol checks.
 The guard covers its instrumented native paths, not every Rack or driver path;
-the temporary fixture override was restored. Timed MIDI live-Rack differential,
-interpreter and compiled graph paths, documentation, manifest and full task
-validation remain. This checkpoint is not evidence that all production I/O
+the temporary fixture override was restored.
+
+A WIP MIDI binding attaches a disconnected, empty Python `InputQueue` to a
+module's native queue and exposes queue counters. In actual Rack, a direct
+note-on and a Loopback-driver note-off reached `MidiToCV` at their specified
+engine frames; attachment, detachment, ownership and dropped-port paths were
+also exercised. The original MIDI host suite still passes. A concurrent producer
+reservation fixes a race in the 8192-message limit; a four-producer saturation
+case passed both sanitizer stress runs. The Werror test-hooks build and 7 CTests,
+`tests/io/test_io_paths.py`, `tests/io/test_midi.py`, `tests/io/test_io_native.py`,
+prek and Sphinx passed. This is not yet a Core MIDI-CV differential, and the
+binding's concurrent lifecycle and real-time path need further review.
+
+Timed MIDI Core differential, interpreter and compiled graph paths, remaining
+documentation, manifest and full task validation remain. This checkpoint is not evidence that all production I/O
 paths are correct or real-time safe.

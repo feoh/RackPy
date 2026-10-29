@@ -15,7 +15,7 @@ SUITE = Path(__file__).resolve().parent / "in_rack_io_paths"
 def test_io_paths_in_live_rack(make_hooks_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path) -> None:
     setup = """
 from rackpy.plugin import plugin
-from rackpy.dsp.kernel import AudioInterface
+from rackpy.dsp.kernel import AudioInterface, MidiToCV
 
 port = None
 
@@ -25,6 +25,15 @@ def configure_audio(m):
     m.set_kernel(AudioInterface(input=0, output=0, channels=2))
 
 plugin.add_model("IOProbe", configure_audio)
+
+midi_input = None
+
+def configure_midi(m):
+    m.config(0, 0, 12, 0)
+    m.set_midi_input(0, midi_input)
+    m.set_kernel(MidiToCV(midi_input=0, output=0, smooth=0))
+
+plugin.add_model("MidiProbe", configure_midi)
 """
     result = run_pytest_in_rack(
         make_hooks_bundle(),
@@ -34,7 +43,7 @@ plugin.add_model("IOProbe", configure_audio)
         during_ui=True,
         timeout=300,
         entry_setup=setup,
-        extra_models=[{"slug": "IOProbe", "name": "I/O Probe"}],
+        extra_models=[{"slug": "IOProbe", "name": "I/O Probe"}, {"slug": "MidiProbe", "name": "MIDI Probe"}],
     )
     assert result.exit == 0, result.summary()
     assert result.outcomes() and set(result.outcomes().values()) == {"passed"}, result.summary()
