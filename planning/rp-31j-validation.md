@@ -1,5 +1,17 @@
 # RP-31J checkpoint — incomplete
 
+The four affected binding records and generated mapping/callback artifacts now
+cite the WIP paths and their evidence without a status promotion. After this
+update, the Linux hooks build and 7 CTests, live I/O/graph suites, live package
+introspection and docs snippets, Sphinx (`-W -n`), `prek` (including mypy),
+generator check, source-only coverage check, 32 unit/codegen and 51 manifest
+checks passed. Introspection and snippets used the existing **test-hooks** build
+via a temporary fixture override; they are not production-build evidence. A
+fresh Werror production build in `/tmp/pytest-of-feoh/pytest-168/build0` timed
+out after 37 of 86 remaining steps and is incomplete. Attempts to run the
+combined unit/docs selection also timed out while building; orphaned compiler
+processes were terminated. The fixture override was restored.
+
 Graph I/O now has interpreter and compiled nodes for device audio and timed
 MIDI-CV, with an offline refusal and native/codegen argument checks. In live
 Rack, both audio graph tiers matched Core Audio sample-for-sample in the

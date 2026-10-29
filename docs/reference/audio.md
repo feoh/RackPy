@@ -47,14 +47,36 @@ A device calls its ports' `process_input`, `process_buffer` and
 `on_stop_stream` there or where the port subscribes. Python never runs on
 that thread:
 
-- Rack's no-op process callbacks run natively, and `stream_stats` counts
-  what passed.
+- For an ordinary port, Rack's no-op process callbacks run natively, and
+  `stream_stats` counts what passed. A port attached to a RackPy module
+  instead routes device frames through the module's native I/O bridge.
 - `on_start_stream` and `on_stop_stream` reach a Python subclass queued, on
   the UI thread.
 - A Python override of the process callbacks runs only for a device that
   Python drives itself ([Python drivers](#audio-python-drivers)), on
   that thread. It gets copies of its part of the buffers, and its writes to
   the output reach the device.
+
+(audio-module-io)=
+### Module audio I/O (RP-31J, work in progress)
+
+`Module.set_audio_port(port, inputs=..., outputs=...)` attaches a Python-owned
+port to a module before Rack's engine owns the module. The port must not
+override the process callbacks; the channel limits are fixed while attached.
+Its native bridge connects the device to a kernel or
+[graph](../how-to/graphs.md#audio-and-midi), without running Python for
+samples. The built-in `AudioInterface` kernel implements Core Audio's
+10-volt conversion and sums polyphonic inputs. `audio_stats` exposes buffer
+and resampler counters. Detach by setting the port to `None` while Python owns
+the module; if the port goes first, the module hears silence.
+
+The bridge buffers a device block as Core Audio does. The Linux live-Rack
+comparison covers steady-rate operation and characterizes initial rate
+changes, not every startup or transition ordering. A change that needs a
+resampler the UI thread has not prepared can produce silence until its next
+maintenance step, counted by `resampler_misses`; it is not equivalent to
+Core's synchronous converter creation. No physical audio device, macOS or
+Windows has been tested for this path.
 
 Rack's audio drivers outlive its context but not RackPy's interpreter. Every
 Python port therefore gives its device back when Rack's context closes, and
