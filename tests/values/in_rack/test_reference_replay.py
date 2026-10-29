@@ -141,7 +141,20 @@ def random_get(s0: int, s1: int, type: str) -> list[Any]:
     saved = generator.state
     try:
         generator.seed(s0, s1)
-        return [rr.get(type) for _ in range(8)]
+        result = [rr.get(type) for _ in range(8)]
+        named = {
+            "uint64": rr.u64,
+            "uint32": rr.get_uint32,
+            "uint16": rr.get_uint16,
+            "uint8": rr.get_uint8,
+            "bool": rr.get_bool,
+            "float": rr.get_float,
+            "double": rr.get_double,
+        }.get(type)
+        if named is not None:
+            generator.seed(s0, s1)
+            assert [named() for _ in range(8)] == result
+        return result
     finally:
         generator.state = saved
 

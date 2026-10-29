@@ -65,3 +65,20 @@ test cannot exercise that effect. Determine a defensible destructor proof and
 mapping instead of treating the hook as evidence. The record is now `planned`;
 RP-31M is responsible and blocks RP-31D. Re-run applicable checks on the final
 changes.
+
+## Random-reference follow-up (incomplete)
+
+On RP-31M's `85320d6` descendant of the RP-31D checkpoint, the Rack C++
+reference replay now checks the named random functions against seeded
+`get<T>` draws, in addition to comparing those draws with the compiled Rack
+reference. This catches swapped named bindings that simple range checks miss.
+The seven affected manifest records cite the replay; no status was promoted.
+The remaining per-record audit has not been completed.
+
+Linux x86_64: a fresh warnings-as-errors test-hooks build passed 6/6 CTests
+(the first build command timed out partway; resuming it completed). The
+actual-Rack test-hooks values suite passed, using temporary fixture overrides
+for the fresh build under `/tmp/rackpy-host-tests.lock`; the overrides were
+restored. `pytest -m unit` passed 114 tests; prek, strict typecheck, generated
+file check and Sphinx `-W -n` passed. Production build and production-host
+replay were not rerun for this follow-up. macOS and Windows were not tested.
