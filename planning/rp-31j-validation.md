@@ -24,7 +24,11 @@ against two Core ports. The comparison is therefore evidence for the
 preconfigured-rate case only, not proof of startup/rate-change equivalence.
 The existing separate rate-change test checks resampling and missed converters.
 
-Timed MIDI live-Rack differential, interpreter and compiled graph paths,
-audio-path guard, sanitizer/stress, documentation, manifest and full task
-validation remain. This checkpoint is not evidence that the production I/O
+`tests/io/test_io_native.py` passed all five cases against the existing
+hooks build: native audio differential, the instrumented audio guard,
+30,000-block ASan/UBSan and TSan stress, and object-level Python symbol checks.
+The guard covers its instrumented native paths, not every Rack or driver path;
+the temporary fixture override was restored. Timed MIDI live-Rack differential,
+interpreter and compiled graph paths, documentation, manifest and full task
+validation remain. This checkpoint is not evidence that all production I/O
 paths are correct or real-time safe.
