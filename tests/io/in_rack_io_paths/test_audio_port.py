@@ -263,6 +263,22 @@ def test_the_device_hears_the_same_as_through_core_audio(rig: dict[str, Any], ma
         rset.settings.thread_count = previous
 
 
+@pytest.mark.parametrize("master", ["core", "module"])
+def test_bridge_and_core_during_initial_rate_change(rig: dict[str, Any], master: str) -> None:
+    e = engine()
+    e.set_master_module(rig[master])
+    HOOKS.engine_set_sample_rate(44100.0)
+    assert e.get_sample_rate() == 44100.0
+    got = blocks(rig["device"], 8, seed=21)
+    assert e.get_sample_rate() == 48000.0
+    assert same_as_core(got[2:])
+    left, right = got[0]
+    # The loopback may carry the preceding frame across the rate event.
+    # The remaining block either matches or one side was cleared, as with two Core ports.
+    assert left[:2] == right[:2]
+    assert left[2:] == right[2:] or not any(left[2:]) or not any(right[2:])
+
+
 def test_either_module_claims_a_free_master(rig: dict[str, Any]) -> None:
     e = engine()
     e.set_master_module(None)

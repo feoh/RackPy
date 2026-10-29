@@ -9,7 +9,13 @@ Both MIDI graph tiers matched each other at scheduled note frames; the built-in
 MidiToCV also matched Core MIDI-CV's 12 outputs each frame for note-on, mod
 wheel and note-off delivered via Rack's Loopback driver. A test-only foreign
 output reader inspects the Core reference. The audio startup/rate-transition
-comparison and wider MIDI cases remain unproven.
+comparison and wider MIDI cases remain unproven. A later live transition
+experiment exercised both master choices with a previously running loopback:
+from the third block Core and RackPy matched; in the first, either they matched
+or one side was cleared after the previous frame. This characterizes those
+runs, not full equivalence across subscriber orders or rate changes. One
+resampler miss was recorded during the transition; the experiment runs after
+the no-miss tests so it does not contaminate their cumulative counter.
 
 The Werror hooks build/7 CTests, targeted live-Rack IO and graph-library suites,
 unit codegen tests, native graph and I/O tests (including sanitizer stress),
