@@ -1,5 +1,24 @@
 # RP-31J checkpoint — incomplete
 
+Graph I/O now has interpreter and compiled nodes for device audio and timed
+MIDI-CV, with an offline refusal and native/codegen argument checks. In live
+Rack, both audio graph tiers matched Core Audio sample-for-sample in the
+preconfigured-rate, mono-loopback case using 0.1 multiplication (the graph's
+strict division by 10 initially differed by one float32 ULP from Core's build).
+Both MIDI graph tiers matched each other at scheduled note frames; the built-in
+MidiToCV also matched Core MIDI-CV's 12 outputs each frame for note-on, mod
+wheel and note-off delivered via Rack's Loopback driver. A test-only foreign
+output reader inspects the Core reference. The audio startup/rate-transition
+comparison and wider MIDI cases remain unproven.
+
+The Werror hooks build/7 CTests, targeted live-Rack IO and graph-library suites,
+unit codegen tests, native graph and I/O tests (including sanitizer stress),
+and `uv run prek run --all-files` passed. The extended LD_PRELOAD guard
+observed no intercepted heap, mutex, write or GIL calls across 100,000 frames
+of interpreted and compiled graph I/O with delivered MIDI messages. This is
+instrumented-path evidence, not a proof about every Rack or driver path. The
+temporary hooks-build fixture override was restored.
+
 The kernel-library loader now negotiates the optional I/O services ABI before
 registering a library. A separately loaded native probe confirmed it receives
 a non-null I/O frame inside Rack; incomplete and wrong-ABI libraries were

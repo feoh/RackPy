@@ -6,11 +6,12 @@ import importlib
 from typing import Any
 
 import pytest
+from _rackpy_host import _testing as HOOKS
 
 from rackpy import raw
 from rackpy.errors import OwnershipError
 from rackpy.raw import midi
-from rackpy.raw.engine import Module
+from rackpy.raw.engine import EngineModule, Module
 
 runner: Any = importlib.import_module("rackpy_in_rack_pytest")
 
@@ -64,6 +65,66 @@ def test_dropping_the_input_before_the_module_is_safe() -> None:
     module.set_midi_input(0, None)
     assert module.midi_input_stats(0) is None
     module.close()
+
+
+def test_timed_midi_matches_core_midi_cv() -> None:
+    context = raw.context_get()
+    assert context is not None and context.engine is not None
+    engine = context.engine
+    core_model = raw.plugin.get_model("Core", "MIDIToCVInterface")
+    model = raw.plugin.get_model("RackPy", "MidiProbe")
+    assert core_model is not None and model is not None
+    queue = midi.InputQueue()
+    sender = midi.Output()
+    runner.midi_input = queue
+    try:
+        module = model.create_module()
+    finally:
+        runner.midi_input = None
+    assert isinstance(module, Module)
+    core = core_model.create_module()
+    assert isinstance(core, EngineModule)
+    for port in (queue, sender):
+        port.set_driver_id(-12)
+        port.set_device_id(0)
+    engine.add_module(core)
+    engine.add_module(module)
+    previous = engine.get_master_module()
+    try:
+        engine.module_from_json(
+            core,
+            {
+                "plugin": "Core",
+                "model": "MIDIToCVInterface",
+                "data": {
+                    "midi": {"driver": -12, "deviceName": queue.get_device_name(0), "channel": -1},
+                    "pwRange": 2.0,
+                    "smooth": False,
+                },
+            },
+        )
+        engine.set_master_module(module)
+        first = engine.get_frame()
+        for status, data, offset in ((0x90, (64, 100), 3), (0xB0, (1, 73), 5), (0x80, (64, 0), 8)):
+            message = midi.Message()
+            message.bytes = [status, *data]
+            message.frame = first + offset
+            sender.send_message(message)
+        gates: list[float] = []
+        for _ in range(12):
+            engine.step_block(1)
+            actual = [module.outputs[k].get_voltage() for k in range(12)]
+            expected = [HOOKS.engine_reference_output(core.id, k, 0) for k in range(12)]
+            assert actual == expected, (engine.get_frame(), actual, expected)
+            gates.append(actual[1])
+        assert gates == [0.0] * 3 + [10.0] * 5 + [0.0] * 4
+    finally:
+        engine.set_master_module(previous)
+        engine.remove_module(module)
+        engine.remove_module(core)
+        module.set_midi_input(0, None)
+        queue.set_device_id(-1)
+        sender.set_device_id(-1)
 
 
 def test_native_midi_input_delivers_messages_at_their_engine_frame() -> None:

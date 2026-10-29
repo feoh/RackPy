@@ -75,6 +75,23 @@ def echo() -> Graph:
     return g
 
 
+def audio_graph() -> Graph:
+    g = Graph()
+    for channel in range(2):
+        g.output(channel, g.audio_input(channel) * 10)
+        g.audio_output(channel, g.input(channel) * 0.1)
+    return g
+
+
+def io_graph() -> Graph:
+    g = Graph()
+    g.output(0, g.midi_cv(0, smooth=False))
+    g.output(1, g.midi_cv(1, smooth=False))
+    g.output(2, g.audio_input(0) * 10)
+    g.audio_output(0, g.input(0) / 10)
+    return g
+
+
 GRAPHS = {
     "Tutorial": tutorial(),
     "Everything": everything(),
@@ -83,6 +100,8 @@ GRAPHS = {
     "Vca": vca(),
     "Sender": sender(),
     "Echo": echo(),
+    "IOGraph": io_graph(),
+    "AudioGraph": audio_graph(),
 }
 CONFIG = {
     "Tutorial": (1, 1, 1, 1),
@@ -92,6 +111,8 @@ CONFIG = {
     "Vca": (1, 1, 1, 0),
     "Sender": (0, 1, 1, 0),
     "Echo": (0, 0, 2, 0),
+    "IOGraph": (0, 1, 3, 0),
+    "AudioGraph": (0, 2, 2, 0),
 }
 # Graphs that run side by side, (left, right), with the "rackpy.graph" lanes each receives: (side, lanes).
 PAIRS = {("Sender", "Echo"): ((1, 1), (0, 2))}

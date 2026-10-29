@@ -177,6 +177,30 @@ def test_two_core_ports_during_initial_rate_change(master_index: int) -> None:
             e.remove_module(core)
 
 
+@pytest.mark.parametrize("tier", ["interpreter", "compiled"])
+def test_audio_graph_matches_core(rig: dict[str, Any], tier: str) -> None:
+    from rackpy.dsp.graph import Graph
+    from rackpy.dsp.kernel import AudioInterface, load
+
+    graph = Graph()
+    for channel in range(2):
+        graph.output(channel, graph.audio_input(channel) * 10)
+        graph.audio_output(channel, graph.input(channel) * 0.1)
+    module = rig["module"]
+    engine().set_master_module(rig["core"])
+    HOOKS.engine_set_sample_rate(48000.0)
+    try:
+        module.set_kernel(graph.compile() if tier == "interpreter" else load("graphs.AudioGraph")())
+        blocks(rig["device"], 4, seed=3)  # kernel handover and buffered frames
+        got = blocks(rig["device"], 12, seed=4)
+        differences = [(a, b) for core, ours in got for a, b in zip(core, ours, strict=True) if a != b]
+        assert not differences, (len(differences), differences[:10])
+        assert any(any(core) for core, _ in got)
+    finally:
+        module.set_kernel(AudioInterface(input=0, output=0, channels=2))
+        blocks(rig["device"], 4, seed=5)
+
+
 def test_a_python_port_becomes_a_modules_audio_port(rig: dict[str, Any]) -> None:
     module, port = rig["module"], rig["port"]
     assert module.audio_port is port and port.max_inputs == 2 and port.max_outputs == 2

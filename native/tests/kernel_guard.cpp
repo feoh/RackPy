@@ -302,6 +302,54 @@ std::string runExpanders(Compiled& compiled, int frames) {
 	return text;
 }
 
+bool ioGraphWorked = false;
+
+std::string runIoGraphs(Compiled& compiled, int frames) {
+	graph::PlanSpec spec;
+	spec.nodes = {
+		{"midi_cv", {}, {0, 1, 1, 0, 0, 2, 0, 24, 0, 0}, {}},
+		{"output", {0}, {1}, {}},
+		{"audio_input", {}, {0}, {}},
+		{"output", {2}, {2}, {}},
+		{"input", {}, {0}, {}},
+		{"audio_output", {4}, {0}, {}},
+	};
+	module::Module a, b;
+	for (auto* m : {&a, &b}) {
+		m->config(0, 1, 3, 0);
+		m->inputs[0].channels = 1;
+		for (auto& o : m->outputs)
+			o.channels = 1;
+		m->midi[0] = std::make_shared<io::MidiQueue>();
+		m->audio = std::make_shared<io::AudioBridge>(1, 1);
+		m->publish();
+	}
+	a.kernels.attach(plan(spec), true);
+	b.kernels.attach(compiled.make("IOGraph"), true);
+	rack::midi::Message msg;
+	msg.bytes = {0x90, 64, 100};
+	rack::engine::Module::ProcessArgs args{48000.f, 1.f / 48000.f, 0};
+	resetCounts();
+	int gates = 0;
+	for (int n = 0; n < frames; n++) {
+		args.frame = n;
+		msg.frame = n;
+		msg.bytes[0] = (n % 2) ? 0x80 : 0x90;
+		enter();
+		for (auto* m : {&a, &b}) {
+			m->midi[0]->push(msg);
+			m->process(args);
+		}
+		leave();
+		if (a.outputs[1].getVoltage() == 10.f && b.outputs[1].getVoltage() == 10.f)
+			gates++;
+	}
+	char text[512];
+	report(text, sizeof text);
+	ioGraphWorked = gates == (frames + 1) / 2;
+	return text;
+}
+
 bool audioFlowed = false;
 
 std::string runAudio(int blocks) {
@@ -409,10 +457,12 @@ int main() {
 	// The compiled library is linked in here, so it shares RackPy's expander services directly.
 	expander::services() = &engine::hostServices();
 	std::string expanderRun = runExpanders(compiled, frames);
+	io::services() = &io::hostServices();
+	std::string ioGraphRun = runIoGraphs(compiled, frames);
 	std::string audioRun = runAudio(600);
 	std::printf("{\"frames\": %d, \"production\": %s, \"failure\": %s, \"inject\": %s, \"graph\": %s, \"compiled\": %s, "
-		"\"expanders\": %s, \"exchanged\": %s, \"audio\": %s, \"audio_flowed\": %s}\n",
+		"\"expanders\": %s, \"exchanged\": %s, \"graph_io\": %s, \"graph_io_worked\": %s, \"audio\": %s, \"audio_flowed\": %s}\n",
 		frames, production.c_str(), failure.c_str(), inject.c_str(), graphRun.c_str(), compiledRun.c_str(), expanderRun.c_str(),
-		exchanged ? "true" : "false", audioRun.c_str(), audioFlowed ? "true" : "false");
+		exchanged ? "true" : "false", ioGraphRun.c_str(), ioGraphWorked ? "true" : "false", audioRun.c_str(), audioFlowed ? "true" : "false");
 	return 0;
 }

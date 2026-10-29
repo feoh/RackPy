@@ -1114,6 +1114,18 @@ void define(py::module_ m) {
 		engineCall("engine_connect", [&] { APP->engine->addCable(cable); });
 		return cable->id;
 	});
+	// Test-only read of a foreign reference module's output while Rack's engine is stopped.
+	m.def("engine_reference_output", [engineCall](int64_t id, int port, int channel) {
+		return engineCall("engine_reference_output", [&] {
+			auto* mod = APP->engine->getModule(id);
+			if (!mod)
+				throw std::invalid_argument("no such module");
+			auto index = module::Construction::index(port, mod->outputs.size());
+			if (channel < 0 || channel >= rack::engine::PORT_MAX_CHANNELS)
+				throw std::invalid_argument("invalid channel");
+			return mod->outputs[index].getVoltage((uint8_t) channel);
+		});
+	});
 	// Test-only Core reference loopback: the caller must disconnect before deleting the module.
 	m.def("engine_reference_loopback", [engineCall](int64_t id, int port) {
 		return engineCall("engine_reference_loopback", [&] {

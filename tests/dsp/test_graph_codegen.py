@@ -13,8 +13,9 @@ from pathlib import Path
 
 import pytest
 
-from rackpy.dsp.graph import Graph, GraphError
+from rackpy.dsp.graph import Graph, GraphError, Node, Plan
 from rackpy.dsp.graph_codegen import emit
+from rackpy.dsp.graph_reference import run
 
 pytestmark = pytest.mark.unit
 REPO = Path(__file__).resolve().parents[2]
@@ -72,6 +73,39 @@ def test_what_cannot_be_compiled_is_refused() -> None:
     looped.output(0, f)
     with pytest.raises(GraphError, match="cycle with no delay"):
         emit({"Looped": looped}, "mine")
+
+
+def test_io_nodes_validate_and_compose() -> None:
+    graph = Graph()
+    graph.output(0, graph.audio_input(15) + graph.midi_cv(1, input=3, channels=16, smooth=False))
+    graph.audio_output(15, graph.input(0) / 10)
+    with pytest.raises(GraphError, match="already written"):
+        graph.audio_output(15, 0)
+    for bad in (-1, 16, True, 1.5):
+        with pytest.raises(GraphError, match="audio channel"):
+            graph.audio_input(bad)  # type: ignore[arg-type]
+    for kwargs in (
+        {"input": 4},
+        {"output": 12},
+        {"channels": 0},
+        {"mono_mode": 4},
+        {"clock_division": 0},
+        {"smooth": 1},
+    ):
+        with pytest.raises(GraphError):
+            graph.midi_cv(**kwargs)  # type: ignore[arg-type]
+    source = emit({"IO": graph}, "mine")
+    assert "#include <rackpy/io.hpp>" in source and "RACKPY_IO" in source
+    assert "audioInput(ioFrame, 15)" in source and "audioOutput(ioFrame, 15" in source
+    assert ".process(p" in source and "ioFrame, args.sampleTime" in source
+    with pytest.raises(GraphError, match="offline reference cannot run"):
+        run(graph, frames=1)
+    invalid = Plan((Node("audio_input", (), (16.0,)),), (), ())
+    with pytest.raises(GraphError, match="audio channel"):
+        emit({"bad": invalid}, "mine")
+    only_sink = Graph()
+    only_sink.audio_output(0, 0.5)
+    assert only_sink.plan().nodes[-1].op == "audio_output"
 
 
 def test_expander_nodes_compose_through_rackpys_services() -> None:

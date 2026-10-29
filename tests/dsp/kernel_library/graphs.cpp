@@ -3,6 +3,7 @@
 // node types of rackpy/graph.hpp statically, as the plan interpreter runs them.
 #include <rack.hpp>
 #include <rackpy/expanders.hpp>
+#include <rackpy/io.hpp>
 #include <rackpy/graph.hpp>
 #include <rackpy/kernel.hpp>
 
@@ -652,6 +653,145 @@ struct Echo final : rackpy::Kernel {
 	}
 };
 
+/** Graph IOGraph: 12 nodes, composed statically. */
+struct IOGraph final : rackpy::Kernel {
+	rackpy::io::Link ioLink;
+	int f0;  // output[0]
+	int f1;  // output[1]
+	int f2;  // output[2]
+	int f3;  // input[0]
+	MidiCV n0;
+	Signal p0;  // midi_cv, on the polyphonic path
+	MidiCV n2;
+	Signal p2;  // midi_cv, on the polyphonic path
+	Signal p4;  // audio_input, on the polyphonic path
+	Signal p5;  // constant, on the polyphonic path
+	Signal p6;  // mul, on the polyphonic path
+	Signal p8;  // input, on the polyphonic path
+	Signal p9;  // constant, on the polyphonic path
+	Signal p10;  // div, on the polyphonic path
+
+	explicit IOGraph(const std::vector<double>& v) {
+		(void) v;
+		f0 = (int) v[0];
+		if (f0 < 0)
+			throw std::invalid_argument("graphs.IOGraph: output[0] must be wired");
+		f1 = (int) v[1];
+		if (f1 < 0)
+			throw std::invalid_argument("graphs.IOGraph: output[1] must be wired");
+		f2 = (int) v[2];
+		if (f2 < 0)
+			throw std::invalid_argument("graphs.IOGraph: output[2] must be wired");
+		f3 = (int) v[3];
+		if (f3 < 0)
+			throw std::invalid_argument("graphs.IOGraph: input[0] must be wired");
+		n0.input = 0; n0.output = (MidiCvOutput) 0;
+		n0.configure(1, 0, 0, 0x1.0000000000000p+1f /* 2.0 */, 0, 24, 0, 0);
+		n2.input = 0; n2.output = (MidiCvOutput) 1;
+		n2.configure(1, 0, 0, 0x1.0000000000000p+1f /* 2.0 */, 0, 24, 0, 0);
+		reset();
+	}
+
+	bool process(rack::engine::Module& m, const rack::engine::Module::ProcessArgs& args) noexcept override {
+		(void) args;
+		const rackpy::io::Frame* ioFrame = rackpy::io::frame(m, ioLink);
+		n0.process(p0, ioFrame, args.sampleTime); settle(p0);  // 0: midi_cv
+		writeOutput(m.outputs[f0], p0);  // 1: output
+		n2.process(p2, ioFrame, args.sampleTime); settle(p2);  // 2: midi_cv
+		writeOutput(m.outputs[f1], p2);  // 3: output
+		mono(p4, audioInput(ioFrame, 0)); settle(p4);  // 4: audio_input
+		mono(p5, 0x1.4000000000000p+3f /* 10.0 */); settle(p5);  // 5: constant
+		map2(p6, p4, p5, [](float x, float y) { return rackpy::graph::mul(x, y); }); settle(p6);  // 6: mul
+		writeOutput(m.outputs[f2], p6);  // 7: output
+		readInput(p8, m.inputs[f3]); settle(p8);  // 8: input
+		mono(p9, 0x1.4000000000000p+3f /* 10.0 */); settle(p9);  // 9: constant
+		map2(p10, p8, p9, [](float x, float y) { return rackpy::graph::div(x, y); }); settle(p10);  // 10: div
+		audioOutput(ioFrame, 0, p10);  // 11: audio_output
+		return true;
+	}
+
+	void reset() noexcept override {
+		n0.reset();
+		n2.reset();
+	}
+
+	void setControl(int slot, double value) noexcept override {
+		switch (slot) {
+			default: break;
+		}
+	}
+};
+
+/** Graph AudioGraph: 16 nodes, composed statically. */
+struct AudioGraph final : rackpy::Kernel {
+	rackpy::io::Link ioLink;
+	int f0;  // output[0]
+	int f1;  // input[0]
+	int f2;  // output[1]
+	int f3;  // input[1]
+	Signal p0;  // audio_input, on the polyphonic path
+	Signal p1;  // constant, on the polyphonic path
+	Signal p2;  // mul, on the polyphonic path
+	Signal p4;  // input, on the polyphonic path
+	Signal p5;  // constant, on the polyphonic path
+	Signal p6;  // mul, on the polyphonic path
+	Signal p8;  // audio_input, on the polyphonic path
+	Signal p9;  // constant, on the polyphonic path
+	Signal p10;  // mul, on the polyphonic path
+	Signal p12;  // input, on the polyphonic path
+	Signal p13;  // constant, on the polyphonic path
+	Signal p14;  // mul, on the polyphonic path
+
+	explicit AudioGraph(const std::vector<double>& v) {
+		(void) v;
+		f0 = (int) v[0];
+		if (f0 < 0)
+			throw std::invalid_argument("graphs.AudioGraph: output[0] must be wired");
+		f1 = (int) v[1];
+		if (f1 < 0)
+			throw std::invalid_argument("graphs.AudioGraph: input[0] must be wired");
+		f2 = (int) v[2];
+		if (f2 < 0)
+			throw std::invalid_argument("graphs.AudioGraph: output[1] must be wired");
+		f3 = (int) v[3];
+		if (f3 < 0)
+			throw std::invalid_argument("graphs.AudioGraph: input[1] must be wired");
+		reset();
+	}
+
+	bool process(rack::engine::Module& m, const rack::engine::Module::ProcessArgs& args) noexcept override {
+		(void) args;
+		const rackpy::io::Frame* ioFrame = rackpy::io::frame(m, ioLink);
+		mono(p0, audioInput(ioFrame, 0)); settle(p0);  // 0: audio_input
+		mono(p1, 0x1.4000000000000p+3f /* 10.0 */); settle(p1);  // 1: constant
+		map2(p2, p0, p1, [](float x, float y) { return rackpy::graph::mul(x, y); }); settle(p2);  // 2: mul
+		writeOutput(m.outputs[f0], p2);  // 3: output
+		readInput(p4, m.inputs[f1]); settle(p4);  // 4: input
+		mono(p5, 0x1.99999a0000000p-4f /* 0.10000000149011612 */); settle(p5);  // 5: constant
+		map2(p6, p4, p5, [](float x, float y) { return rackpy::graph::mul(x, y); }); settle(p6);  // 6: mul
+		audioOutput(ioFrame, 0, p6);  // 7: audio_output
+		mono(p8, audioInput(ioFrame, 1)); settle(p8);  // 8: audio_input
+		mono(p9, 0x1.4000000000000p+3f /* 10.0 */); settle(p9);  // 9: constant
+		map2(p10, p8, p9, [](float x, float y) { return rackpy::graph::mul(x, y); }); settle(p10);  // 10: mul
+		writeOutput(m.outputs[f2], p10);  // 11: output
+		readInput(p12, m.inputs[f3]); settle(p12);  // 12: input
+		mono(p13, 0x1.99999a0000000p-4f /* 0.10000000149011612 */); settle(p13);  // 13: constant
+		map2(p14, p12, p13, [](float x, float y) { return rackpy::graph::mul(x, y); }); settle(p14);  // 14: mul
+		audioOutput(ioFrame, 1, p14);  // 15: audio_output
+		return true;
+	}
+
+	void reset() noexcept override {
+
+	}
+
+	void setControl(int slot, double value) noexcept override {
+		switch (slot) {
+			default: break;
+		}
+	}
+};
+
 }  // namespace
 
 RACKPY_KERNEL_LIBRARY("graphs", registrar) {
@@ -739,7 +879,34 @@ RACKPY_KERNEL_LIBRARY("graphs", registrar) {
 		{},
 		[](const std::vector<double>& v) { return std::make_unique<Echo>(v); },
 	});
+	registrar.add(rackpy::KernelType{
+		"IOGraph",
+		"Graph IOGraph, compiled by bin/rackpy-graph: 12 nodes.",
+		{
+			{"output[0]", rackpy::Field::OUTPUT, 0, false, "wired by the graph (defaults to its own index)"},
+			{"output[1]", rackpy::Field::OUTPUT, 1, false, "wired by the graph (defaults to its own index)"},
+			{"output[2]", rackpy::Field::OUTPUT, 2, false, "wired by the graph (defaults to its own index)"},
+			{"input[0]", rackpy::Field::INPUT, 0, false, "wired by the graph (defaults to its own index)"},
+		},
+		{},
+		[](const std::vector<double>& v) { return std::make_unique<IOGraph>(v); },
+	});
+	registrar.add(rackpy::KernelType{
+		"AudioGraph",
+		"Graph AudioGraph, compiled by bin/rackpy-graph: 16 nodes.",
+		{
+			{"output[0]", rackpy::Field::OUTPUT, 0, false, "wired by the graph (defaults to its own index)"},
+			{"input[0]", rackpy::Field::INPUT, 0, false, "wired by the graph (defaults to its own index)"},
+			{"output[1]", rackpy::Field::OUTPUT, 1, false, "wired by the graph (defaults to its own index)"},
+			{"input[1]", rackpy::Field::INPUT, 1, false, "wired by the graph (defaults to its own index)"},
+		},
+		{},
+		[](const std::vector<double>& v) { return std::make_unique<AudioGraph>(v); },
+	});
 }
 
 // RackPy's expander services, for the graphs that exchange with neighbours (RP-23C).
 RACKPY_EXPANDERS
+
+// RackPy's audio and MIDI services.
+RACKPY_IO
