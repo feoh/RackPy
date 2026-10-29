@@ -47,12 +47,27 @@ def test_only_the_valid_library_registered_types() -> None:
     names = {t.name for t in kernel_types()}
     assert "example.Fold" in names
     refused_types = ("wrongabi.Never", "throws.Partial", "badname.Good", "rackpy.Gain2")
-    for refused in (*refused_types, "expanderabi.Kept", "expanderpart.Kept"):
+    for refused in (*refused_types, "expanderabi.Kept", "expanderpart.Kept", "ioabi.Kept", "iopart.Kept"):
         assert refused not in names
     fold = load("example.Fold")
     assert fold.controls == ("gain", "limit") and [f[0] for f in fold.fields] == ["input", "output", "gain", "limit"]
     with pytest.raises(ValueError, match="limit must be positive"):
         fold(input=0, output=0, limit=0)  # the library's own exception, as ValueError
+
+
+def test_library_receives_io_services() -> None:
+    probe = load("iotest.Probe")
+
+    def configure(m: Module) -> None:
+        m.config(0, 0, 1, 0)
+        m.set_kernel(probe(output=0))
+
+    module = Module.create(configure)
+    HOOKS.engine_adopt(module)
+    try:
+        assert until(lambda: module.outputs[0].get_voltage() == 10.0)
+    finally:
+        HOOKS.engine_delete(module, None)
 
 
 def test_rack_runs_the_library_kernel() -> None:

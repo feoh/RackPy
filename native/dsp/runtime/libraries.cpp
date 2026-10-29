@@ -11,6 +11,7 @@
 #include <stdexcept>
 
 #include "../../engine/expanders.hpp"
+#include "../../io/endpoints.hpp"
 #include "../graph/plan.hpp"
 #include "runtime.hpp"
 
@@ -101,6 +102,15 @@ void loadLibrary(const std::string& pluginDir, const std::string& relative) {
 			throw std::runtime_error("it was built for expander ABI " + std::to_string(expanderAbi()) + ", but RackPy has " +
 				std::to_string(expander::EXPANDER_ABI) + "; rebuild it against this RackPy's rackpy/expanders.hpp");
 	}
+	auto ioAbi = (int (*)()) dlsym(handle, "rackpy_io_abi");
+	auto setIoServices = (void (*)(io::Services*)) dlsym(handle, "rackpy_set_io_services");
+	if (ioAbi || setIoServices) {
+		if (!ioAbi || !setIoServices)
+			throw std::runtime_error("it defines only part of RACKPY_IO");
+		if (ioAbi() != io::IO_ABI)
+			throw std::runtime_error("it was built for I/O ABI " + std::to_string(ioAbi()) + ", but RackPy has " +
+				std::to_string(io::IO_ABI) + "; rebuild it against this RackPy's rackpy/io.hpp");
+	}
 	std::set<std::string> nodeNames;
 	for (auto& type : nodes.types) {
 		if (!identifier(type.name))
@@ -130,6 +140,8 @@ void loadLibrary(const std::string& pluginDir, const std::string& relative) {
 	// Before any of its kernels can be made (Python makes them later, on the main thread).
 	if (setServices)
 		setServices(&engine::hostServices());
+	if (setIoServices)
+		setIoServices(&io::hostServices());
 	for (auto& type : collected.types) {
 		std::string name = type.name;
 		registerType(std::move(type));

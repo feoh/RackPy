@@ -1,5 +1,14 @@
 # RP-31J checkpoint — incomplete
 
+The kernel-library loader now negotiates the optional I/O services ABI before
+registering a library. A separately loaded native probe confirmed it receives
+a non-null I/O frame inside Rack; incomplete and wrong-ABI libraries were
+refused as a whole. The Linux Werror hooks build and 7 CTests, live Rack
+`tests/dsp/test_runtime.py::test_kernel_libraries_load_and_bad_ones_are_skipped`,
+and `uv run prek run --all-files` passed. The temporary hooks-build fixture
+selection was restored. This verifies service negotiation, not compiled graph
+I/O or full production I/O correctness.
+
 The `rp31j` WIP is not validated for production use. On Linux x86_64,
 `CMAKE_BUILD_PARALLEL_LEVEL=2 uv run bin/rackpy-dev build --werror --test-hooks`
 completed and all 7 CTests passed. The first build invocation timed out after

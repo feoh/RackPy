@@ -190,7 +190,8 @@ if(RACKPY_BUILD_TESTS)
     throws:broken.cpp:VARIANT_THROWS duplicate:broken.cpp:VARIANT_DUPLICATE reserved:broken.cpp:VARIANT_RESERVED
     bad_name:broken.cpp:VARIANT_BAD_NAME graph_wrong_abi:broken.cpp:VARIANT_GRAPH_WRONG_ABI
     graph_bad_node:broken.cpp:VARIANT_GRAPH_BAD_NODE graphs:graphs.cpp:NONE levels:levels.cpp:NONE
-    expander_wrong_abi:broken.cpp:VARIANT_EXPANDER_WRONG_ABI expander_partial:broken.cpp:VARIANT_EXPANDER_PARTIAL)
+    expander_wrong_abi:broken.cpp:VARIANT_EXPANDER_WRONG_ABI expander_partial:broken.cpp:VARIANT_EXPANDER_PARTIAL
+    io:io.cpp:NONE io_wrong_abi:broken.cpp:VARIANT_IO_WRONG_ABI io_partial:broken.cpp:VARIANT_IO_PARTIAL)
   foreach(_entry IN LISTS _rackpy_kernel_libraries)
     string(REPLACE ":" ";" _parts "${_entry}")
     list(GET _parts 0 _name)
