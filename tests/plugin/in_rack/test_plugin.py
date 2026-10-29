@@ -131,6 +131,16 @@ def test_plugin_and_model_main_thread_rule() -> None:
     assert len(errors) == len(actions) and all(isinstance(e, ThreadError) for e in errors)
 
 
+def test_detached_model_cannot_make_objects_with_dangling_model_pointers() -> None:
+    model = rp.create_model("Unregistered", lambda module: None)
+    assert model.plugin is None
+    with pytest.raises(OwnershipError, match="committed model"):
+        model.create_module()
+    with pytest.raises(OwnershipError, match="committed model"):
+        model.create_module_widget()
+    assert model.alive
+
+
 def test_a_detached_model_dies_with_its_handle() -> None:
     import gc
     import weakref

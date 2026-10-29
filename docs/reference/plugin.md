@@ -56,8 +56,12 @@ added so far, and raises `ValueError` otherwise.
 
 The new `Model` belongs to Python until `add_model`.
 `Model.create_module()` and `Model.create_module_widget(module=None)` make a
-module or widget of a model, a RackPy model's or another plugin's, which
-Python then owns ([modules from other plugins](app.md#modules-from-other-plugins)).
+module or widget of a committed model, a RackPy model's or another plugin's,
+which Python then owns ([modules from other plugins](app.md#modules-from-other-plugins)).
+Detached models and models staged during plugin initialization cannot create
+modules or widgets (`OwnershipError`): those objects retain a raw model pointer,
+while a detached model can be deleted with its Python handle and a staged model
+can be deleted if registration fails. Wait until registration has committed.
 
 A `Model` has Rack's fields. `slug` can change only before the model is
 added: Rack and patches look models up by it. `plugin` is its plugin, or

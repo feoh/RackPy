@@ -170,6 +170,16 @@ RackModel& ownModel(const ModelHandle& h, const char* field) {
 	return m;
 }
 
+/** A module or widget keeps a raw Model*: it may escape its Python handle. Only a model Rack owns
+can safely make one. Detached and staged models may be deleted when their handle or registration goes away. */
+RackModel& committedModel(const ModelHandle& h, const char* what) {
+	RackModel& m = checked(h);
+	if ((h.detached && h.detached->owned) || !m.plugin ||
+		std::find(m.plugin->models.begin(), m.plugin->models.end(), &m) == m.plugin->models.end())
+		throw runtime::Ownership(std::string(what) + " needs a committed model: detached or staged models can be deleted");
+	return m;
+}
+
 RackModel& addedModel(const ModelHandle& h, const char* what) {
 	RackModel& m = checked(h);
 	if (!m.plugin)
@@ -367,7 +377,7 @@ void bind_plugin(py::module_ raw) {
 		.def("set_favorite", [](const ModelHandle& h, bool favorite) { addedModel(h, "set_favorite").setFavorite(favorite); },
 			py::arg("favorite"))
 		.def("create_module", [](const ModelHandle& h) {
-			RackModel& model = checked(h);
+			RackModel& model = committedModel(h, "Model.create_module");
 			auto* m = dynamic_cast<plugin::Model*>(&model);
 			if (!m) {  // another plugin's model: its own C++ code makes the module
 				runtime::requireMainThread("creating a module");
@@ -389,7 +399,7 @@ void bind_plugin(py::module_ raw) {
 		}, "Rack's Model::createModule for a RackPy model: a new module of it, which Python owns (Rack's own calls "
 			"hand theirs to its engine).")
 		.def("create_module_widget", [](const ModelHandle& h, py::object module) {
-			RackModel& model = checked(h);
+			RackModel& model = committedModel(h, "Model.create_module_widget");
 			auto* m = dynamic_cast<plugin::Model*>(&model);
 			if (m && m->widgetFactory)
 				return widgets::createModuleWidgetForPython(*m->widgetFactory, *m, module);

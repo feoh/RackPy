@@ -149,6 +149,8 @@ def test_registration_errors_leave_no_partial_registry(
         "empty": "ValueError",
         "not_callable": "TypeError",
         "added_twice": "OwnershipError",
+        "staged_module": "OwnershipError",
+        "staged_widget": "OwnershipError",
         "models": ["PyAlpha", "PyTwice"],
     }
     assert run.lines("Loaded plugin RackPy")

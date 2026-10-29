@@ -88,10 +88,11 @@ class Model:
     def from_json(self, data: dict[str, Any]) -> None: ...
     def append_context_menu(self, menu: _ui.Menu, in_browser: bool = False) -> None: ...
     def create_module(self) -> Module | EngineModule:
-        """A RackPy model's module is a Module; another plugin's is an EngineModule Python owns."""
+        """Make a module of a committed model; detached and staged models cannot make modules."""
     def create_module_widget(
         self, module: Module | EngineModule | None = None
-    ) -> _app.ModuleWidget | _app.ForeignModuleWidget: ...
+    ) -> _app.ModuleWidget | _app.ForeignModuleWidget:
+        """Make a widget of a committed model; detached and staged models cannot make widgets."""
 
 def create_model(
     slug: str,

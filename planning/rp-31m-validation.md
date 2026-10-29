@@ -1,4 +1,4 @@
-# RP-31M investigation — owner review required
+# RP-31M investigation — incomplete
 
 Rack 2.6.6 `src/plugin/Plugin.cpp:14-20` shows `Plugin::~Plugin()` clears
 `model->plugin` for each model and does not delete the models. RackPy exposes
@@ -13,14 +13,18 @@ thread checks, including when models outlive the plugin or are dropped before
 it. This must not register the isolated plugin in Rack or change loaded
 plugins. It is not yet implemented or tested.
 
-**Open owner review item:** whether to permit attachment of a detached model to
-such an isolated plugin. The existing RP-16 contract and
-`docs/reference/plugin.md#plugins` restrict `Plugin.add_model` to this Rack
-plugin during initialization; this proposal would add an exception. Do not
-silently change that owner-approved rule or count a native-only fixture as
-Python coverage. The manifest remains `planned` and carries the owner-review
-marker; RP-31D remains blocked by RP-31M. The owner may instead choose a
-specific contract that preserves complete supported semantics.
+The user subsequently authorized proceeding with recommended decisions, so
+the isolated-plugin exception no longer awaits an interactive choice. A
+separate existing hazard remains: a module or widget made from a detached or
+staged RackPy model stores a raw model pointer even though the model can be
+freed when its Python handle is dropped or registration fails. As a WIP safety
+restriction, `create_module` and `create_module_widget` now require a committed
+model; tests cover detached and staged refusals. This also prevents those
+escapes while an eventual isolated plugin owns detached models. It is a
+restriction, not yet a complete Plugin destructor mapping.
 
-This is an investigation, not validation of an implementation. No host or
-platform support was established by this document.
+`native/bindings/plugin.cpp` compiled with Werror, generated files and `prek`
+(including mypy) passed. The fresh hooks build timed out after 36/235 steps;
+the new host tests have **not** been run. No Plugin construction/destruction
+implementation or host proof exists yet, and the destructor record remains
+planned. The build may be resumed in `build/dev`; macOS and Windows are untested.

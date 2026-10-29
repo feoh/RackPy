@@ -28,6 +28,8 @@ model = raw_plugin.create_model("PyTwice", lambda m: None)
 errors["added_twice"] = None
 try:
     plugin.raw.add_model(model)
+    record("staged_module", model.create_module)
+    record("staged_widget", model.create_module_widget)
     plugin.raw.add_model(model)
 except Exception as error:
     errors["added_twice"] = type(error).__name__
