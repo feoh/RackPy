@@ -127,6 +127,56 @@ def same_as_core(got: list[tuple[list[float], list[float]]]) -> bool:
     return all(core == ours for core, ours in got) and any(any(x != 0.0 for x in core) for core, _ in got)
 
 
+@pytest.mark.parametrize("master_index", [0, 1])
+def test_two_core_ports_during_initial_rate_change(master_index: int) -> None:
+    e = engine()
+    driver = audio.PythonDriver("RP-31J Core reference")
+    device = driver.add_device("Two Core ports", 4, 4, [44100, 48000], 48000, [BLOCK], BLOCK)
+    driver_id = AUDIO_ID + 1 + master_index
+    audio.add_driver(driver_id, driver)
+    model = raw.plugin.get_model("Core", "AudioInterface2")
+    assert model is not None
+    modules: list[EngineModule] = []
+    cable_ids: list[int] = []
+    try:
+        for offset in (0, 2):
+            core = model.create_module()
+            assert isinstance(core, EngineModule)
+            e.add_module(core)
+            modules.append(core)
+            saved = {
+                "driver": driver_id,
+                "deviceName": "Two Core ports",
+                "sampleRate": 48000.0,
+                "blockSize": BLOCK,
+                "inputOffset": offset,
+                "outputOffset": offset,
+            }
+            e.module_from_json(
+                core, {"plugin": "Core", "model": "AudioInterface2", "data": {"audio": saved, "dcFilter": False}}
+            )
+            cable_ids.extend(HOOKS.engine_reference_loopback(core.id, i) for i in (0, 1))
+        e.set_master_module(modules[master_index])
+        HOOKS.engine_set_sample_rate(44100.0)
+        assert e.get_sample_rate() == 44100.0
+        got = blocks(device, 4, seed=42)
+        assert e.get_sample_rate() == 48000.0
+        # Rack iterates subscribers in pointer order. If the secondary is fed
+        # before the master changes the rate, the rate event clears its input
+        # and its first block is silent. A loopback can carry a final frame
+        # into the next block; by block three both references must agree.
+        assert same_as_core(got[2:])
+        left, right = got[0]
+        if left != right:
+            assert (not any(left) and any(right)) or (not any(right) and any(left))
+    finally:
+        e.set_master_module(None)
+        for cable_id in cable_ids:
+            HOOKS.engine_disconnect(cable_id)
+        for core in modules:
+            e.remove_module(core)
+
+
 def test_a_python_port_becomes_a_modules_audio_port(rig: dict[str, Any]) -> None:
     module, port = rig["module"], rig["port"]
     assert module.audio_port is port and port.max_inputs == 2 and port.max_outputs == 2

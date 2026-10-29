@@ -19,10 +19,15 @@ for the first block while Core produced audio. Setting Rack's suggested engine
 rate to the device's 48 kHz before starting the comparison made all nine
 inner tests pass, including the entire first block. The likely explanation is
 that a master changes the engine rate while processing device inputs, clearing
-an already-fed secondary port; that explanation has not yet been isolated
-against two Core ports. The comparison is therefore evidence for the
-preconfigured-rate case only, not proof of startup/rate-change equivalence.
-The existing separate rate-change test checks resampling and missed converters.
+an already-fed secondary port. A live-Rack experiment with two Core Audio-2
+modules at 44.1 kHz starting a 48 kHz device reproduced the divergent first
+block in one master selection; the other selection matched. Because Rack
+iterates subscribers in pointer order, the test accepts either first-block
+outcome, requires the silent/non-silent distinction when they differ, and
+requires equality from the third block. It passes with both master choices.
+The RackPy-versus-Core comparison remains evidence for the preconfigured-rate
+case only, not proof of startup/rate-change equivalence. The separate
+rate-change test checks resampling and missed converters.
 
 `tests/io/test_io_native.py` passed all five cases against the existing
 hooks build: native audio differential, the instrumented audio guard,
