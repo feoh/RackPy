@@ -179,7 +179,9 @@ dropped it. `Image.load()` is deprecated, as `Font.load()` is.
 keeps the previous image: Rack draws SVGs it was given without checking that
 they have one ([app controls](app.md#svg-controls-screws-and-panels)).
 NanoSVG parses any string, so `load_string` gives an empty image rather than
-failing. `Svg.draw(vg)` draws it in a drawing
+failing. `get_size()`, `get_num_shapes()`, `get_num_paths()` and
+`get_num_points()` report the parsed image's dimensions and geometry counts.
+`Svg.draw(vg)` draws it in a drawing
 callback. `Svg.handle` is the parsed image as a `NativeHandle`, which goes
 stale when `load_file` or `load_string` replaces it, and
 `window.svg_draw(vg, svg.handle)` is Rack's `svgDraw`. `window.SVG` is

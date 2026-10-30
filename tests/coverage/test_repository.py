@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """RP-11 on the real repository: the manifest matches the inventory, and every derived file is current."""
 
+import ast
 import subprocess
 
 import binding_manifest as bm
@@ -19,6 +20,21 @@ def test_manifest_is_consistent_apart_from_the_built_package() -> None:
     proc = run("check_coverage.py", "check", "--without-built-package")
     assert proc.returncode == 0, proc.stdout + proc.stderr
     assert "NOT checked against the built package" in proc.stdout
+
+
+def test_deprecated_event_alias_cases_cover_inventory() -> None:
+    file = bm.REPO / "tests/ui/in_rack/test_menus_events.py"
+    tree = ast.parse(file.read_text())
+    function = next(
+        n
+        for n in tree.body
+        if isinstance(n, ast.FunctionDef) and n.name == "test_every_deprecated_event_alias_warns_and_preserves_identity"
+    )
+    decorator = next(n for n in function.decorator_list if isinstance(n, ast.Call))
+    cases = ast.literal_eval(decorator.args[1])
+    actual = {f"alias:rack::event::{alias}" for alias, _ in cases}
+    expected = {e["id"] for e in bm.load_inputs().index.values() if e["id"].startswith("alias:rack::event::")}
+    assert len(cases) == len(actual) and actual == expected
 
 
 def test_bound_records_need_the_built_package() -> None:

@@ -20,6 +20,50 @@ GLFW_PRESS, GLFW_RELEASE = raw.glfw.GLFW_PRESS, raw.glfw.GLFW_RELEASE
 GLFW_KEY_A, GLFW_MOUSE_BUTTON_LEFT = raw.glfw.GLFW_KEY_A, raw.glfw.GLFW_MOUSE_BUTTON_LEFT
 
 
+@pytest.mark.parametrize(
+    ("alias", "target"),
+    [
+        ("Base", "BaseEvent"),
+        ("PositionBase", "PositionBaseEvent"),
+        ("KeyBase", "KeyBaseEvent"),
+        ("TextBase", "TextBaseEvent"),
+        ("Hover", "HoverEvent"),
+        ("Button", "ButtonEvent"),
+        ("DoubleClick", "DoubleClickEvent"),
+        ("HoverKey", "HoverKeyEvent"),
+        ("HoverText", "HoverTextEvent"),
+        ("HoverScroll", "HoverScrollEvent"),
+        ("Enter", "EnterEvent"),
+        ("Leave", "LeaveEvent"),
+        ("Select", "SelectEvent"),
+        ("Deselect", "DeselectEvent"),
+        ("SelectKey", "SelectKeyEvent"),
+        ("SelectText", "SelectTextEvent"),
+        ("DragBase", "DragBaseEvent"),
+        ("DragStart", "DragStartEvent"),
+        ("DragEnd", "DragEndEvent"),
+        ("DragMove", "DragMoveEvent"),
+        ("DragHover", "DragHoverEvent"),
+        ("DragEnter", "DragEnterEvent"),
+        ("DragLeave", "DragLeaveEvent"),
+        ("DragDrop", "DragDropEvent"),
+        ("PathDrop", "PathDropEvent"),
+        ("Action", "ActionEvent"),
+        ("Change", "ChangeEvent"),
+        ("Dirty", "DirtyEvent"),
+        ("Reposition", "RepositionEvent"),
+        ("Resize", "ResizeEvent"),
+        ("Add", "AddEvent"),
+        ("Remove", "RemoveEvent"),
+        ("Show", "ShowEvent"),
+        ("Hide", "HideEvent"),
+    ],
+)
+def test_every_deprecated_event_alias_warns_and_preserves_identity(alias: str, target: str) -> None:
+    with pytest.warns(DeprecationWarning, match=alias):
+        assert getattr(raw.event, alias) is getattr(w, target)
+
+
 class Pad(w.OpaqueWidget):
     """A target in Rack's scene that records what Rack dispatches to it."""
 
@@ -140,6 +184,69 @@ def test_raw_fields_and_finalization() -> None:
         if pad.parent is not None:
             pad.remove_from_parent()
         pad.close()
+
+
+def test_event_state_drag_focus_drop_and_dirty() -> None:
+    calls: list[tuple[str, object]] = []
+
+    class Target(w.OpaqueWidget):
+        def on_drag_start(self, event: Any) -> None:
+            calls.append(("start", event.button))
+
+        def on_drag_end(self, event: Any) -> None:
+            calls.append(("end", event.button))
+
+        def on_drag_enter(self, event: Any) -> None:
+            calls.append(("drag-enter", event.origin))
+
+        def on_drag_leave(self, event: Any) -> None:
+            calls.append(("drag-leave", event.origin))
+
+        def on_path_drop(self, event: Any) -> None:
+            calls.append(("drop", event.paths))
+            event.consume(self)
+
+        def on_dirty(self, event: Any) -> None:
+            calls.append(("dirty", None))
+
+    context = raw.context_get()
+    assert context is not None and context.event is not None
+    state = context.event
+    target = Target()
+    target.box = Rect(Vec(200, 200), Vec(80, 80))
+    target.attach_to_scene()
+    try:
+        state.set_dragged_widget(target, 2)
+        assert state.dragged_widget is target and state.get_dragged_widget() is target
+        assert ("start", 2) in calls
+        state.set_drag_hovered_widget(target)
+        assert state.drag_hovered_widget is target and state.get_drag_hovered_widget() is target
+        assert ("drag-enter", target) in calls
+        state.set_drag_hovered_widget(None)
+        assert state.get_drag_hovered_widget() is None and ("drag-leave", target) in calls
+        state.set_dragged_widget(None, 2)
+        assert state.get_dragged_widget() is None and ("end", 2) in calls
+        state.set_hovered_widget(target)
+        assert state.get_hovered_widget() is target
+        state.set_selected_widget(target)
+        assert state.get_selected_widget() is target
+        state.last_clicked_widget = target
+        assert state.last_clicked_widget is target
+        assert state.handle_drop(Vec(240, 240), ["/tmp/rackpy-input.svg"])
+        assert ("drop", ["/tmp/rackpy-input.svg"]) in calls
+        state.handle_dirty()
+        assert ("dirty", None) in calls
+        for name, args in (("set_dragged", (target, 1)), ("set_drag_hovered", (target,)), ("set_selected", (target,))):
+            with pytest.warns(DeprecationWarning):
+                getattr(state, name)(*args)
+    finally:
+        state.set_drag_hovered_widget(None)
+        state.set_dragged_widget(None, 1)
+        state.set_selected_widget(None)
+        state.set_hovered_widget(None)
+        state.last_clicked_widget = None
+        target.remove_from_parent()
+        target.close()
 
 
 def test_menu_helpers_build_working_menus() -> None:

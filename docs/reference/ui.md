@@ -66,13 +66,16 @@ they appear as `HostWidget`s. Put content in the container with
 `offset`, `container_box` and `hide_scrollbars` are Rack's fields, and
 `scroll_to()`, `get_scroll_offset()`, `get_container_offset_bound()`,
 `get_handle_offset()`, `get_handle_size()` and `is_scrolling()` its methods.
-`Scrollbar` (alias `ScrollBar`) has `vertical`.
+The `horizontal_scrollbar` and `vertical_scrollbar` fields identify those
+owned views. `Scrollbar` (alias `ScrollBar`) has `vertical`.
 
 (ui-menus)=
 ## Menus
 
 A menu is a `MenuOverlay` that covers the scene and holds one or more `Menu`s
-of `MenuItem`s, `MenuLabel`s and `MenuSeparator`s. A `MenuItem` subclass
+of `MenuItem`s, `MenuLabel`s and `MenuSeparator`s, all `MenuEntry` widgets.
+`MenuEntry()` constructs the shared, directly subclassable base for menu entries.
+`Menu.corner_flags` accepts Blendish corner flags. A `MenuItem` subclass
 overrides `on_action(event)`. Rack consumes the event and then closes the
 menu; call `event.unconsume()` to keep it open. `do_action()` triggers the
 item as a click does. For a submenu, override `create_child_menu()` and
@@ -132,7 +135,10 @@ on threads Python starts (see [the context](window.md#the-context)). Its
   widget callback, where Rack may be iterating the tree.
 - `set_hovered_widget`, `set_dragged_widget`, `set_drag_hovered_widget` and
   `set_selected_widget` change the focus and send Rack's enter, leave,
-  select and drag events.
+  select and drag events. The corresponding `get_hovered_widget`,
+  `get_dragged_widget`, `get_drag_hovered_widget`, `get_selected_widget` and
+  `get_root_widget` return the current targets. Rack's deprecated shorter
+  `set_hovered`, `set_dragged`, `set_drag_hovered` and `set_selected` warn.
 - `finalize_widget` makes Rack forget a widget.
 - The raw fields (`hovered_widget`, `selected_widget`, and the rest) can be
   written with `None` or a live widget without sending events.
