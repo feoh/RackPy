@@ -27,8 +27,12 @@ duplicate the task graph. RP-01 records the completed metadata recovery.
 
 - Include only <rack.hpp> in plugin translation units. No PRIVATE calls.
 - Pin upstream versions and SDK checksums. Keep downloads/caches outside git.
-- No GIL, Python allocation/destruction, logging, IO, or blocking locks on the
-  production audio path. GIL release alone does not make Python real-time safe.
+- No GIL, Python allocation/destruction, logging, or IO on the production audio
+  path. RackPy must not introduce additional blocking locks on that path; this
+  does not prohibit synchronization already performed by Rack's host or driver
+  when using the supported public API. Document host-owned locks separately and
+  do not claim the entire host path is lock-free. GIL release alone does not make
+  Python real-time safe.
 - Rack calls process once per sample; batching must not change cable/feedback
   timing. Engine events are not automatically safe for arbitrary Python callbacks.
 - Do not expose borrowed pointers as immortal Python objects or integer addresses.
