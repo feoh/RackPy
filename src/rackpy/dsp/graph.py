@@ -1,4 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
+# Graph, Signal and the lowering helpers collaborate on module-private state.
+# Runtime type checks also protect callers that do not use a type checker.
+# pyright: reportPrivateUsage=false, reportUnnecessaryIsInstance=false
 """DSP graphs: a module's per-sample processing, described in Python (RP-21).
 
 A :class:`Graph` is built from native node types: ports, parameters and

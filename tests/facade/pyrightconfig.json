@@ -10,6 +10,7 @@
     "../../src/rackpy/dsp/basic.py",
     "../../src/rackpy/dsp/digital.py",
     "../../src/rackpy/dsp/fft.py",
+    "../../src/rackpy/dsp/graph.py",
     "../../src/rackpy/dsp/kernel.py",
     "../../src/rackpy/dsp/midi.py",
     "../../src/rackpy/dsp/resampling.py",
