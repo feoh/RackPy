@@ -155,6 +155,10 @@ def test_native_midi_input_delivers_messages_at_their_engine_frame() -> None:
             queue.try_pop(frame + 100)
         with pytest.raises(OwnershipError, match="consumed by its native kernel"):
             queue.size()
+        long_message = midi.Message()
+        long_message.bytes = [0xF0, 1, 2, 0xF7]
+        long_message.frame = frame + 2
+        queue.on_message(long_message)  # the native queue's documented SysEx limit
         queue.on_message(note(0x90, frame + 3))
         output.send_message(note(0x80, frame + 7))  # Rack's device delivers the second message
         engine.step_block(3)
@@ -169,7 +173,7 @@ def test_native_midi_input_delivers_messages_at_their_engine_frame() -> None:
         stats = module.midi_input_stats(0)
         assert stats is not None
         assert stats["received"] == stats["delivered"] == 2
-        assert stats["dropped_full"] == stats["dropped_long"] == 0
+        assert stats["dropped_full"] == 0 and stats["dropped_long"] == 1
     finally:
         engine.set_master_module(previous)
         engine.remove_module(module)

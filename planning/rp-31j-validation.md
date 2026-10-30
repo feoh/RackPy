@@ -21,7 +21,10 @@ always lock-free at compile time (indices, counters, state and handover
 pointers), so a target that implements them with library locks cannot silently
 build these paths. This is a compile-time guard, not a proof that every Rack or
 driver call is nonblocking. Linux x86_64 builds and CTests passed; the other
-architectures still require their own builds.
+architectures still require their own builds. The live MIDI path now also
+checks that a four-byte SysEx message increments `dropped_long` without
+preventing the following timed notes from reaching their kernel. This verifies
+the current three-byte limit; it does not make long-message semantics complete.
 
 The four affected binding records and generated mapping/callback artifacts now
 cite the WIP paths and their evidence without a status promotion. After this
