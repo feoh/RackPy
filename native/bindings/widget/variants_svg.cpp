@@ -56,6 +56,5 @@ void bindSvgVariant(py::module_ raw, py::module_ mod) {
 				throw py::error_already_set();
 			native<V>(self).setSvg(drawableSvg(std::move(svg)));
 		}, py::arg("svg"));
-	mod.attr("SVGWidget") = cls;
 }
 } }

@@ -9,6 +9,7 @@ lists what is bound.
 """
 
 import sys as _sys
+import warnings as _warnings
 from types import ModuleType as _ModuleType
 from typing import Any as _Any
 
@@ -102,6 +103,22 @@ __all__.append("event")
 from rackpy._widget_events import register as _register_widget_events  # noqa: E402
 
 _register_widget_events(_rackpy_host.raw.widget)
+
+
+def _deprecated_module_alias(module: _ModuleType, old: str, current: str) -> None:
+    def get(name: str) -> _Any:
+        if name != old:
+            raise AttributeError(f"module {module.__name__!r} has no attribute {name!r}")
+        _warnings.warn(f"{module.__name__}.{old} is deprecated; use {current}", DeprecationWarning, stacklevel=2)
+        return getattr(module, current)
+
+    module.__getattr__ = get  # type: ignore[attr-defined]
+    module.__all__ = [*sorted(name for name in vars(module) if not name.startswith("_")), old]  # type: ignore[attr-defined]
+    module.__dir__ = lambda: sorted({*vars(module), old})  # type: ignore[attr-defined]
+
+
+_deprecated_module_alias(_rackpy_host.raw.ui, "ScrollBar", "Scrollbar")
+_deprecated_module_alias(_rackpy_host.raw.widget, "SVGWidget", "SvgWidget")
 
 # Rack calls ParamQuantity value methods on its engine thread (Core MIDI-Map, ADR 003).
 # Plain Quantity subclasses may override these on the UI thread only.

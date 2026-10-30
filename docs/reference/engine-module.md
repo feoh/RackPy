@@ -584,8 +584,9 @@ through the engine; the handler then runs exactly as when Rack dispatches it.
 For a module Rack's engine owns, Rack dispatches the events, under its engine
 lock, and direct calls raise `OwnershipError`. The deprecated no-argument forms
 (`on_reset()`, `on_add()`, `on_remove()`, `on_randomize()`,
-`on_sample_rate_change()`) warn and call Rack's empty deprecated handler,
-which records nothing.
+`on_sample_rate_change()`) warn and dispatch the deprecated virtual, whose
+Rack implementation is empty and records nothing. A laboratory module can
+override that virtual separately, as described below.
 
 Observing snapshots is not the same semantics as a synchronous Python
 handler. The UI-thread events have Python handlers (below); the sample-rate,
@@ -628,8 +629,14 @@ the data handlers). Rack's own `toJson` calls the Python `params_to_json` and
 `data_to_json`, and `fromJson` the `*_from_json` ones. JSON overrides return
 JSON-compatible data, `None` for Rack's `NULL`. Rack's `toJson` and `fromJson`
 name the module's model: `ModuleClass.create(model)` sets one, which only
-names it. Rack's deprecated no-argument events are reached through `super()`,
-as in RackPy's handlers. Details: [laboratory modules](../explanation/callbacks.md#laboratory-modules).
+names it. The deprecated no-argument virtuals have separate overrides:
+`on_add_legacy`, `on_remove_legacy`, `on_reset_legacy`,
+`on_randomize_legacy`, and `on_sample_rate_change_legacy`. Defining one or
+explicitly calling its base implementation warns. Rack's default modern
+handler calls the corresponding legacy override, without a warning just for
+that internal dispatch. A modern override that omits `super()` suppresses
+that dispatch. Direct module calls and bench callbacks propagate laboratory
+override errors to their Python caller. Details: [laboratory modules](../explanation/callbacks.md#laboratory-modules).
 
 ## Native kernels
 

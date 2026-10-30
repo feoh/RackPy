@@ -2,6 +2,7 @@
 #pragma once
 #include "events.hpp"
 #include "drawing.hpp"
+#include "../support/overrides.hpp"
 
 namespace rackpy { namespace widgets {
 
@@ -59,6 +60,7 @@ void bindBehavior(py::classh<Base, Options...>& cls) {
 		w.Base::draw(value);
 	}, py::arg("args"))
 	.def("draw_vg", [](py::object self, const Graphics& vg) {
+		bindings::deprecated("Widget.draw_vg mirrors deprecated draw(NVGcontext*); use draw(DrawArgs)");
 		auto& w = native<Base>(self);
 		legacyDraw(w, vg.draw());
 	}, py::arg("graphics"))

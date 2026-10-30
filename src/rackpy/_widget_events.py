@@ -5,6 +5,7 @@ The Python classes preserve the SDK prototype hierarchy. The native reference
 performs every lifetime, constness and UI-thread check; no pointer is exposed.
 """
 
+import warnings
 from collections.abc import Sequence
 from types import ModuleType
 from typing import Any
@@ -300,6 +301,8 @@ def register(native: ModuleType) -> None:
     native._register_event_types(classes)
 
     def one_widget_base(cls: type, /, **kwargs: object) -> None:
+        if "draw_vg" in vars(cls):
+            warnings.warn("Widget.draw_vg is deprecated; override draw instead", DeprecationWarning, stacklevel=2)
         if sum(issubclass(base, native.Widget) for base in cls.__bases__) > 1:
             raise TypeError(
                 "use one native Widget base plus non-Widget Python mixins; multiple native owners are ambiguous"

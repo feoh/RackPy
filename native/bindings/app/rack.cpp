@@ -18,6 +18,7 @@
 #include "rackpy/runtime/json.hpp"
 #include "../history/history.hpp"
 #include "app.hpp"
+#include "../support/overrides.hpp"
 
 namespace pybind11 {
 #define RACKPY_RACK_ADDRESS(T) \
@@ -125,8 +126,12 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 		.def_property_readonly("menu_bar", [](const HostScene& h) { return wrapper(hostAs<app::Scene>(h).menuBar); })
 		.def_property_readonly("browser", [](const HostScene& h) { return wrapper(hostAs<app::Scene>(h).browser); },
 			"Rack's module browser (Browser.hpp is outside rack.hpp, so a plain HostWidget).")
-		.def_property("mouse_pos", [](const HostScene& h) { return hostAs<app::Scene>(h).mousePos; },
+		.def_property("mouse_pos", [](const HostScene& h) {
+			bindings::deprecated("Scene.mouse_pos mirrors Rack's deprecated mousePos; use get_mouse_pos");
+			return hostAs<app::Scene>(h).mousePos;
+		},
 			[](const HostScene& h, rack::math::Vec v) {
+				bindings::deprecated("Scene.mouse_pos mirrors Rack's deprecated mousePos; use get_mouse_pos");
 				finite(v, "mouse_pos");
 				hostAs<app::Scene>(h).mousePos = v;
 			}, "Rack's deprecated raw field (Rack sets it as the mouse moves); use get_mouse_pos().")
@@ -167,8 +172,12 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 
 	using RW = app::RackWidget;
 	py::class_<HostRack, ExternalWidget>(appModule, "HostRackWidget", py::is_final(), "Rack's RackWidget: modules, cables and selection.")
-		.def_property("touched_param", [](const HostRack& h) { return wrapper(hostAs<RW>(h).touchedParam); },
+		.def_property("touched_param", [](const HostRack& h) {
+			bindings::deprecated("RackWidget.touched_param mirrors Rack's deprecated touchedParam; use get_touched_param");
+			return wrapper(hostAs<RW>(h).touchedParam);
+		},
 			[](const HostRack& h, py::object pw) {
+				bindings::deprecated("RackWidget.touched_param mirrors Rack's deprecated touchedParam; use set_touched_param");
 				auto& rack = hostAs<RW>(h);
 				if (pw.is_none()) {
 					rack.touchedParam = nullptr;

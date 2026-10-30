@@ -17,7 +17,8 @@ Module removal and null-module
 browser previews are tested through test hooks that follow Rack's code; a
 smoke test in Rack's real module browser with Python module widgets waits for
 RP-28. The names below are the raw layer; there is no `rackpy.widget` facade
-for them yet.
+for them yet. Accessing Rack's deprecated `widget.SVGWidget` and
+`ui.ScrollBar` aliases warns; use `widget.SvgWidget` and `ui.Scrollbar`.
 
 ## Creating and owning widgets
 
@@ -73,7 +74,7 @@ get Rack's behaviour as well:
 | --- | --- |
 | `step()` | every frame, for widgets in the scene |
 | `draw(args)`, `draw_layer(args, layer)` | when drawing, see [drawing](#drawing) |
-| `draw_vg(graphics)` | after `draw(args)`: Rack's deprecated `draw(NVGcontext*)` |
+| `draw_vg(graphics)` | after `draw(args)`: Rack's deprecated `draw(NVGcontext*)`; defining or calling it warns |
 | `draw_framebuffer()` | `FramebufferWidget` and `OpenGlWidget` only, while rendering |
 | `on_hover(event)` … `on_context_destroy(event)` | for each of Rack's 31 widget events |
 | `get_children_bounding_box()`, `get_visible_children_bounding_box()` | layout queries |

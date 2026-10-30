@@ -58,7 +58,9 @@ header code, and subscripting it gives the specialization:
   `TRedLight[GrayModuleLightWidget]`, which is also `TRedLight.default()`.
 - Rack's alias templates are `AliasTemplate`s that give the aliased
   specialization itself: `VCVLightButton[RedLight]` is
-  `LightButton[VCVButton, RedLight]`.
+  `LightButton[VCVButton, RedLight]`. Subscribing Rack's deprecated
+  `LEDLightButton` alias warns; use `VCVLightButton` instead. Constructing
+  deprecated `LEDSliderGreen` also warns; use `VCVLightSlider[GreenLight]`.
 - A template's arguments are classes, Python subclasses included. Templates
   without defaults need them: `LargeLight[...]`, `RectangleLight[...]`.
 

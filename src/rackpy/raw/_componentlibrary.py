@@ -19,6 +19,7 @@ installed artwork.
 This module adds the templates to the native ``rackpy.raw.componentlibrary``.
 """
 
+import warnings
 from collections.abc import Callable
 from typing import Any, ClassVar
 
@@ -115,6 +116,8 @@ class AliasTemplate:
         self._defaults = defaults
 
     def __getitem__(self, args: Any) -> type:
+        if self.__name__ == "LEDLightButton":
+            warnings.warn("LEDLightButton is deprecated; use VCVLightButton", DeprecationWarning, stacklevel=2)
         given = args if isinstance(args, tuple) else (args,)
         full = list(given)
         for default in self._defaults[len(given) :]:
@@ -479,11 +482,24 @@ def _install() -> None:
     ):
         cls = getattr(_lib, alias)
         cls.__name__ = cls.__qualname__ = alias  # as C++ spells them; the cache keeps one class per specialization
+
     # Rack's (deprecated) concrete light sliders: struct LEDSliderGreen : VCVLightSlider<GreenLight> {}.
+    def deprecated_slider_init(base: type) -> Callable[..., None]:
+        def init(self: Any, *args: Any, **kwargs: Any) -> None:
+            warnings.warn(
+                "LEDSliderGreen is deprecated; use VCVLightSlider[GreenLight]", DeprecationWarning, stacklevel=2
+            )
+            base.__init__(self, *args, **kwargs)  # type: ignore[misc]
+
+        return init
+
     for color in ("Green", "Red", "Yellow", "Blue", "White"):
         name = f"LEDSlider{color}"
         parent = VCVLightSlider.__class_getitem__(getattr(_lib, f"{color}Light"))
-        setattr(_lib, name, type(name, (parent,), {"__module__": _MODULE, "__qualname__": name}))
+        attrs: dict[str, Any] = {"__module__": _MODULE, "__qualname__": name}
+        if color == "Green":
+            attrs["__init__"] = deprecated_slider_init(parent)
+        setattr(_lib, name, type(name, (parent,), attrs))
     _lib.SegmentDisplay.set_lights = _set_lights
 
 

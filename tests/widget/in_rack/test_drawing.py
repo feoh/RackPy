@@ -31,6 +31,8 @@ def test_rack_rendering_calls_python_draw_layer_and_legacy_draw_with_scoped_args
 
         def draw_vg(self, graphics: Any) -> None:
             # Rack's drawChild calls the deprecated draw(NVGcontext*) after draw(args).
+            with pytest.warns(DeprecationWarning, match="draw_vg"):
+                super().draw_vg(graphics)
             seen.append(("draw_vg", graphics.alive))
             retained.append(graphics)
 
