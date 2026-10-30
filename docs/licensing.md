@@ -173,8 +173,11 @@ Checked read-only on 2026-10-21. Nothing was registered or published.
 
 Names must follow the trademark rules above: never "VCV" in a product name, and
 no VCV logos. A 2026-10-30 PyPI search and JSON request also found no published
-`rackpy` project. The owner approved reserving the name that day; this is not a claim that the name has been reserved or approval to publish an
-unfinished package.
+`rackpy` project. The owner approved reserving the name that day; this is not a
+claim that the name has been reserved or approval to publish an unfinished
+package. PyPI's [name-retention policy](https://docs.pypi.org/project-management/name-retention/)
+classifies an empty or nonfunctional package as name squatting, so do not
+publish such a placeholder.
 
 ## Open questions for the owner
 
