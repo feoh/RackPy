@@ -148,7 +148,7 @@ def test_text_measurement_and_wrapping() -> None:
         seen["bounds"] = p.measure("Rack", 10, 20, size=14)
         seen["centred"] = p.measure("Rack", 60, 20, size=14, align="center middle")
         seen["end"] = p.text("Rack", 10, 20, size=14, color="#ffffff")
-        seen["box"] = p.text("one two three four", 0, 50, size=10, width=40)
+        seen["box"] = p.text("one two three four", 7, 50, size=10, width=40)
         for bad in ("centre", "left right", "top middle"):
             with pytest.raises(ValueError):
                 p.text("x", 0, 0, align=bad)
@@ -160,7 +160,7 @@ def test_text_measurement_and_wrapping() -> None:
     assert isinstance(bounds, drawing.TextBounds) and bounds.width > 20 and bounds.height > 8
     assert seen["end"] == pytest.approx(10 + bounds.advance)
     assert centred.xmin < 60 < centred.xmax and centred.ymin < 20 < centred.ymax
-    assert seen["box"] == 40
+    assert seen["box"] == 47  # wrapped text returns x + box width, not the rendered advance
     assert any(at(image, x, y)[3] for x in range(10, 50) for y in range(8, 22))  # the text drew
 
 

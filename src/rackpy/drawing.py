@@ -249,7 +249,7 @@ class Painter:
         align: str = "left baseline",
         width: float | None = None,
     ) -> float:
-        """Draws text; with ``width``, wraps it in a box that wide. Returns the x after the (first line of) text.
+        """Draw text and return the text's ending x. With ``width``, wrap in a box and return ``x + width`` instead.
 
         ``font`` is a Font, an absolute path, or a path in Rack's system folder; ``align`` is a
         horizontal word (left, center, right) and a vertical one (top, middle, bottom, baseline).

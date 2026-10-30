@@ -97,6 +97,14 @@ probe passed an ID where `set_param_value` expects a module and failed with
 `TypeError`; correcting it to pass the module made `tests/engine/test_host.py`
 pass. This changes documentation and tests, not the rollback implementation.
 
+## Drawing facade return contract
+
+`Painter.text` with a width returns `x + width`, not the rendered first-line
+advance. Its docstring now matches its implementation; the existing
+framebuffer test uses a nonzero x to distinguish the two. The rendering suite
+passed in actual Linux Rack under Xvfb/Mesa with current RP-32 Python sources
+overlaid on the hooks build; this is not GPU or cross-platform evidence.
+
 ## Offline graph typing
 
 The static contract also checks graph inputs, arithmetic signals and plans
