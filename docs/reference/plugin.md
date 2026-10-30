@@ -130,7 +130,10 @@ plugin as `plugin_instance()`, then adds the models it registered.
 errors logged, then releases the models' Python factories before Python
 stops. `settingsToJson` and `settingsFromJson` call the handlers set with
 `set_settings_handlers(to_json=None, from_json=None)`
-(`rackpy.plugin.Plugin.set_settings_handlers`); see
+(`rackpy.plugin.Plugin.set_settings_handlers`). JSON input handlers receive
+`rackpy.types.JSON` and must validate its contents; output handlers may return
+an object, which RackPy validates as JSON at runtime. ModuleClass's data
+handlers use the same typing. See
 [plugin-wide settings](../how-to/state.md#plugin-wide-settings). The loader
 forwards all four hooks to the host library (host ABI 2). Rack's separate
 `Plugin` destructor clears attached models' plugin pointers without deleting

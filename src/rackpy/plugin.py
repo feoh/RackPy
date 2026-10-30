@@ -17,6 +17,7 @@ from rackpy.errors import LaboratoryError
 from rackpy.raw import plugin as _raw
 from rackpy.raw.app import ModuleWidget
 from rackpy.raw.plugin import Model
+from rackpy.types import JSON
 
 __all__ = ["Model", "ModuleClass", "Plugin", "on_destroy", "plugin"]
 
@@ -64,11 +65,11 @@ class ModuleClass:
     def configure(self) -> None:
         """Configure :attr:`module`: ``config()``, ``config_param()`` and the rest. Runs once, first."""
 
-    def to_json(self) -> Any:
-        """The module's custom data when Rack saves it; ``None``, the default, saves none."""
+    def to_json(self) -> object:
+        """The module's custom data when Rack saves it; RackPy validates it as JSON. ``None`` saves none."""
         return None
 
-    def from_json(self, data: Any) -> None:
+    def from_json(self, data: JSON) -> None:
         """Restore the custom data Rack loaded. Validate it: it comes from a patch file."""
 
     # Rack's module events. Override the ones you need: only overridden ones are
@@ -166,8 +167,8 @@ class Plugin:
     def set_settings_handlers(
         self,
         *,
-        to_json: Callable[[], Any] | None = None,
-        from_json: Callable[[Any], object] | None = None,
+        to_json: Callable[[], object] | None = None,
+        from_json: Callable[[JSON], object] | None = None,
     ) -> None:
         """Save plugin-wide settings in Rack's ``settings.json``, under this plugin's slug.
 

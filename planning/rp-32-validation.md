@@ -38,6 +38,16 @@ assertions; `tests/services/test_system.py` passed against the Linux Rack host
 and existing integration binaries. The raw binding's own `Any` signature is
 not yet changed, and this does not complete the broad typing audit.
 
+## Plugin state-handler typing
+
+`ModuleClass.from_json` and plugin settings input handlers now receive the
+recursive JSON value type instead of `Any`; output handlers return `object`,
+which the native converter validates. This avoids mutable-container invariance
+rejecting valid `list[str]` state while still requiring consumers to narrow
+untrusted input. Strict mypy and scoped pyright pass; actual Rack plugin API
+and create/remove/save/reload host tests passed with current RP-32 Python
+overlaid on the hooks build. The underlying state conversion was not changed.
+
 ## Lifecycle callback typing follow-up
 
 `ModuleClass` now annotates its eight UI lifecycle callbacks with the matching

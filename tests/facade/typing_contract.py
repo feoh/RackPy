@@ -46,6 +46,12 @@ if TYPE_CHECKING:
         module.on_port_change("not an event")  # type: ignore[arg-type]
 
     class TypedCallbacks(ModuleClass):
+        def from_json(self, data: JSON) -> None:
+            assert_type(data, JSON)
+
+        def to_json(self) -> object:
+            return {"words": ["a", "b"]}
+
         def on_add(self, event: Module.AddEvent) -> None: ...
         def on_remove(self, event: Module.RemoveEvent) -> None: ...
         def on_bypass(self, event: Module.BypassEvent) -> None: ...
