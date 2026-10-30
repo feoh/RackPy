@@ -24,6 +24,17 @@ Linux Rack host lock (two outer tests). These host runs used the already-built
 RP-31 integration production and hooks binaries; there was no native change in
 this checkpoint. They do not establish macOS or Windows behavior.
 
+## JSON facade typing follow-up
+
+The network facade now types request bodies and results as the existing
+recursive `rackpy.types.JSON` rather than `Any`. The binding's `fromJsonAt`
+implementation constructs only JSON values. Tests narrow returned values before
+indexing them, and the reference notes that `None` cannot distinguish failure
+from JSON null. Mypy and scoped strict pyright pass the additional type
+assertions; `tests/services/test_system.py` passed against the Linux Rack host
+and existing integration binaries. The raw binding's own `Any` signature is
+not yet changed, and this does not complete the broad typing audit.
+
 Still to do: a complete coherent facade and typing review, raw discoverability,
 strict mypy and pyright samples, signature and exception tests, representative
 user walkthroughs, measured wrapper overhead with explicit baseline, any

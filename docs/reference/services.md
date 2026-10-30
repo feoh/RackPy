@@ -366,4 +366,6 @@ This is the contract for `WeakPtr<T>`, `WeakBase` and `WeakHandle`
 - **`rackpy.services.network`.** `get_json(url, params)`, `post_json`,
   `put_json` and `delete_json`, plus `download(url, filename, on_progress)`,
   which runs Rack's download on a worker thread and calls `on_progress`
-  with the fraction on the calling thread. Also `encode_url` and `url_path`.
+  with the fraction on the calling thread. JSON helpers return `rackpy.types.JSON`;
+  `None` may be either a JSON null or a failure. Narrow the result before
+  treating it as an object or an array. Also `encode_url` and `url_path`.

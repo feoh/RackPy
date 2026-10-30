@@ -197,6 +197,7 @@ def test_json_requests(server: str) -> None:
     got = rn.request_json(rn.METHOD_GET, server + "/api", {"q": "a b", "n": "1", "skip": 5})
     assert got["method"] == "GET" and got["path"] == "/api?q=a%20b&n=1"  # Rack sends string values only
     posted = net.post_json(server + "/api", {"x": [1, 2]}, cookies={"token": "abc"})
+    assert isinstance(posted, dict) and isinstance(posted["body"], str)
     assert (
         posted["method"] == "POST" and json.loads(posted["body"]) == {"x": [1, 2]} and posted["cookie"] == "token=abc;"
     )
@@ -207,7 +208,8 @@ def test_json_requests(server: str) -> None:
     # Rack 2.6.6 sets CURLOPT_POSTFIELDS after CURLOPT_UPLOAD, causing curl to POST.
     raw_put = rn.request_json(rn.Method.METHOD_PUT, server + "/api", [1], {})
     assert raw_put["method"] == "POST" and json.loads(raw_put["body"]) == [1]
-    assert net.delete_json(server + "/api")["method"] == "DELETE"
+    deleted = net.delete_json(server + "/api")
+    assert isinstance(deleted, dict) and deleted["method"] == "DELETE"
     assert net.get_json(server + "/text") is None  # not JSON
     assert net.get_json("http://127.0.0.1:1/") is None  # nothing listens: refused at once
     assert net.get_json("not a url") is None
