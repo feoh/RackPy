@@ -2,9 +2,10 @@
 """RP-31J: native audio-port and MIDI-input I/O for kernels and graphs, without Rack.
 
 The native tests compare a module's audio port with Core Audio's own code
-block for block (native/tests/test_io.cpp); the guard run proves the driver
-and engine halves make no heap, lock, write or GIL calls; the stress runs
-cross the driver, engine and main threads under ASan/UBSan and TSan; the I/O
+block for block (native/tests/test_io.cpp); the guard checks the exchange
+code for heap, lock, write and GIL calls, but does not cover live Rack device
+getters or Rack's own master-clock methods; the stress runs cross the driver, engine and
+main threads under ASan/UBSan and TSan; the I/O
 objects reference no CPython symbols. tests/io/test_io_paths.py runs them in
 Rack.
 """
@@ -21,7 +22,7 @@ from tests.support import linux_x64_only
 pytestmark = [linux_x64_only(), pytest.mark.native]
 
 
-def test_the_audio_port_is_core_audio(dev_build: Path) -> None:
+def test_native_audio_and_midi_match_rack(dev_build: Path) -> None:
     proc = subprocess.run([str(dev_build / "rackpy_io_tests")], capture_output=True, text=True, check=False)
     assert proc.returncode == 0, proc.stdout + proc.stderr
     assert "io paths: all checks passed" in proc.stdout
@@ -33,6 +34,7 @@ def test_the_audio_paths_make_no_forbidden_calls(dev_build: Path) -> None:
     report = json.loads(out.stdout)
     # As master and secondary, resampled and copied, a missed block, stream starts and stops, rackpy.AudioInterface.
     assert not any(report["audio"].values()) and report["audio_flowed"], report
+    assert not any(report["midi_burst"].values()) and report["midi_burst_worked"], report
     assert report["inject"]["malloc"] >= report["frames"]  # the guard is live in this run
 
 
@@ -57,6 +59,13 @@ def test_the_paths_under_sanitizers(dev_build: Path, variant: str, blocks: int) 
     assert "io stress: all checks passed" in proc.stdout, report
     for sanitizer in ("runtime error", "AddressSanitizer", "ThreadSanitizer", "LeakSanitizer"):
         assert sanitizer not in proc.stderr, report
+
+
+def test_bridge_calls_racks_public_master_clock(dev_build: Path) -> None:
+    obj = dev_build / "CMakeFiles/rackpy_host.dir/native/io/audio_bridge.cpp.o"
+    proc = subprocess.run(["nm", "-uC", str(obj)], capture_output=True, text=True, check=True)
+    for method in ("stepBlock", "setMasterModule", "setMasterModule_NoLock", "setSuggestedSampleRate"):
+        assert f"rack::engine::Engine::{method}(" in proc.stdout
 
 
 def test_io_objects_reference_no_python(dev_build: Path) -> None:

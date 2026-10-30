@@ -125,7 +125,7 @@ struct PyAudioPort : a::Port {
 		frames.fetch_add(static_cast<uint64_t>(count), std::memory_order_relaxed);
 		lastFrames.store(count, std::memory_order_relaxed);
 		if (io::AudioBridge* b = bridge.load(std::memory_order_acquire)) {
-			b->portBuffer(bridgeModule);  // a master steps Rack's engine, as Core Audio's port does
+			b->portBuffer(bridgeModule);  // as Core Audio, the master steps Rack's engine
 			return;
 		}
 		if (!pythonDriving || !runtime::interpreterAlive())
@@ -215,7 +215,13 @@ void maintainBridges() noexcept {
 		if (!p->bridgeOwner || p->released)
 			continue;
 		try {
-			p->bridgeOwner->maintain(p->getSampleRate(), engineRate, p->getNumInputs(), p->getNumOutputs());
+			float deviceRate = p->getSampleRate();
+			// Prepare the requested fixed rate separately from the converter
+			// still needed by the current rate. Rack's menu offers 11.025–768 kHz.
+			float requestedRate = rack::settings::sampleRate;
+			if (!(requestedRate >= 11025.f && requestedRate <= 768000.f))
+				requestedRate = 0.f;
+			p->bridgeOwner->maintain(deviceRate, engineRate, p->getNumInputs(), p->getNumOutputs(), requestedRate);
 		}
 		catch (const std::exception& e) {
 			WARN("RackPy: an audio port could not prepare a resampler: %s", e.what());

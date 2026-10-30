@@ -128,6 +128,33 @@ void run(bool master, int blocks) {
 	CHECK(threadFailures.load() == 0);
 }
 
+void converterFutureHandover(int rounds) {
+	io::ConverterSlot slot;
+	io::Setting a{44100, 48000, 2}, b{48000, 96000, 2}, c{48000, 88200, 2};
+	std::atomic<bool> done{false};
+	std::thread driver([&] {
+		for (int n = 0; n < rounds; n++) {
+			const io::Setting& setting = (n % 3 == 0) ? a : ((n % 3 == 1) ? b : c);
+			io::Converter* converter = slot.acquire(setting);
+			if (converter && converter->setting != setting)
+				threadFailures.fetch_add(1);
+			if (n % 7 == 0)
+				slot.release();
+		}
+		done.store(true, std::memory_order_release);
+	});
+	size_t step = 0;
+	while (!done.load(std::memory_order_acquire)) {
+		slot.maintain(a);
+		// Repeatedly replace the future setting while the driver may claim it.
+		slot.prepareFuture((step++ & 1) ? b : c);
+		std::this_thread::yield();
+	}
+	driver.join();
+	slot.maintain({});
+	CHECK(threadFailures.load() == 0);
+}
+
 void midiCapacity() {
 	io::MidiQueue queue;
 	rack::midi::Message message;
@@ -160,6 +187,7 @@ int main(int argc, char** argv) {
 	int blocks = argc > 1 ? std::atoi(argv[1]) : 2000;
 	run(true, blocks);
 	run(false, blocks);
+	converterFutureHandover(blocks * 4);
 	midiCapacity();
 	if (failures)
 		std::fprintf(stderr, "%d check(s) failed\n", failures);

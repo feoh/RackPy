@@ -350,6 +350,28 @@ std::string runIoGraphs(Compiled& compiled, int frames) {
 	return text;
 }
 
+bool midiBurstWorked = false;
+
+std::string runMidiBurst() {
+	io::MidiQueue queue;
+	rack::midi::Message message;
+	message.bytes = {0x90, 60, 100};
+	resetCounts();
+	enter();
+	for (int i = 0; i < (int) io::MIDI_QUEUE_CAPACITY; i++) {
+		message.frame = (int64_t) io::MIDI_QUEUE_CAPACITY - i;
+		queue.push(message);
+	}
+	queue.collect((int64_t) io::MIDI_QUEUE_CAPACITY);
+	midiBurstWorked = queue.dueCount() == (int) io::MIDI_QUEUE_CAPACITY;
+	for (int i = 0; i < queue.dueCount(); i++)
+		midiBurstWorked = midiBurstWorked && queue.due()[i].frame == i + 1;
+	leave();
+	char text[512];
+	report(text, sizeof text);
+	return text;
+}
+
 bool audioFlowed = false;
 
 std::string runAudio(int blocks) {
@@ -459,10 +481,13 @@ int main() {
 	std::string expanderRun = runExpanders(compiled, frames);
 	io::services() = &io::hostServices();
 	std::string ioGraphRun = runIoGraphs(compiled, frames);
+	std::string midiBurstRun = runMidiBurst();
 	std::string audioRun = runAudio(600);
 	std::printf("{\"frames\": %d, \"production\": %s, \"failure\": %s, \"inject\": %s, \"graph\": %s, \"compiled\": %s, "
-		"\"expanders\": %s, \"exchanged\": %s, \"graph_io\": %s, \"graph_io_worked\": %s, \"audio\": %s, \"audio_flowed\": %s}\n",
+		"\"expanders\": %s, \"exchanged\": %s, \"graph_io\": %s, \"graph_io_worked\": %s, "
+		"\"midi_burst\": %s, \"midi_burst_worked\": %s, \"audio\": %s, \"audio_flowed\": %s}\n",
 		frames, production.c_str(), failure.c_str(), inject.c_str(), graphRun.c_str(), compiledRun.c_str(), expanderRun.c_str(),
-		exchanged ? "true" : "false", ioGraphRun.c_str(), ioGraphWorked ? "true" : "false", audioRun.c_str(), audioFlowed ? "true" : "false");
+		exchanged ? "true" : "false", ioGraphRun.c_str(), ioGraphWorked ? "true" : "false", midiBurstRun.c_str(),
+		midiBurstWorked ? "true" : "false", audioRun.c_str(), audioFlowed ? "true" : "false");
 	return 0;
 }

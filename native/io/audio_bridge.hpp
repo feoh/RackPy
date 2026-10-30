@@ -16,17 +16,15 @@
 //
 // Rack's SampleRateConverter reallocates its speex state whenever its rates
 // or channel count change, which the driver thread must not do. RackPy's main
-// thread prepares a fresh converter for each setting the driver needs (at
-// attachment, and at every UI step for what it then observes or the driver
-// last missed) and hands it over through an atomic; the driver retires the
-// ones it stops using through a ring that the main thread empties. A block
+// thread prepares fresh converters for the current or missed setting and,
+// separately, a requested upcoming rate. Atomic handovers cannot displace
+// the current converter; the driver retires converters it stops using through
+// a ring that the main thread empties. A block
 // whose setting has no converter ready yet is silent and counted.
 //
-// The rest of Core's AudioPort runs on the driver thread around Rack's own
-// engine calls: claiming the master module, suggesting the device's sample
-// rate and stepping the engine (Engine::setMasterModule, setSuggestedSampleRate
-// and stepBlock), which take Rack's engine locks exactly as Core Audio's do.
-// RackPy's own exchange code (input, output, shift, push) takes none.
+// As Core Audio does, a port can claim the master, suggest its device rate,
+// and step Rack's engine. These public Rack engine methods take Rack's own
+// locks; RackPy's exchange code (input, output, shift, push) adds none.
 #pragma once
 #include <rack.hpp>
 
@@ -116,6 +114,8 @@ public:
 
 	/** Main thread: a fresh converter for `setting`, unless the driver uses or has been handed one. */
 	void prepare(Setting setting);
+	/** Main thread: prepare a future setting without replacing the converter for the current setting. */
+	void prepareFuture(Setting setting);
 	/** Main thread: frees what the driver retired, and prepares what it last missed, or else `observed`. */
 	void maintain(Setting observed);
 	/** The setting the driver's converter has (0: none), for tests. */
@@ -123,7 +123,13 @@ public:
 
 private:
 	Converter* using_ = nullptr;  // driver thread
-	std::atomic<Converter*> prepared{nullptr};  // main thread -> driver thread
+	std::atomic<Converter*> prepared{nullptr};  // main thread -> driver thread, current or missed setting
+	std::atomic<Converter*> future{nullptr};  // main thread -> driver thread, anticipated setting
+	// 0 = empty; FUTURE_BUSY = transient nonblocking reservation; otherwise
+	// the packed setting of the pointer. Positive int input rates cannot pack
+	// to UINT64_MAX. Both threads reserve before changing the pointer.
+	static constexpr uint64_t FUTURE_BUSY = UINT64_MAX;
+	std::atomic<uint64_t> futureSetting{0};
 	dsp::SpscRing<Converter*, 8> retired;  // driver thread -> main thread
 	std::atomic<uint64_t> wanted{0};  // the last setting the driver missed
 	std::atomic<uint64_t> inUse{0};  // using_'s setting
@@ -149,17 +155,16 @@ public:
 	AudioStats stats;
 
 	// --- the driver thread: Core's AudioPort around Rack's engine (Rack's context set, as Device does) ---
-	/** Core's processInput: claims Rack's master module for `module` if there is none and `engineOwned` says
-	Rack's engine has the module, suggests the device's rate, then input(). */
+	/** Claim master if free, suggest the device rate when master, then run input(). */
 	void portInput(rack::audio::Port& port, rack::engine::Module* module, bool engineOwned, const float* input,
 		int inputStride, int frames) noexcept;
-	/** Core's processBuffer: steps Rack's engine by the frames input() requested, while `module` is master. */
+	/** Step Rack's engine for the frames requested by input() when this module is master. */
 	void portBuffer(rack::engine::Module* module) noexcept;
 	/** Core's processOutput: output() at the engine's rate. */
 	void portOutput(float* output, int outputStride, int frames) noexcept;
 	/** Core's onStartStream; any thread. */
 	void portStart() noexcept;
-	/** Core's onStopStream: also unsets `module` as master (Rack's lock-free variant, as Core does). */
+	/** Stop the port and unset its module as master with Rack's no-lock variant, as Core does. */
 	void portStop(rack::engine::Module* module) noexcept;
 
 	/** The device's block, resampled into the module's ring. `deviceInputs` and `deviceOutputs` are the port's
@@ -183,8 +188,8 @@ public:
 	// --- the main thread ---
 	/** Converters for the rates and channels the main thread observes now. */
 	void prepare(float deviceRate, float engineRate, int deviceInputs, int deviceOutputs);
-	/** prepare(), and what the driver missed since; frees retired converters. Each UI step. */
-	void maintain(float deviceRate, float engineRate, int deviceInputs, int deviceOutputs);
+	/** Prepare the current or missed setting and, separately, a future rate; free retired converters. UI thread. */
+	void maintain(float deviceRate, float engineRate, int deviceInputs, int deviceOutputs, float futureEngineRate = 0.f);
 	/** The device's input and output channels, as the driver last saw them. */
 	int deviceInputs() const noexcept { return deviceIn.load(std::memory_order_relaxed); }
 	int deviceOutputs() const noexcept { return deviceOut.load(std::memory_order_relaxed); }

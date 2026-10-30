@@ -1,4 +1,120 @@
-# RP-31J checkpoint — incomplete
+# RP-31J validation — bounded implementation
+
+The approved native design drops and counts MIDI messages longer than three
+bytes and can emit counted silence when a resampler is unavailable. It is not
+full SysEx or Core rate-transition equivalence. No manifest record is promoted
+to verified by this task, and these limitations do not waive the full-surface
+release gate. Linux x86_64 in Rack Free 2.6.6 is the host evidence here; physical
+audio devices, macOS and Windows were not tested.
+
+## Anticipating fixed sample-rate changes
+
+UI maintenance prepares converters for Rack's requested fixed engine rate in
+separate future slots, without displacing converters for the applied rate. A
+live Rack test requests 96 kHz while the engine is still at 48 kHz, runs
+maintenance, then lets Core apply the rate in its driver callback: the bridge
+reports no resampler misses and matches Core after the characterized transition.
+Another live test starts with a mismatched 44.1 kHz engine, requests 96 kHz,
+and exercises both rates without another UI step; neither converter misses.
+Initially a single-slot implementation failed that case with two misses when
+prewarming displaced the current converter. Native handover tests cover both
+slots; 36 selected Rack-host, introspection, native/sanitizer and docs tests
+passed after both Werror builds. An independent read-only review confirmed
+ownership but identified a race when a future-slot tag and pointer were
+replaced separately. The handover now uses a nonblocking atomic reservation so
+the driver cannot take a replacement pointer under the old tag. A separate
+read-only review found no safety issue in the reservation or memory ordering;
+it did not execute tests. If maintenance is concurrently holding the
+reservation, the driver still does not wait and can
+count/silence a miss; not every anticipated rate transition is guaranteed
+gap-free. On 2026-10-30 the owner chose to keep this counted-silence fallback
+and continue the bounded RP-31J design after reviewing the transition trade-off
+and experimental timings below. This decision does not establish full Core
+transition equivalence or waive the project's full-coverage release gate.
+After the reservation change, Linux production and hooks Werror
+builds and 7 CTests each passed; seven selected native and live-Rack tests,
+including the ASan/UBSan and TSan concurrent handover stress, also passed.
+The stress test was then strengthened to alternate two different future
+settings concurrently with the driver's three settings; the production Werror
+build and all six native I/O tests, including both sanitizer variants, passed.
+The fixed-rate live comparison now covers both RackPy and Core as master.
+Prek and the repository's strict mypy command passed, as did 146 unit/native
+tests, generated-file and source-only coverage checks, and Sphinx. An
+exploratory unconfigured `basedpyright` invocation failed on repository-wide
+stub/import and test-type diagnostics; it is not the project's mypy gate. The
+live Rack I/O suite passed five additional independent runs after the two-slot
+change. This cannot guarantee anticipation if
+the driver observes a change before the UI step, or for arbitrary device/rate
+changes; the documented counted-silence fallback remains. Linux hooks and
+production Werror builds and 7 CTests passed, as did the live Rack I/O suite.
+
+## Experimental Speex state reuse (not implemented)
+
+The pinned Rack submodule records SpeexDSP commit
+`27ddf98b627ab425d5337b1a0d8b80d7528f9b30`. Its `update_filter` retains
+sinc-table and history capacity but can call `realloc` if either is too small.
+A throwaway Linux x86_64 probe linked to the SDK's `libRack.so` initialized
+one oversized single-channel state per channel at Core Audio's quality 6,
+then used public `reset_mem` / `set_rate` / `reset_mem` and compared samples and consumed/output
+counts against freshly initialized multi-channel states. Three repetitions of
+seven selected rate pairs and channel counts 1, 2, and 16 matched bit-for-bit;
+the audio guard saw zero intercepted heap, mutex, write and GIL calls during
+those particular transitions. This is **not** proof for other rates, histories,
+channel changes, platforms, or real-time deadlines. A first probe reusing one
+oversized 16-channel state failed the comparison: Speex's `reset_mem` clears a
+contiguous region that need not cover every channel when capacity is larger
+than the active filter's history. Do not use that approach.
+
+Exploratory single-run transition timings on an Intel i9-14900K (microseconds;
+`fresh16` destroys and initializes one 16-channel Speex state;
+`reuse16x1` resets and retunes 16 overprovisioned one-channel states):
+
+| input → output Hz | fresh16 | reuse16x1 |
+| --- | ---: | ---: |
+| 48000 → 44100 | 20 | 324 |
+| 48000 → 96000 | 2 | 37 |
+| 44100 → 48000 | 18 | 294 |
+| 96000 → 44100 | 20 | 325 |
+| 768000 → 11025 | 150 | 1313 |
+| 11025 → 768000 | 26 | 310 |
+| 48000 → 44100 | 20 | 325 |
+
+These are raw single observations from an isolated probe, not a benchmark or a
+claim about production latency. Table generation on the driver thread may
+consume a substantial part of an audio deadline. Bounds, memory cost, actual
+Rack parity, all-channel transition state, allocator instrumentation, and
+platform behavior still require proof before considering this alternative.
+
+## Audio master decision and MIDI queue
+
+The native MIDI queue uses a fixed-capacity heap to order pending messages
+without shifting the whole waiting list on each out-of-order insertion. A
+native differential test fills the queue, compares frame and same-frame arrival
+ordering with Rack's `InputQueue`, and adds messages while future ones remain
+queued. A production-path audio guard also exercises a full 8,192-message
+reverse-frame burst through the queue: ordering is correct and the guard reports
+no intercepted forbidden calls. Linux hooks and production warnings-as-errors
+builds and 7 CTests, all 39 native tests including I/O guard/sanitizers, and
+selected production Rack-host and introspection tests passed. No timing or
+speedup has been measured.
+
+Rack 2.6.6's `Engine::stepBlock` takes `blockMutex` and a shared engine lock;
+`setMasterModule` and rate suggestion can also lock or dispatch events. Its
+`audio::Device::processBuffer` takes `processMutex` around port callbacks.
+An earlier mistaken interpretation treated Rack-owned locks as forbidden and
+led to a temporary secondary-only bridge. The owner clarified that the rule
+forbids **additional RackPy blocking locks**, not Rack's existing synchronization,
+and then explicitly chose to restore RackPy's device-clocked master behavior.
+The bridge again invokes Rack's public engine clock as Core Audio does; it must
+not claim the complete host path is lock-free. Fresh Linux production and hooks
+Werror builds each passed 7 CTests, and 36 selected Rack-host, introspection,
+native/sanitizer, and documentation tests passed. The in-Rack I/O suite covers
+both Core and RackPy as master with one and four engine threads, and checks a
+standalone RackPy port claims master and clocks its engine block. A subsequent
+live run also verifies stream stop releases master and restart reclaims and
+clocks it; manifest evidence includes the two stream callbacks. A fresh
+production-build run of I/O, package introspection and docs tests passed all
+21 selected tests after that evidence update.
 
 ## Production build and empty-direction safety
 
@@ -12,9 +128,9 @@ zero-stride `FrameRing` spans to return `nullptr` without pointer arithmetic on
 an unallocated buffer. A native test exercises an output-only bridge and the
 empty ring. The 35-test run was repeated after that fix; 107 unit tests,
 prek, strict typecheck, generated-file and source-only coverage checks, and
-Sphinx `-W -n` also passed. This does not settle startup/rate-change
-equivalence or the counted silence when a converter is not ready; the task
-remains incomplete.
+Sphinx `-W -n` also passed. This did not settle startup/rate-change
+equivalence; the owner subsequently accepted the documented counted-silence
+fallback for this bounded task, not as full transition equivalence.
 
 The driver/engine bridge and MIDI queue now require their atomics to be
 always lock-free at compile time (indices, counters, state and handover

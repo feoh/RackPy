@@ -7,7 +7,8 @@ channels 3 and 4 (the port's offsets), each module patched to itself, its
 outputs to its inputs. The device must get the same samples back on both
 pairs, frame for frame: whichever module is Rack's master, on 1 or 4 engine
 threads, and resampled when the engine's rate is fixed below the device's.
-The RackPy port times its frames exactly as Core Audio does.
+The tested steady-rate streams are compared frame for frame; startup and
+rate-change ordering is checked separately and is not claimed equivalent.
 """
 
 import gc
@@ -258,7 +259,7 @@ def test_the_device_hears_the_same_as_through_core_audio(rig: dict[str, Any], ma
         assert same_as_core(got), f"{len(differences)} mismatches; first: {differences[:8]}"
         assert after["blocks"] - before["blocks"] == 24 and after["resampler_misses"] == 0
         stepped = after["stepped_frames"] - before["stepped_frames"]
-        assert stepped == (24 * BLOCK if master == "module" else 0)  # a master steps Rack's engine by each block
+        assert stepped == (24 * BLOCK if master == "module" else 0)
     finally:
         rset.settings.thread_count = previous
 
@@ -282,13 +283,47 @@ def test_bridge_and_core_during_initial_rate_change(rig: dict[str, Any], master:
 def test_either_module_claims_a_free_master(rig: dict[str, Any]) -> None:
     e = engine()
     e.set_master_module(None)
-    got = blocks(rig["device"], 8, seed=7)
-    assert e.get_master_module() in (rig["core"], rig["module"]) and same_as_core(got[1:])
+    blocks(rig["device"], 2, seed=7)
+    assert e.get_master_module() in (rig["core"], rig["module"])
+    # The fallback engine may have run while master was unset. Restart both
+    # streams to clear their buffered frames before comparing their timing.
+    rig["device"].start_stream()
+    got = blocks(rig["device"], 8, seed=8)
+    assert same_as_core(got[1:])
 
 
-def test_a_fixed_engine_rate_resamples_as_core_audio_does(rig: dict[str, Any]) -> None:
+def test_port_alone_claims_and_clocks_the_engine() -> None:
+    e = engine()
+    previous = e.get_master_module()
+    driver = audio.PythonDriver("RP-31J secondary only")
+    device = driver.add_device("No external master", 2, 2, [48000], 48000, [BLOCK], BLOCK)
+    audio.add_driver(AUDIO_ID + 5, driver)
+    port: audio.Port = fa.open_port(AUDIO_ID + 5, "No external master")
+    module = interface(port)
+    e.add_module(module)
+    try:
+        e.set_master_module(None)
+        before = stats_of(module)["stepped_frames"]
+        fa.Stream(device).process(BLOCK, array("f", [0.0] * (BLOCK * 2)))
+        assert e.get_master_module() == module
+        assert stats_of(module)["stepped_frames"] - before == BLOCK
+        device.stop_stream()
+        assert e.get_master_module() is None
+        device.start_stream()
+        fa.Stream(device).process(BLOCK, array("f", [0.0] * (BLOCK * 2)))
+        assert e.get_master_module() == module
+        assert stats_of(module)["stepped_frames"] - before == 2 * BLOCK
+    finally:
+        e.set_master_module(previous)
+        e.remove_module(module)
+        module.set_audio_port(None)
+        module.close()
+
+
+@pytest.mark.parametrize("master", ["core", "module"])
+def test_a_fixed_engine_rate_resamples_as_core_audio_does(rig: dict[str, Any], master: str) -> None:
     e, module = engine(), rig["module"]
-    e.set_master_module(rig["module"])
+    e.set_master_module(rig[master])
     rset.settings.sample_rate = 44100.0
     try:
         HOOKS.engine_set_sample_rate(44100.0)  # Rack's settings win over the device's suggestion
@@ -311,6 +346,62 @@ def test_a_fixed_engine_rate_resamples_as_core_audio_does(rig: dict[str, Any]) -
         later = blocks(rig["device"], 4, seed=5)
         assert any(x != 0.0 for _, ours in later[1:] for x in ours)
     finally:
+        rset.settings.sample_rate = 0.0
+        HOOKS.engine_set_sample_rate(48000.0)
+        HOOKS.maintain_audio_ports()
+
+
+def test_ui_maintenance_prepares_the_next_fixed_engine_rate(rig: dict[str, Any]) -> None:
+    e, module = engine(), rig["module"]
+    e.set_master_module(rig["core"])
+    rset.settings.sample_rate = 0.0
+    HOOKS.engine_set_sample_rate(48000.0)
+    HOOKS.maintain_audio_ports()
+    blocks(rig["device"], 4, seed=10)
+    try:
+        # The UI has requested a new fixed rate, but the engine has not yet
+        # applied it. Maintenance can prepare the converters in advance.
+        rset.settings.sample_rate = 96000.0
+        assert e.get_sample_rate() == 48000.0
+        HOOKS.maintain_audio_ports()
+        before = stats_of(module)["resampler_misses"]
+        got = blocks(rig["device"], 8, seed=11)
+        assert e.get_sample_rate() == 96000.0  # Core applies the fixed rate during its device callback
+        assert stats_of(module)["resampler_misses"] == before
+        assert same_as_core(got[2:])
+    finally:
+        rset.settings.sample_rate = 0.0
+        HOOKS.engine_set_sample_rate(48000.0)
+        HOOKS.maintain_audio_ports()
+
+
+def test_future_rate_does_not_displace_needed_converter(rig: dict[str, Any]) -> None:
+    e = engine()
+    clock = Module.create(lambda m: m.config(0, 0, 0, 0))
+    HOOKS.engine_adopt(clock)
+    e.set_master_module(clock)  # hold the rate until explicitly stepped
+    rset.settings.sample_rate = 44100.0
+    HOOKS.engine_set_sample_rate(44100.0)
+    port: audio.Port = fa.open_port(AUDIO_ID, "IO 4")
+    port.input_offset = port.output_offset = 2
+    module = interface(port)  # the 44.1 kHz converters are prepared but unused
+    e.add_module(module)
+    try:
+        HOOKS.maintain_audio_ports()
+        rset.settings.sample_rate = 96000.0  # not yet applied by the master
+        HOOKS.maintain_audio_ports()
+        before = stats_of(module)["resampler_misses"]
+        blocks(rig["device"], 1, seed=12)
+        assert stats_of(module)["resampler_misses"] == before
+        HOOKS.engine_set_sample_rate(96000.0)
+        blocks(rig["device"], 1, seed=13)
+        assert stats_of(module)["resampler_misses"] == before
+    finally:
+        e.remove_module(module)
+        module.set_audio_port(None)
+        module.close()
+        e.set_master_module(rig["core"])
+        HOOKS.engine_delete(clock)
         rset.settings.sample_rate = 0.0
         HOOKS.engine_set_sample_rate(48000.0)
         HOOKS.maintain_audio_ports()

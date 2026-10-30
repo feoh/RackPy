@@ -276,6 +276,23 @@ void testConverterHandover() {
 	slot.maintain({});
 	CHECK(slot.acquire(io::Setting{44100, 96000, 1}) != nullptr);
 	slot.maintain({});  // frees what was retired
+
+	// A future converter must not replace the unused current one. Both can
+	// be acquired without another UI step as the driver changes rates.
+	io::ConverterSlot anticipated;
+	anticipated.prepare(a);
+	anticipated.prepareFuture(b);
+	io::Converter* current = anticipated.acquire(a);
+	CHECK(current && current->setting == a);
+	io::Converter* next = anticipated.acquire(b);
+	CHECK(next && next->setting == b && next != current);
+	anticipated.maintain({});
+	// A miss for an unrelated current setting must not consume a future
+	// converter that the driver may need on the next rate change.
+	io::ConverterSlot preserved;
+	preserved.prepareFuture(b);
+	CHECK(preserved.acquire(a) == nullptr);
+	CHECK(preserved.acquire(b) && preserved.current() == b.pack());
 }
 
 void testAMissIsSilentAndCounted() {
@@ -323,6 +340,47 @@ void testStreamsAndFullRings() {
 	bridge.shift(&got);
 	bridge.shift(&got);
 	CHECK(got == 0.f && bridge.stats.emptyFrames.load() >= 1);
+}
+
+void testMidiOrderingAgainstRack() {
+	io::MidiQueue queue;
+	rack::midi::InputQueue reference;
+	for (int i = 0; i < (int) io::MIDI_QUEUE_CAPACITY; i++) {
+		rack::midi::Message message;
+		message.frame = 1000 - (i % 73);
+		message.bytes = {0x90, (uint8_t) (i & 0xff), (uint8_t) (i >> 8)};
+		queue.push(message);
+		reference.onMessage(message);
+	}
+	size_t accepted = io::MIDI_QUEUE_CAPACITY;
+	for (int64_t frame = 927; frame <= 1000; frame++) {
+		queue.collect(frame);
+		int n = 0;
+		rack::midi::Message expected;
+		while (reference.tryPop(&expected, frame)) {
+			CHECK(n < queue.dueCount());
+			if (n < queue.dueCount()) {
+				const auto& got = queue.due()[n];
+				CHECK(got.frame == expected.frame && got.size == expected.bytes.size());
+				CHECK(got.bytes[0] == expected.bytes[0] && got.bytes[1] == expected.bytes[1] &&
+					got.bytes[2] == expected.bytes[2]);
+			}
+			n++;
+		}
+		CHECK(n == queue.dueCount());
+		// More messages can arrive while older future messages are held. Equal
+		// frame ties must still follow arrival order across collect() calls.
+		if (frame < 1000) {
+			rack::midi::Message extra;
+			extra.frame = frame + 1;
+			extra.bytes = {0x80, (uint8_t) (frame & 0xff), 0};
+			if (reference.size() < io::MIDI_QUEUE_CAPACITY)
+				accepted++;
+			queue.push(extra);
+			reference.onMessage(extra);
+		}
+	}
+	CHECK(queue.waiting() == 0 && queue.stats.delivered.load() == accepted);
 }
 
 rack::engine::Module::ProcessArgs frameArgs(int64_t n) {
@@ -376,6 +434,7 @@ int main() {
 	testTheBridgeIsCoreAudio();
 	testAMissIsSilentAndCounted();
 	testStreamsAndFullRings();
+	testMidiOrderingAgainstRack();
 	testAModuleRunsAFrameOfItsPortAroundItsKernel();
 	if (failures)
 		std::fprintf(stderr, "%d check(s) failed\n", failures);

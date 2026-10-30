@@ -137,8 +137,9 @@ no channel is available. `audio_output(channel, signal)` sends the sum of the
 signal's channels in those same units; write each device channel at most once.
 Multiply a device sample by 10 to produce Rack's usual voltage scale, and
 scale Rack voltages down before sending them to a device. A graph with only
-an audio output is a valid sink. The bridge buffers device blocks; startup
-and sample-rate transition equivalence to Core Audio is still under study.
+an audio output is a valid sink. The bridge can clock Rack as the audio master
+or operate as a secondary port. Startup and sample-rate transition equivalence
+to Core Audio is still under study.
 
 `midi_cv(output, input=0, ...)` processes messages due on one of the module's
 four MIDI inputs. The output index 0-11 follows `rackpy.MidiToCV`'s order

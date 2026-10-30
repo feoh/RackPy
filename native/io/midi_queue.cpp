@@ -2,8 +2,6 @@
 // A module's MIDI input (RP-31J): see midi_queue.hpp.
 #include "midi_queue.hpp"
 
-#include <cstring>
-
 namespace rackpy {
 namespace io {
 
@@ -12,7 +10,9 @@ static_assert(std::atomic<size_t>::is_always_lock_free, "MIDI queue indices must
 static_assert(std::atomic<uint64_t>::is_always_lock_free, "MIDI counters must be lock-free");
 static_assert(std::atomic<MidiQueue*>::is_always_lock_free, "MIDI queue handover must be lock-free");
 
-MidiQueue::MidiQueue() : cells(new Cell[MIDI_QUEUE_CAPACITY]), pending(new MidiMessage[MIDI_QUEUE_CAPACITY]) {
+MidiQueue::MidiQueue()
+	: cells(new Cell[MIDI_QUEUE_CAPACITY]), pending(new Pending[MIDI_QUEUE_CAPACITY]),
+	  dueMessages(new MidiMessage[MIDI_QUEUE_CAPACITY]) {
 	for (size_t i = 0; i < MIDI_QUEUE_CAPACITY; i++)
 		cells[i].sequence.store(i, std::memory_order_relaxed);
 }
@@ -72,35 +72,49 @@ bool MidiQueue::pop(MidiMessage& out) noexcept {
 	return true;
 }
 
+bool MidiQueue::earlier(const Pending& a, const Pending& b) noexcept {
+	return a.message.frame < b.message.frame || (a.message.frame == b.message.frame && a.arrival < b.arrival);
+}
+
 void MidiQueue::insert(const MidiMessage& m) noexcept {
-	if (begin + count == MIDI_QUEUE_CAPACITY) {
-		std::memmove(pending.get(), pending.get() + begin, count * sizeof(MidiMessage));
-		begin = 0;
+	Pending item{m, arrival++};
+	size_t at = count++;
+	while (at > 0) {
+		size_t parent = (at - 1) / 2;
+		if (!earlier(item, pending[parent]))
+			break;
+		pending[at] = pending[parent];
+		at = parent;
 	}
-	// After every waiting message of the same or an earlier frame: Rack's priority queue breaks ties by arrival.
-	MidiMessage* first = pending.get() + begin;
-	size_t at = count;
-	while (at > 0 && first[at - 1].frame > m.frame) {
-		first[at] = first[at - 1];
-		at--;
+	pending[at] = item;
+}
+
+MidiMessage MidiQueue::removeFirst() noexcept {
+	MidiMessage result = pending[0].message;
+	Pending last = pending[--count];
+	size_t at = 0;
+	while (at * 2 + 1 < count) {
+		size_t child = at * 2 + 1;
+		if (child + 1 < count && earlier(pending[child + 1], pending[child]))
+			child++;
+		if (!earlier(pending[child], last))
+			break;
+		pending[at] = pending[child];
+		at = child;
 	}
-	first[at] = m;
-	count++;
+	if (count)
+		pending[at] = last;
+	return result;
 }
 
 void MidiQueue::collect(int64_t frame) noexcept {
-	begin += dueEnd;
-	count -= dueEnd;
 	dueEnd = 0;
-	if (count == 0)
-		begin = 0;
 	MidiMessage m;
 	while (count < MIDI_QUEUE_CAPACITY && pop(m))
 		insert(m);
-	const MidiMessage* first = pending.get() + begin;
-	while (dueEnd < count && first[dueEnd].frame <= frame)
-		dueEnd++;
-	held.store(count - dueEnd, std::memory_order_relaxed);
+	while (count && pending[0].message.frame <= frame)
+		dueMessages[dueEnd++] = removeFirst();
+	held.store(count, std::memory_order_relaxed);
 	if (dueEnd) {
 		outstanding.fetch_sub(dueEnd, std::memory_order_relaxed);
 		stats.delivered.fetch_add(dueEnd, std::memory_order_relaxed);

@@ -7,8 +7,8 @@
 // Python drives, so several producers may push at once: a bounded lock-free
 // queue (Vyukov's, one sequence number per cell) takes them, dropping and
 // counting what finds it full. Once per frame, before the module's kernel
-// runs, the engine thread moves what arrived into a fixed buffer kept in
-// (frame, arrival) order, the order of Rack's priority queue, and delivers
+// runs, the engine thread moves what arrived into a fixed-capacity heap ordered by
+// (frame, arrival), the order of Rack's priority queue, and delivers
 // those whose frame is due (at or before ProcessArgs::frame), as
 // InputQueue::tryPop does. At most 8192 messages wait, Rack's limit, and a
 // message carries at most 3 bytes: longer ones (SysEx) are dropped and
@@ -52,7 +52,7 @@ public:
 	/** The previous frame's messages go; what arrived since joins the waiting ones in order; the due ones are
 	due() and dueCount() until the next call. */
 	void collect(int64_t frame) noexcept;
-	const MidiMessage* due() const noexcept { return pending.get() + begin; }
+	const MidiMessage* due() const noexcept { return dueMessages.get(); }
 	int dueCount() const noexcept { return (int) dueEnd; }
 	/** Messages waiting for a later frame, as of the last collect(). */
 	size_t waiting() const noexcept { return held.load(std::memory_order_relaxed); }
@@ -66,12 +66,20 @@ private:
 	std::atomic<size_t> enqueuePos{0};
 	std::atomic<size_t> dequeuePos{0};  // advanced by the engine thread only
 	std::atomic<size_t> outstanding{0};  // reservations across producers, ring and pending
-	// The engine thread's (frame, arrival)-ordered buffer, from `begin`, `count` long; the first `dueEnd` are due.
-	std::unique_ptr<MidiMessage[]> pending;
-	size_t begin = 0, count = 0, dueEnd = 0;
-	std::atomic<size_t> held{0};  // `count`, for the producers' limit
+	struct Pending {
+		MidiMessage message;
+		uint64_t arrival;
+	};
+	// Fixed allocations made on the main thread. Only the engine thread touches these arrays.
+	std::unique_ptr<Pending[]> pending;
+	std::unique_ptr<MidiMessage[]> dueMessages;
+	size_t count = 0, dueEnd = 0;
+	uint64_t arrival = 0;
+	std::atomic<size_t> held{0};
 	bool pop(MidiMessage& out) noexcept;
+	static bool earlier(const Pending& a, const Pending& b) noexcept;
 	void insert(const MidiMessage& m) noexcept;
+	MidiMessage removeFirst() noexcept;
 };
 
 }  // namespace io

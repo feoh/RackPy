@@ -100,6 +100,7 @@ ConverterSlot::~ConverterSlot() {
 	while (retired.pop(c))
 		delete c;
 	delete prepared.exchange(nullptr);
+	delete future.exchange(nullptr);
 	delete using_;
 }
 
@@ -119,20 +120,34 @@ Converter* ConverterSlot::acquire(Setting setting) noexcept {
 	wanted.store(setting.pack(), std::memory_order_relaxed);
 	if (!retire())
 		return nullptr;
-	// Room to retire a prepared converter of another setting; only this thread pushes.
-	if (!prepared.load(std::memory_order_relaxed) || retired.size() >= 8)
-		return nullptr;
-	Converter* next = prepared.exchange(nullptr, std::memory_order_acq_rel);
-	if (!next)
-		return nullptr;
-	if (next->setting != setting) {
-		retired.push(next);
-		return nullptr;
+	// Try the current/missed setting and the anticipated one. Never take a
+	// pointer unless there is room to retire it if its setting is stale.
+	for (auto* slot : {&prepared, &future}) {
+		if (retired.size() >= 8)
+			return nullptr;
+		if (slot == &future) {
+			uint64_t expected = setting.pack();
+			// Reserve this handover without waiting for the main thread. It
+			// cannot replace the pointer until we release the reservation.
+			if (!futureSetting.compare_exchange_strong(expected, FUTURE_BUSY, std::memory_order_acq_rel))
+				continue;
+		}
+		Converter* next = slot->exchange(nullptr, std::memory_order_acq_rel);
+		if (slot == &future)
+			// The UI may prepare another converter before inUse is published.
+			futureSetting.store(0, std::memory_order_release);
+		if (!next)
+			continue;
+		if (next->setting != setting) {
+			retired.push(next);
+			continue;
+		}
+		using_ = next;
+		inUse.store(setting.pack(), std::memory_order_release);
+		wanted.store(0, std::memory_order_relaxed);
+		return using_;
 	}
-	using_ = next;
-	inUse.store(setting.pack(), std::memory_order_release);
-	wanted.store(0, std::memory_order_relaxed);
-	return using_;
+	return nullptr;
 }
 
 void ConverterSlot::release() noexcept {
@@ -153,6 +168,25 @@ void ConverterSlot::prepare(Setting setting) {
 		return;
 	auto* fresh = new Converter(setting);
 	delete prepared.exchange(fresh, std::memory_order_acq_rel);
+}
+
+void ConverterSlot::prepareFuture(Setting setting) {
+	uint64_t packed = setting.pack();
+	if (!packed || setting.inRate == setting.outRate || inUse.load(std::memory_order_acquire) == packed)
+		return;
+	uint64_t expected = futureSetting.load(std::memory_order_acquire);
+	if (expected == packed || expected == FUTURE_BUSY)
+		return;
+	auto* fresh = new Converter(setting);
+	// The driver never waits. If it claimed the slot, discard this candidate
+	// on the main thread and try again at the next maintenance step.
+	if (!futureSetting.compare_exchange_strong(expected, FUTURE_BUSY, std::memory_order_acq_rel)) {
+		delete fresh;
+		return;
+	}
+	Converter* old = future.exchange(fresh, std::memory_order_acq_rel);
+	futureSetting.store(packed, std::memory_order_release);
+	delete old;
 }
 
 void ConverterSlot::maintain(Setting observed) {
@@ -348,7 +382,6 @@ void AudioBridge::portInput(rack::audio::Port& port, rack::engine::Module* modul
 
 void AudioBridge::portBuffer(rack::engine::Module* module) noexcept {
 	try {
-		// Audio.cpp:105-111.
 		rack::Context* context = rack::contextGet();
 		rack::engine::Engine* engine = context ? context->engine : nullptr;
 		if (engine && module && requested > 0 && engine->getMasterModule() == module) {
@@ -372,7 +405,9 @@ void AudioBridge::portStart() noexcept {
 
 void AudioBridge::portStop(rack::engine::Module* module) noexcept {
 	stopStream();
-	// Audio.cpp:167-170: Rack may hold its engine's write lock here, so the variant without a lock.
+	// Core uses this same check then no-lock clear because Rack may already
+	// hold its engine lock here. As in Core, a concurrent external master
+	// change between the check and clear is not an atomic operation.
 	rack::Context* context = rack::contextGet();
 	if (context && context->engine && module && context->engine->getMasterModule() == module)
 		context->engine->setMasterModule_NoLock(nullptr);
@@ -395,10 +430,15 @@ void AudioBridge::prepare(float rate, float engineRate, int devIn, int devOut) {
 	toDeviceSrc.prepare(settings.second);
 }
 
-void AudioBridge::maintain(float rate, float engineRate, int devIn, int devOut) {
+void AudioBridge::maintain(float rate, float engineRate, int devIn, int devOut, float futureEngineRate) {
 	auto settings = observed(rate, engineRate, std::min(devIn, inputs), std::min(devOut, outputs));
 	toEngineSrc.maintain(settings.first);
 	toDeviceSrc.maintain(settings.second);
+	if (futureEngineRate > 0.f && futureEngineRate != engineRate) {
+		auto next = observed(rate, futureEngineRate, std::min(devIn, inputs), std::min(devOut, outputs));
+		toEngineSrc.prepareFuture(next.first);
+		toDeviceSrc.prepareFuture(next.second);
+	}
 }
 
 }  // namespace io
