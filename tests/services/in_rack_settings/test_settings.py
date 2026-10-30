@@ -325,6 +325,7 @@ def test_plugin_whitelist(rack_globals: dict[str, object]) -> None:
         rset.is_module_whitelisted("RackPy", "Other") and HOOKS.rack_settings()["moduleWhitelist"]["RackPy"].subscribed
     )
     slugs = S.module_whitelist["RackPy"].module_slugs
+    assert isinstance(slugs, set)
     slugs.add("Changed")  # a set copy: Rack's is unchanged
     assert S.module_whitelist["RackPy"].module_slugs == {"RuntimeProbe"}
 

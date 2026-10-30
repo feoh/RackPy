@@ -114,13 +114,13 @@ in the follow-up validation.
 ## Follow-up outside this slice
 
 - Open, outside this task:
-  - `docs/coverage.md` policy 11 still says the RP-28F decision is "owner
-    review pending", but the records and `docs/reference/app.md` say it was
-    owner-approved on 2026-10-26.
-  - `native/bindings/dsp/ringbuffer.hpp:6` still calls the ring buffers "an
-    owner review item", but they were approved on 2026-10-26.
-  - `rack0.hpp` is an owner review item in `docs/coverage.md`. It has no
-    record, so the gate does not see it.
+  - At the time of this review, `docs/coverage.md` policy 11 and
+    `native/bindings/dsp/ringbuffer.hpp` retained stale owner-review wording.
+    RP-31 reconciliation updated both to record the existing approvals.
+  - `rack0.hpp` was an owner review item without a manifest record. On
+    2026-10-30 the owner decided to exclude the opt-in Rack 0 shim from the
+    Rack 2 `rack.hpp` surface; Rack 2 deprecated declarations reachable from
+    `rack.hpp` remain in scope.
 - The gate's item text runs to the next `.` or `;`. A marker inside
   parentheses therefore keeps the closing `)` in the item name (seen in the
   demo).

@@ -165,26 +165,24 @@ Checked read-only on 2026-10-21. Nothing was registered or published.
 
 | Namespace | Result |
 | --- | --- |
-| PyPI `rackpy`, `rack-py`, `vcvpy` | Not registered (HTTP 404) |
+| PyPI `rackpy`, `rack-py`, `vcvpy` | No published project returned by the JSON endpoint (HTTP 404); this does not establish name availability |
 | PyPI `pyrack` | Taken by an unrelated document-analysis package; avoid |
 | conda-forge `rackpy` | Not present |
 | VCV Library | No plugin slug, name or brand contains `rackpy` (571 plugin manifests) |
 | GitHub | `feoh/RackPy` (this project); `dimbler/RackPy`, last updated 2017, no description |
 
 Names must follow the trademark rules above: never "VCV" in a product name, and
-no VCV logos. Registering a namespace (for example, reserving the PyPI name)
-needs owner approval.
+no VCV logos. A 2026-10-30 PyPI search and JSON request also found no published
+`rackpy` project. The owner approved reserving the name that day; this is not a claim that the name has been reserved or approval to publish an
+unfinished package.
 
 ## Open questions for the owner
 
-1. **`rack0.hpp`.** Confirm that the v0 compatibility header stays outside the
-   surface (see [coverage](coverage.md#pinned-surface-rp-02)).
-2. **User plugins written with RackPy.** User scripts run in the same process as
+1. **User plugins written with RackPy.** User scripts run in the same process as
    GPL code and call it intimately. The FSF view is that such plugins are
    usually derivative works. Decide what RackPy's documentation tells plugin
    authors about licensing their scripts, and whether you want a linking or
    plugin exception for user scripts.
-3. **Commercial use.** VCV's commercial plugin licence also covers the
+2. **Commercial use.** VCV's commercial plugin licence also covers the
    Component Library graphics. RackPy is GPL. Decide whether RackPy says anything
    about commercial plugins built with it.
-4. **Reserving the PyPI name.** Optional; needs your approval.

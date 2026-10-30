@@ -3,7 +3,7 @@
 // ring buffer families (ringbuffer.cpp, ringbuffer_double.cpp, ringbuffer_apple.cpp).
 //
 // RackPy's generic contract for RingBuffer<T, S> and the others (coverage
-// policy 10, an owner review item; docs/reference/dsp.md#ring-buffers):
+// policy 10, owner-approved 2026-10-26; docs/reference/dsp.md#ring-buffers):
 // T is float, simd::float_4, or Frame<C> for C = 2, 8 and 16 (Rack's audio
 // interfaces' frame sizes); S is a power of 2 from 16 to 32768, and for
 // AppleRingBuffer from 16 to 4096 with N = 16 S. Elements cross as Python

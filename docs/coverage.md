@@ -68,7 +68,7 @@ cannot pull one in unnoticed:
 | `library.hpp`, `tag.hpp` | VCV Library client, tag tables | Outside |
 | `keyboard.hpp`, `gamepad.hpp`, `rtmidi.hpp`, `rtaudio.hpp` | Built-in driver implementations | Outside. Drivers are reachable only through `audio::`/`midi::` interfaces |
 | `app/Browser.hpp`, `app/MenuBar.hpp`, `app/TipWindow.hpp` | Rack's own application windows | Outside |
-| `rack0.hpp` | v0 migration shim of deprecated aliases. It includes `rack.hpp`, not the reverse | Outside. **Owner review item:** confirm, or add it as an opt-in compatibility family |
+| `rack0.hpp` | v0 migration shim of deprecated aliases. It includes `rack.hpp`, not the reverse | Outside the Rack 2 `rack.hpp` surface by owner decision, 2026-10-30. Rack 2 deprecated declarations reachable from `rack.hpp` remain in scope. |
 
 **Dependency headers reached:** `jansson.h`, `jansson_config.h`, `nanovg.h`,
 `nanovg_gl.h`, `nanovg_gl_utils.h`, `nanosvg.h`, `blendish.h`,
@@ -190,8 +190,7 @@ in this file.
     blocks the family task. The C ABI hooks from policy 1 are implemented by the
     RackPy host and forward to Python where RP-06 allows it.
 
-    *Classes only Rack can make* (RP-28F decision, 2026-10-26, owner review
-    pending). Public API cannot override a virtual of a class whose
+    *Classes only Rack can make* (RP-28F decision, owner-approved 2026-10-26). Public API cannot override a virtual of a class whose
     constructors are all PRIVATE. The same holds for a class whose public
     constructor gives an unusable object, because the state its virtuals need
     is set only through Rack's pimpl. Plugins, in C++ or Python, only call
