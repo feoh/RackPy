@@ -59,6 +59,13 @@ not a performance guarantee, and it does not measure the audio path or all
 facade operations. The production binary and source revision are identified in
 the artifact; no native changes were part of this checkpoint.
 
+## Offline graph typing
+
+The static contract also checks graph inputs, arithmetic signals and plans
+with mypy and strict pyright. The existing pure-Python graph and graph-codegen
+suites passed 25 tests without a Rack host; this is not an actual-host audio
+walkthrough.
+
 Still to do: a complete coherent facade and typing review, raw discoverability,
 strict mypy and pyright samples, signature and exception tests, representative
 user walkthroughs, measured wrapper overhead with explicit baseline, any

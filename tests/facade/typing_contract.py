@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, assert_type
 
 if TYPE_CHECKING:
     from rackpy.audio import open_port
+    from rackpy.dsp.graph import Graph, Plan, Signal
     from rackpy.midi import open_input
     from rackpy.plugin import ModuleClass
     from rackpy.raw.audio import Port
@@ -17,6 +18,11 @@ if TYPE_CHECKING:
 
     class CustomMidi(Input): ...
 
+    graph = Graph()
+    signal = graph.input(0)
+    assert_type(signal * 0.5 + graph.param(0), Signal)
+    graph.output(0, signal)
+    assert_type(graph.plan(), Plan)
     assert_type(open_port(1), Port)
     assert_type(open_port(1, kind=CustomAudio), CustomAudio)
     assert_type(open_input(1), InputQueue)
