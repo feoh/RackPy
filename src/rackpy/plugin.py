@@ -7,6 +7,8 @@ A model's modules come from a function or from a :class:`ModuleClass`. See
 the how-to page *Register models*. The raw layer is :mod:`rackpy.raw.plugin`.
 """
 
+from __future__ import annotations
+
 from collections.abc import Callable
 from typing import Any, Self
 
@@ -74,29 +76,29 @@ class ModuleClass:
     # Rack's audio stops while on_add, on_remove, on_bypass, on_un_bypass,
     # on_port_change, on_reset and on_randomize run: keep them under 1 ms.
 
-    def on_add(self, event: Any) -> None:
+    def on_add(self, event: Module.AddEvent) -> None:
         """Rack's engine added the module."""
 
-    def on_remove(self, event: Any) -> None:
+    def on_remove(self, event: Module.RemoveEvent) -> None:
         """Rack's engine is removing the module; it still exists."""
 
-    def on_bypass(self, event: Any) -> None:
+    def on_bypass(self, event: Module.BypassEvent) -> None:
         """The module was bypassed."""
 
-    def on_un_bypass(self, event: Any) -> None:
+    def on_un_bypass(self, event: Module.UnBypassEvent) -> None:
         """The module stopped being bypassed."""
 
-    def on_port_change(self, event: Any) -> None:
+    def on_port_change(self, event: Module.PortChangeEvent) -> None:
         """A cable was connected to or disconnected from one of the module's ports (``event.connecting``,
         ``event.type``, ``event.port_id``)."""
 
-    def on_reset(self, event: Any) -> None:
+    def on_reset(self, event: Module.ResetEvent) -> None:
         """Initialize: Rack has already reset the parameters."""
 
-    def on_randomize(self, event: Any) -> None:
+    def on_randomize(self, event: Module.RandomizeEvent) -> None:
         """Randomize: Rack has already randomized the parameters."""
 
-    def on_save(self, event: Any) -> None:
+    def on_save(self, event: Module.SaveEvent) -> None:
         """The patch is being saved: write patch-storage files here."""
 
     @classmethod

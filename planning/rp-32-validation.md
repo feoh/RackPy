@@ -35,6 +35,15 @@ assertions; `tests/services/test_system.py` passed against the Linux Rack host
 and existing integration binaries. The raw binding's own `Any` signature is
 not yet changed, and this does not complete the broad typing audit.
 
+## Lifecycle callback typing follow-up
+
+`ModuleClass` now annotates its eight UI lifecycle callbacks with the matching
+nested Rack `Module` event types instead of `Any`. Scoped mypy and pyright
+contracts exercise subclass overrides and reject an incorrect port-change
+event. `tests/plugin/test_plugin.py` passed nine outer tests in the Linux Rack
+host, using the integration binaries. The pyright contract is now a prek hook;
+it is still scoped to the contract file, not the entire project.
+
 Still to do: a complete coherent facade and typing review, raw discoverability,
 strict mypy and pyright samples, signature and exception tests, representative
 user walkthroughs, measured wrapper overhead with explicit baseline, any

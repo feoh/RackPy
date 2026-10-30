@@ -6,7 +6,9 @@ from typing import TYPE_CHECKING, assert_type
 if TYPE_CHECKING:
     from rackpy.audio import open_port
     from rackpy.midi import open_input
+    from rackpy.plugin import ModuleClass
     from rackpy.raw.audio import Port
+    from rackpy.raw.engine import Module
     from rackpy.raw.midi import Input, InputQueue
     from rackpy.services.network import delete_json, get_json, post_json, put_json
     from rackpy.types import JSON
@@ -24,3 +26,16 @@ if TYPE_CHECKING:
     assert_type(post_json("https://example.invalid", body), JSON)
     assert_type(put_json("https://example.invalid", body), JSON)
     assert_type(delete_json("https://example.invalid"), JSON)
+
+    def rejects_wrong_event(module: ModuleClass) -> None:
+        module.on_port_change("not an event")  # type: ignore[arg-type]
+
+    class TypedCallbacks(ModuleClass):
+        def on_add(self, event: Module.AddEvent) -> None: ...
+        def on_remove(self, event: Module.RemoveEvent) -> None: ...
+        def on_bypass(self, event: Module.BypassEvent) -> None: ...
+        def on_un_bypass(self, event: Module.UnBypassEvent) -> None: ...
+        def on_port_change(self, event: Module.PortChangeEvent) -> None: ...
+        def on_reset(self, event: Module.ResetEvent) -> None: ...
+        def on_randomize(self, event: Module.RandomizeEvent) -> None: ...
+        def on_save(self, event: Module.SaveEvent) -> None: ...

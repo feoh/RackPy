@@ -37,6 +37,11 @@ See [callback rules](callback-matrix.md) and the [DSP reference](dsp.md).
 | `rack::asset` | `rackpy.raw.asset` | `rackpy.assets` | Facade returns `pathlib.Path` objects. |
 | `rack::system`, `rack::network` | `rackpy.raw.system`, `rackpy.raw.network` | `rackpy.services.system`, `rackpy.services.network` | Synchronous operations; consult [services](services.md) for safety restrictions. |
 
+`rackpy.plugin.ModuleClass` lifecycle callbacks accept the corresponding
+nested `rackpy.raw.engine.Module` event types. They retain the thread and
+ownership constraints described in [plugin](plugin.md). The strict typing
+contract exercises these signatures without running callbacks outside Rack.
+
 For complete lookup, use the [surface inventory](surface-summary.md) and the
 family reference pages rather than assuming a declaration appears in this
 short table. Facade signatures and behavior are still being audited; this page
