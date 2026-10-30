@@ -196,6 +196,18 @@ void testTheBridgeIsCoreAudio() {
 }
 
 void testRingsAndClears() {
+	// An output-only bridge has a zero-stride input ring, with no allocation.
+	// Asking for its empty spans must not perform pointer arithmetic on nullptr.
+	io::FrameRing empty(0);
+	CHECK(empty.readSpan() == nullptr && empty.writeSpan() == nullptr);
+	empty.requestClear();
+	CHECK(empty.readSpan() == nullptr);
+	io::AudioBridge outputOnly(0, 1);
+	float sample = 1.f;
+	outputOnly.input(nullptr, 0, 1, true, 48000.f, 48000.f, 0, 1);
+	outputOnly.shift(&sample);
+	CHECK(sample == 1.f);
+
 	io::FrameRing ring(3);
 	CHECK(ring.size() == 0 && ring.space() == io::AUDIO_RING_FRAMES);
 	// Fill most of the ring, consume it, then write across the end: the run stays contiguous.

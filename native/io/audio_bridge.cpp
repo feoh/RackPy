@@ -34,6 +34,8 @@ size_t FrameRing::space() const noexcept {
 }
 
 float* FrameRing::writeSpan() noexcept {
+	if (!data)
+		return nullptr;
 	return data.get() + (tail.load(std::memory_order_relaxed) % AUDIO_RING_FRAMES) * (size_t) stride;
 }
 
@@ -58,7 +60,7 @@ const float* FrameRing::readSpan() noexcept {
 		h = c;
 		head.store(h, std::memory_order_release);
 	}
-	return data.get() + (h % AUDIO_RING_FRAMES) * (size_t) stride;
+	return data ? data.get() + (h % AUDIO_RING_FRAMES) * (size_t) stride : nullptr;
 }
 
 void FrameRing::consume(size_t frames) noexcept {

@@ -1,5 +1,21 @@
 # RP-31J checkpoint — incomplete
 
+## Production build and empty-direction safety
+
+The Linux warnings-as-errors production build completed and passed all 7
+CTests; production built-package introspection and documentation tests passed
+in Rack. A 35-test run also covered the I/O host and native suites, MIDI and
+kernel-library loader, using the production build for `dev_build` and the
+separate hooks build for `hooks_build`; temporary fixture overrides were
+restored. The same production and hooks builds passed 7 CTests after fixing
+zero-stride `FrameRing` spans to return `nullptr` without pointer arithmetic on
+an unallocated buffer. A native test exercises an output-only bridge and the
+empty ring. The 35-test run was repeated after that fix; 107 unit tests,
+prek, strict typecheck, generated-file and source-only coverage checks, and
+Sphinx `-W -n` also passed. This does not settle startup/rate-change
+equivalence or the counted silence when a converter is not ready; the task
+remains incomplete.
+
 The four affected binding records and generated mapping/callback artifacts now
 cite the WIP paths and their evidence without a status promotion. After this
 update, the Linux hooks build and 7 CTests, live I/O/graph suites, live package
