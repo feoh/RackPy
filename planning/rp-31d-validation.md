@@ -82,3 +82,36 @@ for the fresh build under `/tmp/rackpy-host-tests.lock`; the overrides were
 restored. `pytest -m unit` passed 114 tests; prek, strict typecheck, generated
 file check and Sphinx `-W -n` passed. Production build and production-host
 replay were not rerun for this follow-up. macOS and Windows were not tested.
+
+## Final RP-31D evidence review
+
+Reviewed all 40 flagged `engine_plugin_history_patch` entries in the original
+`rp-31-audit/evidence.json` against the current manifest, cited tests and
+reference pages. The file is a historical audit, not a live status list.
+
+- WeakHandle construction uses the owner-reviewed `WeakPtr` disposition in
+  RP-31K; isolated Plugin destruction and surviving model back-pointers are
+  exercised by RP-31M's actual-Rack test.
+- CableColorChange construction, distinct old/new colors, real-cable redo and
+  undo are asserted by `tests/history/test_history.py::test_history_through_racks_ui_paths`
+  via `tests/history/entries/rp24c_history.py`; ComplexAction's empty and
+  nonempty states are covered by `test_complex_actions`. The manifest now
+  cites the latter directly.
+- Plugin and model metadata use distinct fixture values; LightInfo and PortInfo
+  records cite the tests that actually read their fields. The Port.Type entries
+  now also cite the `PortInfo.get_full_name` test, which distinguishes input
+  from output rather than merely enumerating names.
+- The seeded C++ reference replay covers the named random entry points;
+  release, modifier macros, logger levels and Quantity display callbacks have
+  behavioural tests. The random, engine, component and history reference pages
+  name the formerly missing operations; the values page now names `API_URL`.
+
+Linux x86_64, Rack Free 2.6.6: fresh production and test-hooks warnings-as-errors
+builds each passed 6/6 CTests. A serialized actual-Rack run passed 35 outer
+values, history, plugin, services, engine, widget, introspection and docs tests,
+including the production and test-hooks values replay. The built-package
+introspection check passed. `pytest -m unit` passed 114 and `pytest -m native`
+passed 33; prek, strict typecheck, generator check, source-only coverage check
+and Sphinx `-W -n` passed. Temporary fixture overrides used the corresponding
+builds and were restored. macOS and Windows were not tested, and no coverage
+record was promoted to verified.

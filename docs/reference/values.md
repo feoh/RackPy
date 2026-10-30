@@ -180,7 +180,7 @@ which formats with Python's `%` after removing C length modifiers, so
 
 | C++ | Python |
 | --- | --- |
-| `APP_NAME`, `APP_VERSION`, `APP_OS`, `APP_CPU`, … | `rackpy.raw.APP_NAME`, … (the running Rack's values) |
+| `APP_NAME`, `APP_VERSION`, `APP_OS`, `APP_CPU`, `API_URL`, … | `rackpy.raw.APP_NAME`, … (the running Rack's values) |
 | `bitCast<To, From>(x)` | `rackpy.raw.bit_cast(x, to, from_)` with type names `i8` … `u64`, `f32`, `f64`; different sizes raise `ValueError`, as they fail to compile in C++ |
 | `42_u8`, `0.5_f32`, … | `rackpy.raw.literals.u8(42)`, `rackpy.raw.literals.f32(0.5)`, … with C++'s conversions (`u8(256)` is 0) |
 | `construct<T>(&T::field, value, …)` | `rackpy.raw.construct(cls, field=value, …)` |
