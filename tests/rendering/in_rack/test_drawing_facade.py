@@ -183,7 +183,7 @@ def test_a_painter_expires_with_its_callback() -> None:
     with pytest.raises(StaleHandleError):
         kept[0].rect(0, 0, 1, 1)
     with pytest.raises(TypeError):
-        Painter(object())
+        Painter(object())  # type: ignore[arg-type]  # exercise the runtime check for untyped callers
 
     class Parent(w.Widget):
         def draw(self, args: Any) -> None:

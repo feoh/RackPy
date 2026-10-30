@@ -13,7 +13,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Self
+from typing import Protocol, Self
 
 from rackpy.raw import asset as _asset
 from rackpy.raw import context_get
@@ -22,7 +22,7 @@ from rackpy.raw.nanovg import NVGcolor, NVGpaint
 from rackpy.raw.widget import GraphicsContext
 from rackpy.raw.window import Font, Image
 
-__all__ = ["DEFAULT_FONT", "Color", "Painter", "Path2D", "TextBounds", "color"]
+__all__ = ["DEFAULT_FONT", "Color", "DrawTarget", "Painter", "Path2D", "TextBounds", "color"]
 
 Color = NVGcolor | str | tuple[float, float, float] | tuple[float, float, float, float]
 DEFAULT_FONT = "res/fonts/DejaVuSans.ttf"
@@ -154,10 +154,17 @@ class Path2D:
         return self
 
 
+class DrawTarget(Protocol):
+    """An object carrying a drawing context, such as a widget's draw arguments."""
+
+    @property
+    def vg(self) -> GraphicsContext | None: ...
+
+
 class Painter:
     """Draws in one drawing callback: ``Painter(args)`` in ``draw``/``draw_layer``, ``Painter(vg)`` in ``draw_vg``."""
 
-    def __init__(self, target: Any) -> None:
+    def __init__(self, target: GraphicsContext | DrawTarget) -> None:
         vg = target if isinstance(target, GraphicsContext) else getattr(target, "vg", None)
         if not isinstance(vg, GraphicsContext):
             raise TypeError("Painter needs a drawing callback's DrawArgs or GraphicsContext")

@@ -5,14 +5,21 @@ from typing import TYPE_CHECKING, assert_type
 
 if TYPE_CHECKING:
     from rackpy.audio import open_port
+    from rackpy.drawing import Painter
     from rackpy.dsp.graph import Graph, Plan, Signal
     from rackpy.midi import open_input
     from rackpy.plugin import ModuleClass
     from rackpy.raw.audio import Port
     from rackpy.raw.engine import Module
     from rackpy.raw.midi import Input, InputQueue
+    from rackpy.raw.widget import GraphicsContext, Widget
     from rackpy.services.network import delete_json, get_json, post_json, put_json
     from rackpy.types import JSON
+
+    def drawing(args: Widget.DrawArgs, vg: GraphicsContext) -> None:
+        assert_type(Painter(args), Painter)
+        assert_type(Painter(vg), Painter)
+        Painter(object())  # type: ignore[arg-type]  # deliberately invalid
 
     class CustomAudio(Port): ...
 

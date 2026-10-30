@@ -104,6 +104,12 @@ advance. Its docstring now matches its implementation; the existing
 framebuffer test uses a nonzero x to distinguish the two. The rendering suite
 passed in actual Linux Rack under Xvfb/Mesa with current RP-32 Python sources
 overlaid on the hooks build; this is not GPU or cross-platform evidence.
+`Painter`'s input is now typed as a graphics context or an object with a `vg`
+property (`DrawTarget`), rather than `Any`. Mypy and pyright check real
+draw-argument and context types plus an intentionally invalid object, which
+remains rejected at runtime. A first docs build failed because the protocol
+was private and could not be linked; making it a documented public protocol
+fixed the Sphinx `-W -n` build, and the host rendering suite was rerun.
 
 ## Offline graph typing
 
