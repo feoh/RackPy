@@ -81,11 +81,13 @@ def run() -> None:
             change.module_id, change.param_id, change.old_value, change.new_value = a.id, 0, 2.0, 9.0
             change.redo()
             step.push(change)
+            e.set_param_value(b, 0, 5.0)  # no history action records this change
             raise RuntimeError("partway")
     except RuntimeError:
         # undone, and nothing pushed: a push would have dropped the redo of "set levels"
         state = host.history()
         RESULT["rollback"] = [e.get_param_value(a, 0), state.action_index == start, state.get_redo_name()]
+        RESULT["unrecorded"] = e.get_param_value(b, 0)
 
 
 done = [False]

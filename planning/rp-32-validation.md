@@ -60,6 +60,17 @@ not a performance guarantee, and it does not measure the audio path or all
 facade operations. The production binary and source revision are identified in
 the artifact; no native changes were part of this checkpoint.
 
+## Engine rollback contract
+
+The facade and reference no longer promise that every failed operation leaves
+the engine unchanged. `undo_step` can only undo the actions actually recorded;
+undo or history-push failure and unrecorded side effects are not transactionally
+covered. A real windowed Linux Rack host test now checks that a recorded change
+is undone while an unrecorded change survives the same exception. An initial
+probe passed an ID where `set_param_value` expects a module and failed with
+`TypeError`; correcting it to pass the module made `tests/engine/test_host.py`
+pass. This changes documentation and tests, not the rollback implementation.
+
 ## Offline graph typing
 
 The static contract also checks graph inputs, arithmetic signals and plans

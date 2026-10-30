@@ -189,6 +189,8 @@ scripts working on Rack's running patch:
   history when the block ends.
 
 Every call is synchronous. It runs Rack's code on the main thread before
-returning, and nothing is queued. A failed call leaves the engine as it was:
-`map_param` removes its handle again, and when an `undo_step` block raises,
-the actions it collected are undone and nothing is pushed.
+returning, and nothing is queued. On a mapping error, `map_param` attempts to
+remove its new handle. If an `undo_step` block raises, the helper attempts to
+undo the actions it collected and does not push the step. Unrecorded changes,
+errors during undo, and errors committing the step are not covered by a
+transactional rollback guarantee.

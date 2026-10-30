@@ -43,3 +43,4 @@ def test_the_host_facade(make_hooks_bundle: Callable[[], Path], rack_host: Path,
     assert result["unmap"] is True
     assert result["step"] == [True, "set levels", 7.0, 2.0]
     assert result["rollback"] == [2.0, True, "set levels"]  # undone, and nothing pushed
+    assert result["unrecorded"] == 5.0  # no action means no rollback

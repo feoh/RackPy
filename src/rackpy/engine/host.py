@@ -4,11 +4,12 @@
 
 Everything here is synchronous: each call runs Rack's own code on Rack's main
 thread before it returns, and nothing is queued. Calls that take Rack's
-engine lock release the GIL while they wait. A call that fails leaves the
-engine as it was: the raw layer's checks run before Rack's code, and
-:func:`map_param` and :func:`undo_step` undo what they did before raising.
-The raw layer's rules apply unchanged (see the engine and history reference
-pages); nothing here has native semantics of its own.
+engine lock release the GIL while they wait. The raw layer's checks and
+ownership rules apply unchanged (see the engine and history reference pages).
+:func:`map_param` attempts to remove its new handle when mapping fails;
+:func:`undo_step` attempts to undo recorded actions if its block raises.
+Neither helper guarantees rollback of arbitrary side effects or of errors while
+committing a history step.
 """
 
 from collections.abc import Iterator
@@ -130,8 +131,9 @@ def undo_step(name: str) -> Iterator[ComplexAction]:
     """Collect actions into one undo step: push each change's action to the yielded ComplexAction.
 
     On a normal exit the step goes to Rack's history, unless it is empty. If the block raises, the
-    collected actions are undone (Rack's code, newest first) and the step is dropped, so the patch is as
-    it was before the block. Make each change, then push its action, as Rack does.
+    collected actions are undone by Rack, newest first, and the step is dropped. Only recorded actions
+    can be undone; unrecorded changes, errors in undo, or errors while pushing to history are not
+    covered by a transactional guarantee. Make each change, then push its action, as Rack does.
     """
     step = ComplexAction()
     step.name = name
