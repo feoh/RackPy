@@ -201,6 +201,8 @@ def test_json_requests(server: str) -> None:
     assert (
         posted["method"] == "POST" and json.loads(posted["body"]) == {"x": [1, 2]} and posted["cookie"] == "token=abc;"
     )
+    with pytest.raises(TypeError, match="cannot become JSON"):
+        net.post_json(server + "/api", object())
     with pytest.raises(NotImplementedError, match="cannot safely send"):
         net.put_json(server + "/api", {"y": "z"})
     # These names are distinct in Rack's enum even though its curl PUT path sends POST.

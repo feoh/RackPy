@@ -24,6 +24,8 @@ if TYPE_CHECKING:
     body: JSON = {"value": 1, "items": [True, None]}
     assert_type(get_json("https://example.invalid"), JSON)
     assert_type(post_json("https://example.invalid", body), JSON)
+    strings: list[str] = ["item"]
+    assert_type(post_json("https://example.invalid", strings), JSON)
     assert_type(put_json("https://example.invalid", body), JSON)
     assert_type(delete_json("https://example.invalid"), JSON)
 

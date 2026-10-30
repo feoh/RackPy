@@ -26,8 +26,11 @@ this checkpoint. They do not establish macOS or Windows behavior.
 
 ## JSON facade typing follow-up
 
-The network facade now types request bodies and results as the existing
-recursive `rackpy.types.JSON` rather than `Any`. The binding's `fromJsonAt`
+The network facade now types results as the existing recursive
+`rackpy.types.JSON` rather than `Any`. Request bodies use `object` and are
+validated by the native JSON converter: an initial `JSON` input annotation
+incorrectly rejected ordinary typed `list[str]` values because mutable lists
+are invariant. This trade-off is documented rather than hiding it with `Any`. The binding's `fromJsonAt`
 implementation constructs only JSON values. Tests narrow returned values before
 indexing them, and the reference notes that `None` cannot distinguish failure
 from JSON null. Mypy and scoped strict pyright pass the additional type

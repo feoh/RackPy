@@ -368,4 +368,6 @@ This is the contract for `WeakPtr<T>`, `WeakBase` and `WeakHandle`
   which runs Rack's download on a worker thread and calls `on_progress`
   with the fraction on the calling thread. JSON helpers return `rackpy.types.JSON`;
   `None` may be either a JSON null or a failure. Narrow the result before
-  treating it as an object or an array. Also `encode_url` and `url_path`.
+  treating it as an object or an array. Input bodies are typed as `object`
+  and validated by the JSON converter at runtime; see [values](values.md) for
+  supported values and limits. Also `encode_url` and `url_path`.

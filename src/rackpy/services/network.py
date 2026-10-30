@@ -25,12 +25,12 @@ def get_json(url: str, params: dict[str, str] | None = None, cookies: dict[str, 
     return cast(JSON, _network.request_json(_network.METHOD_GET, url, params, cookies or {}))
 
 
-def post_json(url: str, data: JSON = None, cookies: dict[str, str] | None = None) -> JSON:
-    """POST ``data`` as a JSON body. None on failure."""
+def post_json(url: str, data: object = None, cookies: dict[str, str] | None = None) -> JSON:
+    """POST ``data`` as a JSON body. RackPy validates the value at runtime; None on failure."""
     return cast(JSON, _network.request_json(_network.METHOD_POST, url, data, cookies or {}))
 
 
-def put_json(url: str, data: JSON = None, cookies: dict[str, str] | None = None) -> JSON:
+def put_json(url: str, data: object = None, cookies: dict[str, str] | None = None) -> JSON:
     """Refuse to send: Rack 2.6.6's PUT with a JSON body actually sends POST."""
     raise NotImplementedError("Rack 2.6.6 cannot safely send a JSON PUT request")
 
