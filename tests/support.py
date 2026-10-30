@@ -320,6 +320,8 @@ def run_pytest_in_rack(
     args: list[str] | None = None,
     timeout: float = 120,
     during_ui: bool = False,
+    entry_setup: str = "",
+    extra_models: list[dict[str, object]] | None = None,
 ) -> InRackResult:
     """Run a pytest suite inside Rack's embedded interpreter, in the built plugin.
 
@@ -335,6 +337,11 @@ def run_pytest_in_rack(
     import importlib.util
 
     plugin = stage_plugin(bundle, user, entry="rackpy_in_rack_pytest")
+    if extra_models:
+        manifest_path = plugin / "plugin.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["modules"].extend(extra_models)
+        manifest_path.write_text(json.dumps(manifest))
     deps = plugin / "pythonpath" / "_rackpy_test_deps"
     deps.mkdir()
     for name in PYTEST_PACKAGES:
@@ -372,7 +379,7 @@ def run_pytest_in_rack(
         write_patch(user, [PROBE_MODULE])
     else:
         source = header + IN_RACK_RUNNER
-    (plugin / "pythonpath" / "rackpy_in_rack_pytest.py").write_text(source)
+    (plugin / "pythonpath" / "rackpy_in_rack_pytest.py").write_text(entry_setup + "\n" + source)
     run = (
         run_rack_windowed(rack, user, timeout=timeout)
         if during_ui

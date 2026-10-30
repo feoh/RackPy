@@ -10,12 +10,20 @@
 // alternating single-channel and 16-channel input to cover both its paths.
 // RP-23C adds expander exchange: an interpreted and a compiled pair sending
 // and receiving lanes every frame, with snapshots on, and Rack's flips.
+// RP-31J adds a module's audio port: the driver thread's half of Core Audio's
+// buffering (as master, stepping the module's frames itself, and as a
+// secondary), resampling with converters the main thread prepares and swaps,
+// a rate change's missed block, stream starts and stops, and the module's
+// frames around rackpy.AudioInterface. Only the main thread's preparation
+// and Rack's own engine calls (not made here) stay outside the marks.
 #include "../dsp/graph/plan.hpp"
 #include "../engine/expanders.hpp"
 #include "../module/module.hpp"
 
 #include <dlfcn.h>
 
+#include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <memory>
@@ -294,6 +302,131 @@ std::string runExpanders(Compiled& compiled, int frames) {
 	return text;
 }
 
+bool ioGraphWorked = false;
+
+std::string runIoGraphs(Compiled& compiled, int frames) {
+	graph::PlanSpec spec;
+	spec.nodes = {
+		{"midi_cv", {}, {0, 1, 1, 0, 0, 2, 0, 24, 0, 0}, {}},
+		{"output", {0}, {1}, {}},
+		{"audio_input", {}, {0}, {}},
+		{"output", {2}, {2}, {}},
+		{"input", {}, {0}, {}},
+		{"audio_output", {4}, {0}, {}},
+	};
+	module::Module a, b;
+	for (auto* m : {&a, &b}) {
+		m->config(0, 1, 3, 0);
+		m->inputs[0].channels = 1;
+		for (auto& o : m->outputs)
+			o.channels = 1;
+		m->midi[0] = std::make_shared<io::MidiQueue>();
+		m->audio = std::make_shared<io::AudioBridge>(1, 1);
+		m->publish();
+	}
+	a.kernels.attach(plan(spec), true);
+	b.kernels.attach(compiled.make("IOGraph"), true);
+	rack::midi::Message msg;
+	msg.bytes = {0x90, 64, 100};
+	rack::engine::Module::ProcessArgs args{48000.f, 1.f / 48000.f, 0};
+	resetCounts();
+	int gates = 0;
+	for (int n = 0; n < frames; n++) {
+		args.frame = n;
+		msg.frame = n;
+		msg.bytes[0] = (n % 2) ? 0x80 : 0x90;
+		enter();
+		for (auto* m : {&a, &b}) {
+			m->midi[0]->push(msg);
+			m->process(args);
+		}
+		leave();
+		if (a.outputs[1].getVoltage() == 10.f && b.outputs[1].getVoltage() == 10.f)
+			gates++;
+	}
+	char text[512];
+	report(text, sizeof text);
+	ioGraphWorked = gates == (frames + 1) / 2;
+	return text;
+}
+
+bool midiBurstWorked = false;
+
+std::string runMidiBurst() {
+	io::MidiQueue queue;
+	rack::midi::Message message;
+	message.bytes = {0x90, 60, 100};
+	resetCounts();
+	enter();
+	for (int i = 0; i < (int) io::MIDI_QUEUE_CAPACITY; i++) {
+		message.frame = (int64_t) io::MIDI_QUEUE_CAPACITY - i;
+		queue.push(message);
+	}
+	queue.collect((int64_t) io::MIDI_QUEUE_CAPACITY);
+	midiBurstWorked = queue.dueCount() == (int) io::MIDI_QUEUE_CAPACITY;
+	for (int i = 0; i < queue.dueCount(); i++)
+		midiBurstWorked = midiBurstWorked && queue.due()[i].frame == i + 1;
+	leave();
+	char text[512];
+	report(text, sizeof text);
+	return text;
+}
+
+bool audioFlowed = false;
+
+std::string runAudio(int blocks) {
+	module::Module m;
+	m.config(0, 2, 2, 0);
+	m.inputs[0].channels = m.inputs[1].channels = 1;
+	m.outputs[0].channels = m.outputs[1].channels = 1;
+	m.audio = std::make_shared<io::AudioBridge>(2, 2);
+	m.publish();
+	m.kernels.attach(make("rackpy.AudioInterface", {0, 0, 2}), true);
+	io::AudioBridge& bridge = *m.audio;
+	const int block = 256;
+	std::vector<float> in(2 * block), out(2 * block);
+	float deviceRate = 44100.f, engineRate = 48000.f;
+	bridge.prepare(deviceRate, engineRate, 2, 2);  // as Module.set_audio_port does
+	resetCounts();
+	rack::engine::Module::ProcessArgs args;
+	args.sampleRate = engineRate;
+	args.sampleTime = 1.f / engineRate;
+	int64_t frame = 0;
+	float peak = 0.f;
+	for (int b = 0; b < blocks; b++) {
+		if (b == blocks / 3)
+			deviceRate = 48000.f;  // the device's rate changes: equal rates, Rack's copy
+		if (b == 2 * blocks / 3)
+			deviceRate = 96000.f;  // and again: a missed block, then the converter the main thread prepares
+		bool master = b % 50 < 40;  // and a while as a secondary, stepped in another master's blocks
+		for (int i = 0; i < 2 * block; i++)
+			in[(size_t) i] = (float) ((b + i) % 13) / 13.f - 0.5f;
+		enter();
+		if (b % 97 == 5)
+			bridge.startStream();
+		int requested = bridge.input(in.data(), 2, block, master, engineRate, deviceRate, 2, 2);
+		int steps = master ? requested : 300;
+		for (int n = 0; n < steps; n++) {
+			args.frame = frame++;
+			m.inputs[0].setVoltage(m.outputs[0].getVoltage());  // a cable from output to input, one frame late
+			m.inputs[1].setVoltage(m.outputs[1].getVoltage());
+			m.process(args);
+		}
+		bridge.output(out.data(), 2, block, engineRate);
+		if (b % 97 == 90)
+			bridge.stopStream();
+		leave();
+		for (float x : out)
+			peak = std::max(peak, std::fabs(x));
+		if (b % 10 == 0)
+			bridge.maintain(deviceRate, engineRate, 2, 2);  // a UI step
+	}
+	char text[512];
+	report(text, sizeof text);
+	audioFlowed = peak > 0.f && bridge.stats.resamplerMisses.load() > 0;
+	return text;
+}
+
 }  // namespace
 
 int main() {
@@ -346,9 +479,15 @@ int main() {
 	// The compiled library is linked in here, so it shares RackPy's expander services directly.
 	expander::services() = &engine::hostServices();
 	std::string expanderRun = runExpanders(compiled, frames);
+	io::services() = &io::hostServices();
+	std::string ioGraphRun = runIoGraphs(compiled, frames);
+	std::string midiBurstRun = runMidiBurst();
+	std::string audioRun = runAudio(600);
 	std::printf("{\"frames\": %d, \"production\": %s, \"failure\": %s, \"inject\": %s, \"graph\": %s, \"compiled\": %s, "
-		"\"expanders\": %s, \"exchanged\": %s}\n",
+		"\"expanders\": %s, \"exchanged\": %s, \"graph_io\": %s, \"graph_io_worked\": %s, "
+		"\"midi_burst\": %s, \"midi_burst_worked\": %s, \"audio\": %s, \"audio_flowed\": %s}\n",
 		frames, production.c_str(), failure.c_str(), inject.c_str(), graphRun.c_str(), compiledRun.c_str(), expanderRun.c_str(),
-		exchanged ? "true" : "false");
+		exchanged ? "true" : "false", ioGraphRun.c_str(), ioGraphWorked ? "true" : "false", midiBurstRun.c_str(),
+		midiBurstWorked ? "true" : "false", audioRun.c_str(), audioFlowed ? "true" : "false");
 	return 0;
 }

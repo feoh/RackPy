@@ -218,6 +218,8 @@ class _Evaluator:
     ) -> None:
         plan = graph.plan() if isinstance(graph, Graph) else graph
         for node in plan.nodes:
+            if node.op in ("audio_input", "audio_output", "midi_cv"):
+                raise GraphError(f"the offline reference cannot run {node.op}: it needs a Rack I/O endpoint")
             if "." in node.op:
                 raise GraphError(
                     f"the offline reference cannot run the native node type {node.op}: it exists only in Rack, "

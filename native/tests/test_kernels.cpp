@@ -206,7 +206,7 @@ int main() {
 	runtime::markMainThread();
 	dsp::registerBuiltins();
 	dsp::registerBuiltins();  // idempotent
-	CHECK(dsp::types().size() == 2);
+	CHECK(dsp::types().size() == 4);  // rackpy.Gain, rackpy.Sine, rackpy.AudioInterface, rackpy.MidiToCV
 	testGainMatchesDirectCpp();
 	testSineMatchesDirectCpp();
 	testWiringChecks();

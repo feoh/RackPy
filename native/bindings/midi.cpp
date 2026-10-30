@@ -37,6 +37,8 @@
 #include <rack.hpp>
 
 #include "../laboratory/laboratory.hpp"
+#include "../module/module.hpp"
+#include "../io/midi_queue.hpp"
 #include "engine/engine_internal.hpp"
 #include "support/overrides.hpp"
 #include "midi.hpp"
@@ -268,7 +270,31 @@ struct PyInput : TrackedPort<m::Input> {
 			queue.push(message);
 	}
 };
-using PyInputQueue = TrackedPort<m::InputQueue>;
+struct PyInputQueue : TrackedPort<m::InputQueue> {
+	std::atomic<io::MidiQueue*> nativeQueue{nullptr};
+	std::vector<std::shared_ptr<io::MidiQueue>> retained;
+	module::Module* owner = nullptr;  // main thread only
+	int ownerIndex = -1;
+
+	void detachNative() noexcept {
+		nativeQueue.store(nullptr, std::memory_order_release);
+		if (owner && ownerIndex >= 0)
+			owner->detachMidi[ownerIndex] = nullptr;
+		owner = nullptr;
+		ownerIndex = -1;
+	}
+	void release() noexcept override {
+		TrackedPort<m::InputQueue>::release();
+		detachNative();
+	}
+	~PyInputQueue() override { release(); }
+	void onMessage(const m::Message& message) override {
+		if (auto* q = nativeQueue.load(std::memory_order_acquire))
+			q->push(message);
+		else
+			m::InputQueue::onMessage(message);
+	}
+};
 using PyOutput = TrackedPort<m::Output>;
 
 /** rackpy.laboratory.MidiInputQueue (RP-22F): Rack's InputQueue whose onMessage a Python subclass overrides. Its
@@ -630,6 +656,44 @@ rack::midi::Port& pythonMidiPort(py::handle value) {
 	if (!py::isinstance<m::Port>(value))
 		throw py::type_error("expected a rackpy.raw.midi port (Input, InputQueue or Output)");
 	return checked(value.cast<m::Port&>());
+}
+
+void attachMidiInput(module::Module& module, int index, py::handle value) {
+	runtime::requireMainThread("setting a module's MIDI input");
+	refuseDuringMidiDelivery("setting a module's MIDI input");
+	if (module.laboratory)
+		throw runtime::Laboratory("a laboratory module cannot use a production MIDI input");
+	if (module.engineOwned.load(std::memory_order_acquire) || module.onBench)
+		throw runtime::Ownership("a module's MIDI inputs can change only while Python owns it and no Bench runs it");
+	if (index < 0 || index >= io::MAX_MIDI_INPUTS)
+		throw std::invalid_argument("MIDI input index out of range");
+	if (value.is_none()) {
+		module.detachMidiInput(index);
+		return;
+	}
+	auto* port = dynamic_cast<PyInputQueue*>(&pythonMidiPort(value));
+	if (!port)
+		throw py::type_error("a module MIDI input must be a rackpy.raw.midi.InputQueue");
+	if (port->owner && (port->owner != &module || port->ownerIndex != index))
+		throw runtime::Ownership("this MIDI input is already attached to a module");
+	if (port->inputDevice || !port->driverSubscriptions.empty() || !port->deviceSubscriptions.empty())
+		throw runtime::Ownership("disconnect the MIDI input from all devices before attaching it");
+	if (port->size() != 0)
+		throw runtime::Ownership("empty the MIDI InputQueue before attaching it to a module");
+	// A producer may already have loaded an earlier pointer. Retain old queues
+	// until the port is destroyed; bound the number of reattachments.
+	if (port->retained.size() >= 32)
+		throw runtime::Ownership("this MIDI input has reached its reattachment limit");
+	auto queue = std::make_shared<io::MidiQueue>();
+	port->retained.push_back(queue);
+	module.detachMidiInput(index);
+	port->detachNative();
+	module.midi[index] = queue;
+	module.publish();
+	port->owner = &module;
+	port->ownerIndex = index;
+	module.detachMidi[index] = [port] { port->detachNative(); };
+	port->nativeQueue.store(queue.get(), std::memory_order_release);
 }
 
 void connectOutputDevice(py::handle output, m::OutputDevice& device) {
@@ -1086,10 +1150,12 @@ void bindMidi(py::module_ mod) {
 		}))
 		.def("on_message", [](m::InputQueue& q, const m::Message& message) {
 			checked(q);
-			q.InputQueue::onMessage(message);
+			q.onMessage(message);
 		}, py::arg("message"), "Rack's: queues the message, as the driver does.")
 		.def("try_pop", [](m::InputQueue& q, int64_t maxFrame) -> py::object {
 			checked(q);
+			if (auto* p = dynamic_cast<PyInputQueue*>(&q); p && p->owner)
+				throw runtime::Ownership("a module's MIDI input is consumed by its native kernel");
 			m::Message message;
 			if (!q.tryPop(&message, maxFrame))
 				return py::none();
@@ -1097,6 +1163,8 @@ void bindMidi(py::module_ mod) {
 		}, py::arg("max_frame"), "Rack's: the next message if its frame is max_frame or earlier, else None.")
 		.def("size", [](m::InputQueue& q) {
 			checked(q);
+			if (auto* p = dynamic_cast<PyInputQueue*>(&q); p && p->owner)
+				throw runtime::Ownership("a module's MIDI input is consumed by its native kernel");
 			return q.size();
 		});
 

@@ -47,14 +47,49 @@ A device calls its ports' `process_input`, `process_buffer` and
 `on_stop_stream` there or where the port subscribes. Python never runs on
 that thread:
 
-- Rack's no-op process callbacks run natively, and `stream_stats` counts
-  what passed.
+- For an ordinary port, Rack's no-op process callbacks run natively, and
+  `stream_stats` counts what passed. A port attached to a RackPy module
+  instead routes device frames through the module's native I/O bridge.
 - `on_start_stream` and `on_stop_stream` reach a Python subclass queued, on
   the UI thread.
 - A Python override of the process callbacks runs only for a device that
   Python drives itself ([Python drivers](#audio-python-drivers)), on
   that thread. It gets copies of its part of the buffers, and its writes to
   the output reach the device.
+
+(audio-module-io)=
+### Module audio I/O (RP-31J, work in progress)
+
+`Module.set_audio_port(port, inputs=..., outputs=...)` attaches a Python-owned
+port to a module before Rack's engine owns the module. The port must not
+override the process callbacks; the channel limits are fixed while attached.
+Its native bridge connects the device to a kernel or
+[graph](../how-to/graphs.md#audio-and-midi), without running Python for
+samples. The built-in `AudioInterface` kernel implements Core Audio's
+10-volt conversion and sums polyphonic inputs. `audio_stats` exposes buffer
+and resampler counters. Detach by setting the port to `None` while Python owns
+the module; if the port goes first, the module hears silence.
+
+The bridge can be Rack's audio master or a secondary port. As master, it
+claims the engine when no master is present, suggests the device's sample rate,
+and calls Rack's public `Engine::stepBlock` on the driver thread, as Core
+Audio does. `stepped_frames` counts frames it clocks as master. Stopping the
+stream releases its master role; a restarted stream can claim it again.
+
+The Linux live-Rack comparison covers steady-rate operation and characterizes
+initial rate changes, not every startup or transition ordering. UI maintenance
+prepares for a newly requested fixed engine rate in the range 11.025–768 kHz
+when it sees the request before Rack applies it. A separate handover slot
+preserves the converter needed by the currently applied rate. If a required
+resampler has not been prepared, or the future slot is being replaced at the
+moment the driver needs it, the bridge can produce counted silent blocks
+(`resampler_misses`). It does not wait for the UI thread and is not equivalent
+to Core's synchronous converter creation. Rack 2.6.6's
+`audio::Device::processBuffer` itself takes `processMutex` before calling ports;
+Rack's engine, an external master's driver, and device getters may also use
+locks. The exchange guard does not prove the complete host audio path
+lock-free. No physical audio device, macOS or Windows has been tested for this
+path.
 
 Rack's audio drivers outlive its context but not RackPy's interpreter. Every
 Python port therefore gives its device back when Rack's context closes, and

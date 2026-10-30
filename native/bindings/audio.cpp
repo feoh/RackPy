@@ -11,6 +11,11 @@
 // device that Python itself drives (RP-29C) calls a Python port's process
 // overrides, synchronously, on Python's thread.
 //
+// A port that is a RackPy module's audio port (Module.set_audio_port, RP-31J)
+// runs Core Audio's buffering natively instead (native/io/audio_bridge.hpp):
+// its device's frames reach the module's kernel on Rack's engine thread, and
+// the kernel's frames the device, through lock-free rings.
+//
 // Lifetimes: Rack's audio drivers live until audio::destroy(), which runs
 // before RackPy finalizes Python, so every Python port gives its device back
 // when Rack's context closes. A device belongs to its driver (RtAudio deletes
@@ -36,6 +41,8 @@
 #include <rack.hpp>
 
 #include "audio.hpp"
+#include "engine/module.hpp"
+#include "../io/endpoints.hpp"
 #include "../laboratory/laboratory.hpp"
 #include "engine/engine_internal.hpp"
 #include "rackpy/runtime/context.hpp"
@@ -85,6 +92,13 @@ struct PyAudioPort : a::Port {
 	std::vector<a::Device*> deviceSubscriptions;  // Device.subscribe
 	// Counted natively on the audio thread, read by Python.
 	std::atomic<uint64_t> buffers{0}, frames{0}, inputCalls{0}, outputCalls{0};
+	// RP-31J: the module whose audio port this is. The driver reads `bridge`; the main thread sets and clears it
+	// under the device's processMutex, which Rack's Device holds while it calls the port, so the driver is never in
+	// the bridge then. The module clears it (Endpoints::detachAudio) before it goes; `bridgeModule` lives while set.
+	std::atomic<io::AudioBridge*> bridge{nullptr};
+	module::Module* bridgeModule = nullptr;  // main thread, and the driver while `bridge` is set
+	std::shared_ptr<io::AudioBridge> bridgeOwner;  // main thread
+	void detachBridge() noexcept;
 	std::atomic<int> lastFrames{0};
 	// Stream events, from whichever thread Rack calls them on; never blocks it.
 	std::mutex eventMutex;
@@ -110,6 +124,10 @@ struct PyAudioPort : a::Port {
 		buffers.fetch_add(1, std::memory_order_relaxed);
 		frames.fetch_add(static_cast<uint64_t>(count), std::memory_order_relaxed);
 		lastFrames.store(count, std::memory_order_relaxed);
+		if (io::AudioBridge* b = bridge.load(std::memory_order_acquire)) {
+			b->portBuffer(bridgeModule);  // as Core Audio, the master steps Rack's engine
+			return;
+		}
 		if (!pythonDriving || !runtime::interpreterAlive())
 			return;
 		py::gil_scoped_acquire gil;
@@ -122,6 +140,11 @@ struct PyAudioPort : a::Port {
 	}
 	void processInput(const float* input, int inputStride, int count) override {
 		inputCalls.fetch_add(1, std::memory_order_relaxed);
+		if (io::AudioBridge* b = bridge.load(std::memory_order_acquire)) {
+			b->portInput(*this, bridgeModule, bridgeModule->engineOwned.load(std::memory_order_acquire), input,
+				inputStride, count);
+			return;
+		}
 		if (!pythonDriving || !runtime::interpreterAlive())
 			return;
 		py::gil_scoped_acquire gil;
@@ -130,6 +153,10 @@ struct PyAudioPort : a::Port {
 	}
 	void processOutput(float* output, int outputStride, int count) override {
 		outputCalls.fetch_add(1, std::memory_order_relaxed);
+		if (io::AudioBridge* b = bridge.load(std::memory_order_acquire)) {
+			b->portOutput(output, outputStride, count);
+			return;
+		}
 		if (!pythonDriving || !runtime::interpreterAlive())
 			return;
 		py::gil_scoped_acquire gil;
@@ -162,16 +189,49 @@ struct PyAudioPort : a::Port {
 		}
 		queue(event);
 	}
-	void onStartStream() override { stream(StreamEvent::Start); }
-	void onStopStream() override { stream(StreamEvent::Stop); }
+	// Rack's drivers start and stop streams on the main thread (opening and closing them), as Python-driven devices do.
+	void onStartStream() override {
+		if (io::AudioBridge* b = bridge.load(std::memory_order_acquire))
+			b->portStart();
+		stream(StreamEvent::Start);
+	}
+	void onStopStream() override {
+		if (io::AudioBridge* b = bridge.load(std::memory_order_acquire))
+			b->portStop(bridgeModule);
+		stream(StreamEvent::Stop);
+	}
 };
 
 std::vector<PyAudioPort*> ports;  // main thread
 std::vector<UnlistedAudioDevice*> unlistedDevices;  // main thread
 bool hooked = false;
 
+/** Prepares the converters each module's audio port will need and frees retired ones (RP-31J). Main thread, UI
+step; only Rack's own drivers and Python's configured ones answer (a laboratory driver's port cannot be a module's). */
+void maintainBridges() noexcept {
+	rack::Context* context = rack::contextGet();
+	float engineRate = context && context->engine ? context->engine->getSampleRate() : 0.f;
+	for (auto* p : ports) {
+		if (!p->bridgeOwner || p->released)
+			continue;
+		try {
+			float deviceRate = p->getSampleRate();
+			// Prepare the requested fixed rate separately from the converter
+			// still needed by the current rate. Rack's menu offers 11.025–768 kHz.
+			float requestedRate = rack::settings::sampleRate;
+			if (!(requestedRate >= 11025.f && requestedRate <= 768000.f))
+				requestedRate = 0.f;
+			p->bridgeOwner->maintain(deviceRate, engineRate, p->getNumInputs(), p->getNumOutputs(), requestedRate);
+		}
+		catch (const std::exception& e) {
+			WARN("RackPy: an audio port could not prepare a resampler: %s", e.what());
+		}
+	}
+}
+
 /** Runs Python ports' on_start_stream and on_stop_stream for their queued events. Main thread, UI step. */
 void deliverEvents() noexcept {
+	maintainBridges();
 	auto all = ports;
 	for (auto* p : all) {
 		if (std::find(ports.begin(), ports.end(), p) == ports.end() || p->released)
@@ -240,6 +300,30 @@ void PyAudioPort::release() noexcept {
 		device->a::Device::unsubscribe(this);
 	driver = nullptr;
 	driverId = -1;
+	detachBridge();  // no device calls it any more; its module keeps the bridge, and hears silence
+}
+
+void PyAudioPort::detachBridge() noexcept {
+	{
+		std::unique_lock<std::mutex> lock;
+		if (device)
+			lock = std::unique_lock<std::mutex>(device->processMutex);
+		bridge.store(nullptr, std::memory_order_release);
+	}
+	if (bridgeModule)
+		bridgeModule->detachAudio = nullptr;
+	bridgeModule = nullptr;
+	bridgeOwner.reset();
+}
+
+PyAudioPort& checked(a::Port& port);
+
+/** A port whose channel limits may change: not a module's audio port, whose rings have their sizes. */
+PyAudioPort& unbridged(a::Port& port) {
+	PyAudioPort& p = checked(port);
+	if (p.bridgeOwner)
+		throw runtime::Ownership("a module's audio port keeps the channels Module.set_audio_port gave it");
+	return p;
 }
 
 PyAudioPort& checked(a::Port& port) {
@@ -548,6 +632,8 @@ py::object audioPortObject(a::Port* port) {
 
 void connectAudioDriver(py::handle port, UnlistedAudioDriver& driver) {
 	PyAudioPort& p = pythonPort(port);
+	if (p.bridgeOwner)
+		throw runtime::Ownership("this audio port is a module's audio port: a laboratory driver cannot drive it");
 	// Rack's Port::setDriverId, for a driver it found: leave the device, take the driver, then its default device.
 	p.setDeviceId(-1);
 	p.driver = &driver;
@@ -559,6 +645,114 @@ void connectAudioDriver(py::handle port, UnlistedAudioDriver& driver) {
 
 py::list audioSubscribers(py::object owner, a::Device& device) {
 	return subscriberList(device, [owner, &device]() -> a::Device& { return device; });
+}
+
+namespace {
+
+PyAudioPort* moduleAudioPortOf(const module::Module& m) {
+	for (auto* p : ports)
+		if (p->bridgeModule == &m && !p->released)
+			return p;
+	return nullptr;
+}
+
+/** The module's side of an attachment, undone when the module goes or gets another port. Main thread. */
+void detachModulePort(PyAudioPort* port, module::Module* m) noexcept {
+	if (std::find(ports.begin(), ports.end(), port) != ports.end() && port->bridgeModule == m)
+		port->detachBridge();
+	// A module that is not Rack's any more must not stay its master (Core's ~Audio stops its stream for this).
+	try {
+		rack::Context* context = rack::contextGet();
+		if (context && context->engine && context->engine->getMasterModule() == m)
+			context->engine->setMasterModule(nullptr);
+	}
+	catch (...) {
+	}
+}
+
+}  // namespace
+
+void attachAudioPort(module::Module& m, py::handle value, int inputs, int outputs) {
+	runtime::requireMainThread("setting a module's audio port");
+	if (m.laboratory)
+		throw runtime::Laboratory("a laboratory module's audio is its Python process(); give an ordinary module the port");
+	if (m.engineOwned.load(std::memory_order_acquire) || m.onBench)
+		throw runtime::Ownership("a module's audio port is set in its constructor callback, or while Python owns the "
+			"module and no laboratory Bench steps it: Rack's engine reads it every frame");
+	if (value.is_none()) {
+		m.detachAudioPort();
+		return;
+	}
+	PyAudioPort& p = pythonPort(value);
+	if (p.bridgeOwner && p.bridgeModule != &m)
+		throw runtime::Ownership("this audio port is already another module's audio port");
+	if (!p.driverSubscriptions.empty() || !p.deviceSubscriptions.empty())
+		throw runtime::Ownership("this audio port subscribes to other devices (Driver.subscribe, Device.subscribe); "
+			"a module's audio port has only its own device");
+	if (dynamic_cast<UnlistedAudioDriver*>(p.driver))
+		throw runtime::Ownership("a laboratory driver's port cannot be a module's audio port");
+	for (const char* name : {"process_input", "process_buffer", "process_output"})
+		if (rackpy::bindings::pythonOverride(static_cast<const a::Port*>(&p), name))
+			throw py::type_error(std::string("a module's audio port runs natively, so its class must not override ") +
+				name + " (it would never be called)");
+	if (inputs < 0 || inputs > io::MAX_AUDIO_CHANNELS || outputs < 0 || outputs > io::MAX_AUDIO_CHANNELS ||
+		inputs + outputs == 0)
+		throw std::invalid_argument("a module's audio port has 0 to " + std::to_string(io::MAX_AUDIO_CHANNELS) +
+			" inputs and outputs, and at least one channel");
+	auto bridge = std::make_shared<io::AudioBridge>(inputs, outputs);
+	m.detachAudioPort();
+	if (p.bridgeOwner)
+		p.detachBridge();
+	// As Core's AudioPort constructor: the port processes the module's channels.
+	p.maxInputs = inputs;
+	p.maxOutputs = outputs;
+	rack::Context* context = rack::contextGet();
+	bridge->prepare(p.getSampleRate(), context && context->engine ? context->engine->getSampleRate() : 0.f,
+		p.getNumInputs(), p.getNumOutputs());
+	m.audio = bridge;
+	m.publish();
+	p.bridgeOwner = bridge;
+	p.bridgeModule = &m;
+	{
+		std::unique_lock<std::mutex> lock;
+		if (p.device)
+			lock = std::unique_lock<std::mutex>(p.device->processMutex);
+		p.bridge.store(bridge.get(), std::memory_order_release);
+	}
+	PyAudioPort* port = &p;
+	module::Module* self = &m;
+	m.detachAudio = [port, self] { detachModulePort(port, self); };
+}
+
+void maintainAudioPorts() noexcept {
+	maintainBridges();
+}
+
+py::object moduleAudioPort(module::Module& m) {
+	runtime::requireMainThread("reading a module's audio port");
+	PyAudioPort* p = moduleAudioPortOf(m);
+	return p ? audioPortObject(p) : py::none();
+}
+
+py::object moduleAudioStats(module::Module& m) {
+	runtime::requireMainThread("reading a module's audio port");
+	if (!m.audio)
+		return py::none();
+	const io::AudioBridge& b = *m.audio;
+	py::dict d;
+	d["inputs"] = b.inputs;
+	d["outputs"] = b.outputs;
+	d["device_inputs"] = b.deviceInputs();
+	d["device_outputs"] = b.deviceOutputs();
+	d["blocks"] = b.stats.blocks.load();
+	d["stepped_frames"] = b.stats.steppedFrames.load();
+	d["dropped_frames"] = b.stats.droppedFrames.load();
+	d["empty_frames"] = b.stats.emptyFrames.load();
+	d["clears"] = b.stats.clears.load();
+	d["resampler_misses"] = b.stats.resamplerMisses.load();
+	d["frames_to_engine"] = b.toEngineFrames();
+	d["frames_to_device"] = b.toDeviceFrames();
+	return d;
 }
 
 void bindAudio(py::module_ mod) {
@@ -574,6 +768,8 @@ void bindAudio(py::module_ mod) {
 			py::arg("device_id"))
 		.def("subscribe", [](const DriverView& d, int deviceId, py::object port) -> py::object {
 			auto& p = pythonPort(port);
+			if (p.bridgeOwner)
+				throw runtime::Ownership("a module's audio port has only its own device");
 			a::Device* device = d.get().subscribe(deviceId, &p);
 			if (!device)
 				return py::none();
@@ -650,6 +846,8 @@ void bindAudio(py::module_ mod) {
 		.def("subscribe", [](const DeviceView& v, py::object port) {
 			a::Device& d = v.get();
 			auto& p = pythonPort(port);
+			if (p.bridgeOwner)
+				throw runtime::Ownership("a module's audio port has only its own device");
 			d.subscribe(&p);
 			p.deviceSubscriptions.push_back(&d);
 		}, py::arg("port"), "Rack's (its driver's subscribe calls it); RackPy undoes it with the port.")
@@ -676,9 +874,10 @@ void bindAudio(py::module_ mod) {
 		.def_property("output_offset", [](a::Port& p) { return checked(p).outputOffset; },
 			[](a::Port& p, int v) { checked(p).outputOffset = v; })
 		.def_property("max_inputs", [](a::Port& p) { return checked(p).maxInputs; },
-			[](a::Port& p, int v) { checked(p).maxInputs = v; }, "Rack's: the most input channels this port processes.")
+			[](a::Port& p, int v) { unbridged(p).maxInputs = v; },
+			"Rack's: the most input channels this port processes. Fixed while the port is a module's audio port.")
 		.def_property("max_outputs", [](a::Port& p) { return checked(p).maxOutputs; },
-			[](a::Port& p, int v) { checked(p).maxOutputs = v; })
+			[](a::Port& p, int v) { unbridged(p).maxOutputs = v; })
 		.def_property_readonly("driver_id", [](a::Port& p) { return checked(p).driverId; })
 		.def_property_readonly("device_id", [](a::Port& p) { return checked(p).deviceId; })
 		.def_property_readonly("driver", [](a::Port& p) { return checked(p).driver ? driverObject(p.driverId) : py::none(); })

@@ -73,6 +73,15 @@ or `Output` subclass may override them, and Rack's menus and its
   An unset frame is set from Rack's engine timing, as Rack does.
 - **`InputQueue`** is Rack's queue port. It keeps up to 8192 messages in
   frame order, and `try_pop(max_frame)` returns the next one due, or `None`.
+  A Python-owned module can attach an empty, disconnected `InputQueue` using
+  `set_midi_input(index, queue)` (indices 0–3), then connect the port to a
+  device. Its native queue delivers messages to a compatible kernel at their
+  engine frames; `try_pop()` and `size()` raise `OwnershipError` while it is
+  attached. `set_midi_input(index, None)` detaches it while the module is
+  Python-owned. For memory safety, a port permits at most 32 attachments over
+  its lifetime. `module.midi_input_stats(index)` reports received, delivered,
+  full-queue and long-message drops and the waiting count after the last frame.
+  Messages longer than three bytes are dropped, including SysEx.
 - **`Output.send_message(message)`** sends to the port's device, setting the
   port's channel unless it is -1.
 

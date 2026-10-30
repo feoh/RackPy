@@ -47,12 +47,27 @@ def test_only_the_valid_library_registered_types() -> None:
     names = {t.name for t in kernel_types()}
     assert "example.Fold" in names
     refused_types = ("wrongabi.Never", "throws.Partial", "badname.Good", "rackpy.Gain2")
-    for refused in (*refused_types, "expanderabi.Kept", "expanderpart.Kept"):
+    for refused in (*refused_types, "expanderabi.Kept", "expanderpart.Kept", "ioabi.Kept", "iopart.Kept"):
         assert refused not in names
     fold = load("example.Fold")
     assert fold.controls == ("gain", "limit") and [f[0] for f in fold.fields] == ["input", "output", "gain", "limit"]
     with pytest.raises(ValueError, match="limit must be positive"):
         fold(input=0, output=0, limit=0)  # the library's own exception, as ValueError
+
+
+def test_library_receives_io_services() -> None:
+    probe = load("iotest.Probe")
+
+    def configure(m: Module) -> None:
+        m.config(0, 0, 1, 0)
+        m.set_kernel(probe(output=0))
+
+    module = Module.create(configure)
+    HOOKS.engine_adopt(module)
+    try:
+        assert until(lambda: module.outputs[0].get_voltage() == 10.0)
+    finally:
+        HOOKS.engine_delete(module, None)
 
 
 def test_rack_runs_the_library_kernel() -> None:
@@ -199,6 +214,52 @@ def test_compiled_kernels_match_the_plan_interpreter(name: str) -> None:
     assert len(a) == frames
     for frame, (x, y) in enumerate(zip(a, b, strict=True)):
         assert repr(x) == repr(y), (frame, x, y)  # repr: NaN and -0.0 compare too
+
+
+def test_io_graphs_deliver_timed_midi_in_both_tiers() -> None:
+    modules = [Module.create(lambda m: m.config(0, 1, 3, 0)) for _ in range(2)]
+    queues = [raw.midi.InputQueue() for _ in modules]
+    try:
+        for m, queue, kernel in zip(
+            modules, queues, (GRAPHS["IOGraph"].compile(), load("graphs.IOGraph")()), strict=True
+        ):
+            m.set_midi_input(0, queue)
+            m.set_kernel(kernel)
+            for output in m.outputs:
+                output.channels = 1
+            for status, frame in ((0x90, 3), (0x80, 7)):
+                message = raw.midi.Message()
+                message.bytes = [status, 64, 100 if status == 0x90 else 0]
+                message.frame = frame
+                queue.on_message(message)
+        results: list[list[list[float]]] = [[], []]
+        for frame in range(10):
+            for i, m in enumerate(modules):
+                HOOKS.module_process(m, 48000, frame)
+                results[i].append([m.outputs[k].get_voltage() for k in range(3)])
+        assert results[0] == results[1]
+        assert [row[1] for row in results[0]] == [0.0] * 3 + [10.0] * 4 + [0.0] * 3
+        assert results[0][3][0] == pytest.approx(4 / 12)
+        assert all(row[2] == 0.0 for row in results[0])  # no audio port
+    finally:
+        for m in modules:
+            m.set_midi_input(0, None)
+            m.close()
+
+
+def test_native_io_plan_rejects_invalid_settings() -> None:
+    from _rackpy_host import dsp
+
+    valid = GRAPHS["IOGraph"].plan().to_dict()
+    midi_node = next(n for n in valid["nodes"] if n["op"] == "midi_cv")
+    midi_node["args"][0] = 4
+    with pytest.raises(ValueError, match="setting 0"):
+        dsp.graph_kernel(valid)
+    valid = GRAPHS["IOGraph"].plan().to_dict()
+    audio_node = next(n for n in valid["nodes"] if n["op"] == "audio_output")
+    audio_node["args"][0] = -1
+    with pytest.raises(ValueError, match="channel"):
+        dsp.graph_kernel(valid)
 
 
 def test_compiled_kernels_refuse_unwired_fields() -> None:

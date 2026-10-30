@@ -119,8 +119,35 @@ signal or a number to a node raises
 | `delay(initial)` | the signal it is fed, one frame later |
 | `output(port, signal)`, `light(index, signal)` | write an output (at least one channel) or a light's brightness (channel 0) |
 | `expander_send(side, signal, lane)`, `expander_receive(side, lane)` | send a signal to the module beside it, and receive one, a frame later: see [expanders](#expanders) |
+| `audio_input(channel)`, `audio_output(channel, signal)` | device input and output samples: see [audio and MIDI](#audio-and-midi) |
+| `midi_cv(output, ...)` | one of Core MIDI-CV's outputs from a timed MIDI input: see [audio and MIDI](#audio-and-midi) |
 
 Every operation computes in float32, as Rack does.
+
+## Audio and MIDI
+
+The RP-31J I/O path is **work in progress**. Inside Rack, a module can attach
+an audio port and MIDI queues before the engine owns it; the native graph
+interpreter and generated kernel libraries can access their per-frame data.
+See [MIDI](../reference/midi.md) for attachment and ownership constraints.
+The offline reference refuses these nodes because it has no device endpoint.
+
+`audio_input(channel)` reads device units (full scale 1), returning zero when
+no channel is available. `audio_output(channel, signal)` sends the sum of the
+signal's channels in those same units; write each device channel at most once.
+Multiply a device sample by 10 to produce Rack's usual voltage scale, and
+scale Rack voltages down before sending them to a device. A graph with only
+an audio output is a valid sink. The bridge can clock Rack as the audio master
+or operate as a secondary port. Startup and sample-rate transition equivalence
+to Core Audio is still under study.
+
+`midi_cv(output, input=0, ...)` processes messages due on one of the module's
+four MIDI inputs. The output index 0-11 follows `rackpy.MidiToCV`'s order
+(pitch, gate, velocity, aftertouch, pitch wheel, modulation wheel, retrigger,
+clock, divided clock, start, stop, continue). Each node owns an independent
+parser and settings, including polyphony, priority modes and wheel smoothing;
+use the same settings for nodes meant to represent one MIDI-CV module. A
+compiled graph uses RackPy's I/O services and runs the polyphonic path.
 
 ## Channels
 

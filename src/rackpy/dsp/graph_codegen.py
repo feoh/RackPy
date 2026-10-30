@@ -27,6 +27,7 @@ always take the polyphonic path.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 
 from rackpy.dsp.graph import LANE, Graph, GraphError, Plan
@@ -57,6 +58,8 @@ _TERNARY = {"clamp": _NS + "clamp", "where": _NS + "where"}
 _PORTS = {"input": "INPUT", "param": "PARAM", "output": "OUTPUT", "light": "LIGHT"}
 _STATE = {"phasor": "Phasor", "schmitt": "Schmitt", "pulse": "Pulse", "delay": "Delay"}
 _EXPANDER = ("expander_send", "expander_receive")
+_IO = ("audio_input", "audio_output", "midi_cv")
+_SINKS = ("output", "light", "expander_send", "audio_output")
 
 
 def _float(x: float) -> str:
@@ -78,6 +81,18 @@ def _kernel(name: str, namespace: str, plan: Plan) -> tuple[str, str]:
     """The kernel struct for one plan, and its registration."""
     nodes = plan.nodes
     exchanges = any(node.op in _EXPANDER for node in nodes)
+    uses_io = any(node.op in _IO for node in nodes)
+    for node in nodes:
+        if node.op in ("audio_input", "audio_output") and (len(node.args) != 1 or node.args[0] not in range(16)):
+            raise GraphError(f"{node.op} needs an audio channel from 0 to 15")
+        if node.op == "midi_cv":
+            limits = ((0, 3), (0, 11), (1, 16), (0, 3), (0, 3), None, (0, 1), (1, 1 << 20), (0, 1), (0, 1))
+            if len(node.args) != len(limits) or any(
+                not math.isfinite(x)
+                or (limit is not None and (not float(x).is_integer() or not limit[0] <= x <= limit[1]))
+                for x, limit in zip(node.args, limits, strict=True)
+            ):
+                raise GraphError("midi_cv has an invalid setting")
     if any("." in node.op for node in nodes):
         extensions = sorted({node.op for node in nodes if "." in node.op})
         raise GraphError(
@@ -100,6 +115,8 @@ def _kernel(name: str, namespace: str, plan: Plan) -> tuple[str, str]:
         return f"f{field_of[(node.op, int(node.args[0]))]}"
 
     members, init, reset = [], [], []
+    if uses_io:
+        members.append("\trackpy::io::Link ioLink;")
     if exchanges:
         # RackPy's expander services (rackpy/expanders.hpp), given to the library when RackPy loads it.
         members.append("\tconst rackpy::expander::Schema* schema;  // rackpy.graph")
@@ -125,12 +142,21 @@ def _kernel(name: str, namespace: str, plan: Plan) -> tuple[str, str]:
                 init.append(f"\t\tn{k}.duration = {_float(node.args[0])};")
             elif node.op == "delay":
                 init.append(f"\t\tn{k}.initial = {_float(node.args[0])};")
+        if node.op == "midi_cv":
+            members.append(f"\tMidiCV n{k};")
+            values = node.args
+            init.append(
+                f"\t\tn{k}.input = {int(values[0])}; n{k}.output = (MidiCvOutput) {int(values[1])};\n"
+                f"\t\tn{k}.configure({int(values[2])}, {int(values[3])}, {int(values[4])}, {_float(values[5])}, "
+                f"{int(values[6])}, {int(values[7])}, {int(values[8])}, {int(values[9])});"
+            )
+            reset.append(f"\t\tn{k}.reset();")
         if node.op in _EXPANDER:
             side, lane = int(node.args[0]), int(node.args[1])
             members.append(f"\trackpy::expander::Link l{k};  // {node.op}: side {side}, lane {lane}")
             if node.op == "expander_receive":
                 members.append(f"\trackpy::expander::Link o{k};")
-        if node.op not in ("output", "light", "expander_send"):
+        if node.op not in _SINKS:
             members.append(f"\tSignal p{k};  // {node.op}, on the polyphonic path")
 
     mono, poly = [], []
@@ -173,7 +199,7 @@ def _kernel(name: str, namespace: str, plan: Plan) -> tuple[str, str]:
             mono.append(f"{port}.setChannels(1); {port}.setVoltage(v{i[0]});")
         elif op == "light":
             mono.append(f"m.lights[{field(k)}].setBrightness(v{i[0]});")
-        if op not in _EXPANDER:  # graphs that exchange take the polyphonic path only
+        if op not in (*_EXPANDER, *_IO):  # these graphs take the polyphonic path only
             if op not in ("output", "light"):
                 mono[-1] = f"[[maybe_unused]] {mono[-1]} settle({v});"
             mono[-1] += f"  // {k}: {op}"
@@ -192,6 +218,12 @@ def _kernel(name: str, namespace: str, plan: Plan) -> tuple[str, str]:
             line = f"mono({out}, args.sampleRate);"
         elif op == "sample_time":
             line = f"mono({out}, args.sampleTime);"
+        elif op == "audio_input":
+            line = f"mono({out}, audioInput(ioFrame, {int(node.args[0])}));"
+        elif op == "audio_output":
+            line = f"audioOutput(ioFrame, {int(node.args[0])}, {a[0]});"
+        elif op == "midi_cv":
+            line = f"n{k}.process({out}, ioFrame, args.sampleTime);"
         elif op in _BINARY:
             line = f"map2({out}, {a[0]}, {a[1]}, [](float x, float y) {{ return {_BINARY[op]}(x, y); }});"
         elif op in _UNARY:
@@ -224,7 +256,7 @@ def _kernel(name: str, namespace: str, plan: Plan) -> tuple[str, str]:
                 )
         else:  # pragma: no cover - Plan only holds registered ops
             raise GraphError(f"the compiled tier does not know node type {op!r}")
-        if op not in ("output", "light", "expander_send"):
+        if op not in _SINKS:
             line += f" settle({out});"
         poly.append(f"{line}  // {k}: {op}")
     for target, source in plan.latches:
@@ -235,9 +267,11 @@ def _kernel(name: str, namespace: str, plan: Plan) -> tuple[str, str]:
     narrow += [f"n{target}.held.channels <= 1" for target, _ in plan.latches]
     condition = " && ".join(narrow) or "true"
     indent = "\n\t\t\t"
-    if exchanges:
-        # A received lane's channel count is known only once it is read: the polyphonic path computes everything.
+    if exchanges or uses_io:
+        # Received lanes and MIDI can be polyphonic; I/O graphs use the same path for all nodes.
         body = "\t\t" + "\n\t\t".join(poly)
+        if uses_io:
+            body = "\t\tconst rackpy::io::Frame* ioFrame = rackpy::io::frame(m, ioLink);\n" + body
     else:
         body = f"""		// Every input and delay holds at most one channel, so every signal does: one value per node.
 		if ({condition}) {{
@@ -308,6 +342,7 @@ def emit(graphs: Mapping[str, Graph | Plan], namespace: str, source: str = "") -
         raise GraphError("there are no graphs to compile")
     structs, registrations = [], []
     exchanges = False
+    uses_io = False
     for name, graph in graphs.items():
         _identifier(name, "a graph's kernel type name")
         plan = graph.plan() if isinstance(graph, Graph) else graph
@@ -315,6 +350,9 @@ def emit(graphs: Mapping[str, Graph | Plan], namespace: str, source: str = "") -
         structs.append(struct)
         registrations.append(registration)
         exchanges = exchanges or any(node.op in _EXPANDER for node in plan.nodes)
+        uses_io = uses_io or any(node.op in _IO for node in plan.nodes)
+    io_include = "#include <rackpy/io.hpp>\n" if uses_io else ""
+    io_entry = "\n// RackPy's audio and MIDI services.\nRACKPY_IO\n" if uses_io else ""
     expanders_include = "#include <rackpy/expanders.hpp>\n" if exchanges else ""
     expanders_entry = (
         "\n// RackPy's expander services, for the graphs that exchange with neighbours (RP-23C).\nRACKPY_EXPANDERS\n"
@@ -326,7 +364,7 @@ def emit(graphs: Mapping[str, Graph | Plan], namespace: str, source: str = "") -
 // The compiled tier of RackPy's DSP graphs (RP-21C): each kernel composes the
 // node types of rackpy/graph.hpp statically, as the plan interpreter runs them.
 #include <rack.hpp>
-{expanders_include}#include <rackpy/graph.hpp>
+{expanders_include}{io_include}#include <rackpy/graph.hpp>
 #include <rackpy/kernel.hpp>
 
 #include <algorithm>
@@ -344,4 +382,4 @@ using namespace rackpy::graph;
 RACKPY_KERNEL_LIBRARY({_string(namespace)}, registrar) {{
 {chr(10).join(registrations)}
 }}
-{expanders_entry}"""
+{expanders_entry}{io_entry}"""

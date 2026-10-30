@@ -3,6 +3,7 @@
 #include <rack.hpp>
 #include <rackpy/expanders.hpp>
 #include <rackpy/graph.hpp>
+#include <rackpy/io.hpp>
 #include <rackpy/kernel.hpp>
 
 #include <stdexcept>
@@ -67,6 +68,13 @@ RACKPY_KERNEL_LIBRARY("expanderpart", registrar) {
 	registrar.add(type("Kept"));
 }
 extern "C" __attribute__((visibility("default"))) int rackpy_expander_abi() { return rackpy::expander::EXPANDER_ABI; }
+#elif defined(VARIANT_IO_WRONG_ABI)
+RACKPY_KERNEL_LIBRARY("ioabi", registrar) { registrar.add(type("Kept")); }
+extern "C" __attribute__((visibility("default"))) int rackpy_io_abi() { return 999; }
+extern "C" __attribute__((visibility("default"))) void rackpy_set_io_services(rackpy::io::Services*) {}
+#elif defined(VARIANT_IO_PARTIAL)
+RACKPY_KERNEL_LIBRARY("iopart", registrar) { registrar.add(type("Kept")); }
+extern "C" __attribute__((visibility("default"))) int rackpy_io_abi() { return rackpy::io::IO_ABI; }
 #else
 #error "build broken.cpp with one VARIANT_* definition"
 #endif

@@ -100,6 +100,26 @@ OPS: Final[dict[str, Op]] = _ops(
     Op("control", 0, ("default",), True, "A named number, mono, that Python may change while the plan runs."),
     Op("sample_rate", 0, (), True, "The engine's sample rate in Hz, mono."),
     Op("sample_time", 0, (), True, "The duration of one frame in seconds, mono."),
+    Op("audio_input", 0, ("channel",), True, "A device input sample, mono, in device units."),
+    Op("audio_output", 1, ("channel",), False, "Send the signal's channel sum to a device output, in device units."),
+    Op(
+        "midi_cv",
+        0,
+        (
+            "input",
+            "output",
+            "channels",
+            "mono_mode",
+            "poly_mode",
+            "pitch_bend_range",
+            "smooth",
+            "clock_division",
+            "retrigger_on_resume",
+            "release_velocity",
+        ),
+        True,
+        "A MIDI-CV output from the module's timed MIDI input.",
+    ),
     Op("add", 2, (), True, "a + b"),
     Op("sub", 2, (), True, "a - b"),
     Op("mul", 2, (), True, "a * b"),
@@ -385,6 +405,7 @@ class Graph:
         self._sends: dict[tuple[int, int], int] = {}  # (side, lane) -> expander_send node
         self._receives: dict[tuple[int, int], int] = {}  # (side, lane) -> expander_receive node
         self._controls: dict[str, int] = {}
+        self._audio_outputs: dict[int, int] = {}
 
     # --- sources ---------------------------------------------------------------------------
     def input(self, port: int) -> Signal:
@@ -415,6 +436,43 @@ class Graph:
 
     def sample_time(self) -> Signal:
         return self._signal("sample_time", (), ())
+
+    def audio_input(self, channel: int = 0) -> Signal:
+        """A device input sample in device units (full scale 1), or zero when absent."""
+        return self._signal("audio_input", (), (float(self._io_index(channel, 16, "audio channel")),))
+
+    def midi_cv(
+        self,
+        output: int = 0,
+        *,
+        input: int = 0,
+        channels: int = 1,
+        mono_mode: int = 0,
+        poly_mode: int = 0,
+        pitch_bend_range: float = 2.0,
+        smooth: bool = True,
+        clock_division: int = 24,
+        retrigger_on_resume: bool = False,
+        release_velocity: bool = False,
+    ) -> Signal:
+        """A Core MIDI-CV output (0-11) fed by a module's timed MIDI input (0-3).
+
+        Each node has independent parser state. Output order and settings match
+        ``rackpy.MidiToCV``; this node needs Rack and cannot run offline.
+        """
+        args = (
+            self._io_index(input, 4, "MIDI input"),
+            self._io_index(output, 12, "MIDI-CV output"),
+            self._io_count(channels, 16, "channels"),
+            self._io_index(mono_mode, 4, "mono mode"),
+            self._io_index(poly_mode, 4, "poly mode"),
+            _number(pitch_bend_range, "pitch bend range"),
+            self._io_bool(smooth, "smooth"),
+            self._io_count(clock_division, 1 << 20, "clock division"),
+            self._io_bool(retrigger_on_resume, "retrigger on resume"),
+            self._io_bool(release_velocity, "release velocity"),
+        )
+        return self._signal("midi_cv", (), tuple(float(arg) for arg in args))
 
     # --- functions ---------------------------------------------------------------------------
     def minimum(self, a: Signal | float, b: Signal | float) -> Signal:
@@ -514,6 +572,16 @@ class Graph:
             )
         self._outputs[index] = self._node("output", (signal,), (float(index),))
 
+    def audio_output(self, channel: int, signal: Signal | float) -> None:
+        """Send the sum of ``signal``'s channels to a device output, once per channel.
+
+        Device samples are in units of full scale 1; scale voltages as needed.
+        """
+        index = self._io_index(channel, 16, "audio channel")
+        if index in self._audio_outputs:
+            raise GraphError(f"audio channel {index} is already written")
+        self._audio_outputs[index] = self._node("audio_output", (signal,), (float(index),))
+
     def light(self, index: int, brightness: Signal | float) -> None:
         """Sets a light's brightness from channel 0 of ``brightness``, once per light."""
         light = _index(index, "light index")
@@ -560,7 +628,7 @@ class Graph:
     # --- lowering ------------------------------------------------------------------------------
     def plan(self) -> Plan:
         """Validates the graph and lowers it: see :class:`Plan`. Raises :class:`GraphError`."""
-        sinks = [*self._outputs.values(), *self._lights.values(), *self._sends.values()]
+        sinks = [*self._outputs.values(), *self._lights.values(), *self._sends.values(), *self._audio_outputs.values()]
         if not sinks:
             raise GraphError("the graph writes no output, light or expander lane, so it would do nothing")
         resolve = self._resolver()
@@ -612,6 +680,24 @@ class Graph:
         ids = [self._operand(x, f"{op}'s operand {k + 1}") for k, x in enumerate(inputs)]
         self._made.append(_Made(op, ids, args, _caller()))
         return len(self._made) - 1
+
+    @staticmethod
+    def _io_index(value: object, limit: int, what: str) -> int:
+        if not isinstance(value, int) or isinstance(value, bool) or not 0 <= value < limit:
+            raise GraphError(f"{what} must be a whole number from 0 to {limit - 1}, not {value!r}")
+        return value
+
+    @staticmethod
+    def _io_count(value: object, limit: int, what: str) -> int:
+        if not isinstance(value, int) or isinstance(value, bool) or not 1 <= value <= limit:
+            raise GraphError(f"{what} must be a whole number from 1 to {limit}, not {value!r}")
+        return value
+
+    @staticmethod
+    def _io_bool(value: object, what: str) -> int:
+        if not isinstance(value, bool):
+            raise GraphError(f"{what} must be a bool, not {value!r}")
+        return int(value)
 
     @staticmethod
     def _lane(side: object, lane: object, what: str) -> tuple[int, int]:

@@ -34,6 +34,8 @@ def test_a_sixteen_channel_plan_makes_no_forbidden_calls(dev_build: Path) -> Non
     assert not any(report["compiled"].values()), report["compiled"]  # RP-21C: a compiled kernel, both paths
     # RP-23C: interpreted and compiled pairs exchanging expander lanes, snapshots on, with Rack's flips.
     assert not any(report["expanders"].values()) and report["exchanged"], report
+    # RP-31J: timed MIDI and audio graph nodes, in both tiers, inside the guard.
+    assert not any(report["graph_io"].values()) and report["graph_io_worked"], report
     assert report["inject"]["malloc"] >= report["frames"]  # the guard is live in this run
 
 

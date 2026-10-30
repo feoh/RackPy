@@ -1095,6 +1095,11 @@ void define(py::module_ m) {
 	m.def("engine_set_sample_rate", [engineCall](float rate) {
 		engineCall("engine_set_sample_rate", [&] { APP->engine->setSuggestedSampleRate(rate); });
 	});
+	// RP-31J: what RackPy's UI step does for modules' audio ports, now (a test runs inside one UI step).
+	m.def("maintain_audio_ports", [] {
+		requireMainThread("maintain_audio_ports");
+		bindings::maintainAudioPorts();
+	});
 	m.def("engine_set_master", [engineCall, owned](py::object module) {
 		module::Module* mod = module.is_none() ? nullptr : &owned(module.cast<const bindings::ModuleRef&>());
 		engineCall("engine_set_master", [&] { APP->engine->setMasterModule(mod); });
@@ -1108,6 +1113,32 @@ void define(py::module_ m) {
 		cable->inputId = module::Construction::index(inId, cable->inputModule->inputs.size());
 		engineCall("engine_connect", [&] { APP->engine->addCable(cable); });
 		return cable->id;
+	});
+	// Test-only read of a foreign reference module's output while Rack's engine is stopped.
+	m.def("engine_reference_output", [engineCall](int64_t id, int port, int channel) {
+		return engineCall("engine_reference_output", [&] {
+			auto* mod = APP->engine->getModule(id);
+			if (!mod)
+				throw std::invalid_argument("no such module");
+			auto index = module::Construction::index(port, mod->outputs.size());
+			if (channel < 0 || channel >= rack::engine::PORT_MAX_CHANNELS)
+				throw std::invalid_argument("invalid channel");
+			return mod->outputs[index].getVoltage((uint8_t) channel);
+		});
+	});
+	// Test-only Core reference loopback: the caller must disconnect before deleting the module.
+	m.def("engine_reference_loopback", [engineCall](int64_t id, int port) {
+		return engineCall("engine_reference_loopback", [&] {
+			auto* mod = APP->engine->getModule(id);
+			if (!mod)
+				throw std::invalid_argument("no such module");
+			auto cable = std::make_unique<rack::engine::Cable>();
+			cable->outputModule = cable->inputModule = mod;
+			cable->outputId = module::Construction::index(port, mod->outputs.size());
+			cable->inputId = module::Construction::index(port, mod->inputs.size());
+			APP->engine->addCable(cable.get());
+			return cable.release()->id;
+		});
 	});
 	m.def("engine_disconnect", [engineCall](int64_t id) {
 		engineCall("engine_disconnect", [&] {

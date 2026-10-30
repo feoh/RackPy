@@ -12,6 +12,7 @@
 #include "plan.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <cmath>
 #include <cstdint>
@@ -20,6 +21,7 @@
 #include <stdexcept>
 
 #include "../../engine/expanders.hpp"
+#include "../../io/endpoints.hpp"
 #include "rackpy/graph.hpp"
 
 namespace rackpy {
@@ -34,6 +36,9 @@ enum class Op : uint8_t {
 	CONTROL,
 	SAMPLE_RATE,
 	SAMPLE_TIME,
+	AUDIO_INPUT,
+	AUDIO_OUTPUT,
+	MIDI_CV,
 	ADD,
 	SUB,
 	MUL,
@@ -77,6 +82,9 @@ const OpInfo OPS[] = {
 	{"control", Op::CONTROL, 0, 1, true},
 	{"sample_rate", Op::SAMPLE_RATE, 0, 0, true},
 	{"sample_time", Op::SAMPLE_TIME, 0, 0, true},
+	{"audio_input", Op::AUDIO_INPUT, 0, 1, true},
+	{"audio_output", Op::AUDIO_OUTPUT, 1, 1, false},
+	{"midi_cv", Op::MIDI_CV, 0, 10, true},
 	{"add", Op::ADD, 2, 0, true},
 	{"sub", Op::SUB, 2, 0, true},
 	{"mul", Op::MUL, 2, 0, true},
@@ -118,7 +126,8 @@ struct Step {
 	float x = 0.f, y = 0.f;  // CONSTANT: x; SCHMITT: low, high; PULSE: duration; DELAY: initial
 	int extension = -1;  // EXTENSION: index into Checked::extensions
 	uint8_t side = 0;  // EXPANDER_*: 0 left, 1 right
-	int lane = 0;  // EXPANDER_*: the lane of the message
+	int lane = 0;  // EXPANDER_* lane, AUDIO_* channel
+	std::array<double, 10> midi{};  // MIDI_CV settings
 };
 
 /** A native extension node of a checked plan: its type, inputs and arguments in the type's order. */
@@ -174,6 +183,8 @@ struct GraphKernel final : Kernel {
 	std::vector<Schmitt> schmitts;
 	std::vector<Pulse> pulses;
 	std::vector<Delay> delays;
+	std::vector<std::unique_ptr<MidiCV>> midi;
+	io::Link ioLink;
 	std::vector<std::unique_ptr<Node>> extensions;
 	std::vector<std::vector<const Signal*>> extensionInputs;
 	// EXPANDER_SEND uses one (the neighbour), EXPANDER_RECEIVE two (the neighbour, then this module).
@@ -226,6 +237,18 @@ struct GraphKernel final : Kernel {
 					linked += s.op == Op::EXPANDER_SEND ? 1 : 2;
 					r.index = s.lane * LANE;
 					break;
+				case Op::AUDIO_INPUT:
+				case Op::AUDIO_OUTPUT: r.index = s.lane; break;
+				case Op::MIDI_CV: {
+					r.state = (uint16_t) midi.size();
+					auto cv = std::make_unique<MidiCV>();
+					cv->input = (int) s.midi[0];
+					cv->output = (MidiCvOutput) (int) s.midi[1];
+					cv->configure((int) s.midi[2], (int) s.midi[3], (int) s.midi[4], (float) s.midi[5],
+						s.midi[6] != 0, (uint32_t) s.midi[7], s.midi[8] != 0, s.midi[9] != 0);
+					midi.push_back(std::move(cv));
+					break;
+				}
 				case Op::EXTENSION: {
 					// The library's create() runs its own code: RackPy's caller turns what it throws into ValueError.
 					const ExtensionStep& e = plan.extensions[(size_t) s.extension];
@@ -251,7 +274,13 @@ struct GraphKernel final : Kernel {
 
 	bool process(rack::engine::Module& m, const rack::engine::Module::ProcessArgs& args) noexcept override {
 		Signal* s = signals.data();
+		const io::Frame* frame = nullptr;
+		bool ioResolved = false;
 		for (const Run& r : runs) {
+			if (!ioResolved && (r.op == Op::AUDIO_INPUT || r.op == Op::AUDIO_OUTPUT || r.op == Op::MIDI_CV)) {
+				frame = io::frameOf(m, ioLink);
+				ioResolved = true;
+			}
 			Signal& out = s[r.self];
 			switch (r.op) {
 				case Op::INPUT: readInput(out, m.inputs[r.index]); break;
@@ -260,6 +289,9 @@ struct GraphKernel final : Kernel {
 				case Op::CONTROL: break;  // written in advance
 				case Op::SAMPLE_RATE: mono(out, args.sampleRate); break;
 				case Op::SAMPLE_TIME: mono(out, args.sampleTime); break;
+				case Op::AUDIO_INPUT: mono(out, audioInput(frame, r.index)); break;
+				case Op::AUDIO_OUTPUT: audioOutput(frame, r.index, s[r.a]); break;
+				case Op::MIDI_CV: midi[r.state]->process(out, frame, args.sampleTime); break;
 				case Op::ADD: map2(out, s[r.a], s[r.b], [](float x, float y) { return add(x, y); }); break;
 				case Op::SUB: map2(out, s[r.a], s[r.b], [](float x, float y) { return sub(x, y); }); break;
 				case Op::MUL: map2(out, s[r.a], s[r.b], [](float x, float y) { return mul(x, y); }); break;
@@ -329,6 +361,8 @@ struct GraphKernel final : Kernel {
 			d.reset();
 		for (auto& e : extensions)
 			e->reset();
+		for (auto& cv : midi)
+			cv->reset();
 	}
 
 	/** At a frame boundary (RP-17A's slot), so the next frame's nodes all see the new value. */
@@ -406,7 +440,7 @@ std::shared_ptr<const KernelType> planType(const PlanSpec& spec) {
 	auto plan = std::make_shared<Checked>();
 	std::vector<Field> fields;
 	std::map<std::pair<int, long long>, int> fieldOf;  // (kind, index) -> field
-	std::set<long long> outputs, lights;
+	std::set<long long> outputs, lights, audioOutputs;
 	std::set<std::pair<int, long long>> sends, receives;  // (side, lane)
 	std::vector<const OpInfo*> infos;
 	for (size_t k = 0; k < spec.nodes.size(); k++) {
@@ -463,6 +497,27 @@ std::shared_ptr<const KernelType> planType(const PlanSpec& spec) {
 				step.field = found->second;
 				break;
 			}
+			case Op::AUDIO_INPUT:
+			case Op::AUDIO_OUTPUT: {
+				double channel = node.args[0];
+				if (channel < 0 || channel >= io::MAX_AUDIO_CHANNELS || channel != std::floor(channel))
+					refuse(k, node.op, "its channel must be a whole number from 0 to 15");
+				if (info->op == Op::AUDIO_OUTPUT && !audioOutputs.insert((long long) channel).second)
+					refuse(k, node.op, "its audio channel is already written");
+				step.lane = (int) channel;
+				break;
+			}
+			case Op::MIDI_CV: {
+				const int min[] = {0, 0, 1, 0, 0, 0, 0, 1, 0, 0};
+				const int max[] = {io::MAX_MIDI_INPUTS - 1, MIDI_CV_OUTPUTS - 1, 16, 3, 3, 0, 1, 1 << 20, 1, 1};
+				for (size_t i = 0; i < node.args.size(); i++) {
+					double value = node.args[i];
+					if (i != 5 && (value < min[i] || value > max[i] || value != std::floor(value)))
+						refuse(k, node.op, "its setting " + std::to_string(i) + " is out of range or not a whole number");
+					step.midi[i] = value;
+				}
+				break;
+			}
 			case Op::CONSTANT: step.x = (float) node.args[0]; break;
 			case Op::SCHMITT:
 				step.x = (float) node.args[0];
@@ -501,7 +556,7 @@ std::shared_ptr<const KernelType> planType(const PlanSpec& spec) {
 		}
 		plan->steps.push_back(step);
 	}
-	if (outputs.empty() && lights.empty() && sends.empty())
+	if (outputs.empty() && lights.empty() && sends.empty() && audioOutputs.empty())
 		throw std::invalid_argument("a graph plan writes no output, light or expander lane");
 
 	std::vector<bool> fed(spec.nodes.size(), false);

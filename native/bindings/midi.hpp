@@ -5,10 +5,13 @@
 #include <rack.hpp>
 
 namespace rackpy {
+namespace module { struct Module; }
 namespace bindings {
 
 /** rackpy.raw.midi (RP-29A). */
 void bindMidi(pybind11::module_ midi);
+/** Attach a Python MIDI input to a module's native real-time queue. */
+void attachMidiInput(module::Module& module, int index, pybind11::handle value);
 /** A live MIDI port Python made (rackpy.raw.midi.Input, InputQueue or Output), for Rack's MIDI widgets. Main thread. */
 rack::midi::Port& pythonMidiPort(pybind11::handle value);
 /** Point a Python-made Output at `device`, outside Rack's drivers (the callback
