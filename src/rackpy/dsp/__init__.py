@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""DSP for RackPy modules. Available inside Rack only.
+"""DSP for RackPy modules.
+
+Native bindings require Rack's live host. Pure-Python graph descriptions,
+reference evaluation and code generation can also be used outside Rack.
 
 :mod:`rackpy.dsp.kernel` has the native kernels that run a module's audio
 path: Python chooses and configures them, and never runs per sample.
