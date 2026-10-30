@@ -6,10 +6,16 @@ feasibility and freeze justified budgets before implementation fans out.
 
 ## Architectural invariants
 
-Production `process` and `processBypass` paths must contain no Python calls,
-GIL acquisition, Python reference-count transitions, heap allocation/free,
-blocking locks, IO, network, GUI calls, or synchronous logging. Expander message
-exchange remains native and preserves Rack's one-frame latency.
+RackPy's production `process`, `processBypass`, and audio-driver callback paths
+must contain no Python calls, GIL acquisition, Python reference-count
+transitions, heap allocation/free, IO, network, GUI calls, or synchronous
+logging. RackPy must not introduce additional blocking locks on these paths.
+This does not prohibit synchronization already performed by Rack's host or
+driver when using the supported public API. For example, Rack 2.6.6 holds
+`audio::Device::processMutex` while dispatching port callbacks, and
+`Engine::stepBlock` takes engine locks. Document and test RackPy's own path
+separately; do not characterize the complete Rack host path as lock-free.
+Expander message exchange remains native and preserves Rack's one-frame latency.
 
 UI → engine updates have bounded queues and a documented overflow policy.
 State/graph replacement reclaims memory off the audio thread. Atomics must be
