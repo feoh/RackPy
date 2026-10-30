@@ -3,8 +3,9 @@
 that drives Rack's own ports (Core's Audio-2 and MIDI-CV modules) and Python's."""
 
 import gc
+import inspect
 from array import array
-from typing import Any
+from typing import Any, get_type_hints
 
 import _rackpy_host
 import pytest
@@ -13,6 +14,7 @@ from rackpy import audio as fa
 from rackpy import midi as fm
 from rackpy import raw
 from rackpy.errors import OwnershipError, StaleHandleError
+from rackpy.plugin import ModuleClass
 from rackpy.raw import audio, midi
 from rackpy.raw.engine import Engine, EngineModule
 
@@ -247,6 +249,15 @@ def test_audio_same_port_native_stream_reentry_and_nonvirtual_super() -> None:
         assert calls == 65
     finally:
         port.set_device_id(-1)
+
+
+def test_facade_signatures_and_callback_annotations() -> None:
+    audio_kind = inspect.signature(fa.open_port).parameters["kind"]
+    midi_kind = inspect.signature(fm.open_input).parameters["kind"]
+    assert audio_kind.kind is inspect.Parameter.KEYWORD_ONLY and audio_kind.default is audio.Port
+    assert midi_kind.kind is inspect.Parameter.KEYWORD_ONLY and midi_kind.default is midi.InputQueue
+    hints = get_type_hints(ModuleClass.on_port_change)
+    assert hints["event"] is raw.engine.Module.PortChangeEvent and hints["return"] is type(None)
 
 
 def test_duplicate_names_require_ids() -> None:

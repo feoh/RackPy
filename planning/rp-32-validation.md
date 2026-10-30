@@ -67,7 +67,10 @@ when the requested name is ambiguous; the name-map `drivers()` helpers also
 refuse duplicate keys. ID lookup remains available, and a unique name still
 works even if an unrelated name is duplicated. Unit tests exercise the shared
 selection helper; actual Rack host tests register duplicate virtual audio and
-MIDI drivers and devices, check refusal and select devices by ID.
+MIDI drivers and devices, check refusal and select devices by ID. The same
+host suite uses `inspect.signature` to check the keyword-only `kind` defaults
+and resolves the port-change callback event annotation against the real host
+binding.
 
 A fixture correction was necessary during this checkpoint: the reused RP-31
 native build's bundle also contained RP-31's Python sources, not this branch's
