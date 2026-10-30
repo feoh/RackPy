@@ -1,0 +1,42 @@
+{
+  "baseline": "construct raw Message, set bytes and frame",
+  "candidate": "rackpy.midi.message with identical bytes and frame",
+  "samples_per_run": 20000,
+  "runs": 7,
+  "python": "3.14.9 (main, Oct 21 2026, 17:48:02) [Clang 23.1.3 ]",
+  "clock": {
+    "implementation": "clock_gettime(CLOCK_MONOTONIC)",
+    "monotonic": true,
+    "adjustable": false,
+    "resolution": 1e-09
+  },
+  "raw_ns_per_message": [
+    458.6807,
+    469.8515,
+    469.17105,
+    469.57515,
+    461.18065,
+    458.20715,
+    456.385
+  ],
+  "facade_ns_per_message": [
+    511.2613,
+    520.4541,
+    523.6589,
+    522.5909,
+    513.76415,
+    513.01435,
+    520.2491
+  ],
+  "raw_median_ns": 461.18065,
+  "facade_median_ns": 520.2491,
+  "environment": {
+    "measured_utc": "2026-10-30T20:29:59Z",
+    "host": "Linux x86_64 7.3.0-4-cachyos; Intel Core i9-14900K; shared host",
+    "rack_sdk": "2.6.6 commit 061ccf63c1758599396ac1bb10d47345d9d34076",
+    "source_revision": "ca4a19dd382e92af59ec002a8d922ae42bd34405 plus benchmark test source listed below",
+    "benchmark_source_sha256": "7b6e20cf4093804de2eb8baee501efb7bb9351b90b0840c30fadbdc5f0cc93f7",
+    "native_binary_source_revision": "2e3e6b9; production Werror, test hooks off; c++ GCC 16.2.1",
+    "conditions": "Rack Free host, UI thread, seven alternating-order runs; no isolation or CPU pinning; diagnostic only"
+  }
+}

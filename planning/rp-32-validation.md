@@ -44,6 +44,18 @@ event. `tests/plugin/test_plugin.py` passed nine outer tests in the Linux Rack
 host, using the integration binaries. The pyright contract is now a prek hook;
 it is still scoped to the contract file, not the entire project.
 
+## MIDI convenience-cost probe
+
+`tests/facade/test_benchmark.py` runs an alternating-order UI-thread probe in
+the Linux Rack host: `rackpy.midi.message` with three bytes and frame `-1`
+versus direct `Message()` construction followed by the same byte and frame
+assignments. It first checks that the results agree. Seven 20,000-message
+runs, machine details, clock and exact baselines are in
+`benchmarks/rp32-midi-facade-cost.json`. This is one shared-host diagnostic,
+not a performance guarantee, and it does not measure the audio path or all
+facade operations. The production binary and source revision are identified in
+the artifact; no native changes were part of this checkpoint.
+
 Still to do: a complete coherent facade and typing review, raw discoverability,
 strict mypy and pyright samples, signature and exception tests, representative
 user walkthroughs, measured wrapper overhead with explicit baseline, any
