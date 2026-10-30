@@ -1,7 +1,7 @@
 [project]
 name = "rackpy"
 version = "0.0.0.dev0"
-description = "Python for VCV Rack plugins (development skeleton; no Rack API is bound yet)"
+description = "Python for VCV Rack plugins (development version; API coverage incomplete)"
 readme = "README.md"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE", "NOTICE"]
@@ -19,6 +19,7 @@ dev = [
     "cyclopts>=5.2,<6",    # bin/ utilities
     "mypy>=1.18",
     "pybind11==3.1.0",     # headers and CMake config for the native host (ADR 002)
+    "pyright==1.1.408",
     "pytest>=8.4",
     "ruff>=0.14",
 ]

@@ -12,6 +12,7 @@ with each declaration's status in the binding manifest that CI checks. The
 :maxdepth: 1
 
 coverage
+mapping
 ```
 
 ## Bound so far

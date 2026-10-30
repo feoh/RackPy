@@ -9,6 +9,7 @@ The raw layer's rules apply unchanged (see the audio reference page).
 """
 
 from array import array
+from typing import overload
 
 from rackpy.raw.audio import Driver, Port, PythonDevice, PythonDriver, add_driver, get_driver, get_driver_ids
 
@@ -29,7 +30,15 @@ def find_driver(driver: str | int) -> Driver:
     return found
 
 
-def open_port[P: Port](driver: str | int, device: str | int | None = None, *, kind: type[P] = Port) -> P:  # type: ignore[assignment]
+@overload
+def open_port[P: Port](driver: str | int, device: str | int | None = None, *, kind: type[P]) -> P: ...
+
+
+@overload
+def open_port(driver: str | int, device: str | int | None = None) -> Port: ...
+
+
+def open_port(driver: str | int, device: str | int | None = None, *, kind: type[Port] = Port) -> Port:
     """A new audio port (``kind``, a Port subclass) on a driver's device, by name or ID (None: the driver's default)."""
     d = find_driver(driver)
     port = kind()

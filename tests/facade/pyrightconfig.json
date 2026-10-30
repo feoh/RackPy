@@ -1,0 +1,7 @@
+{
+  "include": ["typing_contract.py"],
+  "extraPaths": ["../../src", "../../typings"],
+  "typeCheckingMode": "strict",
+  "pythonVersion": "3.14",
+  "reportMissingModuleSource": false
+}

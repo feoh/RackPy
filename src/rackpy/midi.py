@@ -8,6 +8,8 @@ messages until you pop them. The raw layer's rules apply unchanged (see the
 MIDI reference page); nothing here has native semantics of its own.
 """
 
+from typing import overload
+
 from rackpy.raw.midi import (
     Driver,
     Input,
@@ -103,13 +105,23 @@ def _select[P: Input | Output](port: P, driver: str | int, device: str | int | N
     return port
 
 
+@overload
 def open_input[I: Input](
+    driver: str | int, device: str | int | None = None, *, channel: int = -1, kind: type[I]
+) -> I: ...
+
+
+@overload
+def open_input(driver: str | int, device: str | int | None = None, *, channel: int = -1) -> InputQueue: ...
+
+
+def open_input(
     driver: str | int,
     device: str | int | None = None,
     *,
     channel: int = -1,
-    kind: type[I] = InputQueue,  # type: ignore[assignment]
-) -> I:
+    kind: type[Input] = InputQueue,
+) -> Input:
     """A new input port (an InputQueue unless ``kind`` is an Input subclass) on a driver's device, by name or ID."""
     port = _select(kind(), driver, device, True)
     port.channel = channel
