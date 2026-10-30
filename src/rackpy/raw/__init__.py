@@ -103,8 +103,8 @@ from rackpy._widget_events import register as _register_widget_events  # noqa: E
 
 _register_widget_events(_rackpy_host.raw.widget)
 
-# Rack also calls these Quantity methods on its engine thread (Core MIDI-Map, ADR 003), where Python
-# never runs, so they have no Python path. A subclass that defines one would silently never be called.
+# Rack calls ParamQuantity value methods on its engine thread (Core MIDI-Map, ADR 003).
+# Plain Quantity subclasses may override these on the UI thread only.
 _ENGINE_THREAD_METHODS = ("get_value", "set_value", "get_min_value", "get_max_value", "get_default_value")
 
 
@@ -115,10 +115,10 @@ def _refuse_engine_thread_overrides(cls: type, **kwargs: _Any) -> None:
     if defined:
         raise TypeError(
             f"{cls.__qualname__} defines {', '.join(defined)}: Rack can call these on its engine thread, where "
-            "Python never runs, so a Python Quantity cannot override them. Subclass rackpy.types.ValueQuantity, "
-            "which stores its value natively, and override the display methods instead (or, offline only, a "
+            "Python never runs, so a Python ParamQuantity cannot override them. Use native parameter values "
+            "and override display methods instead (or, offline only, a "
             "rackpy.laboratory quantity class)."
         )
 
 
-Quantity.__init_subclass__ = classmethod(_refuse_engine_thread_overrides)  # type: ignore[assignment]  # noqa: F821
+_rackpy_host.raw.engine.ParamQuantity.__init_subclass__ = classmethod(_refuse_engine_thread_overrides)

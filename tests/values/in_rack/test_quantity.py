@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""rack::Quantity and ValueQuantity inside Rack: Rack's defaults, Python overrides by callback
-strategy, and the engine-thread methods that never reach Python."""
+"""rack::Quantity and ValueQuantity inside Rack: UI overrides and off-thread fallback."""
 
 import threading
 
@@ -8,6 +7,7 @@ import _rackpy_host
 import pytest
 
 from rackpy.raw import Quantity
+from rackpy.raw.engine import ParamQuantity
 from rackpy.runtime import diagnostics
 from rackpy.types import ValueQuantity
 
@@ -81,16 +81,19 @@ def test_display_value_setter_and_virtual_override() -> None:
     assert seen == [8.0] and scaled.get_value() == 4.0
 
 
-def test_python_may_not_define_engine_thread_methods() -> None:
-    with pytest.raises(TypeError, match=r"get_value.*engine thread"):
+def test_native_value_quantity_subclass_overrides_on_ui_thread() -> None:
+    class Doubled(ValueQuantity):
+        def get_value(self) -> float:
+            return 2 * super().get_value()
 
-        class Bad(ValueQuantity):
-            def get_value(self) -> float:
-                return 1.0
+    q = Doubled(0, 10, 2)
+    assert q.get_range() == 10 and q.get_scaled_value() == pytest.approx(0.4)
 
+
+def test_parameter_quantity_may_not_define_engine_thread_methods() -> None:
     with pytest.raises(TypeError, match="set_value, get_max_value"):
 
-        class AlsoBad(Quantity):
+        class AlsoBad(ParamQuantity):
             def set_value(self, value: float) -> None: ...
 
             def get_max_value(self) -> float:
@@ -133,7 +136,28 @@ def test_engine_thread_reads_never_touch_python() -> None:
     q = Labelled(0, 10, 2.5, "", "")
     before = _rackpy_host.dispatch_stats()
     assert _testing.read_quantity_on_rack_thread(q, 10000) == 2.5
-    assert _rackpy_host.dispatch_stats() == before  # no Python call, no refusal: nothing to refuse
+    after = _rackpy_host.dispatch_stats()
+    assert after["calls"] == before["calls"]  # never enters Python on Rack's thread
+    assert after["refused_rack_thread"] == before["refused_rack_thread"] + 1  # bounded diagnostic per object
+
+
+@hooks
+def test_plain_quantity_off_thread_falls_back_without_python() -> None:
+    assert _testing is not None
+    calls: list[str] = []
+
+    class Custom(Quantity):
+        def get_value(self) -> float:
+            calls.append("get")
+            return 0.75
+
+    q = Custom()
+    before = _rackpy_host.dispatch_stats()
+    assert _testing.read_quantity_on_rack_thread(q, 10) == 0.0  # Rack's Quantity base answer
+    after = _rackpy_host.dispatch_stats()
+    assert calls == [] and after["calls"] == before["calls"]
+    assert after["refused_rack_thread"] == before["refused_rack_thread"] + 1
+    assert any(d.code == "refused_rack_thread" and "Quantity.get_value" in d.message for d in diagnostics())
 
 
 def test_value_quantity_is_safe_to_use_from_python_threads() -> None:

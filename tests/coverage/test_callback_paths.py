@@ -90,7 +90,7 @@ def test_laboratory_paths_are_not_mistaken_for_production_overrides() -> None:
     inputs = bm.load_inputs()
     records = bm.load_json(bm.MANIFEST)["entries"]
     laboratory = [r for r in records if r["callback"] in {"engine", "mixed"}]
-    assert len(laboratory) == 16
+    assert len(laboratory) == 11  # RP-31G moved the five plain Quantity methods to UI dispatch
     for record in laboratory:
         text = generator.callback_execution(record, inputs.index[record["id"]])
         assert "Synchronous offline override: rackpy.laboratory." in text
