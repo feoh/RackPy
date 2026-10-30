@@ -44,8 +44,9 @@ not yet changed, and this does not complete the broad typing audit.
 nested Rack `Module` event types instead of `Any`. Scoped mypy and pyright
 contracts exercise subclass overrides and reject an incorrect port-change
 event. `tests/plugin/test_plugin.py` passed nine outer tests in the Linux Rack
-host, using the integration binaries. The pyright contract is now a prek hook;
-it is still scoped to the contract file, not the entire project.
+host, using the integration binaries. The pyright contract is now a prek hook.
+A follow-up expanded its strict scope from the contract file to all files in
+`tests/facade/`; it does not check the entire project.
 
 ## MIDI convenience-cost probe
 
@@ -65,6 +66,11 @@ The static contract also checks graph inputs, arithmetic signals and plans
 with mypy and strict pyright. The existing pure-Python graph and graph-codegen
 suites passed 25 tests without a Rack host; this is not an actual-host audio
 walkthrough.
+
+A diagnostic strict pyright run over `src/rackpy` on 2026-10-30 found 241
+errors in 75 files; unknown members, private internal uses and dynamic
+`__all__` constructions dominate. This is not a passing full-source check;
+the facade-test check above does not suppress these diagnostics globally.
 
 Still to do: a complete coherent facade and typing review, raw discoverability,
 strict mypy and pyright samples, signature and exception tests, representative

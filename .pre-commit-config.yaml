@@ -39,7 +39,7 @@ repos:
         pass_filenames: false
         files: (\.pyi?$|^bin/|^pyproject\.toml$)
       - id: pyright-facade-contract
-        name: pyright (facade typing contract)
+        name: pyright (facade tests)
         entry: uv run --frozen pyright --project tests/facade/pyrightconfig.json --warnings
         language: system
         pass_filenames: false
