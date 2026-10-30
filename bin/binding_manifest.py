@@ -153,6 +153,28 @@ def inventory_index(inventory: dict[str, Any]) -> dict[str, dict[str, Any]]:
         index[e["id"]] = e
     if not any(counted(e) for e in entries):
         raise ManifestError("the inventory has no counted declarations")
+    # Conditional source declarations are separate branch-specific evidence:
+    # an active declaration with the same name does not account for an unseen
+    # alternative definition. Their signatures/availability need platform work.
+    blocks = inventory.get("conditional_blocks")
+    if not isinstance(blocks, list):
+        raise ManifestError("the inventory has no conditional_blocks list; refusing to omit preprocessor branches")
+    for block in blocks:
+        for declaration in block["declarations"]:
+            ident = f"conditional:{block['header']}:{block['lines'][0]}:{declaration}"
+            if ident in index:
+                raise ManifestError(f"the inventory lists {ident} twice")
+            index[ident] = {
+                "id": ident,
+                "kind": "conditional_declaration",
+                "name": declaration,
+                "header": block["header"],
+                "line": block["lines"][0],
+                "condition": block["condition"],
+                "block_sha256": block["sha256"],
+                "skipped_in": block["skipped_in"],
+                "classification": "public",
+            }
     return index
 
 
@@ -198,6 +220,14 @@ def is_engine_method(entry: dict[str, Any]) -> bool:
 
 def availability(inventory: dict[str, Any], entry: dict[str, Any]) -> dict[str, str]:
     """Per platform: "yes", "no" (absent there) or "not inventoried" (no extraction yet, so unknown)."""
+    if entry["kind"] == "conditional_declaration":
+        # A skipped range proves absence in that exact successful extraction,
+        # not presence elsewhere. Active branches need semantic extraction.
+        ok = {r["variant"] for r in inventory["extractions"] if r["status"] == "ok"}
+        return {
+            platform: "no" if platform in ok and platform in entry["skipped_in"] else "not inventoried"
+            for platform in PLATFORMS
+        }
     ok = {r["variant"] for r in inventory["extractions"] if r["status"] == "ok"}
     absent = set(entry.get("absent_in", ()))
     out = {}
@@ -454,6 +484,13 @@ def validate(inputs: Inputs, manifest: dict[str, Any], introspection: dict[str, 
         if entry is None or not counted(entry):
             continue
         status = r.get("status")
+        if entry["kind"] == "conditional_declaration" and status in BOUND | {"excluded_internal"}:
+            add(
+                "conditional-unresolved",
+                ident,
+                "a textual branch scan does not establish a signature or platform semantics; "
+                "reconcile with actual platform inventories before closing this record",
+            )
         if r.get("fingerprint") != fingerprint(entry):
             add("stale-signature", ident, "the declaration changed since this record was reviewed")
         if r.get("callback") != inputs.strategies.get(ident):
@@ -660,7 +697,7 @@ def release_problems(
             continue
         available = availability(inputs.inventory, entry)[platform]
         if available == "not inventoried":
-            problems.append(Problem("not-inventoried", platform, f"no inventory has been extracted for {platform}"))
+            problems.append(Problem("not-inventoried", ident, f"availability on {platform} is not inventoried"))
             break
         if available == "no":
             continue
@@ -682,8 +719,8 @@ def markdown_report(rep: dict[str, Any]) -> str:
         "",
         "Each counted declaration in the [SDK inventory](surface-schema.md), by family and platform. A",
         "full-coverage release needs every available declaration `verified` or `excluded_internal`",
-        "([release bar](../coverage.md#release-bar)). `not inventoried` means no inventory has been",
-        "extracted for that platform yet, which blocks a release there.",
+        "([release bar](../coverage.md#release-bar)). `not inventoried` means platform or conditional-branch",
+        "availability is unresolved, which blocks a release there.",
         "",
         "## Totals",
         "",

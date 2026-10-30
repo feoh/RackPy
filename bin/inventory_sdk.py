@@ -25,6 +25,7 @@ import re
 import shutil
 import subprocess
 from collections import Counter
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Annotated, Any
@@ -772,6 +773,67 @@ def conditional_blocks(ex: Extraction, headers: list[str]) -> None:
             )
 
 
+def boundary_constants(ex: Extraction) -> None:
+    """Count dependency constants needed to interpret Rack input and menu events.
+
+    Only declarations from headers actually reached through rack.hpp are admitted;
+    dependency APIs as a whole remain outside the Rack SDK denominator.
+    """
+    headers: dict[str, Callable[[str], bool]] = {
+        "dep/include/GLFW/glfw3.h": lambda name: (
+            name.startswith(("GLFW_KEY_", "GLFW_MOUSE_BUTTON_", "GLFW_MOD_"))
+            or name in {"GLFW_PRESS", "GLFW_RELEASE", "GLFW_REPEAT"}
+        ),
+        "dep/include/blendish.h": lambda name: name.startswith("BND_CORNER_"),
+    }
+    reached = {Path(inc.include.name).resolve() for inc in ex.tu.get_includes()}
+    paths = {
+        str((ex.sdk / h).resolve()): (h, predicate)
+        for h, predicate in headers.items()
+        if (ex.sdk / h).resolve() in reached
+    }
+    pending = list(ex.tu.cursor.get_children())
+    while pending:
+        cursor = pending.pop()
+        if cursor.kind in (K.LINKAGE_SPEC, K.NAMESPACE, K.UNEXPOSED_DECL):
+            pending.extend(cursor.get_children())
+        if not cursor.location.file:
+            continue
+        selected = paths.get(str(Path(cursor.location.file.name).resolve()))
+        if selected is None:
+            continue
+        header, predicate = selected
+        if cursor.kind == K.MACRO_DEFINITION and predicate(cursor.spelling):
+            tokens = [t.spelling for t in cursor.get_tokens()]
+            add(
+                ex,
+                {
+                    "id": f"boundary_constant:{cursor.spelling}",
+                    "kind": "boundary_constant",
+                    "name": cursor.spelling,
+                    "header": header,
+                    "line": cursor.location.line,
+                    "body": " ".join(tokens[1:]),
+                    "boundary": "input",
+                },
+            )
+        elif cursor.kind == K.ENUM_DECL:
+            for member in cursor.get_children():
+                if member.kind == K.ENUM_CONSTANT_DECL and predicate(member.spelling):
+                    add(
+                        ex,
+                        {
+                            "id": f"boundary_constant:{member.spelling}",
+                            "kind": "boundary_constant",
+                            "name": member.spelling,
+                            "header": header,
+                            "line": member.location.line,
+                            "value": member.enum_value,
+                            "boundary": "menu",
+                        },
+                    )
+
+
 def extract_variant(sdk: Path, variant: Variant, resource: str) -> Extraction:
     tu = parse(sdk, variant, resource)
     ex = Extraction(sdk=sdk, variant=variant, tu=tu)
@@ -782,6 +844,7 @@ def extract_variant(sdk: Path, variant: Variant, resource: str) -> Extraction:
     for header in closure:
         ex.conditions[header] = condition_map((sdk / header).read_text(encoding="utf-8"))
     visit(ex, tu.cursor)
+    boundary_constants(ex)
     for ident, entry in ex.forward.items():
         if ident not in ex.defined:
             add(ex, entry)
@@ -822,6 +885,8 @@ def classify(entry: dict[str, Any]) -> tuple[str, str]:
 
 
 def family(header: str) -> str:
+    if header.startswith("dep/include/"):
+        return "4 widgets/ui/app/componentlibrary"
     rel = header.removeprefix("include/")
     for name, prefixes in FAMILY_RULES:
         if any(rel == p or (p.endswith("/") and rel.startswith(p)) for p in prefixes):

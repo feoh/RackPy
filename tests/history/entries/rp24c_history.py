@@ -90,8 +90,24 @@ def run() -> None:
     history.undo()
     RESULT["append"] += [cables(), gathered.owned_by_rack]
 
-    # Python's own CableAdd and CableRemove against the real cable.
+    # Python's own actions against the real cable.
     cable_widget = rack.get_cable(7)
+    change = h.CableColorChange()
+    change.set_cable(cable_widget)
+    original_color = cable_widget.color
+    change.old_color = original_color
+    change.new_color = raw.nanovg.rgb(37, 83, 129)
+    change.redo()
+    changed = cable_widget.color
+    change.undo()
+    restored = cable_widget.color
+    RESULT["cable_color"] = [
+        change.cable_id == 7,
+        abs(change.new_color.r - 37 / 255) < 1e-5,
+        abs(change.old_color.g - original_color.g) < 1e-5,
+        abs(changed.r - 37 / 255) < 1e-5,
+        abs(restored.r - original_color.r) < 1e-5,
+    ]
     add = h.CableAdd()
     add.set_cable(cable_widget)
     RESULT["cable_add"] = [add.cable_id, add.output_module_id, add.input_module_id, add.is_cable(cable_widget)]

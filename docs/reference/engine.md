@@ -44,6 +44,9 @@ another plugin's model also returns an `EngineModule`, which Python owns
 (`in_engine` false) until `add_module`
 ([modules from other plugins](app.md#modules-from-other-plugins)).
 
+`get_num_modules()` returns the count; `has_module(module)` tests whether a
+module is in the engine.
+
 `reset_module`, `randomize_module` and `bypass_module` are Rack's: they send
 the module its event under the lock, without an undo step.
 `module_to_json`, `module_from_json`, `prepare_save_module` and
@@ -74,6 +77,7 @@ Rack deletes a module with its widget. RackPy follows that:
 ## The master module and timing
 
 The master module is the one whose audio clock steps the engine;
+`get_master_module()` returns its handle or `None`, and
 `set_master_module(None)` gives that back to Rack's own thread. Rack's
 `stepBlock` is for the master module alone, so `step_block(frames)` needs a
 RackPy module as the master: it then advances the engine by that many frames

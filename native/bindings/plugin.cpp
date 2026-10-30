@@ -61,8 +61,25 @@ struct Detached {
 	std::unique_ptr<plugin::Model> owned;
 };
 
+// Isolated Python-created plugins never enter Rack's registry. The main-thread registry keeps them alive
+// until explicit close or context shutdown, so Python GC on a worker thread cannot run Rack's destructor.
+struct OwnedPlugin {
+	std::unique_ptr<RackPlugin> owned = std::make_unique<RackPlugin>();
+	std::vector<std::shared_ptr<Detached>> models;
+	uint64_t generation;
+	explicit OwnedPlugin(uint64_t generation) : generation(generation) {}
+	void close() noexcept {
+		owned.reset();  // Rack's destructor clears every Model::plugin before models may be destroyed.
+		models.clear();
+	}
+};
+std::vector<std::shared_ptr<OwnedPlugin>> isolatedPlugins;
+uint64_t nextPluginGeneration = 1;
+bool isolatedCloseHooked = false;
+
 struct PluginHandle {
 	RackPlugin* plugin;
+	std::shared_ptr<OwnedPlugin> owned;
 };
 
 struct ModelHandle {
@@ -115,6 +132,13 @@ void checkModelJson(py::handle data) {
 			throw py::type_error(std::string("Model.from_json: \"") + key + "\" must be a bool");
 }
 
+std::shared_ptr<OwnedPlugin> isolatedPlugin(const RackPlugin* p) {
+	for (const auto& state : isolatedPlugins)
+		if (state->owned.get() == p)
+			return state;
+	return {};
+}
+
 bool pluginAlive(const RackPlugin* p) {
 	if (p && p == plugin::instance())
 		return true;
@@ -136,8 +160,8 @@ bool modelAlive(const RackModel* m) {
 
 RackPlugin& checked(const PluginHandle& h) {
 	runtime::requireMainThread("using a Rack plugin");
-	if (!pluginAlive(h.plugin))
-		throw runtime::StaleHandle("this plugin is no longer loaded");
+	if (h.owned ? !h.owned->owned : !pluginAlive(h.plugin))
+		throw runtime::StaleHandle("this plugin is no longer loaded or has been closed");
 	return *h.plugin;
 }
 
@@ -153,20 +177,36 @@ RackModel& checked(const ModelHandle& h) {
 py::object pluginObject(RackPlugin* p) {
 	if (!p)
 		return py::none();
-	return runtime::identity(p, 0, [&] { return py::cast(PluginHandle{p}); });
+	auto owned = isolatedPlugin(p);
+	return runtime::identity(p, owned ? owned->generation : 0, [&] { return py::cast(PluginHandle{p, owned}); });
 }
 
 py::object modelObjectInternal(RackModel* m) {
 	if (!m)
 		return py::none();
-	return runtime::identity(m, 0, [&] { return py::cast(ModelHandle{m, nullptr}); });
+	std::shared_ptr<Detached> detached;
+	for (const auto& state : isolatedPlugins)
+		for (const auto& model : state->models)
+			if (model->owned.get() == m)
+				detached = model;
+	return runtime::identity(m, 0, [&] { return py::cast(ModelHandle{m, detached}); });
 }
 
 /** Only this plugin's own models may change, as only a plugin's own code changes them in C++. */
 RackModel& ownModel(const ModelHandle& h, const char* field) {
 	RackModel& m = checked(h);
-	if (m.plugin && m.plugin != plugin::instance())
+	if (m.plugin && m.plugin != plugin::instance() && !isolatedPlugin(m.plugin))
 		throw runtime::Ownership(std::string("Model.") + field + " of another plugin's model is read-only");
+	return m;
+}
+
+/** A module or widget keeps a raw Model*: it may escape its Python handle. Only a model Rack owns
+can safely make one. Detached and staged models may be deleted when their handle or registration goes away. */
+RackModel& committedModel(const ModelHandle& h, const char* what) {
+	RackModel& m = checked(h);
+	if ((h.detached && h.detached->owned) || !m.plugin ||
+		std::find(m.plugin->models.begin(), m.plugin->models.end(), &m) == m.plugin->models.end())
+		throw runtime::Ownership(std::string(what) + " needs a committed model: detached or staged models can be deleted");
 	return m;
 }
 
@@ -185,6 +225,21 @@ void modelField(py::class_<ModelHandle>& cls, const char* name, Field RackModel:
 
 void addModel(const PluginHandle& h, ModelHandle& m) {
 	RackPlugin& p = checked(h);
+	if (h.owned) {
+		if (!m.detached || !m.detached->owned || m.model->plugin)
+			throw runtime::Ownership("an isolated plugin needs a detached model not attached elsewhere");
+		// Rack sets the back-pointer before allocating its list node. Restore it on allocation failure.
+		h.owned->models.reserve(h.owned->models.size() + 1);
+		try {
+			p.addModel(m.model);
+		}
+		catch (...) {
+			m.model->plugin = nullptr;
+			throw;
+		}
+		h.owned->models.push_back(m.detached);
+		return;
+	}
 	if (&p != plugin::instance())
 		throw runtime::Ownership("models can be added only to this plugin (rackpy.raw.plugin.plugin_instance())");
 	if (!m.detached || !m.detached->owned)
@@ -279,11 +334,35 @@ void bind_plugin(py::module_ raw) {
 	py::module_ mod = raw.def_submodule("plugin", "rack::plugin: plugins, models and createModel (RP-16A).");
 
 	py::class_<PluginHandle>(mod, "Plugin", py::is_final(),
-		"A loaded Rack plugin (rack::plugin::Plugin). Rack owns it for its whole run; fields come from its plugin.json.")
+		"A loaded Rack plugin, or an isolated Python-owned plugin closed explicitly on the main thread.")
+		.def(py::init([] {
+			runtime::requireMainThread("creating an isolated Rack plugin");
+			liveUi("creating an isolated Rack plugin");
+			if (!isolatedCloseHooked) {
+				runtime::onContextClosing([] {
+					for (auto& p : isolatedPlugins)
+						p->close();
+					isolatedPlugins.clear();
+					isolatedCloseHooked = false;
+				});
+				isolatedCloseHooked = true;
+			}
+			auto state = std::make_shared<OwnedPlugin>(nextPluginGeneration++);
+			auto* p = state->owned.get();
+			isolatedPlugins.push_back(state);
+			return PluginHandle{p, std::move(state)};
+		}))
 		.def_property_readonly("alive", [](const PluginHandle& h) {
 			runtime::requireMainThread("using a Rack plugin");
-			return pluginAlive(h.plugin);
+			return h.owned ? (bool) h.owned->owned : pluginAlive(h.plugin);
 		})
+		.def("close", [](PluginHandle& h) {
+			runtime::requireMainThread("closing an isolated Rack plugin");
+			if (!h.owned)
+				throw runtime::Ownership("Rack owns loaded plugins; Python cannot close them");
+			h.owned->close();
+			isolatedPlugins.erase(std::remove(isolatedPlugins.begin(), isolatedPlugins.end(), h.owned), isolatedPlugins.end());
+		}, "Destroy an isolated plugin once; its attached models survive while their handles do.")
 		.def_property_readonly("slug", [](const PluginHandle& h) { return checked(h).slug; })
 		.def_property_readonly("name", [](const PluginHandle& h) { return checked(h).name; })
 		.def_property_readonly("version", [](const PluginHandle& h) { return checked(h).version; })
@@ -316,9 +395,15 @@ void bind_plugin(py::module_ raw) {
 					out.append(modelObjectInternal(m.get()));
 			return py::tuple(out);
 		}, "A snapshot of the plugin's models; while this plugin initializes, also the ones its entry module added.")
-		.def("add_model", &addModel, py::arg("model"),
-			"Rack's Plugin::addModel, for this plugin only and only while it initializes. The models must match "
-			"plugin.json's \"modules\" when initialization ends, or none is added.")
+		.def("add_model", [](py::object self, ModelHandle& model) {
+			auto& h = self.cast<PluginHandle&>();
+			if (h.owned) {
+				RackPlugin& p = checked(h);
+				runtime::identity(&p, h.owned->generation, [&] { return self; });
+			}
+			addModel(h, model);
+		}, py::arg("model"),
+			"Attach a detached model to an isolated plugin, or stage a model in this plugin while it initializes.")
 		.def("get_model", [](const PluginHandle& h, const std::string& slug) {
 			RackPlugin& p = checked(h);
 			if (&p == plugin::instance())
@@ -344,7 +429,7 @@ void bind_plugin(py::module_ raw) {
 		.def_property("slug", [](const ModelHandle& h) { return checked(h).slug; },
 			[](const ModelHandle& h, std::string slug) {
 				RackModel& m = checked(h);
-				if (!h.detached || !h.detached->owned)
+				if (!h.detached || !h.detached->owned || m.plugin)
 					throw runtime::Ownership("a model's slug cannot change once it is added: Rack and patches look models up by it");
 				m.slug = std::move(slug);
 			}, "Writable only before the model is added.")
@@ -367,7 +452,7 @@ void bind_plugin(py::module_ raw) {
 		.def("set_favorite", [](const ModelHandle& h, bool favorite) { addedModel(h, "set_favorite").setFavorite(favorite); },
 			py::arg("favorite"))
 		.def("create_module", [](const ModelHandle& h) {
-			RackModel& model = checked(h);
+			RackModel& model = committedModel(h, "Model.create_module");
 			auto* m = dynamic_cast<plugin::Model*>(&model);
 			if (!m) {  // another plugin's model: its own C++ code makes the module
 				runtime::requireMainThread("creating a module");
@@ -389,7 +474,7 @@ void bind_plugin(py::module_ raw) {
 		}, "Rack's Model::createModule for a RackPy model: a new module of it, which Python owns (Rack's own calls "
 			"hand theirs to its engine).")
 		.def("create_module_widget", [](const ModelHandle& h, py::object module) {
-			RackModel& model = checked(h);
+			RackModel& model = committedModel(h, "Model.create_module_widget");
 			auto* m = dynamic_cast<plugin::Model*>(&model);
 			if (m && m->widgetFactory)
 				return widgets::createModuleWidgetForPython(*m->widgetFactory, *m, module);

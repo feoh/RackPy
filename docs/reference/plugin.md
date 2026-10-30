@@ -23,9 +23,21 @@ reason to change them. `handle` is the plugin library's handle as an opaque
 `LibraryHandle`, compared by identity (never an address), or `None` for Core,
 which is part of Rack. `models` is a tuple snapshot; `get_model(slug)` and
 `get_brand()` are Rack's methods. `add_model(model)` is Rack's
-`Plugin::addModel`, for this plugin only and only while it initializes; the
+`Plugin::addModel`, for this plugin only while it initializes; the
 models are added to Rack when initialization ends, all or none
 ([plugin.json](../how-to/plugins.md#pluginjson-lists-the-same-models)).
+
+`Plugin()` creates a separate, **isolated** Python-owned Rack plugin on the
+main thread. It is not registered with Rack and cannot be used to load a plugin
+or create modules. It can attach detached models with `add_model`; they remain
+owned and cannot be attached elsewhere. Call `close()` on the main thread when
+done. It invokes Rack's plugin destructor once, clears attached models' plugin
+back-pointers, and leaves any model held by Python alive. `close()` is
+idempotent; the plugin handle is then stale. Rack-owned plugins cannot be
+closed from Python. Dropping the Python plugin handle does not close it:
+RackPy retains isolated plugins until explicit close or Rack context shutdown,
+so garbage collection on another thread cannot destroy them. Failing to close
+many isolated plugins retains their models and factories until shutdown.
 
 (plugin-loader)=
 ## Rack's loader methods
@@ -54,14 +66,19 @@ added so far, and raises `ValueError` otherwise.
   for a browser preview ([module widgets](app.md#module-widgets)).
 - Without a widget factory, the module gets RackPy's plain panel, `hp` wide.
 
-The new `Model` belongs to Python until `add_model`.
+The new `Model` belongs to Python until it is committed to Rack. An isolated
+plugin retains attached models, which remain Python-owned.
 `Model.create_module()` and `Model.create_module_widget(module=None)` make a
-module or widget of a model, a RackPy model's or another plugin's, which
-Python then owns ([modules from other plugins](app.md#modules-from-other-plugins)).
+module or widget of a committed model, a RackPy model's or another plugin's,
+which Python then owns ([modules from other plugins](app.md#modules-from-other-plugins)).
+Detached models, models attached to isolated plugins, and models staged during
+plugin initialization cannot create modules or widgets (`OwnershipError`): those objects retain a raw model pointer,
+while a detached model can be deleted with its Python handle and a staged model
+can be deleted if registration fails. Wait until registration has committed.
 
 A `Model` has Rack's fields. `slug` can change only before the model is
 added: Rack and patches look models up by it. `plugin` is its plugin, or
-`None` before it is added. `name`, `description`, `manual_url`,
+`None` before it is added or after its isolated plugin is closed. `name`, `description`, `manual_url`,
 `modular_grid_url`, `hidden` and `tag_ids` come from `plugin.json` when the
 plugin finishes loading; this plugin may change its own models' values (as
 its C++ could), and another plugin's are read-only (`OwnershipError`).
@@ -115,7 +132,11 @@ stops. `settingsToJson` and `settingsFromJson` call the handlers set with
 `set_settings_handlers(to_json=None, from_json=None)`
 (`rackpy.plugin.Plugin.set_settings_handlers`); see
 [plugin-wide settings](../how-to/state.md#plugin-wide-settings). The loader
-forwards all four hooks to the host library (host ABI 2).
+forwards all four hooks to the host library (host ABI 2). Rack's separate
+`Plugin` destructor clears attached models' plugin pointers without deleting
+the models. RackPy currently exposes borrowed plugin views; a Python mapping
+and behavioral proof of that destructor remain open (RP-31D). The `destroy()`
+hook is not the destructor.
 
 Everything here is main-thread only (`ThreadError`) except the pure string
 functions `is_slug_valid`, `normalize_slug`, `asset.system` and `asset.user`,

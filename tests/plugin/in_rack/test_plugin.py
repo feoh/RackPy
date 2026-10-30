@@ -8,7 +8,7 @@ import pytest
 
 import rackpy.plugin
 from rackpy import raw
-from rackpy.errors import OwnershipError, ThreadError
+from rackpy.errors import OwnershipError, StaleHandleError, ThreadError
 from rackpy.raw import plugin as rp
 from rackpy.raw.engine import Module
 
@@ -19,11 +19,17 @@ def test_this_plugin_after_initialization() -> None:
     assert this.alive and this.slug == "RackPy" and this.version == "2.0.0"
     assert this.license == "GPL-3.0-or-later" and this.brand == "RackPy" == this.get_brand()
     assert this.source_url == "https://github.com/feoh/RackPy" and this.path.endswith("RackPy")
+    assert this.author == "RackPy contributors" and this.author_email == "test@example.invalid"
+    assert this.author_url == "https://example.invalid/author"
+    assert this.plugin_url == "https://example.invalid/plugin"
+    assert this.donate_url == "https://example.invalid/donate"
+    assert this.changelog_url == "https://example.invalid/changelog"
     assert isinstance(this.modified_timestamp, float)
     probe = this.get_model("RuntimeProbe")
     assert probe is not None and probe in this.models and probe is rp.get_model("RackPy", "RuntimeProbe")
     assert probe.plugin is this and probe.slug == "RuntimeProbe"
     assert probe.name == "Runtime probe" and probe.description == "RackPy test hook"  # from plugin.json
+    assert probe.modular_grid_url == "https://example.invalid/grid"
     assert probe.get_full_name() == "RackPy Runtime probe"
     assert probe.get_factory_preset_directory().endswith("presets/RuntimeProbe")
     assert "RackPy" in probe.get_user_preset_directory() and probe.get_manual_url() == this.manual_url
@@ -100,7 +106,10 @@ def test_plugin_and_model_main_thread_rule() -> None:
     this = rp.plugin_instance()
     probe = this.get_model("RuntimeProbe")
     assert probe is not None
+    isolated = rp.Plugin()
     actions: list[Callable[[], object]] = [
+        rp.Plugin,
+        isolated.close,
         lambda: this.slug,
         lambda: probe.name,
         rp.plugin_instance,
@@ -122,7 +131,108 @@ def test_plugin_and_model_main_thread_rule() -> None:
     thread = threading.Thread(target=worker)
     thread.start()
     thread.join()
+    isolated.close()
     assert len(errors) == len(actions) and all(isinstance(e, ThreadError) for e in errors)
+
+
+def _model_plugin(model: rp.Model) -> rp.Plugin | None:
+    return model.plugin
+
+
+def _plugin_alive(plugin: rp.Plugin) -> bool:
+    return plugin.alive
+
+
+def test_isolated_plugin_destruction_clears_model_backpointers() -> None:
+    import gc
+    import weakref
+
+    class Factory:
+        def __call__(self, module: Module) -> None:
+            pass
+
+    factory = Factory()
+    weak = weakref.ref(factory)
+    model = rp.create_model("Isolated", factory)
+    del factory
+    plugin = rp.Plugin()
+    assert _plugin_alive(plugin) and plugin not in rp.plugins
+    plugin.add_model(model)
+    assert model.plugin is plugin and plugin.get_model("Isolated") is model and plugin.models == (model,)
+    other = rp.Plugin()
+    with pytest.raises(OwnershipError, match="detached model"):
+        other.add_model(model)
+    other.close()
+    with pytest.raises(OwnershipError, match="committed model"):
+        model.create_module()
+    with pytest.raises(OwnershipError, match="committed model"):
+        model.create_module_widget()
+    with pytest.raises(OwnershipError):
+        model.slug = "Changed"
+    plugin.close()
+    plugin.close()  # idempotent: never run Rack's destructor twice
+    assert not _plugin_alive(plugin) and model.alive and _model_plugin(model) is None
+    with pytest.raises(StaleHandleError):
+        _ = plugin.models
+    replacement = rp.Plugin()
+    replacement.add_model(model)
+    assert _model_plugin(model) is replacement and _model_plugin(model) is not plugin
+    replacement.close()
+    assert _model_plugin(model) is None
+    assert weak() is not None
+    del model
+    gc.collect()
+    assert weak() is None
+    with pytest.raises(OwnershipError, match="Rack owns"):
+        rp.plugin_instance().close()
+
+
+def test_isolated_plugin_survives_dropped_handles_until_close() -> None:
+    import gc
+    import weakref
+
+    class Factory:
+        def __call__(self, module: Module) -> None:
+            pass
+
+    factory = Factory()
+    weak = weakref.ref(factory)
+    model = rp.create_model("Retained", factory)
+    del factory
+    plugin = rp.Plugin()
+    plugin.add_model(model)
+    del model
+    gc.collect()
+    assert weak() is not None
+    recovered_model = plugin.get_model("Retained")
+    assert recovered_model is not None and recovered_model.alive
+    del plugin
+    gc.collect()
+    recovered = recovered_model.plugin
+    assert recovered is not None and recovered.alive
+    recovered.close()
+    assert _model_plugin(recovered_model) is None and weak() is not None
+    del recovered_model
+    gc.collect()
+    assert weak() is None
+
+
+def test_unclosed_isolated_plugin_is_cleaned_up_at_context_shutdown() -> None:
+    # The outer host test requires Rack to exit cleanly after this test returns.
+    plugin = rp.Plugin()
+    plugin.add_model(rp.create_model("Shutdown", lambda module: None))
+    assert plugin.alive
+    # Deliberately leave it open; the main-thread context shutdown hook owns cleanup.
+
+
+def test_detached_model_cannot_make_objects_with_dangling_model_pointers() -> None:
+    model = rp.create_model("Unregistered", lambda module: None)
+    assert model.plugin is None
+    with pytest.raises(OwnershipError, match="committed model"):
+        model.create_module()
+    with pytest.raises(OwnershipError, match="committed model"):
+        model.create_module_widget()
+    assert model.alive
 
 
 def test_a_detached_model_dies_with_its_handle() -> None:

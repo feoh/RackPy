@@ -24,10 +24,10 @@ from rackpy.raw import widget as w
 from rackpy.raw.engine import Module
 from rackpy.raw.math import Rect, Vec
 
-GLFW_RELEASE, GLFW_PRESS = 0, 1
-GLFW_MOUSE_BUTTON_LEFT, GLFW_MOUSE_BUTTON_4 = 0, 3
-GLFW_KEY_0, GLFW_KEY_LEFT, GLFW_KEY_PAGE_DOWN = 48, 263, 267
-RACK_MOD_CTRL = 2  # GLFW_MOD_CONTROL on Linux
+GLFW_RELEASE, GLFW_PRESS = raw.glfw.GLFW_RELEASE, raw.glfw.GLFW_PRESS
+GLFW_MOUSE_BUTTON_LEFT, GLFW_MOUSE_BUTTON_4 = raw.glfw.GLFW_MOUSE_BUTTON_LEFT, raw.glfw.GLFW_MOUSE_BUTTON_4
+GLFW_KEY_0, GLFW_KEY_LEFT, GLFW_KEY_PAGE_DOWN = raw.glfw.GLFW_KEY_0, raw.glfw.GLFW_KEY_LEFT, raw.glfw.GLFW_KEY_PAGE_DOWN
+RACK_MOD_CTRL = raw.macros.RACK_MOD_CTRL
 
 
 def scene() -> app.HostScene:

@@ -65,7 +65,10 @@ def test_every_record_is_accounted_for() -> None:
         "7 (RP-29 audio/MIDI), 8 (RP-30 services) and 9 (RP-24C history) are bound so far"
     )
     counted = [e for e in inputs.index.values() if bm.counted(e)]
-    assert len(manifest["entries"]) == len(counted) == 3058
+    # RP-31H adds 143 GLFW and 10 Blendish boundary constants to the original 3058.
+    assert sum(e["kind"] == "boundary_constant" for e in counted) == 153
+    assert sum(e["kind"] == "conditional_declaration" for e in counted) == 13
+    assert len(manifest["entries"]) == len(counted) == 3224
     excluded = [r for r in manifest["entries"] if r["status"] == "excluded_internal"]
     assert len(excluded) == len(inputs.exclusions) == 111
 

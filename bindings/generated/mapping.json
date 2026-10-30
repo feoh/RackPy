@@ -548,6 +548,1077 @@
     },
     {
       "facade": null,
+      "id": "boundary_constant:BND_CORNER_ALL",
+      "kind": "constant",
+      "raw": "rackpy.raw.blendish.BND_CORNER_ALL",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:BND_CORNER_DOWN",
+      "kind": "constant",
+      "raw": "rackpy.raw.blendish.BND_CORNER_DOWN",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:BND_CORNER_DOWN_LEFT",
+      "kind": "constant",
+      "raw": "rackpy.raw.blendish.BND_CORNER_DOWN_LEFT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:BND_CORNER_DOWN_RIGHT",
+      "kind": "constant",
+      "raw": "rackpy.raw.blendish.BND_CORNER_DOWN_RIGHT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:BND_CORNER_LEFT",
+      "kind": "constant",
+      "raw": "rackpy.raw.blendish.BND_CORNER_LEFT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:BND_CORNER_NONE",
+      "kind": "constant",
+      "raw": "rackpy.raw.blendish.BND_CORNER_NONE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:BND_CORNER_RIGHT",
+      "kind": "constant",
+      "raw": "rackpy.raw.blendish.BND_CORNER_RIGHT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:BND_CORNER_TOP",
+      "kind": "constant",
+      "raw": "rackpy.raw.blendish.BND_CORNER_TOP",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:BND_CORNER_TOP_LEFT",
+      "kind": "constant",
+      "raw": "rackpy.raw.blendish.BND_CORNER_TOP_LEFT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:BND_CORNER_TOP_RIGHT",
+      "kind": "constant",
+      "raw": "rackpy.raw.blendish.BND_CORNER_TOP_RIGHT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_0",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_0",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_1",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_1",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_2",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_2",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_3",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_3",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_4",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_4",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_5",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_5",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_6",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_6",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_7",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_7",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_8",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_8",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_9",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_9",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_A",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_A",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_APOSTROPHE",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_APOSTROPHE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_B",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_B",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_BACKSLASH",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_BACKSLASH",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_BACKSPACE",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_BACKSPACE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_C",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_C",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_CAPS_LOCK",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_CAPS_LOCK",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_COMMA",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_COMMA",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_D",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_D",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_DELETE",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_DELETE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_DOWN",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_DOWN",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_E",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_E",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_END",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_END",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_ENTER",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_ENTER",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_EQUAL",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_EQUAL",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_ESCAPE",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_ESCAPE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F1",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F1",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F10",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F10",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F11",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F11",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F12",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F12",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F13",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F13",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F14",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F14",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F15",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F15",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F16",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F16",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F17",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F17",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F18",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F18",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F19",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F19",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F2",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F2",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F20",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F20",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F21",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F21",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F22",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F22",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F23",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F23",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F24",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F24",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F25",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F25",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F3",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F3",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F4",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F4",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F5",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F5",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F6",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F6",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F7",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F7",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F8",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F8",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_F9",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_F9",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_G",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_G",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_GRAVE_ACCENT",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_GRAVE_ACCENT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_H",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_H",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_HOME",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_HOME",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_I",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_I",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_INSERT",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_INSERT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_J",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_J",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_K",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_K",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_0",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_0",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_1",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_1",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_2",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_2",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_3",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_3",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_4",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_4",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_5",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_5",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_6",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_6",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_7",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_7",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_8",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_8",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_9",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_9",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_ADD",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_ADD",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_DECIMAL",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_DECIMAL",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_DIVIDE",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_DIVIDE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_ENTER",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_ENTER",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_EQUAL",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_EQUAL",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_MULTIPLY",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_MULTIPLY",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_KP_SUBTRACT",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_KP_SUBTRACT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_L",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_L",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_LAST",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_LAST",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_LEFT",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_LEFT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_LEFT_ALT",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_LEFT_ALT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_LEFT_BRACKET",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_LEFT_BRACKET",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_LEFT_CONTROL",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_LEFT_CONTROL",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_LEFT_SHIFT",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_LEFT_SHIFT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_LEFT_SUPER",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_LEFT_SUPER",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_M",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_M",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_MENU",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_MENU",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_MINUS",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_MINUS",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_N",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_N",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_NUM_LOCK",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_NUM_LOCK",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_O",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_O",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_P",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_P",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_PAGE_DOWN",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_PAGE_DOWN",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_PAGE_UP",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_PAGE_UP",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_PAUSE",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_PAUSE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_PERIOD",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_PERIOD",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_PRINT_SCREEN",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_PRINT_SCREEN",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_Q",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_Q",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_R",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_R",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_RIGHT",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_RIGHT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_RIGHT_ALT",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_RIGHT_ALT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_RIGHT_BRACKET",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_RIGHT_BRACKET",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_RIGHT_CONTROL",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_RIGHT_CONTROL",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_RIGHT_SHIFT",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_RIGHT_SHIFT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_RIGHT_SUPER",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_RIGHT_SUPER",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_S",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_S",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_SCROLL_LOCK",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_SCROLL_LOCK",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_SEMICOLON",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_SEMICOLON",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_SLASH",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_SLASH",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_SPACE",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_SPACE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_T",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_T",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_TAB",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_TAB",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_U",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_U",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_UNKNOWN",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_UNKNOWN",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_UP",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_UP",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_V",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_V",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_W",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_W",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_WORLD_1",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_WORLD_1",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_WORLD_2",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_WORLD_2",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_X",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_X",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_Y",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_Y",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_KEY_Z",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_KEY_Z",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOD_ALT",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOD_ALT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOD_CAPS_LOCK",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOD_CAPS_LOCK",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOD_CONTROL",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOD_CONTROL",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOD_NUM_LOCK",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOD_NUM_LOCK",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOD_SHIFT",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOD_SHIFT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOD_SUPER",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOD_SUPER",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOUSE_BUTTON_1",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOUSE_BUTTON_1",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOUSE_BUTTON_2",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOUSE_BUTTON_2",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOUSE_BUTTON_3",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOUSE_BUTTON_3",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOUSE_BUTTON_4",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOUSE_BUTTON_4",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOUSE_BUTTON_5",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOUSE_BUTTON_5",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOUSE_BUTTON_6",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOUSE_BUTTON_6",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOUSE_BUTTON_7",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOUSE_BUTTON_7",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOUSE_BUTTON_8",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOUSE_BUTTON_8",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOUSE_BUTTON_LAST",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOUSE_BUTTON_LAST",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOUSE_BUTTON_LEFT",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOUSE_BUTTON_LEFT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOUSE_BUTTON_MIDDLE",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOUSE_BUTTON_MIDDLE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_MOUSE_BUTTON_RIGHT",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_MOUSE_BUTTON_RIGHT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_PRESS",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_PRESS",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_RELEASE",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_RELEASE",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
+      "id": "boundary_constant:GLFW_REPEAT",
+      "kind": "constant",
+      "raw": "rackpy.raw.glfw.GLFW_REPEAT",
+      "status": "implemented"
+    },
+    {
+      "facade": null,
       "id": "class_template:rack::DeferWrapper<type>",
       "kind": "class",
       "raw": "rackpy.raw.DeferWrapper",
@@ -2593,8 +3664,8 @@
     {
       "facade": null,
       "id": "destructor:rack::plugin::Plugin::~Plugin()",
-      "kind": "class",
-      "raw": "rackpy.raw.plugin.Plugin",
+      "kind": "method",
+      "raw": "rackpy.raw.plugin.Plugin.close",
       "status": "implemented"
     },
     {
@@ -20630,6 +21701,6 @@
       "status": "implemented"
     }
   ],
-  "inputs": "3068de07d83367c5",
+  "inputs": "dd14e25c0c898ab8",
   "note": "Generated by bin/generate_bindings.py from bindings/manifest.json; do not edit."
 }

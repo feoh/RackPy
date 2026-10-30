@@ -113,6 +113,9 @@ def test_random() -> None:
     assert shared is rr.local() or shared.state == rr.local().state  # Rack's one generator
     for _ in range(20):
         assert 0.0 <= rr.uniform() < 1.0 and 0 <= rr.get_uint8() <= 255 and 0 <= rr.u32() < 2**32
+        assert 0.0 <= rr.get_float() < 1.0 and 0.0 <= rr.get_double() < 1.0
+        assert 0 <= rr.get_uint16() < 2**16 and 0 <= rr.get_uint32() < 2**32
+        assert isinstance(rr.get_bool(), bool) and 0 <= rr.u64() < 2**64
     assert isinstance(rr.normal(), float) and isinstance(rr.get("bool"), bool) and 0 <= rr.get() < 2**64
     with pytest.raises(ValueError, match="takes"):
         rr.get("int")
@@ -140,9 +143,29 @@ def test_random_get_signed_types() -> None:
         generator.state = saved
 
 
+def test_logging_macro_levels(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[tuple[object, ...]] = []
+    monkeypatch.setattr(logger, "log", lambda *args: calls.append(args))
+    for macro in (macros.DEBUG, macros.INFO, macros.WARN, macros.FATAL):
+        macro("level %d", 7)
+    assert [call[0] for call in calls] == [
+        logger.Level.DEBUG_LEVEL,
+        logger.Level.INFO_LEVEL,
+        logger.Level.WARN_LEVEL,
+        logger.Level.FATAL_LEVEL,
+    ]
+    assert all(
+        str(call[1]).endswith("test_utilities.py") and call[3:] == ("test_logging_macro_levels", "level %d", 7)
+        for call in calls
+    )
+
+
 def test_logging() -> None:
     logger.log(logger.Level.INFO_LEVEL, "rackpy_test.py", 12, "test_logging", "rackpy-log %s %d", "marker", 5)
+    macros.DEBUG("rackpy-macro %s", "debugged")
+    macros.INFO("rackpy-macro %s", "informed")
     macros.WARN("rackpy-macro %s", "warned")
+    macros.FATAL("rackpy-macro %s", "fatal")
     assert isinstance(logger.get_log_path(), str)
     with pytest.raises(TypeError):
         logger.log(logger.Level.INFO_LEVEL, "f", 1, "g", "%d")

@@ -212,7 +212,11 @@ in this file.
     advertised platform. The SSE4.2 and SIMDe implementations of `simd::` must
     behave the same and are tested on both.
 13. **External boundary types.** For each Rack declaration whose signature uses
-    a dependency type, the necessary semantics are mapped: `json_t` as Python
+    a dependency type, the necessary semantics are mapped. RP-31H applies this
+    existing owner-approved policy to the GLFW key, mouse-button, modifier and
+    action constants referenced by event APIs and Blendish's `BND_CORNER_*`
+    menu flags; these dependency constants are counted boundary entries, not a
+    wholesale inclusion of dependency APIs. The necessary semantics include: `json_t` as Python
     values (see [architecture](architecture.md#exceptions-and-state)),
     `NVGcontext` and `NVGcolor` drawing scoped to draw arguments,
     `NSVGimage` through `window::Svg`, `GLFWwindow` in `window::Window` as an

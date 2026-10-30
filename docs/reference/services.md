@@ -61,7 +61,8 @@ The rest are Rack's functions under snake-case names:
 `Xoroshiro128Plus` is Rack's generator, as a value. It is unseeded at first
 (it returns zeros), or seeded with `Xoroshiro128Plus(s0, s1=0)` or
 `seed()`, which draw one number as Rack's do. Calling it returns the next
-64-bit number, and `state` is its two state words. `rotl(x, k)` needs `k`
+64-bit number, `state` is its two state words, and `is_seeded()` reports
+whether those words are nonzero. `result_type` is Python `int`. `rotl(x, k)` needs `k`
 from 1 to 63: Rack's shift by 64 for `k` 0 is undefined in C++.
 
 `local()` is Rack's own generator: one for the whole process, kept until

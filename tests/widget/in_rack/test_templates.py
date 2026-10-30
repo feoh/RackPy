@@ -6,14 +6,16 @@ from typing import Any
 import pytest
 
 from rackpy.errors import OwnershipError
+from rackpy.raw import macros
 from rackpy.raw import widget as w
 from rackpy.raw.math import Rect, Vec
 
-# GLFW's values; RACK_MOD_* are not bound yet.
+# Rack's modifier aliases share GLFW's values on the Linux host used here.
 GLFW_MOD_SHIFT, GLFW_MOD_CONTROL = 1, 2
 
 
 def check_key_names() -> None:
+    assert macros.RACK_MOD_ALT == 4 and macros.RACK_MOD_SHIFT_NAME == "Shift"
     assert w.get_key_name(65) == "A"  # GLFW_KEY_A is ASCII
     assert w.get_key_name(10) == ""  # control codes have no name
     assert w.get_key_command_name(65, 0) == "A"

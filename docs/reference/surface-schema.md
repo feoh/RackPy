@@ -2,7 +2,8 @@
 
 [`upstream/api-surface.json`](../../upstream/api-surface.json) is the
 denominator for API coverage: every declaration and macro that a translation
-unit containing only `#include <rack.hpp>` can see in Rack's own headers. It is
+unit containing only `#include <rack.hpp>` can see in Rack's own headers, plus
+selected dependency constants needed at Rack's event and menu boundary. It is
 an **inventory, not a coverage report**. Whether RackPy binds an entry is
 recorded elsewhere (RP-11), keyed by the IDs defined here.
 
@@ -33,7 +34,9 @@ The Python bindings are pinned to `clang==21.1.7`.
 3. Visit every cursor whose location is under the SDK's `include/` directory,
    following namespaces, `extern "C"` blocks, records, templates, friends and
    anonymous unions. Dependency headers (`dep/include`) and system headers are
-   not inventoried; types they declare are recorded where Rack uses them.
+   not generally inventoried; types they declare are recorded where Rack uses
+   them. The selected GLFW input and Blendish corner constants are counted as
+   `boundary_constant` entries when their headers are reached (policy 13).
 4. Record every macro defined in a Rack header, and every range the
    preprocessor skipped, as a conditional block.
 5. Repeat for each **variant** and merge by ID.
@@ -61,6 +64,28 @@ Two runs with the same SDK and toolchain are byte-identical (tested).
 | `summary` | Counts by classification, kind and family |
 | `entries` | The declarations |
 
+## Conditional branch accountability
+
+The manifest checker derives a separate provisional record for every lexical
+`macro NAME` or `function NAME` in `conditional_blocks`, even when an active
+entry with the same name exists. Its ID is
+`conditional:<header>:<first line>:<kind> <name>`; it identifies a branch,
+not a fully parsed declaration. The branch's content hash, condition and
+`skipped_in` variants are fingerprinted, so changed branch contents reset a
+review. These records are additional conservative placeholders, not a claim that
+each name is a supported public API: the scanner cannot establish signatures,
+visibility, or whether an internal declaration should be excluded. Actual
+platform inventories must reconcile each placeholder with its semantic entry;
+until then a placeholder cannot be implemented, verified or excluded.
+
+For a successful extraction, a branch listed as skipped is absent on that
+exact variant; all other availability is `not inventoried`. Thus the Linux
+inventory proves the recorded skipped branches absent on lin-x64; it does not
+prove anything about their macOS or Windows availability. Unresolved availability
+blocks release on the affected platform. RP-40/RP-41 supply the deferred native
+platform evidence. The checker requires the conditional-block list and rejects
+missing placeholder records rather than silently shrinking the denominator.
+
 ## Entry IDs
 
 An ID is `<kind>:<qualified name><template part>(<parameters>)<qualifiers>`.
@@ -78,6 +103,8 @@ specialization:rack::simd::Vector<float, 4>
 field:rack::engine::Port::voltages
 enumerator:rack::dsp::BooleanTrigger::Event::TRIGGERED
 macro:APP
+boundary_constant:GLFW_KEY_A
+boundary_constant:BND_CORNER_TOP
 opaque_record:rack::patch::Manager
 import:rack:using namespace math
 import:rack::simd:using math::clamp

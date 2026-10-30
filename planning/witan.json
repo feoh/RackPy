@@ -81,6 +81,7 @@
     "RP-31J": "tk-rackpy-31j-native-production-i-o-paths-for-audio-8ba798",
     "RP-31K": "tk-rackpy-31k-settle-template-weak-pointer-and-lock-e4976c",
     "RP-31L": "tk-rackpy-31l-note-typing-and-small-test-cleanups-f-df6aa2",
+    "RP-31M": "tk-rackpy-31m-faithfully-map-and-prove-plugin-destr-37b2a4",
     "RP-25A": "tk-rackpy-25a-checked-detached-native-widget-tree-o-79a09d",
     "RP-25B": "tk-rackpy-25b-checked-widget-geometry-and-spatial-q-8df27f",
     "RP-25C": "tk-rackpy-25c-safe-widget-sibling-insertion-b4de86",
