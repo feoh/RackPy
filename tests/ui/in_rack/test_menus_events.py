@@ -258,28 +258,39 @@ def test_menu_helpers_build_working_menus() -> None:
     class Tinted(ui.MenuItem):
         pass
 
-    menu = raw.create_menu()
+    class CustomMenu(ui.Menu):
+        pass
+
+    class CustomLabel(ui.MenuLabel):
+        pass
+
+    menu = raw.create_menu(CustomMenu)
+    assert isinstance(menu, CustomMenu)
     overlay = menu.parent
     assert isinstance(overlay, ui.MenuOverlay)
     try:
-        label: ui.MenuLabel = raw.create_menu_label("Header")
+        label: ui.MenuLabel = raw.create_menu_label("Header", label_type=CustomLabel)
         plain = raw.create_menu_item("Plain", "R", item_type=Tinted)
         act = raw.create_menu_item("Act", "", lambda: calls.append("act"))
-        check = raw.create_check_menu_item("Check", "x", lambda: True, lambda: calls.append("check"))
+        check = raw.create_check_menu_item("Check", "x", lambda: True, lambda: calls.append("check"), item_type=Tinted)
 
         def set_loop(value: bool) -> None:
             state["loop"] = value
 
-        toggle = raw.create_bool_menu_item("Loop", "", lambda: bool(state["loop"]), set_loop)
+        toggle = raw.create_bool_menu_item("Loop", "", lambda: bool(state["loop"]), set_loop, item_type=Tinted)
         pointer = raw.create_bool_ptr_menu_item("Flag", "", flag)
-        submenu = raw.create_submenu_item("More", "", lambda m: m.add_child(raw.create_menu_item("Inner", "")))
+        submenu = raw.create_submenu_item(
+            "More", "", lambda m: m.add_child(raw.create_menu_item("Inner", "")), item_type=Tinted
+        )
         index = raw.create_index_submenu_item(
-            "Mode", ["A", "B", "C"], lambda: int(state["index"]), lambda i: state.update(index=i)
+            "Mode", ["A", "B", "C"], lambda: int(state["index"]), lambda i: state.update(index=i), item_type=Tinted
         )
         index_ptr = raw.create_index_ptr_submenu_item("Ptr", ["X", "Y"], mode)
         for item in (label, plain, act, check, toggle, pointer, submenu, index, index_ptr):
             menu.add_child(item)
-        assert isinstance(plain, Tinted) and plain.right_text == "R" and label.text == "Header"
+        assert isinstance(label, CustomLabel) and label.text == "Header"
+        assert all(isinstance(item, Tinted) for item in (plain, check, toggle, submenu, index))
+        assert plain.right_text == "R"
         menu.step()  # Rack's step: check marks and index labels update
         assert check.right_text == "x  " + ui.CHECKMARK_STRING and index.right_text == "A  " + ui.RIGHT_ARROW
         assert submenu.right_text == ui.RIGHT_ARROW

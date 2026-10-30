@@ -68,7 +68,8 @@ The templates:
 - `TGrayModuleLightWidget` (`GrayModuleLightWidget`).
 - The colour templates: `TWhiteLight`, `TRedLight`, `TGreenLight`,
   `TBlueLight`, `TYellowLight`, `TGreenRedLight` and `TRedGreenBlueLight`,
-  each with its alias (`WhiteLight`, ...).
+  each with its alias (`WhiteLight`, ...). Their constructors add the named
+  scheme colours to the selected base, including a Python subclass base.
 - `LargeLight`, `MediumLight`, `SmallLight` and `TinyLight` (Rack's SVGs).
 - `LargeSimpleLight`, `MediumSimpleLight`, `SmallSimpleLight` and
   `TinySimpleLight` (sizes in mm).

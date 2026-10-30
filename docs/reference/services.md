@@ -179,7 +179,11 @@ Rack writes the settings to `settings_path` when it quits.
   least 1. Rack's engine reads `thread_count` at each block.
 - **Copies.** `plugin_settings` (Rack's `pluginSettingsJ`) is Python data;
   assign it to replace Rack's. `module_infos` and `module_whitelist` are
-  copies too, and assigning one replaces Rack's whole mapping.
+  copies too, and assigning one replaces Rack's whole mapping. Reading
+  `cable_colors`, `cable_labels` or `recent_patch_paths` returns a list copy;
+  changing the list or its colors does not change Rack. Assign a list back
+  to replace the setting. `PluginWhitelist.module_slugs` similarly returns
+  a set copy; assign a set to replace it.
 - **One module.** `get_module_info(plugin_slug, module_slug)` returns a
   `ModuleInfoView`, which writes straight to Rack's entry, or `None`.
   `is_module_whitelisted` and `reset_cables` are Rack's functions.

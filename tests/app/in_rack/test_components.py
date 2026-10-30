@@ -114,6 +114,42 @@ def test_racks_components_load_racks_artwork() -> None:
             widget.close()
 
 
+def test_base_knob_constructors_build_racks_layers() -> None:
+    for cls in (cl.RoundKnob, cl.Davies1900hKnob, cl.Rogan):
+        knob = cls()
+        try:
+            assert type(knob) is cls
+            assert knob.min_angle == pytest.approx(-0.83 * math.pi)
+            assert knob.max_angle == pytest.approx(0.83 * math.pi)
+            assert isinstance(knob.bg, w.HostSvgWidget) and knob.bg.parent is knob.fb
+            assert knob.bg.svg is None
+            if isinstance(knob, cl.Rogan):
+                assert isinstance(knob.fg, w.HostSvgWidget) and knob.fg.parent is knob.fb
+                assert knob.fg.svg is None
+        finally:
+            knob.close()
+
+
+def test_scheme_colors_match_the_pinned_sdk() -> None:
+    # componentlibrary.hpp defines distinct RGBA values, not interchangeable aliases.
+    expected = {
+        "BLACK_TRANSPARENT": (0x00, 0x00, 0x00, 0x00),
+        "BLACK": (0x00, 0x00, 0x00, 0xFF),
+        "WHITE": (0xFF, 0xFF, 0xFF, 0xFF),
+        "RED": (0xED, 0x2C, 0x24, 0xFF),
+        "ORANGE": (0xF2, 0xB1, 0x20, 0xFF),
+        "YELLOW": (0xFF, 0xD7, 0x14, 0xFF),
+        "GREEN": (0x90, 0xC7, 0x3E, 0xFF),
+        "CYAN": (0x22, 0xE6, 0xEF, 0xFF),
+        "BLUE": (0x29, 0xB2, 0xEF, 0xFF),
+        "PURPLE": (0xD5, 0x2B, 0xED, 0xFF),
+        "LIGHT_GRAY": (0xE6, 0xE6, 0xE6, 0xFF),
+        "DARK_GRAY": (0x17, 0x17, 0x17, 0xFF),
+    }
+    for name, rgba in expected.items():
+        assert getattr(cl, f"SCHEME_{name}") == nvg.rgba(*rgba), name
+
+
 def test_light_templates_are_specializations() -> None:
     red = cl.RedLight()
     assert red.base_colors == [cl.SCHEME_RED] and red.bg_color == nvg.rgba(0x33, 0x33, 0x33, 0xFF)
@@ -130,12 +166,23 @@ def test_light_templates_are_specializations() -> None:
     assert isinstance(lamp, cl.RedLight)
     assert cl.LargeLight[cl.GreenLight]().box.size.x > lamp.box.size.x > cl.TinyLight[cl.BlueLight]().box.size.x
     assert cl.SmallSimpleLight[cl.YellowLight]().box.size == mm2px(Vec(2, 2))
+    assert cl.TinySimpleLight[cl.BlueLight]().box.size == mm2px(Vec(1, 1))
+    assert cl.LargeSimpleLight[cl.WhiteLight]().box.size == mm2px(Vec(5, 5))
+    small = cl.SmallLight[cl.RedLight]()
+    assert small.sw.svg is not None and small.box.size.x < lamp.box.size.x
+    assert cl.BlueLight().base_colors == [cl.SCHEME_BLUE]
+    assert cl.YellowLight().base_colors == [cl.SCHEME_YELLOW]
+    assert cl.WhiteLight().base_colors == [cl.SCHEME_WHITE]
+    assert cl.SvgLight is cl.TSvgLight.default()
     assert cl.MediumSimpleLight.default()().box.size == mm2px(Vec(3, 3))
     assert cl.PB61303Light[cl.WhiteLight]().box.size == mm2px(Vec(9, 9))
     bezel_light = cl.VCVBezelLight[cl.WhiteLight]()
     assert bezel_light.box.size == Vec(17.545, 17.545) and bezel_light.bg_color.a == 0
     # Rack's alias templates give the aliased specializations themselves.
     assert cl.LEDBezelLight[cl.WhiteLight] is cl.VCVBezelLight[cl.WhiteLight]
+    assert cl.LEDLightBezel[cl.RedLight] is cl.VCVLightBezel[cl.RedLight]
+    assert cl.LEDSliderLight[cl.BlueLight] is cl.VCVSliderLight[cl.BlueLight]
+    assert cl.LEDLightSlider[cl.GreenLight] is cl.VCVLightSlider[cl.GreenLight]
     assert cl.VCVLightButton[cl.RedLight] is cl.LightButton[cl.VCVButton, cl.RedLight] is cl.LEDLightButton[cl.RedLight]
     assert isinstance(lamp, cl.MediumLight) and isinstance(lamp, cl.TSvgLight)  # every specialization is its template's
     with pytest.raises(TypeError, match="class template"):
@@ -143,6 +190,23 @@ def test_light_templates_are_specializations() -> None:
     for bad in ((), "x", (cl.RedLight, cl.RedLight)):
         with pytest.raises(TypeError):
             cl.MediumLight[bad]  # type: ignore[index]
+
+
+def test_colour_light_templates_apply_to_a_custom_base() -> None:
+    class CustomBase(app.ModuleLightWidget):
+        pass
+
+    for template, color in (
+        (cl.TBlueLight, cl.SCHEME_BLUE),
+        (cl.TWhiteLight, cl.SCHEME_WHITE),
+        (cl.TYellowLight, cl.SCHEME_YELLOW),
+    ):
+        light = template[CustomBase]()
+        try:
+            assert isinstance(light, CustomBase)
+            assert light.base_colors == [color]
+        finally:
+            light.close()
 
 
 class Rack(w.Widget):
@@ -170,6 +234,23 @@ def test_rectangle_lights_draw_with_racks_code() -> None:
     # RectangleLight keeps) brightens it a little.
     r, g, b, a = pixel(holder_image := render(holder, Vec(10, 6)), 5, 3)
     assert g >= 0xC7 - 4 and r >= 0x90 - 4 and b >= 0x3E - 4 and g > r > b and a == 255, pixel(holder_image, 5, 3)
+
+
+def test_coloured_led_sliders_have_their_own_light() -> None:
+    for slider_cls, light_cls, color in (
+        (cl.LEDSliderRed, cl.RedLight, cl.SCHEME_RED),
+        (cl.LEDSliderYellow, cl.YellowLight, cl.SCHEME_YELLOW),
+        (cl.LEDSliderGreen, cl.GreenLight, cl.SCHEME_GREEN),
+        (cl.LEDSliderBlue, cl.BlueLight, cl.SCHEME_BLUE),
+        (cl.LEDSliderWhite, cl.WhiteLight, cl.SCHEME_WHITE),
+    ):
+        slider = slider_cls()
+        try:
+            light = slider.get_light()
+            assert isinstance(light, cl.VCVSliderLight[light_cls])
+            assert light.base_colors == [color]
+        finally:
+            slider.close()
 
 
 def test_light_sliders_and_buttons(module: Module) -> None:

@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """rack::app: Rack's controls, ports, lights and panels (RP-28A)."""
 
+from collections.abc import Sequence
 from typing import Any, final, overload
 
 from rackpy.raw import audio as _audio
@@ -88,7 +89,10 @@ class LightWidget(TransparentWidget):
     def draw_halo(self, args: Any) -> None: ...
 
 class MultiLightWidget(LightWidget):
-    base_colors: list[NVGcolor]
+    @property
+    def base_colors(self) -> Sequence[NVGcolor]: ...
+    @base_colors.setter
+    def base_colors(self, colors: list[NVGcolor]) -> None: ...
     def get_num_colors(self) -> int: ...
     def add_base_color(self, base_color: NVGcolor) -> None: ...
     def set_brightnesses(self, brightnesses: list[float]) -> None: ...

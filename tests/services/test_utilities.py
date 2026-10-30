@@ -18,8 +18,9 @@ def test_utilities_in_rack(make_hooks_bundle: Callable[[], Path], rack_host: Pat
     assert result.outcomes() and set(result.outcomes().values()) == {"passed"}, result.summary()
     log = (tmp_path / "log.txt").read_text()
     assert "info rackpy_test.py:12 test_logging] rackpy-log marker 5" in log  # Rack's log, with the given location
-    # Rack may filter DEBUG, but the other levels must reach the log distinctly.
-    lines = log.splitlines()
-    assert any("warn " in line and "test_utilities.py:" in line and "rackpy-macro warned" in line for line in lines)
-    assert any("info " in line and "rackpy-macro informed" in line for line in lines)
-    assert any("fatal " in line and "rackpy-macro fatal" in line for line in lines)
+    # Rack may filter DEBUG; verify the source, level and message for the other levels.
+    for level, marker in (("info", "informed"), ("warn", "warned"), ("fatal", "fatal")):
+        assert any(
+            f" {level} " in line and "/test_utilities.py:" in line and f"test_logging] rackpy-macro {marker}" in line
+            for line in log.splitlines()
+        )

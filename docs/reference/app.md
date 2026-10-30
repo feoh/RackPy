@@ -37,7 +37,9 @@ form is `create_model(..., widget_factory=)`). As in Rack's C++, the widget
 calls `set_module(module)` first. The widget then *owns* the module: Rack
 deletes the module with it. So `set_module` takes only the module Rack
 passed the factory, once, and nothing replaces or drops it. Rack then sets
-the widget's `model` and takes the widget.
+the widget's `model` and takes the widget. `set_model(model)` exposes Rack's
+setter for a widget that has no model yet; a second assignment raises
+`OwnershipError`. Factory-created widgets already have their model set by Rack.
 
 If the factory raises, or returns something that is not a new
 `ModuleWidget` with that module, RackPy logs the error. It leaves the module
@@ -58,18 +60,23 @@ creates take part in cables (see [Ports](#app-ports)).
   templates).
 - `paste_json_action`, `paste_clipboard_action`, `load_action`,
   `reset_action`, `randomize_action`, `bypass_action`, `clone_action`,
-  `disconnect_action`, `disconnect`, `remove_action` and
-  `create_context_menu` need the widget in Rack's rack. They are Rack's menu
-  actions, with undo steps. `remove_action` deletes the widget (the Python
-  object is stale afterwards) and, like the other actions that change the
-  widget tree, is refused inside a widget callback.
-- `load_dialog`, `save_dialog`, `save_template_dialog` and
-  `clear_template_dialog` open Rack's dialogs and wait for the user.
+  `disconnect_action`, `remove_action` and `create_context_menu` need the
+  widget in Rack's rack. The modifying menu actions have undo steps.
+  `remove_action` deletes the widget (the Python object is stale afterwards)
+  and, like the other actions that change the widget tree, is refused inside
+  a widget callback.
+- `disconnect()` also needs the widget in Rack's rack, but removes its cables
+  **without an undo step**. Use `disconnect_action()` for an undoable removal.
+- `load_dialog`, `save_dialog` and `clear_template_dialog` open Rack's
+  dialogs and wait for the user. `save_template_dialog` saves immediately
+  if no template exists; otherwise it asks before overwriting.
 - `append_context_menu(menu)` is called by Rack at the end of its module
   context menu, so a subclass may add items. The menu is closed if the
   widget dies.
 - `get_grid_position()`, `set_grid_position(pos)`, `get_grid_size()` and
-  `get_grid_box()` are rack grid coordinates.
+  `get_grid_box()` are rack grid coordinates. `on_drag_move` moves a rack-owned
+  module after the left-button drag passes Rack's grid-width threshold; other
+  buttons do not move it.
 - `ModuleWidget(module)` is Rack's deprecated constructor, and warns.
 
 Calls that take Rack's engine lock (the JSON, preset and clipboard calls,
@@ -109,12 +116,20 @@ the model's own code makes the module and the widget (**RP-24D**):
 
 - `ParamWidget` is a control of one module parameter: `module` and
   `param_id`, `get_param_quantity()`, `reset_action()` (Rack's reset, with
-  an undo step), the tooltip and `create_context_menu()`.
+  an undo step), `create_tooltip()`, `destroy_tooltip()` and
+  `create_context_menu()`. Rack's enter and leave handlers manage the tooltip
+  on hover.
 - `Knob` adds Rack's drag behaviour, with `horizontal`, `smooth`, `snap`,
-  `speed`, `force_linear`, `min_angle` and `max_angle`. `SliderKnob` is the
-  slider version.
+  `speed`, `force_linear`, `min_angle` and `max_angle`. With knob scrolling
+  enabled, Rack's `on_leave` commits a changed scroll value to history for
+  undo. A left-button drag changes the parameter; another button does not.
+  In rotary mode, Rack waits until the pointer leaves the originating knob
+  before changing its value. A short click dispatches `on_action`, whose
+  Rack base is empty, while a drag of at least 16 pixels does not.
+  `SliderKnob` is the slider version.
 - `Switch` steps through its values on each click. With `momentary` set, it
-  holds the maximum while pressed.
+  holds the maximum while pressed. Double-click resets a `ParamWidget` to its
+  default, but Rack's `Switch` deliberately does not reset on double-click.
 - `init_param_quantity()` is Rack's per-kind set-up of the parameter's
   quantity: a `Knob` turns smoothing on unless it snaps, and a `Switch` turns
   snapping on and smoothing off. Override it in a subclass, and Rack's
@@ -149,6 +164,9 @@ open context menu, since Rack's menu items point at the control.
 `PortWidget` has `module`, `type` (`rackpy.raw.engine.Port.Type`) and
 `port_id`; `get_port()` and `get_port_info()` return the module's port and
 its metadata. `delete_top_cable_action()` and the context menu are Rack's.
+`create_tooltip()` and `destroy_tooltip()` open and remove its tooltip;
+Rack's `on_enter` and `on_leave` handlers do the same. Tooltips must be
+enabled in Rack's settings, and the port needs a module.
 
 A Python port takes part in cables only when its module widget's factory
 created it, and only while it is inside that widget. Rack keeps two
@@ -160,7 +178,9 @@ invariants for cabled ports:
   loading find ports through the widget and fail if one is missing.
 
 A port added any other way still runs its Python drag overrides, but not
-Rack's cable behaviour.
+Rack's cable behaviour. During a cable drag, `on_drag_enter` marks the
+compatible incomplete cable as hovering this port, `on_drag_leave` clears
+that hover, and `on_drag_drop` completes the connection when permitted.
 
 (app-lights)=
 ## Lights
@@ -172,17 +192,23 @@ Rack's cable behaviour.
   override any of them.
 - `MultiLightWidget` mixes `base_colors` by brightness: `add_base_color()`,
   `get_num_colors()`, and `set_brightnesses()`, which needs one brightness
-  per colour.
+  per colour. Reading `base_colors` returns a list copy, including copied
+  colors; mutating it does not update Rack. Assign a list back to replace the
+  colors, or use `add_base_color()`.
 - `ModuleLightWidget` follows the module's lights `first_light_id` onward,
   one per colour, each frame (Rack takes the square root of each
   brightness). It also has `get_light(color_id)`, `get_light_info()` and a
-  tooltip.
+  tooltip. `create_tooltip()` and `destroy_tooltip()` manage it directly;
+  Rack's enter and leave handlers do so on hover.
 
 (app-svg)=
 ## SVG controls, screws and panels
 
 `SvgKnob`, `SvgSlider`, `SvgSwitch`, `SvgButton`, `SvgPort`, `SvgScrew` and
-`SvgPanel` draw SVGs and cache them in a framebuffer. The `ThemedSvgPort`,
+`SvgPanel` draw SVGs and cache them in a framebuffer. Rack's `on_change`
+updates the knob's rotation, slider's handle position or switch's frame from
+its parameter value. `SvgButton` dispatches its action on mouse-down, not a
+second time on drag-drop. The `ThemedSvgPort`,
 `ThemedSvgScrew` and `ThemedSvgPanel` versions take a light and a dark SVG,
 and show the dark one while Rack prefers dark panels. Each has Rack's
 setters:
@@ -192,6 +218,11 @@ setters:
   sliders;
 - `add_frame` and `frames` for switches and buttons;
 - `set_background` for panels.
+
+The themed widgets expose `light_svg` and `dark_svg`. Sliders expose
+`min_handle_pos` and `max_handle_pos`; the deprecated `set_background_svg_legacy`,
+`set_handle_svg_legacy` and `set_svgs` spellings warn. `SvgKnob` and `SvgPort`
+likewise retain a warning `set_svg_legacy` spelling.
 
 `SVGKnob`, `SVGPanel` and the other `SVG*` names are Rack's deprecated
 spellings, and using them warns.
@@ -271,7 +302,8 @@ The host-view API:
 - `rackpy.raw.context_get().scene` is a `HostScene`. It has `rack`,
   `rack_scroll`, `menu_bar` and `browser`, `get_mouse_pos()`, and Rack's
   deprecated `mouse_pos` field.
-- `HostRackScrollWidget` has `get_zoom()` and `set_zoom(zoom, pivot=)`
+- `HostRackScrollWidget` exposes `zoom_widget` and `rack_widget` host views,
+  and has `get_zoom()` and `set_zoom(zoom, pivot=)`
   (Rack clamps the zoom to 1/4 to 4), `get_grid_offset()`,
   `set_grid_offset()`, `reset()`, `zoom_to_modules()` and
   `zoom_to_bound(rect)`. The bound must be finite with a positive size,
@@ -281,19 +313,35 @@ The host-view API:
     `set_module_pos_nearest`, `set_module_pos_force` and
     `set_module_pos_squeeze` for a module widget in the rack;
   - Rack's selection and its actions: `select`, `select_all`,
-    `deselect_all`, `get_selected`, `selection_to_json`, load and save,
-    clipboard, reset, randomize, disconnect, clone, bypass and delete;
+    `deselect_all`, `has_selection`, `is_selected`, `get_selected`,
+    `is_selection_bypassed`, `selection_to_json`, load and save, clipboard,
+    reset, randomize, disconnect, clone, bypass and delete. Use
+    `append_selection_context_menu(menu)` to add Rack's selection menu items.
+    `update_selection_from_rect()` updates the selection from Rack's current
+    selection rectangle; `request_selection_pos(delta)` moves the selection
+    if the new positions do not overlap other modules, while
+    `set_selection_pos_nearest(delta)` searches nearby grid positions;
   - patch JSON: `merge_json` and `from_json`. `from_json` refuses modules or
     cables that already have widgets, because Rack would give them a second
     owner;
   - paste: `paste_json_action`, `paste_module_json_action` and
     `paste_clipboard_action`;
-  - `clear()` and cable clearing;
-  - cable lookups (`get_cables`, `get_cable(id)`,
-    `get_cable(output, input)`, `get_cables_on_port`, `get_top_cable`,
-    `get_top_plug`) and the next cable colour;
-  - `get_touched_param()` and `set_touched_param()`, the param Core's
-    MIDI-Map learns. That param needs a module.
+  - `clear()` deletes Rack's module widgets and their modules and cables;
+    it does not clear modules separately added to the engine without widgets.
+    For cable clearing, `clear_cables()` removes all cables without an undo step; `clear_cables_action()` records an undo step, and
+    `clear_cables_on_port(port)` removes those on one port;
+  - Rack's child containers: `get_module_container()`,
+    `get_cable_container()` and `get_plug_container()` return host views;
+  - cable lookups (`get_cables`, `get_complete_cables`,
+    `get_incomplete_cables`, deprecated `get_incomplete_cable`,
+    `get_cable(id)`, `get_cable(output, input)`, `get_cables_on_port`,
+    `get_complete_cables_on_port`, `get_top_cable`, `get_top_plug`) and the
+    next cable colour. `get_incomplete_cable()` warns and returns the last
+    incomplete cable, or `None`; use the plural lookup for all of them. `get_next_cable_color()` selects the current palette
+    entry, advancing and wrapping its ID when `cable_auto_rotate` is enabled;
+    `get_next_cable_color_id()` and `set_next_cable_color_id()` access that ID;
+  - `get_touched_param()`, `set_touched_param()` and `touched_param`, the
+    param Core's MIDI-Map learns. That param needs a module.
 - `add_module(module_widget)` and `add_module_at_mouse(module_widget)` put a
   Python module widget, with its model and module, into the rack, which then
   owns it. `remove_module(module_widget)` takes it out again, disconnecting
@@ -382,11 +430,19 @@ Rack's audio and MIDI widgets show a port and open its menus:
   `AudioBlockSizeChoice` and `AudioDeviceMenuChoice`.
 - `MidiDriverChoice`, `MidiDeviceChoice` and `MidiChannelChoice`.
 - `AudioDisplay` and `MidiDisplay`, whose `set_audio_port` and
-  `set_midi_port` rebuild their choices (Rack's widgets).
+  `set_midi_port` rebuild their choices (Rack's widgets). Their read-only
+  `driver_choice`, `driver_separator`, `device_choice` and `device_separator`
+  are host views or `None`. Audio also exposes `sample_rate_choice`,
+  `sample_rate_separator` and `buffer_size_choice`; MIDI has `channel_choice`.
 - `AudioButton` and `MidiButton`, with the component library's
   `AudioButton_ADAT`, `AudioButton_USB_B` and `MidiButton_MIDI_DIN`, which
   use Rack's artwork.
 - `append_audio_menu(menu, port)` and `append_midi_menu(menu, port)`.
+
+Each choice's `on_action()` opens Rack's corresponding menu; the buttons
+open the combined menus. In Rack 2.6.6 the combined MIDI menu includes driver
+and device choices, but not the channel choice; `MidiChannelChoice` opens its
+own channel menu.
 
 They take ports Python made ([audio](audio.md), [MIDI](midi.md)). Rack's
 widgets read their port every frame and their menus capture it, so RackPy

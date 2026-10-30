@@ -12,6 +12,7 @@ original SVG artwork:
 """
 
 import json
+import subprocess
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -43,9 +44,36 @@ def launch(rack: Path, user: Path, plugin: Path, phase: int) -> dict[str, Any]:
     return data
 
 
+@pytest.mark.parametrize("dialog_stub", [False, True], ids=["native", "dialog-stub"])
 def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
-    make_hooks_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path
+    make_hooks_bundle: Callable[[], Path],
+    rack_host: Path,
+    rack_sdk: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    dialog_stub: bool,
 ) -> None:
+    if dialog_stub:
+        shim = tmp_path / "dialog_stub.so"
+        subprocess.run(
+            [
+                "cc",
+                "-shared",
+                "-fPIC",
+                "-Wall",
+                "-Wextra",
+                "-Werror",
+                "-I",
+                str(rack_sdk / "dep/include"),
+                str(HERE / "dialog_stub.c"),
+                "-o",
+                str(shim),
+            ],
+            check=True,
+        )
+        monkeypatch.setenv("LD_PRELOAD", str(shim))
+        monkeypatch.setenv("RACKPY_DIALOG_STUB", "1")
+        monkeypatch.setenv("RACKPY_DIALOG_LOG", str(tmp_path / "dialogs.log"))
     plugin = stage_plugin(
         make_hooks_bundle(),
         tmp_path,
@@ -69,7 +97,23 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     one = launch(rack_host, tmp_path, plugin, 1)
     assert one["preview_seen"] and one["preview"] == [True, True]  # the browser's preview: no module
     assert one["added_from_browser"]
-    assert one["cable"] == [1, 0, 1] and one["connected"]  # a cable between two Python modules' factory ports
+    assert [True, True, True] in one["deprecated_constructor"]  # preview
+    assert [False, True, True] in one["deprecated_constructor"]  # module-owned widget
+    assert all(one["hovered_output"])  # input-first drag, while both ports are unconnected
+    assert one["clear_cables"] == [[1, 0, 1], [0, 0, 0], True]
+    assert all(one["hovered_cable"])  # live incomplete cable, hovered input and output plug
+    assert all(one["incomplete_lookup"])  # singular deprecated lookup finds the actual incomplete cable
+    assert all(one["direct_port_drag"])  # leave, enter, and drop called through Python
+    assert all(one["direct_module_drag"])  # only left drag moves the module
+    assert one["cable"] == [1, 0, 1] and one["connected"]  # two Python modules' factory ports
+    assert one["cable_removals"] == [
+        [0, 0, 0],
+        [1, 0, 1],
+        [0, 0, 0],
+        [1, 0, 1],
+        [0, 0, 0],
+        True,
+    ]  # undoable actions vs. direct per-port clearing
     views = one["cable_views"]  # RP-28D: Rack's cable through its host views
     assert views["views"] == ["HostCableWidget", "HostPlugWidget"] and views["ports"] == [True, True, True]
     assert all(views["plug"]) and all(views["lookups"]) and views["positions"] and views["json"]
@@ -86,10 +130,31 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     actions = one["actions"]
     assert actions["to_json"] == ["PyVoice", "RackPy"] and actions["from_json"] == 5.0
     assert actions["preset"] == [True, 5.0] and actions["template"] and actions["template_loaded"] == 5.0
-    assert actions["template_cleared"] and actions["paste"] == [True, 5.0] and actions["paste_json"]
+    assert actions["load_action"] == 5.0 and actions["load_action_undo"] == 2.0
+    assert actions["template_cleared"] and actions["template_dialog_created"]
+    if dialog_stub:
+        assert all(actions["dialog_checks"]), actions["dialog_checks"]
+        calls = (tmp_path / "dialogs.log").read_text().splitlines()
+        assert sum(line.startswith("file ") for line in calls) >= 6
+        assert sum(line.startswith("message ") for line in calls) >= 4
+    assert actions["paste"] == [True, 5.0] and actions["paste_json"]
+    assert actions["selection_reset"] == 5.0 and actions["selection_reset_undo"] == 7.0
+    assert 0 <= actions["selection_randomized"] <= 10 and actions["selection_randomized"] != 7.0
+    assert actions["selection_randomize_undo"] == 7.0
+    assert actions["selection_randomize_redo"] == actions["selection_randomized"]
+    assert actions["selection_disconnect"] == [[1, 0, 1], [0, 0, 0], [1, 0, 1]]
+    assert actions["selection_clone_count"] == 1 and actions["selection_clone_undo"]
+    assert actions["selection_saved"] == ["PyVoice"] and actions["selection_loaded"] == 1
+    assert actions["selection_delete_count"] == 0 and actions["selection_delete_undo"] == 1
+    assert actions["selection_load_undo"]
+    assert actions["selection_pasted"] is None  # Rack's void paste action
+    assert actions["selection_paste_count"] == 1 and actions["selection_paste_undo"]
+    assert actions["module_paste_count"] == 1 and actions["module_paste_undo"]
     assert actions["reset"] == 5.0 and actions["bypassed"] and actions["cloned"]
     # The clone copies the cable into its input too (Rack's Duplicate with cables): two cables, then none.
     assert actions["disconnected"][2] < actions["reconnected"][2]
+    assert actions["plain_disconnect"][0][2] < actions["reconnected"][2]
+    assert actions["plain_disconnect"][1]  # no history action, unlike disconnect_action
     assert one["blink"] == [True, ["PyBlink", False], True]  # the documentation's module widget, in Rack
 
     two = launch(rack_host, tmp_path, plugin, 2)

@@ -92,6 +92,21 @@ def test_modules_selection_and_positions(probe: Any) -> None:
     data = rack.selection_to_json()
     assert [m["model"] for m in data["modules"]] == ["RuntimeProbe"]
     assert not rack.is_selection_bypassed()
+    context = raw.context_get()
+    assert context is not None and context.history is not None
+    history_index = context.history.action_index
+    rack.bypass_selection_action(True)
+    assert rack.is_selection_bypassed() and context.history.action_index == history_index + 1
+    context.history.undo()
+    assert not rack.is_selection_bypassed() and context.history.action_index == history_index
+    assert rack.request_selection_pos(Vec(600, 0))
+    assert probe.get_box().pos == pos.plus(Vec(600, 0))
+    rack.set_selection_pos_nearest(Vec(-600, 0))
+    assert probe.get_box().pos == pos
+    with pytest.raises(ValueError):
+        rack.request_selection_pos(Vec(math.nan, 0))
+    with pytest.raises(ValueError):
+        rack.set_selection_pos_nearest(Vec(math.inf, 0))
     rack.deselect_all()
     assert not rack.has_selection()
     rack.select_all()
@@ -103,6 +118,9 @@ def test_modules_selection_and_positions(probe: Any) -> None:
     rack.set_module_pos_force(probe, pos)
     assert probe.get_box().pos == pos
     rack.set_module_pos_nearest(probe, pos)
+    rack.set_module_pos_squeeze(probe, far)
+    assert probe.get_box().pos == far
+    rack.set_module_pos_force(probe, pos)
     with pytest.raises(ValueError):
         rack.request_module_pos(probe, Vec(math.nan, 0))
     with pytest.raises(OwnershipError, match="not in Rack's rack"):
@@ -123,6 +141,7 @@ def test_containers_cables_colours_and_menus() -> None:
         assert rack.get_incomplete_cable() is None
     colour = rack.get_next_cable_color_id()
     rack.set_next_cable_color_id(colour + 1)
+    assert rack.get_next_cable_color_id() == colour + 1
     assert isinstance(rack.get_next_cable_color(), nvg.NVGcolor)
     rack.set_next_cable_color_id(colour)
     assert rack.get_mouse_pos().is_finite()
@@ -132,6 +151,29 @@ def test_containers_cables_colours_and_menus() -> None:
         assert len(menu.children) > 0
     finally:
         menu.close()
+
+
+def test_cable_color_sequence_and_rotation_settings() -> None:
+    rack = scene().rack
+    settings = raw.settings.settings
+    old_colors = list(settings.cable_colors)
+    old_rotate = settings.cable_auto_rotate
+    old_id = rack.get_next_cable_color_id()
+    try:
+        settings.cable_colors = [nvg.rgb(20, 40, 60), nvg.rgb(120, 140, 160)]
+        settings.cable_auto_rotate = True
+        rack.set_next_cable_color_id(0)
+        assert raw.color.to_hex_string(rack.get_next_cable_color()) == "#14283c"
+        assert rack.get_next_cable_color_id() == 1
+        assert raw.color.to_hex_string(rack.get_next_cable_color()) == "#788ca0"
+        assert rack.get_next_cable_color_id() == 0
+        settings.cable_auto_rotate = False
+        assert raw.color.to_hex_string(rack.get_next_cable_color()) == "#14283c"
+        assert rack.get_next_cable_color_id() == 0
+    finally:
+        settings.cable_colors = old_colors
+        settings.cable_auto_rotate = old_rotate
+        rack.set_next_cable_color_id(old_id)
 
 
 def configure(m: Module) -> None:
@@ -290,6 +332,10 @@ def rack_calls(rack: app.HostRackWidget, probe: Any) -> None:
     rack.on_drag_start(w.DragStartEvent(button=GLFW_MOUSE_BUTTON_LEFT))  # Rack starts its selection rectangle
     rack.on_drag_hover(w.DragHoverEvent(button=GLFW_MOUSE_BUTTON_LEFT, pos=end))
     assert rack.get_mouse_pos() == end and rack.is_selected(probe)
+    rack.deselect_all()
+    assert not rack.is_selected(probe)
+    rack.update_selection_from_rect()
+    assert rack.is_selected(probe)  # Rack reselects modules intersecting the active rectangle
     rack.on_drag_end(w.DragEndEvent(button=GLFW_MOUSE_BUTTON_LEFT))
     rack.on_drag_hover(w.DragHoverEvent(button=GLFW_MOUSE_BUTTON_LEFT, pos=start))
     assert rack.get_mouse_pos() == start and rack.is_selected(probe)  # the rectangle has ended

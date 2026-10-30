@@ -114,6 +114,192 @@ def test_module_fields_take_only_engine_modules_with_valid_ids(module: Module) -
     Module.create(constructing).close()
 
 
+def test_control_tooltips_follow_create_destroy_and_enter_leave(module: Module) -> None:
+    settings = raw.settings.settings
+    old_tooltips = settings.tooltips
+    settings.tooltips = True
+    controls: list[app.ParamWidget | app.PortWidget | app.ModuleLightWidget] = [
+        raw.create_param(app.ParamWidget, Vec(), module, 0),
+        raw.create_input(app.PortWidget, Vec(), module, 0),
+        raw.create_light(app.ModuleLightWidget, Vec(), module, 0),
+    ]
+    try:
+        for control in controls:
+            before = HOOKS.scene_tooltip_count()
+            control.create_tooltip()
+            assert HOOKS.scene_tooltip_count() == before + 1
+            control.create_tooltip()  # Rack does not add a second tooltip
+            assert HOOKS.scene_tooltip_count() == before + 1
+            control.destroy_tooltip()
+            assert HOOKS.scene_tooltip_count() == before
+            control.on_enter(w.EnterEvent())
+            assert HOOKS.scene_tooltip_count() == before + 1
+            control.on_leave(w.LeaveEvent())
+            assert HOOKS.scene_tooltip_count() == before
+    finally:
+        for control in controls:
+            control.destroy_tooltip()
+            control.close()
+        settings.tooltips = old_tooltips
+
+
+def test_double_click_resets_param_but_not_switch(module: Module) -> None:
+    param = raw.create_param(app.ParamWidget, Vec(), module, 0)
+    switch = raw.create_param(app.Switch, Vec(), module, 1)
+    try:
+        module.param_quantities[0].set_value(8)
+        module.param_quantities[1].set_value(1)
+        param.on_double_click(w.DoubleClickEvent())
+        switch.on_double_click(w.DoubleClickEvent())
+        assert module.param_quantities[0].get_value() == 5
+        assert module.param_quantities[1].get_value() == 1
+    finally:
+        param.close()
+        switch.close()
+
+
+def test_knob_scroll_leave_records_undo(module: Module) -> None:
+    settings = raw.settings.settings
+    old_scroll, old_sensitivity = settings.knob_scroll, settings.knob_scroll_sensitivity
+    settings.knob_scroll, settings.knob_scroll_sensitivity = True, 0.01
+    knob = raw.create_param(app.Knob, Vec(), module, 0)
+    context = raw.context_get()
+    assert context is not None and context.history is not None
+    history = context.history
+    try:
+        quantity = module.param_quantities[0]
+        before = quantity.get_value()
+        index = history.action_index
+        knob.on_hover_scroll(w.HoverScrollEvent(scroll_delta=Vec(0, 10), context=w.EventContext()))
+        assert quantity.get_value() > before
+        knob.on_leave(w.LeaveEvent())
+        assert history.action_index == index + 1
+        history.undo()
+        assert quantity.get_value() == pytest.approx(before)
+    finally:
+        knob.close()
+        settings.knob_scroll, settings.knob_scroll_sensitivity = old_scroll, old_sensitivity
+
+
+def test_knob_direct_drag_move_changes_value_only_for_left_button(module: Module) -> None:
+    settings = raw.settings.settings
+    old_sensitivity = settings.knob_linear_sensitivity
+    settings.knob_linear_sensitivity = 0.01
+    knob = raw.create_param(app.Knob, Vec(), module, 0)
+    knob.force_linear = True
+    try:
+        quantity = module.param_quantities[0]
+        before = quantity.get_value()
+        knob.on_drag_move(w.DragMoveEvent(button=1, mouse_delta=Vec(0, -10)))
+        assert quantity.get_value() == before
+        knob.on_drag_move(w.DragMoveEvent(button=LEFT, mouse_delta=Vec(0, -10)))
+        assert quantity.get_value() > before
+    finally:
+        knob.close()
+        settings.knob_linear_sensitivity = old_sensitivity
+
+
+def test_knob_rotary_drag_starts_only_after_pointer_leaves_origin(module: Module) -> None:
+    settings = raw.settings.settings
+    old_mode = settings.knob_mode
+    context = raw.context_get()
+    assert context is not None and context.scene is not None
+    scene = context.scene
+    old_mouse = scene.mouse_pos
+    knob = raw.create_param(app.Knob, Vec(), module, 0)
+    other = app.Knob()
+    try:
+        settings.knob_mode = raw.settings.KNOB_MODE_ROTARY_ABSOLUTE
+        scene.mouse_pos = Vec(100, 0)
+        quantity = module.param_quantities[0]
+        before = quantity.get_value()
+        knob.on_drag_start(w.DragStartEvent(button=LEFT))
+        move = w.DragMoveEvent(button=LEFT, mouse_delta=Vec(1, 0))
+        knob.on_drag_leave(w.DragLeaveEvent(button=LEFT, origin=other))
+        knob.on_drag_move(move)
+        assert quantity.get_value() == before
+        knob.on_drag_leave(w.DragLeaveEvent(button=LEFT, origin=knob))
+        knob.on_drag_move(move)
+        assert quantity.get_value() != before
+        knob.on_drag_end(w.DragEndEvent(button=LEFT))
+    finally:
+        knob.close()
+        other.close()
+        scene.mouse_pos = old_mouse
+        settings.knob_mode = old_mode
+
+
+def test_knob_dispatches_action_for_a_click_but_not_a_drag(module: Module) -> None:
+    actions: list[str] = []
+
+    class PushKnob(app.Knob):
+        def on_action(self, event: w.ActionEvent) -> None:
+            actions.append("action")
+            super().on_action(event)  # Rack's base implementation is empty
+
+    click = raw.create_param(PushKnob, Vec(), module, 0)
+    drag = raw.create_param(PushKnob, Vec(), module, 0)
+    try:
+        click.on_drag_end(w.DragEndEvent(button=LEFT))
+        assert actions == ["action"]
+        drag.force_linear = True
+        drag.on_drag_move(w.DragMoveEvent(button=LEFT, mouse_delta=Vec(0, -20)))
+        drag.on_drag_end(w.DragEndEvent(button=LEFT))
+        assert actions == ["action"]
+    finally:
+        click.close()
+        drag.close()
+
+
+def test_svg_button_drag_drop_does_not_dispatch_a_second_action() -> None:
+    actions: list[str] = []
+
+    class Button(app.SvgButton):
+        def on_action(self, event: Any) -> None:
+            actions.append("action")
+
+    button = Button()
+    try:
+        button.on_button(w.ButtonEvent(button=LEFT, action=PRESS))
+        assert actions == ["action"]
+        button.on_drag_drop(w.DragDropEvent(button=LEFT, origin=button))
+        assert actions == ["action"]  # Rack already dispatched on mouse down
+    finally:
+        button.close()
+
+
+def test_svg_controls_apply_change_to_native_children(module: Module) -> None:
+    knob = raw.create_param(app.SvgKnob, Vec(), module, 0)
+    slider = raw.create_param(app.SvgSlider, Vec(), module, 0)
+    switch = raw.create_param(app.SvgSwitch, Vec(), module, 1)
+    first, second = svg(), svg(FRAME_SVG)
+    try:
+        knob.set_svg(first)
+        knob.min_angle, knob.max_angle = -1.0, 1.0
+        slider.set_handle_pos(Vec(1, 2), Vec(11, 22))
+        switch.add_frame(first)
+        switch.add_frame(second)
+        module.param_quantities[0].set_value(0)
+        knob.on_change(w.ChangeEvent())
+        slider.on_change(w.ChangeEvent())
+        low_transform = knob.tw.transform
+        assert slider.handle.get_box().pos == Vec(1, 2)
+        module.param_quantities[0].set_value(10)
+        knob.on_change(w.ChangeEvent())
+        slider.on_change(w.ChangeEvent())
+        assert knob.tw.transform != low_transform
+        assert slider.handle.get_box().pos == Vec(11, 22)
+        module.param_quantities[1].set_value(0)
+        switch.on_change(w.ChangeEvent())
+        assert switch.sw.svg is first
+        module.param_quantities[1].set_value(1)
+        switch.on_change(w.ChangeEvent())
+        assert switch.sw.svg is second
+    finally:
+        for control in (knob, slider, switch):
+            control.close()
+
+
 def test_knob_switch_and_slider_fields_and_param_quantity_setup(module: Module) -> None:
     knob, switch = app.Knob(), app.Switch()
     knob.speed, knob.snap, knob.smooth, knob.horizontal, knob.force_linear = 2.0, False, True, True, True
@@ -252,6 +438,10 @@ def test_module_lights_follow_the_engine(module: Module) -> None:
     try:
         light.base_colors = [nvg.rgb(255, 0, 0)]
         assert light.get_num_colors() == 1
+        colors = light.base_colors
+        assert isinstance(colors, list)
+        colors.clear()
+        assert light.get_num_colors() == 1
         light.module = module
         with pytest.raises(ValueError, match="out of range"):
             light.base_colors = [nvg.rgb(255, 0, 0)] * 3  # only two lights from 0
@@ -376,9 +566,18 @@ def test_switches_buttons_sliders_ports_screws_and_panels() -> None:
         slider.set_handle_pos(Vec(0, 10), Vec(0, 0))
         assert slider.min_handle_pos == Vec(0, 10) and slider.max_handle_pos == Vec(0, 0)
         slider.set_handle_pos_centered(Vec(6, 20), Vec(6, 4))
+        assert slider.min_handle_pos == Vec(-9, 5) and slider.max_handle_pos == Vec(-9, -11)
+        assert slider.handle.get_box().pos == Vec(-9, -11)
         assert isinstance(slider.background, w.HostSvgWidget) and isinstance(slider.handle, w.HostSvgWidget)
         with pytest.warns(DeprecationWarning):
+            slider.set_background_svg_legacy(light)
+        assert slider.background.svg is light
+        with pytest.warns(DeprecationWarning):
+            slider.set_handle_svg_legacy(dark)
+        assert slider.handle.svg is dark
+        with pytest.warns(DeprecationWarning):
             slider.set_svgs(dark, light)
+        assert slider.background.svg is dark and slider.handle.svg is light
         port.set_svg(light)
         assert port.box.size == Vec(30, 30)
         themed_port.set_svg(light, dark)
@@ -386,12 +585,13 @@ def test_switches_buttons_sliders_ports_screws_and_panels() -> None:
         assert themed_port.sw.svg is light  # Rack shows the light SVG unless dark panels are preferred
         screw.set_svg(light)
         themed_screw.set_svg(light, dark)
+        assert themed_screw.light_svg is light and themed_screw.dark_svg is dark
         assert themed_screw.sw.svg is light
         panel.set_background(dark)
         assert panel.svg is dark and isinstance(panel.panel_border, w.HostWidget)
         assert panel.box.size == Vec(15, 0) or panel.box.size.x > 0  # Rack rounds panels to the rack grid
         themed_panel.set_background(light, dark)
-        assert themed_panel.light_svg is light and themed_panel.svg is light
+        assert themed_panel.light_svg is light and themed_panel.dark_svg is dark and themed_panel.svg is light
         for cls in (app.RailWidget, app.PanelBorder, app.CircularShadow):
             cls().close()
         shadow = app.CircularShadow()
@@ -441,7 +641,15 @@ def test_widget_factories(tmp_path: Path) -> None:
 def test_constants_and_deprecated_aliases() -> None:
     assert app.RACK_GRID_WIDTH == 15 and app.RACK_GRID_HEIGHT == 380
     assert Vec(15, 380) == app.RACK_GRID_SIZE and Vec(30000, 38000) == app.RACK_OFFSET
-    for old, new in (("SVGKnob", "SvgKnob"), ("SVGPanel", "SvgPanel"), ("SVGPort", "SvgPort")):
+    for old, new in (
+        ("SVGKnob", "SvgKnob"),
+        ("SVGPanel", "SvgPanel"),
+        ("SVGPort", "SvgPort"),
+        ("SVGButton", "SvgButton"),
+        ("SVGScrew", "SvgScrew"),
+        ("SVGSlider", "SvgSlider"),
+        ("SVGSwitch", "SvgSwitch"),
+    ):
         with pytest.warns(DeprecationWarning, match=new):
             assert getattr(app, old) is getattr(app, new)
 

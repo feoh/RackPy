@@ -6,7 +6,7 @@ import time
 
 import pytest
 
-from rackpy.raw import logger, macros
+from rackpy.raw import logger, macros, settings
 from rackpy.raw import random as rr
 from rackpy.raw import string as rs
 
@@ -89,7 +89,12 @@ def test_versions_and_translations() -> None:
     languages = rs.get_languages()
     assert "en" in languages
     assert rs.translate("language", "en") and rs.translate("no.such.id.rackpy", "en") == ""
-    assert rs.translate("language")  # Rack's language, else English
+    saved_language = settings.settings.language
+    try:
+        settings.settings.language = "rackpy-no-such-language"
+        assert rs.translate("language") == rs.translate("language", "en") != ""
+    finally:
+        settings.settings.language = saved_language
     rs.init()  # reloads the translations
     assert rs.get_languages() == languages
 

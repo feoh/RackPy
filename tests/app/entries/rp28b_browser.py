@@ -9,7 +9,9 @@ A script advances one step per frame from the RuntimeProbe's step().
 import gc
 import importlib
 import json
+import os
 import traceback
+import warnings
 from collections.abc import Callable, Generator
 from pathlib import Path
 from typing import Any
@@ -69,8 +71,12 @@ class Dial(app.Knob):
 
 class VoiceWidget(app.ModuleWidget):
     def __init__(self, module: Module | None) -> None:
-        super().__init__()
-        self.set_module(module)  # as Rack's module widgets do, first
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always", DeprecationWarning)
+            super().__init__(module)  # deprecated constructor, within the factory
+        RESULT.setdefault("deprecated_constructor", []).append(
+            [module is None, self.module is module, any(issubclass(w.category, DeprecationWarning) for w in caught)]
+        )
         RESULT["factory"].append(None if module is None else module.id)
         self.set_panel(raw.create_panel(str(assets.plugin("res/voice.svg"))))
         self.add_param(raw.create_param_centered(Dial, Vec(45, 80), module, 0))
@@ -138,13 +144,97 @@ def phase1() -> Frames:
     second = _testing.browser_add_module("RackPy", "PyVoice")
     yield from wait(3)
     a, b = VOICES[first], VOICES[second]
+    # Call the ModuleWidget binding directly while Rack owns the widget.
+    rw = rack()
+    rw.deselect_all()
+    before_pos = Vec(a.box.pos.x, a.box.pos.y)  # a.box.pos is a live view
+    old_squeeze = raw.settings.settings.squeeze_modules
+    raw.settings.settings.squeeze_modules = False
+    try:
+        start_pos = before_pos.plus(Vec(0, 190))
+        rw.on_hover(w.HoverEvent(pos=start_pos))
+        a.on_drag_start(w.DragStartEvent(button=LEFT))
+        a.on_drag_move(w.DragMoveEvent(button=LEFT))  # records the initial rack position
+        rw.on_hover(w.HoverEvent(pos=start_pos.plus(Vec(150, 0))))
+        a.on_drag_move(w.DragMoveEvent(button=1))
+        right_ignored = a.box.pos == before_pos
+        a.on_drag_move(w.DragMoveEvent(button=LEFT))
+        RESULT["direct_module_drag"] = [right_ignored, a.box.pos != before_pos]
+        a.on_drag_end(w.DragEndEvent(button=LEFT))
+        rw.set_module_pos_nearest(a, before_pos)
+    finally:
+        raw.settings.settings.squeeze_modules = old_squeeze
     out, inp = a.get_output(0), b.get_input(0)
     assert isinstance(out, app.PortWidget) and isinstance(inp, app.PortWidget)
-    drag(scene_pos(out), scene_pos(inp))
+    # Exercise output hover while both ports are initially unconnected.
+    start, end = scene_pos(inp), scene_pos(out)
+    state = events()
+    state.handle_hover(start, Vec())
+    state.handle_button(start, LEFT, PRESS, 0)
+    state.handle_hover(end, end.minus(start))
+    incomplete = rack().get_incomplete_cables()
+    assert len(incomplete) == 1
+    dragging = incomplete[0]
+    RESULT["hovered_output"] = [
+        dragging.hovered_output_port is out,
+        dragging.get_hovered_port(Port.Type.OUTPUT) is out,
+        dragging.hovered_input_port is None,
+        dragging.get_hovered_port(Port.Type.INPUT) is None,
+    ]
+    state.handle_button(end, LEFT, RELEASE, 0)
+    context = raw.context_get()
+    assert context is not None and context.history is not None
+    before_clear = list(_testing.rack_cables())
+    history_index = context.history.action_index
+    rack().clear_cables()
+    RESULT["clear_cables"] = [before_clear, list(_testing.rack_cables()), context.history.action_index == history_index]
+    start, end = scene_pos(out), scene_pos(inp)
+    state.handle_hover(start, Vec())
+    state.handle_button(start, LEFT, PRESS, 0)
+    state.handle_hover(end, end.minus(start))
+    incomplete = rack().get_incomplete_cables()
+    assert len(incomplete) == 1
+    dragging = incomplete[0]
+    with warnings.catch_warnings(record=True) as deprecated:
+        warnings.simplefilter("always", DeprecationWarning)
+        single = rack().get_incomplete_cable()
+    RESULT["incomplete_lookup"] = [single is dragging, len(deprecated) == 1]
+    RESULT["hovered_cable"] = [
+        dragging.hovered_input_port is inp,
+        dragging.get_hovered_port(Port.Type.INPUT) is inp,
+        dragging.hovered_output_port is None,
+        dragging.get_hovered_port(Port.Type.OUTPUT) is None,
+        dragging.output_plug.get_cable() is dragging,
+        dragging.output_plug.get_type() == Port.Type.OUTPUT,
+    ]
+    # Call the Python bindings themselves, not only Rack's EventState dispatch.
+    inp.on_drag_leave(w.DragLeaveEvent(button=LEFT, origin=out))
+    left = dragging.hovered_input_port is None
+    inp.on_drag_enter(w.DragEnterEvent(button=LEFT, origin=out))
+    entered = dragging.hovered_input_port is inp
+    inp.on_drag_drop(w.DragDropEvent(button=LEFT, origin=out))
+    RESULT["direct_port_drag"] = [left, entered, dragging.input_port is inp and dragging.is_complete()]
+    state.handle_button(end, LEFT, RELEASE, 0)
     RESULT["cable"] = list(_testing.rack_cables())
     gate = b.module
     RESULT["connected"] = gate is not None and gate.inputs[0].is_connected()
     yield from cable_views(out, inp)
+    inp.delete_top_cable_action()
+    deleted = list(_testing.rack_cables())
+    _testing.history_undo()
+    restored_delete = list(_testing.rack_cables())
+    rack().clear_cables_action()
+    cleared = list(_testing.rack_cables())
+    _testing.history_undo()
+    restored_clear = list(_testing.rack_cables())
+    context = raw.context_get()
+    assert context is not None and context.history is not None
+    history_index = context.history.action_index
+    rack().clear_cables_on_port(inp)
+    port_cleared = list(_testing.rack_cables())
+    unchanged_history = context.history.action_index == history_index
+    drag(scene_pos(out), scene_pos(inp))
+    RESULT["cable_removals"] = [deleted, restored_delete, cleared, restored_clear, port_cleared, unchanged_history]
 
     # Rack's Delete, then undo and redo: Rack recreates the widget with the Python factory.
     removes = len(RESULT["removes"])
@@ -267,6 +357,12 @@ def actions(module_id: int) -> Frames:
     module.params[0].value = 1.0
     mw.load(str(preset))
     found["preset"] = [preset.is_file(), module.params[0].value]
+    module.params[0].value = 2.0
+    mw.load_action(str(preset))
+    found["load_action"] = module.params[0].value
+    _testing.history_undo()
+    found["load_action_undo"] = module.params[0].value
+    module.params[0].value = 5.0
     mw.save_template()
     found["template"] = mw.has_template()
     module.params[0].value = 2.0
@@ -274,11 +370,121 @@ def actions(module_id: int) -> Frames:
     found["template_loaded"] = module.params[0].value
     mw.clear_template()
     found["template_cleared"] = not mw.has_template()
+    mw.save_template_dialog()  # Rack saves immediately when no template exists
+    found["template_dialog_created"] = mw.has_template()
+    mw.clear_template()
+    if os.environ.get("RACKPY_DIALOG_STUB"):
+        checks: list[bool] = []
+        dialog_preset = preset.with_name("dialog-preset.vcvm")
+        os.environ["RACKPY_DIALOG_FILE"] = ""
+        mw.save_dialog()
+        mw.load_dialog()
+        checks.append(not dialog_preset.exists() and module.params[0].value == 5.0)
+        os.environ["RACKPY_DIALOG_FILE"] = str(dialog_preset)
+        mw.save_dialog()
+        checks.append(dialog_preset.is_file())
+        module.params[0].value = 3.0
+        mw.load_dialog()
+        checks.append(module.params[0].value == 5.0)
+        _testing.history_undo()
+        module.params[0].value = 5.0
+        mw.save_template()
+        os.environ["RACKPY_DIALOG_RESPONSE"] = "cancel"
+        mw.clear_template_dialog()
+        checks.append(mw.has_template())
+        module.params[0].value = 3.0
+        mw.save_template_dialog()
+        mw.load_template()
+        checks.append(module.params[0].value == 5.0)
+        os.environ["RACKPY_DIALOG_RESPONSE"] = "accept"
+        module.params[0].value = 4.0
+        mw.save_template_dialog()
+        mw.load_template()
+        checks.append(module.params[0].value == 4.0)
+        mw.clear_template_dialog()
+        checks.append(not mw.has_template())
+        module.params[0].value = 5.0
+        found["dialog_checks"] = checks
     mw.copy_clipboard()
     module.params[0].value = 3.0
     found["paste"] = [mw.paste_clipboard_action(), module.params[0].value]
     found["paste_json"] = mw.paste_json_action(data)
     module.params[0].value = 7.0
+    rack().deselect_all()
+    rack().select(mw)
+    if os.environ.get("RACKPY_DIALOG_STUB"):
+        selection_path = preset.with_name("dialog-selection.vcvs")
+        os.environ["RACKPY_DIALOG_FILE"] = ""
+        rack().save_selection_dialog()
+        rack().load_selection_dialog()
+        found["dialog_checks"].append(not selection_path.exists())
+        os.environ["RACKPY_DIALOG_FILE"] = str(selection_path)
+        rack().save_selection_dialog()
+        found["dialog_checks"].append(selection_path.is_file())
+        count = len(rack().get_modules())
+        rack().load_selection_dialog()
+        found["dialog_checks"].append(len(rack().get_modules()) == count + 1)
+        _testing.history_undo()
+        found["dialog_checks"].append(len(rack().get_modules()) == count)
+        rack().deselect_all()
+        rack().select(mw)
+    rack().reset_selection_action()
+    found["selection_reset"] = module.params[0].value
+    _testing.history_undo()
+    found["selection_reset_undo"] = module.params[0].value
+    # Retry the vanishingly rare case that Rack randomly picks the existing value.
+    for _ in range(3):
+        rack().randomize_selection_action()
+        randomized = module.params[0].value
+        _testing.history_undo()
+        if randomized != 7.0:
+            break
+    found["selection_randomized"] = randomized
+    found["selection_randomize_undo"] = module.params[0].value
+    _testing.history_redo()
+    found["selection_randomize_redo"] = module.params[0].value
+    _testing.history_undo()
+    before_selection_disconnect = list(_testing.rack_cables())
+    rack().disconnect_selection_action()
+    after_selection_disconnect = list(_testing.rack_cables())
+    _testing.history_undo()
+    found["selection_disconnect"] = [
+        before_selection_disconnect,
+        after_selection_disconnect,
+        list(_testing.rack_cables()),
+    ]
+    before_selection_clone = len(rack().get_modules())
+    rack().clone_selection_action(False)
+    found["selection_clone_count"] = len(rack().get_modules()) - before_selection_clone
+    _testing.history_undo()
+    found["selection_clone_undo"] = len(rack().get_modules()) == before_selection_clone
+    rack().deselect_all()
+    rack().select(mw)
+    selection_path = Path(CONFIG["result"]).with_name("selection.vcvs")
+    rack().save_selection(str(selection_path))
+    selection = json.loads(selection_path.read_text())
+    found["selection_saved"] = [m["model"] for m in selection["modules"]]
+    modules_before = len(rack().get_modules())
+    rack().load_selection(str(selection_path))
+    found["selection_loaded"] = len(rack().get_modules()) - modules_before
+    rack().delete_selection_action()
+    found["selection_delete_count"] = len(rack().get_modules()) - modules_before
+    _testing.history_undo()
+    found["selection_delete_undo"] = len(rack().get_modules()) - modules_before
+    _testing.history_undo()
+    found["selection_load_undo"] = len(rack().get_modules()) == modules_before
+    rack().deselect_all()
+    rack().select(mw)
+    rack().copy_clipboard_selection()
+    found["selection_pasted"] = rack().paste_clipboard_action()
+    found["selection_paste_count"] = len(rack().get_modules()) - modules_before
+    _testing.history_undo()
+    found["selection_paste_undo"] = len(rack().get_modules()) == modules_before
+    rack().paste_module_json_action(data)
+    found["module_paste_count"] = len(rack().get_modules()) - modules_before
+    _testing.history_undo()
+    found["module_paste_undo"] = len(rack().get_modules()) == modules_before
+    rack().deselect_all()
     mw.reset_action()
     found["reset"] = module.params[0].value
     mw.randomize_action()
@@ -293,6 +499,12 @@ def actions(module_id: int) -> Frames:
     found["disconnected"] = list(_testing.rack_cables())
     _testing.history_undo()
     found["reconnected"] = list(_testing.rack_cables())
+    context = raw.context_get()
+    assert context is not None and context.history is not None
+    history = context.history
+    before_disconnect = history.action_index
+    mw.disconnect()
+    found["plain_disconnect"] = [list(_testing.rack_cables()), history.action_index == before_disconnect]
     mw.create_context_menu()  # Rack's module menu; it closes when the next click lands elsewhere
     yield from wait(1)
     events().handle_button(Vec(2, 2), LEFT, PRESS, 0)

@@ -3,8 +3,10 @@
 Rack's live UI (Rack's audio drivers are isolated in tests and list no devices)."""
 
 import gc
+from typing import Any
 
 import pytest
+from _rackpy_host import _testing as HOOKS
 
 from rackpy import raw
 from rackpy.errors import OwnershipError
@@ -57,6 +59,36 @@ def test_choices_show_their_ports() -> None:
         choice.port = loop  # type: ignore[assignment]  # an audio choice takes an audio port
 
 
+def test_choices_and_buttons_open_their_rack_menus() -> None:
+    audio_port, midi_port = audio.Port(), midi.InputQueue()
+    audio_controls: list[tuple[Any, list[str]]] = [
+        (app.AudioDriverChoice(), ["Audio driver"]),
+        (app.AudioDeviceChoice(), ["Audio device"]),
+        (app.AudioSampleRateChoice(), ["Sample rate"]),
+        (app.AudioBlockSizeChoice(), ["Block size"]),
+        (app.AudioDeviceMenuChoice(), ["Audio driver", "Audio device", "Sample rate", "Block size"]),
+        (app.AudioButton(), ["Audio driver", "Audio device", "Sample rate", "Block size"]),
+    ]
+    midi_controls: list[tuple[Any, list[str]]] = [
+        (app.MidiDriverChoice(), ["MIDI driver"]),
+        (app.MidiDeviceChoice(), ["MIDI device"]),
+        (app.MidiChannelChoice(), ["MIDI channel"]),
+        (app.MidiButton(), ["MIDI driver", "MIDI device"]),  # Rack's combined menu omits channel
+    ]
+    try:
+        for control, expected in audio_controls:
+            control.port = audio_port
+            control.on_action(w.ActionEvent())
+            assert HOOKS.take_scene_menu_labels() == expected
+        for control, expected in midi_controls:
+            control.port = midi_port
+            control.on_action(w.ActionEvent())
+            assert HOOKS.take_scene_menu_labels() == expected
+    finally:
+        for control, _ in audio_controls + midi_controls:
+            control.close()
+
+
 def test_displays_rebuild_for_a_port_and_keep_it_alive() -> None:
     display = app.AudioDisplay()
     display.box.size = Vec(130, 90)
@@ -64,13 +96,39 @@ def test_displays_rebuild_for_a_port_and_keep_it_alive() -> None:
     gc.collect()
     assert display.driver_choice is not None and display.device_choice is not None
     assert display.sample_rate_choice is not None and display.buffer_size_choice is not None
-    assert display.driver_separator is not None and display.sample_rate_separator is not None
+    assert display.driver_separator is not None and display.device_separator is not None
+    assert display.sample_rate_separator is not None
+    audio_parts = [
+        display.driver_choice,
+        display.driver_separator,
+        display.device_choice,
+        display.device_separator,
+        display.sample_rate_choice,
+        display.sample_rate_separator,
+        display.buffer_size_choice,
+    ]
+    assert all(part is not None and part in display.children for part in audio_parts)
+    assert len({id(part) for part in audio_parts}) == len(audio_parts)
+    assert [display.children.index(part) for part in audio_parts] == sorted(
+        display.children.index(part) for part in audio_parts
+    )
     display.step()  # Rack's choices read the port every frame
     midi_display = app.MidiDisplay()
     midi_display.box.size = Vec(130, 90)
     out = midi.Output()
     midi_display.set_midi_port(out)
-    assert midi_display.channel_choice is not None and midi_display.device_separator is not None
+    midi_parts = [
+        midi_display.driver_choice,
+        midi_display.driver_separator,
+        midi_display.device_choice,
+        midi_display.device_separator,
+        midi_display.channel_choice,
+    ]
+    assert all(part is not None and part in midi_display.children for part in midi_parts)
+    assert len({id(part) for part in midi_parts}) == len(midi_parts)
+    assert [midi_display.children.index(part) for part in midi_parts] == sorted(
+        midi_display.children.index(part) for part in midi_parts
+    )
     midi_display.step()
     display.close()
     midi_display.close()
