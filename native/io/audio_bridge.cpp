@@ -11,6 +11,14 @@
 namespace rackpy {
 namespace io {
 
+// These atomics are used by the driver/engine exchange. A library fallback
+// lock is not acceptable on either real-time path.
+static_assert(std::atomic<size_t>::is_always_lock_free, "audio ring indices must be lock-free");
+static_assert(std::atomic<uint64_t>::is_always_lock_free, "audio counters and settings must be lock-free");
+static_assert(std::atomic<int>::is_always_lock_free, "audio channel counts must be lock-free");
+static_assert(std::atomic<bool>::is_always_lock_free, "audio state flags must be lock-free");
+static_assert(std::atomic<Converter*>::is_always_lock_free, "audio converter handover must be lock-free");
+
 // --- FrameRing ---------------------------------------------------------------------------------
 
 FrameRing::FrameRing(int stride)

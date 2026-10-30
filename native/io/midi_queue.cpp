@@ -8,6 +8,9 @@ namespace rackpy {
 namespace io {
 
 static_assert((MIDI_QUEUE_CAPACITY & (MIDI_QUEUE_CAPACITY - 1)) == 0, "a power of two");
+static_assert(std::atomic<size_t>::is_always_lock_free, "MIDI queue indices must be lock-free");
+static_assert(std::atomic<uint64_t>::is_always_lock_free, "MIDI counters must be lock-free");
+static_assert(std::atomic<MidiQueue*>::is_always_lock_free, "MIDI queue handover must be lock-free");
 
 MidiQueue::MidiQueue() : cells(new Cell[MIDI_QUEUE_CAPACITY]), pending(new MidiMessage[MIDI_QUEUE_CAPACITY]) {
 	for (size_t i = 0; i < MIDI_QUEUE_CAPACITY; i++)

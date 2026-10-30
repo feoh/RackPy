@@ -16,6 +16,13 @@ Sphinx `-W -n` also passed. This does not settle startup/rate-change
 equivalence or the counted silence when a converter is not ready; the task
 remains incomplete.
 
+The driver/engine bridge and MIDI queue now require their atomics to be
+always lock-free at compile time (indices, counters, state and handover
+pointers), so a target that implements them with library locks cannot silently
+build these paths. This is a compile-time guard, not a proof that every Rack or
+driver call is nonblocking. Linux x86_64 builds and CTests passed; the other
+architectures still require their own builds.
+
 The four affected binding records and generated mapping/callback artifacts now
 cite the WIP paths and their evidence without a status promotion. After this
 update, the Linux hooks build and 7 CTests, live I/O/graph suites, live package
