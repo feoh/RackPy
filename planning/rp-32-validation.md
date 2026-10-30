@@ -61,7 +61,8 @@ runs, machine details, clock and exact baselines are in
 `benchmarks/rp32-midi-facade-cost.json`. This is one shared-host diagnostic,
 not a performance guarantee, and it does not measure the audio path or all
 facade operations. The production binary and source revision are identified in
-the artifact; no native changes were part of this checkpoint.
+the artifact; no native changes were part of this checkpoint. A subsequent
+`uv run pytest -q -m unit` on the RP-32 tree passed 118 tests (215 deselected).
 
 ## Duplicate driver and device names
 
