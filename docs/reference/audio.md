@@ -178,4 +178,7 @@ thread:
 The `rackpy.audio` facade finds drivers by name (`drivers`, `find_driver`),
 opens ports (`open_port(driver, device, kind=...)`), makes and registers a
 virtual driver (`virtual_driver`), and drives a device one block at a time
-(`Stream`).
+(`Stream`). Duplicate driver or device names raise `LookupError` instead of
+silently picking one; use driver and device IDs to disambiguate. `drivers()`
+also raises if it cannot make an unambiguous name map. The raw driver-ID
+and device-ID enumeration methods remain available.

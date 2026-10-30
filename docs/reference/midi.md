@@ -159,4 +159,6 @@ The `rackpy.midi` facade builds messages (`note_on`, `note_off`,
 `control_change`, `message`, with range checks), finds drivers by name
 (`drivers`, `find_driver`), opens ports by driver and device name
 (`open_input`, `open_output`), and makes a virtual driver with its devices
-(`virtual_driver`).
+(`virtual_driver`). Duplicate driver or device names raise `LookupError` rather
+than selecting one silently; use IDs to disambiguate. `drivers()` also raises
+when its name map would lose a duplicate. Raw ID enumeration remains available.

@@ -249,6 +249,40 @@ def test_audio_same_port_native_stream_reentry_and_nonvirtual_super() -> None:
         port.set_device_id(-1)
 
 
+def test_duplicate_names_require_ids() -> None:
+    first = fa.virtual_driver(4360, "Duplicate audio", devices=("Same", "Same"))
+    fa.virtual_driver(4361, "Duplicate audio")
+    with pytest.raises(LookupError, match="ambiguous"):
+        fa.drivers()
+    with pytest.raises(LookupError, match="ambiguous"):
+        fa.find_driver("Duplicate audio")
+    assert fa.find_driver("RackPy Test Audio").id == AUDIO_ID
+    with pytest.raises(LookupError, match="ambiguous"):
+        fa.open_port(4360, "Same")
+    port = fa.open_port(4360, first.get_device_ids()[0])
+    assert port.get_device_id() == first.get_device_ids()[0]
+    port.set_device_id(-1)
+
+    fm.virtual_driver(4362, "Duplicate MIDI", inputs=("Same", "Same"), outputs=("Same", "Same"))
+    midi_first = fm.find_driver(4362)
+    fm.virtual_driver(4363, "Duplicate MIDI")
+    with pytest.raises(LookupError, match="ambiguous"):
+        fm.drivers()
+    with pytest.raises(LookupError, match="ambiguous"):
+        fm.find_driver("Duplicate MIDI")
+    assert fm.find_driver("RackPy Test MIDI").id == MIDI_ID
+    with pytest.raises(LookupError, match="ambiguous"):
+        fm.open_input(4362, "Same")
+    with pytest.raises(LookupError, match="ambiguous"):
+        fm.open_output(4362, "Same")
+    input_port = fm.open_input(4362, midi_first.get_input_device_ids()[0])
+    output_port = fm.open_output(4362, midi_first.get_output_device_ids()[0])
+    assert input_port.get_device_id() == midi_first.get_input_device_ids()[0]
+    assert output_port.get_device_id() == midi_first.get_output_device_ids()[0]
+    input_port.set_device_id(-1)
+    output_port.set_device_id(-1)
+
+
 def test_rack_deletes_python_drivers_as_it_quits() -> None:
     """Rack's midi::destroy() and audio::destroy() delete every driver (its virtual ~Driver) before the plugin's
     destroy(), so a destroy callback finds the Python drivers' handles stale. The outer test reads Rack's log."""

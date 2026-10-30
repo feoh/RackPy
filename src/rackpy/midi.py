@@ -10,6 +10,7 @@ MIDI reference page); nothing here has native semantics of its own.
 
 from typing import overload
 
+from rackpy._selection import by_name, unique_names
 from rackpy.raw.midi import (
     Driver,
     Input,
@@ -75,17 +76,20 @@ def _check(channel: int, **data: int) -> None:
 
 
 def drivers() -> dict[str, Driver]:
-    """Rack's MIDI drivers by name."""
+    """Rack's MIDI drivers by name; raise LookupError on duplicate names."""
     found = (get_driver(i) for i in get_driver_ids())
-    return {d.get_name(): d for d in found if d is not None}
+    return unique_names(((d.get_name(), d) for d in found if d is not None), "MIDI driver")
 
 
 def find_driver(driver: str | int) -> Driver:
-    """A driver by name or ID. LookupError if Rack has none."""
-    found = get_driver(driver) if isinstance(driver, int) else drivers().get(driver)
-    if found is None:
+    """A driver by name or ID. LookupError if absent or the name is ambiguous."""
+    if isinstance(driver, str):
+        found = (get_driver(i) for i in get_driver_ids())
+        return by_name(((d.get_name(), d) for d in found if d is not None), driver, "MIDI driver")
+    result = get_driver(driver)
+    if result is None:
         raise LookupError(f"Rack has no MIDI driver {driver!r}")
-    return found
+    return result
 
 
 def _select[P: Input | Output](port: P, driver: str | int, device: str | int | None, inputs: bool) -> P:
@@ -95,10 +99,8 @@ def _select[P: Input | Output](port: P, driver: str | int, device: str | int | N
         return port  # Rack's default device
     if isinstance(device, str):
         ids = d.get_input_device_ids() if inputs else d.get_output_device_ids()
-        names = {(d.get_input_device_name(i) if inputs else d.get_output_device_name(i)): i for i in ids}
-        if device not in names:
-            raise LookupError(f"{d.get_name()} has no MIDI {'input' if inputs else 'output'} device {device!r}")
-        device = names[device]
+        names = ((d.get_input_device_name(i) if inputs else d.get_output_device_name(i), i) for i in ids)
+        device = by_name(names, device, f"{d.get_name()} MIDI {'input' if inputs else 'output'} device")
     port.set_device_id(device)
     if port.get_device_id() != device:
         raise LookupError(f"{d.get_name()} could not open MIDI device {device}")

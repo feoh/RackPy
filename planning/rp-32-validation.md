@@ -60,6 +60,25 @@ not a performance guarantee, and it does not measure the audio path or all
 facade operations. The production binary and source revision are identified in
 the artifact; no native changes were part of this checkpoint.
 
+## Duplicate driver and device names
+
+Audio and MIDI name-based driver and device lookups now raise `LookupError`
+when the requested name is ambiguous; the name-map `drivers()` helpers also
+refuse duplicate keys. ID lookup remains available, and a unique name still
+works even if an unrelated name is duplicated. Unit tests exercise the shared
+selection helper; actual Rack host tests register duplicate virtual audio and
+MIDI drivers and devices, check refusal and select devices by ID.
+
+A fixture correction was necessary during this checkpoint: the reused RP-31
+native build's bundle also contained RP-31's Python sources, not this branch's
+facade. Earlier host runs therefore did not prove the modified RP-32 Python
+code. The corrected fixture overlaid this worktree's `src/rackpy` into the
+bundle while keeping the identified native binaries; it was restored after
+use. With that correction, 12 outer virtual-I/O, services, plugin and engine
+host tests and two production I/O/benchmark outer tests passed. The earlier
+benchmark used the RP-31 version of `midi.message`, which is unchanged here;
+its artifact identifies that baseline. Linux only.
+
 ## Engine rollback contract
 
 The facade and reference no longer promise that every failed operation leaves
@@ -86,5 +105,7 @@ the facade-test check above does not suppress these diagnostics globally.
 Still to do: a complete coherent facade and typing review, raw discoverability,
 strict mypy and pyright samples, signature and exception tests, representative
 user walkthroughs, measured wrapper overhead with explicit baseline, any
-resulting fixes, and versioning/freeze decision. Do not close RP-32 on this
-checkpoint.
+resulting fixes, and versioning/freeze decision. DSP bulk filter typing and
+dynamic IIR template stubs still use `Any`; a structural protocol that accepts
+unsupported native filter objects would be misleading. Do not close RP-32 on
+this checkpoint.

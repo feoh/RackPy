@@ -11,23 +11,27 @@ The raw layer's rules apply unchanged (see the audio reference page).
 from array import array
 from typing import overload
 
+from rackpy._selection import by_name, unique_names
 from rackpy.raw.audio import Driver, Port, PythonDevice, PythonDriver, add_driver, get_driver, get_driver_ids
 
 __all__ = ["Stream", "drivers", "find_driver", "open_port", "virtual_driver"]
 
 
 def drivers() -> dict[str, Driver]:
-    """Rack's audio drivers by name."""
+    """Rack's audio drivers by name; raise LookupError on duplicate names."""
     found = (get_driver(i) for i in get_driver_ids())
-    return {d.get_name(): d for d in found if d is not None}
+    return unique_names(((d.get_name(), d) for d in found if d is not None), "audio driver")
 
 
 def find_driver(driver: str | int) -> Driver:
-    """A driver by name or ID. LookupError if Rack has none."""
-    found = get_driver(driver) if isinstance(driver, int) else drivers().get(driver)
-    if found is None:
+    """A driver by name or ID. LookupError if absent or the name is ambiguous."""
+    if isinstance(driver, str):
+        found = (get_driver(i) for i in get_driver_ids())
+        return by_name(((d.get_name(), d) for d in found if d is not None), driver, "audio driver")
+    result = get_driver(driver)
+    if result is None:
         raise LookupError(f"Rack has no audio driver {driver!r}")
-    return found
+    return result
 
 
 @overload
@@ -46,10 +50,8 @@ def open_port(driver: str | int, device: str | int | None = None, *, kind: type[
     if device is None:
         return port
     if isinstance(device, str):
-        names = {d.get_device_name(i): i for i in d.get_device_ids()}
-        if device not in names:
-            raise LookupError(f"{d.get_name()} has no audio device {device!r}")
-        device = names[device]
+        names = ((d.get_device_name(i), i) for i in d.get_device_ids())
+        device = by_name(names, device, f"{d.get_name()} audio device")
     port.set_device_id(device)
     if port.get_device_id() != device:
         raise LookupError(f"{d.get_name()} could not open audio device {device}")
