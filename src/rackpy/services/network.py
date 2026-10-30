@@ -30,8 +30,8 @@ def post_json(url: str, data: Any = None, cookies: dict[str, str] | None = None)
 
 
 def put_json(url: str, data: Any = None, cookies: dict[str, str] | None = None) -> Any:
-    """PUT ``data`` as a JSON body. None on failure."""
-    return _network.request_json(_network.METHOD_PUT, url, data, cookies or {})
+    """Refuse to send: Rack 2.6.6's PUT with a JSON body actually sends POST."""
+    raise NotImplementedError("Rack 2.6.6 cannot safely send a JSON PUT request")
 
 
 def delete_json(url: str, cookies: dict[str, str] | None = None) -> Any:

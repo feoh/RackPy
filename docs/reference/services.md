@@ -88,7 +88,9 @@ reference in `tests/values`).
 the message as `string.f` does, then passes it to Rack's log as one `%s`
 argument: the same text, without Python's format string ever reaching
 Rack's printf. It is thread-safe and releases the GIL. `Level` has Rack's
-levels. `get_log_path()` returns the file Rack logs to, and
+levels, `DEBUG_LEVEL`, `INFO_LEVEL`, `WARN_LEVEL` and `FATAL_LEVEL`, which
+Rack's log labels `debug`, `info`, `warn` and `fatal`; it writes every
+level. `get_log_path()` returns the file Rack logs to, and
 `set_log_path()` sets Rack's variable, though Rack opened its log at
 start-up, so later messages still go there.
 
@@ -155,6 +157,11 @@ another thread can read its progress (0 to 1) from a `DownloadProgress`
 meanwhile. Both block in curl, which allows 30 seconds to connect and sets
 no overall limit, with the GIL released.
 
+- `Method` has `METHOD_GET`, `METHOD_POST`, `METHOD_PUT` and
+  `METHOD_DELETE`. In Rack 2.6.6, `METHOD_PUT` with JSON data actually sends
+  POST because of Rack's curl options; without data it can read stdin. Do not
+  use it for PUT. The `services.network.put_json` facade raises
+  `NotImplementedError` rather than sending an unintended request.
 - `request_json` sends `data` as the query for `METHOD_GET` (string values
   only, as Rack does) or as the JSON body otherwise. It returns the parsed
   answer, or `None` on any failure: no connection, a malformed URL, or a
@@ -172,6 +179,12 @@ main thread. `rackpy.raw.settings.settings` has one property for each of
 them, such as `prefer_dark_panels`, `rack_brightness`, `cable_colors`,
 `knob_mode` and `thread_count`. The properties work on the main thread only.
 Rack writes the settings to `settings_path` when it quits.
+
+Each property reads and writes the Rack global of the same name in
+snake case (`cable_opacity` is `settings::cableOpacity`), except
+`plugin_settings`, which is `pluginSettingsJ`. A test in Rack
+writes a new value to every property and reads Rack's global from C++, and
+the reverse, so it would fail if a property reached the wrong global.
 
 - **Read-only.** Rack sets `headless` and `is_plugin` at start-up and relies
   on them afterwards, so they cannot be changed.
@@ -194,6 +207,55 @@ Rack writes the settings to `settings_path` when it quits.
 - **Not refreshed.** Writing `ui_theme` alone does not refresh the UI;
   Rack's View menu also refreshes the theme.
 - **The login token.** `token` is the user's VCV login token. Never log it.
+  Rack's library client sends it to VCV's server as a cookie.
+
+Some settings take effect only at start-up, or at quit, so writing them in
+a running Rack does less, or more, than it seems:
+
+- **`restart`.** When Rack quits with it set, it starts again (Rack's menus
+  set it after a language change or a library update). Rack does not
+  save it.
+- **`safe_mode`.** Rack reads it at start-up, when it skips loading plugins
+  and the autosave. Its patch manager also reads it as Rack quits: set, it
+  deletes the autosave instead of saving it. Rack always saves it as `false`.
+- **`dev_mode`.** Rack chooses its directories and plugin folder from it at
+  start-up; later, it changes only what Rack's menus show and whether
+  Rack checks for updates. Rack does not save it.
+- **`verify_https_certs`.** Rack's HTTP client reads it at every request,
+  Rack's own and `rackpy.raw.network`'s. `false` turns off certificate
+  checks for every HTTPS request, which lets anyone on the network forge
+  the replies. Rack saves it.
+- **`window_pos`, `window_size`, `window_maximized`.** Rack's window
+  writes them as it moves and resizes, and reads them only when it opens.
+  Writing them does not move the window, and Rack overwrites them at the
+  window's next move. Rack's default `window_pos` is NaN, NaN: no saved
+  position.
+- **`settings_path`.** Where Rack saves the settings when it quits.
+- **`sample_rate`.** 0 means the audio device's rate. Rack's engine reads
+  it only when a device suggests a rate.
+
+(services-settings-values)=
+### Settings values
+
+- **`KnobMode`** is how dragging a knob changes it: `KNOB_MODE_LINEAR` (0),
+  `KNOB_MODE_SCALED_LINEAR` (1), `KNOB_MODE_ROTARY_ABSOLUTE` (2) and
+  `KNOB_MODE_ROTARY_RELATIVE` (3), Rack's values, also exported from the
+  module. `knob_mode` is one.
+- **`BrowserSort`** is the module browser's order: `BROWSER_SORT_UPDATED`
+  (0), `BROWSER_SORT_LAST_USED` (1), `BROWSER_SORT_MOST_USED` (2),
+  `BROWSER_SORT_BRAND` (3), `BROWSER_SORT_NAME` (4) and
+  `BROWSER_SORT_RANDOM` (5). `browser_sort` is one.
+- **`ModuleInfo`** is Rack's record of one module in the browser, a value:
+  `enabled` (true at first), `favorite`, `added` (how many times it was
+  added) and `last_added`, a Unix time, or NaN if never. `module_infos`
+  maps plugin slugs to module slugs to copies; a `ModuleInfoView` from
+  `get_module_info` has the same fields and writes Rack's.
+- **`PluginWhitelist`** is Rack's record of which of one plugin's modules
+  the user subscribed to, a value: `subscribed` (the whole plugin) and
+  `module_slugs`, a set copy (assign a new set). `module_whitelist` maps
+  plugin slugs to copies. `is_module_whitelisted(plugin, module)` is
+  Rack's check: true for a plugin with no entry or a subscribed one, else
+  whether `module_slugs` has the module.
 
 (services-mutex)=
 ## Rack's shared mutex: `rackpy.raw.SharedMutex`

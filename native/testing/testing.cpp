@@ -20,10 +20,14 @@
 #include <pybind11/stl.h>
 
 #include <algorithm>
+#include <functional>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <string>
 #include <thread>
+#include <type_traits>
 #include <unordered_set>
 #include <vector>
 
@@ -249,6 +253,98 @@ ProbeModule& live(const ModuleHandle& h) {
 rack::Context* foreignContext() {
 	static rack::Context* fake = new rack::Context;  // never deleted: deleting a Context tears down its members
 	return fake;
+}
+
+// RP-31E: each of Rack's settings globals, read and written here directly rather than through
+// rackpy.raw.settings, so a test can tell which global each Python property reaches. The keys are
+// the globals' C++ names; enums are ints and pluginSettingsJ is Python data (a copy).
+struct RackSetting {
+	std::function<py::object()> get;
+	std::function<void(py::handle)> set;  // empty for the read-only headless and isPlugin
+};
+
+template <class T>
+py::object rackSettingValue(const T& value) {
+	if constexpr (std::is_enum_v<T>)
+		return py::int_(static_cast<int>(value));
+	else
+		return py::cast(value);
+}
+
+template <class T>
+void setRackSetting(T& field, py::handle value) {
+	if constexpr (std::is_enum_v<T>)
+		field = static_cast<T>(value.cast<int>());
+	else
+		field = value.cast<T>();
+}
+
+const std::map<std::string, RackSetting>& rackSettings() {
+	namespace st = rack::settings;
+#define RACKPY_RACK_SETTING(field) \
+	{#field, {[] { return rackSettingValue(st::field); }, [](py::handle v) { setRackSetting(st::field, v); }}}
+#define RACKPY_RACK_READONLY_SETTING(field) {#field, {[] { return rackSettingValue(st::field); }, nullptr}}
+	static const std::map<std::string, RackSetting> table = {
+		RACKPY_RACK_SETTING(settingsPath),
+		RACKPY_RACK_SETTING(devMode),
+		RACKPY_RACK_READONLY_SETTING(headless),
+		RACKPY_RACK_READONLY_SETTING(isPlugin),
+		RACKPY_RACK_SETTING(restart),
+		RACKPY_RACK_SETTING(language),
+		RACKPY_RACK_SETTING(safeMode),
+		RACKPY_RACK_SETTING(token),
+		RACKPY_RACK_SETTING(windowMaximized),
+		RACKPY_RACK_SETTING(windowSize),
+		RACKPY_RACK_SETTING(windowPos),
+		RACKPY_RACK_SETTING(invertZoom),
+		RACKPY_RACK_SETTING(mouseWheelZoom),
+		RACKPY_RACK_SETTING(pixelRatio),
+		RACKPY_RACK_SETTING(uiTheme),
+		RACKPY_RACK_SETTING(cableOpacity),
+		RACKPY_RACK_SETTING(cableTension),
+		RACKPY_RACK_SETTING(rackBrightness),
+		RACKPY_RACK_SETTING(spotlightBrightness),
+		RACKPY_RACK_SETTING(spotlightRadius),
+		RACKPY_RACK_SETTING(haloBrightness),
+		RACKPY_RACK_SETTING(allowCursorLock),
+		RACKPY_RACK_SETTING(knobMode),
+		RACKPY_RACK_SETTING(knobScroll),
+		RACKPY_RACK_SETTING(knobLinearSensitivity),
+		RACKPY_RACK_SETTING(knobScrollSensitivity),
+		RACKPY_RACK_SETTING(sampleRate),
+		RACKPY_RACK_SETTING(threadCount),
+		RACKPY_RACK_SETTING(tooltips),
+		RACKPY_RACK_SETTING(cpuMeter),
+		RACKPY_RACK_SETTING(lockModules),
+		RACKPY_RACK_SETTING(squeezeModules),
+		RACKPY_RACK_SETTING(preferDarkPanels),
+		RACKPY_RACK_SETTING(frameRateLimit),
+		RACKPY_RACK_SETTING(autosaveInterval),
+		RACKPY_RACK_SETTING(skipLoadOnLaunch),
+		RACKPY_RACK_SETTING(lastPatchDirectory),
+		RACKPY_RACK_SETTING(lastSelectionDirectory),
+		RACKPY_RACK_SETTING(recentPatchPaths),
+		RACKPY_RACK_SETTING(cableAutoRotate),
+		RACKPY_RACK_SETTING(cableColors),
+		RACKPY_RACK_SETTING(cableLabels),
+		RACKPY_RACK_SETTING(autoCheckUpdates),
+		RACKPY_RACK_SETTING(verifyHttpsCerts),
+		RACKPY_RACK_SETTING(showTipsOnLaunch),
+		RACKPY_RACK_SETTING(tipIndex),
+		RACKPY_RACK_SETTING(browserSort),
+		RACKPY_RACK_SETTING(browserZoom),
+		{"pluginSettingsJ", {[]() -> py::object { return st::pluginSettingsJ ? fromJson(st::pluginSettingsJ) : py::none(); },
+			[](py::handle v) {
+				json_t* json = v.is_none() ? nullptr : toJson(v);
+				json_decref(st::pluginSettingsJ);
+				st::pluginSettingsJ = json;
+			}}},
+		RACKPY_RACK_SETTING(moduleInfos),
+		RACKPY_RACK_SETTING(moduleWhitelist),
+	};
+#undef RACKPY_RACK_SETTING
+#undef RACKPY_RACK_READONLY_SETTING
+	return table;
 }
 
 }  // namespace
@@ -581,6 +677,39 @@ void define(py::module_ m) {
 			std::copy_n(rows.data() + size_t(h - 1 - y) * w * 4, size_t(w) * 4, out.begin() + size_t(y) * w * 4);
 		return py::make_tuple(w, h, py::bytes(out));
 	});
+	m.def("rack_settings", [] {
+		requireMainThread("rack_settings");
+		py::dict out;
+		for (const auto& [name, setting] : rackSettings())
+			out[py::str(name)] = setting.get();
+		return out;
+	}, "Every one of Rack's settings globals, read directly: {C++ name: value}.");
+	m.def("set_rack_setting", [](const std::string& name, py::handle value) {
+		requireMainThread("set_rack_setting");
+		auto it = rackSettings().find(name);
+		if (it == rackSettings().end())
+			throw py::key_error(name);
+		if (!it->second.set)
+			throw py::value_error(name + " is read-only");
+		it->second.set(value);
+	}, py::arg("name"), py::arg("value"), "Writes one of Rack's settings globals directly, by its C++ name.");
+	m.def("rack_settings_enumerators", [] {
+		namespace st = rack::settings;
+		py::dict out;
+#define RACKPY_ENUMERATOR(name) out[#name] = static_cast<int>(st::name);
+		RACKPY_ENUMERATOR(KNOB_MODE_LINEAR)
+		RACKPY_ENUMERATOR(KNOB_MODE_SCALED_LINEAR)
+		RACKPY_ENUMERATOR(KNOB_MODE_ROTARY_ABSOLUTE)
+		RACKPY_ENUMERATOR(KNOB_MODE_ROTARY_RELATIVE)
+		RACKPY_ENUMERATOR(BROWSER_SORT_UPDATED)
+		RACKPY_ENUMERATOR(BROWSER_SORT_LAST_USED)
+		RACKPY_ENUMERATOR(BROWSER_SORT_MOST_USED)
+		RACKPY_ENUMERATOR(BROWSER_SORT_BRAND)
+		RACKPY_ENUMERATOR(BROWSER_SORT_NAME)
+		RACKPY_ENUMERATOR(BROWSER_SORT_RANDOM)
+#undef RACKPY_ENUMERATOR
+		return out;
+	}, "Rack's KnobMode and BrowserSort enumerators: {name: C++ value}.");
 	m.def("set_rack_brightness", [](float rack, float spotlight) {
 		// Rack's View > Room brightness and spotlight settings (settings.hpp is RP-30's); returns the old values.
 		requireMainThread("set_rack_brightness");
