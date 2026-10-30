@@ -27,7 +27,7 @@ _closing_callbacks: list[Callable[[], None]] = []
 def _role(name: str) -> ThreadRole:
     if name not in _ROLES:
         raise ValueError(f"unknown thread role {name!r} from the host")
-    return cast(ThreadRole, name)
+    return cast(ThreadRole, name)  # pyright: ignore[reportUnnecessaryCast]
 
 
 @dataclass(frozen=True)
@@ -82,7 +82,7 @@ def on_context_closing(callback: Callable[[], None]) -> Callable[[], None]:
     return callback
 
 
-def _run_closing_callbacks() -> None:
+def _run_closing_callbacks() -> None:  # pyright: ignore[reportUnusedFunction]
     while _closing_callbacks:
         callback = _closing_callbacks.pop()
         try:

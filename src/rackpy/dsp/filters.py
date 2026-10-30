@@ -62,8 +62,8 @@ def process_block(filter: Any, in_: Buffer, out: Buffer, delta_time: float | Non
     if isinstance(filter, _TIMED):
         if delta_time is None:
             raise TypeError(f"process_block: a {type(filter).__name__} needs delta_time")
-        _raw._process_block(filter, in_, out, delta_time)
+        _raw._process_block(filter, in_, out, delta_time)  # pyright: ignore[reportPrivateUsage]
     else:
         if delta_time is not None:
             raise TypeError(f"process_block: a {type(filter).__name__} takes no delta_time")
-        _raw._process_block(filter, in_, out)
+        _raw._process_block(filter, in_, out)  # pyright: ignore[reportPrivateUsage]

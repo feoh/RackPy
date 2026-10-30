@@ -46,7 +46,7 @@ contracts exercise subclass overrides and reject an incorrect port-change
 event. `tests/plugin/test_plugin.py` passed nine outer tests in the Linux Rack
 host, using the integration binaries. The pyright contract is now a prek hook.
 A follow-up expanded its strict scope from the contract file to all files in
-`tests/facade/` and 28 explicitly listed facade modules that pass strict
+`tests/facade/` and 33 explicitly listed facade modules that pass strict
 pyright. Inclusion means only that the static check passed, not that each
 module has received a complete behavioral review; the check does not cover the
 entire project.
@@ -103,7 +103,10 @@ The static contract also checks graph inputs, arithmetic signals and plans
 with mypy and strict pyright. `graph.py` is included in the strict pyright
 scope: its two file-local suppressions cover module-internal collaboration on
 private attributes and runtime type checks for untyped callers; unknown-type
-diagnostics remain enabled. The existing pure-Python graph and graph-codegen
+diagnostics remain enabled. Five additional facade files use targeted pyright
+suppressions for runtime validation of untyped callers, intended private native
+adapter calls, a mypy-required cast, and a native-invoked shutdown hook;
+`filters.process_block` still has its explicit `Any` gap. The existing pure-Python graph and graph-codegen
 suites passed 25 tests without a Rack host; this is not an actual-host audio
 walkthrough.
 

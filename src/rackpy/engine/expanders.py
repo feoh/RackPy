@@ -46,7 +46,7 @@ def graph_messages(expander: Expander, lanes: int = 1) -> tuple[ExpanderMessage,
     own messages: the neighbour's ``Graph.expander_send`` writes into them, and
     this module's ``Graph.expander_receive`` reads them one frame later.
     """
-    if isinstance(lanes, bool) or not isinstance(lanes, int) or not 1 <= lanes <= MAX_LANES:
+    if isinstance(lanes, bool) or not isinstance(lanes, int) or not 1 <= lanes <= MAX_LANES:  # pyright: ignore[reportUnnecessaryIsInstance]
         raise ValueError(f"graph_messages takes 1 to {MAX_LANES} lanes, not {lanes!r}")
     return allocate_messages(expander, EXPANDER_SCHEMA, lanes * LANE)
 

@@ -53,7 +53,7 @@ from rackpy.raw.simd import (
     trunc,
 )
 
-IMPLEMENTATION: str = _raw._IMPLEMENTATION
+IMPLEMENTATION: str = _raw._IMPLEMENTATION  # pyright: ignore[reportPrivateUsage]
 """Rack's SIMD implementation this plugin was built with: "sse4.2" on x86-64, "simde" elsewhere."""
 
 __all__ = [

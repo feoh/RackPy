@@ -47,7 +47,7 @@ def color(value: Color) -> NVGcolor:
             raise ValueError(f"not a #RRGGBB or #RRGGBBAA colour: {value!r}")
         parts = [int(digits[i : i + 2], 16) for i in range(0, len(digits), 2)]
         return _nvg.rgba(*parts) if len(parts) == 4 else _nvg.rgb(*parts)
-    if isinstance(value, tuple) and len(value) in (3, 4):
+    if isinstance(value, tuple) and len(value) in (3, 4):  # pyright: ignore[reportUnnecessaryIsInstance]
         return NVGcolor(*(float(c) for c in value))
     raise TypeError(f"not a colour: {value!r}")
 
