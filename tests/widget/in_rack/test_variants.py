@@ -145,6 +145,41 @@ def test_transform_array_write_through_copy_math_and_invalidation() -> None:
         matrix.copy()
 
 
+def premultiplied(transform: tuple[float, ...], by: tuple[float, ...]) -> tuple[float, ...]:
+    """nanovg's nvgTransformPremultiply(transform, by), which TransformWidget uses, in Python floats."""
+    a, b = by, transform
+    return (
+        a[0] * b[0] + a[1] * b[2],
+        a[0] * b[1] + a[1] * b[3],
+        a[2] * b[0] + a[3] * b[2],
+        a[2] * b[1] + a[3] * b[3],
+        a[4] * b[0] + a[5] * b[2] + b[4],
+        a[4] * b[1] + a[5] * b[3] + b[5],
+    )
+
+
+def test_transform_rotate_without_an_origin_is_racks_rotation() -> None:
+    angle, origin = 0.7, Vec(5, 6)
+    start = (2.0, 0.5, -1.0, 3.0, 4.0, -6.0)
+    by_parts, whole, alone = w.TransformWidget(), w.TransformWidget(), w.TransformWidget()
+    try:
+        by_parts.transform = whole.transform = alone.transform = start
+        # Rack's rotate(angle, origin) is translate(origin), rotate(angle), translate(-origin): the same bits.
+        by_parts.translate(origin)
+        by_parts.rotate(angle)
+        by_parts.translate(origin.neg())
+        whole.rotate(angle, origin)
+        assert by_parts.transform.copy() == whole.transform.copy()
+        # About (0, 0), premultiplied by nvgTransformRotate's matrix, not postmultiplied.
+        alone.rotate(angle)
+        c, s = math.cos(angle), math.sin(angle)
+        assert alone.transform.copy() == pytest.approx(premultiplied(start, (c, s, -s, c, 0.0, 0.0)), abs=1e-5)
+        assert alone.transform.copy() != pytest.approx(premultiplied((c, s, -s, c, 0.0, 0.0), start), abs=1e-2)
+    finally:
+        for widget in (by_parts, whole, alone):
+            widget.close()
+
+
 def test_raw_field_geometry_interoperability_and_eventful_setters() -> None:
     events: list[str] = []
 

@@ -116,7 +116,7 @@ def generator(channels: int) -> Callable[[list[list[Any]]], list[list[Any]]]:
         out = []
         for name, *args in ops:
             setters[name](*args)
-            out.append([[m.bytes, m.frame] for m in g.take_messages()])
+            out.append([[[m.bytes, m.frame] for m in g.take_messages()], g.key_pressures.tolist(), g.channel_pressure])
         return out
 
     return run
@@ -142,34 +142,87 @@ def state(p: Any) -> list[Any]:
         wheels,
         [pulse.remaining for pulse in pulses],
         [pulse.remaining for pulse in p.retrigger_pulses.tolist()],
+        [
+            [f.out, f.lambda_, g.out, g.lambda_]
+            for f, g in zip(p.pw_filters.tolist(), p.mod_filters.tolist(), strict=True)
+        ],
+        [
+            p.mono_mode.value,
+            p.poly_mode.value,
+            p.retrigger_on_resume,
+            p.release_velocity_enabled,
+            p.pw_range,
+            p.smooth,
+            p.clock_division,
+        ],
     ]
 
 
+def message(data: list[int]) -> midi.Message:
+    m = midi.Message()
+    m.bytes = data
+    m.frame = 7
+    return m
+
+
 def parser(channels: int) -> Callable[[list[list[Any]]], list[Any]]:
+    """Replays a script: messages, and (the methods scripts) the methods process_message calls and the fields."""
+
     def run(ops: list[list[Any]]) -> list[Any]:
         p = dsp.MidiParser[channels]()
-        out = []
+        out: list[Any] = []
         for name, *args in ops:
+            if name == "assign":
+                out.append([p.assign_channel(args[0]), state(p)])
+                continue
             if name == "channels":
                 p.set_channels(args[0])
             elif name == "poly":
-                p.set_poly_mode(dsp.MidiParser_16.PolyMode(args[0]))
+                p.set_poly_mode(getattr(dsp.MidiParser_16.PolyMode, args[0]))
             elif name == "mono":
-                p.set_mono_mode(dsp.MidiParser_16.MonoMode(args[0]))
+                p.set_mono_mode(getattr(dsp.MidiParser_16.MonoMode, args[0]))
             elif name == "flags":
                 p.retrigger_on_resume, p.release_velocity_enabled, p.clock_division = args
             elif name == "msg":
-                m = midi.Message()
-                m.bytes = args[0]
-                m.frame = 7
-                p.process_message(m)
+                p.process_message(message(args[0]))
             elif name == "step":
                 p.process_filters(args[0])
                 p.process_pulses(args[1])
+            elif name == "press":
+                p.press_note(*args)
+            elif name == "release":
+                p.release_note(*args)
+            elif name == "press_pedal":
+                p.press_pedal()
+            elif name == "release_pedal":
+                p.release_pedal()
+            elif name == "refresh":
+                p.refresh_held()
+            elif name == "pedal":
+                p.pedal = args[0]
+            elif name == "held":
+                p.held_notes = args[0]
+            elif name == "cc":
+                p.process_cc(message(args[0]))
+            elif name == "sys":
+                p.process_system(message(args[0]))
+            elif name == "lambda":
+                p.set_filter_lambda(args[0])
+            elif name == "pw_range":
+                p.pw_range = args[0]
+            elif name == "rotate_index":
+                p.rotate_index = args[0]
+            else:
+                raise AssertionError(f"unknown parser op {name}")
             out.append(state(p))
         return [out, p.to_json()]
 
     return run
+
+
+def parser_enums() -> list[list[list[Any]]]:
+    """Every enumerator of the two Python enums by name and value, in order, as Rack's header declares them."""
+    return [[[m.name, m.value] for m in modes] for modes in (dsp.MidiParser_16.MonoMode, dsp.MidiParser_16.PolyMode)]
 
 
 FROM_JSON = {
@@ -201,8 +254,21 @@ CALLS: dict[str, Callable[..., Any]] = {
     "generator.4": generator(4),
     "generator.1": generator(1),
     "parser.from_json": from_json,
+    "parser.enums": parser_enums,
 }
-for _name in ("mono_last", "mono_first", "mono_lowest", "mono_highest", "rotate", "reuse", "reset", "mpe"):
+for _name in (
+    "mono_last",
+    "mono_first",
+    "mono_lowest",
+    "mono_highest",
+    "rotate",
+    "reuse",
+    "reset",
+    "mpe",
+    "methods_poly",
+    "methods_mono",
+    "methods_mpe",
+):
     CALLS[f"parser.16.{_name}"] = parser(16)
 CALLS["parser.4.rotate"] = parser(4)
 CALLS["parser.1.mono"] = parser(1)
@@ -215,7 +281,7 @@ def test_every_reference_script_matches_rack(midi_cases: list[dict[str, Any]]) -
         fn = case["fn"]
         seen[fn] += 1
         expected = decode(case["result"])
-        if fn.startswith("parser.") and fn != "parser.from_json":
+        if fn.startswith("parser.") and fn not in ("parser.from_json", "parser.enums"):
             expected[1] = json.loads(expected[1])  # Rack's toJson, as text
         actual = CALLS[fn](*decode(case["args"]))
         if not same(actual, expected):
@@ -252,6 +318,14 @@ def test_midi_generator() -> None:
     messages = g.take_messages()
     assert len(messages) == 1 and isinstance(messages[0], midi.Message) and messages[0].bytes == [0x90, 60, 100]
     assert g.take_messages() == []  # taking clears them
+    # The pressure setters send only a change from the fields, which are Rack's (the array a live view).
+    g.channel_pressure = 40
+    g.set_channel_pressure(40)
+    g.key_pressures[2] = 30
+    g.set_key_pressure(30, 2)
+    assert g.take_messages() == []
+    g.set_key_pressure(31, 2)
+    assert g.key_pressures[2] == 31 and [m.bytes for m in g.take_messages()] == [[0xA0, 60, 31]]
     out_of_range: list[Callable[[], object]] = [
         lambda: g.set_note_gate(60, True, 4),
         lambda: g.set_velocity(1, -1),
@@ -296,6 +370,10 @@ def test_midi_parser_refuses_what_rack_would_get_wrong() -> None:
         p.process_message(on9)
     with pytest.raises(IndexError):
         p.press_note(60, 9, 100)
+    with pytest.raises(IndexError):
+        p.release_note(60, 9, 0)
+    with pytest.raises(ValueError, match="MIDI channel 9"):
+        p.process_cc(message([0xB9, 0x01, 5]))  # the mod wheel, by MIDI channel
     on2 = midi.Message()
     on2.bytes = [0x92, 60, 100]
     p.process_message(on2)
@@ -306,6 +384,8 @@ def test_midi_parser_refuses_what_rack_would_get_wrong() -> None:
     clock.bytes = [0xF8]
     with pytest.raises(ValueError, match="divide"):
         p.process_message(clock)
+    with pytest.raises(ValueError, match="divide"):
+        p.process_system(clock)
     # Patch JSON is untrusted.
     for invalid in ({"channels": 99}, {"monoMode": 9}, {"polyMode": -1}):
         with pytest.raises(ValueError):

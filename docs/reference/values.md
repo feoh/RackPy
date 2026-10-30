@@ -84,7 +84,8 @@ Out-parameters become return values: `euc_div_mod(-7, 3)` is `(-3, 2)` and
 ## Vec
 
 `Vec(x, y)` is a 2D vector of C++ floats with Rack's methods (`plus`, `norm`,
-`rotate`, …) and Rack's operators: `+`, `-`, `*` and `/` with a `Vec` or a
+`rotate`, …; `mult` and `div` take a `Vec` or a float, as their two C++
+overloads do) and Rack's operators: `+`, `-`, `*` and `/` with a `Vec` or a
 float, unary `+` and `-`, `==` and `!=`, and the in-place forms, which change
 the `Vec` itself. `v[0]` and `v[1]` are `x` and `y`; any other index raises
 `IndexError` (C++ would quietly return `y`).
@@ -98,9 +99,15 @@ not hashable.
 
 `Rect(pos, size)` or `Rect(x, y, width, height)` includes its left and top
 edges but not its right and bottom ones. `Rect.inf()` is the whole plane.
-`contains` takes a `Vec` or a `Rect`. The facade adds read-only properties
-(`left`, `right`, `top`, `bottom`, `width`, `height`, `center`) over Rack's
-getters.
+It has Rack's methods, which return new values: the static constructors
+`from_min_max` and `from_corners`; the getters (`get_left`, …, `get_center`,
+`get_top_left`, `get_top_right`, `get_bottom_left`, `get_bottom_right`);
+`contains`, which takes a `Vec` or a `Rect`, `intersects` and `equals`;
+`clamp`, `nudge`, `expand`, `intersect`, `zero_pos`, `grow`, `shrink` and
+`interpolate`; and Rack's aliases `is_containing`, `is_intersecting` and
+`is_equal`. `==` and `!=` are Rack's operators. The facade adds read-only
+properties (`left`, `right`, `top`, `bottom`, `width`, `height`, `center`)
+over Rack's getters.
 
 (values-views)=
 ## Copies and views

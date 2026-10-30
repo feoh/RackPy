@@ -279,7 +279,9 @@ views, and every method calls Rack's code out of line
 - `SlewLimiter`: `set_rise_fall(rise, fall)` in units per second;
   `process(delta_time, in_)` moves toward the input by at most that much.
 - `ExponentialSlewLimiter`: exponential smoothing with separate rise and fall
-  rates, `set_rise_fall` and `set_rise_fall_tau`.
+  rates, `set_rise_fall(rise, fall)` and `set_rise_fall_tau(rise, fall)`
+  (`lambda = 1 / tau`). They set Rack's fields `rise_lambda` and
+  `fall_lambda`, which `process` reads and which can also be assigned.
 - **Deprecated.** `process(in_)` with one argument (Rack's `process(1, in)`)
   on the four smoothers, and `PeakFilter.peak()` and `set_rate(r)`
   (`lambda = 1 - r`), emit `DeprecationWarning`.
@@ -310,9 +312,9 @@ the biquads' base); a class's `B_ORDER` and `A_ORDER` say which.
 `BiquadFilter` (and `TBiquadFilter[float_4]`) is an `IIRFilter[3, 3]` with
 Rack's designs: `set_parameters(type, f, q, v)` sets the coefficients for a
 `BiquadFilter.Type` (`LOWPASS_1POLE`, `HIGHPASS_1POLE`, `LOWPASS`,
-`HIGHPASS`, `LOWSHELF`, `HIGHSHELF`, `BANDPASS`, `PEAK`, `NOTCH`), at
-`f = f_c/f_s` (below 0.5), quality factor `q` and gain `v`. `NUM_TYPES` sets
-nothing. Both instantiations take `BiquadFilter.Type`; in C++ each has its own
+`HIGHPASS`, `LOWSHELF`, `HIGHSHELF`, `BANDPASS`, `PEAK`, `NOTCH`, with
+Rack's values 0 to 8), at `f = f_c/f_s` (below 0.5), quality factor `q` and
+gain `v`. `NUM_TYPES` (9) sets nothing. Both instantiations take `BiquadFilter.Type`; in C++ each has its own
 `Type` with the same values.
 
 **A new biquad's coefficients are NaN.** Rack's constructor calls
@@ -384,9 +386,11 @@ shortcuts (`set_mod_wheel`, `set_volume`, `set_balance`, `set_pan`,
 `set_sustain_pedal`), `set_pitch_wheel`, the transport (`set_clock`,
 `set_start`, `set_continue`, `set_stop`), `set_frame`, `set_channels`,
 `reset` and `panic`. The setters send a message only when their value
-changes; `panic()` resets and sends a note off for every note. The
-fields (`notes`, `gates`, `ccs`, `pw`, ...) are Rack's, the arrays as live
-views.
+changes from the field they compare against; `panic()` resets and sends a
+note off for every note. The fields (`notes`, `vels`, `gates`,
+`key_pressures`, `channel_pressure`, `ccs`, `pw`, `clk`, `start`, `stop`,
+`cont`, `frame`, `channels`) are Rack's, the arrays as live views, so
+assigning one changes what the next setter call compares with.
 
 Rack hands each message to the virtual `onMessage`, which a C++ subclass
 overrides. It is an engine-thread callback (ADR 003), so Python cannot
@@ -408,11 +412,34 @@ MIDI messages into gates, CV and pulses: `process_message(msg)` (or
 `process_cc`, `process_system`), then `process_filters(delta_time)` and
 `process_pulses(delta_time)` every frame, and `get_pitch_voltage(c)`,
 `get_pw(c)`, `get_mod(c)`, `gates`, `velocities`, `aftertouches` and the
-pulses (`clock_pulse`, `retrigger_pulses`, ...) to read the result. The modes
-are `MonoMode` (last, first, lowest or highest priority) and `PolyMode`
-(rotate, reuse, reset, MPE), one pair of enums shared by every
-instantiation. `to_json()` and `from_json(json)` save and restore the
-settings with Rack's keys, as Python values.
+pulses (`clock_pulse`, `retrigger_pulses`, ...) to read the result;
+`get_wheel_channels()` says how many channels have their own wheels (all of
+them in polyphonic MPE mode, otherwise 1). The modes are `MonoMode`
+(`LAST_PRIORITY_MODE`, `FIRST_PRIORITY_MODE`, `LOWEST_PRIORITY_MODE`,
+`HIGHEST_PRIORITY_MODE`, then `NUM_MONO_MODES`) and `PolyMode`
+(`ROTATE_MODE`, `REUSE_MODE`, `RESET_MODE`, `MPE_MODE`, then
+`NUM_POLY_MODES`), with Rack's values from 0, one pair of enums shared by
+every instantiation; `set_mono_mode(mode)` and `set_poly_mode(mode)` change
+one and, as in Rack, reset the performance state when it changes.
+`to_json()` and `from_json(json)` save and restore the settings with Rack's
+keys, as Python values.
+
+The methods `process_message` calls are bound too, for a parser driven
+directly: `press_note(note, channel, velocity)` and
+`release_note(note, channel, velocity)` (velocity -1 for none),
+`assign_channel(note)`, which returns the channel the poly mode picks (and
+advances `rotate_index`), `refresh_held()`, which reconciles the gates with
+`held_notes`, `press_pedal()` and `release_pedal()`, and
+`set_filter_lambda(lambda_)`, which sets every wheel smoothing filter.
+
+Its fields are Rack's, the arrays as live views: the settings
+(`channels`, `mono_mode`, `poly_mode`, `retrigger_on_resume`,
+`release_velocity_enabled`, `pw_range` in semitones, `smooth`,
+`clock_division`) and the state (`clock`, `pedal`, `notes`, `gates`,
+`velocities`, `aftertouches`, `rotate_index`, the wheels `pws` and `mods`, and
+their smoothing filters `pw_filters` and `mod_filters`, which are
+`ExponentialFilter` objects). `held_notes` is a copy, as a list of ints;
+assigning it replaces Rack's.
 
 Rack trusts its inputs here; RackPy refuses what it would get wrong:
 
@@ -448,10 +475,16 @@ copying the C++ object would free the setup twice.
   input and output may be the same buffer, but not partly overlap. Rack's
   comments say a real FFT's output is `2 * length` floats; PFFFT writes
   `length`.
+- **Transforms.** `rfft(input, output)` and `irfft(input, output)` on a
+  `RealFFT`, `fft` and `ifft` on a `ComplexFFT`, are the forward and inverse
+  transforms; each has an `_unordered` form (`rfft_unordered`,
+  `irfft_unordered`, `fft_unordered`, `ifft_unordered`).
 - **Order.** `rfft`/`fft` give the canonical order: for a real FFT `F(0)`,
-  `F(n/2)`, then the real and imaginary parts of `F(1)` to `F(n/2 - 1)`;
+  `F(n/2)`, then the real and imaginary parts of `F(1)` to `F(n/2 - 1)`, and
+  `irfft`/`ifft` take a spectrum in that order;
   `rfft_unordered`/`fft_unordered` give PFFFT's internal order, faster and
-  consistent between transforms, for convolution or inverting.
+  consistent between transforms, for convolution or inverting, and
+  `irfft_unordered`/`ifft_unordered` take a spectrum in that order.
 - **Scale.** Nothing is normalized: the inverse of a forward transform is
   `length` times the input. `scale(x)` multiplies `length` floats (`2 *
   length` complex) by `1 / length`. It reads the writable `length` field;
@@ -527,7 +560,9 @@ as in Rack), and `process()` returns the next correction to add. `buf`
   `process(in_, out)` writes `oversample` outputs for one input. Both take a
   `cutoff`, as a ratio of the lower rate's Nyquist frequency (0.9 by default), and keep
   `in_index` within the range Rack's code keeps it in, as it copies or
-  indexes from there.
+  indexes from there. `in_buffer` is Rack's input history (`oversample *
+  quality` inputs for a decimator, `quality` zero-stuffed ones for an
+  upsampler) and `kernel` the filter's taps, as live views.
 
 (dsp-ring-buffers)=
 ## Ring buffers

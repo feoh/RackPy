@@ -103,7 +103,7 @@ def convolver(block: int, kernel: list[float], inputs: list[list[float]]) -> lis
         out = floats(block)
         conv.process_block(array.array("f", x), out)
         outputs.append(out.tolist())
-    return [outputs, conv.kernel_blocks, conv.input_pos]
+    return [outputs, conv.kernel_blocks, conv.input_pos, conv.input_ffts.tolist()]
 
 
 CALLS: dict[str, Callable[..., Any]] = {
@@ -213,8 +213,11 @@ def test_real_time_convolver() -> None:
     kernel = array.array("f", [1.0] + [0.0] * 63)  # an identity, two blocks long
     conv.set_kernel(kernel, 64)
     assert conv.kernel_blocks == 2 and len(view) == 2 * 64  # the view finds the new array
+    spectra = conv.input_ffts
+    assert len(spectra) == 2 * 64 and not any(spectra.tolist())  # set_kernel zeroes the input spectra
     block = array.array("f", [float(k) for k in range(32)])
     conv.process_block(block, block)  # in place: input is read first
+    assert conv.input_pos == 1 and not any(spectra.tolist()[:64]) and any(spectra.tolist()[64:])  # block 1's spectrum
     assert block.tolist() == pytest.approx([float(k) for k in range(32)], abs=1e-4)
     conv.input_pos = 7
     assert conv.input_pos == 7

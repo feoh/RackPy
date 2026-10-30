@@ -116,7 +116,8 @@ def smoothers(vector: bool) -> Callable[..., list[list[Any]]]:
         p.set_tau(tau)
         s.set_rise_fall(rise, fall)
         x.set_rise_fall_tau(rise_tau, fall_tau)
-        return [[e.process(dt, v), p.process(dt, v), s.process(dt, v), x.process(dt, v)] for v in inputs]
+        rows = [[e.process(dt, v), p.process(dt, v), s.process(dt, v), x.process(dt, v)] for v in inputs]
+        return [rows, copied(x.rise_lambda), copied(x.fall_lambda)]
 
     return run
 
@@ -161,12 +162,23 @@ def iir(vector: bool, b_order: int, a_order: int) -> Callable[..., list[Any]]:
 
 
 def biquad(vector: bool) -> Callable[..., list[Any]]:
-    def run(kind: int, freq: float, q: float, v: float, frequencies: list[float]) -> list[Any]:
+    def run(kind: str, freq: float, q: float, v: float, frequencies: list[float]) -> list[Any]:
         f = dsp.TBiquadFilter[float_4]() if vector else dsp.BiquadFilter()
-        f.set_parameters(dsp.BiquadFilter.Type(kind), freq, q, v)
+        types = dsp.TBiquadFilter_float_4.Type if vector else dsp.BiquadFilter.Type
+        f.set_parameters(getattr(types, kind), freq, q, v)
         coefficients = [*f.b.tolist(), *f.a.tolist()]
         impulse = [f.process(1.0 if k == 0 else 0.0) for k in range(16)]
         return [coefficients, impulse, [f.get_frequency_response(fr) for fr in frequencies]]
+
+    return run
+
+
+def biquad_types(vector: bool) -> Callable[[], list[list[Any]]]:
+    """Every enumerator of the Python enum by name and value, in order, as Rack's header declares them."""
+
+    def run() -> list[list[Any]]:
+        types = dsp.TBiquadFilter_float_4.Type if vector else dsp.BiquadFilter.Type
+        return [[t.name, t.value] for t in types]
 
     return run
 
@@ -190,6 +202,8 @@ CALLS: dict[str, Callable[..., Any]] = {
     "biquad4": biquad(True),
     "biquad_default": biquad_default(False),
     "biquad_default4": biquad_default(True),
+    "biquad_types": biquad_types(False),
+    "biquad_types4": biquad_types(True),
 }
 for _b, _a in ((2, 2), (3, 3), (4, 2), (2, 5), (8, 8)):
     CALLS[f"iir.{_b}.{_a}"] = iir(False, _b, _a)
@@ -250,7 +264,13 @@ def test_single_pole_filters() -> None:
     assert s.process(0.1, 5.0) == 1.0 and s.process(0.1, -5.0) == pytest.approx(0.9)
     x = dsp.ExponentialSlewLimiter()
     x.set_rise_fall(2.0, 0.0)
+    assert (x.rise_lambda, x.fall_lambda) == (2.0, 0.0)
     assert x.process(0.25, 1.0) == 0.5 and x.process(1.0, 0.0) == 0.0  # fall lambda 0: snaps
+    x.set_rise_fall_tau(0.5, 0.25)
+    assert (x.rise_lambda, x.fall_lambda) == (2.0, 4.0)  # lambda = 1 / tau
+    x.rise_lambda = 1.0  # the fields are what process reads
+    x.reset()
+    assert x.process(0.5, 1.0) == 0.5
     rcf = dsp.RCFilter()
     rcf.set_cutoff(2.0)
     assert rcf.c == 1.0
