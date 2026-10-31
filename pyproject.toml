@@ -67,6 +67,9 @@ mypy_path = [
     "bin",
     "examples/oscillator/pythonpath",
     "examples/template/pythonpath",
+    "examples/configuration/pythonpath",
+    "examples/state-and-events/pythonpath",
+    "examples/menus/pythonpath",
 ]
 explicit_package_bases = true
 # bin/ utilities without a .py suffix all map to module __main__, so
@@ -94,8 +97,12 @@ warn_unreachable = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-# The oscillator example's pure DSP module, as its plugin imports it (tests/examples).
-pythonpath = ["examples/oscillator/pythonpath"]
+# The examples' Rack-free modules, as their plugins import them (tests/examples).
+pythonpath = [
+    "examples/oscillator/pythonpath",
+    "examples/configuration/pythonpath",
+    "examples/state-and-events/pythonpath",
+]
 addopts = ["--strict-markers", "--strict-config", "-ra"]
 xfail_strict = true
 # Host runs keep whole Rack bundles and native builds under the base temp

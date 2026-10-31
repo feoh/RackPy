@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Original RackPy artwork (GPL-3.0-or-later), not derived from VCV or Fundamental panels. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+     width="50.8mm" height="128.5mm" viewBox="0 0 50.8 128.5">
+  <rect width="50.8" height="128.5" fill="#1f2a27"/>
+  <rect x="0" y="0" width="50.8" height="15" fill="#2b3b36"/>
+  <path d="M6 11 L14 4 L22 11 L30 4 L38 11 L44.8 5" stroke="#7fd1b9" stroke-width="1.1" fill="none"/>
+  <rect x="4" y="18" width="42.8" height="42" rx="2" fill="#18211f" stroke="#3e5550" stroke-width="0.4"/>
+  <rect x="4" y="63" width="42.8" height="35" rx="2" fill="#18211f" stroke="#3e5550" stroke-width="0.4"/>
+  <path d="M8 72 C10 66, 15 66, 17 72 S22 78, 24 72" stroke="#7fd1b9" stroke-width="0.5" fill="none"/>
+  <rect x="4" y="101" width="42.8" height="20" rx="2" fill="#2b3b36"/>
+  <path d="M19 110 L23 110 M21.5 108 L23.5 110 L21.5 112" stroke="#7fd1b9" stroke-width="0.6" fill="none"/>
+  <path d="M27.5 110 L31.5 110 M30 108 L32 110 L30 112" stroke="#7fd1b9" stroke-width="0.6" fill="none"/>
+  <g inkscape:label="components" inkscape:groupmode="layer" style="display:none">
+    <circle inkscape:label="level" cx="14" cy="29" r="5" fill="#ff0000"/>
+    <circle inkscape:label="scale" cx="36.8" cy="29" r="5" fill="#ff0000"/>
+    <circle inkscape:label="offset" cx="14" cy="49" r="5" fill="#ff0000"/>
+    <circle inkscape:label="depth" cx="36.8" cy="49" r="5" fill="#ff0000"/>
+    <circle inkscape:label="rate" cx="14" cy="80" r="5" fill="#ff0000"/>
+    <circle inkscape:label="mode" cx="36.8" cy="80" r="3" fill="#ff0000"/>
+    <circle inkscape:label="mute" cx="25.4" cy="91" r="3" fill="#ff0000"/>
+    <circle inkscape:label="lfo" cx="25.4" cy="70" r="1.5" fill="#ff00ff"/>
+    <circle inkscape:label="signal" cx="12" cy="111" r="3" fill="#00ff00"/>
+    <circle inkscape:label="shaped" cx="38.8" cy="111" r="3" fill="#0000ff"/>
+  </g>
+</svg>

@@ -1,0 +1,25 @@
+{
+  "slug": "RackPyStateEvents",
+  "name": "RackPy State and Events",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "RackPy",
+  "author": "RackPy contributors",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "https://github.com/feoh/RackPy",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "Sequencer",
+      "name": "Sequencer",
+      "description": "Sixteen steps of saved, randomizable voltages",
+      "tags": [
+        "Sequencer"
+      ]
+    }
+  ]
+}

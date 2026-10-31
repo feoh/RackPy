@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Original RackPy artwork (GPL-3.0-or-later), not derived from VCV or Fundamental panels. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+     width="30.48mm" height="128.5mm" viewBox="0 0 30.48 128.5">
+  <rect width="30.48" height="128.5" fill="#2a2433"/>
+  <rect x="0" y="0" width="30.48" height="15" fill="#3a3147"/>
+  <path d="M4 12 L4 9 L8 9 L8 6 L12 6 L12 10 L16 10 L16 4 L20 4 L20 8 L24 8 L24 12" stroke="#c9a7f2" stroke-width="0.9" fill="none"/>
+  <circle cx="15.24" cy="32" r="9" fill="none" stroke="#574a6b" stroke-width="0.5"/>
+  <rect x="4" y="52" width="22.48" height="66" rx="2" fill="#211c29" stroke="#574a6b" stroke-width="0.4"/>
+  <path d="M11 66 L13 66 L13 63 L15 63 L15 66 L17 66" stroke="#c9a7f2" stroke-width="0.5" fill="none"/>
+  <g inkscape:label="components" inkscape:groupmode="layer" style="display:none">
+    <circle inkscape:label="length" cx="15.24" cy="32" r="6" fill="#ff0000"/>
+    <circle inkscape:label="step" cx="15.24" cy="47" r="1.5" fill="#ff00ff"/>
+    <circle inkscape:label="clock" cx="15.24" cy="60" r="3" fill="#00ff00"/>
+    <circle inkscape:label="reset" cx="15.24" cy="80" r="3" fill="#00ff00"/>
+    <circle inkscape:label="cv" cx="15.24" cy="108" r="3" fill="#0000ff"/>
+  </g>
+</svg>

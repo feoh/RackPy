@@ -44,7 +44,10 @@
     "../../src",
     "../../typings",
     "../../examples/oscillator/pythonpath",
-    "../../examples/template/pythonpath"
+    "../../examples/template/pythonpath",
+    "../../examples/configuration/pythonpath",
+    "../../examples/state-and-events/pythonpath",
+    "../../examples/menus/pythonpath"
   ],
   "typeCheckingMode": "strict",
   "pythonVersion": "3.14",

@@ -12,6 +12,7 @@
 #include "../laboratory/devices.hpp"
 #include "../bindings/widget/behavior.hpp"
 #include "../bindings/support/hooks.hpp"
+#include "../tests/controls_reference.hpp"
 #include "../tests/quantity_reference.hpp"
 #include "../plugin/model.hpp"
 #include "../bindings/plugin.hpp"
@@ -536,10 +537,29 @@ void define(py::module_ m) {
 		}
 		return fromJson(result.get());
 	});
-	// RP-14A: superclass dispatch off the engine, not a public callback mapping.
-	m.def("module_process_bypass", [](const bindings::ModuleRef& r) {
-		r.get().processBypass({48000.f, 1.f / 48000.f, 0});
+	// RP-34: examples/configuration's modules as a C++ author writes them, run in live Rack.
+	m.def("controls_reference", [] {
+		requireMainThread("controls_reference");
+		auto context = liveContext();
+		std::string text;
+		{
+			py::gil_scoped_release release;
+			EngineLease lease(*context);
+			text = rackpy_controls_reference::controlsReference();
+		}
+		return text;
 	});
+	// RP-14A: superclass dispatch off the engine, not a public callback mapping.
+	// RP-34: also steps a bypass kernel frame by frame, as module_process steps the kernel.
+	m.def("module_process_bypass", [](const bindings::ModuleRef& r, float sampleRate, int64_t frame) {
+		requireMainThread("module_process_bypass");
+		module::Module& mod = r.get();
+		if (mod.engineOwned.load(std::memory_order_acquire))
+			throw Ownership("Rack's engine runs this module; module_process_bypass steps only Python-owned modules");
+		if (!(sampleRate > 0.f))
+			throw py::value_error("module_process_bypass needs a positive sample rate");
+		mod.processBypass({sampleRate, 1.f / sampleRate, frame});
+	}, py::arg("module"), py::arg("sample_rate") = 48000.f, py::arg("frame") = 0);
 	// RP-21B: step a Python-owned module's process() on the main thread, frame by frame, so that a
 	// graph plan's output can be compared exactly. The engine never runs such a module.
 	m.def("module_process", [](const bindings::ModuleRef& r, float sampleRate, int64_t frame) {

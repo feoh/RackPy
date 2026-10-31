@@ -15,7 +15,7 @@ attribute) instead of a C++ pointer; ``None`` behaves like a null pointer.
 """
 
 from collections.abc import Callable, Sequence
-from typing import Any, Protocol
+from typing import Any, Protocol, overload
 
 from rackpy.raw import ui as _ui
 
@@ -53,14 +53,18 @@ def _item[T: _ui.MenuItem](item_type: type[T] | None) -> type[T]:
     return cls  # type: ignore[return-value]
 
 
-def create_menu_label[T: _ui.MenuLabel](text: str, label_type: type[T] | None = None) -> T:
+@overload
+def create_menu_label(text: str, label_type: None = None) -> _ui.MenuLabel: ...
+@overload
+def create_menu_label[T: _ui.MenuLabel](text: str, label_type: type[T]) -> T: ...
+def create_menu_label(text: str, label_type: type[_ui.MenuLabel] | None = None) -> _ui.MenuLabel:
     """Rack's ``createMenuLabel<TMenuLabel>(text)``."""
     cls = _ui.MenuLabel if label_type is None else label_type
     if not (isinstance(cls, type) and issubclass(cls, _ui.MenuLabel)):
         raise TypeError("label_type must be a rackpy.raw.ui.MenuLabel subclass")
     label = cls()
     label.text = text
-    return label  # type: ignore[return-value]
+    return label
 
 
 def create_menu_item(

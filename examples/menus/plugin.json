@@ -1,0 +1,25 @@
+{
+  "slug": "RackPyMenus",
+  "name": "RackPy Menus",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "RackPy",
+  "author": "RackPy contributors",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "https://github.com/feoh/RackPy",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "Switchboard",
+      "name": "Switchboard",
+      "description": "A pitch set from the context menu",
+      "tags": [
+        "Utility"
+      ]
+    }
+  ]
+}

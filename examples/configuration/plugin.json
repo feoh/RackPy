@@ -1,0 +1,35 @@
+{
+  "slug": "RackPyConfiguration",
+  "name": "RackPy Configuration",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "RackPy",
+  "author": "RackPy contributors",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "https://github.com/feoh/RackPy",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "Shaper",
+      "name": "Shaper",
+      "description": "Level, offset and tremolo, showing every parameter display",
+      "tags": [
+        "Utility",
+        "Attenuator"
+      ]
+    },
+    {
+      "slug": "Splitter",
+      "name": "Splitter",
+      "description": "A signal and its inverse, with a custom bypass",
+      "tags": [
+        "Utility",
+        "Multiple"
+      ]
+    }
+  ]
+}
