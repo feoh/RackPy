@@ -30,6 +30,10 @@ jqr() { "$JQ" "$@"; }
 note "machine: macOS $(sw_vers -productVersion) ($(sw_vers -buildVersion)), $(uname -m), $PLATFORM"
 note "Rack: $(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$APP/Contents/Info.plist" 2>/dev/null)"
 note "environment: $(env | cut -d= -f1 | sort | tr '\n' ' ')"
+# The protections the signature and quarantine cases depend on: what this machine shows is only what a Mac in
+# the same state does (CI runners may have Gatekeeper off).
+GATEKEEPER=$(spctl --status 2>&1 | head -1)
+note "gatekeeper: $GATEKEEPER; SIP: $(csrutil status 2>&1 | head -1)"
 (cd "$ARTIFACTS" && shasum -a 256 -c SHA256SUMS) > "$LOGS/sha256sum.txt" 2>&1
 check "every artifact matches SHA256SUMS" grep -q ": OK" "$LOGS/sha256sum.txt"
 check "no artifact fails SHA256SUMS" lacks "$LOGS/sha256sum.txt" "FAILED"
@@ -222,18 +226,16 @@ else
     note "skip  a package for the other CPU: no ALIEN_LOADER given"
 fi
 
-# 2. A broken signature: the loader edited after signing. arm64 macOS runs no code whose signature fails;
-# x86_64 macOS does not require one, so there the edited loader may still load. Recorded either way.
+# 2. No signature: the loader's signature removed. Apple silicon runs only signed code, but how macOS treats an unsigned
+# library in a process that disables library validation (as Rack does) is recorded here, not assumed.
 fresh_user "$user" "$first"
 headless "$user" extract
 codesign --remove-signature "$user/$PLUGINS/$slug1/plugin.dylib"
+check "an unsigned loader: its signature is gone" bash -c "! codesign -v '$user/$PLUGINS/$slug1/plugin.dylib'"
 headless "$user" unsigned
 note "info  an unsigned loader: Rack's exit status $(cat "$LOGS/unsigned.rc")"
-if [ "$PLATFORM" = mac-arm64 ]; then
-    check "an unsigned loader on arm64: Rack refuses it" lacks "$LOGS/unsigned.log" "Loaded plugin $slug1 "
-else
-    if has "$LOGS/unsigned.log" "Loaded plugin $slug1 "; then note "info  an unsigned loader on x86_64: loaded"; else note "info  an unsigned loader on x86_64: refused"; fi
-fi
+if has "$LOGS/unsigned.log" "Loaded plugin $slug1 "; then note "info  an unsigned loader on $PLATFORM: loaded"
+else note "info  an unsigned loader on $PLATFORM: refused"; fi
 grep -iE "$slug1|signature|code sign" "$LOGS/unsigned.log" | head -5 > "$LOGS/unsigned.excerpt"
 codesign --force --sign - "$user/$PLUGINS/$slug1/plugin.dylib" > "$LOGS/resign.out" 2>&1
 headless "$user" resigned
@@ -257,6 +259,10 @@ grep -iE "$slug1|quarantine|not opened|malware|verify" "$LOGS/quarantined-folder
 xattr -r -d com.apple.quarantine "$user/$PLUGINS/$slug1"
 headless "$user" unquarantined
 clean_run unquarantined "$slug1"
+case "$GATEKEEPER" in
+    *enabled*) ;;
+    *) gate "an unsigned loader and a quarantined folder with Gatekeeper on: not run here (gatekeeper: $GATEKEEPER)" ;;
+esac
 
 # Upgrade and uninstall as docs/installation/macos.md says: remove the folder, install the package again; then
 # remove the folder for good. The patch keeps the modules across the upgrade. After the uninstall the patch is
