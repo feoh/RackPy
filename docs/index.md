@@ -45,7 +45,8 @@ Tutorials and troubleshooting pages will follow the
 how-to guides cover [registering models](how-to/plugins.md),
 [saving a module's state](how-to/state.md) and
 [processing audio](how-to/dsp.md). [Callbacks and the laboratory](explanation/callbacks.md)
-explains where Python may run, and the offline laboratory for audio callbacks.
+explains where Python may run, and the offline laboratory for audio callbacks;
+[security and trust](explanation/security.md) what RackPy runs and refuses to run.
 
 ```{toctree}
 :caption: Start here
@@ -63,6 +64,7 @@ examples
 
 runtime
 explanation/callbacks
+explanation/security
 ```
 
 ```{toctree}

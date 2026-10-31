@@ -135,7 +135,7 @@ violations must be impossible to optimize away.
 | Slow Python UI | Must not reduce frames processed | 98.7% with 100 ms sleeps per UI frame | Frozen as a test |
 | Audio deadline misses attributable to RackPy | Zero in a 30-minute stress run | Not measurable here: no audio device | Unchanged; RP-43 on controlled hardware |
 | Interactive UI response | p95 < 50 ms | Not measured | Unchanged; RP-43 |
-| Lifetime stability | No live-object growth over 1,000 create/delete cycles | RP-06 ran 40 cycles | Unchanged; RP-38 |
+| Lifetime stability | No live-object growth over 1,000 create/delete cycles | RP-38, in Rack with the engine running: 1,000 create/delete and 1,000 save/reload cycles returned every RackPy counter exactly, with resident memory unchanged ([validation](../../planning/rp-38-validation.md)) | Met on Linux x86_64 (`-m stress`) |
 | Plugin start-up before user scripts | ≤ 250 ms and ≤ 64 MB RSS | Runtime 5 ms / 9 MB; the full bindings are still unknown. RP-08 skeleton in Rack: 12 ms, +14.2 MiB ([ADR 005](005-build-and-ci.md#results-on-the-planning-machine)) | Provisional; re-measure in RP-11 |
 
 ## Recommendation: go, with conditions

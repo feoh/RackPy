@@ -40,7 +40,8 @@ same way. This is a limit of CPython embedding, not a policy choice.
 RackPy runs the Python files shipped inside the plugin, and nothing else.
 Patch files never contain or run code. Python in a plugin has the same power
 as the plugin's C++ would have: RackPy is not a sandbox, and a plugin you
-install is code you trust.
+install is code you trust. [Security and trust](explanation/security.md) lists
+what RackPy refuses to run, and how that is tested.
 
 ## Threads
 
