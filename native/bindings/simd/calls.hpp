@@ -83,7 +83,10 @@ RACKPY_OUT_OF_LINE float pow(float a, float b) { return s::pow(a, b); }
 RACKPY_OUT_OF_LINE float_4 pow(float a, float_4 b) { return s::pow(a, b); }
 RACKPY_OUT_OF_LINE float_4 pow(float_4 a, float_4 b) { return s::pow(a, b); }
 RACKPY_OUT_OF_LINE float powInt(float a, int b) { return s::pow<float>(a, b); }
-RACKPY_OUT_OF_LINE float_4 powInt(float_4 a, int b) { return s::pow<float_4>(a, b); }
+// Deduced, not s::pow<float_4>: rack::simd has `using std::pow`, and naming float_4 explicitly makes
+// libc++ (macOS) substitute it into std::pow(complex<T>, U), whose __promote is a hard error. Deduction
+// still picks Rack's pow(T, int): std::pow's overloads do not deduce from a float_4.
+RACKPY_OUT_OF_LINE float_4 powInt(float_4 a, int b) { return s::pow(a, b); }
 RACKPY_OUT_OF_LINE float clamp(float x, float a, float b) { return s::clamp(x, a, b); }
 RACKPY_OUT_OF_LINE float_4 clamp(float_4 x, float_4 a, float_4 b) { return s::clamp(x, a, b); }
 RACKPY_OUT_OF_LINE float rescale(float x, float xMin, float xMax, float yMin, float yMax) {
