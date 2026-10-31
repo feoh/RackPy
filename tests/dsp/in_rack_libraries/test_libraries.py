@@ -254,12 +254,12 @@ def test_native_io_plan_rejects_invalid_settings() -> None:
     midi_node = next(n for n in valid["nodes"] if n["op"] == "midi_cv")
     midi_node["args"][0] = 4
     with pytest.raises(ValueError, match="setting 0"):
-        dsp.graph_kernel(valid)
+        dsp.graph_kernel(dict(valid))
     valid = GRAPHS["IOGraph"].plan().to_dict()
     audio_node = next(n for n in valid["nodes"] if n["op"] == "audio_output")
     audio_node["args"][0] = -1
     with pytest.raises(ValueError, match="channel"):
-        dsp.graph_kernel(valid)
+        dsp.graph_kernel(dict(valid))
 
 
 def test_compiled_kernels_refuse_unwired_fields() -> None:

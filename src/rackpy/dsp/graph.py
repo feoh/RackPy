@@ -40,7 +40,7 @@ from __future__ import annotations
 import dataclasses
 import math
 import sys
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Final, NotRequired, TypedDict
 
 if TYPE_CHECKING:
     from _rackpy_host.dsp import Kernel
@@ -52,14 +52,17 @@ __all__ = [
     "MAX_LANES",
     "OPS",
     "Control",
+    "ControlDict",
     "Delay",
     "Forward",
     "Graph",
     "GraphError",
     "Node",
+    "NodeDict",
     "NodeType",
     "Op",
     "Plan",
+    "PlanDict",
     "Signal",
     "node_types",
 ]
@@ -234,6 +237,31 @@ class Control:
     default: float
 
 
+class NodeDict(TypedDict):
+    """A :class:`Node` as plain data, in :meth:`Plan.to_dict`."""
+
+    op: str
+    inputs: list[int]
+    args: list[float]
+    names: NotRequired[list[str]]
+
+
+class ControlDict(TypedDict):
+    """A :class:`Control` as plain data, in :meth:`Plan.to_dict`."""
+
+    name: str
+    node: int
+    default: float
+
+
+class PlanDict(TypedDict):
+    """A :class:`Plan` as plain data: what :meth:`Plan.to_dict` returns and the native interpreter reads."""
+
+    nodes: list[NodeDict]
+    latches: list[list[int]]
+    controls: list[ControlDict]
+
+
 @dataclasses.dataclass(frozen=True)
 class Plan:
     """A validated graph, lowered for execution.
@@ -248,17 +276,20 @@ class Plan:
     latches: tuple[tuple[int, int], ...]
     controls: tuple[Control, ...]
 
-    def to_dict(self) -> dict[str, list[Any]]:
+    def to_dict(self) -> PlanDict:
         """The plan as plain data (lists, numbers, strings)."""
         return {
-            "nodes": [
-                {"op": n.op, "inputs": list(n.inputs), "args": list(n.args)}
-                | ({"names": list(n.names)} if n.names else {})
-                for n in self.nodes
-            ],
+            "nodes": [_node_dict(n) for n in self.nodes],
             "latches": [list(latch) for latch in self.latches],
             "controls": [{"name": c.name, "node": c.node, "default": c.default} for c in self.controls],
         }
+
+
+def _node_dict(node: Node) -> NodeDict:
+    data: NodeDict = {"op": node.op, "inputs": list(node.inputs), "args": list(node.args)}
+    if node.names:  # RackPy's own node types carry none
+        data["names"] = list(node.names)
+    return data
 
 
 class Signal:
@@ -626,7 +657,7 @@ class Graph:
             raise ImportError(
                 "Graph.compile needs Rack, in a RackPy plugin; rackpy.dsp.graph_reference runs graphs offline"
             ) from e
-        return dsp.graph_kernel(plan.to_dict())
+        return dsp.graph_kernel(dict(plan.to_dict()))
 
     # --- lowering ------------------------------------------------------------------------------
     def plan(self) -> Plan:

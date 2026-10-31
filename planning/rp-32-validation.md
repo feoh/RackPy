@@ -130,7 +130,12 @@ Listing `Any` in the snapshot's signatures found 11 real uses (one false hit,
 (it keeps its runtime `TypeError` check). The laboratory `ModuleClass`'s six
 Rack JSON hooks take `JSON` and return `JSON` (cast from the raw stubs' `Any`);
 its test now narrows `super()`'s results before extending them, as typed
-callers must. `Plan.to_dict` still returns `dict[str, list[Any]]`. A first
+callers must. `Plan.to_dict` now returns a `PlanDict` `TypedDict` (with
+`NodeDict` and `ControlDict`), so callers can index its nodes without casts;
+the native `graph_kernel` stub still takes `dict[str, Any]` because it
+validates arbitrary data, and the two call sites convert with `dict()`. With
+that, no public facade signature in the snapshot uses `Any`. The in-Rack
+graph and kernel-library suites (2 outer tests) passed with current Python. A first
 attempt typed the laboratory returns `object`, which pushed `dict[Any, Any]`
 narrowing onto every caller; `JSON` is the accurate type of what Rack returns.
 Laboratory and engine host suites (14 outer tests) passed in actual Linux Rack
