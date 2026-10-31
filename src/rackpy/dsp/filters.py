@@ -10,7 +10,7 @@ per-sample audio belongs in a native kernel. Available inside Rack only.
 """
 
 from collections.abc import Buffer
-from typing import Any
+from typing import overload
 
 from rackpy.raw import dsp as _raw
 from rackpy.raw.dsp import (
@@ -18,6 +18,7 @@ from rackpy.raw.dsp import (
     ExponentialFilter,
     ExponentialSlewLimiter,
     IIRFilter,
+    IIRFilter_3_3_float,
     PeakFilter,
     RCFilter,
     SlewLimiter,
@@ -43,13 +44,26 @@ __all__ = [
     "TPeakFilter",
     "TRCFilter",
     "TSlewLimiter",
+    "TimedFilter",
     "process_block",
 ]
 
 _TIMED = (ExponentialFilter, PeakFilter, SlewLimiter, ExponentialSlewLimiter)
+type TimedFilter = ExponentialFilter | PeakFilter | SlewLimiter | ExponentialSlewLimiter
+"""The float filters whose ``process`` takes a time step."""
 
 
-def process_block(filter: Any, in_: Buffer, out: Buffer, delta_time: float | None = None) -> None:
+@overload
+def process_block(filter: TimedFilter, in_: Buffer, out: Buffer, delta_time: float) -> None: ...
+
+
+@overload
+def process_block(filter: IIRFilter_3_3_float, in_: Buffer, out: Buffer) -> None: ...
+
+
+def process_block(
+    filter: TimedFilter | IIRFilter_3_3_float, in_: Buffer, out: Buffer, delta_time: float | None = None
+) -> None:
     """Run a float filter over every sample of ``in_``, writing ``out``, natively.
 
     Each sample goes through the same Rack call as ``filter.process``, in
@@ -58,6 +72,10 @@ def process_block(filter: Any, in_: Buffer, out: Buffer, delta_time: float | Non
     float32 buffers; ``out`` may be ``in_``. The exponential, peak and slew
     filters need ``delta_time``; the IIR and biquad filters take none. RC
     filters have no single output, so they are not supported.
+
+    ``BiquadFilter`` and the 3-3 IIR filter are typed; other ``IIRFilter[b_order, a_order]``
+    instantiations are created by a template, so type checkers see them as ``Any``. Other
+    objects raise ``TypeError`` at runtime.
     """
     if isinstance(filter, _TIMED):
         if delta_time is None:

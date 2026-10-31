@@ -373,7 +373,10 @@ def test_bulk_processing_equals_per_call_processing() -> None:
                 f.set_coefficients([0.2, 0.3, 0.1, 0.05], [-0.3, 0.1])
         expected = [one.process(x) for x in samples] if dt is None else [one.process(dt, x) for x in samples]
         out = array.array("f", [0.0] * len(samples))
-        rackpy.dsp.filters.process_block(bulk, samples, out, dt)
+        if dt is None:
+            rackpy.dsp.filters.process_block(bulk, samples, out)
+        else:
+            rackpy.dsp.filters.process_block(bulk, samples, out, dt)
         assert out.tolist() == expected
         in_place = array.array("f", samples)
         fresh: Any = make()
@@ -384,6 +387,6 @@ def test_bulk_processing_equals_per_call_processing() -> None:
     with pytest.raises(ValueError, match="shorter"):
         rackpy.dsp.filters.process_block(dsp.BiquadFilter(), samples, array.array("f", [0.0]))
     with pytest.raises(TypeError, match="delta_time"):
-        rackpy.dsp.filters.process_block(dsp.SlewLimiter(), samples, array.array("f", samples))
+        rackpy.dsp.filters.process_block(dsp.SlewLimiter(), samples, array.array("f", samples))  # type: ignore[call-overload]  # also refused at runtime
     with pytest.raises(TypeError):
-        rackpy.dsp.filters.process_block(dsp.RCFilter(), samples, array.array("f", samples))
+        rackpy.dsp.filters.process_block(dsp.RCFilter(), samples, array.array("f", samples))  # type: ignore[call-overload]  # also refused at runtime

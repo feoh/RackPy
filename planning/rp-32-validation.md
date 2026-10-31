@@ -113,6 +113,22 @@ overlaid on the identified RP-31 integration binaries: `tests/docs/test_snippets
 (every snippet, in Rack and in Python), `tests/io/test_virtual.py` and
 `tests/services/test_system.py`, 7 outer tests passed.
 
+## Bulk filter typing
+
+`rackpy.dsp.filters.process_block` no longer takes `Any`. Two overloads
+encode its contract: the four time-step filters (new public alias
+`TimedFilter`) require `delta_time`, and `IIRFilter_3_3_float` (so also
+`BiquadFilter`) takes none. A structural protocol was rejected because
+`SchmittTrigger.process` returns `bool`, a `float` subtype, and would match.
+Other IIR orders come from the raw `Template` stub as `Any`, so they still
+type-check; that is a raw-stub limitation, documented on the stability page.
+The test's misuse calls (a slew limiter without `delta_time`, an RC filter)
+are now also rejected statically and keep their runtime `TypeError`
+assertions. `bin/facade-surface check` reported the changed signature and
+the new alias before the snapshot was regenerated. `tests/dsp/test_basic.py`
+passed in actual Linux Rack with the production integration binaries and
+current RP-32 Python.
+
 ## Duplicate driver and device names
 
 Audio and MIDI name-based driver and device lookups now raise `LookupError`
@@ -181,7 +197,5 @@ the facade-test check above does not suppress these diagnostics globally.
 Still to do: a complete coherent facade and typing review, raw discoverability,
 strict mypy and pyright samples, signature and exception tests, representative
 user walkthroughs, measured wrapper overhead with explicit baseline, any
-resulting fixes, and versioning/freeze decision. DSP bulk filter typing and
-dynamic IIR template stubs still use `Any`; a structural protocol that accepts
-unsupported native filter objects would be misleading. Do not close RP-32 on
-this checkpoint.
+resulting fixes, and versioning/freeze decision. Do not close RP-32 on this
+checkpoint.

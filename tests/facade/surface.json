@@ -246,7 +246,12 @@
   "TPeakFilter": "re-export rackpy.raw.dsp.TPeakFilter",
   "TRCFilter": "re-export rackpy.raw.dsp.TRCFilter",
   "TSlewLimiter": "re-export rackpy.raw.dsp.TSlewLimiter",
-  "process_block": "def process_block(filter: Any, in_: Buffer, out: Buffer, delta_time: float | None=None) -> None"
+  "TimedFilter": "type TimedFilter = ExponentialFilter | PeakFilter | SlewLimiter | ExponentialSlewLimiter",
+  "process_block": [
+   "@overload def process_block(filter: TimedFilter, in_: Buffer, out: Buffer, delta_time: float) -> None",
+   "@overload def process_block(filter: IIRFilter_3_3_float, in_: Buffer, out: Buffer) -> None",
+   "def process_block(filter: TimedFilter | IIRFilter_3_3_float, in_: Buffer, out: Buffer, delta_time: float | None=None) -> None"
+  ]
  },
  "rackpy.dsp.graph": {
   "Control": {
