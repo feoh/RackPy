@@ -80,3 +80,17 @@ def test_broken_links_are_reported() -> None:
     found = problems(entries, surface)
     assert any("rackpy.midi.Message re-exports rackpy.raw.midi.Message, but no mapping entry" in p for p in found)
     assert any("facade rackpy.math.NoSuchVec is not a public facade name" in p for p in found)
+
+
+def test_introspection_covers_every_public_facade_module() -> None:
+    """The built-package check only sees modules rackpy._introspect imports; a missing one hides its names."""
+    import ast
+
+    tree = ast.parse((REPO / "src" / "rackpy" / "_introspect.py").read_text(encoding="utf-8"))
+    listed = next(
+        ast.literal_eval(node.value)
+        for node in tree.body
+        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "MODULES" for t in node.targets)
+    )
+    _, surface = load()
+    assert set(listed) == set(surface) | {"rackpy.raw"}

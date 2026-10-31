@@ -113,6 +113,24 @@ overlaid on the identified RP-31 integration binaries: `tests/docs/test_snippets
 (every snippet, in Rack and in Python), `tests/io/test_virtual.py` and
 `tests/services/test_system.py`, 7 outer tests passed.
 
+## Final validation and an introspection gap it found
+
+Fresh hooks and production builds of this tree with warnings as errors each
+passed 7/7 CTests. The whole pytest suite against them (no Python overlay;
+the bundles come from this tree) gave 336 passed, 1 failed:
+`tests/coverage/test_introspection.py::test_manifest_checks_against_the_built_package`
+rejected the new `rackpy.midi.Message` facade links as "not in the built
+package". The links were right; `rackpy._introspect.MODULES`, a hand-kept
+list, omitted ten public facade modules (`rackpy.audio`, `rackpy.midi`,
+`rackpy.engine.components`, `.host`, `.module`, `rackpy.services` and its
+`network` and `system` modules, and the three graph modules), so no facade
+name in them had ever been checked against the built package. They are now
+listed, and `tests/facade/test_discoverability.py` requires the list to equal
+the snapshot's public modules plus `rackpy.raw`. Earlier checkpoints'
+`check_coverage.py --without-built-package` runs could not catch this. After
+incremental rebuilds, all 70 `tests/coverage` tests passed, including the
+built-package check over the newly covered modules.
+
 ## Docs-signature audit and the remaining `Any`
 
 A script compared every backticked call to a facade function in the human docs
