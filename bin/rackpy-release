@@ -1,0 +1,631 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.14"
+# dependencies = ["cyclopts>=5.2,<6"]
+#
+# [tool.uv]
+# exclude-newer = "2026-10-21T00:00:00Z"
+# ///
+"""Build, verify and compare RackPy's Linux x86_64 release-candidate artifacts (RP-39).
+
+build    from a clean checkout, with the official Rack plugin toolchain: the
+         runtime bundle, every example as a .vcvplugin, the developer wheel,
+         the GPL source archive, license notices, a manifest and SHA256SUMS
+verify   install the artifacts in a clean container (no checkout, no Python on
+         the system, no network for Rack) and run them in Rack Free
+compare  explain every difference between two builds of the same commit
+
+Nothing is ever uploaded or published: the artifacts stay in DEST, outside git.
+"""
+
+import hashlib
+import html
+import json
+import os
+import re
+import shutil
+import subprocess
+import tarfile
+import tempfile
+import time
+import urllib.request
+import zipfile
+from fnmatch import fnmatchcase
+from pathlib import Path
+from typing import Any
+
+import cyclopts
+
+REPO = Path(__file__).resolve().parent.parent
+BIN = REPO / "bin"
+CACHE = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "rackpy" / "build-inputs"
+DEFAULT_DEST = REPO / "build" / "release"
+PLATFORM = "lin-x64"
+GLIBC_FLOOR = "2.23"  # the official toolchain's sysroot (Ubuntu 16.04)
+# Shared libraries an artifact's ELF files may need from the system or from Rack. Anything else fails the build.
+SYSTEM_LIBRARIES = {
+    "libc.so.6",
+    "libm.so.6",
+    "libdl.so.2",
+    "libpthread.so.0",
+    "librt.so.1",
+    "libutil.so.1",
+    "libcrypt.so.1",
+    "ld-linux-x86-64.so.2",
+    "libRack.so",
+}
+# Shared extension modules of the bundled CPython left out of every artifact (RP-39), with why.
+EXCLUDED_RUNTIME = {
+    "lib/python3.14/lib-dynload/_dbm.cpython-314-x86_64-linux-gnu.so": "Berkeley DB: the Sleepycat license adds "
+    "its own source obligations, and Rack plugins have no use for it",
+    "lib/python3.14/lib-dynload/_tkinter.cpython-314-x86_64-linux-gnu.so": "Tk's GUI event loop cannot run in Rack",
+    "lib/libtcl9.0.so": "Tcl, needed only by _tkinter",
+    "lib/libtcl9tk9.0.so": "Tk, needed only by _tkinter",
+    "lib/tcl9": "Tcl's library, needed only by _tkinter",
+    "lib/tcl9.0": "Tcl's library, needed only by _tkinter",
+    "lib/itcl4.3.8": "Tcl's library, needed only by _tkinter",
+    "lib/thread3.0.6": "Tcl's thread extension, needed only by _tkinter",
+    "lib/tk9.0": "Tk's library, needed only by _tkinter",
+    "lib/python3.14/tkinter": "imports _tkinter",
+    "lib/python3.14/idlelib": "IDLE, a Tk application",
+    "lib/python3.14/turtledemo": "Tk demonstrations",
+    "lib/python3.14/turtle.py": "imports tkinter",
+    "bin/idle3": "starts IDLE",
+    "bin/idle3.14": "starts IDLE",
+    "lib/python3.14/site-packages/pip": "pip cannot install into a running Rack; it vendors other libraries",
+    "lib/python3.14/site-packages/pip-26.2.2.dist-info": "pip's metadata",
+    "lib/python3.14/ensurepip": "bundles a pip wheel",
+    "bin/pip": "starts pip",
+    "bin/pip3": "starts pip",
+    "bin/pip3.14": "starts pip",
+}
+EXCLUDED_EXTENSIONS = {"_dbm", "_tkinter"}
+# Library search paths an artifact may have: Rack's, which it symlinks to its own folder while it loads a plugin
+# (the Rack SDK's plugin.mk adds it to every plugin), and the plugin's own runtime.
+ALLOWED_SEARCH_PATHS = {"/tmp/Rack2", "$ORIGIN/python/lib", "$ORIGIN/../lib", "$ORIGIN"}
+# Tracked files that are not RackPy's to license under the GPL: kept out of the source archive (docs/licensing.md).
+RESTRICTED_SOURCES = ["docs/_static/examples"]
+
+app = cyclopts.App(help=__doc__)
+
+
+def run(
+    args: list[str | Path], cwd: Path | None = None, capture: bool = False, env: dict[str, str] | None = None
+) -> str:
+    printable = " ".join(str(a) for a in args)
+    print(f"+ {printable}", flush=True)
+    proc = subprocess.run([str(a) for a in args], cwd=cwd, check=False, text=True, capture_output=capture, env=env)
+    if proc.returncode:
+        detail = f"\n{proc.stdout}\n{proc.stderr}" if capture else ""
+        raise SystemExit(f"command failed with exit status {proc.returncode}: {printable}{detail}")
+    return proc.stdout or ""
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def fetch(entry: dict[str, Any]) -> Path:
+    archive: Path = CACHE / "archives" / entry["file"]
+    if not archive.exists() or sha256_file(archive) != entry["sha256"]:
+        archive.parent.mkdir(parents=True, exist_ok=True)
+        partial = archive.with_name(archive.name + ".partial")
+        with urllib.request.urlopen(entry["url"], timeout=600) as response, partial.open("wb") as out:
+            shutil.copyfileobj(response, out)
+        partial.replace(archive)
+    if (actual := sha256_file(archive)) != entry["sha256"]:
+        raise SystemExit(f"{entry['file']}: sha256 {actual} does not match the pin {entry['sha256']}")
+    return archive
+
+
+def checkout_facts() -> dict[str, Any]:
+    """The commit being released; the checkout must match it exactly, so the artifacts are that commit."""
+    status = run(["git", "-C", REPO, "status", "--porcelain", "--untracked-files=normal"], capture=True)
+    if status.strip():
+        raise SystemExit("the checkout has uncommitted or untracked files; release only a commit:\n" + status)
+    commit = run(["git", "-C", REPO, "rev-parse", "HEAD"], capture=True).strip()
+    epoch = int(run(["git", "-C", REPO, "show", "-s", "--format=%ct", commit], capture=True).strip())
+    version = re.search(r'^version = "(.+?)"', (REPO / "pyproject.toml").read_text(), re.MULTILINE)
+    assert version is not None
+    return {"commit": commit, "source_date_epoch": epoch, "version": f"{version[1]}+g{commit[:9]}"}
+
+
+def elf_files(root: Path) -> list[Path]:
+    found = []
+    for path in sorted(root.rglob("*")):
+        if path.is_file() and not path.is_symlink():
+            with path.open("rb") as f:
+                if f.read(4) == b"\x7fELF":
+                    found.append(path)
+    return found
+
+
+def elf_facts(path: Path) -> dict[str, Any]:
+    dynamic = run(["readelf", "-d", "-W", path], capture=True)
+    versions = run(["objdump", "-T", path], capture=True)
+    glibc = sorted(set(re.findall(r"GLIBC_([0-9.]+)", versions)), key=lambda v: tuple(map(int, v.split("."))))
+    return {
+        "needed": re.findall(r"\(NEEDED\)\s+Shared library: \[(.+?)\]", dynamic),
+        "runpath": re.findall(r"\((?:RUNPATH|RPATH)\)\s+Library (?:runpath|rpath): \[(.+?)\]", dynamic),
+        "max_glibc": glibc[-1] if glibc else None,
+    }
+
+
+def toolchain_id() -> dict[str, str]:
+    """The official toolchain by its recipe's hash and target, not by where this machine keeps it."""
+    bindir = Path(run([BIN / "rack-toolchain", "path"], capture=True).strip().splitlines()[-1])
+    recipe = REPO / "packaging" / "toolchain" / "lin-x64.Dockerfile"
+    return {"build": bindir.parents[2].name, "target": bindir.parent.name, "recipe_sha256": sha256_file(recipe)}
+
+
+def machine_paths(root: Path) -> list[tuple[Path, str]]:
+    """Files under root that name this machine: its home, the checkout or the build caches."""
+    needles = sorted({str(Path.home()), str(REPO), str(CACHE.parent)}, key=len, reverse=True)
+    found = []
+    for path in sorted(root.rglob("*")):
+        if path.is_file() and not path.is_symlink():
+            data = path.read_bytes()
+            found += [(path, n) for n in needles if n.encode() in data][:1]
+    return found
+
+
+def version_tuple(version: str) -> tuple[int, ...]:
+    return tuple(int(p) for p in version.split("."))
+
+
+def prepare_runtime(python: Path) -> dict[str, str]:
+    """Remove the excluded modules from a copied runtime and strip its ELF files; return what was removed."""
+    removed = {}
+    for rel, why in EXCLUDED_RUNTIME.items():
+        target = python / rel
+        if target.is_dir():
+            shutil.rmtree(target)
+        elif target.exists() or target.is_symlink():
+            target.unlink()
+        else:
+            raise SystemExit(f"the runtime has no {rel}: update EXCLUDED_RUNTIME for this runtime")
+        removed[rel] = why
+    # Only the shared libraries: strip warns on, and may break, the patchelf-edited executable, which Rack never runs.
+    for path in elf_files(python):
+        if ".so" in path.name:
+            path.chmod(path.stat().st_mode | 0o200)
+            run(["strip", "--strip-unneeded", path])
+    return removed
+
+
+def third_party_notices(licenses_dir: Path, version: str) -> list[dict[str, Any]]:
+    """Copy the bundled CPython's license texts from its full archive, and pybind11's; write the notices."""
+    pins = json.loads((REPO / "packaging" / "inputs.json").read_text())
+    archive = fetch(pins["python_licenses"]["3.14"])
+    python_licenses = licenses_dir / "python"
+    python_licenses.mkdir(parents=True)
+    meta: dict[str, Any] = {}
+    with tarfile.open(archive, "r:zst") as tf:
+        texts: dict[str, bytes] = {}
+        for member in tf:
+            if member.name == "python/PYTHON.json":
+                f = tf.extractfile(member)
+                assert f is not None
+                meta = json.load(f)
+            elif member.name.startswith("python/licenses/") and member.isreg():
+                f = tf.extractfile(member)
+                assert f is not None
+                texts[member.name.removeprefix("python/")] = f.read()
+    runtime = pins["python_runtime"]["3.14"]["version"]
+    if meta.get("python_version") != runtime:
+        raise SystemExit(f"the license archive is CPython {meta.get('python_version')}, the runtime {runtime}")
+    components: list[dict[str, Any]] = [
+        {
+            "component": f"CPython {runtime}",
+            "licenses": meta["licenses"],
+            "text": "licenses/python/" + Path(meta["license_path"]).name,
+            "used_by": "the interpreter",
+        }
+    ]
+    used: dict[str, set[str]] = {meta["license_path"]: {"CPython"}}
+    for name, variants in sorted(meta["build_info"]["extensions"].items()):
+        if name in EXCLUDED_EXTENSIONS:
+            continue
+        for variant in variants:
+            for path in variant.get("license_paths") or []:
+                used.setdefault(path, set()).add(name)
+            linked = [link["name"] for link in variant.get("links", []) if not link.get("system")]
+            if variant.get("licenses"):
+                components.append(
+                    {
+                        "component": f"libraries of the {name} module ({', '.join(linked)})",
+                        "licenses": variant["licenses"],
+                        "text": ", ".join(
+                            "licenses/python/" + Path(p).name for p in variant.get("license_paths") or []
+                        ),
+                        "used_by": name,
+                    }
+                )
+            elif variant.get("license_public_domain"):
+                components.append(
+                    {
+                        "component": f"libraries of the {name} module",
+                        "licenses": ["public domain"],
+                        "text": "",
+                        "used_by": name,
+                    }
+                )
+    for path in sorted(used):
+        (python_licenses / Path(path).name).write_bytes(texts[path])
+    pybind11 = next((REPO / ".venv").glob("lib/python3.*/site-packages/pybind11-*.dist-info"))
+    (licenses_dir / "pybind11-LICENSE").write_bytes((pybind11 / "licenses" / "LICENSE").read_bytes())
+    components.append(
+        {
+            "component": f"pybind11 {pybind11.name.removesuffix('.dist-info').split('-')[1]}",
+            "licenses": ["BSD-3-Clause"],
+            "text": "licenses/pybind11-LICENSE",
+            "used_by": "compiled into rackpy_host.so",
+        }
+    )
+    lines = [
+        f"# Third-party notices for RackPy {version} ({PLATFORM})",
+        "",
+        "RackPy itself is GPL-3.0-or-later (LICENSE, NOTICE). It is compiled against the headers of the VCV Rack",
+        "SDK 2.6.6, also GPL-3.0-or-later, and runs inside VCV Rack; it contains no Rack binaries or artwork.",
+        "These are the third-party components this artifact contains, and where their license texts are:",
+        "",
+        "| Component | Licenses | Text | Used by |",
+        "| --- | --- | --- | --- |",
+    ]
+    for c in components:
+        lines.append(f"| {c['component']} | {', '.join(c['licenses'])} | {c['text'] or '-'} | {c['used_by']} |")
+    lines += [
+        "",
+        "Left out of this runtime, and not distributed: "
+        + ", ".join(sorted(EXCLUDED_EXTENSIONS))
+        + " (Berkeley DB, whose Sleepycat license adds its own source obligations; Tcl/Tk, whose GUI loop"
+        " cannot run in Rack), and pip and ensurepip (pip cannot install into a running Rack, and vendors"
+        " other libraries).",
+        "",
+        "licenses/rack-sdk-headers.txt has the notices of the third-party code in the Rack SDK's headers, and",
+        "licenses/FILES.json lists every file of this plugin with its SHA-256 and what it is made from.",
+        "",
+        "The corresponding source of RackPy is the rackpy-*-source archive published with this artifact;",
+        "CPython's is at https://github.com/python/cpython (v" + runtime + ") and the build of this runtime at",
+        "https://github.com/astral-sh/python-build-standalone (release "
+        + pins["python_runtime"]["3.14"]["release"]
+        + ").",
+        "",
+    ]
+    (licenses_dir / "THIRD-PARTY-NOTICES.md").write_text("\n".join(lines))
+    return components
+
+
+def sdk_header_notices(licenses_dir: Path, sdk: Path) -> None:
+    """The notices of the third-party header code that compiling against the Rack SDK can put in a binary."""
+    dist = (sdk / "LICENSE-dist.html").read_text(encoding="utf-8")
+    parts = [
+        "Third-party code in the VCV Rack SDK 2.6.6's headers, which can be compiled into RackPy's",
+        "binaries and the kernel libraries of plugins: jansson's inline functions, SIMDe and sse_mathfun.",
+        "The texts are copied from the SDK's LICENSE-dist.html and include/simd/ headers.",
+    ]
+    for name in ("jansson", "simde"):
+        section = re.search(rf"<h2>{name}</h2>(.*?)(?=<h2>|\Z)", dist, re.DOTALL)
+        if section is None:
+            raise SystemExit(f"the SDK's LICENSE-dist.html has no {name} section")
+        text = html.unescape(re.sub(r"<[^>]+>", "", section[1])).strip()
+        parts += ["", f"## {name}", "", text]
+    for header in ("sse_mathfun.h", "sse_mathfun_extension.h"):
+        source = (sdk / "include" / "simd" / header).read_text(encoding="utf-8")
+        comments = re.match(r"\s*((?:/\*.*?\*/\s*)+)", source, re.DOTALL)
+        if comments is None or ("zlib" not in comments[1] and "Permission is granted" not in comments[1]):
+            raise SystemExit(f"{header} has no license comment where expected")
+        parts += ["", f"## include/simd/{header}", "", comments[1].strip()]
+    (licenses_dir / "rack-sdk-headers.txt").write_text("\n".join(parts) + "\n", encoding="utf-8")
+
+
+# What each file of an artifact is, by the first pattern its path matches: the components (keys of
+# COMPONENTS) it is made from. A file no pattern matches fails the build, so the list stays exact.
+COMPONENTS = {
+    "rackpy": "RackPy, GPL-3.0-or-later: LICENSE, NOTICE",
+    "rack-sdk-headers": "VCV Rack SDK 2.6.6 header code, GPL-3.0-or-later, with jansson (MIT), SIMDe (MIT) and "
+    "sse_mathfun (zlib): licenses/rack-sdk-headers.txt",
+    "pybind11": "pybind11, BSD-3-Clause: licenses/pybind11-LICENSE",
+    "cpython": "CPython, PSF-2.0: licenses/python/LICENSE.cpython.txt",
+    "cpython-libraries": "the libraries linked into libpython: licenses/THIRD-PARTY-NOTICES.md, licenses/python/",
+    "plugin": "the plugin's own files, under the license its plugin.json names",
+    "notices": "license texts and this manifest",
+}
+FILE_RULES = [
+    (["LICENSE", "NOTICE", "licenses/*", "*-LICENSE", "*-LICENSE.md", "*-LICENSE.txt"], ["notices"]),
+    (["plugin.json"], ["plugin"]),
+    (["rackpy-loader.json", "pythonpath/rackpy/*"], ["rackpy"]),
+    (["plugin.so"], ["rackpy", "rack-sdk-headers"]),
+    (["rackpy_host.so"], ["rackpy", "rack-sdk-headers", "pybind11"]),
+    (["python/lib/libpython3.14.so.1.0"], ["cpython", "cpython-libraries"]),
+    (["python/*"], ["cpython"]),
+    (["kernels/*"], ["plugin", "rack-sdk-headers"]),
+    (["pythonpath/*", "res/*", "presets/*"], ["plugin"]),
+]
+
+
+def file_manifest(root: Path, build: dict[str, Any]) -> list[str]:
+    """Write root/licenses/FILES.json: every file's SHA-256 and components; return the files no rule covers."""
+    manifest = json.loads((root / "plugin.json").read_text())
+    files: dict[str, Any] = {}
+    unmatched = []
+    for path in sorted(root.rglob("*"), key=lambda p: p.relative_to(root).as_posix()):
+        rel = path.relative_to(root).as_posix()
+        # As bin/rackpy-plugin pack leaves out bytecode caches, so does the list.
+        if path.is_dir() or rel == "licenses/FILES.json" or "__pycache__" in rel.split("/") or path.suffix == ".pyc":
+            continue
+        rule = next((c for patterns, c in FILE_RULES if any(fnmatchcase(rel, p) for p in patterns)), None)
+        if rule is None:
+            unmatched.append(f"{root.name}/{rel}")
+            continue
+        entry: dict[str, Any] = {"components": rule}
+        if path.is_symlink():
+            entry["symlink"] = str(path.readlink())
+        else:
+            entry["sha256"] = sha256_file(path)
+        files[rel] = entry
+    data = {
+        "plugin": {"slug": manifest["slug"], "version": manifest["version"], "license": manifest.get("license")},
+        "build": build,
+        "components": COMPONENTS,
+        "files": files,
+    }
+    (root / "licenses" / "FILES.json").write_text(json.dumps(data, indent=1, sort_keys=True) + "\n")
+    return unmatched
+
+
+@app.command
+def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
+    """Build every Linux x86_64 release-candidate artifact of this commit into DEST (emptied first).
+
+    --allow-dirty is for trying the tool only: the manifest then says the checkout was dirty, and such
+    artifacts must never leave this machine.
+    """
+    try:
+        facts = checkout_facts()
+        dirty = False
+    except SystemExit:
+        if not allow_dirty:
+            raise
+        commit = run(["git", "-C", REPO, "rev-parse", "HEAD"], capture=True).strip()
+        facts = {"commit": commit, "source_date_epoch": int(time.time()), "version": "0.0.0.dev0+dirty"}
+        dirty = True
+    version, epoch = facts["version"], facts["source_date_epoch"]
+    if dest.exists():
+        shutil.rmtree(dest)
+    work, out = dest / "work", dest / "artifacts"
+    work.mkdir(parents=True)
+    out.mkdir()
+    tree = dest / "build-tree"
+
+    # 1. The plugin skeleton and the example kernels, with the official toolchain (glibc floor 2.23). The
+    # runtime is a fresh extraction of the pinned archive, not the build cache's copy that local runs touch.
+    run([BIN / "rackpy-dev", "build", "--build-dir", tree, "--toolchain", "rack-lin-x64", "--werror"])
+    run([BIN / "rackpy-dev", "bundle", work, "--build-dir", tree, "--runtime", "copy"])
+    bundle = work / "RackPy"
+    shutil.rmtree(bundle / "python")
+    pin = json.loads((REPO / "packaging" / "inputs.json").read_text())["python_runtime"]["3.14"]
+    staging = work / "runtime"
+    with tarfile.open(fetch(pin)) as tf:
+        tf.extractall(staging, filter="data")
+    (staging / pin["root"]).rename(bundle / "python")
+    staging.rmdir()
+    removed = prepare_runtime(bundle / "python")
+    components = third_party_notices(bundle / "licenses", version)
+    sdk = Path(run([BIN / "rack-sdk", "path"], capture=True).strip().splitlines()[-1])
+    sdk_header_notices(bundle / "licenses", sdk)
+    versions = json.loads((REPO / "upstream" / "versions.json").read_text())
+    build_info = {
+        "rackpy_version": version,
+        "commit": facts["commit"],
+        "dirty": dirty,
+        "rack": {"version": versions["rack"]["version"], "commit": versions["rack"]["commit"]},
+        "rack_sdk": next(a for a in versions["sdk"]["archives"] if a["platform"] == PLATFORM),
+        "python_runtime": pin,
+        "toolchain": toolchain_id(),
+        "glibc_floor": GLIBC_FLOOR,
+    }
+
+    # 2. Every example as a plugin directory, its kernel libraries stripped as cmake --install strips RackPy's.
+    plugins = work / "plugins"
+    examples = []
+    for project in sorted(p.parent for p in (REPO / "examples").glob("*/plugin.json")):
+        manifest = json.loads((project / "plugin.json").read_text())
+        config = json.loads((project / "rackpy-plugin.json").read_text())
+        args: list[str | Path] = [BIN / "rackpy-plugin", "build", project, "--bundle", bundle, "--dest", plugins]
+        if config.get("kernels"):
+            args += ["--kernels", tree / "examples" / project.name / "kernels"]
+        run(args)
+        for kernel in sorted((plugins / manifest["slug"] / "kernels").glob("*.so")):
+            run(["strip", "--strip-unneeded", kernel])
+        examples.append((project, manifest))
+
+    # 3. What every ELF file needs: only the system's C library family, Rack and the bundled runtime, at most
+    # glibc 2.23, and no search path but Rack's /tmp/Rack2 and the plugin's own. No file names this machine.
+    elf: dict[str, Any] = {}
+    problems = []
+    for root in [bundle, *(plugins / m["slug"] for _, m in examples)]:
+        files = elf_files(root)
+        bundled = {p.name for p in files} | {"libpython3.14.so.1.0"}
+        for path in files:
+            rel = path.relative_to(work).as_posix()
+            fact = elf_facts(path)
+            if root == bundle or path.parent.name == "kernels":
+                elf[rel] = fact
+            unexpected = [
+                n
+                for n in fact["needed"]
+                if n not in SYSTEM_LIBRARIES | bundled
+                and not (
+                    n.startswith("$ORIGIN/")
+                    and (path.parent / n.removeprefix("$ORIGIN/")).resolve().is_relative_to(root)
+                )
+            ]
+            if unexpected:
+                problems.append(f"{rel} needs {unexpected}")
+            for entry in fact["runpath"]:
+                if any(d not in ALLOWED_SEARCH_PATHS for d in entry.split(":")):
+                    problems.append(f"{rel} searches {entry}")
+            if fact["max_glibc"] and version_tuple(fact["max_glibc"]) > version_tuple(GLIBC_FLOOR):
+                problems.append(f"{rel} needs GLIBC_{fact['max_glibc']}, newer than {GLIBC_FLOOR}")
+        problems += [f"{f}: no license rule covers it" for f in file_manifest(root, build_info)]
+        problems += [f"{p.relative_to(work)} names {m}" for p, m in machine_paths(root)]
+        run([BIN / "rackpy-dev", "inspect", root, "--max-glibc", GLIBC_FLOOR], capture=True)
+    if problems:
+        raise SystemExit("artifact problems:\n" + "\n".join(f"- {p}" for p in problems))
+
+    artifacts: list[dict[str, Any]] = []
+
+    def record(path: Path, role: str, **more: Any) -> None:
+        artifacts.append(
+            {"file": path.name, "role": role, "sha256": sha256_file(path), "size": path.stat().st_size, **more}
+        )
+
+    # 4. The runtime bundle, what bin/rackpy-plugin build combines with a plugin project, and every example as
+    # a plugin package, Rack's own format.
+    runtime_archive = out / f"rackpy-runtime-{version}-{PLATFORM}.tar.zst"
+    pack: list[str | Path] = [BIN / "rackpy-plugin", "pack", "--source-date-epoch", str(epoch)]
+    run([*pack, bundle, "--output", runtime_archive])
+    record(runtime_archive, "runtime bundle: input to bin/rackpy-plugin build; not itself a plugin to install")
+    for project, manifest in examples:
+        package = out / f"{manifest['slug']}-{manifest['version']}-{PLATFORM}.vcvplugin"
+        run([*pack, plugins / manifest["slug"], "--output", package])
+        record(
+            package,
+            "example plugin: copy into Rack's plugins folder",
+            slug=manifest["slug"],
+            models=[m["slug"] for m in manifest["modules"]],
+            example=project.name,
+        )
+
+    # 5. The developer package: the rackpy Python package, for typing, offline graphs and tests; not a plugin.
+    wheels = work / "wheel"
+    run(["uv", "build", "--wheel", "--out-dir", wheels], cwd=REPO, env={**os.environ, "SOURCE_DATE_EPOCH": str(epoch)})
+    (wheel,) = wheels.glob("*.whl")  # its name and metadata keep the package version; the manifest has the commit
+    shutil.copy(wheel, out / wheel.name)
+    record(
+        out / wheel.name,
+        "developer package: pip/uv-installable rackpy for editors, type checkers and offline "
+        "graph tests; runs nothing in Rack",
+    )
+
+    # 6. The GPL corresponding source: the commit, without the files that are not RackPy's to license.
+    source = out / f"rackpy-{version}-source.tar.gz"
+    pathspec = ["."] + [f":(exclude){p}" for p in RESTRICTED_SOURCES]
+    run(
+        [
+            "git",
+            "-C",
+            REPO,
+            "archive",
+            "--format=tar.gz",
+            f"--prefix=rackpy-{version}/",
+            "-o",
+            source,
+            facts["commit"],
+            "--",
+            *pathspec,
+        ]
+    )
+    record(source, "corresponding source (GPL-3.0-or-later)")
+
+    manifest_data = {
+        "schema_version": 1,
+        "note": "RackPy release candidate. Not published: nothing here may be distributed without owner approval.",
+        "rackpy_version": version,
+        "commit": facts["commit"],
+        "dirty": dirty,
+        "source_date_epoch": epoch,
+        "platform": PLATFORM,
+        "glibc_floor": GLIBC_FLOOR,
+        "inputs": {**build_info, "uv_lock_sha256": sha256_file(REPO / "uv.lock")},
+        "excluded_from_runtime": removed,
+        "restricted_sources_excluded": RESTRICTED_SOURCES,
+        "third_party": components,
+        "elf": elf,
+        "artifacts": artifacts,
+    }
+    (out / "manifest.json").write_text(json.dumps(manifest_data, indent=2, sort_keys=True) + "\n")
+    sums = "".join(f"{sha256_file(p)}  {p.name}\n" for p in sorted(out.iterdir()) if p.name != "SHA256SUMS")
+    (out / "SHA256SUMS").write_text(sums)
+    print(f"\n{len(artifacts)} artifacts in {out}" + ("  (DIRTY CHECKOUT: do not distribute)" if dirty else ""))
+
+
+def archive_members(path: Path) -> dict[str, str]:
+    """Each regular file in an archive, by name: its SHA-256."""
+    out: dict[str, str] = {}
+    if path.suffix == ".whl":
+        with zipfile.ZipFile(path) as zf:
+            return {n: hashlib.sha256(zf.read(n)).hexdigest() for n in zf.namelist()}
+    with tarfile.open(path, "r:gz") if path.name.endswith(".tar.gz") else tarfile.open(path, "r:zst") as tf:
+        for member in tf:
+            if member.isreg():
+                f = tf.extractfile(member)
+                assert f is not None
+                out[member.name] = hashlib.sha256(f.read()).hexdigest()
+    return out
+
+
+@app.command
+def compare(first: Path, second: Path) -> None:
+    """Compare two artifact folders (DEST/artifacts) of the same commit: list every file that differs, by member."""
+    report: dict[str, Any] = {}
+    names = sorted({p.name for p in first.iterdir()} | {p.name for p in second.iterdir()})
+    for name in names:
+        a, b = first / name, second / name
+        if not a.exists() or not b.exists():
+            report[name] = "only in " + (str(first) if a.exists() else str(second))
+            continue
+        if sha256_file(a) == sha256_file(b):
+            report[name] = "identical"
+            continue
+        if name in {"SHA256SUMS", "manifest.json"}:
+            report[name] = "differs (it records the others' hashes)"
+            continue
+        ma, mb = archive_members(a), archive_members(b)
+        differing = sorted(n for n in set(ma) | set(mb) if ma.get(n) != mb.get(n))
+        report[name] = {"differing_members": differing} if differing else "differs only in archive metadata"
+    print(json.dumps(report, indent=2))
+
+
+VERIFY_SCRIPT = REPO / "packaging" / "linux" / "verify-in-container.sh"
+VERIFY_IMAGE = REPO / "packaging" / "linux" / "verify.Dockerfile"
+
+
+@app.command
+def verify(artifacts: Path, *, rack: Path, logs: Path) -> None:
+    """Install ARTIFACTS in a clean container with Rack Free at RACK, and run every example; logs go to LOGS.
+
+    The image (packaging/linux/verify.Dockerfile) has Rack's system libraries and Xvfb, but no Python and no
+    RackPy checkout; the run itself has no network, as an offline machine would.
+    """
+    tag = "rackpy-verify:" + hashlib.sha256(VERIFY_IMAGE.read_bytes()).hexdigest()[:12]
+    run(["docker", "build", "-t", tag, "-f", VERIFY_IMAGE, VERIFY_IMAGE.parent])
+    if logs.exists():
+        shutil.rmtree(logs)
+    logs.mkdir(parents=True)
+    # A copy, so that editing the script cannot change a run under way (bash reads it as it goes).
+    script = Path(tempfile.mkdtemp(prefix="rackpy-verify-")) / "verify.sh"
+    shutil.copy(VERIFY_SCRIPT, script)
+    try:
+        run([
+            "docker", "run", "--rm", "--network", "none",
+            "--user", f"{os.getuid()}:{os.getgid()}", "--env", "HOME=/tmp",  # the logs stay the caller's
+            "-v", f"{artifacts.resolve()}:/artifacts:ro",
+            "-v", f"{rack.resolve()}:/opt/Rack2Free:ro",
+            "-v", f"{script}:/verify.sh:ro",
+            "-v", f"{logs.resolve()}:/logs",
+            tag, "bash", "/verify.sh",
+        ])  # fmt: skip
+    finally:
+        shutil.rmtree(script.parent)
+        if (logs / "summary.txt").exists():
+            print((logs / "summary.txt").read_text())
+
+
+if __name__ == "__main__":
+    app()

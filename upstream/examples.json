@@ -1057,7 +1057,18 @@
       "port_task": "RP-39",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "bin/rackpy-plugin build copies the project's presets/ into the plugin, so no list of distributables is kept; rackpy-plugin pack packages them with the rest",
+        "files": [
+          "bin/rackpy-plugin",
+          "docs/how-to/packaging.md",
+          "examples/configuration/presets"
+        ],
+        "tests": [
+          "tests/examples/test_controls_state.py::test_each_example_loads_as_its_own_plugin"
+        ]
+      }
     },
     {
       "id": "presets-03",
@@ -1686,7 +1697,19 @@
       "port_task": "RP-39",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "bin/rackpy-plugin pack makes a plugin folder a reproducible .vcvplugin, as make dist does; bin/rackpy-release build makes RackPy's own release candidates",
+        "files": [
+          "bin/rackpy-plugin",
+          "bin/rackpy-release",
+          "docs/how-to/packaging.md",
+          "docs/installation/linux.md"
+        ],
+        "tests": [
+          "tests/integration/test_release.py::test_pack_names_the_package_as_rack_does_and_refuses_a_misnamed_folder"
+        ]
+      }
     },
     {
       "id": "building-15",
@@ -1700,7 +1723,17 @@
       "port_task": "RP-39",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "bin/rackpy-plugin build --dest <Rack user folder>/plugins-lin-x64 installs a project, as make install does; a .vcvplugin is installed by copying it there",
+        "files": [
+          "docs/quickstart.md",
+          "docs/installation/linux.md"
+        ],
+        "tests": [
+          "tests/docs/test_tutorial.py::test_the_tutorial_plugin_on_a_production_bundle_and_a_broken_configure"
+        ]
+      }
     },
     {
       "id": "helper-createplugin-makefile",

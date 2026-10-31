@@ -57,6 +57,8 @@ missing or different SDK is a configure error, not a warning.
 | `bin/rackpy-dev lint`, `bin/rackpy-dev typecheck` | Ruff, and strict mypy including each `bin/` script |
 | `bin/rack-sdk verify\|closure\|probe` | SDK pins ([compatibility](docs/compatibility.md#reproduce)) |
 | `bin/rack-toolchain build\|check\|path` | The official Linux toolchain for distributable builds (about an hour, once) |
+| `bin/rackpy-release build\|verify\|compare` | Linux release candidates from a clean commit; install and run them on a clean container; explain the differences between two builds ([install on Linux](docs/installation/linux.md)) |
+| `bin/rackpy-plugin pack DIR` | A plugin directory as a reproducible `.vcvplugin` package |
 | `bin/planning-check` | `planning/` files agree with each other and form a DAG |
 | `uv run sphinx-build -W --keep-going -n -b html docs build/docs/html` | The documentation site; conventions in [docs/contributing-docs.md](docs/contributing-docs.md) |
 
@@ -119,10 +121,11 @@ and on pull requests, on `ubuntu-24.04`:
 | Documentation external links (weekly and on demand) | `sphinx-build -b linkcheck` |
 | Rack host smoke tests | `pytest -m "host and not dist"`: the skeleton, the docs snippets that run in Rack, the RP-04 spike and the RP-06 probe in Rack Free 2.6.6 |
 | Distributable build (pushes to `main` and on demand) | builds or restores the official toolchain, then `pytest -m dist` |
+| Linux release candidate (pushes to `main` and on demand) | `bin/rackpy-release build`, then `bin/rackpy-release verify` installs it on a clean container with no Python and no network; keeps the manifest, checksums, logs and screenshots |
 
 Each job keeps its JUnit report, the host jobs keep every Rack `log.txt`, and
 the docs job keeps the built site, for 14 days. CI keeps no binaries:
-distributing a build needs the RP-39 license manifest and owner approval.
+distributing a build needs owner approval (RP-44).
 
 **Known gap.** `upstream/api-surface.json` records the libclang build that
 produced it (clang 23.1.3 on the planning machine). CI's LLVM 21 cannot

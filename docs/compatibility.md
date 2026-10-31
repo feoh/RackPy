@@ -112,7 +112,9 @@ macOS toolchains have not been built.
    Linux release artifacts need the official toolchain or an equivalent old-glibc
    sysroot. Host builds are fine for development and tests. RP-08 builds with
    the official toolchain in CI and checks the floor with
-   `bin/rackpy-dev inspect --max-glibc 2.23`. (RP-39 owns the release artifact.)
+   `bin/rackpy-dev inspect --max-glibc 2.23`. RP-39's release candidates
+   (`bin/rackpy-release build`) are built this way, and run on a clean
+   Ubuntu 20.04 container ([install on Linux](installation/linux.md)).
 2. **Windows mixes C runtimes unless proven otherwise.** Plugins link against
    a MinGW import library. python.org CPython is built with MSVC. RP-04 and
    RP-41 must probe CRT and C++ runtime coexistence before choosing an ABI.

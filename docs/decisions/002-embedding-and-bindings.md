@@ -238,7 +238,9 @@ lines with `py:` come from the trusted script.
 - RP-08 scaffolds the loader/host split, the bundled runtime and pybind11 3.1.0
   pins. It also needs an old-glibc toolchain for distributable builds.
 - RP-10 implements the context policy above.
-- The runtime adds about 254 MB unpacked before trimming. RP-39 decides what
-  ships.
+- The runtime adds about 254 MB unpacked before trimming. RP-39 ships it
+  without Tcl/Tk, `_dbm`, pip and `ensurepip`, with its shared libraries
+  stripped: about 128 MB unpacked, and each Linux plugin package about 48 MB
+  ([licensing](../licensing.md#linux-release-candidates-rp-39)).
 - Windowed Rack, macOS and Windows remain untested. No support is claimed for
   them.

@@ -106,12 +106,15 @@ runtime, which is always available.
 
 ### 6. CI
 
-One workflow, `ubuntu-24.04`, six jobs: planning data; hooks, strict typing and
-unit tests; SDK pins, native build and the audio-path guard; the inventory;
-real-host smoke tests (headless and Xvfb); and, outside pull requests, the
-distributable build with the official toolchain (restored from cache, or built
-in about an hour). Reports and Rack logs are kept 14 days. CI keeps no binaries,
-because distributing one needs the RP-39 license manifest and owner approval.
+One workflow, `ubuntu-24.04`, nine jobs: planning data; hooks, strict typing and
+unit tests; the docs build; their links; SDK pins, native build and the audio-path
+guard; the inventory; real-host smoke tests (headless and Xvfb); and, outside
+pull requests, the distributable build with the official toolchain (restored
+from cache, or built in about an hour) and the Linux release candidate, built
+by `bin/rackpy-release build` and installed on a clean container by
+`bin/rackpy-release verify` (RP-39). Reports and Rack logs are kept 14 days,
+the release candidate's evidence 30. CI keeps no binaries, because
+distributing one needs owner approval (RP-44).
 
 ### 7. Spike code is retained
 

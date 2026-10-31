@@ -3,7 +3,7 @@
 #
 # Every input is pinned and checksum-verified by the bin/ tools, so the caches
 # below only save downloads. CI keeps logs and test reports, never binaries:
-# distributing a build needs the RP-39 license manifest and owner approval.
+# distributing a build needs owner approval (RP-44).
 name: CI
 
 on:
@@ -270,4 +270,53 @@ jobs:
           name: dist-reports
           path: reports/
           retention-days: 14
+          if-no-files-found: ignore
+
+  release-candidate:
+    name: Linux release candidate, installed and run on a clean machine
+    # RP-39. Builds every Linux artifact of this commit with the official toolchain (bin/rackpy-release build),
+    # then installs and runs them in a clean Ubuntu 20.04 container with no Python and no network
+    # (bin/rackpy-release verify). Keeps the manifest, checksums, logs and screenshots, not the artifacts:
+    # nothing is distributed without owner approval.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs: dist  # shares its toolchain cache
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build jq
+      - name: Restore the toolchain
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/rackpy/toolchain/*/local
+          key: rack-toolchain-lin-x64-${{ hashFiles('upstream/versions.json', 'packaging/toolchain/lin-x64.Dockerfile') }}
+          fail-on-cache-miss: true
+      - run: bin/rack-toolchain check
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/rackpy/sdk
+            ~/.cache/rackpy/build-inputs
+          key: rackpy-release-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json') }}
+      - run: uv sync --frozen
+      - name: Build the release candidate
+        run: bin/rackpy-release build --dest "$RUNNER_TEMP/release"
+      - name: Install and run it on a clean machine
+        run: >
+          bin/rackpy-release verify "$RUNNER_TEMP/release/artifacts" --rack "$(bin/rack-sdk host | tail -1)"
+          --logs reports/verify
+      - if: always()
+        name: Keep the manifest and checksums with the logs
+        run: |
+          mkdir -p reports
+          cp "$RUNNER_TEMP/release/artifacts/manifest.json" "$RUNNER_TEMP/release/artifacts/SHA256SUMS" reports/ || true
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-candidate-evidence
+          path: reports/
+          retention-days: 30
           if-no-files-found: ignore

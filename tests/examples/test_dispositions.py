@@ -12,7 +12,7 @@ import pytest
 from tests.support import REPO
 
 pytestmark = pytest.mark.unit
-COMPLETED = {"RP-33", "RP-34", "RP-35", "RP-36", "RP-37"}
+COMPLETED = {"RP-33", "RP-34", "RP-35", "RP-36", "RP-37", "RP-39"}
 SAMPLES = json.loads((REPO / "upstream" / "examples.json").read_text(encoding="utf-8"))["samples"]
 
 
@@ -35,9 +35,9 @@ def test_a_disposition_names_existing_files_and_tests(sample: dict[str, object])
 
 
 # RP-36's end-to-end audit. RP-37 documented the shell commands and migration notes that RackPy
-# does not adapt (dispositions above); RP-39 documents the packaging ones; samples about building
-# Rack itself are out of scope.
-LATER = {"RP-39"}
+# does not adapt (dispositions above), and RP-39 the packaging ones; samples about building Rack
+# itself are out of scope. No task is left to give the rest a disposition.
+LATER: set[str] = set()
 OFFICIAL_PAGES = ("tutorial-", "guide-", "helper-")
 
 

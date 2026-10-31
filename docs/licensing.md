@@ -66,8 +66,12 @@ need their own check. RackPy never copies them into git or into an artifact.
 | Manual images, including tutorial `MyModule.svg` (`49f02446…577d6`) and panel guide `VCO.svg` (`8de42fc2…61ba7`) | Unknown; even the hidden manual license note excludes images | Not copied. Examples use original panels. |
 | Fundamental plugin artwork and layouts | GPL code; panel art has separate terms | Not ported |
 
-Screenshots of Rack's interface in RackPy documentation will contain VCV
-artwork. RP-37 has to settle a screenshot policy before publishing any.
+Screenshots of Rack's interface in RackPy documentation contain VCV artwork
+(the RP-35 example screenshots in `docs/_static/examples/` show Rack's rails and
+menus around RackPy's own panels). No screenshot policy has been settled, so
+these images are not part of any release artifact: `bin/rackpy-release` leaves
+them out of the source archive. The owner decides the policy before a release
+(RP-44).
 
 ## Official sample sources
 
@@ -159,6 +163,32 @@ Every binary artifact will contain:
 
 RP-39, RP-40 and RP-41 implement this per platform. RP-44 checks it before
 release. Signing, publishing and registering names need owner approval.
+
+### Linux release candidates (RP-39)
+
+`bin/rackpy-release build` makes these from a clean checkout. Every plugin
+package and the runtime bundle contain:
+
+| File | What it is |
+| --- | --- |
+| `LICENSE`, `NOTICE` | RackPy's GPL-3.0-or-later license and notice |
+| `licenses/THIRD-PARTY-NOTICES.md` | Each third-party component, its licenses, the file with its text, and what uses it; generated from the runtime's own build metadata (`PYTHON.json` of the same python-build-standalone build, pinned in `packaging/inputs.json`) |
+| `licenses/python/` | The license texts of CPython and of each library linked into it: OpenSSL 3 (Apache-2.0), libffi, expat, mpdecimal, liblzma, bzip2, zlib and zlib-ng, zstd, libuuid, libedit, ncurses, and SQLite (public domain) |
+| `licenses/pybind11-LICENSE` | pybind11 (BSD-3-Clause), compiled into `rackpy_host.so` |
+| `licenses/rack-sdk-headers.txt` | The notices of the third-party code in the Rack SDK's headers that can be compiled in: jansson (MIT), SIMDe (MIT) and `sse_mathfun` (zlib), copied from the pinned SDK |
+| `licenses/FILES.json` | Every file of that artifact with its SHA-256 and the components it is made from, and the build's inputs: RackPy commit, Rack commit, SDK archive digest, CPython archive digest and toolchain. A file no rule covers fails the build. |
+
+Left out of the bundled CPython: `_dbm` (Berkeley DB, under the Sleepycat
+license, which adds its own source obligations), `_tkinter` with Tcl/Tk and
+their libraries (Tk's event loop cannot run inside Rack), `tkinter`, `idlelib`
+and `turtledemo`, which need them, and pip and `ensurepip` (pip cannot install
+into a running Rack, and vendors further libraries). The build fails if the
+pinned runtime changes so that these no longer match.
+
+The corresponding source is `rackpy-<version>-source.tar.gz`, `git archive` of
+the commit, without `docs/_static/examples/` (above). No artifact contains a
+Rack SDK archive, Rack or Fundamental binaries, VCV artwork, or a path of the
+computer that built it; the build checks the last.
 
 ## Package identity
 

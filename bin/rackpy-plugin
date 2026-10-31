@@ -1,6 +1,6 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.12"
+# requires-python = ">=3.14"
 # dependencies = ["cyclopts>=5.2,<6"]
 #
 # [tool.uv]
@@ -9,8 +9,9 @@
 """Create, extend and assemble RackPy plugin projects: RackPy's counterpart of Rack's helper.py (RP-33).
 
 ``create`` makes a plugin project, ``add-module`` adds a module (and, from an SVG
-panel's "components" layer, its Python source), and ``build`` combines a project
-with a RackPy bundle into a plugin directory that Rack loads.
+panel's "components" layer, its Python source), ``build`` combines a project
+with a RackPy bundle into a plugin directory that Rack loads, and ``pack`` makes
+that directory a ``.vcvplugin`` package, as ``make dist`` does for a C++ plugin.
 
 The panel parsing and the shape of the generated module follow Rack's helper.py
 (Rack 2.6.6, commit 061ccf63c1758599396ac1bb10d47345d9d34076, sha256
@@ -21,9 +22,11 @@ listed in examples/template/PROVENANCE.md.
 
 import json
 import keyword
+import os
 import re
 import shutil
 import sys
+import tarfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
@@ -498,10 +501,80 @@ def build(project: Path = Path(), *, bundle: Path, dest: Path, kernels: Path | N
     for notice in ("LICENSE", "LICENSE.md", "LICENSE.txt"):
         if (root / notice).is_file():
             shutil.copy2(root / notice, target / f"{slug}-{notice}")
+    # A release bundle's file list describes the bundle; this plugin's files differ (bin/rackpy-release).
+    (target / "licenses" / "FILES.json").unlink(missing_ok=True)
     for cache in target.joinpath("pythonpath").rglob("__pycache__"):
         if not cache.is_relative_to(target / "pythonpath" / "rackpy"):
             shutil.rmtree(cache)
     print(target)
+
+
+def pack_tree(root: Path, out: Path, epoch: int) -> None:
+    """root as root.name/ in a zstd tar: sorted, owned by root, dated epoch, modes 755 or 644, no bytecode."""
+
+    def info(path: Path, name: str) -> tarfile.TarInfo:
+        ti = tarfile.TarInfo(name)
+        ti.mtime, ti.uid, ti.gid, ti.uname, ti.gname = epoch, 0, 0, "", ""
+        if path.is_symlink():
+            ti.type, ti.linkname, ti.mode = tarfile.SYMTYPE, str(path.readlink()), 0o777
+        elif path.is_dir():
+            ti.type, ti.mode = tarfile.DIRTYPE, 0o755
+        else:
+            ti.size, ti.mode = path.stat().st_size, 0o755 if os.access(path, os.X_OK) else 0o644
+        return ti
+
+    paths = [
+        p
+        for p in root.rglob("*")
+        if "__pycache__" not in p.relative_to(root).parts and p.suffix not in {".pyc", ".pyo"}
+    ]
+    with tarfile.open(out, "w:zst") as tf:
+        tf.addfile(info(root, root.name))
+        for path in sorted(paths, key=lambda p: p.relative_to(root).as_posix()):
+            ti = info(path, f"{root.name}/{path.relative_to(root).as_posix()}")
+            if ti.isreg():
+                with path.open("rb") as f:
+                    tf.addfile(ti, f)
+            else:
+                tf.addfile(ti)
+
+
+@app.command
+def pack(
+    plugin: Path, *, dest: Path = Path(), output: Path | None = None, source_date_epoch: int | None = None
+) -> None:
+    """Make a plugin directory, as ``build`` makes it, a package Rack installs: DEST/<slug>-<version>-lin-x64.vcvplugin.
+
+    A ``.vcvplugin`` is a zstd-compressed tar of the plugin's folder, which Rack extracts
+    when it finds one in its plugins folder. The package is reproducible: its files are
+    sorted, owned by root and dated SOURCE_DATE_EPOCH, so packing the same folder twice
+    gives the same bytes. Python bytecode caches are left out.
+
+    Parameters
+    ----------
+    plugin
+        The plugin directory, named after its slug.
+    dest
+        Where to write the package.
+    output
+        The package's path instead, for another name.
+    source_date_epoch
+        The files' date, in seconds since 1970: by default the SOURCE_DATE_EPOCH
+        environment variable, or 0.
+    """
+    root = plugin.resolve()
+    manifest = read_json(root / "plugin.json")
+    slug, version = manifest.get("slug", ""), manifest.get("version", "")
+    if root.name != slug:
+        raise UsageError(f"{root} must be named after its slug, {slug!r}: Rack extracts it to a folder of that name")
+    if not (root / "plugin.so").is_file():
+        raise UsageError(f"{root} has no plugin.so; make it with `bin/rackpy-plugin build`")
+    if source_date_epoch is None:
+        source_date_epoch = int(os.environ.get("SOURCE_DATE_EPOCH", "0"))
+    out = output if output is not None else dest / f"{slug}-{version}-lin-x64.vcvplugin"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    pack_tree(root, out, source_date_epoch)
+    print(out)
 
 
 if __name__ == "__main__":

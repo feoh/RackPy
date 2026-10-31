@@ -13,5 +13,13 @@
       "sha256": "dfa4c5a40c47f338f41658017be550c72247c391e6bfb1fa4da03ebc8451abdf",
       "root": "python"
     }
+  },
+  "python_licenses": {
+    "note": "The same python-build-standalone build's full archive, read only for python/PYTHON.json and python/licenses/: which libraries the runtime links, under which licences, with their texts (RP-39). install_only archives are derived from this pgo+lto build and carry only CPython's licence.",
+    "3.14": {
+      "file": "cpython-3.14.9+20261021-x86_64-unknown-linux-gnu-pgo+lto-full.tar.zst",
+      "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-unknown-linux-gnu-pgo%2Blto-full.tar.zst",
+      "sha256": "92f6abbce0283ed317873615396b5c43ccdcdf13ae9c7d68c9a07651df527528"
+    }
   }
 }

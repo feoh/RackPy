@@ -29,8 +29,10 @@ endif()
 include(cmake/RackSDK.cmake)
 include(cmake/BundledPython.cmake)
 
-# Log lines and debug info name sources relative to the repository, not the build machine's checkout.
-add_compile_options("-ffile-prefix-map=${PROJECT_SOURCE_DIR}/=")
+# Log lines and debug info name sources relative to the repository, not the build machine's checkout,
+# and the pinned inputs' headers by what they are, not where this machine cached them (RP-39).
+add_compile_options("-ffile-prefix-map=${PROJECT_SOURCE_DIR}/=" "-ffile-prefix-map=${RACK_SDK_DIR}=Rack-SDK"
+  "-ffile-prefix-map=${RACKPY_PYTHON_HOME}=python")
 
 # Headers only: the host links the bundled libpython itself, not the build machine's Python.
 set(PYBIND11_NOPYTHON ON)
@@ -288,7 +290,8 @@ foreach(_source IN LISTS RACKPY_EXAMPLE_KERNELS)
   add_library(${_target} MODULE "${_source}")
   set_target_properties(${_target} PROPERTIES PREFIX "" OUTPUT_NAME "${_name}"
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/examples/${_project}/kernels"
-    CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF CXX_VISIBILITY_PRESET hidden)
+    CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF CXX_VISIBILITY_PRESET hidden
+    SKIP_BUILD_RPATH ON)  # Rack loads libRack.so through /tmp/Rack2, as for plugin.so; not the SDK path
   target_include_directories(${_target} PRIVATE native/include)
   target_link_libraries(${_target} PRIVATE rackpy_sdk_plugin)
 endforeach()
