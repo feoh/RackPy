@@ -4,7 +4,9 @@
 # Defines:
 #   RACKPY_PLATFORM     lin-x64, mac-x64 or mac-arm64: Rack's name for the target
 #   rackpy_sdk_compile  compile flags and SDK headers (as -isystem, see ADR 004)
-#   rackpy_sdk_plugin   compile + link flags for a DSO that Rack loads
+#   rackpy_sdk_plugin   compile + link flags for a DSO that Rack loads (plugin.so / plugin.dylib)
+#   rackpy_sdk_module   compile + link flags for a DSO that RackPy loads once Rack has loaded the plugin
+#                       (rackpy_host.so, kernel libraries)
 #   rackpy_sdk_program  compile + link flags for a native test program outside Rack
 
 if(APPLE)
@@ -129,6 +131,20 @@ else()
   # Rack symlinks /tmp/Rack2 to its system directory while it dlopens a plugin.
   target_link_options(rackpy_sdk_plugin INTERFACE -Wl,-rpath=/tmp/Rack2 -static-libstdc++ -static-libgcc)
   target_link_options(rackpy_sdk_program INTERFACE "-Wl,-rpath,${RACK_SDK_DIR}" -static-libstdc++ -static-libgcc)
+endif()
+
+# Rack symlinks /tmp/Rack2 only while it dlopens plugin.dylib, and removes the link before calling
+# init() (src/plugin.cpp, loadLibrary), so a library the loader opens later cannot load
+# /tmp/Rack2/libRack.dylib: macOS's dyld looks the path up, where Linux's ld.so matches the libRack.so
+# already loaded by name (RP-40). On macOS such libraries therefore have no libRack load command; their
+# Rack symbols resolve, as plugin.mk's do, through -undefined dynamic_lookup against the libRack Rack
+# loaded.
+add_library(rackpy_sdk_module INTERFACE)
+if(APPLE)
+  target_link_libraries(rackpy_sdk_module INTERFACE rackpy_sdk_compile)
+  target_link_options(rackpy_sdk_module INTERFACE -undefined dynamic_lookup)
+else()
+  target_link_libraries(rackpy_sdk_module INTERFACE rackpy_sdk_plugin)
 endif()
 
 # A macOS module's install name (LC_ID_DYLIB) is, by default, the path the linker wrote it to: a build-tree

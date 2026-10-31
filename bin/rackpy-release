@@ -569,11 +569,13 @@ def mach_o_problems(root: Path, work: Path, facts: dict[str, Any] | None) -> lis
             recorded[rel] = fact
         if fact["cpu"] != PLATFORM:
             found.append(f"{rel} is a {fact['cpu']} binary, not {PLATFORM}: build one package per architecture")
+        # Only the loader may load libRack by path: Rack's /tmp/Rack2 link exists only while it loads
+        # plugin.dylib, so anything loaded later finds Rack's symbols in the loaded libRack (dynamic_lookup).
         unexpected = [
             n
             for n in fact["needed"]
             if not n.startswith(MAC_SYSTEM_PREFIXES)
-            and n != MAC_RACK_LIBRARY
+            and not (n == MAC_RACK_LIBRARY and path == root / LOADER)
             and not (n.startswith("@rpath/") and n.removeprefix("@rpath/") in bundled)
         ]
         if unexpected:

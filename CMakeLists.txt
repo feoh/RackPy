@@ -102,7 +102,7 @@ set_target_properties(rackpy_host PROPERTIES
   CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON
   BUILD_WITH_INSTALL_RPATH ON INSTALL_RPATH "$<IF:$<BOOL:${APPLE}>,@loader_path/python/lib,$ORIGIN/python/lib>")
 target_include_directories(rackpy_host PRIVATE native/include native/bindings/generated)
-target_link_libraries(rackpy_host PRIVATE rackpy_sdk_plugin rackpy_python pybind11::headers)
+target_link_libraries(rackpy_host PRIVATE rackpy_sdk_module rackpy_python pybind11::headers)
 rackpy_module_install_name(rackpy_host)
 # libstdc++ gives std:: instances and its static objects default visibility, so
 # -fvisibility=hidden is not enough; the version script (on macOS the exported symbols list)
@@ -240,7 +240,7 @@ if(RACKPY_BUILD_TESTS)
     set_target_properties(rackpy_kernels_${_name} PROPERTIES PREFIX "" OUTPUT_NAME kernels_${_name}
       CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF CXX_VISIBILITY_PRESET hidden)
     target_include_directories(rackpy_kernels_${_name} PRIVATE native/include)
-    target_link_libraries(rackpy_kernels_${_name} PRIVATE rackpy_sdk_plugin)
+    target_link_libraries(rackpy_kernels_${_name} PRIVATE rackpy_sdk_module)
     rackpy_module_install_name(rackpy_kernels_${_name})
     if(NOT _variant STREQUAL "NONE")
       target_compile_definitions(rackpy_kernels_${_name} PRIVATE ${_variant})
@@ -325,7 +325,7 @@ foreach(_source IN LISTS RACKPY_EXAMPLE_KERNELS)
     CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF CXX_VISIBILITY_PRESET hidden
     SKIP_BUILD_RPATH ON)  # Rack loads libRack.so through /tmp/Rack2, as for plugin.so; not the SDK path
   target_include_directories(${_target} PRIVATE native/include)
-  target_link_libraries(${_target} PRIVATE rackpy_sdk_plugin)
+  target_link_libraries(${_target} PRIVATE rackpy_sdk_module)
   rackpy_module_install_name(${_target})
 endforeach()
 

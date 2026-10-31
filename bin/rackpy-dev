@@ -336,10 +336,13 @@ def inspect_mac(plugin: Path) -> tuple[dict[str, Any], list[str]]:
         found.append(f"rackpy_host.so's rpaths are {host['runpath']}, expected ['@loader_path/python/lib']")
     if "@rpath/libpython3.14.dylib" not in host["needed"]:
         found.append("rackpy_host.so does not link @rpath/libpython3.14.dylib, the bundled runtime")
+    # Rack symlinks /tmp/Rack2 to its own folder only while it loads plugin.dylib (plugin.mk links plugins
+    # so); the host, loaded later, must find Rack's symbols in the loaded libRack instead.
+    if "/tmp/Rack2/libRack.dylib" not in loader["needed"]:
+        found.append("plugin.dylib does not link /tmp/Rack2/libRack.dylib")
+    if any("libRack" in n for n in host["needed"]):
+        found.append("rackpy_host.so links libRack; /tmp/Rack2 is gone by the time the loader opens it")
     for name, facts in (("plugin.dylib", loader), ("rackpy_host.so", host)):
-        # Rack symlinks /tmp/Rack2 to its own folder while it loads plugins; plugin.mk links them so.
-        if "/tmp/Rack2/libRack.dylib" not in facts["needed"]:
-            found.append(f"{name} does not link /tmp/Rack2/libRack.dylib")
         if facts["install_name"] != f"@rpath/{name}":
             found.append(f"{name}'s install name is {facts['install_name']}, expected @rpath/{name}")
     report = {"plugin.dylib": loader, "rackpy_host.so": host}
