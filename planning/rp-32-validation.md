@@ -113,6 +113,29 @@ overlaid on the identified RP-31 integration binaries: `tests/docs/test_snippets
 (every snippet, in Rack and in Python), `tests/io/test_virtual.py` and
 `tests/services/test_system.py`, 7 outer tests passed.
 
+## Docs-signature audit and the remaining `Any`
+
+A script compared every backticked call to a facade function in the human docs
+(not the generated surface pages) with the snapshot's parameter names. Of 34
+hits, 30 were raw-layer methods that share a name with a facade function
+(`process`, `load`, `translate`, Rack's `from_json`). Four were real and are
+fixed: `pitch_to_freq(v)`, `sin2pi(x)` and `light(index, signal)` in the graph
+guide (the parameters are `pitch`, `phase`, `brightness`), and
+`map_param(module, ...)` in the engine reference (the parameter is `target`,
+and `overwrite` was undocumented; its behaviour is now described).
+
+Listing `Any` in the snapshot's signatures found 11 real uses (one false hit,
+`AnyModule`). `run_pair`'s `left_inputs`/`right_inputs` are now a public
+`RunOptions` `TypedDict`, which also rejects the test's unknown key statically
+(it keeps its runtime `TypeError` check). The laboratory `ModuleClass`'s six
+Rack JSON hooks take `JSON` and return `JSON` (cast from the raw stubs' `Any`);
+its test now narrows `super()`'s results before extending them, as typed
+callers must. `Plan.to_dict` still returns `dict[str, list[Any]]`. A first
+attempt typed the laboratory returns `object`, which pushed `dict[Any, Any]`
+narrowing onto every caller; `JSON` is the accurate type of what Rack returns.
+Laboratory and engine host suites (14 outer tests) passed in actual Linux Rack
+with current RP-32 Python overlaid on the integration binaries.
+
 ## Two-way C++ -> raw -> facade discoverability
 
 `bindings/generated/mapping.json` records, per Rack declaration, its raw name

@@ -26,11 +26,11 @@ import ctypes
 import dataclasses
 import math
 from collections.abc import Callable, Mapping, Sequence
-from typing import Any
+from typing import Any, TypedDict
 
 from rackpy.dsp.graph import MAX_CHANNELS, Graph, GraphError, Plan
 
-__all__ = ["Lane", "Result", "run", "run_pair"]
+__all__ = ["Lane", "Result", "RunOptions", "run", "run_pair"]
 
 FREQ_C4: float = ctypes.c_float(261.6256).value
 """``rack::dsp::FREQ_C4``, as the float it is."""
@@ -170,14 +170,23 @@ def run(
     return evaluator.result
 
 
+class RunOptions(TypedDict, total=False):
+    """One graph's inputs for :func:`run_pair`: :func:`run`'s keyword arguments of the same names."""
+
+    inputs: Mapping[int, Sequence[Sequence[float]]]
+    params: Mapping[int, float | Sequence[float]]
+    controls: Mapping[int, Mapping[str, float]]
+    rate_changes: Mapping[int, float]
+
+
 def run_pair(
     left: Graph | Plan,
     right: Graph | Plan,
     frames: int,
     *,
     sample_rate: float = 44100.0,
-    left_inputs: Mapping[str, Any] | None = None,
-    right_inputs: Mapping[str, Any] | None = None,
+    left_inputs: RunOptions | None = None,
+    right_inputs: RunOptions | None = None,
 ) -> tuple[Result, Result]:
     """Evaluates two graphs side by side, ``left`` to the left of ``right``, exchanging expander lanes.
 
@@ -201,7 +210,7 @@ def run_pair(
     return a.result, b.result
 
 
-def _options(options: Mapping[str, Any] | None, what: str) -> dict[str, Any]:
+def _options(options: RunOptions | None, what: str) -> dict[str, Any]:
     allowed = {"inputs", "params", "controls", "rate_changes"}
     given = dict(options or {})
     unknown = set(given) - allowed

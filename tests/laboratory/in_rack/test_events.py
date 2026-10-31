@@ -176,6 +176,7 @@ def test_json_overrides_answer_synchronously() -> None:
 
         def data_to_json(self) -> Any:
             data = super().data_to_json()  # the data handler above
+            assert isinstance(data, dict)
             return {**data, "lab": True}
 
         def data_from_json(self, data: Any) -> None:
@@ -249,7 +250,8 @@ def test_racks_to_json_calls_python_params_and_data_overrides() -> None:
         def params_to_json(self) -> Any:
             calls.append("params_to_json")
             params = super().params_to_json()  # Rack's: each quantity's value and ID
-            return [p for p in params if p["id"] == 0]
+            assert isinstance(params, list)
+            return [p for p in params if isinstance(p, dict) and p["id"] == 0]
 
         def params_from_json(self, data: Any) -> None:
             calls.append(f"params_from_json {data}")

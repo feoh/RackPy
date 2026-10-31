@@ -111,13 +111,13 @@ signal or a number to a node raises
 | `+ - * /`, `-x`, `abs(x)` | IEEE float arithmetic per channel (division by zero gives an infinity or NaN) |
 | `< <= > >=` | 1 where true, else 0 |
 | `minimum`, `maximum`, `clamp`, `where` | `std::fmin`, `std::fmax`, `rack::math::clamp`, and a choice per channel |
-| `pitch_to_freq(v)` | `dsp::FREQ_C4 * std::pow(2.f, v)`: V/oct to Hz, 0 V being C4 |
-| `sin2pi(x)` | `std::sin(2.f * float(M_PI) * x)` |
+| `pitch_to_freq(pitch)` | `dsp::FREQ_C4 * std::pow(2.f, pitch)`: V/oct to Hz, 0 V being C4 |
+| `sin2pi(phase)` | `std::sin(2.f * float(M_PI) * phase)` |
 | `phasor(freq)` | a phase from 0 to 1 per channel, kept as Rack's tutorial oscillator keeps it |
 | `schmitt(x, low, high)` | Rack's `dsp::SchmittTrigger`: 1 on the frame `x` rises to `high` |
 | `pulse(trigger, duration)` | Rack's `dsp::PulseGenerator`: 1 for `duration` seconds after each trigger |
 | `delay(initial)` | the signal it is fed, one frame later |
-| `output(port, signal)`, `light(index, signal)` | write an output (at least one channel) or a light's brightness (channel 0) |
+| `output(port, signal)`, `light(index, brightness)` | write an output (at least one channel) or a light's brightness (channel 0) |
 | `expander_send(side, signal, lane)`, `expander_receive(side, lane)` | send a signal to the module beside it, and receive one, a frame later: see [expanders](#expanders) |
 | `audio_input(channel)`, `audio_output(channel, signal)` | device input and output samples: see [audio and MIDI](#audio-and-midi) |
 | `midi_cv(output, ...)` | one of Core MIDI-CV's outputs from a timed MIDI input: see [audio and MIDI](#audio-and-midi) |

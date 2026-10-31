@@ -488,8 +488,25 @@
     ]
    }
   },
+  "RunOptions": {
+   "class": "class RunOptions(TypedDict)",
+   "members": {
+    "controls": [
+     "controls: Mapping[int, Mapping[str, float]]"
+    ],
+    "inputs": [
+     "inputs: Mapping[int, Sequence[Sequence[float]]]"
+    ],
+    "params": [
+     "params: Mapping[int, float | Sequence[float]]"
+    ],
+    "rate_changes": [
+     "rate_changes: Mapping[int, float]"
+    ]
+   }
+  },
   "run": "def run(graph: Graph | Plan, frames: int, *, sample_rate: float=44100.0, rate_changes: Mapping[int, float] | None=None, inputs: Mapping[int, Sequence[Sequence[float]]] | None=None, params: Mapping[int, float | Sequence[float]] | None=None, controls: Mapping[int, Mapping[str, float]] | None=None, received: Mapping[Lane, Sequence[Sequence[float]]] | None=None) -> Result",
-  "run_pair": "def run_pair(left: Graph | Plan, right: Graph | Plan, frames: int, *, sample_rate: float=44100.0, left_inputs: Mapping[str, Any] | None=None, right_inputs: Mapping[str, Any] | None=None) -> tuple[Result, Result]"
+  "run_pair": "def run_pair(left: Graph | Plan, right: Graph | Plan, frames: int, *, sample_rate: float=44100.0, left_inputs: RunOptions | None=None, right_inputs: RunOptions | None=None) -> tuple[Result, Result]"
  },
  "rackpy.dsp.kernel": {
   "AudioInterface": "AudioInterface: KernelType",
@@ -622,16 +639,16 @@
      "@classmethod def create(cls, model: Model | None=None) -> Self"
     ],
     "data_from_json": [
-     "def data_from_json(self, data: Any) -> None"
+     "def data_from_json(self, data: JSON) -> None"
     ],
     "data_to_json": [
-     "def data_to_json(self) -> Any"
+     "def data_to_json(self) -> JSON"
     ],
     "module_from_json": [
-     "def module_from_json(self, data: Any) -> None"
+     "def module_from_json(self, data: JSON) -> None"
     ],
     "module_to_json": [
-     "def module_to_json(self) -> Any"
+     "def module_to_json(self) -> JSON"
     ],
     "on_add": [
      "def on_add(self, event: Module.AddEvent) -> None"
@@ -685,10 +702,10 @@
      "def on_unset_master(self, event: Module.UnsetMasterEvent) -> None"
     ],
     "params_from_json": [
-     "def params_from_json(self, data: Any) -> None"
+     "def params_from_json(self, data: JSON) -> None"
     ],
     "params_to_json": [
-     "def params_to_json(self) -> Any"
+     "def params_to_json(self) -> JSON"
     ],
     "process": [
      "def process(self, args: ProcessArgs) -> None"

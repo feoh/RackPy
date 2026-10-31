@@ -331,7 +331,7 @@ def test_a_pair_exchanges_one_frame_apart_both_ways() -> None:
     # The echo right sent at n - 1 (what it got then, 0 V at first, plus 100) reaches left at n.
     assert a.outputs[0] == [[0.0]] + [[float(n - 1) + 100] for n in range(1, 6)]
     with pytest.raises(TypeError, match="left_inputs takes"):
-        run_pair(left, right, 1, left_inputs={"received": {}})
+        run_pair(left, right, 1, left_inputs={"received": {}})  # type: ignore[arg-type]  # also refused at runtime
 
 
 def test_a_pair_only_connects_the_facing_sides() -> None:

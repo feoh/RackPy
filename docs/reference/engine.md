@@ -182,8 +182,10 @@ scripts working on Rack's running patch:
 - `connect((module, output_id), (module, input_id))` returns the new
   `Cable`, and `disconnect(cable)` removes it, under the rules in
   [Cables](#cables).
-- `map_param(module, param_id, text=..., color=...)` returns a mapped
-  `ParamHandle`, and `unmap_param(handle)` removes it.
+- `map_param(target, param_id, text=..., color=..., overwrite=True)` returns a
+  mapped `ParamHandle`, and `unmap_param(handle)` removes it. Without
+  `overwrite`, a param that already has a handle keeps it, and the returned
+  handle is left unmapped (`module_id` is -1), as Rack does.
 - `undo_step(name)` is a context manager that yields a `ComplexAction`:
   make each change, push its action to it, and the step goes to Rack's
   history when the block ends.

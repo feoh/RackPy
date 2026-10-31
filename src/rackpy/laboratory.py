@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import functools
 import warnings
-from typing import TYPE_CHECKING, Any, Self, cast
+from typing import TYPE_CHECKING, Self, cast
 
 try:
     from _rackpy_host import laboratory as _lab
@@ -36,6 +36,7 @@ from rackpy.raw import dsp as _dsp
 from rackpy.raw import engine as _engine
 from rackpy.raw import midi as _midi
 from rackpy.raw.plugin import Model
+from rackpy.types import JSON
 
 __all__ = [
     "AudioDevice",
@@ -307,27 +308,27 @@ class ModuleClass(_plugin.ModuleClass):
 
     # Rack's JSON, synchronous: return JSON-compatible data (None for Rack's NULL).
 
-    def module_to_json(self) -> Any:
+    def module_to_json(self) -> JSON:
         """Rack's ``Module::toJson`` (``Engine::moduleToJson`` calls it); needs a model, see :meth:`create`."""
-        return _lab.base_module_to_json(self.module)
+        return cast(JSON, _lab.base_module_to_json(self.module))
 
-    def module_from_json(self, data: Any) -> None:
+    def module_from_json(self, data: JSON) -> None:
         """Rack's ``Module::fromJson``: checks the model, then parameters, bypass, expanders and data."""
         _lab.base_module_from_json(self.module, data)
 
-    def params_to_json(self) -> Any:
+    def params_to_json(self) -> JSON:
         """Rack's ``Module::paramsToJson``."""
-        return _lab.base_params_to_json(self.module)
+        return cast(JSON, _lab.base_params_to_json(self.module))
 
-    def params_from_json(self, data: Any) -> None:
+    def params_from_json(self, data: JSON) -> None:
         """Rack's ``Module::paramsFromJson``."""
         _lab.base_params_from_json(self.module, data)
 
-    def data_to_json(self) -> Any:
+    def data_to_json(self) -> JSON:
         """Rack's ``Module::dataToJson``: here, the ``to_json`` data handler."""
-        return _lab.base_data_to_json(self.module)
+        return cast(JSON, _lab.base_data_to_json(self.module))
 
-    def data_from_json(self, data: Any) -> None:
+    def data_from_json(self, data: JSON) -> None:
         """Rack's ``Module::dataFromJson``: here, the ``from_json`` data handler."""
         _lab.base_data_from_json(self.module, data)
 
