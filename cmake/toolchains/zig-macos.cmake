@@ -17,11 +17,13 @@ else()
 endif()
 find_program(_rackpy_zig zig REQUIRED)
 # CMake wants one executable per compiler; these wrappers pass Zig's subcommand and target. They drop
-# -march: Zig names CPUs (apple_m1), not Clang's armv8-a+fp+simd, and the target's baseline is enough
-# for a compile check.
+# -march=armv8-a+...: Zig names CPUs (apple_m1), not Clang's architecture syntax, and the target's
+# baseline is enough for a compile check. x86_64's -march=nehalem is a CPU name, and is kept: without its
+# SSE4.1 the SIMD round becomes a libm call that macOS 10.15 lacks. -UNDEBUG: zig cc defines NDEBUG at -O3, which AppleClang does not, and the
+# native tests check with assert().
 foreach(_lang cc c++)
   set(_wrapper "${CMAKE_BINARY_DIR}/zig-${_lang}")
-  file(WRITE "${_wrapper}" "#!/bin/sh\nfor a do shift; case \"$a\" in -march=*) ;; *) set -- \"$@\" \"$a\";; esac; done\nexec \"${_rackpy_zig}\" ${_lang} -target ${_rackpy_zig_target} \"$@\"\n")
+  file(WRITE "${_wrapper}" "#!/bin/sh\nfor a do shift; case \"$a\" in -march=armv8*) ;; *) set -- \"$@\" \"$a\";; esac; done\nexec \"${_rackpy_zig}\" ${_lang} -target ${_rackpy_zig_target} \"$@\" -UNDEBUG\n")
   file(CHMOD "${_wrapper}" PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE)
 endforeach()
 set(CMAKE_C_COMPILER "${CMAKE_BINARY_DIR}/zig-cc")

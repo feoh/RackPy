@@ -172,7 +172,7 @@ if(RACKPY_BUILD_TESTS)
     target_link_options(rackpy_expander_stress_asan PRIVATE -fsanitize=address,undefined)
     # -Wno-tsan: the diagnostics ring (native/runtime/diagnostics.cpp) uses fences, which TSan does not model;
     # the expander snapshot does not.
-    target_compile_options(rackpy_expander_stress_tsan PRIVATE -fsanitize=thread -fno-omit-frame-pointer -Wno-tsan)
+    target_compile_options(rackpy_expander_stress_tsan PRIVATE -fsanitize=thread -fno-omit-frame-pointer $<$<CXX_COMPILER_ID:GNU>:-Wno-tsan>)
     target_link_options(rackpy_expander_stress_tsan PRIVATE -fsanitize=thread)
     # RP-31J: a module's audio port and MIDI inputs under stress (tests/io/test_io_native.py), the same two ways.
     foreach(_variant asan tsan)
@@ -184,7 +184,7 @@ if(RACKPY_BUILD_TESTS)
     target_compile_options(rackpy_io_stress_asan PRIVATE -fsanitize=address,undefined -fno-sanitize-recover=undefined
       -fno-omit-frame-pointer)
     target_link_options(rackpy_io_stress_asan PRIVATE -fsanitize=address,undefined)
-    target_compile_options(rackpy_io_stress_tsan PRIVATE -fsanitize=thread -fno-omit-frame-pointer -Wno-tsan)
+    target_compile_options(rackpy_io_stress_tsan PRIVATE -fsanitize=thread -fno-omit-frame-pointer $<$<CXX_COMPILER_ID:GNU>:-Wno-tsan>)
     target_link_options(rackpy_io_stress_tsan PRIVATE -fsanitize=thread)
   endif()
   # The RP-07 audio-path guard interposes on libc with LD_PRELOAD, which macOS has no equivalent of
@@ -265,7 +265,10 @@ if(RACKPY_BUILD_TESTS)
   # Explicit -mno-* flags win over the SDK's -march=nehalem whatever their order. -mno-sse3 (which
   # also drops SSSE3 and SSE4) keeps libstdc++'s <random> from including the native pmmintrin.h,
   # whose __m128i would clash with SIMDe's. SIMDe's headers trip GCC's maybe-uninitialized analysis.
-  target_compile_options(rackpy_simd_reference_simde PRIVATE -mno-sse3 -Wno-maybe-uninitialized)
+  # On arm64 Rack's SIMD types are SIMDe already, and SIMDE_NO_NATIVE gives its portable code there.
+  target_compile_options(rackpy_simd_reference_simde PRIVATE
+    $<$<NOT:$<STREQUAL:${RACKPY_PLATFORM},mac-arm64>>:-mno-sse3>
+    $<$<CXX_COMPILER_ID:GNU>:-Wno-maybe-uninitialized>)
   target_compile_definitions(rackpy_simd_reference_simde PRIVATE SIMDE_NO_NATIVE)
   target_link_libraries(rackpy_simd_reference_simde PRIVATE rackpy_sdk_program)
   # Rack's own DSP results (RP-18); tests/dsp compares rackpy.raw.dsp against them inside Rack.

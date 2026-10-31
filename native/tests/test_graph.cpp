@@ -80,7 +80,7 @@ void connect(rack::engine::Port& port, int channels = 1) {
 /** A value as a graph node leaves it: rounded and stored, so that -funsafe-math-optimizations cannot
 reassociate a twin's expression across what are separate nodes in the plan. */
 float keep(float x) {
-	asm volatile("" : "+x"(x));
+	rackpy::graph::settle(x);  // the compiled tier's own barrier, for each architecture
 	return x;
 }
 
