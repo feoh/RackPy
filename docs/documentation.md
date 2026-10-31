@@ -67,5 +67,12 @@ snippets that need Rack run in Rack through the host tests.
 
 RP-09 built the site skeleton and its checks
 ([ADR 006](decisions/006-documentation-toolchain.md),
-[conventions](contributing-docs.md)). The runtime manual and the sample
-walkthroughs are still future tasks.
+[conventions](contributing-docs.md)). RP-37 wrote the manual to this plan: the
+[quickstart](quickstart.md), the [oscillator tutorial](tutorials/oscillator.md),
+the how-to guides, the [execution](explanation/execution.md) and
+[security](explanation/security.md) explanations,
+[troubleshooting](troubleshooting.md), and the generated
+[C++ to Python crosswalk](reference/crosswalk.md). `tests/docs/test_tutorial.py`
+runs the quickstart's and the tutorial's own commands and plays the result in
+Rack. Still open: release notes (RP-44), and a tutorial run by a reader new to
+Rack, which only a person can do.

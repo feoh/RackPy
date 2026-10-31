@@ -23,8 +23,8 @@ It takes about 30 minutes, most of it the first build.
 - An editor for SVG files, such as [Inkscape](https://inkscape.org/), to draw a
   panel. The first plugin can reuse one of the examples' panels.
 
-You do not need to know C++, and you do not need Python installed: uv provides
-it.
+You do not need to know C++. uv installs a Python for RackPy's tools if your
+system has none, and the plugin itself always uses the Python it bundles.
 
 ## 1. Build RackPy
 

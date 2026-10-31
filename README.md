@@ -1,25 +1,20 @@
 # RackPy
 
-**A planned Python API for VCV Rack: expressive at the surface, native where timing matters.**
+**A Python API for VCV Rack plugins: expressive at the surface, native where timing matters.**
 
-RackPy aims to let you build Rack plugins with idiomatic Python while preserving
-access to the complete supported public C++ plugin API. It will run **inside Rack**,
-not as an external remote-control service.
+RackPy lets you build Rack plugins with idiomatic Python while keeping access to
+the complete supported public C++ plugin API. It runs **inside Rack**, not as an
+external remote-control service.
 
-> **Early development — partial bindings, not a usable instrument toolkit.**
-> The Linux development plugin embeds Python and exposes common values, engine
-> components, scoped module construction, built-in port/light/quantity metadata
-> adapters, port/light/quantity class factories for Python subclasses,
-> standalone quantities with UI-safe overrides, module JSON state and patch
-> storage, and [subclassable widgets](docs/reference/widgets.md) with typed
-> bases and scoped events (no NanoVG drawing API, input dispatcher or
-> component library yet). A trusted entry module can
-> [register models](docs/how-to/plugins.md) that Rack creates, saves and reloads,
-> though they have plain panels and process no audio yet.
-> See the [coverage report](docs/reference/coverage.md)
-> for exact gaps. Python module widgets, DSP, lifecycle adapters and the
-> planned instrument examples are not complete.
-> There is no published installable runtime bundle. Broader API designs remain proposals.
+> **Early development, no release.** On Linux x86_64, RackPy builds from source,
+> loads into Rack Free 2.6.6 and binds every public declaration of Rack's SDK
+> that exists there, except Rack-internal ones; each is tested, none is yet
+> marked `verified` ([coverage report](docs/reference/coverage.md)). Plugins
+> written in Python add modules with panels, controls, menus, drawing, state,
+> expanders and audio processed natively, and the [examples](examples/README.md)
+> run in Rack under test. macOS and Windows are not built, and development builds
+> run only on the computer that built them: there is nothing to distribute yet.
+> The [quickstart](docs/quickstart.md) builds RackPy and a first plugin.
 
 ## What we are building
 
@@ -43,12 +38,14 @@ they must not disappear from the coverage denominator.
 
 | You want to… | Read |
 | --- | --- |
+| Build RackPy and make a first plugin | [Quickstart](docs/quickstart.md), then the [oscillator tutorial](docs/tutorials/oscillator.md) |
+| Fix a plugin that does not load | [Troubleshooting](docs/troubleshooting.md) |
 | Understand scope and upstream evidence | [Scope and research](docs/scope.md) |
 | See the pinned SDK, toolchain and platform targets | [Compatibility baseline](docs/compatibility.md) |
 | Check licenses, assets and sample provenance | [Licensing](docs/licensing.md) |
 | Understand the Python/native boundary | [Architecture](docs/architecture.md) |
 | See how completeness will be proved | [API coverage contract](docs/coverage.md) |
-| Review the planned examples | [Example inventory](examples/README.md) |
+| Read the examples | [Example inventory](examples/README.md) |
 | Understand performance requirements | [Performance and safety](docs/performance.md) |
 | See the documentation experience we intend | [Documentation plan](docs/documentation.md); build the site with `uv run sphinx-build -W -n -b html docs build/docs/html` |
 | Pick up implementation work | [Execution plan](planning/README.md) |
