@@ -53,6 +53,9 @@ int main() {
 	}
 	Oscillator osc;
 	osc.voct.setChannels(patched ? 1 : 0);
+	// Rack's engine computes args.sampleTime once and modules receive the stored value; volatile keeps
+	// the compiler from turning x * (1 / rate) into x / rate after inlining, which rounds differently.
+	volatile float sampleTime = 1.f / rate;
 	for (long k = 0; k < frames; k++) {
 		float knob = 0.f, volts = 0.f;
 		if (std::scanf("%f %f", &knob, &volts) != 2) {
@@ -62,7 +65,7 @@ int main() {
 		osc.pitch.setValue(knob);
 		if (patched)
 			osc.voct.setVoltage(volts);
-		osc.process(1.f / rate);
+		osc.process(sampleTime);
 		std::printf("%.9g %.9g\n", osc.sine.getVoltage(), osc.blink.getBrightness());
 	}
 	return 0;

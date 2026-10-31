@@ -99,6 +99,9 @@ int main() {
 		simd4.pitch.setValue(s.knob);
 		scalar.sine.channels = simd4.sine.channels = 1;  // a patched output
 		std::string inputs = "[", scalarOut = "[", simdOut = "[";
+		// Rack's engine computes args.sampleTime once and modules receive the stored value; volatile keeps
+		// the compiler from turning x * (1 / rate) into x / rate after inlining, which rounds differently.
+		volatile float sampleTime = 1.f / rate;
 		for (int k = 0; k < frames; k++) {
 			int n = k < frames / 2 ? s.first : s.second;
 			for (Ports* p : {(Ports*) &scalar, (Ports*) &simd4}) {
@@ -106,8 +109,8 @@ int main() {
 				for (int c = 0; c < n; c++)
 					p->voct.setVoltage(voltage(k, c), c);
 			}
-			scalar.process(1.f / rate);
-			simd4.process(1.f / rate);
+			scalar.process(sampleTime);
+			simd4.process(sampleTime);
 			const char* sep = k ? ", " : "";
 			inputs += sep + channels(scalar.voct.getVoltages(), n);
 			scalarOut += sep + channels(scalar.sine.getVoltages(), scalar.sine.getChannels());

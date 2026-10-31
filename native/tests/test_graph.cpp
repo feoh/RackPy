@@ -84,7 +84,9 @@ float keep(float x) {
 	return x;
 }
 
-/** Sample times the compiler cannot fold into constants (the plan reads them at run time). */
+/** Sample times the compiler cannot fold into constants (the plan reads them at run time). The references
+multiply by a kept 1/rate, as a module multiplies by Rack's stored args.sampleTime: written as x * (1 / rate),
+LLVM under -funsafe-math-optimizations may turn it into x / rate, which rounds differently (RP-40). */
 volatile float RATE_44100 = 44100.f, RATE_48000 = 48000.f, RATE_1000 = 1000.f;
 
 bool same(float a, float b) {
@@ -125,7 +127,7 @@ void testTheTutorialOscillatorMatchesDirectCpp() {
 				// The tutorial's process(), written out (as RP-07's reference and rackpy.Sine compute it).
 				float pitch = keep(m.params[0].getValue() + (channels ? m.inputs[0].getPolyVoltage(c) : 0.f));
 				float freq = keep(rack::dsp::FREQ_C4 * std::pow(2.f, pitch));
-				phase[c] += freq * (1.f / RATE_44100);
+				phase[c] += freq * keep(1.f / RATE_44100);  // a stored sample time, as args.sampleTime is
 				if (phase[c] >= 1.f)
 					phase[c] -= 1.f;
 				if (!same(m.outputs[0].getVoltage(c), 5.f * keep(std::sin(2.f * float(M_PI) * phase[c])))) {
@@ -133,7 +135,7 @@ void testTheTutorialOscillatorMatchesDirectCpp() {
 					return;
 				}
 			}
-			blink += 1.f * (1.f / RATE_44100);
+			blink += 1.f * keep(1.f / RATE_44100);
 			if (blink >= 1.f)
 				blink -= 1.f;
 			if (!same(m.lights[0].getBrightness(), blink < 0.5f ? 1.f : 0.f)) {
@@ -195,7 +197,7 @@ void testSixteenVoicesAndAControlMatchDirectCpp() {
 		CHECK(m.outputs[0].getChannels() == 16);
 		for (int c = 0; c < 16; c++) {
 			float freq = keep(rack::dsp::FREQ_C4 * std::pow(2.f, m.inputs[0].getVoltage(c)));
-			phase[c] += freq * (1.f / RATE_48000);
+			phase[c] += freq * keep(1.f / RATE_48000);
 			if (phase[c] >= 1.f)
 				phase[c] -= 1.f;
 			if (!same(m.outputs[0].getVoltage(c), keep(std::sin(2.f * float(M_PI) * phase[c])) * level)) {
