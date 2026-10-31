@@ -45,6 +45,15 @@ namespace testing {
 
 using namespace rackpy::runtime;
 
+// RP-38's AddressSanitizer canary: UBSan is off here, so that only ASan (not UBSan's object-size check) reports it.
+__attribute__((noinline, no_sanitize("undefined"))) int sanitizerCanary() {
+	volatile size_t size = 8;
+	volatile char* bytes = new char[size];
+	volatile char past = bytes[size];
+	delete[] bytes;
+	return (int) past;
+}
+
 namespace {
 
 struct ProbeWidget;
@@ -738,6 +747,9 @@ void define(py::module_ m) {
 		rack::settings::spotlightBrightness = spotlight;
 		return old;
 	});
+	// RP-38: a deliberate one-byte heap overflow, so that a sanitized run can prove AddressSanitizer is
+	// active. Called only by tests/hardening/test_sanitizers.py's control run, in a sanitizer build.
+	m.def("sanitizer_canary", &sanitizerCanary);
 	m.def("last_frame_pixel", [](int x, int y) {
 		// The RGBA of the last frame Rack drew at framebuffer pixel (x, y), top-left origin. Call
 		// from a step(), before Rack draws again. It reads the back buffer, which Mesa's software

@@ -56,6 +56,16 @@ target_compile_options(rackpy_sdk_compile INTERFACE
 if(RACKPY_WERROR)
   target_compile_options(rackpy_sdk_compile INTERFACE -Werror)
 endif()
+# RP-38: a sanitizer build of every native target ("address,undefined" or "thread"), for the native
+# tests (CTest). Never distribute one: Rack itself is not instrumented, so a sanitized plugin loads only
+# with the sanitizer runtime preloaded.
+if(RACKPY_SANITIZE)
+  target_compile_options(rackpy_sdk_compile INTERFACE -fsanitize=${RACKPY_SANITIZE} -fno-omit-frame-pointer)
+  if(RACKPY_SANITIZE STREQUAL "address,undefined")
+    target_compile_options(rackpy_sdk_compile INTERFACE -fno-sanitize-recover=undefined)
+  endif()
+  target_link_options(rackpy_sdk_compile INTERFACE -fsanitize=${RACKPY_SANITIZE})
+endif()
 target_link_directories(rackpy_sdk_compile INTERFACE "${RACK_SDK_DIR}")
 # libRack.so has no SONAME, so link it by name (-lRack): a full path would be
 # recorded as the DT_NEEDED entry.

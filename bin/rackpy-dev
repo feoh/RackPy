@@ -52,6 +52,7 @@ LOADER_EXPORTS = {"init", "destroy", "settingsToJson", "settingsFromJson"}
 app = cyclopts.App(help=__doc__)
 CacheOpt = Annotated[Path, cyclopts.Parameter(help="Download cache outside git.")]
 Toolchain = Literal["host", "rack-lin-x64"]
+Sanitize = Literal["", "address,undefined", "thread"]
 
 
 def run(args: list[str | Path], **kwargs: Any) -> str:
@@ -122,12 +123,15 @@ def configure(
     werror: bool = False,
     test_hooks: bool = False,
     entry: str = "",
+    sanitize: Sanitize = "",
     cache: CacheOpt = DEFAULT_CACHE,
 ) -> None:
     """Configure the CMake build with the pinned SDK, runtime and pybind11.
 
     --test-hooks adds the RuntimeProbe module and _rackpy_host._testing for the runtime tests.
-    Never distribute such a build.
+    --sanitize builds every native target with AddressSanitizer and UndefinedBehaviorSanitizer
+    ("address,undefined") or ThreadSanitizer ("thread"), for the native tests. Never distribute
+    either kind of build.
     """
     sdk = capture([REPO / "bin" / "rack-sdk", "path"])
     python = runtimes(cache)["3.14"]
@@ -146,6 +150,7 @@ def configure(
         f"-DRACKPY_WERROR={'ON' if werror else 'OFF'}",
         f"-DRACKPY_ENTRY={entry}",
         f"-DRACKPY_TEST_HOOKS={'ON' if test_hooks else 'OFF'}",
+        f"-DRACKPY_SANITIZE={sanitize}",
     ]
     if toolchain == "rack-lin-x64":
         bindir = capture([REPO / "bin" / "rack-toolchain", "path"])
@@ -166,10 +171,13 @@ def build(
     werror: bool = False,
     test_hooks: bool = False,
     test: bool = True,
+    sanitize: Sanitize = "",
     cache: CacheOpt = DEFAULT_CACHE,
 ) -> None:
     """Configure, build and run the native unit tests (CTest)."""
-    configure(build_dir=build_dir, toolchain=toolchain, werror=werror, test_hooks=test_hooks, cache=cache)
+    configure(
+        build_dir=build_dir, toolchain=toolchain, werror=werror, test_hooks=test_hooks, sanitize=sanitize, cache=cache
+    )
     run(["cmake", "--build", build_dir])
     if test and toolchain == "host":
         run(["ctest", "--test-dir", build_dir, "--output-on-failure"])

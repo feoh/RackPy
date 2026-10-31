@@ -20,6 +20,11 @@ option(RACKPY_WERROR "Treat warnings in RackPy sources as errors" OFF)
 option(RACKPY_BUILD_TESTS "Build the native unit tests (they link the SDK's libRack and run outside Rack)" ON)
 option(RACKPY_TEST_HOOKS "Add the RuntimeProbe module and _rackpy_host._testing (tests only; never ship this)" OFF)
 set(RACKPY_ENTRY "" CACHE STRING "Trusted module the host imports at start-up, or empty")
+set(RACKPY_SANITIZE "" CACHE STRING "Sanitizers for every native target: empty, address,undefined or thread (tests only)")
+set_property(CACHE RACKPY_SANITIZE PROPERTY STRINGS "" "address,undefined" "thread")
+if(RACKPY_SANITIZE AND NOT RACKPY_SANITIZE MATCHES "^(address,undefined|thread)$")
+  message(FATAL_ERROR "RACKPY_SANITIZE must be address,undefined or thread, not ${RACKPY_SANITIZE}")
+endif()
 
 include(cmake/RackSDK.cmake)
 include(cmake/BundledPython.cmake)
@@ -130,35 +135,38 @@ if(RACKPY_BUILD_TESTS)
   target_include_directories(rackpy_io_tests PRIVATE native/include)
   target_link_libraries(rackpy_io_tests PRIVATE rackpy_sdk_program)
   add_test(NAME io_paths COMMAND rackpy_io_tests)
-  # RP-23C: expander exchange under stress (tests/engine/test_expander_stress.py), once with ASan and UBSan,
-  # once with TSan; libRack is not instrumented.
-  foreach(_variant asan tsan)
-    add_executable(rackpy_expander_stress_${_variant} native/tests/expander_stress.cpp native/module/lifecycle.cpp
-      ${RACKPY_RUNTIME_CORE} ${RACKPY_DSP_RUNTIME})
-    set_target_properties(rackpy_expander_stress_${_variant} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
-    target_include_directories(rackpy_expander_stress_${_variant} PRIVATE native/include)
-    target_link_libraries(rackpy_expander_stress_${_variant} PRIVATE rackpy_sdk_program)
-    set_property(TARGET rackpy_expander_stress_${_variant} PROPERTY JOB_POOL_COMPILE rackpy_heavy)
-  endforeach()
-  target_compile_options(rackpy_expander_stress_asan PRIVATE -fsanitize=address,undefined -fno-sanitize-recover=undefined
-    -fno-omit-frame-pointer)
-  target_link_options(rackpy_expander_stress_asan PRIVATE -fsanitize=address,undefined)
-  # -Wno-tsan: the diagnostics ring (native/runtime/diagnostics.cpp) uses fences, which TSan does not model;
-  # the expander snapshot does not.
-  target_compile_options(rackpy_expander_stress_tsan PRIVATE -fsanitize=thread -fno-omit-frame-pointer -Wno-tsan)
-  target_link_options(rackpy_expander_stress_tsan PRIVATE -fsanitize=thread)
-  # RP-31J: a module's audio port and MIDI inputs under stress (tests/io/test_io_native.py), the same two ways.
-  foreach(_variant asan tsan)
-    add_executable(rackpy_io_stress_${_variant} native/tests/io_stress.cpp ${RACKPY_RUNTIME_CORE})
-    set_target_properties(rackpy_io_stress_${_variant} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
-    target_include_directories(rackpy_io_stress_${_variant} PRIVATE native/include)
-    target_link_libraries(rackpy_io_stress_${_variant} PRIVATE rackpy_sdk_program)
-  endforeach()
-  target_compile_options(rackpy_io_stress_asan PRIVATE -fsanitize=address,undefined -fno-sanitize-recover=undefined
-    -fno-omit-frame-pointer)
-  target_link_options(rackpy_io_stress_asan PRIVATE -fsanitize=address,undefined)
-  target_compile_options(rackpy_io_stress_tsan PRIVATE -fsanitize=thread -fno-omit-frame-pointer -Wno-tsan)
-  target_link_options(rackpy_io_stress_tsan PRIVATE -fsanitize=thread)
+  # Dedicated sanitizer builds; a RACKPY_SANITIZE build instruments every target instead (RP-38).
+  if(NOT RACKPY_SANITIZE)
+    # RP-23C: expander exchange under stress (tests/engine/test_expander_stress.py), once with ASan and UBSan,
+    # once with TSan; libRack is not instrumented.
+    foreach(_variant asan tsan)
+      add_executable(rackpy_expander_stress_${_variant} native/tests/expander_stress.cpp native/module/lifecycle.cpp
+        ${RACKPY_RUNTIME_CORE} ${RACKPY_DSP_RUNTIME})
+      set_target_properties(rackpy_expander_stress_${_variant} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+      target_include_directories(rackpy_expander_stress_${_variant} PRIVATE native/include)
+      target_link_libraries(rackpy_expander_stress_${_variant} PRIVATE rackpy_sdk_program)
+      set_property(TARGET rackpy_expander_stress_${_variant} PROPERTY JOB_POOL_COMPILE rackpy_heavy)
+    endforeach()
+    target_compile_options(rackpy_expander_stress_asan PRIVATE -fsanitize=address,undefined -fno-sanitize-recover=undefined
+      -fno-omit-frame-pointer)
+    target_link_options(rackpy_expander_stress_asan PRIVATE -fsanitize=address,undefined)
+    # -Wno-tsan: the diagnostics ring (native/runtime/diagnostics.cpp) uses fences, which TSan does not model;
+    # the expander snapshot does not.
+    target_compile_options(rackpy_expander_stress_tsan PRIVATE -fsanitize=thread -fno-omit-frame-pointer -Wno-tsan)
+    target_link_options(rackpy_expander_stress_tsan PRIVATE -fsanitize=thread)
+    # RP-31J: a module's audio port and MIDI inputs under stress (tests/io/test_io_native.py), the same two ways.
+    foreach(_variant asan tsan)
+      add_executable(rackpy_io_stress_${_variant} native/tests/io_stress.cpp ${RACKPY_RUNTIME_CORE})
+      set_target_properties(rackpy_io_stress_${_variant} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+      target_include_directories(rackpy_io_stress_${_variant} PRIVATE native/include)
+      target_link_libraries(rackpy_io_stress_${_variant} PRIVATE rackpy_sdk_program)
+    endforeach()
+    target_compile_options(rackpy_io_stress_asan PRIVATE -fsanitize=address,undefined -fno-sanitize-recover=undefined
+      -fno-omit-frame-pointer)
+    target_link_options(rackpy_io_stress_asan PRIVATE -fsanitize=address,undefined)
+    target_compile_options(rackpy_io_stress_tsan PRIVATE -fsanitize=thread -fno-omit-frame-pointer -Wno-tsan)
+    target_link_options(rackpy_io_stress_tsan PRIVATE -fsanitize=thread)
+  endif()
   # The RP-07 audio-path guard, preloaded by tests/dsp/test_runtime.py around rackpy_kernel_guard.
   add_library(rackpy_audio_guard MODULE native/testing/audio_guard.c)
   set_target_properties(rackpy_audio_guard PROPERTIES PREFIX "" OUTPUT_NAME audio_guard C_STANDARD 11)
@@ -242,12 +250,15 @@ if(RACKPY_BUILD_TESTS)
   target_link_libraries(rackpy_dsp_reference PRIVATE rackpy_sdk_program)
   # The same reference under AddressSanitizer and UndefinedBehaviorSanitizer (tests/dsp/test_sanitizers.py):
   # every buffer boundary it exercises in Rack's inline DSP code is checked. libRack is not instrumented.
-  add_executable(rackpy_dsp_reference_sanitized native/tests/dsp_reference.cpp)
-  set_target_properties(rackpy_dsp_reference_sanitized PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
-  target_compile_options(rackpy_dsp_reference_sanitized PRIVATE -fsanitize=address,undefined -fno-sanitize-recover=undefined)
-  target_link_options(rackpy_dsp_reference_sanitized PRIVATE -fsanitize=address,undefined)
-  target_link_libraries(rackpy_dsp_reference_sanitized PRIVATE rackpy_sdk_program)
-  set_property(TARGET rackpy_dsp_reference rackpy_dsp_reference_sanitized PROPERTY JOB_POOL_COMPILE rackpy_heavy)
+  set_property(TARGET rackpy_dsp_reference PROPERTY JOB_POOL_COMPILE rackpy_heavy)
+  if(NOT RACKPY_SANITIZE)
+    add_executable(rackpy_dsp_reference_sanitized native/tests/dsp_reference.cpp)
+    set_target_properties(rackpy_dsp_reference_sanitized PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+    target_compile_options(rackpy_dsp_reference_sanitized PRIVATE -fsanitize=address,undefined -fno-sanitize-recover=undefined)
+    target_link_options(rackpy_dsp_reference_sanitized PRIVATE -fsanitize=address,undefined)
+    target_link_libraries(rackpy_dsp_reference_sanitized PRIVATE rackpy_sdk_program)
+    set_property(TARGET rackpy_dsp_reference_sanitized PROPERTY JOB_POOL_COMPILE rackpy_heavy)
+  endif()
   add_executable(rackpy_components_reference native/tests/components_reference.cpp)
   set_target_properties(rackpy_components_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_link_libraries(rackpy_components_reference PRIVATE rackpy_sdk_program)

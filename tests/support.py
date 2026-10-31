@@ -99,7 +99,13 @@ def isolated_audio_env(user: Path) -> dict[str, str]:
 
 
 def run_rack(
-    rack: Path, user: Path, *, settle: float = 1.0, timeout: float = 60, env: dict[str, str] | None = None
+    rack: Path,
+    user: Path,
+    *,
+    settle: float = 1.0,
+    timeout: float = 60,
+    env: dict[str, str] | None = None,
+    stderr: Path | None = None,
 ) -> RackRun:
     """Run Rack Free headless with a temporary user directory, then quit it through stdin.
 
@@ -122,7 +128,7 @@ def run_rack(
         cwd=rack,
         stdin=subprocess.PIPE,
         stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stderr=stderr.open("w") if stderr is not None else subprocess.DEVNULL,  # e.g. sanitizer reports
         env=environ,
     )
     deadline = time.monotonic() + timeout
@@ -144,7 +150,15 @@ def run_rack(
     return RackRun(returncode, log.read_text(errors="replace") if log.exists() else "")
 
 
-def run_rack_windowed(rack: Path, user: Path, *, timeout: float = 120, patch: Path | None = None) -> RackRun:
+def run_rack_windowed(
+    rack: Path,
+    user: Path,
+    *,
+    timeout: float = 120,
+    patch: Path | None = None,
+    env: dict[str, str] | None = None,
+    stderr: Path | None = None,
+) -> RackRun:
     """Run Rack with a window on a virtual X display until it exits by itself (the test closes the window).
 
     Needs xvfb-run. Rack renders with Mesa's software renderer and nothing
@@ -152,8 +166,10 @@ def run_rack_windowed(rack: Path, user: Path, *, timeout: float = 120, patch: Pa
     and Xvfb) is killed and returncode is None.
     """
     require("xvfb-run", shutil.which("xvfb-run") is not None, "install Xvfb (xorg-server-xvfb or xvfb)")
-    environ = {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}} | isolated_audio_env(
-        user
+    environ = (
+        {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}
+        | isolated_audio_env(user)
+        | (env or {})
     )
     (user / "autosave").mkdir(parents=True, exist_ok=True)
     cmd = ["xvfb-run", "-a", "-s", "-screen 0 1600x1000x24", str(rack / "Rack"), "-u", str(user)]
@@ -165,7 +181,7 @@ def run_rack_windowed(rack: Path, user: Path, *, timeout: float = 120, patch: Pa
         env=environ,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stderr=stderr.open("w") if stderr is not None else subprocess.DEVNULL,  # e.g. sanitizer reports
         start_new_session=True,
     )
     try:
@@ -322,6 +338,8 @@ def run_pytest_in_rack(
     during_ui: bool = False,
     entry_setup: str = "",
     extra_models: list[dict[str, object]] | None = None,
+    env: dict[str, str] | None = None,
+    stderr: Path | None = None,
 ) -> InRackResult:
     """Run a pytest suite inside Rack's embedded interpreter, in the built plugin.
 
@@ -381,9 +399,9 @@ def run_pytest_in_rack(
         source = header + IN_RACK_RUNNER
     (plugin / "pythonpath" / "rackpy_in_rack_pytest.py").write_text(entry_setup + "\n" + source)
     run = (
-        run_rack_windowed(rack, user, timeout=timeout)
+        run_rack_windowed(rack, user, timeout=timeout, env=env, stderr=stderr)
         if during_ui
-        else run_rack(rack, user, settle=0.3, timeout=timeout)
+        else run_rack(rack, user, settle=0.3, timeout=timeout, env=env, stderr=stderr)
     )
     assert run.returncode == 0, run.tail()
     assert result_path.exists(), "the in-Rack pytest run wrote no result:\n" + run.tail()

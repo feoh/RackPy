@@ -58,9 +58,12 @@ auto onThread(F&& f) -> decltype(f()) {
 	return result;
 }
 
-// Bare contexts: never deleted, because ~Context tears down whatever it holds.
+// Bare contexts: never deleted, because ~Context tears down whatever it holds. They stay reachable
+// from here, so that LeakSanitizer (RP-38's sanitizer build) does not report them as leaks.
 rack::Context* newContext() {
-	return new rack::Context;
+	static auto* contexts = new std::vector<rack::Context*>;  // never destroyed: still reachable at exit
+	contexts->push_back(new rack::Context);
+	return contexts->back();
 }
 
 void testThreadRoles() {

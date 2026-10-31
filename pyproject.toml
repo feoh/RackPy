@@ -110,7 +110,8 @@ pythonpath = [
     "examples/polyphony/pythonpath",
     "examples/expanders/pythonpath",
 ]
-addopts = ["--strict-markers", "--strict-config", "-ra"]
+# The sanitizer and stress suites (RP-38) take many minutes each: run them with -m sanitizer or -m stress.
+addopts = ["--strict-markers", "--strict-config", "-ra", "-m", "not sanitizer and not stress"]
 xfail_strict = true
 # Host runs keep whole Rack bundles and native builds under the base temp
 # directory (several GB per run, often on a RAM-backed /tmp): keep only the
@@ -125,4 +126,6 @@ markers = [
     "gui: runs windowed Rack inside Xvfb (needs xvfb-run)",
     "dist: builds with the official Rack plugin toolchain (bin/rack-toolchain build first)",
     "docs: builds the documentation site or runs its snippets",
+    "sanitizer: builds RackPy under ASan/UBSan or TSan and runs native and in-Rack tests (slow; run with -m sanitizer)",
+    "stress: long create/delete, save/reload and concurrency cycles in Rack (slow; run with -m stress)",
 ]
