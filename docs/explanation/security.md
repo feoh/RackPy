@@ -3,7 +3,7 @@
 RackPy runs Python inside Rack. This page says what that Python may do, what
 RackPy refuses to run, how that is tested, and what it does not protect
 against. To report a vulnerability, see
-[SECURITY.md](https://github.com/feoh/rackpy/blob/main/SECURITY.md).
+[SECURITY.md](../../SECURITY.md).
 
 :::{admonition} RackPy is not a sandbox
 :class: warning

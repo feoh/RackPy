@@ -95,3 +95,13 @@ def make_hooks_bundle(hooks_build: Path, tmp_path_factory: pytest.TempPathFactor
         return bundle
 
     return make
+
+
+@pytest.fixture(scope="session")
+def dev_build() -> Path:  # TEMPORARY
+    return Path("/home/feoh/src/personal/RackPy-rp38/build/production")
+
+
+@pytest.fixture(scope="session")
+def hooks_build() -> Path:  # TEMPORARY
+    return Path("/home/feoh/src/personal/RackPy-rp38/build/dev")

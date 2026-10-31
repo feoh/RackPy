@@ -2,8 +2,8 @@
 
 **Implemented (RP-35), Linux x86_64 inside Rack Free {{rack_version}}.** This
 walkthrough follows two example plugins, the
-[Lantern](https://github.com/feoh/RackPy/tree/main/examples/dark-panels) and
-the [Meter](https://github.com/feoh/RackPy/tree/main/examples/drawing). Each
+[Lantern](../../examples/dark-panels/README.md) and
+the [Meter](../../examples/drawing/README.md). Each
 section covers one feature of the Plugin API Guide's
 [dark panels](https://vcvrack.com/manual/PluginGuide#Dark-panels) and
 [custom widgets](https://vcvrack.com/manual/PluginGuide#Custom-widgets)

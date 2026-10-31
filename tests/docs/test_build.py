@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """RP-09: the site builds with zero warnings, and each kind of mistake fails the build."""
 
+import json
 import re
 from collections.abc import Callable
 from pathlib import Path
@@ -111,3 +112,21 @@ def test_link_rewriting_leaves_code_and_urls_alone(tmp_path: Path) -> None:
     assert "[adr](002-embedding-and-bindings.md)" in out
     assert "`[code](../../nowhere)`" in out and "[fenced](../../nowhere)" in out
     assert [p.target for p in problems] == ["../../upstream/nowhere.json"]
+
+
+def test_dependency_headers_link_to_their_submodules() -> None:
+    """RP-37: Rack's tree has no dep/include/; GLFW's and blendish's lines link to the pinned submodule commits."""
+    versions = json.loads((rackpy_docs.REPO / "upstream" / "versions.json").read_text())["dependencies"]["submodules"]
+    glfw = rackpy_docs.source_url("dep/include/GLFW/glfw3.h", 346)
+    assert glfw == f"https://github.com/VCVRack/glfw/blob/{versions['dep/glfw']['commit']}/include/GLFW/glfw3.h#L346"
+    blendish = rackpy_docs.source_url("dep/include/blendish.h", 191)
+    assert blendish.startswith(
+        f"https://github.com/VCVRack/oui-blendish/blob/{versions['dep/oui-blendish']['commit']}/"
+    )
+    rack = rackpy_docs.repo_facts()["rack_commit"]
+    assert (
+        rackpy_docs.source_url("include/rack.hpp", 1)
+        == f"https://github.com/VCVRack/Rack/blob/{rack}/include/rack.hpp#L1"
+    )
+    with pytest.raises(ValueError, match="DEP_HEADERS"):
+        rackpy_docs.source_url("dep/include/nanovg.h", 1)

@@ -17,12 +17,12 @@ patch data never opts into executing Python callback code.
 To start a plugin of your own, `bin/rackpy-plugin` creates a project, generates
 a module and its widget from an SVG panel, and builds a plugin directory from a
 RackPy bundle: see the
-[plugin template](https://github.com/feoh/RackPy/tree/main/examples/template)
+[plugin template](../../examples/template/README.md)
 and, for a module with sound, the
-[oscillator](https://github.com/feoh/RackPy/tree/main/examples/oscillator).
-The [configuration](https://github.com/feoh/RackPy/tree/main/examples/configuration),
-[state and events](https://github.com/feoh/RackPy/tree/main/examples/state-and-events)
-and [menus](https://github.com/feoh/RackPy/tree/main/examples/menus) examples
+[oscillator](../../examples/oscillator/README.md).
+The [configuration](../../examples/configuration/README.md),
+[state and events](../../examples/state-and-events/README.md)
+and [menus](../../examples/menus/README.md) examples
 show a module's controls, bypass and presets, its events and saved state, and
 its context menu.
 

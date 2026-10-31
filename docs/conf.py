@@ -87,6 +87,10 @@ linkcheck_ignore = [
     # Thousands of line links into the pinned Rack commit, from the SDK tables.
     # One of them is checked through the compatibility page's commit link.
     r"https://github\.com/VCVRack/Rack/blob/[0-9a-f]{40}/include/.*#L\d+",
+    # The same for the GLFW and blendish headers, at their submodule commits (rackpy_docs.DEP_HEADERS).
+    r"https://github\.com/VCVRack/(glfw|oui-blendish)/blob/[0-9a-f]{40}/.*#L\d+",
+    # Inkscape's home page refuses automated requests, even with a browser's user agent (403).
+    r"https://inkscape\.org/",
     # Links to this repository at the commit being built, which is not pushed yet during local builds.
     r"https://github\.com/feoh/RackPy/(blob|tree)/[0-9a-f]{40}/.*",
 ]

@@ -141,9 +141,9 @@ In a plugin project made by `bin/rackpy-plugin`, put the source in
 RackPy's build compiles the examples' libraries this way, and `bin/rackpy-plugin
 build --kernels DIR` copies `DIR/NAME.so` into the plugin's `kernels/` folder
 and lists it in `rackpy-loader.json`. The
-[polyphony](https://github.com/feoh/RackPy/tree/main/examples/polyphony),
-[dsp](https://github.com/feoh/RackPy/tree/main/examples/dsp) and
-[expanders](https://github.com/feoh/RackPy/tree/main/examples/expanders)
+[polyphony](../../examples/polyphony/README.md),
+[dsp](../../examples/dsp/README.md) and
+[expanders](../../examples/expanders/README.md)
 examples are such projects.
 
 The rules:

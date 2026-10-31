@@ -72,6 +72,27 @@ def repo_facts(repo: Path = REPO) -> dict[str, str]:
     }
 
 
+# Headers that Rack's dep/Makefile installs unchanged from a submodule (byte-identical at the pinned commits,
+# checked in RP-37): their SDK lines link to the submodule's own repository, at the commit that the pinned
+# Rack tree records in upstream/versions.json. Rack's tree has no dep/include/ to link to.
+DEP_HEADERS = {
+    "dep/include/GLFW/glfw3.h": ("dep/glfw", "include/GLFW/glfw3.h"),
+    "dep/include/blendish.h": ("dep/oui-blendish", "blendish.h"),
+}
+
+
+def source_url(header: str, line: int, repo: Path = REPO) -> str:
+    """Where a declaration of the pinned SDK is, on GitHub."""
+    if header.startswith("dep/"):
+        if header not in DEP_HEADERS:
+            raise ValueError(f"{header} is a dependency's header: map it to its submodule in DEP_HEADERS")
+        submodule, path = DEP_HEADERS[header]
+        versions = json.loads((repo / "upstream" / "versions.json").read_text(encoding="utf-8"))
+        pin = versions["dependencies"]["submodules"][submodule]
+        return f"{pin['url'].removesuffix('.git')}/blob/{pin['commit']}/{path}#L{line}"
+    return f"https://github.com/VCVRack/Rack/blob/{repo_facts(repo)['rack_commit']}/{header}#L{line}"
+
+
 @cache
 def source_ref(repo: Path = REPO) -> str:
     """The commit to link repository files at; `main` when git cannot say."""
@@ -382,7 +403,6 @@ class RackPySurface(SphinxDirective):
         entries = family_entries(family)
         if not entries:
             raise self.error(f"family {family!r} has no entries in upstream/api-surface.json")
-        commit = repo_facts()["rack_commit"]
         rows: list[list[nodes.Node]] = []
         for e in entries:
             deprecated = e.get("deprecated") or e.get("comment_deprecated") or e.get("deprecated_scope")
@@ -391,7 +411,10 @@ class RackPySurface(SphinxDirective):
                 flags.append("only if " + " and ".join(e["conditions"]))
             if e.get("absent_in"):
                 flags.append("absent in " + ", ".join(e["absent_in"]))
-            url = f"https://github.com/VCVRack/Rack/blob/{commit}/{e['header']}#L{e['line']}"
+            try:
+                url = source_url(e["header"], e["line"])
+            except ValueError as error:
+                raise self.error(str(error)) from error
             where = nodes.paragraph(
                 "", "", nodes.reference("", f"{e['header'].removeprefix('include/')}:{e['line']}", refuri=url)
             )
