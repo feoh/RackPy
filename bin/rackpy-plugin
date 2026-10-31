@@ -436,7 +436,7 @@ def add_module(
 
 
 @app.command
-def build(project: Path = Path(), *, bundle: Path, dest: Path) -> None:
+def build(project: Path = Path(), *, bundle: Path, dest: Path, kernels: Path | None = None) -> None:
     """Make DEST/<slug>, a Rack plugin: the RackPy BUNDLE with the project's manifest, code, res/ and presets/.
 
     Parameters
@@ -448,10 +448,25 @@ def build(project: Path = Path(), *, bundle: Path, dest: Path) -> None:
     dest
         Where to make the plugin directory, for example Rack's user folder's
         ``plugins-lin-x64``.
+    kernels
+        Where the project's native kernel libraries were built, ``NAME.so`` for each
+        NAME its rackpy-plugin.json lists under ``"kernels"``: for RackPy's examples,
+        ``build/dev/examples/<project>/kernels``. They are copied to ``kernels/`` and
+        listed in rackpy-loader.json, which loads them before the entry package.
     """
     root = project.resolve()
     manifest = read_json(root / "plugin.json")
-    package = read_json(root / PROJECT_FILE)["entry"]
+    settings = read_json(root / PROJECT_FILE)
+    package = settings["entry"]
+    libraries = settings.get("kernels", [])
+    if not isinstance(libraries, list) or not all(isinstance(n, str) and valid_slug(n) for n in libraries):
+        raise UsageError(f'{PROJECT_FILE}\'s "kernels" must be a list of library names')
+    if libraries and kernels is None:
+        raise UsageError(f"{root.name} has native kernel libraries ({', '.join(libraries)}); pass --kernels")
+    built = [kernels / f"{name}.so" for name in libraries] if kernels is not None else []
+    missing = [str(path) for path in built if not path.is_file()]
+    if missing:
+        raise UsageError(f"no kernel library {', '.join(missing)}; build it first")
     slug = manifest.get("slug", "")
     if not valid_slug(slug):
         raise UsageError(f"plugin.json's slug {slug!r} is not a valid slug")
@@ -465,6 +480,11 @@ def build(project: Path = Path(), *, bundle: Path, dest: Path) -> None:
     write_json(target / "plugin.json", manifest)
     config = read_json(loader)
     config["entry"] = package
+    if built:
+        (target / "kernels").mkdir(exist_ok=True)
+        for path in built:
+            shutil.copy2(path, target / "kernels" / path.name)
+        config["kernels"] = [*config.get("kernels", []), *(f"kernels/{path.name}" for path in built)]
     write_json(target / "rackpy-loader.json", config)
     for item in sorted((root / "pythonpath").iterdir()):
         if item.name == "rackpy" or (target / "pythonpath" / item.name).exists():

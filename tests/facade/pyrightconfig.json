@@ -49,7 +49,10 @@
     "../../examples/state-and-events/pythonpath",
     "../../examples/menus/pythonpath",
     "../../examples/dark-panels/pythonpath",
-    "../../examples/drawing/pythonpath"
+    "../../examples/drawing/pythonpath",
+    "../../examples/polyphony/pythonpath",
+    "../../examples/expanders/pythonpath",
+    "../../examples/dsp/pythonpath"
   ],
   "typeCheckingMode": "strict",
   "pythonVersion": "3.14",

@@ -1,0 +1,35 @@
+{
+  "slug": "RackPyPolyphony",
+  "name": "RackPy Polyphony",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "RackPy",
+  "author": "RackPy contributors",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "https://github.com/feoh/RackPy",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "PolySine",
+      "name": "Poly sine (SIMD)",
+      "description": "A polyphonic sine oscillator, four voices at a time with SIMD",
+      "tags": [
+        "Oscillator",
+        "Polyphonic"
+      ]
+    },
+    {
+      "slug": "PolySineScalar",
+      "name": "Poly sine (scalar)",
+      "description": "A polyphonic sine oscillator, one voice at a time",
+      "tags": [
+        "Oscillator",
+        "Polyphonic"
+      ]
+    }
+  ]
+}

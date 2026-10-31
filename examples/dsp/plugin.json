@@ -1,0 +1,26 @@
+{
+  "slug": "RackPyDsp",
+  "name": "RackPy DSP",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "RackPy",
+  "author": "RackPy contributors",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "https://github.com/feoh/RackPy",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "Filter",
+      "name": "Filter",
+      "description": "A polyphonic biquad filter, natively, with Rack's own DSP",
+      "tags": [
+        "Filter",
+        "Polyphonic"
+      ]
+    }
+  ]
+}

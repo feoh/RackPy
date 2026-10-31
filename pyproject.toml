@@ -72,6 +72,9 @@ mypy_path = [
     "examples/menus/pythonpath",
     "examples/dark-panels/pythonpath",
     "examples/drawing/pythonpath",
+    "examples/polyphony/pythonpath",
+    "examples/expanders/pythonpath",
+    "examples/dsp/pythonpath",
 ]
 explicit_package_bases = true
 # bin/ utilities without a .py suffix all map to module __main__, so
@@ -104,6 +107,8 @@ pythonpath = [
     "examples/oscillator/pythonpath",
     "examples/configuration/pythonpath",
     "examples/state-and-events/pythonpath",
+    "examples/polyphony/pythonpath",
+    "examples/expanders/pythonpath",
 ]
 addopts = ["--strict-markers", "--strict-config", "-ra"]
 xfail_strict = true

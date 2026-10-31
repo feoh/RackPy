@@ -1,0 +1,41 @@
+{
+  "slug": "RackPyExpanders",
+  "name": "RackPy Expanders",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "RackPy",
+  "author": "RackPy contributors",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "https://github.com/feoh/RackPy",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "Source",
+      "name": "Source",
+      "description": "Sends its scaled signal and level to the module on its right",
+      "tags": [
+        "Utility"
+      ]
+    },
+    {
+      "slug": "Receiver",
+      "name": "Receiver",
+      "description": "Outputs what a Source on its left sends",
+      "tags": [
+        "Utility"
+      ]
+    },
+    {
+      "slug": "Peeker",
+      "name": "Peeker",
+      "description": "Reads a Source on its left directly",
+      "tags": [
+        "Utility"
+      ]
+    }
+  ]
+}

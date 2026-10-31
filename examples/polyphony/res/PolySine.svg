@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Original RackPy artwork (GPL-3.0-or-later), not derived from VCV or Fundamental panels. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+     width="20.32mm" height="128.5mm" viewBox="0 0 20.32 128.5">
+  <rect width="20.32" height="128.5" fill="#202b24"/>
+  <rect x="0" y="0" width="20.32" height="15" fill="#2c3b31"/>
+  <path d="M3 7.5 C5 3, 7 3, 9 7.5 S13 12, 15 7.5 M5 10 C7 6, 9 6, 11 10 S15 14, 17 10" stroke="#9be0a8" stroke-width="0.6" fill="none"/>
+  <circle cx="10.16" cy="40" r="7.5" fill="none" stroke="#4d6a55" stroke-width="0.5"/>
+  <rect x="3" y="70" width="14.32" height="48" rx="2" fill="#18201b"/>
+  <g inkscape:label="components" inkscape:groupmode="layer" style="display:none">
+    <circle inkscape:label="pitch" cx="10.16" cy="40" r="5" fill="#ff0000"/>
+    <circle inkscape:label="voct" cx="10.16" cy="82" r="3" fill="#00ff00"/>
+    <circle inkscape:label="sine" cx="10.16" cy="106" r="3" fill="#0000ff"/>
+  </g>
+</svg>

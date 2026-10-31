@@ -169,6 +169,11 @@ if(RACKPY_BUILD_TESTS)
   set_target_properties(rackpy_kernel_guard PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_include_directories(rackpy_kernel_guard PRIVATE native/include)
   target_link_libraries(rackpy_kernel_guard PRIVATE rackpy_sdk_program)
+  # RP-36: the example plugins' kernel libraries under the same guard (tests/examples preloads it).
+  add_executable(rackpy_example_kernel_guard native/tests/example_kernel_guard.cpp)
+  set_target_properties(rackpy_example_kernel_guard PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_include_directories(rackpy_example_kernel_guard PRIVATE native/include)
+  target_link_libraries(rackpy_example_kernel_guard PRIVATE rackpy_sdk_program dl)
 
   # RackPy's kernel path against plain C++ modules, per frame (timing only; not a CTest).
   add_executable(rackpy_kernel_bench native/tests/kernel_bench.cpp native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE}
@@ -253,7 +258,29 @@ if(RACKPY_BUILD_TESTS)
   add_executable(rackpy_oscillator_reference native/tests/oscillator_reference.cpp)
   set_target_properties(rackpy_oscillator_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_link_libraries(rackpy_oscillator_reference PRIVATE rackpy_sdk_program)
+  # RP-36: examples/polyphony's oscillator as C++, scalar and float_4.
+  add_executable(rackpy_polyphony_reference native/tests/polyphony_reference.cpp)
+  set_target_properties(rackpy_polyphony_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_link_libraries(rackpy_polyphony_reference PRIVATE rackpy_sdk_program)
 endif()
+
+# Example plugins' kernel libraries (RP-36): examples/<project>/kernels/<name>.cpp becomes
+# examples/<project>/kernels/<name>.so in the build tree, built as RackPy's own kernel libraries are
+# (the SDK's plugin flags, RackPy's native/include). bin/rackpy-plugin build --kernels copies them in.
+file(GLOB RACKPY_EXAMPLE_KERNELS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/examples/*/kernels/*.cpp")
+foreach(_source IN LISTS RACKPY_EXAMPLE_KERNELS)
+  get_filename_component(_name "${_source}" NAME_WE)
+  get_filename_component(_kernels "${_source}" DIRECTORY)
+  get_filename_component(_project_dir "${_kernels}" DIRECTORY)
+  get_filename_component(_project "${_project_dir}" NAME)
+  string(MAKE_C_IDENTIFIER "rackpy_example_${_project}_${_name}" _target)
+  add_library(${_target} MODULE "${_source}")
+  set_target_properties(${_target} PROPERTIES PREFIX "" OUTPUT_NAME "${_name}"
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/examples/${_project}/kernels"
+    CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF CXX_VISIBILITY_PRESET hidden)
+  target_include_directories(${_target} PRIVATE native/include)
+  target_link_libraries(${_target} PRIVATE rackpy_sdk_plugin)
+endforeach()
 
 # Plugin directory layout. bin/rackpy-dev bundle adds the runtime as python/.
 # Rack rejects a plugin whose manifest and registered models differ, so the
