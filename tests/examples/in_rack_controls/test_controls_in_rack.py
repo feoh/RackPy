@@ -319,6 +319,15 @@ def test_every_switchboard_menu_item_works() -> None:
         HOOKS.engine_reset(m)  # Initialize: middle C, neither muted nor inverted
         assert (board.octave, board.note, board.muted, board.inverted) == (2, 0, False, False) and volts(0.0)
 
+        # Rack's own module menu: in Rack's rack, Rack calls append_context_menu after its items.
+        context = raw.context_get()
+        assert context is not None and context.scene is not None
+        context.scene.rack.add_module_at_mouse(widget)
+        widget.create_context_menu()
+        rack_labels = HOOKS.take_scene_menu_labels()  # and dismisses the menu
+        assert rack_labels[0] == "Switchboard" and rack_labels[-1] == "Pitch", rack_labels
+        context.scene.rack.remove_module(widget)
+
         # A menu outliving its module: each item does nothing, and nothing raises.
         menu, items, _ = menu_of(widget)
     finally:

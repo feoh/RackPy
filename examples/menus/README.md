@@ -74,8 +74,9 @@ plugins first, and remove `plugins-lin-x64/RackPyMenus` before building again.
 
 `tests/examples/test_controls_state.py`:
 
-- in Rack (test-hooks build): a browser preview's menu is empty; the module's
-  menu has the label, the two separators and the eight items in order; each
+- in Rack (test-hooks build): a browser preview's menu is empty; Rack's own
+  module menu ends with the example's items; the module's menu has the
+  label, the two separators and the eight items in order; each
   item does what the table says, and Rack's engine outputs the voltage it
   sets; the check mark and the index submenus' labels follow the state; the
   ends of the range disable the actions; the saved state round-trips and
