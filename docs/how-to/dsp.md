@@ -136,6 +136,16 @@ Build it as you would a Rack plugin: with the Rack SDK's compiler flags
 `-static-libstdc++ -static-libgcc`, as for any plugin. RackPy's own build does
 exactly that for the example (`rackpy_kernels_example` in `CMakeLists.txt`).
 
+In a plugin project made by `bin/rackpy-plugin`, put the source in
+`kernels/NAME.cpp` and list `NAME` under `"kernels"` in `rackpy-plugin.json`.
+RackPy's build compiles the examples' libraries this way, and `bin/rackpy-plugin
+build --kernels DIR` copies `DIR/NAME.so` into the plugin's `kernels/` folder
+and lists it in `rackpy-loader.json`. The
+[polyphony](https://github.com/feoh/RackPy/tree/main/examples/polyphony),
+[dsp](https://github.com/feoh/RackPy/tree/main/examples/dsp) and
+[expanders](https://github.com/feoh/RackPy/tree/main/examples/expanders)
+examples are such projects.
+
 The rules:
 
 - `process`, `reset`, `sampleRateChange` and `setControl` run where audio

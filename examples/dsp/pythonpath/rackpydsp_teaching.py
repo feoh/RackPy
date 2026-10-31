@@ -61,7 +61,7 @@ def run(
         n = max(1, len(volts))
         out: list[float] = []
         for first in range(0, n, 4):
-            # A mono cable feeds every channel (getPolyVoltageSimd); unpatched reads 0 V.
+            # As getPolyVoltageSimd reads them: a mono cable's channel 0 in every lane; unpatched, 0 V.
             lanes = [
                 volts[0] if len(volts) == 1 else (volts[c] if c < len(volts) else 0.0) for c in range(first, first + 4)
             ]

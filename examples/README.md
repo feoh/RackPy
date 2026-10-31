@@ -1,6 +1,6 @@
 # Examples covering the official Rack samples
 
-Implemented (RP-33 to RP-35), Linux x86_64 in Rack Free 2.6.6:
+Implemented (RP-33 to RP-36), Linux x86_64 in Rack Free 2.6.6:
 
 - [template](template/README.md): the plugin-template workflow with
   `bin/rackpy-plugin` (create, add a module from a panel, build).
@@ -20,8 +20,20 @@ Implemented (RP-33 to RP-35), Linux x86_64 in Rack Free 2.6.6:
 - [drawing](drawing/README.md): NanoVG shapes, text, a self-lit layer and a
   cached framebuffer, checked in Rack's real frames and shown in the
   [walkthrough](../docs/how-to/draw-panels.md).
+- [polyphony](polyphony/README.md): a polyphonic sine oscillator as two C++
+  kernels, one channel at a time and four at a time with `float_4`, compared
+  with a C++ reference.
+- [dsp](dsp/README.md): a polyphonic biquad filter kernel built on Rack's own
+  `rack::dsp`, compared with the same filter run from Python.
+- [expanders](expanders/README.md): messages between adjacent modules, one
+  frame apart, and a kernel that reads only a neighbour of the right model.
 
-The rest of this page defines the remaining work (RP-36). It avoids
+Every tutorial, API-guide and plugin-template sample now has a tested
+disposition in [upstream/examples.json](../upstream/examples.json); the
+remaining samples are shell commands and migration notes for RP-37's guides,
+packaging commands for RP-39, and building Rack itself, which is out of
+scope (`tests/examples/test_dispositions.py` checks all of this). The rest of
+this page describes the layout every example follows. It avoids
 pretending that Python-shaped pseudocode is a working Rack plugin.
 
 RackPy writes **original** examples. Each one demonstrates a feature that the
@@ -81,10 +93,14 @@ examples/<sample>/
   pythonpath/           # the entry package and modules: actual working facade calls
   res/                  # original assets and their licenses
   presets/              # optional factory presets, presets/<module slug>/*.vcvm
+  kernels/              # optional C++ kernel libraries, listed in rackpy-plugin.json
 tests/examples/         # native/Python parity plus actual-host checks
 ```
 
-Native code is added only where real-time operation needs it. Each sample the
+Native code is added only where real-time operation needs it: RackPy's build
+compiles `kernels/*.cpp` with the Rack SDK's plugin flags into
+`build/<dir>/examples/<sample>/kernels/`, and `bin/rackpy-plugin build --kernels`
+copies them into the plugin. Each sample the
 example covers gets a `disposition` in `upstream/examples.json` naming its
 files and tests (`tests/examples/test_dispositions.py`).
 

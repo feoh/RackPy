@@ -12,7 +12,7 @@ import pytest
 from tests.support import REPO
 
 pytestmark = pytest.mark.unit
-COMPLETED = {"RP-33", "RP-34", "RP-35"}
+COMPLETED = {"RP-33", "RP-34", "RP-35", "RP-36"}
 SAMPLES = json.loads((REPO / "upstream" / "examples.json").read_text(encoding="utf-8"))["samples"]
 
 
@@ -32,3 +32,25 @@ def test_a_disposition_names_existing_files_and_tests(sample: dict[str, object])
         path, _, name = node.partition("::")
         source = (REPO / path).read_text(encoding="utf-8")
         assert re.search(rf"^def {re.escape(name)}\(", source, re.MULTILINE), node
+
+
+# RP-36's end-to-end audit. RP-37 documents the shell commands and migration notes that RackPy
+# does not adapt, and RP-39 the packaging ones; samples about building Rack itself are out of scope.
+LATER = {"RP-37", "RP-39"}
+OFFICIAL_PAGES = ("tutorial-", "guide-", "helper-")
+
+
+def test_every_tutorial_guide_and_template_sample_has_a_disposition() -> None:
+    missing = [s["id"] for s in SAMPLES if s["id"].startswith(OFFICIAL_PAGES) and "disposition" not in s]
+    assert missing == []
+
+
+def test_every_other_sample_is_resolved_or_assigned() -> None:
+    unresolved = [
+        s["id"]
+        for s in SAMPLES
+        if "disposition" not in s
+        and not (s["port_task"] in LATER and s["classification"] in {"shell", "config", "out-of-scope"})
+        and not (s["port_task"] == "none" and s["classification"] == "out-of-scope" and s.get("reason"))
+    ]
+    assert unresolved == []

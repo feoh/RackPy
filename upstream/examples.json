@@ -568,7 +568,18 @@
       "port_task": "RP-36",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "the Peeker's C++ kernel (expanders.Peek) reads its left neighbour's LEVEL and output after checking it is this plugin's Source",
+        "files": [
+          "examples/expanders/kernels/expanders.cpp",
+          "examples/expanders/pythonpath/rackpyexpanders/peeker.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_dsp/test_dsp_in_rack.py::test_the_peeker_reads_only_a_source",
+          "tests/examples/test_dsp_expanders.py::test_the_example_kernels_make_no_audio_path_calls"
+        ]
+      }
     },
     {
       "id": "guide-14",
@@ -582,7 +593,16 @@
       "port_task": "RP-36",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "the Receiver gives its left side two \"rackpy.graph\" message buffers in its constructor callback (graph_messages)",
+        "files": [
+          "examples/expanders/pythonpath/rackpyexpanders/receiver.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_dsp/test_dsp_in_rack.py::test_the_source_reaches_the_receiver_one_frame_later"
+        ]
+      }
     },
     {
       "id": "guide-15",
@@ -596,7 +616,18 @@
       "port_task": "RP-36",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "the Source's graph writes two lanes into its right neighbour's message and requests the flip (expander_send), natively",
+        "files": [
+          "examples/expanders/pythonpath/rackpyexpanders_graphs.py",
+          "examples/expanders/pythonpath/rackpyexpanders/source.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_dsp/test_dsp_in_rack.py::test_the_source_reaches_the_receiver_one_frame_later",
+          "tests/examples/test_dsp_expanders.py::test_the_expander_pair_is_one_frame_apart_offline"
+        ]
+      }
     },
     {
       "id": "guide-16",
@@ -611,7 +642,17 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "part_of": "guide-15"
+      "part_of": "guide-15",
+      "disposition": {
+        "how": "the Receiver's graph reads them one frame later (expander_receive)",
+        "files": [
+          "examples/expanders/pythonpath/rackpyexpanders_graphs.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_dsp/test_dsp_in_rack.py::test_the_source_reaches_the_receiver_one_frame_later",
+          "tests/examples/test_dsp_expanders.py::test_the_expander_pair_is_one_frame_apart_offline"
+        ]
+      }
     },
     {
       "id": "guide-17",
@@ -795,7 +836,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "part_of": "guide-25"
+      "part_of": "guide-25",
+      "disposition": {
+        "how": "one phase per channel: Voice voices[16] in polyphony.Scalar, float_4 phases[4] in polyphony.Simd",
+        "files": [
+          "examples/polyphony/kernels/polyphony.cpp"
+        ],
+        "tests": [
+          "tests/examples/in_rack_dsp/test_dsp_in_rack.py::test_the_oscillators_match_the_cpp_reference"
+        ]
+      }
     },
     {
       "id": "guide-25",
@@ -810,7 +860,18 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "erratum": "std::sin(2.f * M_PI * phase) passes the array; it must use phase[c]"
+      "erratum": "std::sin(2.f * M_PI * phase) passes the array; it must use phase[c]",
+      "disposition": {
+        "how": "polyphony.Scalar: as many voices as the V/OCT cable's channels, at least one, in a native kernel",
+        "files": [
+          "examples/polyphony/kernels/polyphony.cpp",
+          "examples/polyphony/pythonpath/rackpypolyphony/polysine.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_dsp/test_dsp_in_rack.py::test_the_oscillators_match_the_cpp_reference",
+          "tests/examples/test_dsp_expanders.py::test_the_example_kernels_make_no_audio_path_calls"
+        ]
+      }
     },
     {
       "id": "guide-26",
@@ -825,7 +886,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "part_of": "guide-25"
+      "part_of": "guide-25",
+      "disposition": {
+        "how": "the Voice struct holds one voice's state",
+        "files": [
+          "examples/polyphony/kernels/polyphony.cpp"
+        ],
+        "tests": [
+          "tests/examples/in_rack_dsp/test_dsp_in_rack.py::test_the_oscillators_match_the_cpp_reference"
+        ]
+      }
     },
     {
       "id": "guide-27",
@@ -840,7 +910,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "part_of": "guide-25"
+      "part_of": "guide-25",
+      "disposition": {
+        "how": "Scalar::process calls voices[c].process for each channel",
+        "files": [
+          "examples/polyphony/kernels/polyphony.cpp"
+        ],
+        "tests": [
+          "tests/examples/in_rack_dsp/test_dsp_in_rack.py::test_the_oscillators_match_the_cpp_reference"
+        ]
+      }
     },
     {
       "id": "guide-28",
@@ -855,7 +934,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "part_of": "guide-30"
+      "part_of": "guide-30",
+      "disposition": {
+        "how": "explained by rackpypolyphony_teaching.four_at_a_time, the scalar loop over groups of four that float_4 replaces",
+        "files": [
+          "examples/polyphony/pythonpath/rackpypolyphony_teaching.py"
+        ],
+        "tests": [
+          "tests/examples/test_dsp_expanders.py::test_the_teaching_loops_agree"
+        ]
+      }
     },
     {
       "id": "guide-29",
@@ -870,7 +958,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "part_of": "guide-30"
+      "part_of": "guide-30",
+      "disposition": {
+        "how": "float_4 phases[4] in polyphony.Simd",
+        "files": [
+          "examples/polyphony/kernels/polyphony.cpp"
+        ],
+        "tests": [
+          "tests/examples/in_rack_dsp/test_dsp_in_rack.py::test_the_oscillators_match_the_cpp_reference"
+        ]
+      }
     },
     {
       "id": "guide-30",
@@ -885,7 +982,19 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "erratum": "float_t freq should be float_4; simd::sin(2.f * M_PI * phase) passes the array and must use phase[c / 4]"
+      "erratum": "float_t freq should be float_4; simd::sin(2.f * M_PI * phase) passes the array and must use phase[c / 4]",
+      "disposition": {
+        "how": "polyphony.Simd: four voices per float_4 with simd::pow and simd::sin (phase[c / 4], correcting the manual's float_t and whole-array sin)",
+        "files": [
+          "examples/polyphony/kernels/polyphony.cpp",
+          "examples/polyphony/pythonpath/rackpypolyphony/polysine.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_dsp/test_dsp_in_rack.py::test_the_oscillators_match_the_cpp_reference",
+          "tests/examples/test_dsp_expanders.py::test_the_cpp_reference_scalar_and_simd_agree",
+          "tests/examples/test_dsp_expanders.py::test_the_example_kernels_make_no_audio_path_calls"
+        ]
+      }
     },
     {
       "id": "panel-01",

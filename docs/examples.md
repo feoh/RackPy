@@ -3,7 +3,7 @@
 RackPy has, or will have, an original, runnable example for every feature
 that the official VCV Rack tutorial, plugin API guide and plugin template
 demonstrate; none of them copies the VCV manual
-([ADR 001](decisions/001-licensing-and-identity.md)). Seven exist so far, all
+([ADR 001](decisions/001-licensing-and-identity.md)). Ten exist so far, all
 Linux x86_64 in Rack Free {{rack_version}}:
 
 - [Plugin template](https://github.com/feoh/RackPy/tree/main/examples/template):
@@ -37,7 +37,17 @@ Linux x86_64 in Rack Free {{rack_version}}:
   framebuffer. The [walkthrough](how-to/draw-panels.md) shows them in
   screenshots of Rack's own frames.
 
-The guide's polyphony, SIMD, DSP and expander examples are planned (RP-36).
+- [Polyphony](https://github.com/feoh/RackPy/tree/main/examples/polyphony),
+  [DSP](https://github.com/feoh/RackPy/tree/main/examples/dsp) and
+  [Expanders](https://github.com/feoh/RackPy/tree/main/examples/expanders):
+  plugins that ship their own [C++ kernel libraries](how-to/dsp.md#write-a-kernel-in-c):
+  a polyphonic oscillator one channel at a time and with `float_4`, a biquad
+  filter from Rack's `rack::dsp`, and modules that exchange expander messages
+  or read the module beside them.
+
+Every sample of the tutorial, the API guide and the plugin template has a
+tested example; the rest are shell commands and notes that the guides
+document (RP-37).
 
 The plan, the required layout of each example and the list of features are in
 [examples/README.md](../examples/README.md). The 77 official samples, with
