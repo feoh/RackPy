@@ -133,5 +133,5 @@ plugin it checks that Rack extracts and loads it, that all of its modules run,
 are saved and come back when the patch is reopened, that the module browser
 draws their previews, and that Rack quits with the interpreter finalized. It
 also checks each failure in the table above. Its logs and screenshots are kept
-with the build; [RP-39's validation record](https://github.com/feoh/rackpy/blob/main/planning/rp-39-validation.md)
+with the build; [RP-39's validation record](../../planning/rp-39-validation.md)
 has the results. A computer's sound card and MIDI devices are not part of it.

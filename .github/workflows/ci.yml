@@ -23,6 +23,8 @@ concurrency:
   group: ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
   cancel-in-progress: true
 
+# A -m on the command line replaces pyproject's addopts -m, so every selection below repeats
+# "not sanitizer and not stress": those suites are opt-in (RP-38) and take hours here.
 env:
   UV_VERSION: "0.9.18"
   # Missing tools or inputs fail tests (tests/support.py); jobs list what they deliberately lack.
@@ -67,7 +69,7 @@ jobs:
   docs:
     name: Documentation site
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30  # nine deliberately broken site builds, ~90 s each
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
@@ -77,7 +79,7 @@ jobs:
       - name: Build with warnings as errors (pages, anchors, repository links, labelled code, alt text)
         run: uv run --frozen sphinx-build -W --keep-going -n -b html docs build/docs/html
       - name: Docs checks and runs-in=python snippets (runs-in=rack snippets run in the host job)
-        run: uv run --frozen pytest -m "docs and not host" -v --junitxml=reports/docs.xml
+        run: uv run --frozen pytest -m "docs and not host and not sanitizer and not stress" -v --junitxml=reports/docs.xml
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -141,7 +143,7 @@ jobs:
       - name: rack.hpp-only probe builds with the SDK's plugin.mk
         run: bin/rack-sdk probe
       - name: Native build (warnings as errors), CTest, inspection, setup errors, audio-path guard
-        run: uv run --frozen pytest -m "native and not host" -v --junitxml=reports/native.xml
+        run: uv run --frozen pytest -m "native and not host and not sanitizer and not stress" -v --junitxml=reports/native.xml
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -212,7 +214,7 @@ jobs:
       - run: uv sync --frozen
       - name: Skeleton, docs snippets, RP-04 embedding spike and RP-06 lifecycle probe in Rack Free 2.6.6
         run: >
-          uv run --frozen pytest -m "host and not dist" -v --basetemp="$RUNNER_TEMP/pytest"
+          uv run --frozen pytest -m "host and not dist and not sanitizer and not stress" -v --basetemp="$RUNNER_TEMP/pytest"
           --junitxml=reports/host.xml
       - if: always()
         name: Collect Rack logs

@@ -72,11 +72,16 @@ missing, so no test can fall outside every CI job:
 | Marker | Needs | Command |
 | --- | --- | --- |
 | `unit` | nothing but the project environment | `uv run pytest -m unit` |
-| `native` | SDK, compiler, CMake | `uv run pytest -m "native and not host"` |
+| `native` | SDK, compiler, CMake | `uv run pytest -m "native and not host and not sanitizer and not stress"` |
 | `inventory` | clang and libclang | `uv run pytest -m inventory` |
-| `host` | the pinned Rack Free 2.6.6 host (downloaded on first use); `gui` tests also need Xvfb | `uv run pytest -m "host and not dist"` |
+| `host` | the pinned Rack Free 2.6.6 host (downloaded on first use); `gui` tests also need Xvfb | `uv run pytest -m "host and not dist and not sanitizer and not stress"` |
 | `dist` | the official toolchain from `bin/rack-toolchain build` | `uv run pytest -m dist` |
-| `docs` | the docs toolchain (installed by `uv sync`); snippets marked `runs-in=rack` are also `host` | `uv run pytest -m "docs and not host"` |
+| `docs` | the docs toolchain (installed by `uv sync`); snippets marked `runs-in=rack` are also `host` | `uv run pytest -m "docs and not host and not sanitizer and not stress"` |
+
+The `sanitizer` and `stress` suites (RP-38) are opt-in: plain `uv run pytest`
+leaves them out, through `addopts` in `pyproject.toml`. A `-m` of your own
+replaces that one, so a selection repeats `not sanitizer and not stress`, as
+above; run them with `-m sanitizer` or `-m stress`.
 
 **A missing requirement fails the test.** A test that needs the SDK, Rack,
 Xvfb, clang or the toolchain and cannot find it reports a setup error that
