@@ -12,7 +12,7 @@ import pytest
 from tests.support import REPO
 
 pytestmark = pytest.mark.unit
-COMPLETED = {"RP-33"}
+COMPLETED = {"RP-33", "RP-34"}
 SAMPLES = json.loads((REPO / "upstream" / "examples.json").read_text(encoding="utf-8"))["samples"]
 
 

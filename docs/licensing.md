@@ -117,7 +117,7 @@ example's README compares itself to the manual section, it names the erratum:
 
 | Sample | Upstream text | Problem |
 | --- | --- | --- |
-| `guide-08` | `onRandomize(const ResetEvent& e) override` | Wrong event type; does not compile. `migrate2-06` has the correct type. |
+| `guide-08` | `onRandomize(const ResetEvent& e) override` | Wrong event type; does not compile. `migrate2-06` has the correct type, as does RackPy's `examples/state-and-events`. |
 | `guide-18` | Comment "triangle with blue stroke" | The stroke is red |
 | `guide-25` | `std::sin(2.f * M_PI * phase)` | Passes the array; must be `phase[c]` |
 | `guide-30` | `float_t freq`, `simd::sin(2.f * M_PI * phase)` | Must be `float_4`, and `phase[c / 4]` |

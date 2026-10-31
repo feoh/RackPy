@@ -437,7 +437,7 @@ def add_module(
 
 @app.command
 def build(project: Path = Path(), *, bundle: Path, dest: Path) -> None:
-    """Make DEST/<slug>, a Rack plugin directory: the RackPy BUNDLE with the project's manifest, code and res/.
+    """Make DEST/<slug>, a Rack plugin: the RackPy BUNDLE with the project's manifest, code, res/ and presets/.
 
     Parameters
     ----------
@@ -473,6 +473,8 @@ def build(project: Path = Path(), *, bundle: Path, dest: Path) -> None:
         copy(item, target / "pythonpath" / item.name)
     if (root / "res").is_dir():
         shutil.copytree(root / "res", target / "res", dirs_exist_ok=True)
+    if (root / "presets").is_dir():  # factory presets: presets/<module slug>/*.vcvm, where Rack looks
+        shutil.copytree(root / "presets", target / "presets", dirs_exist_ok=True)
     for notice in ("LICENSE", "LICENSE.md", "LICENSE.txt"):
         if (root / notice).is_file():
             shutil.copy2(root / notice, target / f"{slug}-{notice}")

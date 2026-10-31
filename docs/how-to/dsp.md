@@ -78,10 +78,7 @@ boundary handover, controls, reset, sample-rate and failure handling as
 kernel the module runs unbypassed is not called. A compiled
 [graph](graphs.md) is a convenient bypass kernel:
 
-```python
-bypassed = Graph()
-bypassed.output(0, -bypassed.input(0))  # pass the input through, inverted
-module.set_bypass_kernel(bypassed.compile())
+```{rackpy-example} bypass_kernel.py
 ```
 
 ## What it costs

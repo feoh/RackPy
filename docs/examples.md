@@ -3,7 +3,7 @@
 RackPy has, or will have, an original, runnable example for every feature
 that the official VCV Rack tutorial, plugin API guide and plugin template
 demonstrate; none of them copies the VCV manual
-([ADR 001](decisions/001-licensing-and-identity.md)). Two exist so far, both
+([ADR 001](decisions/001-licensing-and-identity.md)). Five exist so far, all
 Linux x86_64 in Rack Free {{rack_version}}:
 
 - [Plugin template](https://github.com/feoh/RackPy/tree/main/examples/template):
@@ -14,9 +14,25 @@ Linux x86_64 in Rack Free {{rack_version}}:
   the tutorial's sine oscillator with a 1 Hz blink, running as a native kernel
   compiled from a graph, compared in Rack with a C++ reference at 44.1, 48 and
   96 kHz.
+- [Configuration](https://github.com/feoh/RackPy/tree/main/examples/configuration):
+  parameter displays (plain, volts, percent, hertz on a base-2 scale,
+  decibels), a labelled switch, a button, descriptions, port and light names,
+  bypass routes, a custom bypass that runs a second native kernel
+  ([processing audio](how-to/dsp.md#reset-sample-rate-bypass-and-failures)),
+  and factory presets. In Rack, every tooltip and frame matches the same
+  modules written in C++.
+- [State and events](https://github.com/feoh/RackPy/tree/main/examples/state-and-events):
+  a sequencer whose range is saved in the patch, whose pattern is a file in
+  its patch storage and whose default length is a plugin setting
+  ([state](how-to/state.md)); Initialize and Randomize handlers; and a
+  laboratory script that handles every module event, the sample rate's
+  included, in Python, offline.
+- [Menus](https://github.com/feoh/RackPy/tree/main/examples/menus): a pitch
+  source set entirely from its context menu, with one of each of Rack's menu
+  helpers ([menus](reference/ui.md#menu-helpers)).
 
-The guide's configuration, lifecycle, menu, panel, drawing, polyphony, SIMD,
-DSP and expander examples are planned (RP-34 to RP-36).
+The guide's panel, drawing, polyphony, SIMD, DSP and expander examples are
+planned (RP-35 and RP-36).
 
 The plan, the required layout of each example and the list of features are in
 [examples/README.md](../examples/README.md). The 77 official samples, with

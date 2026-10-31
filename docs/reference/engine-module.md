@@ -642,7 +642,9 @@ override errors to their Python caller. Details: [laboratory modules](../explana
 
 `set_kernel(kernel)`, `kernel` and `kernel_failed` are RackPy's, not Rack's:
 they give a module its production audio path, a native kernel that Rack's
-engine runs from the module's `process()` every frame. See
+engine runs from the module's `process()` every frame.
+`set_bypass_kernel(kernel)`, `bypass_kernel` and `bypass_kernel_failed` do
+the same for its `processBypass()` ([bypass configuration](#bypass-configuration)). See
 [processing audio](../how-to/dsp.md). Rack's `process` itself, as a Python
 override, exists only in the laboratory: see [audio callbacks](#audio-callbacks).
 

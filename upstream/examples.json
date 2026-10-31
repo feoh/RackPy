@@ -272,7 +272,17 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "part_of": "guide-02"
+      "part_of": "guide-02",
+      "disposition": {
+        "how": "config_input, config_output and config_light name the Shaper's port and light, compared with the C++ fixture",
+        "files": [
+          "examples/configuration/pythonpath/rackpyconfiguration/shaper.py",
+          "native/tests/controls_reference.hpp"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_controls_ports_lights_and_routes_match_cpp"
+        ]
+      }
     },
     {
       "id": "guide-02",
@@ -286,7 +296,17 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "the Shaper's five knobs: plain, volts, percent, hertz on a base-2 scale and decibels, every tooltip compared with C++",
+        "files": [
+          "examples/configuration/pythonpath/rackpyconfiguration/shaper.py",
+          "native/tests/controls_reference.hpp"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_controls_ports_lights_and_routes_match_cpp"
+        ]
+      }
     },
     {
       "id": "guide-03",
@@ -300,7 +320,17 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "config_switch with three labelled shapes (Shaper's MODE)",
+        "files": [
+          "examples/configuration/pythonpath/rackpyconfiguration/shaper.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_controls_ports_lights_and_routes_match_cpp",
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_frames_match_cpp_processed_and_bypassed"
+        ]
+      }
     },
     {
       "id": "guide-04",
@@ -314,7 +344,17 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "config_button: the Shaper mutes while it is held",
+        "files": [
+          "examples/configuration/pythonpath/rackpyconfiguration/shaper.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_controls_ports_lights_and_routes_match_cpp",
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_frames_match_cpp_processed_and_bypassed"
+        ]
+      }
     },
     {
       "id": "guide-05",
@@ -328,7 +368,17 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "descriptions set on the quantity and port info config_param and config_output return; get_output_info for the Splitter",
+        "files": [
+          "examples/configuration/pythonpath/rackpyconfiguration/shaper.py",
+          "examples/configuration/pythonpath/rackpyconfiguration/splitter.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_controls_ports_lights_and_routes_match_cpp"
+        ]
+      }
     },
     {
       "id": "guide-06",
@@ -342,7 +392,17 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "config_bypass: Rack's own processBypass copies the Shaper's input, compared with C++ for 3 channels",
+        "files": [
+          "examples/configuration/pythonpath/rackpyconfiguration/shaper.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_controls_ports_lights_and_routes_match_cpp",
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_frames_match_cpp_processed_and_bypassed"
+        ]
+      }
     },
     {
       "id": "guide-07",
@@ -357,7 +417,20 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "callback_note": "processBypass runs on the audio path: native in production, Python only in the RP-22 laboratory"
+      "callback_note": "processBypass runs on the audio path: native in production, Python only in the RP-22 laboratory",
+      "disposition": {
+        "how": "Module.set_bypass_kernel: a second native kernel Rack's engine runs while bypassed (the Splitter keeps its inverted output inverted)",
+        "files": [
+          "examples/configuration/pythonpath/rackpyconfiguration/splitter.py",
+          "examples/configuration/pythonpath/rackpyconfiguration_dsp.py",
+          "native/module/module.hpp"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_frames_match_cpp_processed_and_bypassed",
+          "tests/dsp/in_rack/test_kernels.py::test_a_bypass_kernel_is_racks_process_bypass",
+          "tests/dsp/test_runtime.py::test_the_kernel_path_makes_no_forbidden_calls"
+        ]
+      }
     },
     {
       "id": "guide-08",
@@ -372,7 +445,18 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "erratum": "onRandomize is declared with const ResetEvent&; the override needs const RandomizeEvent& and does not compile as written"
+      "erratum": "onRandomize is declared with const ResetEvent&; the override needs const RandomizeEvent& and does not compile as written",
+      "disposition": {
+        "how": "on_reset and on_randomize on the Sequencer's ModuleClass, with Rack's ResetEvent and RandomizeEvent (correcting the manual's erratum); the sample rate reaches the kernel natively; laboratory/events_on_a_bench.py handles every event in Python offline",
+        "files": [
+          "examples/state-and-events/pythonpath/rackpystateevents/sequencer.py",
+          "examples/state-and-events/laboratory/events_on_a_bench.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_the_sequencer_steps_saves_and_handles_events",
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_the_laboratory_events_script"
+        ]
+      }
     },
     {
       "id": "guide-09",
@@ -386,7 +470,19 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "ModuleClass.to_json and from_json: the Sequencer's versioned range and the Switchboard's choices, read as untrusted",
+        "files": [
+          "examples/state-and-events/pythonpath/rackpystateevents/sequencer.py",
+          "examples/state-and-events/pythonpath/rackpystateevents_core.py",
+          "examples/menus/pythonpath/rackpymenus/switchboard.py"
+        ],
+        "tests": [
+          "tests/examples/test_controls_state.py::test_saved_state_takes_only_what_it_understands",
+          "tests/examples/test_controls_state.py::test_rack_saves_and_reopens_state_storage_and_settings"
+        ]
+      }
     },
     {
       "id": "guide-10",
@@ -400,7 +496,17 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "on_add reads and on_save writes the Sequencer's pattern file in Module.patch_storage()",
+        "files": [
+          "examples/state-and-events/pythonpath/rackpystateevents/sequencer.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_the_sequencer_steps_saves_and_handles_events",
+          "tests/examples/test_controls_state.py::test_rack_saves_and_reopens_state_storage_and_settings"
+        ]
+      }
     },
     {
       "id": "guide-11",
@@ -414,7 +520,18 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "plugin.set_settings_handlers from the entry package: the Sequencer's default length in settings.json",
+        "files": [
+          "examples/state-and-events/pythonpath/rackpystateevents/__init__.py",
+          "examples/state-and-events/pythonpath/rackpystateevents/sequencer.py"
+        ],
+        "tests": [
+          "tests/examples/test_controls_state.py::test_plugin_settings_are_checked",
+          "tests/examples/test_controls_state.py::test_rack_saves_and_reopens_state_storage_and_settings"
+        ]
+      }
     },
     {
       "id": "guide-12",
@@ -428,7 +545,16 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "SwitchboardWidget.append_context_menu: label, separators, actions, a disabled item, check, bool, bool pointer, submenu, index and index-pointer submenus; nothing for a browser preview; harmless after deletion",
+        "files": [
+          "examples/menus/pythonpath/rackpymenus/switchboard.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_every_switchboard_menu_item_works"
+        ]
+      }
     },
     {
       "id": "guide-13",
@@ -731,7 +857,18 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "the configuration example ships presets/Shaper/*.vcvm; bin/rackpy-plugin build copies presets/ where Model.get_factory_preset_directory() looks",
+        "files": [
+          "examples/configuration/presets/Shaper",
+          "bin/rackpy-plugin"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_the_factory_presets_are_where_rack_looks_and_load",
+          "tests/examples/test_controls_state.py::test_each_example_loads_as_its_own_plugin"
+        ]
+      }
     },
     {
       "id": "presets-02",
@@ -759,7 +896,16 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "zero-padded number prefixes order the Shaper's presets; Rack hides them in its menu",
+        "files": [
+          "examples/configuration/presets/Shaper"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_the_factory_presets_are_where_rack_looks_and_load"
+        ]
+      }
     },
     {
       "id": "presets-04",
@@ -773,7 +919,16 @@
       "port_task": "RP-34",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "each preset is a .vcvm module JSON with params by id, loaded by ModuleWidget.load",
+        "files": [
+          "examples/configuration/presets/Shaper/01_Gentle tremolo.vcvm"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_the_factory_presets_are_where_rack_looks_and_load"
+        ]
+      }
     },
     {
       "id": "migrate2-01",
@@ -832,7 +987,18 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "part_of": "guide-05"
+      "part_of": "guide-05",
+      "disposition": {
+        "how": "get_param_quantity is the only way the examples reach a quantity",
+        "files": [
+          "examples/state-and-events/pythonpath/rackpystateevents/sequencer.py",
+          "examples/configuration/pythonpath/rackpyconfiguration/shaper.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_controls_ports_lights_and_routes_match_cpp",
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_the_sequencer_steps_saves_and_handles_events"
+        ]
+      }
     },
     {
       "id": "migrate2-05",
@@ -847,7 +1013,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "part_of": "migrate2-06"
+      "part_of": "migrate2-06",
+      "disposition": {
+        "how": "reset_enabled and randomize_enabled turned off for the Sequencer's LENGTH",
+        "files": [
+          "examples/state-and-events/pythonpath/rackpystateevents/sequencer.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_the_sequencer_steps_saves_and_handles_events"
+        ]
+      }
     },
     {
       "id": "migrate2-06",
@@ -862,7 +1037,17 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "note": "Uses the correct RandomizeEvent type that guide-08 gets wrong"
+      "note": "Uses the correct RandomizeEvent type that guide-08 gets wrong",
+      "disposition": {
+        "how": "on_reset sets LENGTH to the plugin's default length and on_randomize to one of 4, 8, 12 or 16",
+        "files": [
+          "examples/state-and-events/pythonpath/rackpystateevents/sequencer.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_the_sequencer_steps_saves_and_handles_events",
+          "tests/examples/test_controls_state.py::test_rack_saves_and_reopens_state_storage_and_settings"
+        ]
+      }
     },
     {
       "id": "migrate2-07",
@@ -892,7 +1077,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "not-adapted",
-      "duplicate_of": "guide-01"
+      "duplicate_of": "guide-01",
+      "disposition": {
+        "how": "as guide-01",
+        "files": [
+          "examples/configuration/pythonpath/rackpyconfiguration/shaper.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_controls_ports_lights_and_routes_match_cpp"
+        ]
+      }
     },
     {
       "id": "migrate2-09",
@@ -907,7 +1101,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "part_of": "guide-03"
+      "part_of": "guide-03",
+      "disposition": {
+        "how": "as guide-03 and guide-04",
+        "files": [
+          "examples/configuration/pythonpath/rackpyconfiguration/shaper.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_controls_ports_lights_and_routes_match_cpp"
+        ]
+      }
     },
     {
       "id": "migrate2-10",
@@ -923,7 +1126,16 @@
       "license": "unclear",
       "port_gate": "not-adapted",
       "duplicate_of": "guide-06",
-      "identical": true
+      "identical": true,
+      "disposition": {
+        "how": "as guide-06",
+        "files": [
+          "examples/configuration/pythonpath/rackpyconfiguration/shaper.py"
+        ],
+        "tests": [
+          "tests/examples/in_rack_controls/test_controls_in_rack.py::test_frames_match_cpp_processed_and_bypassed"
+        ]
+      }
     },
     {
       "id": "migrate2-11",
@@ -939,7 +1151,16 @@
       "license": "unclear",
       "port_gate": "not-adapted",
       "duplicate_of": "guide-10",
-      "note": "Calls createPatchStorageDirectory() in onAdd where guide-10 calls getPatchStorageDirectory(); the port documents both"
+      "note": "Calls createPatchStorageDirectory() in onAdd where guide-10 calls getPatchStorageDirectory(); the port documents both",
+      "disposition": {
+        "how": "as guide-10; on_add only reads (create=False), and on_save creates the directory as it writes",
+        "files": [
+          "examples/state-and-events/pythonpath/rackpystateevents/sequencer.py"
+        ],
+        "tests": [
+          "tests/examples/test_controls_state.py::test_rack_saves_and_reopens_state_storage_and_settings"
+        ]
+      }
     },
     {
       "id": "migrate2-12",

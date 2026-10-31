@@ -177,6 +177,11 @@ def stage_examples(bundle: Path) -> Path:
             if item.name != "__pycache__":
                 (shutil.copytree if item.is_dir() else shutil.copy)(item, bundle / "pythonpath" / item.name)
         shutil.copytree(project / "res", bundle / "res", dirs_exist_ok=True)
+        for preset in project.glob("presets/*/*.vcvm"):
+            # Rack refuses a preset for another plugin; these modules are the test bundle's, "RackPy".
+            staged = bundle / preset.relative_to(project)
+            staged.parent.mkdir(parents=True, exist_ok=True)
+            staged.write_text(json.dumps({**json.loads(preset.read_text()), "plugin": "RackPy"}))
     return bundle
 
 
@@ -198,7 +203,7 @@ def test_the_modules_in_live_rack(make_hooks_bundle: Callable[[], Path], rack_ho
     assert result.exit == 0, result.summary()
     print("".join(line + "\n" for line in result.output.splitlines() if "difference from C++" in line), end="")
     outcomes = result.outcomes()
-    assert len(outcomes) == 7 and set(outcomes.values()) == {"passed"}, result.summary()
+    assert len(outcomes) == 9 and set(outcomes.values()) == {"passed"}, result.summary()
 
 
 CUSTOM = [0.05 * i for i in range(core.STEPS)]
@@ -352,3 +357,5 @@ def test_each_example_loads_as_its_own_plugin(
         assert [(m["plugin"], m["model"]) for m in saved["modules"]] == [
             (slug, e["slug"]) for e in manifest["modules"]
         ], launch
+    built = sorted(p.relative_to(plugins / slug).as_posix() for p in (plugins / slug).glob("presets/*/*.vcvm"))
+    assert built == sorted(p.relative_to(project).as_posix() for p in project.glob("presets/*/*.vcvm"))

@@ -1,13 +1,22 @@
 # Examples covering the official Rack samples
 
-Implemented (RP-33), Linux x86_64 in Rack Free 2.6.6:
+Implemented (RP-33, RP-34), Linux x86_64 in Rack Free 2.6.6:
 
 - [template](template/README.md): the plugin-template workflow with
   `bin/rackpy-plugin` (create, add a module from a panel, build).
 - [oscillator](oscillator/README.md): the tutorial's sine oscillator and blink
   as a native kernel, with an offline reference and a C++ comparison.
+- [configuration](configuration/README.md): every parameter display, a
+  labelled switch, a button, descriptions, port and light names, bypass
+  routes, a custom bypass and factory presets, compared in Rack with the same
+  modules written in C++.
+- [state-and-events](state-and-events/README.md): a sequencer's JSON state,
+  patch-storage file and plugin settings through Rack's save and reopen, its
+  Initialize and Randomize handlers, and a laboratory script for every event.
+- [menus](menus/README.md): one of each of Rack's context-menu helpers, with
+  browser previews and menus that outlive their module.
 
-The rest of this page defines the remaining work (RP-34 to RP-36). It avoids
+The rest of this page defines the remaining work (RP-35 and RP-36). It avoids
 pretending that Python-shaped pseudocode is a working Rack plugin.
 
 RackPy writes **original** examples. Each one demonstrates a feature that the
@@ -66,6 +75,7 @@ examples/<sample>/
   rackpy-plugin.json    # the entry package's name
   pythonpath/           # the entry package and modules: actual working facade calls
   res/                  # original assets and their licenses
+  presets/              # optional factory presets, presets/<module slug>/*.vcvm
 tests/examples/         # native/Python parity plus actual-host checks
 ```
 

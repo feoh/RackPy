@@ -3,6 +3,8 @@
 **Implemented (RP-15A to RP-15D), Linux x86_64 inside Rack Free 2.6.6.**
 Tested through Rack's own File > Save to a `.vcv`, its reopen, the autosave
 and undo of a deleted module, with modules of [registered models](plugins.md).
+The [state and events example](https://github.com/feoh/RackPy/tree/main/examples/state-and-events)
+is a whole plugin that keeps state in all three places below.
 
 Rack saves a module as JSON: its parameters, whether it is bypassed, and
 whatever *custom data* the module adds. RackPy keeps Rack's split:

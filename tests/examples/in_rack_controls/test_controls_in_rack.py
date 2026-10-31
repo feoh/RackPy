@@ -99,6 +99,22 @@ def test_controls_ports_lights_and_routes_match_cpp(reference: dict[str, Any], s
         m.close()
 
 
+def test_the_shaper_tooltips_the_readme_lists() -> None:
+    m = make("Shaper")
+    try:
+        assert [m.get_param_quantity(i).get_string() for i in range(len(m.params))] == [
+            "Level: 0 dB",
+            "Scale: 1",
+            "Offset: 0 V",
+            "Tremolo depth: 0%",
+            "Tremolo rate: 1 Hz",
+            "Shape: Bipolar",
+            "Mute while held",
+        ]
+    finally:
+        m.close()
+
+
 def replay(slug: str, scenario: dict[str, Any], rate: float) -> float:
     """Steps a module of the example's model through the C++ scenario; returns the largest difference."""
     m = make(slug)
@@ -135,7 +151,27 @@ def test_frames_match_cpp_processed_and_bypassed(reference: dict[str, Any], slug
     for scenario in reference[slug.lower()]["scenarios"]:
         worst = replay(slug, scenario, reference["rate"])
         print(f"{slug} {scenario['name']}: largest difference from C++ {worst:.3g} V")
-        assert worst <= 1e-4, scenario["name"]
+        assert worst <= 1e-5, scenario["name"]
+
+
+def test_the_factory_presets_are_where_rack_looks_and_load() -> None:
+    model = raw.plugin.get_model("RackPy", "Shaper")
+    assert model is not None
+    directory = Path(model.get_factory_preset_directory())
+    names = sorted(p.name for p in directory.iterdir())  # Rack sorts them so, and hides the "01_" prefixes
+    assert names == ["01_Gentle tremolo.vcvm", "02_Full-wave rectifier.vcvm", "03_Positive half at +6 dB.vcvm"]
+    m = make("Shaper")
+    HOOKS.engine_adopt(m)
+    widget = model.create_module_widget(m)
+    assert isinstance(widget, app.ModuleWidget)
+    try:
+        for name in names:
+            preset = json.loads((directory / name).read_text())
+            widget.load(str(directory / name))  # what choosing it in the module's Preset menu does, without undo
+            want = [p["value"] for p in preset["params"]]
+            assert [m.params[p["id"]].value for p in preset["params"]] == pytest.approx(want, rel=1e-7), name  # float32
+    finally:
+        widget.close()
 
 
 def test_the_sequencer_steps_saves_and_handles_events() -> None:
@@ -250,7 +286,7 @@ def test_every_switchboard_menu_item_works() -> None:
         ]
         menu.step()  # Rack's step: check marks and the index submenus' labels
         assert items["Middle C"].right_text.endswith(ui.CHECKMARK_STRING)
-        assert items["Note"].right_text.startswith("C ")
+        assert items["Note"].right_text.startswith("C ") and items["Octave"].right_text.startswith("0 ")
         items["Up a semitone"].do_action(False)
         assert (board.octave, board.note) == (2, 1) and volts(1 / 12)
         menu.step()
@@ -273,9 +309,15 @@ def test_every_switchboard_menu_item_works() -> None:
         menu, items, _ = menu_of(widget)
         assert items["Up a semitone"].disabled and not items["Down a semitone"].disabled
         dismiss(menu)
+        board.choose(0, 0)  # the bottom
+        menu, items, _ = menu_of(widget)
+        assert items["Down a semitone"].disabled and not items["Up a semitone"].disabled
+        dismiss(menu)
         # Saved state from a patch: what it understands, nothing else.
         m.data_from_json({"octave": 1, "note": 99, "muted": "no", "inverted": False, "later": 1})
-        assert (board.octave, board.note, board.muted, board.inverted) == (1, 11, True, False)
+        assert (board.octave, board.note, board.muted, board.inverted) == (1, 0, True, False)  # note 99 ignored
+        HOOKS.engine_reset(m)  # Initialize: middle C, neither muted nor inverted
+        assert (board.octave, board.note, board.muted, board.inverted) == (2, 0, False, False) and volts(0.0)
 
         # A menu outliving its module: each item does nothing, and nothing raises.
         menu, items, _ = menu_of(widget)

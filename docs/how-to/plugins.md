@@ -20,6 +20,11 @@ RackPy bundle: see the
 [plugin template](https://github.com/feoh/RackPy/tree/main/examples/template)
 and, for a module with sound, the
 [oscillator](https://github.com/feoh/RackPy/tree/main/examples/oscillator).
+The [configuration](https://github.com/feoh/RackPy/tree/main/examples/configuration),
+[state and events](https://github.com/feoh/RackPy/tree/main/examples/state-and-events)
+and [menus](https://github.com/feoh/RackPy/tree/main/examples/menus) examples
+show a module's controls, bypass and presets, its events and saved state, and
+its context menu.
 
 A Rack plugin offers *models*: the entries in Rack's module browser. Each
 model makes *modules*, the instances in a patch. In a RackPy plugin, the
