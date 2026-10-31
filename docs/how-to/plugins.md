@@ -14,6 +14,13 @@ offline on the main thread, never Rack's engine or driver threads. Loading
 patch data never opts into executing Python callback code.
 :::
 
+To start a plugin of your own, `bin/rackpy-plugin` creates a project, generates
+a module and its widget from an SVG panel, and builds a plugin directory from a
+RackPy bundle: see the
+[plugin template](https://github.com/feoh/RackPy/tree/main/examples/template)
+and, for a module with sound, the
+[oscillator](https://github.com/feoh/RackPy/tree/main/examples/oscillator).
+
 A Rack plugin offers *models*: the entries in Rack's module browser. Each
 model makes *modules*, the instances in a patch. In a RackPy plugin, the
 trusted entry module (named by `entry` in `rackpy-loader.json`) adds its

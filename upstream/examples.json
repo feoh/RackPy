@@ -5,7 +5,8 @@
     "Page and block hashes are of the HTML as served and of each <pre> element's unescaped text (UTF-8). bin/manual-sources check re-derives them.",
     "Classification: port = primary example to port; supporting-fragment = folded into the port named by part_of; illustration = explains a concept and is not ported; duplicate = covered by duplicate_of; shell/config/transcript = documented with a RackPy equivalent, not adapted; out-of-scope = not plugin API.",
     "No manual text or code is stored in this repository, and RackPy examples do not adapt it.",
-    "port_gate: original-example = RackPy writes its own example for the feature and links the source section; clear-with-attribution = may be derived from GPL Rack source (helper.py) with attribution; not-adapted = documented with a RackPy equivalent or out of scope."
+    "port_gate: original-example = RackPy writes its own example for the feature and links the source section; clear-with-attribution = may be derived from GPL Rack source (helper.py) with attribution; not-adapted = documented with a RackPy equivalent or out of scope.",
+    "disposition (once its task completes) = how RackPy covers the sample, the files that do, and the tests that check them; tests/examples/test_dispositions.py verifies them."
   ],
   "manual": {
     "license_status": "unclear",
@@ -95,7 +96,17 @@
       "port_task": "RP-33",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "RackPy's build uses the pinned, checksummed SDK; no RACK_DIR",
+        "files": [
+          "bin/rackpy-dev",
+          "examples/template/README.md"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_loads_in_rack_under_its_own_slug"
+        ]
+      }
     },
     {
       "id": "tutorial-02",
@@ -109,7 +120,17 @@
       "port_task": "RP-33",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "bin/rackpy-plugin create",
+        "files": [
+          "bin/rackpy-plugin",
+          "examples/template"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_is_what_the_tool_generates"
+        ]
+      }
     },
     {
       "id": "tutorial-03",
@@ -123,7 +144,18 @@
       "port_task": "RP-33",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "create's options replace the prompts",
+        "files": [
+          "bin/rackpy-plugin",
+          "examples/template/README.md"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_is_what_the_tool_generates",
+          "tests/examples/test_template.py::test_create_refuses_bad_names"
+        ]
+      }
     },
     {
       "id": "tutorial-04",
@@ -137,7 +169,18 @@
       "port_task": "RP-33",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "bin/rackpy-plugin add-module --panel",
+        "files": [
+          "bin/rackpy-plugin",
+          "examples/template/res/Starter.svg"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_is_what_the_tool_generates",
+          "tests/examples/test_template.py::test_panel_geometry_units_and_refusals"
+        ]
+      }
     },
     {
       "id": "tutorial-05",
@@ -151,7 +194,17 @@
       "port_task": "RP-33",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "add-module's options replace the prompts",
+        "files": [
+          "bin/rackpy-plugin",
+          "examples/template/README.md"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_is_what_the_tool_generates"
+        ]
+      }
     },
     {
       "id": "tutorial-06",
@@ -166,7 +219,17 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "part_of": "tutorial-07"
+      "part_of": "tutorial-07",
+      "disposition": {
+        "how": "the graph's two phasors",
+        "files": [
+          "examples/oscillator/pythonpath/rackpyoscillator_dsp.py"
+        ],
+        "tests": [
+          "tests/examples/test_oscillator.py::test_the_offline_reference_is_the_oscillator",
+          "tests/examples/test_oscillator.py::test_the_module_in_live_rack"
+        ]
+      }
     },
     {
       "id": "tutorial-07",
@@ -180,7 +243,21 @@
       "port_task": "RP-33",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "a native kernel compiled from a graph, compared with a C++ reference in Rack",
+        "files": [
+          "examples/oscillator/pythonpath/rackpyoscillator/oscillator.py",
+          "examples/oscillator/pythonpath/rackpyoscillator_dsp.py",
+          "native/tests/oscillator_reference.cpp"
+        ],
+        "tests": [
+          "tests/examples/test_oscillator.py::test_the_cpp_reference_and_the_graph_agree",
+          "tests/examples/test_oscillator.py::test_the_module_in_live_rack",
+          "tests/examples/test_oscillator.py::test_rack_creates_deletes_restores_and_reopens_it",
+          "tests/examples/test_oscillator.py::test_the_plugin_loads_under_its_own_slug_and_keeps_its_patch"
+        ]
+      }
     },
     {
       "id": "guide-01",
@@ -631,7 +708,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "not-adapted",
-      "duplicate_of": "tutorial-04"
+      "duplicate_of": "tutorial-04",
+      "disposition": {
+        "how": "add-module --panel, as tutorial-04",
+        "files": [
+          "bin/rackpy-plugin"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_panel_geometry_units_and_refusals"
+        ]
+      }
     },
     {
       "id": "presets-01",
@@ -1095,7 +1181,16 @@
       "port_task": "RP-33",
       "provenance": "Rack SDK helper.py at the pinned commit",
       "license": "GPL-3.0-or-later",
-      "port_gate": "clear-with-attribution"
+      "port_gate": "clear-with-attribution",
+      "disposition": {
+        "how": "bin/rackpy-plugin build: a RackPy bundle plus the project",
+        "files": [
+          "bin/rackpy-plugin"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_loads_in_rack_under_its_own_slug"
+        ]
+      }
     },
     {
       "id": "helper-createplugin-plugin-hpp",
@@ -1107,7 +1202,17 @@
       "port_task": "RP-33",
       "provenance": "Rack SDK helper.py at the pinned commit",
       "license": "GPL-3.0-or-later",
-      "port_gate": "clear-with-attribution"
+      "port_gate": "clear-with-attribution",
+      "disposition": {
+        "how": "the entry package and rackpy.plugin.plugin",
+        "files": [
+          "examples/template/pythonpath/rackpytemplate/__init__.py"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_is_what_the_tool_generates",
+          "tests/examples/test_template.py::test_the_template_loads_in_rack_under_its_own_slug"
+        ]
+      }
     },
     {
       "id": "helper-createplugin-plugin-cpp",
@@ -1119,7 +1224,17 @@
       "port_task": "RP-33",
       "provenance": "Rack SDK helper.py at the pinned commit",
       "license": "GPL-3.0-or-later",
-      "port_gate": "clear-with-attribution"
+      "port_gate": "clear-with-attribution",
+      "disposition": {
+        "how": "the entry package adds each model",
+        "files": [
+          "examples/template/pythonpath/rackpytemplate/__init__.py"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_is_what_the_tool_generates",
+          "tests/examples/test_template.py::test_the_template_loads_in_rack_under_its_own_slug"
+        ]
+      }
     },
     {
       "id": "helper-createplugin-gitignore",
@@ -1131,7 +1246,16 @@
       "port_task": "RP-33",
       "provenance": "Rack SDK helper.py at the pinned commit",
       "license": "GPL-3.0-or-later",
-      "port_gate": "clear-with-attribution"
+      "port_gate": "clear-with-attribution",
+      "disposition": {
+        "how": "Python's caches and dist/",
+        "files": [
+          "examples/template/.gitignore"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_is_what_the_tool_generates"
+        ]
+      }
     },
     {
       "id": "helper-createplugin-manifest",
@@ -1143,7 +1267,17 @@
       "port_task": "RP-33",
       "provenance": "Rack SDK helper.py at the pinned commit",
       "license": "GPL-3.0-or-later",
-      "port_gate": "clear-with-attribution"
+      "port_gate": "clear-with-attribution",
+      "disposition": {
+        "how": "create's options give the same fields",
+        "files": [
+          "examples/template/plugin.json"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_is_what_the_tool_generates",
+          "tests/examples/test_template.py::test_the_template_loads_in_rack_under_its_own_slug"
+        ]
+      }
     },
     {
       "id": "helper-createmodule-manifest-entry",
@@ -1155,7 +1289,17 @@
       "port_task": "RP-33",
       "provenance": "Rack SDK helper.py at the pinned commit",
       "license": "GPL-3.0-or-later",
-      "port_gate": "clear-with-attribution"
+      "port_gate": "clear-with-attribution",
+      "disposition": {
+        "how": "add-module's options",
+        "files": [
+          "examples/template/plugin.json"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_is_what_the_tool_generates",
+          "tests/examples/test_template.py::test_add_module_keeps_one_import_line_and_refuses_overwrites"
+        ]
+      }
     },
     {
       "id": "helper-createmodule-panel-parser",
@@ -1167,7 +1311,17 @@
       "port_task": "RP-33",
       "provenance": "Rack SDK helper.py at the pinned commit",
       "license": "GPL-3.0-or-later",
-      "port_gate": "clear-with-attribution"
+      "port_gate": "clear-with-attribution",
+      "disposition": {
+        "how": "panel_components(); rect sizes corrected",
+        "files": [
+          "bin/rackpy-plugin"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_is_what_the_tool_generates",
+          "tests/examples/test_template.py::test_panel_geometry_units_and_refusals"
+        ]
+      }
     },
     {
       "id": "helper-createmodule-source",
@@ -1179,7 +1333,17 @@
       "port_task": "RP-33",
       "provenance": "Rack SDK helper.py at the pinned commit",
       "license": "GPL-3.0-or-later",
-      "port_gate": "clear-with-attribution"
+      "port_gate": "clear-with-attribution",
+      "disposition": {
+        "how": "module_source(): Python for RackPy's API",
+        "files": [
+          "examples/template/pythonpath/rackpytemplate/starter.py"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_is_what_the_tool_generates",
+          "tests/examples/test_template.py::test_the_template_loads_in_rack_under_its_own_slug"
+        ]
+      }
     }
   ]
 }

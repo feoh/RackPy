@@ -2,6 +2,7 @@
   "include": [
     ".",
     "../../docs/snippets",
+    "../../examples",
     "../../src/rackpy/__init__.py",
     "../../src/rackpy/_introspect.py",
     "../../src/rackpy/_selection.py",
@@ -38,7 +39,13 @@
     "../../src/rackpy/types.py",
     "../../src/rackpy/widget.py"
   ],
-  "extraPaths": ["../..", "../../src", "../../typings"],
+  "extraPaths": [
+    "../..",
+    "../../src",
+    "../../typings",
+    "../../examples/oscillator/pythonpath",
+    "../../examples/template/pythonpath"
+  ],
   "typeCheckingMode": "strict",
   "pythonVersion": "3.14",
   "reportMissingModuleSource": false

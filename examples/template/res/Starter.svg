@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Original RackPy artwork (GPL-3.0-or-later), not derived from VCV or Fundamental panels. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+     width="30.48mm" height="128.5mm" viewBox="0 0 30.48 128.5">
+  <rect width="30.48" height="128.5" fill="#1f2a33"/>
+  <rect x="2" y="12" width="26.48" height="1" fill="#3e8f7f"/>
+  <rect x="2" y="115.5" width="26.48" height="1" fill="#3e8f7f"/>
+  <circle cx="15.24" cy="30" r="9" fill="none" stroke="#3e8f7f" stroke-width="0.6"/>
+  <path d="M7 62 L23.48 62 M7 92 L23.48 92" stroke="#51606c" stroke-width="0.5" fill="none"/>
+  <rect x="5.24" y="104" width="20" height="8" rx="1" fill="#101519"/>
+  <g inkscape:label="components" inkscape:groupmode="layer" style="display:none">
+    <circle inkscape:label="level" cx="15.24" cy="30" r="4" fill="#ff0000"/>
+    <circle inkscape:label="active" cx="15.24" cy="46" r="1.5" fill="#ff00ff"/>
+    <circle inkscape:label="in" cx="15.24" cy="72" r="3" fill="#00ff00"/>
+    <circle inkscape:label="out" cx="15.24" cy="84" r="3" fill="#0000ff"/>
+    <rect inkscape:label="readout#Readout" x="5.24" y="104" width="20" height="8" fill="#ffff00"/>
+  </g>
+</svg>

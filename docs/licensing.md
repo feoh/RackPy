@@ -121,6 +121,7 @@ example's README compares itself to the manual section, it names the erratum:
 | `guide-18` | Comment "triangle with blue stroke" | The stroke is red |
 | `guide-25` | `std::sin(2.f * M_PI * phase)` | Passes the array; must be `phase[c]` |
 | `guide-30` | `float_t freq`, `simd::sin(2.f * M_PI * phase)` | Must be `float_4`, and `phase[c / 4]` |
+| `helper-createmodule-panel-parser` | `(float(el.get('width')) - view_x) / view_width * root_width` | Subtracts the view box's origin from a size; only harmless when the origin is 0. `bin/rackpy-plugin` scales sizes without it. |
 
 ## Components in RackPy artifacts
 

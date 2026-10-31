@@ -1,0 +1,25 @@
+{
+  "slug": "RackPyOscillator",
+  "name": "RackPy Oscillator",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "RackPy",
+  "author": "RackPy contributors",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "https://github.com/feoh/RackPy",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "Oscillator",
+      "name": "Oscillator",
+      "description": "A sine oscillator with a 1 Hz blink",
+      "tags": [
+        "Oscillator"
+      ]
+    }
+  ]
+}

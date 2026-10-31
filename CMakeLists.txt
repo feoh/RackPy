@@ -249,6 +249,10 @@ if(RACKPY_BUILD_TESTS)
   add_executable(rackpy_module_reference native/tests/module_reference.cpp)
   set_target_properties(rackpy_module_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_link_libraries(rackpy_module_reference PRIVATE rackpy_sdk_program)
+  # The C++ reference that examples/oscillator is compared with (RP-33).
+  add_executable(rackpy_oscillator_reference native/tests/oscillator_reference.cpp)
+  set_target_properties(rackpy_oscillator_reference PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  target_link_libraries(rackpy_oscillator_reference PRIVATE rackpy_sdk_program)
 endif()
 
 # Plugin directory layout. bin/rackpy-dev bundle adds the runtime as python/.

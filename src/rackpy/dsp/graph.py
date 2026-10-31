@@ -424,7 +424,7 @@ def _index(value: object, what: str) -> int:
         raise GraphError(f"{what} must be a whole number, not {value!r}")
     if value < 0:
         raise GraphError(f"{what} must not be negative, not {value}")
-    return value
+    return int(value)  # an IntEnum member becomes its plain number in the plan
 
 
 class Graph:

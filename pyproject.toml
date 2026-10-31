@@ -60,7 +60,14 @@ ignore = [
 [tool.mypy]
 strict = true
 python_version = "3.14"
-mypy_path = ["typings", "src", "docs/_ext", "bin"]
+mypy_path = [
+    "typings",
+    "src",
+    "docs/_ext",
+    "bin",
+    "examples/oscillator/pythonpath",
+    "examples/template/pythonpath",
+]
 explicit_package_bases = true
 # bin/ utilities without a .py suffix all map to module __main__, so
 # `bin/rackpy-dev typecheck` runs mypy on each of them separately.
@@ -69,6 +76,7 @@ files = [
     "tests",
     "docs/conf.py",
     "docs/snippets",
+    "examples",
     "docs/_ext",
     "bin/inventory_sdk.py",
     "bin/binding_manifest.py",
@@ -86,6 +94,8 @@ warn_unreachable = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# The oscillator example's pure DSP module, as its plugin imports it (tests/examples).
+pythonpath = ["examples/oscillator/pythonpath"]
 addopts = ["--strict-markers", "--strict-config", "-ra"]
 xfail_strict = true
 # Host runs keep whole Rack bundles and native builds under the base temp

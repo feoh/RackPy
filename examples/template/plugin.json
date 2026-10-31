@@ -1,0 +1,25 @@
+{
+  "slug": "RackPyTemplate",
+  "name": "RackPy Template",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "RackPy",
+  "author": "RackPy contributors",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "https://github.com/feoh/RackPy",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "Starter",
+      "name": "Starter",
+      "description": "A starting point: one of each component",
+      "tags": [
+        "Utility"
+      ]
+    }
+  ]
+}

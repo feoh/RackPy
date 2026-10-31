@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Original RackPy artwork (GPL-3.0-or-later), not derived from VCV or Fundamental panels. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+     width="40.64mm" height="128.5mm" viewBox="0 0 40.64 128.5">
+  <rect width="40.64" height="128.5" fill="#22262e"/>
+  <rect x="0" y="0" width="40.64" height="18" fill="#2d3440"/>
+  <path d="M6 9 C10 1, 14 1, 18 9 S26 17, 30 9 S34.6 4, 34.6 4" stroke="#e8a33d" stroke-width="1.2" fill="none"/>
+  <circle cx="20.32" cy="38" r="11" fill="none" stroke="#e8a33d" stroke-width="0.7"/>
+  <circle cx="20.32" cy="38" r="12.6" fill="none" stroke="#4a5462" stroke-width="0.4" stroke-dasharray="1 1.2"/>
+  <rect x="6" y="70" width="28.64" height="40" rx="2" fill="#1a1d23" stroke="#4a5462" stroke-width="0.4"/>
+  <path d="M13 78 L13 84 M10 81 L16 81" stroke="#8fa0b3" stroke-width="0.6"/>
+  <path d="M24 97 C25.5 93, 27 93, 28.5 97 S31.5 101, 33 97" stroke="#8fa0b3" stroke-width="0.6" fill="none"/>
+  <g inkscape:label="components" inkscape:groupmode="layer" style="display:none">
+    <circle inkscape:label="pitch" cx="20.32" cy="38" r="8" fill="#ff0000"/>
+    <circle inkscape:label="blink" cx="20.32" cy="60" r="1.5" fill="#ff00ff"/>
+    <circle inkscape:label="pitch" cx="13" cy="90" r="3" fill="#00ff00"/>
+    <circle inkscape:label="sine" cx="28.5" cy="90" r="3" fill="#0000ff"/>
+  </g>
+</svg>

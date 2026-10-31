@@ -1,6 +1,13 @@
-# Planned examples covering the official Rack samples
+# Examples covering the official Rack samples
 
-**No examples are implemented yet.** This page defines future work and avoids
+Implemented (RP-33), Linux x86_64 in Rack Free 2.6.6:
+
+- [template](template/README.md): the plugin-template workflow with
+  `bin/rackpy-plugin` (create, add a module from a panel, build).
+- [oscillator](oscillator/README.md): the tutorial's sine oscillator and blink
+  as a native kernel, with an offline reference and a C++ comparison.
+
+The rest of this page defines the remaining work (RP-34 to RP-36). It avoids
 pretending that Python-shaped pseudocode is a working Rack plugin.
 
 RackPy writes **original** examples. Each one demonstrates a feature that the
@@ -48,16 +55,23 @@ Do not clone its panels, layout, logos or branding.
 
 ## Required layout for each completed example
 
+Each example is a plugin project as `bin/rackpy-plugin create` makes it, so
+`bin/rackpy-plugin build` turns it into a plugin Rack loads:
+
 ```text
 examples/<sample>/
-  README.md             # feature, purpose, steps, expected result, restrictions
+  README.md             # feature, purpose, exact commands, expected result, restrictions
   PROVENANCE.md         # sample IDs covered, manual sections linked, any derived GPL source
-  plugin.json           # version/slug rules verified against actual Rack
-  module.py             # actual working facade calls
-  native/               # only the native work required for real-time operation
+  plugin.json           # the manifest, with its own slug
+  rackpy-plugin.json    # the entry package's name
+  pythonpath/           # the entry package and modules: actual working facade calls
   res/                  # original assets and their licenses
-  tests/                # native/Python parity plus actual-host checks
+tests/examples/         # native/Python parity plus actual-host checks
 ```
+
+Native code is added only where real-time operation needs it. Each sample the
+example covers gets a `disposition` in `upstream/examples.json` naming its
+files and tests (`tests/examples/test_dispositions.py`).
 
 A completed example must load in actual Rack, work in module-browser previews
 where module can be null, survive save/reopen and deletion, and have a

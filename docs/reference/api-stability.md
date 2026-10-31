@@ -53,12 +53,12 @@ These were reviewed across the facade in RP-32:
 
 ## Typing checks
 
-Strict mypy checks `src/`, `tests/` and every documentation snippet
-(`docs/snippets/`). For the snippets alone, `warn_unreachable` is off,
+Strict mypy checks `src/`, `tests/`, every documentation snippet
+(`docs/snippets/`) and the example plugins (`examples/`). For the snippets alone, `warn_unreachable` is off,
 because they demonstrate lifetime transitions (`remove_child`, `close`) that
 mypy cannot see change an attribute it has already narrowed. Strict pyright,
 pinned in the development dependencies, checks the facade tests, the
-snippets and the facade modules listed in `tests/facade/pyrightconfig.json`,
+snippets, the examples and the facade modules listed in `tests/facade/pyrightconfig.json`,
 which include every public facade module. It does not check the raw stubs or
 the private underscore modules. `rackpy.dsp.filters.process_block` is typed with overloads
 for the time-step and IIR filters; IIR orders other than 3-3 come from the

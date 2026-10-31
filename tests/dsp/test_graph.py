@@ -342,3 +342,15 @@ def test_a_pair_only_connects_the_facing_sides() -> None:
     right.output(1, right.expander_receive(0))
     _, b = run_pair(left, right, 2)
     assert b.outputs[0] == [[0.0], [0.0]] and b.outputs[1] == [[0.0], [2.0]]
+
+
+def test_enum_indexes_become_plain_numbers() -> None:
+    from enum import IntEnum
+
+    class Port(IntEnum):
+        PITCH = 2
+
+    g = Graph()
+    g.output(Port.PITCH, g.input(Port.PITCH))
+    args = [arg for node in g.plan().to_dict()["nodes"] for arg in node["args"]]
+    assert args == [2, 2] and all(type(arg) in (int, float) for arg in args)  # no enum members

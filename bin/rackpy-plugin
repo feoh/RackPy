@@ -1,0 +1,486 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["cyclopts>=5.2,<6"]
+#
+# [tool.uv]
+# exclude-newer = "2026-10-21T00:00:00Z"
+# ///
+"""Create, extend and assemble RackPy plugin projects: RackPy's counterpart of Rack's helper.py (RP-33).
+
+``create`` makes a plugin project, ``add-module`` adds a module (and, from an SVG
+panel's "components" layer, its Python source), and ``build`` combines a project
+with a RackPy bundle into a plugin directory that Rack loads.
+
+The panel parsing and the shape of the generated module follow Rack's helper.py
+(Rack 2.6.6, commit 061ccf63c1758599396ac1bb10d47345d9d34076, sha256
+5d9f058e57e7b28c6fbbe3cfb4bbeb7e035492a7ecb1a6c46eff09348ff1fa12; Copyright
+VCV, GPL-3.0-or-later), rewritten for RackPy's Python API. The differences are
+listed in examples/template/PROVENANCE.md.
+"""
+
+import json
+import keyword
+import re
+import shutil
+import sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+from typing import Any
+
+import cyclopts
+
+app = cyclopts.App(help=__doc__)
+
+PROJECT_FILE = "rackpy-plugin.json"
+MARKER = "# Models: bin/rackpy-plugin add-module adds each module's import above and its model below."
+SVG = "http://www.w3.org/2000/svg"
+INKSCAPE = "http://www.inkscape.org/namespaces/inkscape"
+KINDS = ("params", "inputs", "outputs", "lights", "widgets")
+# Rack's panel colours for each kind of component (helper.py's), lower case.
+COLOURS = {
+    "params": {"#ff0000", "#f00", "rgb(255,0,0)", "red"},
+    "inputs": {"#00ff00", "#0f0", "rgb(0,255,0)", "lime"},
+    "outputs": {"#0000ff", "#00f", "rgb(0,0,255)", "blue"},
+    "lights": {"#ff00ff", "#f0f", "rgb(255,0,255)", "magenta"},
+    "widgets": {"#ffff00", "#ff0", "rgb(255,255,0)", "yellow"},
+}
+DEFAULT_CLASS = {
+    "params": "RoundBlackKnob",
+    "inputs": "PJ301MPort",
+    "outputs": "PJ301MPort",
+    "lights": "MediumLight<RedLight>",
+    "widgets": "Widget",
+}
+
+
+class UsageError(SystemExit):
+    def __init__(self, message: str) -> None:
+        super().__init__(f"rackpy-plugin: {message}")
+
+
+def valid_slug(slug: str) -> bool:
+    return re.fullmatch(r"[A-Za-z0-9_\-]+", slug) is not None
+
+
+def identifier(text: str) -> str:
+    """A CamelCase Python class name from a slug or label (helper.py's str_to_identifier, for Python)."""
+    text = re.sub(r"\W", "_", text) or "_"
+    text = text[0].upper() + text[1:]
+    return f"M{text}" if text[0].isdigit() or text[0] == "_" else text
+
+
+def module_name(text: str) -> str:
+    """A snake_case Python module name from a slug."""
+    name = re.sub(r"\W", "_", text).lower() or "module"
+    return f"m_{name}" if name[0].isdigit() else name
+
+
+def member(label: str, index: int) -> str:
+    """An enum member name from a component's label: upper case, a valid Python identifier."""
+    name = re.sub(r"\W", "_", label).upper().strip("_")
+    if not name:
+        return f"UNNAMED_{index}"
+    return f"C_{name}" if name[0].isdigit() or keyword.iskeyword(name) else name
+
+
+def read_json(path: Path) -> Any:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        raise UsageError(f"{path} does not exist; is this a RackPy plugin project?") from None
+
+
+def write_json(path: Path, data: Any) -> None:
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+# --- create ----------------------------------------------------------------------------------
+
+ENTRY_SOURCE = '''"""{name}: a RackPy plugin. Rack imports this package while it loads the plugin."""
+
+from rackpy.plugin import plugin
+
+{marker}
+'''
+
+GITIGNORE = "/dist\n__pycache__/\n*.pyc\n.DS_Store\n"
+
+
+@app.command
+def create(
+    slug: str,
+    directory: Path | None = None,
+    *,
+    license: str,
+    name: str | None = None,
+    version: str = "2.0.0",
+    brand: str | None = None,
+    author: str = "",
+    author_email: str = "",
+    author_url: str = "",
+    plugin_url: str = "",
+    manual_url: str = "",
+    source_url: str = "",
+    donate_url: str = "",
+    changelog_url: str = "",
+    entry: str | None = None,
+) -> None:
+    """Create a plugin project in DIRECTORY (default: SLUG): plugin.json, the entry package and res/.
+
+    Parameters
+    ----------
+    slug
+        The plugin's slug: ASCII letters, digits, ``-`` and ``_``. Rack refuses a
+        second plugin with the same slug.
+    license
+        An SPDX identifier. The plugin will contain RackPy and CPython, so its
+        licence must be compatible with GPL-3.0-or-later; RackPy gives no legal advice.
+    entry
+        The entry package's name (default: the slug in snake_case).
+    """
+    if not valid_slug(slug):
+        raise UsageError("a slug may only contain ASCII letters, digits, '-' and '_'")
+    package = entry or module_name(slug)
+    reserved = package in sys.stdlib_module_names or package == "rackpy" or package.startswith("_rackpy")
+    if not package.isidentifier() or keyword.iskeyword(package) or reserved:
+        raise UsageError(f"{package!r} cannot be the entry package; choose another with --entry")
+    root = directory or Path(slug)
+    if root.exists():
+        raise UsageError(f"{root} already exists")
+    manifest = {
+        "slug": slug,
+        "name": name or slug,
+        "version": version,
+        "license": license,
+        "brand": brand or name or slug,
+        "author": author,
+        "authorEmail": author_email,
+        "authorUrl": author_url,
+        "pluginUrl": plugin_url,
+        "manualUrl": manual_url,
+        "sourceUrl": source_url,
+        "donateUrl": donate_url,
+        "changelogUrl": changelog_url,
+        "modules": [],
+    }
+    (root / "pythonpath" / package).mkdir(parents=True)
+    (root / "res").mkdir()
+    write_json(root / "plugin.json", manifest)
+    write_json(root / PROJECT_FILE, {"entry": package})
+    (root / "pythonpath" / package / "__init__.py").write_text(
+        ENTRY_SOURCE.format(name=manifest["name"], marker=MARKER), encoding="utf-8"
+    )
+    (root / ".gitignore").write_text(GITIGNORE, encoding="utf-8")
+    print(f"Created the plugin project {root}. Add modules with: bin/rackpy-plugin add-module SLUG --project {root}")
+
+
+# --- the panel's components layer --------------------------------------------------------------
+
+
+def length(value: str | None, what: str) -> tuple[float, str]:
+    match = re.fullmatch(r"\s*(-?\d*\.?\d+(?:[eE][-+]?\d+)?)\s*([a-zA-Z%]*)\s*", value or "")
+    if not match:
+        raise UsageError(f"the panel's {what} {value!r} is not a length")
+    return float(match[1]), match[2]
+
+
+def fill(element: ET.Element) -> str | None:
+    if element.get("fill"):
+        return element.get("fill", "").lower()
+    for pair in (element.get("style") or "").split(";"):
+        key, _, value = pair.partition(":")
+        if key.strip() == "fill":
+            return value.strip().lower()
+    return None
+
+
+def panel_components(panel: Path) -> dict[str, list[dict[str, Any]]]:
+    """Each kind's components in the panel's "components" layer, in millimetres, top to bottom.
+
+    As helper.py: circles and ellipses give a centre, rectangles a top-left corner and a size;
+    the fill colour says the kind; a label ``name#Class`` names it and its widget class.
+    Unlike helper.py, a rectangle's size is not offset by the view box's origin.
+    """
+    try:
+        root = ET.parse(panel).getroot()
+    except (ET.ParseError, OSError) as error:
+        raise UsageError(f"cannot read the panel {panel}: {error}") from None
+    width, width_unit = length(root.get("width"), "width")
+    height, height_unit = length(root.get("height"), "height")
+    scale = 1.0 if width_unit == height_unit == "mm" else 25.4 / 75  # helper.py: SVG pixels at 75 DPI
+    width, height = width * scale, height * scale
+    view = [float(v) for v in root.get("viewBox", f"0 0 {width} {height}").replace(",", " ").split()]
+    if len(view) != 4 or view[2] <= 0 or view[3] <= 0:
+        raise UsageError(f"the panel's viewBox {root.get('viewBox')!r} is not valid")
+    vx, vy, vw, vh = view
+    group = None
+    for g in root.iter(f"{{{SVG}}}g"):
+        if "components" in (g.get(f"{{{INKSCAPE}}}label"), g.get("data-name"), g.get("id")):
+            group = g
+            break
+    if group is None:
+        raise UsageError(f'{panel} has no "components" layer')
+    found: dict[str, list[dict[str, Any]]] = {kind: [] for kind in KINDS}
+    for element in group:
+        label = element.get(f"{{{INKSCAPE}}}label") or element.get("data-name") or element.get("id") or ""
+        name, _, cls = label.partition("#")
+        c: dict[str, Any] = {"label": name}
+        if cls:
+            c["cls"] = cls
+        tag = element.tag.removeprefix(f"{{{SVG}}}")
+        if tag == "rect":
+            x = (float(element.get("x", "0")) - vx) / vw * width
+            y = (float(element.get("y", "0")) - vy) / vh * height
+            w = float(element.get("width", "0")) / vw * width
+            h = float(element.get("height", "0")) / vh * height
+            c.update(x=round(x, 3), y=round(y, 3), width=round(w, 3), height=round(h, 3))
+            c.update(cx=round(x + w / 2, 3), cy=round(y + h / 2, 3))
+        elif tag in ("circle", "ellipse"):
+            c["cx"] = round((float(element.get("cx", "0")) - vx) / vw * width, 3)
+            c["cy"] = round((float(element.get("cy", "0")) - vy) / vh * height, 3)
+        else:
+            print(f"warning: skipping a <{tag}> in the components layer: only rect, circle and ellipse count")
+            continue
+        colour = fill(element)
+        kind = next((k for k, colours in COLOURS.items() if colour in colours), None)
+        if kind is None:
+            print(f"warning: skipping {label or tag!r}: its fill {colour!r} is not a component colour")
+            continue
+        found[kind].append(c)
+    for kind, components in found.items():
+        components.sort(key=lambda c: c["cy"] + 0.01 * c["cx"])
+        names: set[str] = set()
+        for index, c in enumerate(components):
+            c["name"] = member(c["label"], index)
+            if c["name"] in names:
+                raise UsageError(f"two {kind} on the panel are both named {c['name']}; label them differently")
+            names.add(c["name"])
+    counts = ", ".join(f"{len(found[k])} {k}" for k in KINDS)
+    print(f'Found {counts} in the "components" layer.')
+    return found
+
+
+# --- the generated module -----------------------------------------------------------------------
+
+
+def python_class(cpp: str, kind: str) -> str:
+    """A component class as Python: ``MediumLight<RedLight>`` is ``cl.MediumLight[cl.RedLight]``."""
+    if not re.fullmatch(r"[A-Za-z_][\w<>, ]*", cpp) or cpp.count("<") != cpp.count(">"):
+        raise UsageError(f"{cpp!r} is not a component class name")
+    if kind == "widgets":
+        return identifier(cpp)  # a class this module defines (below)
+    text = re.sub(r"[A-Za-z_]\w*", lambda m: f"cl.{m[0]}", cpp)
+    return text.replace("<", "[").replace(">", "]").replace(" ", "")
+
+
+def added(method: str, call: str) -> list[str]:
+    """``self.method(call)``, wrapped as ruff format wraps a line longer than 120 characters."""
+    line = f"        self.{method}({call})"
+    return [line] if len(line) <= 120 else [f"        self.{method}(", f"            {call}", "        )"]
+
+
+def module_source(slug: str, title: str, panel: str, components: dict[str, list[dict[str, Any]]]) -> str:
+    ident = identifier(slug)
+    lines = [
+        f'"""{title}: generated from {panel} by bin/rackpy-plugin add-module.',
+        "",
+        "Configure the controls in configure(), and give the module a kernel for its audio",
+        "(rackpy.dsp.graph or rackpy.dsp.kernel): Python never runs per sample.",
+        '"""',
+        "",
+        "from enum import IntEnum",
+        "",
+        "from rackpy import assets, raw",
+        "from rackpy.engine import Module",
+        "from rackpy.raw import app",
+        "from rackpy.raw import componentlibrary as cl",
+    ]
+    if components["widgets"]:
+        lines.append("from rackpy.raw import widget as w")
+    lines += ["from rackpy.raw.math import Vec", "from rackpy.raw.window import mm2px", ""]
+    for kind, enum in zip(KINDS[:4], ("Param", "Input", "Output", "Light"), strict=True):
+        lines += ["", f"class {enum}(IntEnum):"]
+        lines += [f"    {c['name']} = {i}" for i, c in enumerate(components[kind])] or ["    pass"]
+        lines.append("")
+    custom = sorted({c.get("cls", DEFAULT_CLASS["widgets"]) for c in components["widgets"]})
+    for cls in custom:
+        doc = '    """A custom widget on the panel: draw it here."""'
+        lines += ["", f"class {identifier(cls)}(w.Widget):", doc, ""]
+    lines += [
+        "",
+        "def configure(module: Module) -> None:",
+        '    """Rack calls this to build each module: configure its controls here."""',
+        "    module.config(len(Param), len(Input), len(Output), len(Light))",
+    ]
+    lines += [f'    module.config_param(Param.{c["name"]}, 0.0, 1.0, 0.0, "")' for c in components["params"]]
+    lines += [f'    module.config_input(Input.{c["name"]}, "")' for c in components["inputs"]]
+    lines += [f'    module.config_output(Output.{c["name"]}, "")' for c in components["outputs"]]
+    lines += [
+        "",
+        "",
+        f"class {ident}Widget(app.ModuleWidget):",
+        '    """The module\'s panel. Rack passes the module, or None for its browser\'s preview."""',
+        "",
+        "    def __init__(self, module: Module | None) -> None:",
+        "        super().__init__()",
+        "        self.set_module(module)",
+        f'        self.set_panel(raw.create_panel(str(assets.plugin("{panel}"))))',
+        "        grid, right = app.RACK_GRID_WIDTH, self.box.size.x - 2 * app.RACK_GRID_WIDTH",
+        "        bottom = app.RACK_GRID_HEIGHT - app.RACK_GRID_WIDTH",
+        "        for x, y in ((grid, 0), (right, 0), (grid, bottom), (right, bottom)):",
+        "            self.add_child(raw.create_widget(cl.ScrewSilver, Vec(x, y)))",
+    ]
+    calls = {
+        "params": ("add_param", "create_param", "Param"),
+        "inputs": ("add_input", "create_input", "Input"),
+        "outputs": ("add_output", "create_output", "Output"),
+        "lights": ("add_child", "create_light", "Light"),
+    }
+    for kind, (add, create, enum) in calls.items():
+        for c in components[kind]:
+            cls = python_class(c.get("cls", DEFAULT_CLASS[kind]), kind)
+            corner = "x" in c  # a rectangle places its top-left corner; a circle its centre
+            function = create if corner else f"{create}_centered"
+            where = f"mm2px(Vec({c['x']}, {c['y']}))" if corner else f"mm2px(Vec({c['cx']}, {c['cy']}))"
+            lines += added(add, f"raw.{function}({cls}, {where}, module, {enum}.{c['name']})")
+    for c in components["widgets"]:
+        cls = python_class(c.get("cls", DEFAULT_CLASS["widgets"]), "widgets")
+        if "x" in c:
+            lines.append(f"        custom = raw.create_widget({cls}, mm2px(Vec({c['x']}, {c['y']})))")
+            lines.append(f"        custom.box.size = mm2px(Vec({c['width']}, {c['height']}))")
+        else:
+            lines.append(f"        custom = raw.create_widget_centered({cls}, mm2px(Vec({c['cx']}, {c['cy']})))")
+        lines.append("        self.add_child(custom)")
+    return "\n".join(lines) + "\n"
+
+
+def register(entry_file: Path, module: str, slug: str, ident: str) -> bool:
+    """Add the module's import and model to the entry package, below the marker comment. False if not found."""
+    text = entry_file.read_text(encoding="utf-8")
+    if MARKER not in text:
+        return False
+    head, tail = text.split(MARKER, 1)
+    found = re.search(r"^from \. import (.+)$", head, re.MULTILINE)
+    if found:
+        names = sorted({*(n.strip() for n in found[1].split(",")), module})
+        head = head[: found.start()] + f"from . import {', '.join(names)}" + head[found.end() :]
+    else:
+        head = head.rstrip("\n") + f"\n\nfrom . import {module}\n\n"
+    tail = tail.rstrip("\n") + f'\nplugin.add_model("{slug}", {module}.configure, widget={module}.{ident}Widget)\n'
+    entry_file.write_text(head + MARKER + tail, encoding="utf-8")
+    return True
+
+
+@app.command
+def add_module(
+    slug: str,
+    *,
+    project: Path = Path(),
+    panel: Path | None = None,
+    name: str | None = None,
+    description: str = "",
+    tags: list[str] | None = None,
+    overwrite: bool = False,
+) -> None:
+    """Add module SLUG to the project's plugin.json; with --panel, generate its Python from the panel.
+
+    Parameters
+    ----------
+    panel
+        An SVG panel inside the project (normally res/SLUG.svg) whose "components"
+        layer marks params (red), inputs (green), outputs (blue), lights (magenta)
+        and custom widgets (yellow), as for Rack's helper.py.
+    tags
+        Rack's module tags (https://vcvrack.com/manual/Manifest#modules-tags).
+    """
+    if not valid_slug(slug):
+        raise UsageError("a slug may only contain ASCII letters, digits, '-' and '_'")
+    root = project.resolve()
+    manifest = read_json(root / "plugin.json")
+    package = read_json(root / PROJECT_FILE)["entry"]
+    entry = next((m for m in manifest["modules"] if m.get("slug") == slug), None)
+    if entry is None:
+        entry = {"slug": slug, "name": name or slug, "description": description, "tags": list(tags or [])}
+        manifest["modules"].append(entry)
+        write_json(root / "plugin.json", manifest)
+        print(f"Added {slug} to plugin.json")
+    else:
+        print(f"{slug} is already in plugin.json; edit it there.")
+    if panel is None:
+        return
+    panel = panel.resolve()
+    if not panel.is_relative_to(root):
+        raise UsageError(f"the panel must be inside the project, normally as res/{slug}.svg")
+    relative = panel.relative_to(root).as_posix()
+    components = panel_components(panel)
+    module = module_name(slug)
+    source = root / "pythonpath" / package / f"{module}.py"
+    if source.exists() and not overwrite:
+        raise UsageError(f"{source} already exists; pass --overwrite to replace it")
+    source.write_text(module_source(slug, entry["name"], relative, components), encoding="utf-8")
+    print(f"Wrote {source}")
+    entry_file = root / "pythonpath" / package / "__init__.py"
+    ident = identifier(slug)
+    if f'plugin.add_model("{slug}"' in entry_file.read_text(encoding="utf-8"):
+        print(f"{entry_file} already adds {slug}.")
+    elif register(entry_file, module, slug, ident):
+        print(f"Added {slug} to {entry_file}")
+    else:
+        print(f"Add the model to {entry_file} yourself:\n")
+        print(f"    from . import {module}")
+        print(f'    plugin.add_model("{slug}", {module}.configure, widget={module}.{ident}Widget)')
+
+
+# --- build ------------------------------------------------------------------------------------
+
+
+@app.command
+def build(project: Path = Path(), *, bundle: Path, dest: Path) -> None:
+    """Make DEST/<slug>, a Rack plugin directory: the RackPy BUNDLE with the project's manifest, code and res/.
+
+    Parameters
+    ----------
+    bundle
+        A RackPy plugin directory, as ``bin/rackpy-dev bundle`` makes (its RackPy
+        directory). Its own plugin.json is replaced; its loader, host, runtime and
+        rackpy package are kept.
+    dest
+        Where to make the plugin directory, for example Rack's user folder's
+        ``plugins-lin-x64``.
+    """
+    root = project.resolve()
+    manifest = read_json(root / "plugin.json")
+    package = read_json(root / PROJECT_FILE)["entry"]
+    slug = manifest.get("slug", "")
+    if not valid_slug(slug):
+        raise UsageError(f"plugin.json's slug {slug!r} is not a valid slug")
+    loader = bundle / "rackpy-loader.json"
+    if not loader.is_file() or not (bundle / "pythonpath" / "rackpy").is_dir():
+        raise UsageError(f"{bundle} is not a RackPy bundle (no rackpy-loader.json or pythonpath/rackpy)")
+    target = dest / slug
+    if target.exists():
+        raise UsageError(f"{target} already exists; remove it first")
+    shutil.copytree(bundle, target, symlinks=True)
+    write_json(target / "plugin.json", manifest)
+    config = read_json(loader)
+    config["entry"] = package
+    write_json(target / "rackpy-loader.json", config)
+    for item in sorted((root / "pythonpath").iterdir()):
+        if item.name == "rackpy" or (target / "pythonpath" / item.name).exists():
+            raise UsageError(f"pythonpath/{item.name} would replace part of RackPy; rename it")
+        copy = shutil.copytree if item.is_dir() else shutil.copy2
+        copy(item, target / "pythonpath" / item.name)
+    if (root / "res").is_dir():
+        shutil.copytree(root / "res", target / "res", dirs_exist_ok=True)
+    for notice in ("LICENSE", "LICENSE.md", "LICENSE.txt"):
+        if (root / notice).is_file():
+            shutil.copy2(root / notice, target / f"{slug}-{notice}")
+    for cache in target.joinpath("pythonpath").rglob("__pycache__"):
+        if not cache.is_relative_to(target / "pythonpath" / "rackpy"):
+            shutil.rmtree(cache)
+    print(target)
+
+
+if __name__ == "__main__":
+    app()
