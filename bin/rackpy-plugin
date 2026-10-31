@@ -520,7 +520,8 @@ def pack_tree(root: Path, out: Path, epoch: int) -> None:
         elif path.is_dir():
             ti.type, ti.mode = tarfile.DIRTYPE, 0o755
         else:
-            ti.size, ti.mode = path.stat().st_size, 0o755 if os.access(path, os.X_OK) else 0o644
+            st = path.stat()  # the mode bits, not os.access: that also depends on how the disk is mounted
+            ti.size, ti.mode = st.st_size, 0o755 if st.st_mode & 0o111 else 0o644
         return ti
 
     paths = [

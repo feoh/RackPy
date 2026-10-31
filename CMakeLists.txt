@@ -311,7 +311,10 @@ configure_file(packaging/plugin/plugin.json.in plugin.json @ONLY)
 file(STRINGS native/include/rackpy/host_abi.h _rackpy_abi_line REGEX "^#define RACKPY_HOST_ABI [0-9]+$")
 string(REGEX REPLACE "^#define RACKPY_HOST_ABI " "" RACKPY_HOST_ABI "${_rackpy_abi_line}")
 configure_file(packaging/plugin/rackpy-loader.json.in rackpy-loader.json @ONLY)
-install(TARGETS rackpy_loader rackpy_host LIBRARY DESTINATION .)
+# Explicit modes: on Debian and Ubuntu CMake installs shared libraries without execute bits
+# (CMAKE_INSTALL_SO_NO_EXE), which made the same release differ between build machines (RP-39).
+install(TARGETS rackpy_loader rackpy_host LIBRARY DESTINATION .
+  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/plugin.json" "${CMAKE_CURRENT_BINARY_DIR}/rackpy-loader.json" LICENSE NOTICE DESTINATION .)
 install(DIRECTORY src/rackpy DESTINATION pythonpath
   FILES_MATCHING PATTERN "*.py" PATTERN "py.typed"
