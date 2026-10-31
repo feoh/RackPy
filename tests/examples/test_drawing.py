@@ -23,10 +23,11 @@ import pytest
 
 from tests.examples.support import EXAMPLES, plugin_tool, saved_patch, write_patch
 from tests.support import (
+    PLUGINS,
     PROBE_MODULE,
     REPO,
     assert_clean_exit,
-    linux_x64_only,
+    rack_platforms,
     run_rack,
     run_rack_windowed,
     stage_plugin,
@@ -112,7 +113,7 @@ def test_the_panels_are_original_and_no_font_is_copied() -> None:
 
 @pytest.mark.host
 @pytest.mark.gui
-@linux_x64_only()
+@rack_platforms()
 def test_the_examples_over_racks_real_frames(
     make_hooks_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path
 ) -> None:
@@ -193,14 +194,14 @@ def test_the_examples_over_racks_real_frames(
 
 
 @pytest.mark.host
-@linux_x64_only()
+@rack_platforms()
 @pytest.mark.parametrize("project", PROJECTS, ids=lambda p: p.name)
 def test_each_example_loads_as_its_own_plugin(
     make_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path, project: Path
 ) -> None:
     manifest = json.loads((project / "plugin.json").read_text())
     user = tmp_path / "user"
-    plugins = user / "plugins-lin-x64"
+    plugins = user / PLUGINS
     plugins.mkdir(parents=True)
     plugin_tool("build", project, "--bundle", make_bundle(), "--dest", plugins)
     slug = manifest["slug"]

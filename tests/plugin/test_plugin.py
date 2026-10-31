@@ -14,9 +14,10 @@ from typing import Any
 import pytest
 
 from tests.support import (
+    PLUGINS,
     PROBE_MODULE,
     assert_clean_exit,
-    linux_x64_only,
+    rack_platforms,
     run_pytest_in_rack,
     run_rack,
     run_rack_windowed,
@@ -24,7 +25,7 @@ from tests.support import (
     write_patch,
 )
 
-pytestmark = [pytest.mark.host, linux_x64_only()]
+pytestmark = [pytest.mark.host, rack_platforms()]
 SUITE = Path(__file__).resolve().parent / "in_rack"
 ENTRY = Path(__file__).resolve().parent / "entries"
 
@@ -102,7 +103,7 @@ def test_rack_creates_removes_restores_and_reloads_python_modules(
     assert saved[ids["PyBroken"]]["data"] == {"kept": True}
 
     second = tmp_path / "second.json"
-    (tmp_path / "plugins-lin-x64" / "RackPy" / "pythonpath" / "rp16_config.json").write_text(
+    (tmp_path / PLUGINS / "RackPy" / "pythonpath" / "rp16_config.json").write_text(
         json.dumps({"phase": 2, "result": str(second), "ids": ids, "broken": True})
     )
     run = run_rack_windowed(rack_host, tmp_path)

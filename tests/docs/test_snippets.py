@@ -17,7 +17,7 @@ import pytest
 import rackpy_docs
 
 from tests.docs.conftest import DOCS
-from tests.support import assert_clean_exit, linux_x64_only, run_rack, stage_plugin
+from tests.support import assert_clean_exit, rack_platforms, run_rack, stage_plugin
 
 pytestmark = pytest.mark.docs
 SNIPPETS = sorted(rackpy_docs.SNIPPETS.glob("*.py"))
@@ -116,7 +116,7 @@ def test_python_snippets_print_their_expected_output() -> None:
 
 
 @pytest.mark.host
-@linux_x64_only()
+@rack_platforms()
 def test_rack_snippets_print_their_expected_output(
     make_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path
 ) -> None:
@@ -131,7 +131,7 @@ def test_rack_snippets_print_their_expected_output(
 
 
 @pytest.mark.host
-@linux_x64_only()
+@rack_platforms()
 def test_wrong_output_and_errors_are_caught_in_rack(
     make_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path
 ) -> None:

@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# rackpy_host.so on macOS exports exactly the loader ABI (native/include/rackpy/host_abi.h), as
+# host.map does on Linux; ld64's exported symbols list, so C names carry their leading underscore.
+_rackpy_host_init
+_rackpy_host_destroy
+_rackpy_host_settings_to_json
+_rackpy_host_settings_from_json

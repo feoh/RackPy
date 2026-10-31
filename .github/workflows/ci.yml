@@ -333,3 +333,49 @@ jobs:
           path: reports/
           retention-days: 30
           if-no-files-found: ignore
+
+  macos:
+    name: macOS ${{ matrix.platform }}, native build, CTest and Rack host tests
+    # RP-40. Native builds with the runner's AppleClang (one architecture each), the native tests
+    # (CTest, through the dev_build fixture) and the host tests in Rack Free 2.6.6, headless and
+    # windowed. Linux-only tests (ELF tools, LD_PRELOAD guards, the Linux toolchain) skip by platform.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            platform: mac-arm64
+          - runner: macos-15-intel
+            platform: mac-x64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+      - run: brew install ninja jq
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/rackpy/sdk
+            ~/.cache/rackpy/build-inputs
+          key: rackpy-${{ matrix.platform }}-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json') }}
+      - run: uv sync --frozen
+      - name: Native tests and Rack host tests
+        run: >
+          uv run --frozen pytest -m "(native or host) and not dist and not sanitizer and not stress and not inventory"
+          -v --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/${{ matrix.platform }}.xml
+      - if: always()
+        name: Collect Rack logs
+        run: |
+          mkdir -p reports/rack-logs
+          cd "$RUNNER_TEMP/pytest" 2>/dev/null && find . -name log.txt -exec rsync -R {} "$GITHUB_WORKSPACE/reports/rack-logs/" \; || true
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: macos-${{ matrix.platform }}-reports
+          path: reports/
+          retention-days: 14
+          if-no-files-found: ignore

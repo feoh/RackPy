@@ -19,6 +19,26 @@ BIN = REPO / "bin"
 READY = "Loading autosave"
 
 
+def host_platform() -> str:
+    """Rack's name for this computer's platform: lin-x64, mac-arm64 or mac-x64 (or "unsupported")."""
+    if sys.platform == "darwin":
+        return "mac-arm64" if platform.machine() == "arm64" else "mac-x64"
+    if sys.platform == "linux" and platform.machine() == "x86_64":
+        return "lin-x64"
+    return "unsupported"
+
+
+PLATFORM = host_platform()
+MACOS = PLATFORM.startswith("mac-")
+PLUGINS = f"plugins-{PLATFORM}"  # the plugins folder of a Rack user directory
+RACK_HOST = "mac-x64+arm64" if MACOS else PLATFORM  # Rack Free's archive: one universal app on macOS
+
+
+def rack_program(rack: Path) -> Path:
+    """Rack's executable in a Rack Free host directory (on macOS the .app)."""
+    return rack / "Contents" / "MacOS" / "Rack" if MACOS else rack / "Rack"
+
+
 def allowed_missing() -> set[str]:
     return {name.strip() for name in os.environ.get("RACKPY_ALLOW_MISSING", "").split(",") if name.strip()}
 
@@ -39,10 +59,15 @@ def require(name: str, available: bool, how: str) -> None:
 
 
 def linux_x64_only() -> pytest.MarkDecorator:
-    """Platform gate: native and host tests exist only for Linux x86_64 so far (RP-40, RP-41)."""
+    """Platform gate for tests of Linux-only tools or mechanisms (ELF inspection, LD_PRELOAD guards,
+    the official Linux toolchain, sanitizers, Xvfb)."""
+    return pytest.mark.skipif(PLATFORM != "lin-x64", reason="this test uses Linux x86_64-only tools")
+
+
+def rack_platforms() -> pytest.MarkDecorator:
+    """Platform gate: native and host tests run on Linux x86_64 and macOS (RP-40); Windows is RP-41."""
     return pytest.mark.skipif(
-        sys.platform != "linux" or platform.machine() != "x86_64",
-        reason="RackPy native builds and host tests exist only for Linux x86_64 so far",
+        PLATFORM == "unsupported", reason="RackPy builds and runs only on Linux x86_64 and macOS so far"
     )
 
 
@@ -124,7 +149,7 @@ def run_rack(
     if not patch.exists():
         patch.write_text('{"version": "2.6.6", "modules": [], "cables": []}')
     proc = subprocess.Popen(
-        [str(rack / "Rack"), "-h", "-u", str(user)],
+        [str(rack_program(rack)), "-h", "-u", str(user)],
         cwd=rack,
         stdin=subprocess.PIPE,
         stdout=subprocess.DEVNULL,
@@ -161,18 +186,21 @@ def run_rack_windowed(
 ) -> RackRun:
     """Run Rack with a window on a virtual X display until it exits by itself (the test closes the window).
 
-    Needs xvfb-run. Rack renders with Mesa's software renderer and nothing
-    appears on the desktop. On timeout the whole process group (Rack, xvfb-run
-    and Xvfb) is killed and returncode is None.
+    Needs xvfb-run on Linux: Rack renders with Mesa's software renderer and nothing appears on the
+    desktop. On macOS the window opens in the logged-in session (CI runners have one). On timeout the
+    whole process group (Rack, xvfb-run and Xvfb) is killed and returncode is None.
     """
-    require("xvfb-run", shutil.which("xvfb-run") is not None, "install Xvfb (xorg-server-xvfb or xvfb)")
+    if not MACOS:
+        require("xvfb-run", shutil.which("xvfb-run") is not None, "install Xvfb (xorg-server-xvfb or xvfb)")
     environ = (
         {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}
         | isolated_audio_env(user)
         | (env or {})
     )
     (user / "autosave").mkdir(parents=True, exist_ok=True)
-    cmd = ["xvfb-run", "-a", "-s", "-screen 0 1600x1000x24", str(rack / "Rack"), "-u", str(user)]
+    cmd = [str(rack_program(rack)), "-u", str(user)]
+    if not MACOS:
+        cmd = ["xvfb-run", "-a", "-s", "-screen 0 1600x1000x24", *cmd]
     if patch is not None:
         cmd.append(str(patch))  # Rack opens it as File > Open does, instead of the autosave
     proc = subprocess.Popen(
@@ -231,7 +259,7 @@ def copy_sharing_binaries(src: Path, dst: Path) -> None:
 
 def stage_plugin(bundle: Path, user: Path, *, entry: str | None = None, files: dict[str, str] | None = None) -> Path:
     """Copy a bundle into a Rack user directory's plugin folder, optionally setting the entry module."""
-    plugin = user / "plugins-lin-x64" / bundle.name
+    plugin = user / PLUGINS / bundle.name
     plugin.parent.mkdir(parents=True, exist_ok=True)
     copy_sharing_binaries(bundle, plugin)
     for rel, text in (files or {}).items():

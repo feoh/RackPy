@@ -12,9 +12,9 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import linux_x64_only, run_pytest_in_rack
+from tests.support import rack_platforms, run_pytest_in_rack
 
-pytestmark = [pytest.mark.host, pytest.mark.gui, linux_x64_only()]
+pytestmark = [pytest.mark.host, pytest.mark.gui, rack_platforms()]
 SUITE = Path(__file__).resolve().parent / "in_rack"
 
 

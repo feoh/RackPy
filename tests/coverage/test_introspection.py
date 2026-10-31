@@ -13,9 +13,9 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import BIN, assert_clean_exit, linux_x64_only, run_rack, stage_plugin
+from tests.support import BIN, assert_clean_exit, rack_platforms, run_rack, stage_plugin
 
-pytestmark = [pytest.mark.host, linux_x64_only()]
+pytestmark = [pytest.mark.host, rack_platforms()]
 
 
 @pytest.fixture(scope="module")

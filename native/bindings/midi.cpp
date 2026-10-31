@@ -1067,32 +1067,33 @@ void bindMidi(py::module_ mod) {
 			return deviceObject(self, p.getDevice(), dynamic_cast<m::Input*>(&p) != nullptr);
 		})
 		.def("get_device_id", [](m::Port& p) { return checked(p).getDeviceId(); })
+		// T is used (value.T::...); Clang reports such an alias in a generic lambda as unused.
 		.def("set_device_id", [](m::Port& p, int id) {
 			refuseDuringMidiDelivery("Port.set_device_id");
 			laboratory::LaboratoryCall call;
 			return portImplementation(p,
-				[id](auto& value) { using T = std::decay_t<decltype(value)>; return value.T::setDeviceId(id); },
+				[id](auto& value) { using T [[maybe_unused]] = std::decay_t<decltype(value)>; return value.T::setDeviceId(id); },
 				[id](m::Port& value) { return value.setDeviceId(id); });
 		}, py::arg("device_id"),
 			"Rack's: subscribes to the driver's device (-1: none).")
 		.def("get_device_ids", [](m::Port& p) {
 			return portImplementation(p,
-				[](auto& value) { using T = std::decay_t<decltype(value)>; return value.T::getDeviceIds(); },
+				[](auto& value) { using T [[maybe_unused]] = std::decay_t<decltype(value)>; return value.T::getDeviceIds(); },
 				[](m::Port& value) { return value.getDeviceIds(); });
 		})
 		.def("get_default_device_id", [](m::Port& p) {
 			return portImplementation(p,
-				[](auto& value) { using T = std::decay_t<decltype(value)>; return value.T::getDefaultDeviceId(); },
+				[](auto& value) { using T [[maybe_unused]] = std::decay_t<decltype(value)>; return value.T::getDefaultDeviceId(); },
 				[](m::Port& value) { return value.getDefaultDeviceId(); });
 		})
 		.def("get_device_name", [](m::Port& p, int id) {
 			return portImplementation(p,
-				[id](auto& value) { using T = std::decay_t<decltype(value)>; return value.T::getDeviceName(id); },
+				[id](auto& value) { using T [[maybe_unused]] = std::decay_t<decltype(value)>; return value.T::getDeviceName(id); },
 				[id](m::Port& value) { return value.getDeviceName(id); });
 		}, py::arg("device_id"))
 		.def("get_channels", [](m::Port& p) {
 			return portImplementation(p,
-				[](auto& value) { using T = std::decay_t<decltype(value)>; return value.T::getChannels(); },
+				[](auto& value) { using T [[maybe_unused]] = std::decay_t<decltype(value)>; return value.T::getChannels(); },
 				[](m::Port& value) { return value.getChannels(); });
 		})
 		.def("get_channel", [](m::Port& p) { return checked(p).getChannel(); })

@@ -103,6 +103,9 @@ template <int N>
 struct RecordingGenerator : d::MidiGenerator<N> {
 	std::vector<Message> sent;
 	bool laboratoryCallbacks = false;
+	// pybind11 deletes a Python-made generator (a PyRecordingGenerator) through this type; Rack's
+	// MidiGenerator has virtual functions but no virtual destructor.
+	virtual ~RecordingGenerator() = default;
 	void onMessage(const Message& message) override { sent.push_back(message); }
 };
 

@@ -227,7 +227,7 @@ def prepare_runtime(python: Path, strip: Path) -> dict[str, str]:
 def third_party_notices(licenses_dir: Path, version: str) -> list[dict[str, Any]]:
     """Copy the bundled CPython's license texts from its full archive, and pybind11's; write the notices."""
     pins = json.loads((REPO / "packaging" / "inputs.json").read_text())
-    archive = fetch(pins["python_licenses"]["3.14"])
+    archive = fetch(pins["python_licenses"]["3.14"][PLATFORM])
     python_licenses = licenses_dir / "python"
     python_licenses.mkdir(parents=True)
     meta: dict[str, Any] = {}
@@ -242,7 +242,7 @@ def third_party_notices(licenses_dir: Path, version: str) -> list[dict[str, Any]
                 f = tf.extractfile(member)
                 assert f is not None
                 texts[member.name.removeprefix("python/")] = f.read()
-    runtime = pins["python_runtime"]["3.14"]["version"]
+    runtime = pins["python_runtime"]["3.14"][PLATFORM]["version"]
     if meta.get("python_version") != runtime:
         raise SystemExit(f"the license archive is CPython {meta.get('python_version')}, the runtime {runtime}")
     components: list[dict[str, Any]] = [
@@ -319,7 +319,7 @@ def third_party_notices(licenses_dir: Path, version: str) -> list[dict[str, Any]
         "The corresponding source of RackPy is the rackpy-*-source archive published with this artifact;",
         "CPython's is at https://github.com/python/cpython (v" + runtime + ") and the build of this runtime at",
         "https://github.com/astral-sh/python-build-standalone (release "
-        + pins["python_runtime"]["3.14"]["release"]
+        + pins["python_runtime"]["3.14"][PLATFORM]["release"]
         + ").",
         "",
     ]
@@ -435,7 +435,7 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
     run([BIN / "rackpy-dev", "bundle", work, "--build-dir", tree, "--runtime", "copy"])
     bundle = work / "RackPy"
     shutil.rmtree(bundle / "python")
-    pin = json.loads((REPO / "packaging" / "inputs.json").read_text())["python_runtime"]["3.14"]
+    pin = json.loads((REPO / "packaging" / "inputs.json").read_text())["python_runtime"]["3.14"][PLATFORM]
     staging = work / "runtime"
     with tarfile.open(fetch(pin)) as tf:
         tf.extractall(staging, filter="data")

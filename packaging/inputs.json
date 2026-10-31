@@ -1,25 +1,61 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "note": "Pinned inputs for the RackPy plugin build that uv.lock cannot pin. pybind11 comes from uv.lock. Downloads go to a cache outside git; see bin/rackpy-dev inputs.",
   "python_runtime": {
     "3.14": {
-      "source": "https://github.com/astral-sh/python-build-standalone",
-      "release": "20261021",
-      "flavor": "install_only",
-      "platform": "x86_64-unknown-linux-gnu",
-      "version": "3.14.9",
-      "file": "cpython-3.14.9+20261021-x86_64-unknown-linux-gnu-install_only.tar.gz",
-      "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-unknown-linux-gnu-install_only.tar.gz",
-      "sha256": "dfa4c5a40c47f338f41658017be550c72247c391e6bfb1fa4da03ebc8451abdf",
-      "root": "python"
+      "lin-x64": {
+        "source": "https://github.com/astral-sh/python-build-standalone",
+        "release": "20261021",
+        "flavor": "install_only",
+        "platform": "x86_64-unknown-linux-gnu",
+        "version": "3.14.9",
+        "file": "cpython-3.14.9+20261021-x86_64-unknown-linux-gnu-install_only.tar.gz",
+        "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-unknown-linux-gnu-install_only.tar.gz",
+        "sha256": "dfa4c5a40c47f338f41658017be550c72247c391e6bfb1fa4da03ebc8451abdf",
+        "root": "python"
+      },
+      "mac-arm64": {
+        "release": "20261021",
+        "root": "python",
+        "source": "https://github.com/astral-sh/python-build-standalone",
+        "version": "3.14.9",
+        "file": "cpython-3.14.9+20261021-aarch64-apple-darwin-install_only.tar.gz",
+        "flavor": "install_only",
+        "platform": "aarch64-apple-darwin",
+        "sha256": "226d696642a8a53d03b4d5b255b1c319b1575a6d44bd723a953c9f507755e36a",
+        "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-aarch64-apple-darwin-install_only.tar.gz"
+      },
+      "mac-x64": {
+        "release": "20261021",
+        "root": "python",
+        "source": "https://github.com/astral-sh/python-build-standalone",
+        "version": "3.14.9",
+        "file": "cpython-3.14.9+20261021-x86_64-apple-darwin-install_only.tar.gz",
+        "flavor": "install_only",
+        "platform": "x86_64-apple-darwin",
+        "sha256": "600cf336dd007e7c72318214fd0708a56c555b516964175df4a748e4ff0487a2",
+        "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-apple-darwin-install_only.tar.gz"
+      }
     }
   },
   "python_licenses": {
     "note": "The same python-build-standalone build's full archive, read only for python/PYTHON.json and python/licenses/: which libraries the runtime links, under which licences, with their texts (RP-39). install_only archives are derived from this pgo+lto build and carry only CPython's licence.",
     "3.14": {
-      "file": "cpython-3.14.9+20261021-x86_64-unknown-linux-gnu-pgo+lto-full.tar.zst",
-      "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-unknown-linux-gnu-pgo%2Blto-full.tar.zst",
-      "sha256": "92f6abbce0283ed317873615396b5c43ccdcdf13ae9c7d68c9a07651df527528"
+      "lin-x64": {
+        "file": "cpython-3.14.9+20261021-x86_64-unknown-linux-gnu-pgo+lto-full.tar.zst",
+        "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-unknown-linux-gnu-pgo%2Blto-full.tar.zst",
+        "sha256": "92f6abbce0283ed317873615396b5c43ccdcdf13ae9c7d68c9a07651df527528"
+      },
+      "mac-arm64": {
+        "file": "cpython-3.14.9+20261021-aarch64-apple-darwin-pgo+lto-full.tar.zst",
+        "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-aarch64-apple-darwin-pgo%2Blto-full.tar.zst",
+        "sha256": "6404c3ca06e7a8abf3bb5247bf359c8f06c3d0e1d0421a6c539b5457cd885537"
+      },
+      "mac-x64": {
+        "file": "cpython-3.14.9+20261021-x86_64-apple-darwin-pgo+lto-full.tar.zst",
+        "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-apple-darwin-pgo%2Blto-full.tar.zst",
+        "sha256": "b51b8a1f266a4b633cb75a754fa3ab712b5f4255c5a5d550a0412368e9bee605"
+      }
     }
   }
 }

@@ -13,9 +13,9 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import linux_x64_only
+from tests.support import rack_platforms
 
-pytestmark = [linux_x64_only(), pytest.mark.native]
+pytestmark = [rack_platforms(), pytest.mark.native]
 
 
 @pytest.mark.parametrize(("variant", "workers", "blocks"), [("asan", 1, 1500), ("asan", 4, 3000), ("tsan", 4, 1500)])

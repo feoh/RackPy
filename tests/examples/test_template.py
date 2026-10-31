@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 from tests.examples.support import EXAMPLES, plugin_tool, project_files, saved_patch, write_patch
-from tests.support import assert_clean_exit, linux_x64_only, run_rack
+from tests.support import PLUGINS, assert_clean_exit, rack_platforms, run_rack
 
 TEMPLATE = EXAMPLES / "template"
 CREATE = [
@@ -147,12 +147,12 @@ def test_panel_geometry_units_and_refusals(tmp_path: Path) -> None:
 
 
 @pytest.mark.host
-@linux_x64_only()
+@rack_platforms()
 def test_the_template_loads_in_rack_under_its_own_slug(
     make_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path
 ) -> None:
     user = tmp_path / "user"
-    plugins = user / "plugins-lin-x64"
+    plugins = user / PLUGINS
     plugins.mkdir(parents=True)
     plugin_tool("build", TEMPLATE, "--bundle", make_bundle(), "--dest", plugins)
     assert not (plugins / "RackPyTemplate" / "pythonpath" / "rackpytemplate" / "__pycache__").exists()

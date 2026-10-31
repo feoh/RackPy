@@ -23,14 +23,15 @@ from pathlib import Path
 import pytest
 
 from tests.support import (
+    PLUGINS,
     REPO,
     assert_clean_exit,
-    linux_x64_only,
+    rack_platforms,
     run_rack,
     run_rack_windowed,
 )
 
-pytestmark = [pytest.mark.docs, pytest.mark.host, linux_x64_only()]
+pytestmark = [pytest.mark.docs, pytest.mark.host, rack_platforms()]
 DOCS = REPO / "docs"
 BASH = re.compile(r"^```bash\n(.*?)^```", re.MULTILINE | re.DOTALL)
 EXAMPLE = REPO / "examples" / "oscillator" / "pythonpath" / "rackpyoscillator" / "oscillator.py"
@@ -55,7 +56,7 @@ def run_block(block: str, cwd: Path, user: Path, bundle: Path) -> None:
 
 def follow_the_pages(work: Path, user: Path, bundle: Path) -> Path:
     """The quickstart's steps 2 and 3, the tutorial's steps 1 and 3, then the build of step 4; returns the plugin."""
-    (user / "plugins-lin-x64").mkdir(parents=True)
+    (user / PLUGINS).mkdir(parents=True)
     quickstart = blocks("quickstart.md")
     assert quickstart[0].startswith("git clone")  # building RackPy: the session's own build stands for it
     create, add_module, build = quickstart[1], quickstart[2], quickstart[3]
@@ -68,7 +69,7 @@ def follow_the_pages(work: Path, user: Path, bundle: Path) -> Path:
     module = work / "MyPlugin" / "pythonpath" / "myplugin" / "mymodule.py"
     module.write_text(tutorial_edits(module.read_text()))
     run_block(rebuild, work, user, bundle)
-    return user / "plugins-lin-x64" / "MyPlugin"
+    return user / PLUGINS / "MyPlugin"
 
 
 def tutorial_edits(source: str) -> str:

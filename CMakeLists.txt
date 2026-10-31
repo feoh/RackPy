@@ -6,10 +6,17 @@
 # CONTRIBUTING.md. Configure by hand with:
 #   cmake -S . -B build/dev -G Ninja -DRACK_SDK_DIR=... -DRACKPY_PYTHON_HOME=... -Dpybind11_DIR=...
 cmake_minimum_required(VERSION 3.25)
+# macOS: one architecture per build, and the oldest macOS both Rack 2.6.6 and the bundled CPython run on
+# (RP-40): Rack's libRack.dylib needs 11.0 on arm64 and 10.9 on x86_64, CPython 3.14's 11.0 and 10.15.
+if(CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Oldest macOS the plugin loads on")
+elseif(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Oldest macOS the plugin loads on")
+endif()
 project(RackPy VERSION 0.0.0 DESCRIPTION "Python for VCV Rack plugins" LANGUAGES C CXX)
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" OR NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64)$")
-  message(FATAL_ERROR "RackPy builds only for Linux x86_64 so far; macOS and Windows are RP-40 and RP-41.")
+if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64)$") AND NOT APPLE)
+  message(FATAL_ERROR "RackPy builds for Linux x86_64 and macOS (x86_64, arm64) so far; Windows is RP-41.")
 endif()
 if(CMAKE_BUILD_TYPE)
   # The SDK's flags already choose -O3 -g; a CMake build type would add its own.
@@ -41,12 +48,16 @@ if(NOT pybind11_FOUND)
   message(FATAL_ERROR "pybind11 3.1.0 not found. Run `uv sync --frozen` and pass -Dpybind11_DIR=$(uv run python -m pybind11 --cmakedir), or use bin/rackpy-dev.")
 endif()
 
-# plugin.so: thin loader with no Python dependency (ADR 002, decision 1).
+# plugin.so (plugin.dylib on macOS, as Rack looks for): thin loader with no Python dependency
+# (ADR 002, decision 1).
 add_library(rackpy_loader MODULE native/loader/loader.cpp native/loader/loader_config.cpp)
 set_target_properties(rackpy_loader PROPERTIES
   PREFIX "" OUTPUT_NAME plugin
   CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF
   SKIP_BUILD_RPATH ON)
+if(APPLE)
+  set_target_properties(rackpy_loader PROPERTIES SUFFIX ".dylib")
+endif()
 target_include_directories(rackpy_loader PRIVATE native/include)
 target_link_libraries(rackpy_loader PRIVATE rackpy_sdk_plugin)
 
@@ -88,13 +99,20 @@ set_target_properties(rackpy_host PROPERTIES
   PREFIX ""
   CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF
   CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON
-  BUILD_WITH_INSTALL_RPATH ON INSTALL_RPATH "$ORIGIN/python/lib")
+  BUILD_WITH_INSTALL_RPATH ON INSTALL_RPATH "$<IF:$<BOOL:${APPLE}>,@loader_path/python/lib,$ORIGIN/python/lib>")
 target_include_directories(rackpy_host PRIVATE native/include native/bindings/generated)
 target_link_libraries(rackpy_host PRIVATE rackpy_sdk_plugin rackpy_python pybind11::headers)
 # libstdc++ gives std:: instances and its static objects default visibility, so
-# -fvisibility=hidden is not enough; the version script exports the ABI only.
-target_link_options(rackpy_host PRIVATE "-Wl,--version-script=${PROJECT_SOURCE_DIR}/native/host/host.map")
-set_property(TARGET rackpy_host APPEND PROPERTY LINK_DEPENDS "${PROJECT_SOURCE_DIR}/native/host/host.map")
+# -fvisibility=hidden is not enough; the version script (on macOS the exported symbols list)
+# exports the ABI only.
+if(APPLE)
+  set(_rackpy_host_exports "${PROJECT_SOURCE_DIR}/native/host/host.exp")
+  target_link_options(rackpy_host PRIVATE "-Wl,-exported_symbols_list,${_rackpy_host_exports}")
+else()
+  set(_rackpy_host_exports "${PROJECT_SOURCE_DIR}/native/host/host.map")
+  target_link_options(rackpy_host PRIVATE "-Wl,--version-script=${_rackpy_host_exports}")
+endif()
+set_property(TARGET rackpy_host APPEND PROPERTY LINK_DEPENDS "${_rackpy_host_exports}")
 
 if(RACKPY_BUILD_TESTS)
   enable_testing()
@@ -169,21 +187,25 @@ if(RACKPY_BUILD_TESTS)
     target_compile_options(rackpy_io_stress_tsan PRIVATE -fsanitize=thread -fno-omit-frame-pointer -Wno-tsan)
     target_link_options(rackpy_io_stress_tsan PRIVATE -fsanitize=thread)
   endif()
-  # The RP-07 audio-path guard, preloaded by tests/dsp/test_runtime.py around rackpy_kernel_guard.
-  add_library(rackpy_audio_guard MODULE native/testing/audio_guard.c)
-  set_target_properties(rackpy_audio_guard PROPERTIES PREFIX "" OUTPUT_NAME audio_guard C_STANDARD 11)
-  target_link_libraries(rackpy_audio_guard PRIVATE dl)
-  # Runs the kernel path under the RP-07 audio-path guard (tests/dsp/test_runtime.py preloads it).
-  add_executable(rackpy_kernel_guard native/tests/kernel_guard.cpp tests/dsp/kernel_library/graphs.cpp
-    native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE} ${RACKPY_DSP_RUNTIME})
-  set_target_properties(rackpy_kernel_guard PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
-  target_include_directories(rackpy_kernel_guard PRIVATE native/include)
-  target_link_libraries(rackpy_kernel_guard PRIVATE rackpy_sdk_program)
-  # RP-36: the example plugins' kernel libraries under the same guard (tests/examples preloads it).
-  add_executable(rackpy_example_kernel_guard native/tests/example_kernel_guard.cpp)
-  set_target_properties(rackpy_example_kernel_guard PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
-  target_include_directories(rackpy_example_kernel_guard PRIVATE native/include)
-  target_link_libraries(rackpy_example_kernel_guard PRIVATE rackpy_sdk_program dl)
+  # The RP-07 audio-path guard interposes on libc with LD_PRELOAD, which macOS has no equivalent of
+  # for these tests (DYLD_INSERT_LIBRARIES is limited by SIP): Linux only (RP-40).
+  if(NOT APPLE)
+    # The RP-07 audio-path guard, preloaded by tests/dsp/test_runtime.py around rackpy_kernel_guard.
+    add_library(rackpy_audio_guard MODULE native/testing/audio_guard.c)
+    set_target_properties(rackpy_audio_guard PROPERTIES PREFIX "" OUTPUT_NAME audio_guard C_STANDARD 11)
+    target_link_libraries(rackpy_audio_guard PRIVATE dl)
+    # Runs the kernel path under the RP-07 audio-path guard (tests/dsp/test_runtime.py preloads it).
+    add_executable(rackpy_kernel_guard native/tests/kernel_guard.cpp tests/dsp/kernel_library/graphs.cpp
+      native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE} ${RACKPY_DSP_RUNTIME})
+    set_target_properties(rackpy_kernel_guard PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+    target_include_directories(rackpy_kernel_guard PRIVATE native/include)
+    target_link_libraries(rackpy_kernel_guard PRIVATE rackpy_sdk_program)
+    # RP-36: the example plugins' kernel libraries under the same guard (tests/examples preloads it).
+    add_executable(rackpy_example_kernel_guard native/tests/example_kernel_guard.cpp)
+    set_target_properties(rackpy_example_kernel_guard PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+    target_include_directories(rackpy_example_kernel_guard PRIVATE native/include)
+    target_link_libraries(rackpy_example_kernel_guard PRIVATE rackpy_sdk_program dl)
+  endif()
 
   # RackPy's kernel path against plain C++ modules, per frame (timing only; not a CTest).
   add_executable(rackpy_kernel_bench native/tests/kernel_bench.cpp native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE}

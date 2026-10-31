@@ -13,9 +13,9 @@ from pathlib import Path
 import pytest
 
 from tests.dsp.test_basic import environment
-from tests.support import REPO, linux_x64_only, run_pytest_in_rack
+from tests.support import REPO, rack_platforms, run_pytest_in_rack
 
-pytestmark = [pytest.mark.host, linux_x64_only()]
+pytestmark = [pytest.mark.host, rack_platforms()]
 
 
 def test_laboratory_callback_cost(

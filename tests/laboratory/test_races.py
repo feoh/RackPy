@@ -9,7 +9,7 @@ import pytest
 from tests.support import (
     PROBE_MODULE,
     assert_clean_exit,
-    linux_x64_only,
+    rack_platforms,
     run_pytest_in_rack,
     run_rack,
     run_rack_windowed,
@@ -17,7 +17,7 @@ from tests.support import (
     write_patch,
 )
 
-pytestmark = [pytest.mark.host, linux_x64_only()]
+pytestmark = [pytest.mark.host, rack_platforms()]
 HERE = Path(__file__).resolve().parent
 
 

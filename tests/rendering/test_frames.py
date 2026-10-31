@@ -13,9 +13,9 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import PROBE_MODULE, linux_x64_only, run_rack_windowed, stage_plugin, write_patch
+from tests.support import PROBE_MODULE, rack_platforms, run_rack_windowed, stage_plugin, write_patch
 
-pytestmark = [pytest.mark.host, pytest.mark.gui, linux_x64_only()]
+pytestmark = [pytest.mark.host, pytest.mark.gui, rack_platforms()]
 HERE = Path(__file__).resolve().parent
 
 

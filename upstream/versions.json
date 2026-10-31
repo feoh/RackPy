@@ -74,7 +74,9 @@
         "platform": "mac-x64+arm64",
         "url": "https://vcvrack.com/downloads/RackFree-2.6.6-mac-x64+arm64.pkg",
         "sha256": "5ecbe5c0c1e66c8628c98d7902e6c7542204e0199168907a74e812d08423096c",
-        "size": 25883353
+        "size": 25883353,
+        "root": "VCV Rack 2 Free.app",
+        "format": "pkg"
       },
       {
         "platform": "win-x64",

@@ -16,14 +16,14 @@ import pytest
 from tests.support import (
     RackRun,
     assert_clean_exit,
-    linux_x64_only,
+    rack_platforms,
     run_rack,
     run_rack_windowed,
     stage_plugin,
     write_patch,
 )
 
-pytestmark = [pytest.mark.host, linux_x64_only()]
+pytestmark = [pytest.mark.host, rack_platforms()]
 SCENARIOS = Path(__file__).resolve().parent / "scenarios"
 PROBE = {"id": 1, "plugin": "RackPy", "model": "RuntimeProbe", "version": "2.0.0", "params": [{"id": 0, "value": 0.5}]}
 CHECK = re.compile(r"RackPy: CHECK (?P<name>.+?) (?P<result>PASS|FAIL) ?(?P<detail>.*)$")

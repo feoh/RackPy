@@ -27,7 +27,7 @@ import rackpypolyphony_teaching as teaching
 
 from rackpy.dsp.graph_reference import run, run_pair
 from tests.examples.support import EXAMPLES, plugin_tool, saved_patch, write_patch
-from tests.support import BIN, assert_clean_exit, linux_x64_only, run_pytest_in_rack, run_rack
+from tests.support import BIN, PLUGINS, assert_clean_exit, linux_x64_only, run_pytest_in_rack, run_rack
 
 POLYPHONY, DSP, EXPANDERS = (EXAMPLES / name for name in ("polyphony", "dsp", "expanders"))
 PROJECTS = (POLYPHONY, DSP, EXPANDERS)
@@ -174,7 +174,7 @@ def test_each_example_loads_as_its_own_plugin(
 ) -> None:
     manifest = json.loads((project / "plugin.json").read_text())
     user = tmp_path / "user"
-    plugins = user / "plugins-lin-x64"
+    plugins = user / PLUGINS
     plugins.mkdir(parents=True)
     kernels = dev_build / "examples" / project.name / "kernels"
     plugin_tool("build", project, "--bundle", make_bundle(), "--dest", plugins, "--kernels", kernels)

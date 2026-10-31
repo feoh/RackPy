@@ -15,9 +15,9 @@ from pathlib import Path
 import pytest
 
 import rackpy
-from tests.support import assert_clean_exit, linux_x64_only, run_rack, stage_plugin
+from tests.support import assert_clean_exit, rack_platforms, run_rack, stage_plugin
 
-pytestmark = [pytest.mark.host, linux_x64_only()]
+pytestmark = [pytest.mark.host, rack_platforms()]
 
 ENTRY = """
 import json, sys

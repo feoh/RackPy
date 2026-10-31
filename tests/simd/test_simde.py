@@ -20,9 +20,9 @@ from typing import Any
 
 import pytest
 
-from tests.support import linux_x64_only
+from tests.support import rack_platforms
 
-pytestmark = [pytest.mark.native, linux_x64_only()]
+pytestmark = [pytest.mark.native, rack_platforms()]
 
 # sse_mathfun's polynomials and everything built on them: the SIMDe build rounds differently in the
 # last bits (at most a few ULP, so far 1e-5 relative after pow's amplification).

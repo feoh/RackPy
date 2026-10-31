@@ -112,6 +112,22 @@ def fetch_archive(entry: dict[str, Any], cache: Path, fresh: bool) -> Path:
     return dest
 
 
+def extract_pkg(archive: Path, staging: Path) -> None:
+    """A macOS installer package: a xar archive whose Payload is a gzipped cpio. libarchive's bsdtar reads
+    both (macOS's own tar is bsdtar); members outside the target are refused, as bsdtar does by default."""
+    tar = shutil.which("bsdtar") or (shutil.which("tar") if platform.system() == "Darwin" else None)
+    if tar is None:
+        raise SystemExit("extracting the macOS Rack package needs bsdtar (libarchive)")
+    expanded = staging / "expanded"
+    expanded.mkdir()
+    subprocess.run([tar, "-xf", str(archive), "-C", str(expanded)], check=True)
+    (payload,) = expanded.glob("*.pkg/Payload")
+    subprocess.run([tar, "-xf", str(payload), "-C", str(staging)], check=True)
+    shutil.rmtree(expanded)
+    for apple_double in staging.rglob("._*"):  # extended attributes, as files when not on macOS
+        apple_double.unlink()
+
+
 def extract(archive: Path, entry: dict[str, Any], cache: Path) -> Path:
     """Extract into a directory keyed by the archive digest; returns the SDK root."""
     dest = cache / "extracted" / f"{entry['platform']}-{entry['sha256'][:16]}"
@@ -121,6 +137,11 @@ def extract(archive: Path, entry: dict[str, Any], cache: Path) -> Path:
     if dest.exists():
         shutil.rmtree(dest)  # An interrupted earlier extraction; it is keyed by digest, so redo it.
     staging = Path(tempfile.mkdtemp(prefix="extract-", dir=cache))
+    if entry.get("format") == "pkg":
+        extract_pkg(archive, staging)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        staging.replace(dest)
+        return root
     with zipfile.ZipFile(archive) as zf:
         for member in zf.namelist():
             target = (staging / member).resolve()
@@ -150,7 +171,7 @@ def path(platform: str = "lin-x64", *, cache: CacheOpt = DEFAULT_CACHE) -> None:
 
 @app.command
 def host(platform: str = "lin-x64", *, cache: CacheOpt = DEFAULT_CACHE) -> None:
-    """Fetch and verify a pinned Rack Free host; extract and print its directory when it is a zip."""
+    """Fetch and verify a pinned Rack Free host; extract it and print its directory (on macOS the .app)."""
     (entry,) = archives([platform], "host")
     archive = fetch_archive(entry, cache / "host", fresh=False)
     if "root" not in entry:

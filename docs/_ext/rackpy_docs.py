@@ -62,6 +62,8 @@ def repo_facts(repo: Path = REPO) -> dict[str, str]:
     lock = tomllib.loads((repo / "uv.lock").read_text(encoding="utf-8"))
     pybind11 = next(p["version"] for p in lock["package"] if p["name"] == "pybind11")
     (minor,) = runtime
+    # One CPython build for every platform (tests/integration/test_release.py checks): Linux's stands for all.
+    runtime = {minor: runtime[minor]["lin-x64"]}
     return {
         "rackpy_version": project["version"],
         "rack_version": versions["rack"]["version"],

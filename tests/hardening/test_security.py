@@ -17,9 +17,9 @@ from typing import Any
 
 import pytest
 
-from tests.support import assert_clean_exit, linux_x64_only, run_rack, stage_plugin, write_patch
+from tests.support import PLUGINS, assert_clean_exit, rack_platforms, run_rack, stage_plugin, write_patch
 
-pytestmark = [pytest.mark.host, linux_x64_only()]
+pytestmark = [pytest.mark.host, rack_platforms()]
 
 
 def evil(marker: Path, name: str) -> str:
@@ -113,7 +113,7 @@ def test_python_environment_variables_are_ignored(
     assert facts["isolated"] and facts["ignore_environment"] and facts["safe_path"], facts
     assert facts["no_site"] and not facts["site_loaded"] and facts["no_user_site"], facts
     assert facts["dont_write_bytecode"] and facts["pycache_prefix"] is None and facts["warnings"] == [], facts
-    plugin = tmp_path / "plugins-lin-x64"
+    plugin = tmp_path / PLUGINS
     assert Path(facts["rackpy"]).is_relative_to(plugin) and Path(facts["json"]).is_relative_to(plugin)
     assert "/python/lib/python3.14/json/" in facts["json"]  # the bundled runtime's standard library
 

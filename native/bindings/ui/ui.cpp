@@ -126,7 +126,7 @@ dangling pointer. */
 void focusField(py::classh<ui::TextField, OW, TextFieldWidget<ui::TextField>>& cls, const char* name,
 	W* ui::TextField::*field) {
 	cls.def_property(name, [field](py::object self) { return wrapper(native<ui::TextField>(self).*field); },
-		[name, field](py::object self, py::object value) {
+		[field](py::object self, py::object value) {
 			auto& tf = native<ui::TextField>(self);
 			if (value.is_none()) {
 				tf.*field = nullptr;

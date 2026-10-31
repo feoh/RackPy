@@ -18,7 +18,13 @@
 #include <complex>
 
 #ifndef RACKPY_OUT_OF_LINE
+#if defined(__clang__)
+// Clang (macOS, RP-40) has no noipa; noinline keeps each call out of line, though Clang may still
+// specialise across it.
+#define RACKPY_OUT_OF_LINE [[gnu::noinline]] inline
+#else
 #define RACKPY_OUT_OF_LINE [[gnu::noipa]] inline
+#endif
 #endif
 
 namespace rackpy {

@@ -13,18 +13,23 @@ packaging/inputs.json, and pybind11 and the Python tools by uv.lock. Downloads
 and builds stay outside git. Tools from the project environment run through
 `uv run --frozen --project <repo>`, so `uv sync --frozen` must work first.
 
-Linux x86_64 only for now. A build with the host compiler is for development
-and tests; `--toolchain rack-lin-x64` uses the official Rack plugin toolchain
-(bin/rack-toolchain) for a build with the glibc floor of Rack's own plugins.
+Linux x86_64 and macOS (arm64, x86_64; RP-40). A build with the host compiler is
+for development and tests; `--toolchain rack-lin-x64` uses the official Rack
+plugin toolchain (bin/rack-toolchain) for a build with the glibc floor of Rack's
+own plugins. `--platform mac-arm64 --toolchain zig-macos` cross-compiles the
+macOS plugin on Linux to check that it compiles and links: Zig links its own
+libc++, so such a build must never be run in Rack or distributed.
 """
 
 import hashlib
 import json
 import os
+import platform as platform_module
 import re
 import shutil
 import statistics
 import subprocess
+import sys
 import tarfile
 import tempfile
 import time
@@ -37,6 +42,7 @@ import cyclopts
 REPO = Path(__file__).resolve().parent.parent
 INPUTS = REPO / "packaging" / "inputs.json"
 TOOLCHAIN_FILE = REPO / "cmake" / "toolchains" / "rack-lin-x64.cmake"
+ZIG_TOOLCHAIN_FILE = REPO / "cmake" / "toolchains" / "zig-macos.cmake"
 DEFAULT_CACHE = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "rackpy" / "build-inputs"
 DEFAULT_BUILD = REPO / "build" / "dev"
 SLUG = "RackPy"
@@ -51,7 +57,18 @@ LOADER_EXPORTS = {"init", "destroy", "settingsToJson", "settingsFromJson"}
 
 app = cyclopts.App(help=__doc__)
 CacheOpt = Annotated[Path, cyclopts.Parameter(help="Download cache outside git.")]
-Toolchain = Literal["host", "rack-lin-x64"]
+Toolchain = Literal["host", "rack-lin-x64", "zig-macos"]
+Platform = Literal["lin-x64", "mac-x64", "mac-arm64"]
+OSX_ARCHITECTURES = {"mac-x64": "x86_64", "mac-arm64": "arm64"}
+
+
+def host_platform() -> Platform:
+    """Rack's name for this computer's platform."""
+    if sys.platform == "darwin":
+        return "mac-arm64" if platform_module.machine() == "arm64" else "mac-x64"
+    return "lin-x64"
+
+
 Sanitize = Literal["", "address,undefined", "thread"]
 
 
@@ -104,15 +121,23 @@ def fetch_runtime(entry: dict[str, Any], cache: Path) -> Path:
     return root
 
 
-def runtimes(cache: Path) -> dict[str, Path]:
+def runtime(cache: Path, platform: Platform, minor: str = "3.14") -> Path:
     pins: dict[str, dict[str, Any]] = json.loads(INPUTS.read_text(encoding="utf-8"))["python_runtime"]
-    return {minor: fetch_runtime(entry, cache) for minor, entry in pins.items()}
+    return fetch_runtime(pins[minor][platform], cache)
 
 
 @app.command
-def inputs(*, cache: CacheOpt = DEFAULT_CACHE) -> None:
-    """Fetch and verify the pinned bundled runtimes; print their locations as JSON."""
-    print(json.dumps({f"python-{k}": str(v) for k, v in runtimes(cache).items()}, indent=2, sort_keys=True))
+def inputs(*, platform: Platform | None = None, cache: CacheOpt = DEFAULT_CACHE) -> None:
+    """Fetch and verify the pinned bundled runtime for PLATFORM (this computer's by default); print its location."""
+    target = platform or host_platform()
+    print(json.dumps({f"python-3.14-{target}": str(runtime(cache, target))}, indent=2, sort_keys=True))
+
+
+def cmake_cache_value(build_dir: Path, name: str) -> str:
+    for line in (build_dir / "CMakeCache.txt").read_text(encoding="utf-8").splitlines():
+        if line.startswith(f"{name}:"):
+            return line.split("=", 1)[1]
+    raise SystemExit(f"{build_dir} is not a configured RackPy build (no {name} in CMakeCache.txt)")
 
 
 @app.command
@@ -120,21 +145,25 @@ def configure(
     *,
     build_dir: Path = DEFAULT_BUILD,
     toolchain: Toolchain = "host",
+    platform: Platform | None = None,
     werror: bool = False,
     test_hooks: bool = False,
     entry: str = "",
     sanitize: Sanitize = "",
     cache: CacheOpt = DEFAULT_CACHE,
 ) -> None:
-    """Configure the CMake build with the pinned SDK, runtime and pybind11.
+    """Configure the CMake build with the pinned SDK, runtime and pybind11, for PLATFORM (this computer's).
 
     --test-hooks adds the RuntimeProbe module and _rackpy_host._testing for the runtime tests.
     --sanitize builds every native target with AddressSanitizer and UndefinedBehaviorSanitizer
     ("address,undefined") or ThreadSanitizer ("thread"), for the native tests. Never distribute
     either kind of build.
     """
-    sdk = capture([REPO / "bin" / "rack-sdk", "path"])
-    python = runtimes(cache)["3.14"]
+    target = platform or host_platform()
+    if (toolchain == "zig-macos") != (target != host_platform()):
+        raise SystemExit(f"a {target} build on {host_platform()} needs --toolchain zig-macos, and only it")
+    sdk = capture([REPO / "bin" / "rack-sdk", "path", target])
+    python = runtime(cache, target)
     pybind11 = capture(project_tool("python", "-m", "pybind11", "--cmakedir"))
     args: list[str | Path] = [
         "cmake",
@@ -152,6 +181,11 @@ def configure(
         f"-DRACKPY_TEST_HOOKS={'ON' if test_hooks else 'OFF'}",
         f"-DRACKPY_SANITIZE={sanitize}",
     ]
+    if target in OSX_ARCHITECTURES:
+        args.append(f"-DCMAKE_OSX_ARCHITECTURES={OSX_ARCHITECTURES[target]}")
+    if toolchain == "zig-macos":
+        # A compile and link check only (see the module docstring); native tests cannot run here.
+        args += [f"-DCMAKE_TOOLCHAIN_FILE={ZIG_TOOLCHAIN_FILE}", "-DRACKPY_BUILD_TESTS=OFF"]
     if toolchain == "rack-lin-x64":
         bindir = capture([REPO / "bin" / "rack-toolchain", "path"])
         # Native tests link libRack's X11/GL/audio dependencies, which the toolchain sysroot lacks.
@@ -168,6 +202,7 @@ def build(
     *,
     build_dir: Path = DEFAULT_BUILD,
     toolchain: Toolchain = "host",
+    platform: Platform | None = None,
     werror: bool = False,
     test_hooks: bool = False,
     test: bool = True,
@@ -176,7 +211,13 @@ def build(
 ) -> None:
     """Configure, build and run the native unit tests (CTest)."""
     configure(
-        build_dir=build_dir, toolchain=toolchain, werror=werror, test_hooks=test_hooks, sanitize=sanitize, cache=cache
+        build_dir=build_dir,
+        toolchain=toolchain,
+        platform=platform,
+        werror=werror,
+        test_hooks=test_hooks,
+        sanitize=sanitize,
+        cache=cache,
     )
     run(["cmake", "--build", build_dir])
     if test and toolchain == "host":
@@ -200,7 +241,7 @@ def bundle(
     if plugin.exists():
         raise SystemExit(f"{plugin} already exists; choose an empty destination")
     run(["cmake", "--install", build_dir, "--prefix", plugin, *(["--strip"] if runtime == "copy" else [])])
-    python = runtimes(cache)["3.14"]
+    python = Path(cmake_cache_value(build_dir, "RACKPY_PYTHON_HOME"))  # the runtime this tree was built for
     if runtime == "link":
         (plugin / "python").symlink_to(python, target_is_directory=True)
     else:

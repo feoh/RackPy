@@ -105,13 +105,22 @@ def test_compare_names_the_members_that_differ(
     }
 
 
-def test_the_license_pin_is_the_same_build_as_the_runtime() -> None:
+TRIPLES = {"lin-x64": "x86_64-unknown-linux-gnu", "mac-arm64": "aarch64-apple-darwin", "mac-x64": "x86_64-apple-darwin"}
+
+
+def test_every_platform_bundles_the_same_cpython_build_with_its_license_archive() -> None:
     inputs = json.loads((BIN.parent / "packaging" / "inputs.json").read_text())
-    runtime, licenses = inputs["python_runtime"]["3.14"], inputs["python_licenses"]["3.14"]
-    tag = f"cpython-{runtime['version']}+{runtime['release']}-x86_64-unknown-linux-gnu-"
-    assert runtime["file"].startswith(tag) and licenses["file"].startswith(tag)
-    assert licenses["file"].endswith("-pgo+lto-full.tar.zst")
-    assert len(licenses["sha256"]) == 64
+    runtimes, licenses = inputs["python_runtime"]["3.14"], inputs["python_licenses"]["3.14"]
+    assert set(runtimes) == set(licenses) == set(TRIPLES)
+    assert len({(r["version"], r["release"]) for r in runtimes.values()}) == 1
+    for platform, triple in TRIPLES.items():
+        runtime, license_archive = runtimes[platform], licenses[platform]
+        tag = f"cpython-{runtime['version']}+{runtime['release']}-{triple}-"
+        assert runtime["file"].startswith(tag) and license_archive["file"].startswith(tag), platform
+        assert runtime["platform"] == triple
+        assert license_archive["file"].endswith("-pgo+lto-full.tar.zst")
+        assert len(runtime["sha256"]) == len(license_archive["sha256"]) == 64
+        assert runtime["url"].endswith(runtime["file"].replace("+", "%2B"))
 
 
 def test_pack_names_the_package_as_rack_does_and_refuses_a_misnamed_folder(

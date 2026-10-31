@@ -15,9 +15,9 @@ from typing import Any
 
 import pytest
 
-from tests.support import PROBE_MODULE, linux_x64_only, run_pytest_in_rack, run_rack_windowed, stage_plugin
+from tests.support import PROBE_MODULE, rack_platforms, run_pytest_in_rack, run_rack_windowed, stage_plugin
 
-pytestmark = [pytest.mark.host, pytest.mark.gui, linux_x64_only()]
+pytestmark = [pytest.mark.host, pytest.mark.gui, rack_platforms()]
 HERE = Path(__file__).resolve().parent
 ZSTD_MAGIC = bytes.fromhex("28b52ffd")
 

@@ -27,9 +27,10 @@ import rackpystateevents_core as core
 from rackpy.dsp.graph_reference import run
 from tests.examples.support import EXAMPLES, plugin_tool, saved_patch, write_patch
 from tests.support import (
+    PLUGINS,
     PROBE_MODULE,
     assert_clean_exit,
-    linux_x64_only,
+    rack_platforms,
     run_pytest_in_rack,
     run_rack,
     run_rack_windowed,
@@ -187,7 +188,7 @@ def stage_examples(bundle: Path) -> Path:
 
 @pytest.mark.host
 @pytest.mark.gui
-@linux_x64_only()
+@rack_platforms()
 def test_the_modules_in_live_rack(make_hooks_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path) -> None:
     result = run_pytest_in_rack(
         stage_examples(make_hooks_bundle()),
@@ -263,7 +264,7 @@ def session_patch(user: Path) -> None:
 
 @pytest.mark.host
 @pytest.mark.gui
-@linux_x64_only()
+@rack_platforms()
 def test_rack_saves_and_reopens_state_storage_and_settings(
     make_hooks_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path
 ) -> None:
@@ -325,14 +326,14 @@ def test_rack_saves_and_reopens_state_storage_and_settings(
 
 
 @pytest.mark.host
-@linux_x64_only()
+@rack_platforms()
 @pytest.mark.parametrize("project", PROJECTS, ids=lambda p: p.name)
 def test_each_example_loads_as_its_own_plugin(
     make_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path, project: Path
 ) -> None:
     manifest = json.loads((project / "plugin.json").read_text())
     user = tmp_path / "user"
-    plugins = user / "plugins-lin-x64"
+    plugins = user / PLUGINS
     plugins.mkdir(parents=True)
     plugin_tool("build", project, "--bundle", make_bundle(), "--dest", plugins)
     slug = manifest["slug"]

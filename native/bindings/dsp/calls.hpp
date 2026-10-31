@@ -14,7 +14,13 @@
 #include <cstddef>
 
 #ifndef RACKPY_OUT_OF_LINE
+#if defined(__clang__)
+// Clang (macOS, RP-40) has no noipa; noinline keeps each call out of line, though Clang may still
+// specialise across it.
+#define RACKPY_OUT_OF_LINE [[gnu::noinline]] inline
+#else
 #define RACKPY_OUT_OF_LINE [[gnu::noipa]] inline
+#endif
 #endif
 
 namespace rackpy {
@@ -124,7 +130,11 @@ RACKPY_OUT_OF_LINE X* make(Args... args) {
 `member<&TRCFilter<float>::process>(filter, x)`. */
 template <auto M, typename Object, typename... Args>
 RACKPY_OUT_OF_LINE decltype(auto) member(Object& object, Args... args) {
+	// Deprecated members are bound on purpose (complete coverage); Clang warns where they are called.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	return (object.*M)(args...);
+#pragma GCC diagnostic pop
 }
 
 }  // namespace dsp_calls

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import BIN, REPO, copy_sharing_binaries, require_tools, tool
+from tests.support import BIN, MACOS, PLATFORM, RACK_HOST, REPO, copy_sharing_binaries, require_tools, tool
 
 # Suites under */in_rack*/ run inside Rack (tests.support.run_pytest_in_rack); outside Rack they cannot import.
 collect_ignore_glob = ["*/in_rack", "*/in_rack/*", "*/in_rack_*", "*/in_rack_*/*"]
@@ -25,18 +25,18 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
 @pytest.fixture(scope="session")
 def rack_sdk() -> Path:
     """The verified, extracted Rack SDK; downloads it into the cache on first use."""
-    return Path(tool("rack-sdk", "path").strip())
+    return Path(tool("rack-sdk", "path", PLATFORM).strip())
 
 
 @pytest.fixture(scope="session")
 def rack_host() -> Path:
     """The pinned Rack Free host directory."""
-    return Path(tool("rack-sdk", "host").strip())
+    return Path(tool("rack-sdk", "host", RACK_HOST).strip().splitlines()[-1])
 
 
 @pytest.fixture(scope="session")
 def native_tools() -> None:
-    require_tools("cmake", "ninja", "g++", "readelf", "nm", "objdump")
+    require_tools("cmake", "ninja", *(("c++", "otool", "nm") if MACOS else ("g++", "readelf", "nm", "objdump")))
 
 
 @pytest.fixture(scope="session")

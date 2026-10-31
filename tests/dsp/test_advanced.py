@@ -16,9 +16,9 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import linux_x64_only
+from tests.support import rack_platforms
 
-pytestmark = [pytest.mark.native, linux_x64_only()]
+pytestmark = [pytest.mark.native, rack_platforms()]
 
 
 def test_dsp_reference_runs_clean_under_sanitizers(dev_build: Path) -> None:

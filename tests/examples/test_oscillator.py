@@ -23,9 +23,10 @@ from rackpy.dsp.graph_reference import run
 from tests.examples.signal import check_blink, check_parity, check_sine, stream
 from tests.examples.support import EXAMPLES, plugin_tool, saved_patch, write_patch
 from tests.support import (
+    PLUGINS,
     PROBE_MODULE,
     assert_clean_exit,
-    linux_x64_only,
+    rack_platforms,
     run_pytest_in_rack,
     run_rack,
     run_rack_windowed,
@@ -68,7 +69,7 @@ def test_the_graph_is_mono_unpatched_and_polyphonic_with_a_cable() -> None:
 
 
 @pytest.mark.native
-@linux_x64_only()
+@rack_platforms()
 @pytest.mark.parametrize("kind", KINDS)
 @pytest.mark.parametrize("rate", RATES)
 def test_the_cpp_reference_and_the_graph_agree(dev_build: Path, rate: int, kind: str) -> None:
@@ -91,7 +92,7 @@ def stage_example(bundle: Path) -> Path:
 
 @pytest.mark.host
 @pytest.mark.gui
-@linux_x64_only()
+@rack_platforms()
 def test_the_module_in_live_rack(
     make_hooks_bundle: Callable[[], Path], hooks_build: Path, rack_host: Path, tmp_path: Path
 ) -> None:
@@ -129,7 +130,7 @@ def oscillators(plugin: str, knob: float) -> tuple[list[dict[str, object]], list
 
 @pytest.mark.host
 @pytest.mark.gui
-@linux_x64_only()
+@rack_platforms()
 def test_rack_creates_deletes_restores_and_reopens_it(
     make_hooks_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path
 ) -> None:
@@ -172,12 +173,12 @@ def test_rack_creates_deletes_restores_and_reopens_it(
 
 
 @pytest.mark.host
-@linux_x64_only()
+@rack_platforms()
 def test_the_plugin_loads_under_its_own_slug_and_keeps_its_patch(
     make_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path
 ) -> None:
     user = tmp_path / "user"
-    plugins = user / "plugins-lin-x64"
+    plugins = user / PLUGINS
     plugins.mkdir(parents=True)
     plugin_tool("build", OSCILLATOR, "--bundle", make_bundle(), "--dest", plugins)
     modules, cables = oscillators("RackPyOscillator", -1.5)

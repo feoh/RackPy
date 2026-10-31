@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "loader_config.hpp"
 
+#if defined(__APPLE__)
+#include <mach-o/dyld.h>
+#else
 #include <link.h>
+#endif
 
 #include <cctype>
 
@@ -97,19 +101,36 @@ bool readConfig(const std::string& path, Config& cfg, std::string& err) {
 
 namespace {
 
+// A loaded image that is a CPython runtime: libpython*, or on macOS a framework build's
+// Python.framework/Versions/X.Y/Python.
+bool isPython(const std::string& name) {
+	return rack::string::startsWith(rack::system::getFilename(name), "libpython")
+		|| name.find("/Python.framework/") != std::string::npos;
+}
+
+#if !defined(__APPLE__)
 int collectPython(struct dl_phdr_info* info, size_t, void* data) {
 	std::string name = info->dlpi_name ? info->dlpi_name : "";
-	std::string base = rack::system::getFilename(name);
-	if (rack::string::startsWith(base, "libpython"))
+	if (isPython(name))
 		static_cast<std::vector<std::string>*>(data)->push_back(name);
 	return 0;
 }
+#endif
 
 }  // namespace
 
 std::vector<std::string> loadedPythons() {
 	std::vector<std::string> names;
+#if defined(__APPLE__)
+	// dyld's image list, as dl_iterate_phdr's on Linux: also images other plugins opened with RTLD_LOCAL.
+	for (uint32_t i = 0, n = _dyld_image_count(); i < n; i++) {
+		const char* name = _dyld_get_image_name(i);
+		if (name && isPython(name))
+			names.push_back(name);
+	}
+#else
 	dl_iterate_phdr(collectPython, &names);
+#endif
 	return names;
 }
 
