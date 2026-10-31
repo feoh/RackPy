@@ -114,7 +114,9 @@ def _kernel(name: str, namespace: str, plan: Plan) -> tuple[str, str]:
         node = nodes[node_index]
         return f"f{field_of[(node.op, int(node.args[0]))]}"
 
-    members, init, reset = [], [], []
+    members: list[str] = []
+    init: list[str] = []
+    reset: list[str] = []
     if uses_io:
         members.append("\trackpy::io::Link ioLink;")
     if exchanges:
@@ -159,7 +161,8 @@ def _kernel(name: str, namespace: str, plan: Plan) -> tuple[str, str]:
         if node.op not in _SINKS:
             members.append(f"\tSignal p{k};  // {node.op}, on the polyphonic path")
 
-    mono, poly = [], []
+    mono: list[str] = []
+    poly: list[str] = []
     for k, node in enumerate(nodes):
         op, i = node.op, node.inputs
         # The single-channel path: a value and a channel count (0 or 1) per node; a value is 0 without a channel.
@@ -340,7 +343,8 @@ def emit(graphs: Mapping[str, Graph | Plan], namespace: str, source: str = "") -
         raise GraphError(f"the namespace {namespace} is reserved for RackPy")
     if not graphs:
         raise GraphError("there are no graphs to compile")
-    structs, registrations = [], []
+    structs: list[str] = []
+    registrations: list[str] = []
     exchanges = False
     uses_io = False
     for name, graph in graphs.items():

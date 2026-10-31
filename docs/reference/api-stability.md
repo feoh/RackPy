@@ -58,9 +58,9 @@ Strict mypy checks `src/`, `tests/` and every documentation snippet
 because they demonstrate lifetime transitions (`remove_child`, `close`) that
 mypy cannot see change an attribute it has already narrowed. Strict pyright,
 pinned in the development dependencies, checks the facade tests, the
-snippets and the facade modules listed in `tests/facade/pyrightconfig.json`.
-It does not yet check `rackpy.dsp.graph_reference`, `rackpy.dsp.graph_codegen`
-or the raw stubs. `rackpy.dsp.filters.process_block` is typed with overloads
+snippets and the facade modules listed in `tests/facade/pyrightconfig.json`,
+which include every public facade module. It does not check the raw stubs or
+the private underscore modules. `rackpy.dsp.filters.process_block` is typed with overloads
 for the time-step and IIR filters; IIR orders other than 3-3 come from the
 `IIRFilter[b_order, a_order]` template, which type checkers see as `Any`.
 

@@ -52,7 +52,9 @@ class Result:
 
     outputs: dict[int, list[list[float]]]
     lights: dict[int, list[float]]
-    sent: dict[tuple[int, int], list[list[float]]] = dataclasses.field(default_factory=dict)
+    sent: dict[tuple[int, int], list[list[float]]] = dataclasses.field(
+        default_factory=dict[tuple[int, int], list[list[float]]]
+    )
 
 
 def _lanes(signal: list[float], n: int) -> list[float]:
@@ -97,7 +99,13 @@ def _sin(x: float) -> float:
     return f32(math.sin(x)) if math.isfinite(x) else math.nan
 
 
-_ELEMENTWISE: dict[str, Callable[..., float]] = {
+_UNARY: dict[str, Callable[[float], float]] = {
+    "neg": lambda x: -x,
+    "abs": abs,
+    "pitch_to_freq": lambda v: FREQ_C4 * _pow2(v),
+    "sin2pi": lambda x: _sin(f32(_TWO_PI * x)),
+}
+_BINARY: dict[str, Callable[[float, float], float]] = {
     "add": lambda a, b: a + b,
     "sub": lambda a, b: a - b,
     "mul": lambda a, b: a * b,
@@ -108,13 +116,12 @@ _ELEMENTWISE: dict[str, Callable[..., float]] = {
     "le": lambda a, b: 1.0 if a <= b else 0.0,
     "gt": lambda a, b: 1.0 if a > b else 0.0,
     "ge": lambda a, b: 1.0 if a >= b else 0.0,
-    "neg": lambda x: -x,
-    "abs": abs,
+}
+_TERNARY: dict[str, Callable[[float, float, float], float]] = {
     "clamp": lambda x, low, high: _fmax(_fmin(x, high), low),
     "where": lambda c, a, b: a if c > 0 else b,
-    "pitch_to_freq": lambda v: FREQ_C4 * _pow2(v),
-    "sin2pi": lambda x: _sin(f32(_TWO_PI * x)),
 }
+_ELEMENTWISE: dict[str, Callable[..., float]] = {**_UNARY, **_BINARY, **_TERNARY}
 
 
 def _elementwise(op: str, operands: list[list[float]]) -> list[float]:

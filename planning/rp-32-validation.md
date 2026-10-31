@@ -113,6 +113,18 @@ overlaid on the identified RP-31 integration binaries: `tests/docs/test_snippets
 (every snippet, in Rack and in Python), `tests/io/test_virtual.py` and
 `tests/services/test_system.py`, 7 outer tests passed.
 
+## Strict pyright over every public facade module
+
+`graph_reference.py` and `graph_codegen.py` were the last public facade
+modules outside the strict pyright scope (36 and 46 errors). The causes were
+untyped lambdas in one mixed-arity table, now split into unary, binary and
+ternary tables whose declared types give the lambdas real parameter types; an
+untyped `default_factory=dict`; and lists created as `a, b = [], []`. These
+are annotation-only changes. Every public facade module is now in the gated
+pyright scope (checked by listing modules against the config). Mypy over 320
+files, the 25 pure-Python graph, reference and codegen tests, and the
+Python-run snippets passed.
+
 ## Bulk filter typing
 
 `rackpy.dsp.filters.process_block` no longer takes `Any`. Two overloads

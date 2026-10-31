@@ -14,6 +14,8 @@
     "../../src/rackpy/dsp/fft.py",
     "../../src/rackpy/dsp/filters.py",
     "../../src/rackpy/dsp/graph.py",
+    "../../src/rackpy/dsp/graph_codegen.py",
+    "../../src/rackpy/dsp/graph_reference.py",
     "../../src/rackpy/dsp/kernel.py",
     "../../src/rackpy/dsp/midi.py",
     "../../src/rackpy/dsp/resampling.py",
