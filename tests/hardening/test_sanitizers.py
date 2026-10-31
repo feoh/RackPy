@@ -30,6 +30,7 @@ SUITES: dict[str, list[str]] = {
     "tests/dsp/in_rack": [],
     "tests/engine/ops/in_rack": [],
     "tests/engine/expanders/in_rack": [],
+    "tests/hardening/in_rack_fuzz": [],
     "tests/history/in_rack": [],
     "tests/laboratory/in_rack": [],
     "tests/rendering/in_rack": [],

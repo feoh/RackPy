@@ -229,6 +229,11 @@ void registerErrorTranslator() {
 		catch (const Laboratory& e) {
 			PyErr_SetString(errorType("LaboratoryError"), e.what());
 		}
+		catch (const py::cast_error& e) {
+			// RP-38: a Python value of the wrong type met an explicit py::cast (a plan, an event field, a JSON key).
+			// pybind11 reports it as RuntimeError; Python, and pybind11's own argument checks, say TypeError.
+			PyErr_SetString(PyExc_TypeError, e.what());
+		}
 	});
 }
 
