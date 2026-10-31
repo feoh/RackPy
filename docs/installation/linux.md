@@ -15,7 +15,7 @@ not install a file that claims to be a RackPy release from anywhere else.
 - **Linux x86_64** with glibc 2.23 (Ubuntu 16.04's) or newer. The release
   candidates are built with VCV's own Rack plugin toolchain, the one Rack's own
   plugins are built with, and need no newer glibc than they do. They are
-  tested on Ubuntu 20.04.
+  tested on Ubuntu 16.04 (glibc 2.23) and Ubuntu 20.04.
 - **VCV Rack Free {{rack_version}}**. Other Rack 2 versions are untested.
 - **Nothing else.** Each plugin brings its own CPython {{python_version}}, and
   never uses a Python installed on the computer, or the network.
@@ -31,9 +31,10 @@ A release candidate is a folder of files, with `manifest.json` and `SHA256SUMS`:
 | `rackpy-<version>-py3-none-any.whl` | The `rackpy` Python package, for editors, type checkers and offline graph tests | Into a virtual environment, if you write plugins |
 | `rackpy-<version>-source.tar.gz` | The corresponding source code (GPL-3.0-or-later) | No |
 
-Each plugin is about 50 MB, most of it the Python runtime. **Install one RackPy
-plugin at a time**: each carries its own Python, and Rack can run only one of
-them ([why](../explanation/security.md#what-rackpy-never-runs)).
+Each plugin package is about 48 MB (173 MB once Rack extracts it), most of it
+the Python runtime. **Install one RackPy plugin at a time**: each carries its
+own Python, and Rack can run only one of them
+([why](../explanation/security.md#what-rackpy-never-runs)).
 
 ## Verify the download
 
@@ -124,8 +125,10 @@ plugin loads.
 ## How the release candidates are checked
 
 `bin/rackpy-release verify` installs every plugin package of a release
-candidate on a clean Ubuntu 20.04 container: no RackPy checkout, no Python on
-the system and no network, with a fresh Rack user folder for each run. For each
+candidate on a clean Ubuntu 20.04 container, and with `--image ubuntu-16.04`
+on Ubuntu 16.04 (glibc 2.23, the oldest claimed): no RackPy checkout, no
+Python on the system and no network, with a fresh Rack user folder for each
+run. For each
 plugin it checks that Rack extracts and loads it, that all of its modules run,
 are saved and come back when the patch is reopened, that the module browser
 draws their previews, and that Rack quits with the interpreter finalized. It

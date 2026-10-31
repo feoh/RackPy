@@ -111,8 +111,8 @@ unit tests; the docs build; their links; SDK pins, native build and the audio-pa
 guard; the inventory; real-host smoke tests (headless and Xvfb); and, outside
 pull requests, the distributable build with the official toolchain (restored
 from cache, or built in about an hour) and the Linux release candidate, built
-by `bin/rackpy-release build` and installed on a clean container by
-`bin/rackpy-release verify` (RP-39). Reports and Rack logs are kept 14 days,
+by `bin/rackpy-release build` and installed on clean Ubuntu 20.04 and 16.04
+containers by `bin/rackpy-release verify` (RP-39). Reports and Rack logs are kept 14 days,
 the release candidate's evidence 30. CI keeps no binaries, because
 distributing one needs owner approval (RP-44).
 

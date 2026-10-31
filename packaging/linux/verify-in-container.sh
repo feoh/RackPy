@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: GPL-3.0-or-later
-# RP-39: runs inside packaging/linux/verify.Dockerfile, without a network. /artifacts holds the release
+# RP-39: runs inside packaging/linux/ubuntu-*.Dockerfile, without a network. /artifacts holds the release
 # candidate (read-only), /opt/Rack2Free the pinned Rack Free 2.6.6 (read-only); logs and screenshots go to
 # /logs, and /logs/summary.txt says what passed. Each Rack run gets a fresh user folder, as a fresh install.
 set -uo pipefail

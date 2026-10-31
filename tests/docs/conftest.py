@@ -28,6 +28,7 @@ LINKED = (
     "cmake",
     "LICENSE",
     "NOTICE",
+    "SECURITY.md",
     ".github",
 )
 

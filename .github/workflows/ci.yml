@@ -275,7 +275,7 @@ jobs:
   release-candidate:
     name: Linux release candidate, installed and run on a clean machine
     # RP-39. Builds every Linux artifact of this commit with the official toolchain (bin/rackpy-release build),
-    # then installs and runs them in a clean Ubuntu 20.04 container with no Python and no network
+    # then installs and runs them in clean Ubuntu 20.04 and 16.04 containers with no Python and no network
     # (bin/rackpy-release verify). Keeps the manifest, checksums, logs and screenshots, not the artifacts:
     # nothing is distributed without owner approval.
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
@@ -304,10 +304,14 @@ jobs:
       - run: uv sync --frozen
       - name: Build the release candidate
         run: bin/rackpy-release build --dest "$RUNNER_TEMP/release"
-      - name: Install and run it on a clean machine
+      - name: Install and run it on a clean Ubuntu 20.04
         run: >
           bin/rackpy-release verify "$RUNNER_TEMP/release/artifacts" --rack "$(bin/rack-sdk host | tail -1)"
-          --logs reports/verify
+          --logs reports/verify-ubuntu-20.04
+      - name: Install and run it on a clean Ubuntu 16.04 (glibc 2.23, the oldest claimed)
+        run: >
+          bin/rackpy-release verify "$RUNNER_TEMP/release/artifacts" --rack "$(bin/rack-sdk host | tail -1)"
+          --logs reports/verify-ubuntu-16.04 --image ubuntu-16.04
       - if: always()
         name: Keep the manifest and checksums with the logs
         run: |

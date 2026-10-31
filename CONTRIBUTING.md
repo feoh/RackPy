@@ -121,7 +121,7 @@ and on pull requests, on `ubuntu-24.04`:
 | Documentation external links (weekly and on demand) | `sphinx-build -b linkcheck` |
 | Rack host smoke tests | `pytest -m "host and not dist"`: the skeleton, the docs snippets that run in Rack, the RP-04 spike and the RP-06 probe in Rack Free 2.6.6 |
 | Distributable build (pushes to `main` and on demand) | builds or restores the official toolchain, then `pytest -m dist` |
-| Linux release candidate (pushes to `main` and on demand) | `bin/rackpy-release build`, then `bin/rackpy-release verify` installs it on a clean container with no Python and no network; keeps the manifest, checksums, logs and screenshots |
+| Linux release candidate (pushes to `main` and on demand) | `bin/rackpy-release build`, then `bin/rackpy-release verify` installs it on clean Ubuntu 20.04 and 16.04 containers with no Python and no network; keeps the manifest, checksums, logs and screenshots |
 
 Each job keeps its JUnit report, the host jobs keep every Rack `log.txt`, and
 the docs job keeps the built site, for 14 days. CI keeps no binaries:

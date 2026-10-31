@@ -32,7 +32,7 @@ import urllib.request
 import zipfile
 from fnmatch import fnmatchcase
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import cyclopts
 
@@ -593,18 +593,23 @@ def compare(first: Path, second: Path) -> None:
 
 
 VERIFY_SCRIPT = REPO / "packaging" / "linux" / "verify-in-container.sh"
-VERIFY_IMAGE = REPO / "packaging" / "linux" / "verify.Dockerfile"
+# Clean machines to install on: the oldest Linux claimed (glibc 2.23, the toolchain's floor) and a later one.
+VERIFY_IMAGES = {name: REPO / "packaging" / "linux" / f"{name}.Dockerfile" for name in ("ubuntu-20.04", "ubuntu-16.04")}
 
 
 @app.command
-def verify(artifacts: Path, *, rack: Path, logs: Path) -> None:
+def verify(
+    artifacts: Path, *, rack: Path, logs: Path, image: Literal["ubuntu-20.04", "ubuntu-16.04"] = "ubuntu-20.04"
+) -> None:
     """Install ARTIFACTS in a clean container with Rack Free at RACK, and run every example; logs go to LOGS.
 
-    The image (packaging/linux/verify.Dockerfile) has Rack's system libraries and Xvfb, but no Python and no
-    RackPy checkout; the run itself has no network, as an offline machine would.
+    The image (packaging/linux/IMAGE.Dockerfile) has Rack's system libraries and Xvfb, but no Python and no
+    RackPy checkout; the run itself has no network, as an offline machine would. ubuntu-16.04 has glibc 2.23,
+    the oldest the artifacts claim.
     """
-    tag = "rackpy-verify:" + hashlib.sha256(VERIFY_IMAGE.read_bytes()).hexdigest()[:12]
-    run(["docker", "build", "-t", tag, "-f", VERIFY_IMAGE, VERIFY_IMAGE.parent])
+    dockerfile = VERIFY_IMAGES[image]
+    tag = f"rackpy-verify-{image}:" + hashlib.sha256(dockerfile.read_bytes()).hexdigest()[:12]
+    run(["docker", "build", "-t", tag, "-f", dockerfile, dockerfile.parent])
     if logs.exists():
         shutil.rmtree(logs)
     logs.mkdir(parents=True)
