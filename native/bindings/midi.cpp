@@ -252,8 +252,8 @@ bool deliverSynchronously(const Self* self, Tracked& port, const m::Message& mes
 	// Rack's own main-thread delivery (its computer keyboard driver): callPython also drains queued releases
 	// after `deliver`, still inside Rack's loop, so the delivery counts until it returns.
 	++deliveries;
-	struct Leave {
-		~Leave() { --deliveries; }
+	struct MidiLeave {
+		~MidiLeave() { --deliveries; }
 	} leave;
 	runtime::callPython("on_message", deliver);
 	return true;
@@ -370,7 +370,7 @@ void requireLiveContext(const char* what) {
 }
 
 /** One of Rack's MIDI drivers, by its ID: drivers live until Rack's shutdown. */
-struct DriverView {
+struct MidiDriverView {
 	int id;
 	m::Driver& get() const {
 		runtime::requireMainThread("using a MIDI driver");
@@ -382,11 +382,11 @@ struct DriverView {
 };
 
 py::object driverObject(int id) {
-	return m::getDriver(id) ? py::cast(DriverView{id}) : py::none();
+	return m::getDriver(id) ? py::cast(MidiDriverView{id}) : py::none();
 }
 
 /** A device, through the Python port that holds it: Rack's driver may delete it once no port does. */
-struct DeviceView {
+struct MidiDeviceView {
 	py::object owner;  // the Python port
 	m::Device* device;
 	m::Device& get() const {
@@ -398,8 +398,8 @@ struct DeviceView {
 		return *device;
 	}
 };
-struct InputDeviceView : DeviceView {};
-struct OutputDeviceView : DeviceView {};
+struct InputDeviceView : MidiDeviceView {};
+struct OutputDeviceView : MidiDeviceView {};
 
 py::object deviceObject(py::object owner, m::Device* device, bool input) {
 	if (!device)
@@ -410,7 +410,7 @@ py::object deviceObject(py::object owner, m::Device* device, bool input) {
 }
 
 /** A port in a device's subscriber set that Python did not make (a module's): read-only, found again in the set. */
-struct PortView {
+struct MidiPortView {
 	std::function<m::Device&()> device;  // resolves the device again, or raises
 	const m::Port* port;
 	bool input;
@@ -456,7 +456,7 @@ py::list subscribers(std::function<m::Device&()> resolve, const Set& set, bool i
 		if (py::object o = portObject(port))
 			out.append(o);
 		else
-			out.append(py::cast(PortView{resolve, port, input}));
+			out.append(py::cast(MidiPortView{resolve, port, input}));
 	}
 	return out;
 }
@@ -900,19 +900,19 @@ void bindMidi(py::module_ mod) {
 			return "<Message " + msg.toString() + " frame=" + std::to_string(msg.frame) + ">";
 		});
 
-	py::class_<DriverView>(mod, "Driver", py::is_final(),
+	py::class_<MidiDriverView>(mod, "Driver", py::is_final(),
 		"One of Rack's MIDI drivers (get_driver), by its ID. Main thread.")
-		.def_property_readonly("id", [](const DriverView& d) { return d.id; })
-		.def("get_name", [](const DriverView& d) { return d.get().getName(); })
-		.def("get_input_device_ids", [](const DriverView& d) { return d.get().getInputDeviceIds(); })
-		.def("get_default_input_device_id", [](const DriverView& d) { return d.get().getDefaultInputDeviceId(); })
-		.def("get_input_device_name", [](const DriverView& d, int id) { return d.get().getInputDeviceName(id); },
+		.def_property_readonly("id", [](const MidiDriverView& d) { return d.id; })
+		.def("get_name", [](const MidiDriverView& d) { return d.get().getName(); })
+		.def("get_input_device_ids", [](const MidiDriverView& d) { return d.get().getInputDeviceIds(); })
+		.def("get_default_input_device_id", [](const MidiDriverView& d) { return d.get().getDefaultInputDeviceId(); })
+		.def("get_input_device_name", [](const MidiDriverView& d, int id) { return d.get().getInputDeviceName(id); },
 			py::arg("device_id"))
-		.def("get_output_device_ids", [](const DriverView& d) { return d.get().getOutputDeviceIds(); })
-		.def("get_default_output_device_id", [](const DriverView& d) { return d.get().getDefaultOutputDeviceId(); })
-		.def("get_output_device_name", [](const DriverView& d, int id) { return d.get().getOutputDeviceName(id); },
+		.def("get_output_device_ids", [](const MidiDriverView& d) { return d.get().getOutputDeviceIds(); })
+		.def("get_default_output_device_id", [](const MidiDriverView& d) { return d.get().getDefaultOutputDeviceId(); })
+		.def("get_output_device_name", [](const MidiDriverView& d, int id) { return d.get().getOutputDeviceName(id); },
 			py::arg("device_id"))
-		.def("subscribe_input", [](const DriverView& d, int deviceId, py::object input) -> py::object {
+		.def("subscribe_input", [](const MidiDriverView& d, int deviceId, py::object input) -> py::object {
 			auto& port = pythonPort<m::Input>(input, "subscribe_input");
 			auto& t = tracked(port);
 			auto* device = d.get().subscribeInput(deviceId, &port);
@@ -923,7 +923,7 @@ void bindMidi(py::module_ mod) {
 		}, py::arg("device_id"), py::arg("input"),
 			"Rack's: makes the port a subscriber of the device, apart from the port's own device; RackPy undoes it "
 			"when the port dies or the context closes. Port.set_device_id is the usual way.")
-		.def("unsubscribe_input", [](const DriverView& d, int deviceId, py::object input) {
+		.def("unsubscribe_input", [](const MidiDriverView& d, int deviceId, py::object input) {
 			auto& port = pythonPort<m::Input>(input, "unsubscribe_input");
 			auto& t = tracked(port);
 			auto it = t.findDriverSubscription(d.id, deviceId);
@@ -932,7 +932,7 @@ void bindMidi(py::module_ mod) {
 			d.get().unsubscribeInput(deviceId, &port);
 			t.driverSubscriptions.erase(it);
 		}, py::arg("device_id"), py::arg("input"))
-		.def("subscribe_output", [](const DriverView& d, int deviceId, py::object output) -> py::object {
+		.def("subscribe_output", [](const MidiDriverView& d, int deviceId, py::object output) -> py::object {
 			auto& port = pythonPort<m::Output>(output, "subscribe_output");
 			auto& t = tracked(port);
 			auto* device = d.get().subscribeOutput(deviceId, &port);
@@ -941,7 +941,7 @@ void bindMidi(py::module_ mod) {
 			t.driverSubscriptions.push_back({d.id, deviceId, device});
 			return deviceObject(output, device, false);
 		}, py::arg("device_id"), py::arg("output"))
-		.def("unsubscribe_output", [](const DriverView& d, int deviceId, py::object output) {
+		.def("unsubscribe_output", [](const MidiDriverView& d, int deviceId, py::object output) {
 			auto& port = pythonPort<m::Output>(output, "unsubscribe_output");
 			auto& t = tracked(port);
 			auto it = t.findDriverSubscription(d.id, deviceId);
@@ -950,12 +950,12 @@ void bindMidi(py::module_ mod) {
 			d.get().unsubscribeOutput(deviceId, &port);
 			t.driverSubscriptions.erase(it);
 		}, py::arg("device_id"), py::arg("output"))
-		.def("__eq__", [](const DriverView& a, const DriverView& b) { return a.id == b.id; })
-		.def("__hash__", [](const DriverView& d) { return py::hash(py::int_(d.id)); })
-		.def("__repr__", [](const DriverView& d) { return "<midi.Driver " + std::to_string(d.id) + ">"; });
+		.def("__eq__", [](const MidiDriverView& a, const MidiDriverView& b) { return a.id == b.id; })
+		.def("__hash__", [](const MidiDriverView& d) { return py::hash(py::int_(d.id)); })
+		.def("__repr__", [](const MidiDriverView& d) { return "<midi.Driver " + std::to_string(d.id) + ">"; });
 
-	py::class_<DeviceView>(mod, "Device", "A MIDI device of a driver, through the Python port that holds it.")
-		.def_property_readonly("alive", [](const DeviceView& v) {
+	py::class_<MidiDeviceView>(mod, "Device", "A MIDI device of a driver, through the Python port that holds it.")
+		.def_property_readonly("alive", [](const MidiDeviceView& v) {
 			try {
 				v.get();
 				return true;
@@ -964,8 +964,8 @@ void bindMidi(py::module_ mod) {
 				return false;
 			}
 		})
-		.def("get_name", [](const DeviceView& v) { return v.get().getName(); });
-	py::class_<InputDeviceView, DeviceView>(mod, "InputDevice")
+		.def("get_name", [](const MidiDeviceView& v) { return v.get().getName(); });
+	py::class_<InputDeviceView, MidiDeviceView>(mod, "InputDevice")
 		.def_property_readonly("subscribed", [](py::object self) {
 			auto& v = self.cast<const InputDeviceView&>();
 			return subscribers([self]() -> m::Device& { return self.cast<const InputDeviceView&>().get(); },
@@ -994,7 +994,7 @@ void bindMidi(py::module_ mod) {
 		}, py::arg("message"),
 			"Rack's: delivers the message to the device's subscribers, as the driver does when one arrives (an unset "
 			"frame is set to Rack's engine timing).");
-	py::class_<OutputDeviceView, DeviceView>(mod, "OutputDevice")
+	py::class_<OutputDeviceView, MidiDeviceView>(mod, "OutputDevice")
 		.def_property_readonly("subscribed", [](py::object self) {
 			auto& v = self.cast<const OutputDeviceView&>();
 			return subscribers([self]() -> m::Device& { return self.cast<const OutputDeviceView&>().get(); },
@@ -1022,9 +1022,9 @@ void bindMidi(py::module_ mod) {
 			static_cast<m::OutputDevice&>(v.get()).sendMessage(message);
 		}, py::arg("message"), "Rack's: sends the message to the device as it is (no channel is applied).");
 
-	py::class_<PortView>(mod, "PortView", py::is_final(),
+	py::class_<MidiPortView>(mod, "PortView", py::is_final(),
 		"A port Python did not make (a module's), listed by a device's subscribers: read-only, found again at every use.")
-		.def_property_readonly("alive", [](const PortView& v) {
+		.def_property_readonly("alive", [](const MidiPortView& v) {
 			try {
 				v.get();
 				return true;
@@ -1033,9 +1033,9 @@ void bindMidi(py::module_ mod) {
 				return false;
 			}
 		})
-		.def_property_readonly("driver_id", [](const PortView& v) { return v.get().driverId; })
-		.def_property_readonly("device_id", [](const PortView& v) { return v.get().deviceId; })
-		.def_property_readonly("channel", [](const PortView& v) { return v.get().channel; });
+		.def_property_readonly("driver_id", [](const MidiPortView& v) { return v.get().driverId; })
+		.def_property_readonly("device_id", [](const MidiPortView& v) { return v.get().deviceId; })
+		.def_property_readonly("channel", [](const MidiPortView& v) { return v.get().channel; });
 
 	py::class_<m::Port, std::unique_ptr<m::Port, MainThreadDelete<m::Port>>> port(mod, "Port",
 		"Rack's MIDI port: a handle on one device of one driver. Make an Input, InputQueue or Output; main thread, in "
@@ -1311,7 +1311,7 @@ void bindMidi(py::module_ mod) {
 	}, "Rack's: the IDs of its MIDI drivers.");
 	mod.def("get_driver", [](int id) -> py::object {
 		runtime::requireMainThread("finding a MIDI driver");
-		return m::getDriver(id) ? py::cast(DriverView{id}) : py::none();
+		return m::getDriver(id) ? py::cast(MidiDriverView{id}) : py::none();
 	}, py::arg("driver_id"), "Rack's: the driver with this ID, or None.");
 }
 

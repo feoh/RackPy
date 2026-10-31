@@ -77,8 +77,8 @@ void dispatch(Override o, F&& call) {
 			throw py::error_already_set();
 		}
 		nesting++;
-		struct Leave {
-			~Leave() { nesting--; }
+		struct ModuleLabLeave {
+			~ModuleLabLeave() { nesting--; }
 		} leave;
 		call();
 	});

@@ -83,11 +83,11 @@ struct PyOutputDevice : OutputDevice, py::trampoline_self_life_support {
 returns from subscribe outlives the call. */
 template <class Device>
 struct Devices {
-	struct Entry {
+	struct MidiLabEntry {
 		py::object object;
 		Device* device;
 	};
-	std::map<int, Entry> entries;
+	std::map<int, MidiLabEntry> entries;
 	int nextId = 0;
 	int defaultId = -1;
 

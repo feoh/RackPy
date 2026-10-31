@@ -13,7 +13,7 @@ constexpr size_t WORDS = DIAGNOSTIC_MESSAGE_BYTES / sizeof(uint64_t);
 constexpr size_t CODES = 16;
 
 /** One record, guarded by a sequence lock. Every field is atomic, so a torn read is detected, never undefined. */
-struct Slot {
+struct DiagnosticSlot {
 	// 0: never written. Odd: being written. Even 2n: holds record n.
 	std::atomic<uint64_t> seq{0};
 	std::atomic<double> time{0};
@@ -22,7 +22,7 @@ struct Slot {
 	std::atomic<uint64_t> words[WORDS] = {};
 };
 
-Slot slots[DIAGNOSTIC_CAPACITY];
+DiagnosticSlot slots[DIAGNOSTIC_CAPACITY];
 std::atomic<uint64_t> next{0};
 std::atomic<uint64_t> counts[CODES] = {};
 
@@ -45,7 +45,7 @@ const char* codeName(DiagnosticCode code) {
 void diagnose(DiagnosticCode code, const char* message) {
 	uint64_t n = next.fetch_add(1, std::memory_order_relaxed) + 1;
 	counts[(size_t) code % CODES].fetch_add(1, std::memory_order_relaxed);
-	Slot& s = slots[(n - 1) % DIAGNOSTIC_CAPACITY];
+	DiagnosticSlot& s = slots[(n - 1) % DIAGNOSTIC_CAPACITY];
 	s.seq.store(2 * n - 1, std::memory_order_relaxed);
 	std::atomic_thread_fence(std::memory_order_release);
 	s.time.store(rack::system::getTime(), std::memory_order_relaxed);
@@ -69,7 +69,7 @@ std::vector<Diagnostic> readDiagnostics(uint64_t after) {
 	if (after + 1 > first)
 		first = after + 1;
 	for (uint64_t n = first; n <= last; n++) {
-		const Slot& s = slots[(n - 1) % DIAGNOSTIC_CAPACITY];
+		const DiagnosticSlot& s = slots[(n - 1) % DIAGNOSTIC_CAPACITY];
 		uint64_t before = s.seq.load(std::memory_order_acquire);
 		if (before != 2 * n)
 			continue;  // being written, or already overwritten by a newer record

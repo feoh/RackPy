@@ -100,12 +100,12 @@ struct PyAudioDevice : AudioDevice, py::trampoline_self_life_support {
 /** rackpy.laboratory.AudioDriver: its native answers come from the devices Python added. The Python objects of
 its devices stay alive while it holds them, so a device it returns from subscribe outlives the call. */
 struct AudioDriver : bindings::UnlistedAudioDriver {
-	struct Entry {
+	struct AudioLabEntry {
 		py::object object;
 		AudioDevice* device;
 	};
 	std::string name;
-	std::map<int, Entry> devices;
+	std::map<int, AudioLabEntry> devices;
 	int nextId = 0;
 	int defaultId = -1;
 

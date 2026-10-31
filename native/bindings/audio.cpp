@@ -339,7 +339,7 @@ PyAudioPort& checked(a::Port& port) {
 }
 
 /** One of Rack's audio drivers, by its ID: drivers live until Rack's shutdown. */
-struct DriverView {
+struct AudioDriverView {
 	int id;
 	a::Driver& get() const {
 		runtime::requireMainThread("using an audio driver");
@@ -351,11 +351,11 @@ struct DriverView {
 };
 
 py::object driverObject(int id) {
-	return a::getDriver(id) ? py::cast(DriverView{id}) : py::none();
+	return a::getDriver(id) ? py::cast(AudioDriverView{id}) : py::none();
 }
 
 /** A device, through the Python port that holds it. */
-struct DeviceView {
+struct AudioDeviceView {
 	py::object owner;
 	a::Device* device;
 	a::Device& get() const {
@@ -367,11 +367,11 @@ struct DeviceView {
 };
 
 py::object deviceObject(py::object owner, a::Device* device) {
-	return device ? py::cast(DeviceView{std::move(owner), device}) : py::none();
+	return device ? py::cast(AudioDeviceView{std::move(owner), device}) : py::none();
 }
 
 /** A port in a device's subscriber set that Python did not make (a module's): read-only. */
-struct PortView {
+struct AudioPortView {
 	std::function<a::Device&()> device;  // resolves the device again, or raises
 	const a::Port* port;
 	const a::Port& get() const {
@@ -391,7 +391,7 @@ py::list subscriberList(a::Device& d, std::function<a::Device&()> resolve) {
 		if (dynamic_cast<PyAudioPort*>(port))
 			out.append(py::cast(port, py::return_value_policy::reference));
 		else
-			out.append(py::cast(PortView{resolve, port}));
+			out.append(py::cast(AudioPortView{resolve, port}));
 	}
 	return out;
 }
@@ -756,17 +756,17 @@ py::object moduleAudioStats(module::Module& m) {
 }
 
 void bindAudio(py::module_ mod) {
-	py::class_<DriverView>(mod, "Driver", py::is_final(), "One of Rack's audio drivers (get_driver), by its ID. Main thread.")
-		.def_property_readonly("id", [](const DriverView& d) { return d.id; })
-		.def("get_name", [](const DriverView& d) { return d.get().getName(); })
-		.def("get_device_ids", [](const DriverView& d) { return d.get().getDeviceIds(); })
-		.def("get_default_device_id", [](const DriverView& d) { return d.get().getDefaultDeviceId(); })
-		.def("get_device_name", [](const DriverView& d, int id) { return d.get().getDeviceName(id); }, py::arg("device_id"))
-		.def("get_device_num_inputs", [](const DriverView& d, int id) { return d.get().getDeviceNumInputs(id); },
+	py::class_<AudioDriverView>(mod, "Driver", py::is_final(), "One of Rack's audio drivers (get_driver), by its ID. Main thread.")
+		.def_property_readonly("id", [](const AudioDriverView& d) { return d.id; })
+		.def("get_name", [](const AudioDriverView& d) { return d.get().getName(); })
+		.def("get_device_ids", [](const AudioDriverView& d) { return d.get().getDeviceIds(); })
+		.def("get_default_device_id", [](const AudioDriverView& d) { return d.get().getDefaultDeviceId(); })
+		.def("get_device_name", [](const AudioDriverView& d, int id) { return d.get().getDeviceName(id); }, py::arg("device_id"))
+		.def("get_device_num_inputs", [](const AudioDriverView& d, int id) { return d.get().getDeviceNumInputs(id); },
 			py::arg("device_id"))
-		.def("get_device_num_outputs", [](const DriverView& d, int id) { return d.get().getDeviceNumOutputs(id); },
+		.def("get_device_num_outputs", [](const AudioDriverView& d, int id) { return d.get().getDeviceNumOutputs(id); },
 			py::arg("device_id"))
-		.def("subscribe", [](const DriverView& d, int deviceId, py::object port) -> py::object {
+		.def("subscribe", [](const AudioDriverView& d, int deviceId, py::object port) -> py::object {
 			auto& p = pythonPort(port);
 			if (p.bridgeOwner)
 				throw runtime::Ownership("a module's audio port has only its own device");
@@ -778,7 +778,7 @@ void bindAudio(py::module_ mod) {
 		}, py::arg("device_id"), py::arg("port"),
 			"Rack's: makes the port a subscriber of the device (which may open its stream), apart from the port's own "
 			"device; RackPy undoes it when the port dies or the context closes. Port.set_device_id is the usual way.")
-		.def("unsubscribe", [](const DriverView& d, int deviceId, py::object port) {
+		.def("unsubscribe", [](const AudioDriverView& d, int deviceId, py::object port) {
 			auto& p = pythonPort(port);
 			auto it = std::find_if(p.driverSubscriptions.begin(), p.driverSubscriptions.end(),
 				[&](const PyAudioPort::Direct& s) { return s.driverId == d.id && s.deviceId == deviceId; });
@@ -787,13 +787,13 @@ void bindAudio(py::module_ mod) {
 			d.get().unsubscribe(deviceId, &p);
 			p.driverSubscriptions.erase(it);
 		}, py::arg("device_id"), py::arg("port"))
-		.def("__eq__", [](const DriverView& x, const DriverView& y) { return x.id == y.id; })
-		.def("__hash__", [](const DriverView& d) { return py::hash(py::int_(d.id)); })
-		.def("__repr__", [](const DriverView& d) { return "<audio.Driver " + std::to_string(d.id) + ">"; });
+		.def("__eq__", [](const AudioDriverView& x, const AudioDriverView& y) { return x.id == y.id; })
+		.def("__hash__", [](const AudioDriverView& d) { return py::hash(py::int_(d.id)); })
+		.def("__repr__", [](const AudioDriverView& d) { return "<audio.Driver " + std::to_string(d.id) + ">"; });
 
-	py::class_<PortView>(mod, "PortView", py::is_final(),
+	py::class_<AudioPortView>(mod, "PortView", py::is_final(),
 		"A port Python did not make (a module's), listed by a device's subscribers: read-only, found again at every use.")
-		.def_property_readonly("alive", [](const PortView& v) {
+		.def_property_readonly("alive", [](const AudioPortView& v) {
 			try {
 				v.get();
 				return true;
@@ -802,17 +802,17 @@ void bindAudio(py::module_ mod) {
 				return false;
 			}
 		})
-		.def_property_readonly("driver_id", [](const PortView& v) { return v.get().driverId; })
-		.def_property_readonly("device_id", [](const PortView& v) { return v.get().deviceId; })
-		.def_property_readonly("input_offset", [](const PortView& v) { return v.get().inputOffset; })
-		.def_property_readonly("output_offset", [](const PortView& v) { return v.get().outputOffset; })
-		.def_property_readonly("max_inputs", [](const PortView& v) { return v.get().maxInputs; })
-		.def_property_readonly("max_outputs", [](const PortView& v) { return v.get().maxOutputs; });
+		.def_property_readonly("driver_id", [](const AudioPortView& v) { return v.get().driverId; })
+		.def_property_readonly("device_id", [](const AudioPortView& v) { return v.get().deviceId; })
+		.def_property_readonly("input_offset", [](const AudioPortView& v) { return v.get().inputOffset; })
+		.def_property_readonly("output_offset", [](const AudioPortView& v) { return v.get().outputOffset; })
+		.def_property_readonly("max_inputs", [](const AudioPortView& v) { return v.get().maxInputs; })
+		.def_property_readonly("max_outputs", [](const AudioPortView& v) { return v.get().maxOutputs; });
 
-	py::class_<DeviceView>(mod, "Device", py::is_final(),
+	py::class_<AudioDeviceView>(mod, "Device", py::is_final(),
 		"An audio device of a driver, through the Python port that holds it. Rack's device methods may raise Rack's "
 		"Exception from the driver.")
-		.def_property_readonly("alive", [](const DeviceView& v) {
+		.def_property_readonly("alive", [](const AudioDeviceView& v) {
 			try {
 				v.get();
 				return true;
@@ -821,29 +821,29 @@ void bindAudio(py::module_ mod) {
 				return false;
 			}
 		})
-		.def("get_name", [](const DeviceView& v) { return v.get().getName(); })
-		.def("get_num_inputs", [](const DeviceView& v) { return v.get().getNumInputs(); })
-		.def("get_num_outputs", [](const DeviceView& v) { return v.get().getNumOutputs(); })
-		.def("get_sample_rates", [](const DeviceView& v) { return sorted(v.get().getSampleRates()); },
+		.def("get_name", [](const AudioDeviceView& v) { return v.get().getName(); })
+		.def("get_num_inputs", [](const AudioDeviceView& v) { return v.get().getNumInputs(); })
+		.def("get_num_outputs", [](const AudioDeviceView& v) { return v.get().getNumOutputs(); })
+		.def("get_sample_rates", [](const AudioDeviceView& v) { return sorted(v.get().getSampleRates()); },
 			"Rack's set of selectable rates, sorted.")
-		.def("get_sample_rate", [](const DeviceView& v) { return v.get().getSampleRate(); })
-		.def("set_sample_rate", [](const DeviceView& v, float rate) {
+		.def("get_sample_rate", [](const AudioDeviceView& v) { return v.get().getSampleRate(); })
+		.def("set_sample_rate", [](const AudioDeviceView& v, float rate) {
 			a::Device& d = v.get();
 			ReleaseForDriver release(&d);  // the driver may reopen its stream
 			d.setSampleRate(rate);
 		}, py::arg("sample_rate"))
-		.def("get_block_sizes", [](const DeviceView& v) { return sorted(v.get().getBlockSizes()); })
-		.def("get_block_size", [](const DeviceView& v) { return v.get().getBlockSize(); })
-		.def("set_block_size", [](const DeviceView& v, int size) {
+		.def("get_block_sizes", [](const AudioDeviceView& v) { return sorted(v.get().getBlockSizes()); })
+		.def("get_block_size", [](const AudioDeviceView& v) { return v.get().getBlockSize(); })
+		.def("set_block_size", [](const AudioDeviceView& v, int size) {
 			a::Device& d = v.get();
 			ReleaseForDriver release(&d);
 			d.setBlockSize(size);
 		}, py::arg("block_size"))
 		.def_property_readonly("subscribed", [](py::object self) {
-			a::Device& d = self.cast<const DeviceView&>().get();
-			return subscriberList(d, [self]() -> a::Device& { return self.cast<const DeviceView&>().get(); });
+			a::Device& d = self.cast<const AudioDeviceView&>().get();
+			return subscriberList(d, [self]() -> a::Device& { return self.cast<const AudioDeviceView&>().get(); });
 		}, "Rack's subscribers: Python's own ports, and PortViews of the others (modules' ports).")
-		.def("subscribe", [](const DeviceView& v, py::object port) {
+		.def("subscribe", [](const AudioDeviceView& v, py::object port) {
 			a::Device& d = v.get();
 			auto& p = pythonPort(port);
 			if (p.bridgeOwner)
@@ -851,7 +851,7 @@ void bindAudio(py::module_ mod) {
 			d.subscribe(&p);
 			p.deviceSubscriptions.push_back(&d);
 		}, py::arg("port"), "Rack's (its driver's subscribe calls it); RackPy undoes it with the port.")
-		.def("unsubscribe", [](const DeviceView& v, py::object port) {
+		.def("unsubscribe", [](const AudioDeviceView& v, py::object port) {
 			a::Device& d = v.get();
 			auto& p = pythonPort(port);
 			auto it = std::find(p.deviceSubscriptions.begin(), p.deviceSubscriptions.end(), &d);

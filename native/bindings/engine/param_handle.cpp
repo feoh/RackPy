@@ -39,11 +39,11 @@ namespace {
 constexpr int64_t kSentinelModuleId = int64_t(1) << 53;
 constexpr int kSentinelParamId = -1;
 
-struct Slot {
+struct HandleSlot {
 	ParamHandle handle{};
 	bool registered = false;
 	uint64_t generation = 0;
-	Slot() { handle.color = nvgRGBf(0.f, 0.f, 0.f); }
+	HandleSlot() { handle.color = nvgRGBf(0.f, 0.f, 0.f); }
 };
 
 /** Main thread only. */
@@ -51,7 +51,7 @@ struct Registry {
 	ParamHandle sentinel{};
 	const Engine* engine = nullptr;  // the engine the sentinel was added to
 	uint64_t generation = 0;         // bumped at each (re)install: older registrations are gone
-	std::vector<std::shared_ptr<Slot>> slots;  // Python's handles in the engine
+	std::vector<std::shared_ptr<HandleSlot>> slots;  // Python's handles in the engine
 	bool cleanupRegistered = false;
 };
 
@@ -95,7 +95,7 @@ void ensureSentinel(Engine& engine) {
 	++r.generation;
 }
 
-bool registered(const Slot& slot) {
+bool registered(const HandleSlot& slot) {
 	return slot.registered && slot.generation == registry().generation && registry().engine;
 }
 
@@ -118,7 +118,7 @@ void removeAllAtClose(const std::shared_ptr<runtime::ContextToken>& token) noexc
 
 /** A ParamHandle from Python: one Python made (its slot), or another owner's, found by its IDs. */
 struct ParamHandleRef {
-	std::shared_ptr<Slot> slot;
+	std::shared_ptr<HandleSlot> slot;
 	// Another owner's handle (a module's): found again with getParamHandle at every use.
 	std::shared_ptr<runtime::ContextToken> token;
 	int64_t moduleId = -1;
@@ -204,7 +204,7 @@ void bindParamHandles(py::module_ engine, py::class_<EngineHandle>& cls) {
 	py::class_<ParamHandleRef>(engine, "ParamHandle", py::is_final(),
 		"Rack's ParamHandle: a weak link to one module's param, managed by Rack's engine. One Python makes is RackPy's "
 		"until Rack's engine has it; another owner's (a module's) is found again by its IDs at every use.")
-		.def(py::init([] { return ParamHandleRef{std::make_shared<Slot>(), nullptr, -1, 0}; }))
+		.def(py::init([] { return ParamHandleRef{std::make_shared<HandleSlot>(), nullptr, -1, 0}; }))
 		.def_property_readonly("ours", &ParamHandleRef::ours, "True for a handle Python made.")
 		.def_property_readonly("in_engine", [](const ParamHandleRef& ref) {
 			if (!ref.ours())

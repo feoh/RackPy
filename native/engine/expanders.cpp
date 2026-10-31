@@ -108,7 +108,7 @@ void publishChannel(rack::engine::Module& module, ExpanderChannels& channels, ui
 namespace {
 
 /** What kernel libraries call: the same checks as the plan interpreter's. */
-struct HostServices final : expander::Services {
+struct ExpanderHostServices final : expander::Services {
 	const Schema* schema(const char* name) noexcept override {
 		try {
 			return name ? internSchema(name) : nullptr;
@@ -133,7 +133,7 @@ struct HostServices final : expander::Services {
 }  // namespace
 
 expander::Services& hostServices() {
-	static HostServices services;
+	static ExpanderHostServices services;
 	return services;
 }
 

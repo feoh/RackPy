@@ -76,14 +76,14 @@ void Endpoints::sampleRateChanged() noexcept {
 namespace {
 
 /** What kernel libraries call: the cross-cast in RackPy's own code. */
-struct HostServices final : Services {
+struct EndpointHostServices final : Services {
 	const Frame* frame(rack::engine::Module& self, Link& link) noexcept override { return frameOf(self, link); }
 };
 
 }  // namespace
 
 Services& hostServices() {
-	static HostServices services;
+	static EndpointHostServices services;
 	return services;
 }
 
