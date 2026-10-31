@@ -587,7 +587,7 @@ def test_weak_handle_is_made_by_weak_ptr() -> None:
     assert again.get() is widget and widget.get_weak_count() == 1
     with pytest.raises(TypeError):
         raw.WeakHandle(widget)  # type: ignore[call-arg]
-    with pytest.raises(RuntimeError, match="Widget"):
+    with pytest.raises(TypeError, match="Widget"):  # a failed cast is a TypeError (RP-38)
         raw.WeakPtr(object())  # WeakPtr<T> needs a WeakBase, and Widget is Rack's only one
     widget.close()
     assert again.get() is None

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """RP-38 fixtures: sanitizer builds of RackPy, made once per session."""
 
-import json
 import subprocess
 from collections.abc import Callable
 from pathlib import Path
@@ -38,12 +37,10 @@ def asan_build(native_tools: None, tmp_path_factory: pytest.TempPathFactory) -> 
 
 @pytest.fixture(scope="session")
 def tsan_build(native_tools: None, tmp_path_factory: pytest.TempPathFactory) -> Path:
-    """The native unit tests (CTest) under ThreadSanitizer: only their executables are built."""
+    """Every native target under ThreadSanitizer; the test runs CTest. (CTest names no executable before it is
+    built, so the whole tree is built.)"""
     build = tmp_path_factory.mktemp("tsan-build")
-    _run([str(BIN / "rackpy-dev"), "configure", "--build-dir", str(build), "--sanitize", "thread"])
-    tests = json.loads(_run(["ctest", "--test-dir", str(build), "--show-only=json-v1"]).stdout)["tests"]
-    targets = sorted({Path(t["command"][0]).name for t in tests})
-    _run(["cmake", "--build", str(build), "--target", *targets])
+    _run([str(BIN / "rackpy-dev"), "build", "--build-dir", str(build), "--sanitize", "thread", "--no-test"])
     return build
 
 

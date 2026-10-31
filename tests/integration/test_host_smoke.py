@@ -83,7 +83,8 @@ def test_skeleton_loads_into_rack_and_finalizes(
     assert seen["test_hooks"] is False and seen["has_testing"] is False, "a production build must not have test hooks"
     assert seen["hijacked"] is False, "PYTHONPATH or the working directory leaked into sys.path"
     path = seen["path"]
-    assert isinstance(path, list) and path[0] == str(plugin / "pythonpath")
+    # After the standard library (RP-38): a plugin file named like a standard module never replaces it.
+    assert isinstance(path, list) and path[-1] == str(plugin / "pythonpath") and path.index(path[-1]) > 0
     assert all(p.startswith(str(plugin)) for p in path), path
     assert seen["prefix"] == str(plugin / "python")
     assert seen["rackpy_file"] == str(plugin / "pythonpath" / "rackpy" / "__init__.py")

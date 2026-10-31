@@ -100,13 +100,28 @@ the expander views (which refuse on use, asserted) answered on a dead module.
 14 passed: environment, standard-library shadowing, patches never run code, ten
 malformed loader configurations, symlink refusal.
 
-### Sanitizers
+### Sanitizers (`uv run pytest -m sanitizer tests/hardening`, fresh builds by the fixtures)
 
-To be filled from the final `-m sanitizer` run.
+- ASan+UBSan (`build --test-hooks --sanitize address,undefined`, `libasan.so.8` preloaded into Rack):
+  14 passed in 547.02 s, no sanitizer report. The native CTest suite; the control canary (ASan reports
+  `heap-buffer-overflow` in `sanitizerCanary`, so it is active in Rack); and in Rack, `tests/app`,
+  `coverage`, `dsp`, `engine/expanders`, `engine/ops`, `hardening/in_rack_fuzz`, `history`,
+  `laboratory`, `rendering`, `ui`, `widget` (except its start-up-only test) and the whole stress
+  suite, 1,000-cycle runs included (RSS bound skipped: ASan's quarantine holds freed memory; the
+  exact counters are checked).
+- TSan (`build --sanitize thread`): the native CTest suite passed, no TSan report, 263.12 s. The first
+  run's fixture asked CTest for executables before they were built (CTest names none then) and
+  errored; it now builds the whole tree, and that rerun is the result.
+- UBSan in the plugin reports to stderr (it is linked separately from the preloaded ASan runtime);
+  the harness captures Rack's stderr for these runs. The canary is compiled without UBSan, so that
+  only ASan, not UBSan's object-size check, sees it.
 
-### Full suite
+### Full suite (fresh `build/dev` `--werror --test-hooks`, `build/production` `--werror`)
 
-To be filled.
+466 passed, 3 failed in 1001.16 s. All three asserted pre-RP-38 behaviour: the plugin's
+`pythonpath` at `sys.path[0]` (`test_host_smoke.py::test_skeleton_loads_into_rack_and_finalizes`)
+and `RuntimeError` for a failed cast (`test_settings.py`, `test_reentry.py`). They now assert the new
+behaviour and pass (3 passed in 10.10 s). `prek run`, strict mypy, `sphinx-build -W -n` clean.
 
 ## Limits and blockers
 

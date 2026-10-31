@@ -285,7 +285,7 @@ def test_infinite_float_conversion_reentry_is_bounded_and_recovers() -> None:
     quantity = Q()
     # pybind11's numeric caster clears conversion exceptions and retries once.
     # The exhaustion latch prevents a retry from starting a fresh recursive tree.
-    with pytest.raises(RuntimeError, match="Unable to cast Python instance"):
+    with pytest.raises(TypeError, match="Unable to cast Python instance"):  # translated from RuntimeError (RP-38)
         testing.call_virtual(quantity, "get_display_value")
     assert callbacks == 64 and 64 <= conversions <= 128
     recursive = False
