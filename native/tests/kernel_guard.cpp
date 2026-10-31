@@ -106,6 +106,34 @@ std::string run(module::Module& m, int frames, bool swapping) {
 	return text;
 }
 
+/** Bypassed frames (RP-34): Rack's route copy first, then a bypass kernel swapped and controlled as above. */
+std::string runBypass(module::Module& m, int frames) {
+	resetCounts();
+	rack::engine::Module::ProcessArgs args;
+	args.sampleRate = 48000.f;
+	args.sampleTime = 1.f / 48000.f;
+	for (int n = 0; n < frames; n++) {
+		args.frame = n;
+		if (n == frames / 4)
+			m.bypassKernels.attach(make("rackpy.Sine", {0, 1, 0, 5}), true);
+		if (n > frames / 4 && n % 1000 == 500)
+			m.bypassKernels.attach(make("rackpy.Gain", {0, 0, 0, 1}), true);
+		if (n > frames / 4 && n % 1000 == 900)
+			m.bypassKernels.attach(make("rackpy.Sine", {0, 1, 0, 5}), true);
+		if (n % 7 == 0 && m.bypassKernels.latest())
+			m.bypassKernels.set(m.bypassKernels.latest(), 0, 0.5 + (n % 3), true);
+		m.inputs[0].setVoltage((float) (n % 11) / 5.f - 1.f);
+		enter();
+		m.processBypass(args);
+		leave();
+		if (n % 100 == 0)
+			m.bypassKernels.reclaim();
+	}
+	char text[512];
+	report(text, sizeof text);
+	return text;
+}
+
 /** A plan with every node type, on 16 channels; `seed` varies its constants so replacements differ. */
 std::unique_ptr<dsp::Hosted> everyNode(double seed) {
 	graph::PlanSpec spec;
@@ -448,6 +476,12 @@ int main() {
 	m.outputs[0].channels = m.outputs[1].channels = 1;
 	m.kernels.attach(make("rackpy.Sine", {0, 1, 0, 5}), true);
 	std::string production = run(m, frames, true);
+	module::Module bypassed;
+	bypassed.config(1, 1, 2, 0);
+	bypassed.inputs[0].channels = 16;
+	bypassed.outputs[0].channels = bypassed.outputs[1].channels = 1;
+	bypassed.configBypass(0, 1);
+	std::string bypassRun = runBypass(bypassed, frames);
 	module::Module failing;
 	failing.config(0, 1, 1, 0);
 	failing.outputs[0].channels = 1;
@@ -483,10 +517,10 @@ int main() {
 	std::string ioGraphRun = runIoGraphs(compiled, frames);
 	std::string midiBurstRun = runMidiBurst();
 	std::string audioRun = runAudio(600);
-	std::printf("{\"frames\": %d, \"production\": %s, \"failure\": %s, \"inject\": %s, \"graph\": %s, \"compiled\": %s, "
+	std::printf("{\"frames\": %d, \"production\": %s, \"bypass\": %s, \"failure\": %s, \"inject\": %s, \"graph\": %s, \"compiled\": %s, "
 		"\"expanders\": %s, \"exchanged\": %s, \"graph_io\": %s, \"graph_io_worked\": %s, "
 		"\"midi_burst\": %s, \"midi_burst_worked\": %s, \"audio\": %s, \"audio_flowed\": %s}\n",
-		frames, production.c_str(), failure.c_str(), inject.c_str(), graphRun.c_str(), compiledRun.c_str(), expanderRun.c_str(),
+		frames, production.c_str(), bypassRun.c_str(), failure.c_str(), inject.c_str(), graphRun.c_str(), compiledRun.c_str(), expanderRun.c_str(),
 		exchanged ? "true" : "false", ioGraphRun.c_str(), ioGraphWorked ? "true" : "false", midiBurstRun.c_str(),
 		midiBurstWorked ? "true" : "false", audioRun.c_str(), audioFlowed ? "true" : "false");
 	return 0;

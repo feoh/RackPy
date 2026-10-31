@@ -53,6 +53,7 @@ def test_the_kernel_path_makes_no_forbidden_calls(dev_build: Path) -> None:
     out = subprocess.run([str(dev_build / "rackpy_kernel_guard")], capture_output=True, text=True, check=True, env=env)
     report = json.loads(out.stdout)
     assert not any(report["production"].values()), report  # pickup, controls, retirement, two kernel types
+    assert not any(report["bypass"].values()), report  # Rack's route copy, then bypass kernels swapped (RP-34)
     assert not any(report["failure"].values()), report  # silence and the diagnostic
     assert report["inject"]["malloc"] >= report["frames"] and report["inject"]["free"] >= report["frames"]
 

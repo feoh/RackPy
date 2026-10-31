@@ -666,7 +666,9 @@ trusted code calls `rackpy.laboratory.enable()`; that is not real-time audio.
 `step()` does nothing and warns as deprecated). `Module.ProcessArgs` is
 Rack's argument record, a value with `sample_rate`, `sample_time` and
 `frame`. An ordinary module's `process` is its native kernel, and its
-`processBypass` is Rack's; a bench runs both, as Rack's engine does. Details:
+`processBypass` is Rack's, or its native bypass kernel
+(`set_bypass_kernel`, [below](#bypass-configuration)); a bench runs both, as
+Rack's engine does. Details:
 [laboratory modules](../explanation/callbacks.md#laboratory-modules).
 
 ## Bypass configuration
@@ -695,6 +697,16 @@ and voltages to its output. The live-UI tests drive this through cables in
 the real engine with 0, 1 and 16 channels and compare the output with Rack's
 own `processBypass` on a plain module (RP-14C4). Enabling the module again
 clears its outputs, as Rack does.
+
+`set_bypass_kernel(kernel)` replaces that route copy with a native kernel,
+RackPy's equivalent of a C++ `processBypass` override (RP-34): Rack's engine
+runs it for every bypassed frame with no Python, and the module's ordinary
+kernel is not called. It is checked, handed over, reset, told about sample
+rate changes and silenced on failure exactly as `set_kernel`'s kernel;
+`bypass_kernel` returns it (or `None`) and `bypass_kernel_failed` reports a
+failure. A laboratory module refuses it with `LaboratoryError`: its bypass
+is its Python `process_bypass`. See
+[process audio](../how-to/dsp.md#reset-sample-rate-bypass-and-failures).
 
 (expanders)=
 ## Expanders

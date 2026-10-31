@@ -34,7 +34,13 @@ struct KernelHandle {
 	std::shared_ptr<runtime::ObjectToken> hostedToken;
 	module::Module* module = nullptr;
 	std::shared_ptr<runtime::ObjectToken> moduleToken;
+	bool bypass = false;  // attached as the module's bypass kernel (RP-34), not its kernel
 };
+
+/** The module's slot an attached handle belongs to. */
+dsp::KernelSlot& slotOf(const KernelHandle& k) {
+	return k.bypass ? k.module->bypassKernels : k.module->kernels;
+}
 
 const char* kindName(Field::Kind kind) {
 	switch (kind) {
@@ -142,7 +148,7 @@ KernelHandle makeKernel(const KernelType& type, std::vector<double> values, std:
 module::Module& attachedModule(const KernelHandle& k) {
 	if (!k.moduleToken->alive() || !k.hostedToken->alive())
 		throw runtime::StaleHandle("this kernel's module has been deleted, or the kernel replaced and reclaimed");
-	if (k.module->kernels.latest() != k.hosted)
+	if (slotOf(k).latest() != k.hosted)
 		throw runtime::StaleHandle("this kernel has been replaced on its module");
 	return *k.module;
 }
@@ -156,7 +162,7 @@ void setControl(KernelHandle& k, const std::string& name, py::handle value) {
 	}
 	else {
 		module::Module& m = attachedModule(k);
-		if (!m.kernels.set(k.hosted, slot, v, m.engineOwned.load(std::memory_order_acquire)))
+		if (!slotOf(k).set(k.hosted, slot, v, m.engineOwned.load(std::memory_order_acquire)))
 			throw py::value_error(k.type->name + ": the control queue is full (" +
 				std::to_string(dsp::CONTROL_CAPACITY) + " values the engine has not consumed); try again later");
 	}
@@ -227,28 +233,31 @@ KernelHandle graphKernel(const py::dict& plan) {
 
 }  // namespace
 
-void attachKernel(const ModuleRef& ref, py::handle kernel) {
+void attachKernel(const ModuleRef& ref, py::handle kernel, bool bypass) {
 	runtime::requireMainThread("setting a module's kernel");
 	module::Module& m = ref.get();
+	const char* method = bypass ? "set_bypass_kernel" : "set_kernel";
 	if (!py::isinstance<KernelHandle>(kernel))
-		throw py::type_error("set_kernel takes a kernel, e.g. rackpy.dsp.kernel.Gain(input=0, output=0)");
+		throw py::type_error(std::string(method) + " takes a kernel, e.g. rackpy.dsp.kernel.Gain(input=0, output=0)");
 	KernelHandle& k = kernel.cast<KernelHandle&>();
 	if (!k.owned)
 		throw runtime::Ownership("this kernel already belongs to a module; create another one");
 	dsp::checkWiring(*k.type, k.owned->values, m);  // std::invalid_argument -> ValueError
 	k.module = &m;
 	k.moduleToken = m.token;
+	k.bypass = bypass;
 	dsp::Hosted* hosted = k.hosted;
-	m.kernels.attach(std::move(k.owned), m.engineOwned.load(std::memory_order_acquire));
+	slotOf(k).attach(std::move(k.owned), m.engineOwned.load(std::memory_order_acquire));
 	// Module.kernel returns this same object while it is the module's kernel.
 	runtime::identity(hosted, hosted->token->generation, [&] { return py::reinterpret_borrow<py::object>(kernel); });
 }
 
-py::object moduleKernel(const ModuleRef& ref) {
+py::object moduleKernel(const ModuleRef& ref, bool bypass) {
 	runtime::requireMainThread("reading a module's kernel");
 	module::Module& m = ref.get();
-	m.kernels.reclaim();
-	dsp::Hosted* hosted = m.kernels.latest();
+	dsp::KernelSlot& slot = bypass ? m.bypassKernels : m.kernels;
+	slot.reclaim();
+	dsp::Hosted* hosted = slot.latest();
 	if (!hosted)
 		return py::none();
 	return runtime::identity(hosted, hosted->token->generation, [&] {
@@ -259,6 +268,7 @@ py::object moduleKernel(const ModuleRef& ref) {
 		k.hostedToken = hosted->token;
 		k.module = &m;
 		k.moduleToken = m.token;
+		k.bypass = bypass;
 		return py::cast(std::move(k));
 	});
 }
@@ -291,8 +301,8 @@ void bindKernels(py::module_ host) {
 			if (k.owned)
 				return true;
 			if (k.moduleToken->alive())
-				k.module->kernels.reclaim();
-			return k.moduleToken->alive() && k.hostedToken->alive() && k.module->kernels.latest() == k.hosted;
+				slotOf(k).reclaim();
+			return k.moduleToken->alive() && k.hostedToken->alive() && slotOf(k).latest() == k.hosted;
 		}, "False once its module is deleted or another kernel replaced it.")
 		.def_property_readonly("values", [](const KernelHandle& k) {
 			runtime::requireMainThread("reading a kernel");

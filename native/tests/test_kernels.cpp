@@ -200,6 +200,41 @@ void testReplacingAWaitingKernelDeletesIt() {
 	CHECK(!token->alive());  // never reached the engine, so the main thread deleted it
 }
 
+/** A kernel that writes one voltage to output 0. */
+struct Constant : Kernel {
+	float volts;
+	explicit Constant(float volts) : volts(volts) {}
+	bool process(rack::engine::Module& m, const rack::engine::Module::ProcessArgs&) noexcept override {
+		m.outputs[0].setVoltage(volts);
+		return true;
+	}
+};
+
+void testBypassKernel() {
+	module::Module m;
+	m.config(0, 1, 1, 0);
+	connect(m.inputs[0]);
+	connect(m.outputs[0]);
+	m.configBypass(0, 0);
+	m.inputs[0].setVoltage(2.5f);
+	CHECK(!m.bypassKernels.engaged());
+	m.processBypass(frame(48000.f, 0));
+	CHECK(m.outputs[0].getVoltage() == 2.5f);  // no bypass kernel: Rack copies the route
+	auto hosted = std::make_unique<dsp::Hosted>();
+	hosted->kernel = std::make_unique<Constant>(-1.f);
+	m.bypassKernels.attach(std::move(hosted), true);
+	CHECK(m.bypassKernels.engaged() && !m.kernels.engaged());
+	m.processBypass(frame(48000.f, 1));
+	CHECK(m.outputs[0].getVoltage() == -1.f);  // the bypass kernel, picked up at the frame boundary
+	auto main = std::make_unique<dsp::Hosted>();
+	main->kernel = std::make_unique<Constant>(4.f);
+	m.kernels.attach(std::move(main), true);
+	m.process(frame(48000.f, 2));
+	CHECK(m.outputs[0].getVoltage() == 4.f);  // unbypassed, the ordinary kernel runs
+	m.processBypass(frame(48000.f, 3));
+	CHECK(m.outputs[0].getVoltage() == -1.f);
+}
+
 }  // namespace
 
 int main() {
@@ -212,6 +247,7 @@ int main() {
 	testWiringChecks();
 	testHandoverControlsAndReclaim();
 	testReplacingAWaitingKernelDeletesIt();
+	testBypassKernel();
 	if (failures)
 		std::fprintf(stderr, "%d check(s) failed\n", failures);
 	else

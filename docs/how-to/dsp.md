@@ -69,6 +69,21 @@ kernel reports a failure, RackPy silences the module's outputs, records a
 `kernel_failed` diagnostic (`rackpy.runtime.diagnostics()`), and stops calling
 it; `module.kernel_failed` is then `True` until Initialize or `set_kernel`.
 
+For bypass behavior other than copying routes (C++ plugins override
+`processBypass`), give the module a second kernel with
+`module.set_bypass_kernel(kernel)`. While the module is bypassed, Rack's
+engine runs that kernel instead of copying the routes, with the same frame
+boundary handover, controls, reset, sample-rate and failure handling as
+`set_kernel` (`module.bypass_kernel`, `module.bypass_kernel_failed`). The
+kernel the module runs unbypassed is not called. A compiled
+[graph](graphs.md) is a convenient bypass kernel:
+
+```python
+bypassed = Graph()
+bypassed.output(0, -bypassed.input(0))  # pass the input through, inverted
+module.set_bypass_kernel(bypassed.compile())
+```
+
 ## What it costs
 
 On the planning machine (not controlled hardware; the raw data and
@@ -83,10 +98,11 @@ per frame on these workloads.
 
 ## Threads
 
-Create kernels, call `set_kernel` and `set` on Rack's main thread
+Create kernels, call `set_kernel`, `set_bypass_kernel` and `set` on Rack's main thread
 (`ThreadError` otherwise). The engine thread only runs the kernel. A test in
 RackPy's suite runs the kernel path under an allocation and lock detector
-and requires zero heap, lock, write or GIL calls on it.
+and requires zero heap, lock, write or GIL calls on it, bypassed frames
+included.
 
 ## Write a kernel in C++
 

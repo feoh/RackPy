@@ -34,6 +34,10 @@ def alive(kernel: Kernel) -> bool:
     return kernel.alive
 
 
+def bypass_of(m: Module) -> Kernel | None:
+    return m.bypass_kernel  # a call, so that type checkers do not narrow it between Rack calls
+
+
 def adopted(configure: Callable[[Module], object]) -> Module:
     m = Module.create(configure)
     HOOKS.engine_adopt(m)
@@ -261,3 +265,53 @@ def test_module_class_kernels_and_thread_rules() -> None:
         assert len(errors) == 3 and all(isinstance(e, ThreadError) for e in errors)
     finally:
         m.close()
+
+
+def test_a_bypass_kernel_is_racks_process_bypass() -> None:
+    """RP-34: while the module is bypassed Rack's engine runs the bypass kernel; without one, the routes."""
+    from rackpy.dsp.graph import Graph
+
+    normal, bypassed = Graph(), Graph()
+    normal.output(0, normal.constant(3.0))
+    bypassed.output(0, -bypassed.input(0))  # custom bypass semantics: the input, inverted
+
+    def configure(m: Module) -> None:
+        m.config(0, 1, 1, 0)
+        m.config_bypass(0, 0)
+        m.set_kernel(normal.compile())
+
+    feed = Graph()
+    feed.output(0, feed.constant(2.0))
+
+    def source_module(m: Module) -> None:
+        m.config(0, 0, 1, 0)
+        m.set_kernel(feed.compile())
+
+    source = adopted(source_module)
+    m = adopted(configure)
+    sink = adopted(lambda m: m.config(0, 1, 0, 0))
+    cables = [HOOKS.engine_connect(source, 0, m, 0), HOOKS.engine_connect(m, 0, sink, 0)]
+    out = m.outputs[0]
+    try:
+        assert bypass_of(m) is None and not m.bypass_kernel_failed
+        assert until(lambda: out.get_voltage() == 3.0)
+        HOOKS.engine_bypass(m, True)
+        assert until(lambda: out.get_voltage() == 2.0)  # no bypass kernel: Rack copies the route
+        kernel = bypassed.compile()
+        m.set_bypass_kernel(kernel)
+        assert bypass_of(m) is kernel and m.kernel is not kernel
+        assert until(lambda: out.get_voltage() == -2.0)  # picked up at a frame boundary, no Python
+        HOOKS.engine_bypass(m, False)
+        assert until(lambda: out.get_voltage() == 3.0)
+        with pytest.raises(OwnershipError, match="already belongs"):
+            m.set_bypass_kernel(kernel)
+        with pytest.raises(OwnershipError, match="already belongs"):
+            m.set_kernel(kernel)
+        with pytest.raises(TypeError, match="set_bypass_kernel takes a kernel"):
+            m.set_bypass_kernel(object())  # type: ignore[arg-type]
+    finally:
+        for cable in cables:
+            HOOKS.engine_disconnect(cable)
+        for module in (sink, m, source):
+            HOOKS.engine_delete(module, None)
+    assert not alive(kernel)  # deleted with its module

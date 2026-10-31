@@ -194,6 +194,9 @@ def test_bypass_runs_process_bypass_with_racks_routes_or_an_override() -> None:
     bench.set_bypassed(routed.module, False)
     bench.step()
     assert voltages(routed.module) == [6.0]
+    # Its bypass is its Python process_bypass, not a native bypass kernel (RP-34).
+    with pytest.raises(LaboratoryError, match="process_bypass"):
+        routed.module.set_bypass_kernel(kernel.Gain(input=0, output=0))
 
 
 def test_superclass_calls_reach_racks_implementations() -> None:

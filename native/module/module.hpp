@@ -147,6 +147,9 @@ struct Module : rack::engine::Module, engine::ExpanderChannels, io::Endpoints {
 	}
 	// The native kernel Python chose (RP-17A): the module's production audio path.
 	dsp::KernelSlot kernels;
+	// The kernel Rack's engine runs instead while the module is bypassed (RP-34); until one is
+	// attached, Rack's own processBypass copies the bypass routes.
+	dsp::KernelSlot bypassKernels;
 	// RackPy expander message buffers Python put in this module's expander slots (RP-23): kept
 	// alive as long as the module, as Rack expects a module to own its buffers. Main thread. The
 	// channels they form are published in the engine::ExpanderChannels base, for native code.
@@ -160,6 +163,19 @@ struct Module : rack::engine::Module, engine::ExpanderChannels, io::Endpoints {
 			return;
 		}
 		kernels.process(*this, args);
+	}
+	void processBypass(const ProcessArgs& args) override {
+		if (!bypassKernels.engaged()) {
+			rack::engine::Module::processBypass(args);
+			return;
+		}
+		if (__builtin_expect(io::Endpoints::active, 0)) {
+			beginFrame(args.frame);
+			bypassKernels.process(*this, args);
+			endFrame();
+			return;
+		}
+		bypassKernels.process(*this, args);
 	}
 	json_t* dataToJson() override;
 	void dataFromJson(json_t* rootJ) override;

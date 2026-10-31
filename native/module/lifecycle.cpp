@@ -84,6 +84,7 @@ void Module::onReset(const ResetEvent& e) {
 	runtime::ExclusiveScope exclusive;
 	rack::engine::Module::onReset(e);
 	kernels.reset();
+	bypassKernels.reset();
 	handle(recordOf(LifecycleKind::Reset));
 }
 
@@ -98,6 +99,7 @@ void Module::onSampleRateChange(const SampleRateChangeEvent& e) {
 	runtime::ExclusiveScope exclusive;
 	rack::engine::Module::onSampleRateChange(e);
 	kernels.sampleRateChange(e.sampleRate, e.sampleTime);
+	bypassKernels.sampleRateChange(e.sampleRate, e.sampleTime);
 	sampleRateChanged();  // Core Audio's: the audio port's rings start over (RP-31J)
 	LifecycleRecord record = recordOf(LifecycleKind::SampleRateChange);
 	record.sampleRate = e.sampleRate;

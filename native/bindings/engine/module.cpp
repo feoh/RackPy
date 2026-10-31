@@ -786,11 +786,25 @@ void bindModule(py::module_ engine) {
 		"Make `kernel` this module's audio path: Rack's engine calls it every frame, with no Python. Its wiring is "
 		"checked against the module's configuration. In the constructor callback, or later to replace the "
 		"kernel at the next frame boundary. Main thread.")
-		.def_property_readonly("kernel", &moduleKernel, "The kernel last set, or None.")
+		.def_property_readonly("kernel", [](const ModuleRef& r) { return moduleKernel(r, false); }, "The kernel last set, or None.")
 		.def_property_readonly("kernel_failed", [](const ModuleRef& r) {
 			runtime::requireMainThread("reading a module's kernel");
 			return r.get().kernels.failed();
 		}, "True after the kernel reported a failure: the module's outputs are silent until set_kernel or a reset.");
+	// Bypass kernels (RP-34): Rack's processBypass, natively; without one, Rack copies the bypass routes.
+	cls.def("set_bypass_kernel", [](const ModuleRef& r, py::handle kernel) {
+		if (r.get().laboratory)
+			throw runtime::Laboratory("a laboratory module's bypass is its Python process_bypass(); give an ordinary module the kernel");
+		attachKernel(r, kernel, true);
+	}, py::arg("kernel"),
+		"Make `kernel` what Rack's engine runs every frame while the module is bypassed, instead of copying its bypass "
+		"routes (Rack's processBypass), with no Python. Checked and handed over as set_kernel's. Main thread.")
+		.def_property_readonly("bypass_kernel", [](const ModuleRef& r) { return moduleKernel(r, true); },
+			"The bypass kernel last set, or None (Rack copies the bypass routes).")
+		.def_property_readonly("bypass_kernel_failed", [](const ModuleRef& r) {
+			runtime::requireMainThread("reading a module's kernel");
+			return r.get().bypassKernels.failed();
+		}, "True after the bypass kernel reported a failure: bypassed outputs are silent until set_bypass_kernel or a reset.");
 	// Audio-port I/O (RP-31J): native production paths between a port's driver and the module's kernel.
 	cls.def("set_audio_port", [](const ModuleRef& r, py::object port, int inputs, int outputs) {
 		attachAudioPort(r.get(), port, inputs, outputs);

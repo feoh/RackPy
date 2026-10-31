@@ -10,9 +10,9 @@ namespace bindings {
 
 void bindKernels(pybind11::module_ host);
 /** Module.set_kernel: check the kernel's wiring against `module` and hand it over. Main thread. */
-void attachKernel(const ModuleRef& module, pybind11::handle kernel);
+void attachKernel(const ModuleRef& module, pybind11::handle kernel, bool bypass = false);
 /** Module.kernel: the module's latest kernel as a handle, or None. */
-pybind11::object moduleKernel(const ModuleRef& module);
+pybind11::object moduleKernel(const ModuleRef& module, bool bypass = false);
 
 }  // namespace bindings
 }  // namespace rackpy

@@ -77,6 +77,8 @@ struct KernelSlot {
 	void process(rack::engine::Module& module, const rack::engine::Module::ProcessArgs& args) noexcept;
 	void reset() noexcept;
 	void sampleRateChange(float sampleRate, float sampleTime) noexcept;
+	/** Whether a kernel has been attached, running or handed over: false until the first attach(). */
+	bool engaged() const noexcept { return current || pending.load(std::memory_order_acquire); }
 
 	// --- main thread -------------------------------------------------------------
 	/** Hand `next` to the module. While Rack's engine runs the module, it
