@@ -335,6 +335,11 @@ def prepare_runtime(python: Path, finish: Any) -> dict[str, str]:
         if ".so" in path.name or path.suffix == ".dylib":
             path.chmod(path.stat().st_mode | 0o200)
             finish(path)
+        elif MACOS:
+            # Not stripped either, but signed: the x86_64 runtime's bin/python3.14 comes unsigned (RP-40),
+            # and every Mach-O file an artifact ships must have a signature that verifies.
+            path.chmod(path.stat().st_mode | 0o200)
+            run(["codesign", "--force", "--sign", "-", path])
     return removed
 
 
