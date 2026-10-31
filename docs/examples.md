@@ -3,7 +3,7 @@
 RackPy has, or will have, an original, runnable example for every feature
 that the official VCV Rack tutorial, plugin API guide and plugin template
 demonstrate; none of them copies the VCV manual
-([ADR 001](decisions/001-licensing-and-identity.md)). Five exist so far, all
+([ADR 001](decisions/001-licensing-and-identity.md)). Seven exist so far, all
 Linux x86_64 in Rack Free {{rack_version}}:
 
 - [Plugin template](https://github.com/feoh/RackPy/tree/main/examples/template):
@@ -31,8 +31,13 @@ Linux x86_64 in Rack Free {{rack_version}}:
   source set entirely from its context menu, with one of each of Rack's menu
   helpers ([menus](reference/ui.md#menu-helpers)).
 
-The guide's panel, drawing, polyphony, SIMD, DSP and expander examples are
-planned (RP-35 and RP-36).
+- [Dark panels](https://github.com/feoh/RackPy/tree/main/examples/dark-panels)
+  and [Drawing](https://github.com/feoh/RackPy/tree/main/examples/drawing): a
+  light and a dark panel; NanoVG shapes, text, a self-lit layer and a cached
+  framebuffer. The [walkthrough](how-to/draw-panels.md) shows them in
+  screenshots of Rack's own frames.
+
+The guide's polyphony, SIMD, DSP and expander examples are planned (RP-36).
 
 The plan, the required layout of each example and the list of features are in
 [examples/README.md](../examples/README.md). The 77 official samples, with

@@ -47,7 +47,9 @@
     "../../examples/template/pythonpath",
     "../../examples/configuration/pythonpath",
     "../../examples/state-and-events/pythonpath",
-    "../../examples/menus/pythonpath"
+    "../../examples/menus/pythonpath",
+    "../../examples/dark-panels/pythonpath",
+    "../../examples/drawing/pythonpath"
   ],
   "typeCheckingMode": "strict",
   "pythonVersion": "3.14",

@@ -6,6 +6,8 @@
   that point at nothing.
 - ``rackpy-example``: shows a snippet file from docs/snippets/ exactly as tests
   run it, so the page and the tested code cannot drift.
+- ``rackpy-example-source``: shows a class or function from an example plugin in
+  examples/, which tests/examples runs in Rack (RP-35).
 - ``rackpy-conceptual``: shows code that is not runnable, with a visible label.
 - Any other Python code block is an error: every Python listing on the site is
   either tested or labelled.
@@ -18,6 +20,7 @@
 
 from __future__ import annotations
 
+import ast
 import builtins
 import inspect
 import json
@@ -41,6 +44,7 @@ DOCS = Path(__file__).resolve().parents[1]
 REPO = DOCS.parent
 GITHUB = "https://github.com/feoh/RackPy"
 SNIPPETS = DOCS / "snippets"
+EXAMPLES = REPO / "examples"
 PYTHON_LANGUAGES = {"python", "python3", "py", "pycon", "ipython"}
 LABELLED = {"rackpy-example", "rackpy-conceptual"}
 
@@ -266,6 +270,40 @@ class RackPyExample(SphinxDirective):
         return out
 
 
+def example_object(path: Path, name: str) -> str:
+    """The source of the top-level class or function ``name`` in an example file, decorators included."""
+    text = path.read_text(encoding="utf-8")
+    for node in ast.parse(text).body:
+        if isinstance(node, ast.ClassDef | ast.FunctionDef) and node.name == name:
+            start = min([node.lineno, *(d.lineno for d in node.decorator_list)])
+            return "\n".join(text.splitlines()[start - 1 : node.end_lineno]) + "\n"
+    raise ValueError(f"{path.name} has no top-level class or function {name}")
+
+
+class RackPyExampleSource(SphinxDirective):
+    """Show a class or function from an example plugin in examples/, which tests/examples runs in Rack."""
+
+    required_arguments = 1
+    option_spec: ClassVar[dict[str, Any]] = {
+        "pyobject": directives.unchanged_required,
+        "caption": directives.unchanged,
+    }
+
+    def run(self) -> list[nodes.Node]:
+        path = (EXAMPLES / self.arguments[0]).resolve()
+        if not path.is_relative_to(EXAMPLES) or path.suffix != ".py" or not path.is_file():
+            raise self.error(f"no example source {self.arguments[0]} in examples/")
+        if "pyobject" not in self.options:
+            raise self.error("rackpy-example-source needs :pyobject:")
+        try:
+            code = example_object(path, self.options["pyobject"])
+        except ValueError as e:
+            raise self.error(str(e)) from e
+        self.env.note_dependency(str(path))
+        caption = self.options.get("caption", f"examples/{self.arguments[0]}")
+        return [labelled_block(code, f"{caption} · from an example plugin tested in Rack", "rackpy-example")]
+
+
 class RackPyConceptual(SphinxDirective):
     """Code that is not runnable: a proposal or a sketch. Rendered with a label saying so."""
 
@@ -415,6 +453,7 @@ def setup(app: Sphinx) -> dict[str, Any]:
     app.connect("doctree-read", check_doctree)
     app.connect("doctree-read", unscope_builtin_annotations)
     app.add_directive("rackpy-example", RackPyExample)
+    app.add_directive("rackpy-example-source", RackPyExampleSource)
     app.add_directive("rackpy-conceptual", RackPyConceptual)
     app.add_directive("rackpy-surface", RackPySurface)
     return {"version": "1", "parallel_read_safe": True, "parallel_write_safe": True}

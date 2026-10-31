@@ -65,8 +65,22 @@ def test_repository_links_point_at_existing_files(site: Build) -> None:
         ("\n```python\nprint('untested')\n```\n", "neither a tested {rackpy-example} nor a labelled"),
         ("\n```{rackpy-example} no_such_snippet.py\n```\n", "no snippet no_such_snippet.py"),
         ("\n![](../LICENSE)\n", "has no alt text"),
+        ("\n```{rackpy-example-source} drawing/no_such.py\n:pyobject: Meter\n```\n", "no example source"),
+        (
+            "\n```{rackpy-example-source} drawing/pythonpath/rackpydrawing/meter.py\n:pyobject: NoSuchClass\n```\n",
+            "has no top-level class or function NoSuchClass",
+        ),
     ],
-    ids=["page", "anchor", "repository-file", "unlabelled-python", "missing-snippet", "image-alt"],
+    ids=[
+        "page",
+        "anchor",
+        "repository-file",
+        "unlabelled-python",
+        "missing-snippet",
+        "image-alt",
+        "missing-example",
+        "missing-object",
+    ],
 )
 def test_mistakes_fail_the_build(broken_site: Callable[[dict[str, str]], Build], addition: str, message: str) -> None:
     build = broken_site({"installation.md": INSTALLATION + addition})

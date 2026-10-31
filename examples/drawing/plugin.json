@@ -1,0 +1,25 @@
+{
+  "slug": "RackPyDrawing",
+  "name": "RackPy Drawing",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "RackPy",
+  "author": "RackPy contributors",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "https://github.com/feoh/RackPy",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "Meter",
+      "name": "Meter",
+      "description": "A voltmeter drawn with NanoVG: shapes, text, a self-lit bar and a cached scale",
+      "tags": [
+        "Visual"
+      ]
+    }
+  ]
+}

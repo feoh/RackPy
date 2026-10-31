@@ -1,6 +1,6 @@
 # Examples covering the official Rack samples
 
-Implemented (RP-33, RP-34), Linux x86_64 in Rack Free 2.6.6:
+Implemented (RP-33 to RP-35), Linux x86_64 in Rack Free 2.6.6:
 
 - [template](template/README.md): the plugin-template workflow with
   `bin/rackpy-plugin` (create, add a module from a panel, build).
@@ -15,8 +15,13 @@ Implemented (RP-33, RP-34), Linux x86_64 in Rack Free 2.6.6:
   Initialize and Randomize handlers, and a laboratory script for every event.
 - [menus](menus/README.md): one of each of Rack's context-menu helpers, with
   browser previews and menus that outlive their module.
+- [dark-panels](dark-panels/README.md): a light and a dark panel, with themed
+  screws and jack, and a lamp that stays lit in a dark room.
+- [drawing](drawing/README.md): NanoVG shapes, text, a self-lit layer and a
+  cached framebuffer, checked in Rack's real frames and shown in the
+  [walkthrough](../docs/how-to/draw-panels.md).
 
-The rest of this page defines the remaining work (RP-35 and RP-36). It avoids
+The rest of this page defines the remaining work (RP-36). It avoids
 pretending that Python-shaped pseudocode is a working Rack plugin.
 
 RackPy writes **original** examples. Each one demonstrates a feature that the

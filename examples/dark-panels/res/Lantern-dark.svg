@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Original RackPy artwork (GPL-3.0-or-later), not derived from VCV or Fundamental panels. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="30.48mm" height="128.5mm" viewBox="0 0 30.48 128.5">
+  <rect width="30.48" height="128.5" fill="#1d2026"/>
+  <rect x="0" y="0" width="30.48" height="15" fill="#2a2e36"/>
+  <path d="M11 11 L15.24 4 L19.48 11 Z" fill="none" stroke="#e0b25a" stroke-width="0.8"/>
+  <circle cx="15.24" cy="38" r="9" fill="none" stroke="#e0b25a" stroke-width="0.5"/>
+  <rect x="8" y="55" width="14.48" height="14" rx="7" fill="#2a2e36"/>
+  <rect x="4" y="98" width="22.48" height="20" rx="2" fill="#2a2e36"/>
+</svg>

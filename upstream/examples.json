@@ -626,7 +626,19 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "asset_note": "Needs original light/dark panel SVGs; the guide's VCO panels are not copied"
+      "asset_note": "Needs original light/dark panel SVGs; the guide's VCO panels are not copied",
+      "disposition": {
+        "how": "raw.create_panel with a light and a dark SVG makes a ThemedSvgPanel; themed screws and jack; checked in Rack's frames with each setting",
+        "files": [
+          "examples/dark-panels/pythonpath/rackpydarkpanels/lantern.py",
+          "examples/dark-panels/res/Lantern.svg",
+          "examples/dark-panels/res/Lantern-dark.svg"
+        ],
+        "tests": [
+          "tests/examples/test_drawing.py::test_the_examples_over_racks_real_frames",
+          "tests/examples/test_drawing.py::test_the_panels_are_original_and_no_font_is_copied"
+        ]
+      }
     },
     {
       "id": "guide-18",
@@ -641,7 +653,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "erratum": "Comment says blue stroke; code strokes red (nvgRGBf(1, 0, 0))"
+      "erratum": "Comment says blue stroke; code strokes red (nvgRGBf(1, 0, 0))",
+      "disposition": {
+        "how": "Shapes.draw: NanoVG paths through rackpy.raw.nanovg, filled and stroked (the triangle's stroke is red, as drawn)",
+        "files": [
+          "examples/drawing/pythonpath/rackpydrawing/meter.py"
+        ],
+        "tests": [
+          "tests/examples/test_drawing.py::test_the_examples_over_racks_real_frames"
+        ]
+      }
     },
     {
       "id": "guide-19",
@@ -656,7 +677,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "part_of": "guide-18"
+      "part_of": "guide-18",
+      "disposition": {
+        "how": "MeterWidget creates each custom widget, sets its box and adds it to the panel",
+        "files": [
+          "examples/drawing/pythonpath/rackpydrawing/meter.py"
+        ],
+        "tests": [
+          "tests/examples/test_drawing.py::test_the_examples_over_racks_real_frames"
+        ]
+      }
     },
     {
       "id": "guide-20",
@@ -671,7 +701,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "asset_note": "Needs a font RackPy may redistribute; res/MyFont.ttf is a placeholder name"
+      "asset_note": "Needs a font RackPy may redistribute; res/MyFont.ttf is a placeholder name",
+      "disposition": {
+        "how": "Readout.draw loads Rack's ShareTechMono font from the window every frame and draws the input's voltage; a missing font draws nothing",
+        "files": [
+          "examples/drawing/pythonpath/rackpydrawing/meter.py"
+        ],
+        "tests": [
+          "tests/examples/test_drawing.py::test_the_examples_over_racks_real_frames"
+        ]
+      }
     },
     {
       "id": "guide-21",
@@ -685,7 +724,16 @@
       "port_task": "RP-35",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "Bar.draw_layer draws on layer 1, which room brightness does not dim (rackpy.drawing.Painter)",
+        "files": [
+          "examples/drawing/pythonpath/rackpydrawing/meter.py"
+        ],
+        "tests": [
+          "tests/examples/test_drawing.py::test_the_examples_over_racks_real_frames"
+        ]
+      }
     },
     {
       "id": "guide-22",
@@ -699,7 +747,16 @@
       "port_task": "RP-35",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "original-example"
+      "port_gate": "original-example",
+      "disposition": {
+        "how": "Scale is a FramebufferWidget around Ticks: rendered once, then drawn from its image",
+        "files": [
+          "examples/drawing/pythonpath/rackpydrawing/meter.py"
+        ],
+        "tests": [
+          "tests/examples/test_drawing.py::test_the_examples_over_racks_real_frames"
+        ]
+      }
     },
     {
       "id": "guide-23",
@@ -714,7 +771,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "original-example",
-      "part_of": "guide-22"
+      "part_of": "guide-22",
+      "disposition": {
+        "how": "Scale.step calls set_dirty when RANGE changes",
+        "files": [
+          "examples/drawing/pythonpath/rackpydrawing/meter.py"
+        ],
+        "tests": [
+          "tests/examples/test_drawing.py::test_the_examples_over_racks_real_frames"
+        ]
+      }
     },
     {
       "id": "guide-24",
@@ -1062,7 +1128,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "not-adapted",
-      "duplicate_of": "guide-20"
+      "duplicate_of": "guide-20",
+      "disposition": {
+        "how": "as guide-20: no Font is kept across frames, so a new graphics context needs nothing special",
+        "files": [
+          "examples/drawing/pythonpath/rackpydrawing/meter.py"
+        ],
+        "tests": [
+          "tests/examples/test_drawing.py::test_the_examples_over_racks_real_frames"
+        ]
+      }
     },
     {
       "id": "migrate2-08",
@@ -1175,7 +1250,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "not-adapted",
-      "duplicate_of": "guide-21"
+      "duplicate_of": "guide-21",
+      "disposition": {
+        "how": "as guide-21",
+        "files": [
+          "examples/drawing/pythonpath/rackpydrawing/meter.py"
+        ],
+        "tests": [
+          "tests/examples/test_drawing.py::test_the_examples_over_racks_real_frames"
+        ]
+      }
     },
     {
       "id": "building-01",

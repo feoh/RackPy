@@ -764,6 +764,35 @@ void define(py::module_ m) {
 		if (error != GL_NO_ERROR) throw std::runtime_error("glReadPixels failed: GL error " + std::to_string(error));
 		return py::make_tuple(rgba[0], rgba[1], rgba[2], rgba[3]);
 	});
+	m.def("last_frame_region", [](int x, int y, int width, int height) {
+		// RP-35: a width x height region of the last frame Rack drew, top-left origin, as RGBA bytes,
+		// top row first, for screenshots. Same back-buffer rules as last_frame_pixel.
+		requireMainThread("last_frame_region");
+		liveContext();
+		int w = 0, h = 0;
+		glfwGetFramebufferSize(APP->window->win, &w, &h);
+		if (width <= 0 || height <= 0 || x < 0 || y < 0 || x + width > w || y + height > h)
+			throw std::invalid_argument("region (" + std::to_string(x) + ", " + std::to_string(y) + ", " +
+				std::to_string(width) + " x " + std::to_string(height) + ") is outside the " + std::to_string(w) + " x " +
+				std::to_string(h) + " window");
+		while (glGetError() != GL_NO_ERROR) {}
+		GLint fbo = 0, previous = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glGetIntegerv(GL_READ_BUFFER, &previous);
+		glReadBuffer(GL_BACK);
+		std::vector<unsigned char> rows(size_t(width) * height * 4);
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadPixels(x, h - y - height, width, height, GL_RGBA, GL_UNSIGNED_BYTE, rows.data());
+		GLenum error = glGetError();
+		glReadBuffer(GLenum(previous));
+		glBindFramebuffer(GL_FRAMEBUFFER, GLuint(fbo));
+		if (error != GL_NO_ERROR) throw std::runtime_error("glReadPixels failed: GL error " + std::to_string(error));
+		std::string out(rows.size(), '\0');
+		for (int row = 0; row < height; ++row)
+			std::copy_n(rows.data() + size_t(height - 1 - row) * width * 4, size_t(width) * 4, out.begin() + size_t(row) * width * 4);
+		return py::make_tuple(width, height, py::bytes(out));
+	});
 	m.def("show_browser", [](bool visible) {
 		// Rack's module browser (Browser.hpp is outside rack.hpp), as View > Module browser shows it.
 		requireMainThread("show_browser");
