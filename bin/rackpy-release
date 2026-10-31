@@ -109,8 +109,6 @@ ALLOWED_MAC_SEARCH_PATHS = {"@loader_path/python/lib", "@executable_path/../lib"
 # plugin.mk links through /tmp/Rack2 (Rack symlinks it to its own folder while it loads plugins).
 MAC_SYSTEM_PREFIXES = ("/usr/lib/", "/System/Library/Frameworks/")
 MAC_RACK_LIBRARY = "/tmp/Rack2/libRack.dylib"
-# Tracked files that are not RackPy's to license under the GPL: kept out of the source archive (docs/licensing.md).
-RESTRICTED_SOURCES = ["docs/_static/examples"]
 
 app = cyclopts.App(help=__doc__)
 
@@ -735,13 +733,11 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
         "graph tests; runs nothing in Rack",
     )
 
-    # 6. The GPL corresponding source: the commit, without the files that are not RackPy's to license.
+    # 6. The GPL corresponding source: the whole commit, the documentation's screenshots included (docs/licensing.md).
     # git archive's tar, compressed here: git's own gzip output changes with its version.
     source = out / f"rackpy-{version}-source.tar.gz"
-    pathspec = ["."] + [f":(exclude){p}" for p in RESTRICTED_SOURCES]
     tar = work / "source.tar"
-    run(["git", "-C", REPO, "archive", "--format=tar", f"--prefix=rackpy-{version}/", "-o", tar, facts["commit"],
-         "--", *pathspec])  # fmt: skip
+    run(["git", "-C", REPO, "archive", "--format=tar", f"--prefix=rackpy-{version}/", "-o", tar, facts["commit"]])
     with tar.open("rb") as raw, source.open("wb") as f, gzip.GzipFile("", "wb", 9, f, mtime=0) as gz:
         shutil.copyfileobj(raw, gz)
     record(source, "corresponding source (GPL-3.0-or-later)")
@@ -758,7 +754,6 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
         "inputs": {**build_info, "uv_lock_sha256": sha256_file(REPO / "uv.lock"), "build_tools": build_tools()},
         "excluded_from_runtime": removed,
         "upstream_machine_like_paths": sorted(f"{rel}: {needle}" for rel, needle in upstream_paths),
-        "restricted_sources_excluded": RESTRICTED_SOURCES,
         "third_party": components,
         ("mach_o" if MACOS else "elf"): binaries | RECORDED,
         "artifacts": artifacts,

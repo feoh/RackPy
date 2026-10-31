@@ -66,12 +66,12 @@ need their own check. RackPy never copies them into git or into an artifact.
 | Manual images, including tutorial `MyModule.svg` (`49f02446…577d6`) and panel guide `VCO.svg` (`8de42fc2…61ba7`) | Unknown; even the hidden manual license note excludes images | Not copied. Examples use original panels. |
 | Fundamental plugin artwork and layouts | GPL code; panel art has separate terms | Not ported |
 
-Screenshots of Rack's interface in RackPy documentation contain VCV artwork
-(the RP-35 example screenshots in `docs/_static/examples/` show Rack's rails and
-menus around RackPy's own panels). No screenshot policy has been settled, so
-these images are not part of any release artifact: `bin/rackpy-release` leaves
-them out of the source archive. The owner decides the policy before a release
-(RP-44).
+Screenshots of Rack's interface in RackPy documentation show VCV artwork
+around RackPy's own panels (the RP-35 example screenshots in
+`docs/_static/examples/` show Rack's rails and menus). The owner decided on
+2026-10-31 that RackPy publishes them, as screenshots of Rack in use are
+widely published: they are part of the documentation and of the source
+archive. RackPy still copies no VCV artwork into its own panels or plugins.
 
 ## Official sample sources
 
@@ -186,9 +186,10 @@ into a running Rack, and vendors further libraries). The build fails if the
 pinned runtime changes so that these no longer match.
 
 The corresponding source is `rackpy-<version>-source.tar.gz`, `git archive` of
-the commit, without `docs/_static/examples/` (above). No artifact contains a
-Rack SDK archive, Rack or Fundamental binaries, VCV artwork, or a path of the
-computer that built it; the build checks the last.
+the whole commit. No artifact contains a Rack SDK archive, Rack or Fundamental
+binaries, VCV artwork files (the documentation's screenshots of Rack in use,
+above, are the only images of Rack), or a path of the computer that built it;
+the build checks the last.
 
 ## Package identity
 

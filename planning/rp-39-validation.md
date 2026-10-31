@@ -191,5 +191,6 @@ identical, the bundle's `FILES.json` was left out, and `rackpy-dev inspect
   automated checks are that no widget failed and no Python error was logged.
 - **macOS and Windows**: RP-40 and RP-41.
 - **Publication** needs owner approval (RP-44). The screenshot policy for
-  `docs/_static/examples/` is still open; those images are left out of the
-  source archive.
+  `docs/_static/examples/` was open at RP-39, and those images were left out of
+  the source archive; on 2026-10-31 the owner decided to publish them, and
+  from RP-40 on the source archive is the whole commit (docs/licensing.md).
