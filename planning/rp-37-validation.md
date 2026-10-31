@@ -57,6 +57,16 @@ Following `docs/documentation.md`'s structure:
 | `tests/examples/test_dispositions.py` | 73 passed |
 | `bin/generate_bindings.py check`, `bin/manual-sources check` | ok; 69 manual blocks match |
 | `prek run` | clean |
+| `sphinx-build -b linkcheck` (external links, network) | 22 working, 0 broken; 3,270 reviewed exceptions (SDK line links, this repository at an unpushed commit, inkscape.org, which refuses automated requests) |
+| Full suite on `rp37` (RP-38 included; rp38's fresh Werror builds) | 483 passed, 16 deselected (opt-in sanitizer and stress), in 1,009.13 s |
+
+The link check found the SDK surface linking GLFW's and blendish's
+declarations into Rack's tree, which has no `dep/include/` (its headers come
+from submodules): 153 dead links, predating RP-37. They now point at the
+submodules at the commits `upstream/versions.json` pins; the two headers were
+checked byte-identical with the SDK's copies. Links to the examples and
+`SECURITY.md` went to `main` on GitHub, which does not have them yet; they are
+repository links pinned to the commit being built, as the conventions ask.
 
 ### The quickstart in a clean profile
 
