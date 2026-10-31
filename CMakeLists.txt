@@ -60,6 +60,7 @@ if(APPLE)
 endif()
 target_include_directories(rackpy_loader PRIVATE native/include)
 target_link_libraries(rackpy_loader PRIVATE rackpy_sdk_plugin)
+rackpy_module_install_name(rackpy_loader)
 
 # The runtime's native-only parts, shared by the host and the native unit tests.
 set(RACKPY_RUNTIME_CORE native/runtime/threads.cpp native/runtime/diagnostics.cpp native/runtime/context.cpp
@@ -102,6 +103,7 @@ set_target_properties(rackpy_host PROPERTIES
   BUILD_WITH_INSTALL_RPATH ON INSTALL_RPATH "$<IF:$<BOOL:${APPLE}>,@loader_path/python/lib,$ORIGIN/python/lib>")
 target_include_directories(rackpy_host PRIVATE native/include native/bindings/generated)
 target_link_libraries(rackpy_host PRIVATE rackpy_sdk_plugin rackpy_python pybind11::headers)
+rackpy_module_install_name(rackpy_host)
 # libstdc++ gives std:: instances and its static objects default visibility, so
 # -fvisibility=hidden is not enough; the version script (on macOS the exported symbols list)
 # exports the ABI only.
@@ -239,6 +241,7 @@ if(RACKPY_BUILD_TESTS)
       CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF CXX_VISIBILITY_PRESET hidden)
     target_include_directories(rackpy_kernels_${_name} PRIVATE native/include)
     target_link_libraries(rackpy_kernels_${_name} PRIVATE rackpy_sdk_plugin)
+    rackpy_module_install_name(rackpy_kernels_${_name})
     if(NOT _variant STREQUAL "NONE")
       target_compile_definitions(rackpy_kernels_${_name} PRIVATE ${_variant})
     endif()
@@ -318,6 +321,7 @@ foreach(_source IN LISTS RACKPY_EXAMPLE_KERNELS)
     SKIP_BUILD_RPATH ON)  # Rack loads libRack.so through /tmp/Rack2, as for plugin.so; not the SDK path
   target_include_directories(${_target} PRIVATE native/include)
   target_link_libraries(${_target} PRIVATE rackpy_sdk_plugin)
+  rackpy_module_install_name(${_target})
 endforeach()
 
 # Plugin directory layout. bin/rackpy-dev bundle adds the runtime as python/.

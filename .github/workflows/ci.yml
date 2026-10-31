@@ -334,6 +334,62 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
+  macos-release-candidate:
+    name: macOS ${{ matrix.platform }} release candidate, installed and run in fresh Rack user folders
+    # RP-40. Builds every macOS artifact of this commit for the runner's architecture with Xcode's AppleClang
+    # (bin/rackpy-release build: Mach-O architecture, install names, rpaths, deployment target and signature
+    # checked), then installs and runs them in Rack Free 2.6.6 with an empty environment, including the
+    # wrong-architecture, unsigned and quarantine cases (bin/rackpy-release verify). A runner is not a clean
+    # Mac: the logs record every library Rack mapped. Keeps evidence, not the artifacts.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            platform: mac-arm64
+          - runner: macos-15-intel
+            platform: mac-x64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+      - run: brew install ninja jq
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/rackpy/sdk
+            ~/.cache/rackpy/build-inputs
+          key: rackpy-${{ matrix.platform }}-release-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json') }}
+      - run: uv sync --frozen
+      - name: Build the release candidate
+        run: bin/rackpy-release build --dest "$RUNNER_TEMP/release"
+      - name: Install and run it in fresh Rack user folders
+        run: >
+          bin/rackpy-release verify "$RUNNER_TEMP/release/artifacts"
+          --rack "$(bin/rack-sdk host mac-x64+arm64 | tail -1)" --logs reports/verify
+      - if: always()
+        name: Keep the manifest, checksums and each artifact's file list with the logs
+        run: |
+          mkdir -p reports/files reports/listings
+          cp "$RUNNER_TEMP/release/artifacts/manifest.json" "$RUNNER_TEMP/release/artifacts/SHA256SUMS" reports/ || true
+          for d in "$RUNNER_TEMP"/release/work/RackPy "$RUNNER_TEMP"/release/work/plugins/*; do
+            cp "$d/licenses/FILES.json" "reports/files/$(basename "$d").json" || true
+          done
+          for f in "$RUNNER_TEMP"/release/artifacts/*.vcvplugin "$RUNNER_TEMP"/release/artifacts/*.tar.zst; do
+            tar -tvf "$f" > "reports/listings/$(basename "$f").txt" || true
+          done
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: macos-${{ matrix.platform }}-release-candidate-evidence
+          path: reports/
+          retention-days: 30
+          if-no-files-found: ignore
+
   macos:
     name: macOS ${{ matrix.platform }}, native build, CTest and Rack host tests
     # RP-40. Native builds with the runner's AppleClang (one architecture each), the native tests

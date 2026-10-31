@@ -6,13 +6,17 @@
 # [tool.uv]
 # exclude-newer = "2026-10-21T00:00:00Z"
 # ///
-"""Build, verify and compare RackPy's Linux x86_64 release-candidate artifacts (RP-39).
+"""Build, verify and compare RackPy's release-candidate artifacts for this computer's platform.
 
-build    from a clean checkout, with the official Rack plugin toolchain: the
-         runtime bundle, every example as a .vcvplugin, the developer wheel,
+Linux x86_64 (RP-39) and macOS arm64 or x86_64 (RP-40), each built natively: a Mac
+builds the architecture it runs, with Xcode's AppleClang.
+
+build    from a clean checkout (on Linux with the official Rack plugin toolchain):
+         the runtime bundle, every example as a .vcvplugin, the developer wheel,
          the GPL source archive, license notices, a manifest and SHA256SUMS
-verify   install the artifacts in a clean container (no checkout, no Python on
-         the system, no network for Rack) and run them in Rack Free
+verify   install the artifacts on a clean machine and run them in Rack Free: on
+         Linux a container with no checkout, no Python and no network; on a Mac
+         fresh Rack user folders, run with an empty environment
 compare  explain every difference between two builds of the same commit
 
 Nothing is ever uploaded or published: the artifacts stay in DEST, outside git.
@@ -23,6 +27,7 @@ import hashlib
 import html
 import json
 import os
+import platform as platform_module
 import re
 import shutil
 import subprocess
@@ -42,8 +47,21 @@ REPO = Path(__file__).resolve().parent.parent
 BIN = REPO / "bin"
 CACHE = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "rackpy" / "build-inputs"
 DEFAULT_DEST = REPO / "build" / "release"
-PLATFORM = "lin-x64"
+if sys.platform == "darwin":
+    PLATFORM = "mac-arm64" if platform_module.machine() == "arm64" else "mac-x64"
+else:
+    PLATFORM = "lin-x64"
+MACOS = PLATFORM.startswith("mac-")
 GLIBC_FLOOR = "2.23"  # the official toolchain's sysroot (Ubuntu 16.04)
+# The oldest macOS each architecture claims: CMakeLists.txt's deployment targets, which are the pinned
+# runtime's (CPython's minos; libRack's is 10.9 on x86_64, 11.0 on arm64).
+MACOS_FLOORS = {"mac-arm64": "11.0", "mac-x64": "10.15"}
+MACOS_FLOOR = MACOS_FLOORS.get(PLATFORM, "")
+MACH_O_CPUS = {0x01000007: "mac-x64", 0x0100000C: "mac-arm64"}
+LOADER = "plugin.dylib" if MACOS else "plugin.so"
+LIBPYTHON = "libpython3.14.dylib" if MACOS else "libpython3.14.so.1.0"
+_SHARED = ".dylib" if MACOS else ".so"
+_EXTENSION = ".cpython-314-darwin.so" if MACOS else ".cpython-314-x86_64-linux-gnu.so"
 # Shared libraries an artifact's ELF files may need from the system or from Rack. Anything else fails the build.
 SYSTEM_LIBRARIES = {
     "libc.so.6",
@@ -58,11 +76,11 @@ SYSTEM_LIBRARIES = {
 }
 # Shared extension modules of the bundled CPython left out of every artifact (RP-39), with why.
 EXCLUDED_RUNTIME = {
-    "lib/python3.14/lib-dynload/_dbm.cpython-314-x86_64-linux-gnu.so": "Berkeley DB: the Sleepycat license adds "
+    f"lib/python3.14/lib-dynload/_dbm{_EXTENSION}": "Berkeley DB: the Sleepycat license adds "
     "its own source obligations, and Rack plugins have no use for it",
-    "lib/python3.14/lib-dynload/_tkinter.cpython-314-x86_64-linux-gnu.so": "Tk's GUI event loop cannot run in Rack",
-    "lib/libtcl9.0.so": "Tcl, needed only by _tkinter",
-    "lib/libtcl9tk9.0.so": "Tk, needed only by _tkinter",
+    f"lib/python3.14/lib-dynload/_tkinter{_EXTENSION}": "Tk's GUI event loop cannot run in Rack",
+    f"lib/libtcl9.0{_SHARED}": "Tcl, needed only by _tkinter",
+    f"lib/libtcl9tk9.0{_SHARED}": "Tk, needed only by _tkinter",
     "lib/tcl9": "Tcl's library, needed only by _tkinter",
     "lib/tcl9.0": "Tcl's library, needed only by _tkinter",
     "lib/itcl4.3.8": "Tcl's library, needed only by _tkinter",
@@ -85,6 +103,12 @@ EXCLUDED_EXTENSIONS = {"_dbm", "_tkinter"}
 # Library search paths an artifact may have: Rack's, which it symlinks to its own folder while it loads a plugin
 # (the Rack SDK's plugin.mk adds it to every plugin), and the plugin's own runtime.
 ALLOWED_SEARCH_PATHS = {"/tmp/Rack2", "$ORIGIN/python/lib", "$ORIGIN/../lib", "$ORIGIN"}
+# On macOS: the host's search path for the bundled libpython, and the bundled interpreter's own.
+ALLOWED_MAC_SEARCH_PATHS = {"@loader_path/python/lib", "@executable_path/../lib"}
+# What a Mach-O file may load from outside its plugin: the OS's libraries and frameworks, and Rack, which
+# plugin.mk links through /tmp/Rack2 (Rack symlinks it to its own folder while it loads plugins).
+MAC_SYSTEM_PREFIXES = ("/usr/lib/", "/System/Library/Frameworks/")
+MAC_RACK_LIBRARY = "/tmp/Rack2/libRack.dylib"
 # Tracked files that are not RackPy's to license under the GPL: kept out of the source archive (docs/licensing.md).
 RESTRICTED_SOURCES = ["docs/_static/examples"]
 
@@ -157,6 +181,87 @@ def elf_facts(path: Path) -> dict[str, Any]:
     }
 
 
+MH_MAGIC_64 = b"\xcf\xfa\xed\xfe"  # a thin 64-bit Mach-O, little-endian
+FAT_MAGICS = {b"\xca\xfe\xba\xbe", b"\xca\xfe\xba\xbf"}  # universal binaries
+
+
+def mach_o_files(root: Path) -> list[Path]:
+    found = []
+    for path in sorted(root.rglob("*")):
+        if path.is_file() and not path.is_symlink():
+            with path.open("rb") as f:
+                if (magic := f.read(4)) == MH_MAGIC_64 or magic in FAT_MAGICS:
+                    found.append(path)
+    return found
+
+
+def mach_o_tool(name: str) -> str:
+    """Apple's otool, nm or strip on a Mac (Xcode's command line tools); LLVM's elsewhere, for inspection."""
+    for candidate in (name, f"llvm-{name}") if sys.platform == "darwin" else (f"llvm-{name}",):
+        if shutil.which(candidate):
+            return candidate
+    raise SystemExit(f"no {name}: install Xcode's command line tools (xcode-select --install)")
+
+
+def load_commands(path: Path) -> list[dict[str, str]]:
+    """A Mach-O file's load commands, from otool -l: each command's fields by name (cmd, name, path, minos...)."""
+    commands: list[dict[str, str]] = []
+    for line in run([mach_o_tool("otool"), "-l", path], capture=True).splitlines():
+        fields = line.split(None, 1)
+        if line.startswith("Load command"):
+            commands.append({})
+        elif commands and len(fields) == 2:
+            commands[-1].setdefault(fields[0], re.sub(r" \(offset \d+\)$", "", fields[1].strip()))
+    return commands
+
+
+def code_signature(path: Path) -> dict[str, Any]:
+    """codesign's view of a file: whether its signature verifies, and what kind it is (adhoc, linker-signed)."""
+    if not shutil.which("codesign"):
+        return {"checked": False}
+    verify = subprocess.run(["codesign", "--verify", "--strict", path], check=False, capture_output=True, text=True)
+    detail = subprocess.run(["codesign", "-d", "--verbose=2", path], check=False, capture_output=True, text=True)
+    pairs = [line.split("=", 1) for line in detail.stderr.splitlines() if "=" in line]
+    flags = re.search(r"\bflags=(\S+)", detail.stderr)
+    return {
+        "checked": True,
+        "valid": verify.returncode == 0,
+        "error": verify.stderr.strip() or None,
+        "signature": next((v for k, v in pairs if k == "Signature"), None),  # "adhoc": signed by no identity
+        "flags": flags[1] if flags else None,  # e.g. 0x2(adhoc); linker-signed when the linker signed it
+        "authority": [v for k, v in pairs if k == "Authority"],  # a Developer ID signature's chain; none ad hoc
+        "team": next((v for k, v in pairs if k == "TeamIdentifier"), None),
+    }
+
+
+def mach_o_facts(path: Path) -> dict[str, Any]:
+    with path.open("rb") as f:
+        header = f.read(8)
+    cpu = (
+        MACH_O_CPUS.get(int.from_bytes(header[4:8], "little"), "unknown") if header[:4] == MH_MAGIC_64 else "universal"
+    )
+    commands = load_commands(path)
+    build = next((c for c in commands if c.get("cmd") == "LC_BUILD_VERSION"), None)
+    legacy = next((c for c in commands if c.get("cmd") == "LC_VERSION_MIN_MACOSX"), None)
+    return {
+        "cpu": cpu,
+        "needed": [c["name"] for c in commands if c.get("cmd") in {"LC_LOAD_DYLIB", "LC_LOAD_WEAK_DYLIB"}],
+        "install_name": next((c["name"] for c in commands if c.get("cmd") == "LC_ID_DYLIB"), None),
+        "runpath": [c["path"] for c in commands if c.get("cmd") == "LC_RPATH"],
+        "minos": build["minos"] if build else legacy["version"] if legacy else None,
+        "sdk": build.get("sdk") if build else legacy.get("sdk") if legacy else None,
+        "code_signature": code_signature(path),
+    }
+
+
+def finish_mach_o(path: Path) -> None:
+    """Strip a Mach-O library as plugin.mk's dist does (debug symbols, and local symbols), then sign it ad hoc:
+    editing a file invalidates its signature, and arm64 macOS loads no unsigned code."""
+    path.chmod(path.stat().st_mode | 0o200)
+    run([mach_o_tool("strip"), "-S", "-x", path])
+    run(["codesign", "--force", "--sign", "-", path])
+
+
 def toolchain_bin() -> Path:
     return Path(run([BIN / "rack-toolchain", "path"], capture=True).strip().splitlines()[-1])
 
@@ -183,7 +288,15 @@ def content_digest(path: Path) -> str:
 
 
 def toolchain_id() -> dict[str, str]:
-    """The official toolchain by its recipe's hash and target, not by where this machine keeps it."""
+    """The official toolchain by its recipe's hash and target, not by where this machine keeps it; on a Mac,
+    Xcode's compiler and SDK, and the macOS version."""
+    if MACOS:
+        return {
+            "compiler": run(["xcrun", "clang", "--version"], capture=True).splitlines()[0],
+            "sdk": run(["xcrun", "--show-sdk-version"], capture=True).strip(),
+            "macos": run(["sw_vers", "-productVersion"], capture=True).strip(),
+            "machine": platform_module.machine(),
+        }
     bindir = toolchain_bin()
     recipe = REPO / "packaging" / "toolchain" / "lin-x64.Dockerfile"
     return {"build": bindir.parents[2].name, "target": bindir.parent.name, "recipe_sha256": sha256_file(recipe)}
@@ -204,8 +317,9 @@ def version_tuple(version: str) -> tuple[int, ...]:
     return tuple(int(p) for p in version.split("."))
 
 
-def prepare_runtime(python: Path, strip: Path) -> dict[str, str]:
-    """Remove the excluded modules from a copied runtime and strip its ELF files; return what was removed."""
+def prepare_runtime(python: Path, finish: Any) -> dict[str, str]:
+    """Remove the excluded modules from a copied runtime and strip its shared libraries with FINISH (on a Mac,
+    signing them again); return what was removed."""
     removed = {}
     for rel, why in EXCLUDED_RUNTIME.items():
         target = python / rel
@@ -217,10 +331,10 @@ def prepare_runtime(python: Path, strip: Path) -> dict[str, str]:
             raise SystemExit(f"the runtime has no {rel}: update EXCLUDED_RUNTIME for this runtime")
         removed[rel] = why
     # Only the shared libraries: strip warns on, and may break, the patchelf-edited executable, which Rack never runs.
-    for path in elf_files(python):
-        if ".so" in path.name:
+    for path in mach_o_files(python) if MACOS else elf_files(python):
+        if ".so" in path.name or path.suffix == ".dylib":
             path.chmod(path.stat().st_mode | 0o200)
-            run([strip, "--strip-unneeded", path])
+            finish(path)
     return removed
 
 
@@ -366,9 +480,9 @@ FILE_RULES = [
     (["LICENSE", "NOTICE", "licenses/*", "*-LICENSE", "*-LICENSE.md", "*-LICENSE.txt"], ["notices"]),
     (["plugin.json"], ["plugin"]),
     (["rackpy-loader.json", "pythonpath/rackpy/*"], ["rackpy"]),
-    (["plugin.so"], ["rackpy", "rack-sdk-headers"]),
+    ([LOADER], ["rackpy", "rack-sdk-headers"]),
     (["rackpy_host.so"], ["rackpy", "rack-sdk-headers", "pybind11"]),
-    (["python/lib/libpython3.14.so.1.0"], ["cpython", "cpython-libraries"]),
+    ([f"python/lib/{LIBPYTHON}"], ["cpython", "cpython-libraries"]),
     (["python/*"], ["cpython"]),
     (["kernels/*"], ["plugin", "rack-sdk-headers"]),
     (["pythonpath/*", "res/*", "presets/*"], ["plugin"]),
@@ -405,9 +519,72 @@ def file_manifest(root: Path, build: dict[str, Any]) -> list[str]:
     return unmatched
 
 
+RECORDED: dict[str, Any] = {}  # each kernel library's facts, from every plugin, as well as the bundle's
+
+
+def elf_problems(root: Path, work: Path, facts: dict[str, Any] | None) -> list[str]:
+    """What is wrong with root's ELF files; their facts go in FACTS (the bundle's) or, for kernels, RECORDED."""
+    found: list[str] = []
+    recorded = facts if facts is not None else RECORDED
+    files = elf_files(root)
+    bundled = {p.name for p in files} | {"libpython3.14.so.1.0"}
+    for path in files:
+        rel = path.relative_to(work).as_posix()
+        fact = elf_facts(path)
+        if facts is not None or path.parent.name == "kernels":
+            recorded[rel] = fact
+        unexpected = [
+            n
+            for n in fact["needed"]
+            if n not in SYSTEM_LIBRARIES | bundled
+            and not (
+                n.startswith("$ORIGIN/") and (path.parent / n.removeprefix("$ORIGIN/")).resolve().is_relative_to(root)
+            )
+        ]
+        if unexpected:
+            found.append(f"{rel} needs {unexpected}")
+        for entry in fact["runpath"]:
+            if any(d not in ALLOWED_SEARCH_PATHS for d in entry.split(":")):
+                found.append(f"{rel} searches {entry}")
+        if fact["max_glibc"] and version_tuple(fact["max_glibc"]) > version_tuple(GLIBC_FLOOR):
+            found.append(f"{rel} needs GLIBC_{fact['max_glibc']}, newer than {GLIBC_FLOOR}")
+    return found
+
+
+def mach_o_problems(root: Path, work: Path, facts: dict[str, Any] | None) -> list[str]:
+    """What is wrong with root's Mach-O files; their facts go in FACTS (the bundle's) or, for kernels, RECORDED."""
+    found: list[str] = []
+    recorded = facts if facts is not None else RECORDED
+    files = mach_o_files(root)
+    bundled = {p.name for p in files}
+    for path in files:
+        rel = path.relative_to(work).as_posix()
+        fact = mach_o_facts(path)
+        if facts is not None or path.parent.name == "kernels":
+            recorded[rel] = fact
+        if fact["cpu"] != PLATFORM:
+            found.append(f"{rel} is a {fact['cpu']} binary, not {PLATFORM}: build one package per architecture")
+        unexpected = [
+            n
+            for n in fact["needed"]
+            if not n.startswith(MAC_SYSTEM_PREFIXES)
+            and n != MAC_RACK_LIBRARY
+            and not (n.startswith("@rpath/") and n.removeprefix("@rpath/") in bundled)
+        ]
+        if unexpected:
+            found.append(f"{rel} needs {unexpected}")
+        found += [f"{rel} searches {entry}" for entry in fact["runpath"] if entry not in ALLOWED_MAC_SEARCH_PATHS]
+        if fact["minos"] is None or version_tuple(fact["minos"]) > version_tuple(MACOS_FLOOR):
+            found.append(f"{rel} needs macOS {fact['minos']}, newer than {MACOS_FLOOR}")
+        signature = fact["code_signature"]
+        if not signature["checked"] or not signature["valid"]:
+            found.append(f"{rel}: its code signature does not verify ({signature.get('error')})")
+    return found
+
+
 @app.command
 def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
-    """Build every Linux x86_64 release-candidate artifact of this commit into DEST (emptied first).
+    """Build every release-candidate artifact of this commit for this computer's platform into DEST (emptied first).
 
     --allow-dirty is for trying the tool only: the manifest then says the checkout was dirty, and such
     artifacts must never leave this machine.
@@ -429,9 +606,11 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
     out.mkdir()
     tree = dest / "build-tree"
 
-    # 1. The plugin skeleton and the example kernels, with the official toolchain (glibc floor 2.23). The
-    # runtime is a fresh extraction of the pinned archive, not the build cache's copy that local runs touch.
-    run([BIN / "rackpy-dev", "build", "--build-dir", tree, "--toolchain", "rack-lin-x64", "--werror"])
+    # 1. The plugin skeleton and the example kernels: on Linux with the official toolchain (glibc floor 2.23),
+    # on a Mac with Xcode's AppleClang for this Mac's architecture (CMakeLists.txt sets the deployment target).
+    # The runtime is a fresh extraction of the pinned archive, not the build cache's copy that local runs touch.
+    toolchain = [] if MACOS else ["--toolchain", "rack-lin-x64"]
+    run([BIN / "rackpy-dev", "build", "--build-dir", tree, *toolchain, "--werror"])
     run([BIN / "rackpy-dev", "bundle", work, "--build-dir", tree, "--runtime", "copy"])
     bundle = work / "RackPy"
     shutil.rmtree(bundle / "python")
@@ -441,11 +620,21 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
         tf.extractall(staging, filter="data")
     (staging / pin["root"]).rename(bundle / "python")
     staging.rmdir()
-    # The toolchain's strip, not the build machine's: binutils versions strip the same file differently.
-    strip = toolchain_bin() / "x86_64-ubuntu16.04-linux-gnu-strip"
-    removed = prepare_runtime(bundle / "python", strip)
+    if MACOS:
+        finish = finish_mach_o
+    else:
+        # The toolchain's strip, not the build machine's: binutils versions strip the same file differently.
+        strip = toolchain_bin() / "x86_64-ubuntu16.04-linux-gnu-strip"
+
+        def finish(path: Path) -> None:
+            run([strip, "--strip-unneeded", path])
+
+    removed = prepare_runtime(bundle / "python", finish)
+    if MACOS:  # cmake --install --strip edited them after the linker signed them
+        for name in (LOADER, "rackpy_host.so"):
+            finish(bundle / name)
     components = third_party_notices(bundle / "licenses", version)
-    sdk = Path(run([BIN / "rack-sdk", "path"], capture=True).strip().splitlines()[-1])
+    sdk = Path(run([BIN / "rack-sdk", "path", PLATFORM], capture=True).strip().splitlines()[-1])
     sdk_header_notices(bundle / "licenses", sdk)
     versions = json.loads((REPO / "upstream" / "versions.json").read_text())
     build_info = {
@@ -456,7 +645,7 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
         "rack_sdk": next(a for a in versions["sdk"]["archives"] if a["platform"] == PLATFORM),
         "python_runtime": pin,
         "toolchain": toolchain_id(),
-        "glibc_floor": GLIBC_FLOOR,
+        **({"macos_floor": MACOS_FLOOR} if MACOS else {"glibc_floor": GLIBC_FLOOR}),
     }
 
     # 2. Every example as a plugin directory, its kernel libraries stripped as cmake --install strips RackPy's.
@@ -470,40 +659,22 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
             args += ["--kernels", tree / "examples" / project.name / "kernels"]
         run(args)
         for kernel in sorted((plugins / manifest["slug"] / "kernels").glob("*.so")):
-            run([strip, "--strip-unneeded", kernel])
+            finish(kernel)
         examples.append((project, manifest))
 
-    # 3. What every ELF file needs: only the system's C library family, Rack and the bundled runtime, at most
-    # glibc 2.23, and no search path but Rack's /tmp/Rack2 and the plugin's own. No file names this machine.
-    elf: dict[str, Any] = {}
+    # 3. What every binary needs, and that no file names this machine. On Linux: only the system's C library
+    # family, Rack and the bundled runtime, at most glibc 2.23, and no search path but Rack's /tmp/Rack2 and the
+    # plugin's own. On a Mac: one architecture, this Mac's; only the OS's libraries, Rack and the bundled
+    # runtime; the deployment target at most the claimed macOS; and a signature that verifies.
+    binaries: dict[str, Any] = {}
     problems = []
     for root in [bundle, *(plugins / m["slug"] for _, m in examples)]:
-        files = elf_files(root)
-        bundled = {p.name for p in files} | {"libpython3.14.so.1.0"}
-        for path in files:
-            rel = path.relative_to(work).as_posix()
-            fact = elf_facts(path)
-            if root == bundle or path.parent.name == "kernels":
-                elf[rel] = fact
-            unexpected = [
-                n
-                for n in fact["needed"]
-                if n not in SYSTEM_LIBRARIES | bundled
-                and not (
-                    n.startswith("$ORIGIN/")
-                    and (path.parent / n.removeprefix("$ORIGIN/")).resolve().is_relative_to(root)
-                )
-            ]
-            if unexpected:
-                problems.append(f"{rel} needs {unexpected}")
-            for entry in fact["runpath"]:
-                if any(d not in ALLOWED_SEARCH_PATHS for d in entry.split(":")):
-                    problems.append(f"{rel} searches {entry}")
-            if fact["max_glibc"] and version_tuple(fact["max_glibc"]) > version_tuple(GLIBC_FLOOR):
-                problems.append(f"{rel} needs GLIBC_{fact['max_glibc']}, newer than {GLIBC_FLOOR}")
+        check = mach_o_problems if MACOS else elf_problems
+        problems += check(root, work, binaries if root == bundle else None)
         problems += [f"{f}: no license rule covers it" for f in file_manifest(root, build_info)]
         problems += [f"{p.relative_to(work)} names {m}" for p, m in machine_paths(root)]
-        run([BIN / "rackpy-dev", "inspect", root, "--max-glibc", GLIBC_FLOOR], capture=True)
+        floor = [] if MACOS else ["--max-glibc", GLIBC_FLOOR]
+        run([BIN / "rackpy-dev", "inspect", root, *floor], capture=True)
     if problems:
         raise SystemExit("artifact problems:\n" + "\n".join(f"- {p}" for p in problems))
 
@@ -568,12 +739,12 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
         "dirty": dirty,
         "source_date_epoch": epoch,
         "platform": PLATFORM,
-        "glibc_floor": GLIBC_FLOOR,
+        **({"macos_floor": MACOS_FLOOR} if MACOS else {"glibc_floor": GLIBC_FLOOR}),
         "inputs": {**build_info, "uv_lock_sha256": sha256_file(REPO / "uv.lock"), "build_tools": build_tools()},
         "excluded_from_runtime": removed,
         "restricted_sources_excluded": RESTRICTED_SOURCES,
         "third_party": components,
-        "elf": elf,
+        ("mach_o" if MACOS else "elf"): binaries | RECORDED,
         "artifacts": artifacts,
     }
     (out / "manifest.json").write_text(json.dumps(manifest_data, indent=2, sort_keys=True) + "\n")
@@ -622,6 +793,7 @@ def compare(first: Path, second: Path) -> None:
 
 
 VERIFY_SCRIPT = REPO / "packaging" / "linux" / "verify-in-container.sh"
+VERIFY_MAC_SCRIPT = REPO / "packaging" / "macos" / "verify.sh"
 # Clean machines to install on: the oldest Linux claimed (glibc 2.23, the toolchain's floor) and a later one.
 VERIFY_IMAGES = {name: REPO / "packaging" / "linux" / f"{name}.Dockerfile" for name in ("ubuntu-20.04", "ubuntu-16.04")}
 
@@ -630,12 +802,19 @@ VERIFY_IMAGES = {name: REPO / "packaging" / "linux" / f"{name}.Dockerfile" for n
 def verify(
     artifacts: Path, *, rack: Path, logs: Path, image: Literal["ubuntu-20.04", "ubuntu-16.04"] = "ubuntu-20.04"
 ) -> None:
-    """Install ARTIFACTS in a clean container with Rack Free at RACK, and run every example; logs go to LOGS.
+    """Install ARTIFACTS on a clean machine with Rack Free at RACK, and run every example; logs go to LOGS.
 
-    The image (packaging/linux/IMAGE.Dockerfile) has Rack's system libraries and Xvfb, but no Python and no
-    RackPy checkout; the run itself has no network, as an offline machine would. ubuntu-16.04 has glibc 2.23,
-    the oldest the artifacts claim.
+    On Linux, a container: the image (packaging/linux/IMAGE.Dockerfile) has Rack's system libraries and
+    Xvfb, but no Python and no RackPy checkout; the run itself has no network, as an offline machine would.
+    ubuntu-16.04 has glibc 2.23, the oldest the artifacts claim.
+
+    On a Mac, RACK is "VCV Rack 2 Free.app" and --image does not apply: packaging/macos/verify.sh installs
+    the artifacts in fresh Rack user folders and runs Rack with an empty environment (no PATH beyond the
+    system's, no PYTHON*, DYLD_* or developer variables), and records which libraries Rack mapped.
     """
+    if MACOS:
+        verify_mac(artifacts, rack, logs)
+        return
     dockerfile = VERIFY_IMAGES[image]
     tag = f"rackpy-verify-{image}:" + hashlib.sha256(dockerfile.read_bytes()).hexdigest()[:12]
     run(["docker", "build", "-t", tag, "-f", dockerfile, dockerfile.parent])
@@ -657,6 +836,39 @@ def verify(
         ])  # fmt: skip
     finally:
         shutil.rmtree(script.parent)
+        if (logs / "summary.txt").exists():
+            print((logs / "summary.txt").read_text())
+
+
+def verify_mac(artifacts: Path, rack: Path, logs: Path) -> None:
+    if logs.exists():
+        shutil.rmtree(logs)
+    logs.mkdir(parents=True)
+    scratch = Path(tempfile.mkdtemp(prefix="rackpy-verify-"))
+    script = scratch / "verify.sh"  # a copy, so that editing the script cannot change a run under way
+    shutil.copy(VERIFY_MAC_SCRIPT, script)
+    # For the wrong-architecture case: a library for the other Mac CPU, the other pinned runtime's libpython.
+    other = "mac-x64" if PLATFORM == "mac-arm64" else "mac-arm64"
+    pin = json.loads((REPO / "packaging" / "inputs.json").read_text())["python_runtime"]["3.14"][other]
+    alien = scratch / f"libpython-{other}.dylib"
+    with tarfile.open(fetch(pin)) as tf:
+        member = tf.extractfile(f"{pin['root']}/lib/{LIBPYTHON}")
+        assert member is not None
+        alien.write_bytes(member.read())
+    home = scratch / "home"
+    home.mkdir()
+    env = {
+        "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
+        "HOME": str(home),
+        "TMPDIR": "/tmp/",
+        "LANG": "en_US.UTF-8",
+        "JQ": shutil.which("jq") or "/usr/bin/jq",
+        "ALIEN_LOADER": str(alien),
+    }
+    try:
+        run(["/bin/bash", script, artifacts.resolve(), rack.resolve(), logs.resolve()], env=env)
+    finally:
+        shutil.rmtree(scratch)
         if (logs / "summary.txt").exists():
             print((logs / "summary.txt").read_text())
 

@@ -266,18 +266,106 @@ def dynamic_facts(path: Path) -> dict[str, Any]:
     }
 
 
+# Symbols every Mach-O image defines, which are not part of an ABI.
+MACH_O_LINKER_SYMBOLS = {"___dso_handle", "__mh_dylib_header", "__mh_bundle_header", "__mh_execute_header"}
+
+
+def mach_o_tool(name: str) -> str:
+    """Apple's otool or nm on a Mac (Xcode's command line tools); LLVM's elsewhere, whose output is the same."""
+    for candidate in (name, f"llvm-{name}") if sys.platform == "darwin" else (f"llvm-{name}",):
+        if shutil.which(candidate):
+            return candidate
+    raise SystemExit(f"no {name}: install Xcode's command line tools (xcode-select --install)")
+
+
+def load_commands(path: Path) -> list[dict[str, str]]:
+    """A Mach-O file's load commands, from otool -l: each command's fields by name (cmd, name, path, minos...)."""
+    commands: list[dict[str, str]] = []
+    for line in capture([mach_o_tool("otool"), "-l", path]).splitlines():
+        fields = line.split(None, 1)
+        if line.startswith("Load command"):
+            commands.append({})
+        elif commands and len(fields) == 2:
+            commands[-1].setdefault(fields[0], re.sub(r" \(offset \d+\)$", "", fields[1].strip()))
+    return commands
+
+
+def mach_o_facts(path: Path) -> dict[str, Any]:
+    commands = load_commands(path)
+    nm = mach_o_tool("nm")
+    exported = capture([nm, "-gU", path])
+    undefined = capture([nm, "-u", path])
+
+    def c_name(symbol: str) -> str:  # Mach-O prefixes C names with an underscore
+        return symbol.removeprefix("_")
+
+    return {
+        "needed": [c["name"] for c in commands if c.get("cmd") in {"LC_LOAD_DYLIB", "LC_LOAD_WEAK_DYLIB"}],
+        "install_name": next((c["name"] for c in commands if c.get("cmd") == "LC_ID_DYLIB"), None),
+        "runpath": [c["path"] for c in commands if c.get("cmd") == "LC_RPATH"],
+        "exports": sorted(
+            {c_name(line.split()[-1]) for line in exported.splitlines() if line.strip()}
+            - {c_name(s) for s in MACH_O_LINKER_SYMBOLS}
+        ),
+        "python_references": sorted(
+            {
+                c_name(line.split()[-1])
+                for line in undefined.splitlines()
+                if c_name(line.strip()).startswith(("Py", "_Py"))
+            }
+        ),
+    }
+
+
+def inspect_mac(plugin: Path) -> tuple[dict[str, Any], list[str]]:
+    """inspect's checks for a macOS bundle: plugin.dylib and rackpy_host.so, as cmake/RackSDK.cmake links them."""
+    loader = mach_o_facts(plugin / "plugin.dylib")
+    host = mach_o_facts(plugin / "rackpy_host.so")
+    found: list[str] = []
+    if loader["python_references"]:
+        found.append(f"plugin.dylib references Python symbols: {loader['python_references'][:5]}")
+    if "libpython" in " ".join(loader["needed"]):
+        found.append("plugin.dylib links libpython; the loader must not depend on Python")
+    if not set(loader["exports"]) >= LOADER_EXPORTS:
+        found.append(f"plugin.dylib does not export {sorted(LOADER_EXPORTS)}")
+    if set(host["exports"]) != HOST_EXPORTS:
+        found.append(f"rackpy_host.so exports {sorted(set(host['exports']) ^ HOST_EXPORTS)} beyond the host ABI")
+    if loader["runpath"]:
+        found.append(f"plugin.dylib has rpaths {loader['runpath']}; it needs none")
+    if host["runpath"] != ["@loader_path/python/lib"]:
+        found.append(f"rackpy_host.so's rpaths are {host['runpath']}, expected ['@loader_path/python/lib']")
+    if "@rpath/libpython3.14.dylib" not in host["needed"]:
+        found.append("rackpy_host.so does not link @rpath/libpython3.14.dylib, the bundled runtime")
+    for name, facts in (("plugin.dylib", loader), ("rackpy_host.so", host)):
+        # Rack symlinks /tmp/Rack2 to its own folder while it loads plugins; plugin.mk links them so.
+        if "/tmp/Rack2/libRack.dylib" not in facts["needed"]:
+            found.append(f"{name} does not link /tmp/Rack2/libRack.dylib")
+        if facts["install_name"] != f"@rpath/{name}":
+            found.append(f"{name}'s install name is {facts['install_name']}, expected @rpath/{name}")
+    report = {"plugin.dylib": loader, "rackpy_host.so": host}
+    report["rackpy_host.so"]["python_references"] = len(host["python_references"])
+    return report, found
+
+
 def version_tuple(version: str) -> tuple[int, ...]:
     return tuple(int(p) for p in version.split("."))
 
 
 @app.command
 def inspect(plugin: Path, *, max_glibc: str | None = None) -> None:
-    """Check a bundled plugin directory's ELF files and print their dynamic facts as JSON.
+    """Check a bundled plugin directory's loader and host and print their dynamic facts as JSON.
 
     Fails if the loader references Python, if either library exports more than
     the RackPy ABI, if the RUNPATHs differ from ADR 002, or if a library needs a
-    glibc newer than --max-glibc.
+    glibc newer than --max-glibc. A macOS bundle (plugin.dylib) gets the same checks
+    for Mach-O, with its install names and rpaths; --max-glibc does not apply.
     """
+    if (plugin / "plugin.dylib").is_file():
+        mac_report, problems = inspect_mac(plugin)
+        print(json.dumps(mac_report, indent=2))
+        if problems:
+            raise SystemExit("bundle problems:\n" + "\n".join(f"- {p}" for p in problems))
+        return
     loader = dynamic_facts(plugin / "plugin.so")
     host = dynamic_facts(plugin / "rackpy_host.so")
     found: list[str] = []

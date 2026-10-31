@@ -450,7 +450,7 @@ def build(project: Path = Path(), *, bundle: Path, dest: Path, kernels: Path | N
         rackpy package are kept.
     dest
         Where to make the plugin directory, for example Rack's user folder's
-        ``plugins-lin-x64``.
+        ``plugins-lin-x64`` (``plugins-mac-arm64`` or ``plugins-mac-x64`` on a Mac).
     kernels
         Where the project's native kernel libraries were built, ``NAME.so`` for each
         NAME its rackpy-plugin.json lists under ``"kernels"``: for RackPy's examples,
@@ -509,6 +509,30 @@ def build(project: Path = Path(), *, bundle: Path, dest: Path, kernels: Path | N
     print(target)
 
 
+# Rack's loader file on Linux and on macOS, and the platform of a thin 64-bit Mach-O by its CPU type.
+LOADERS = ("plugin.so", "plugin.dylib")
+MACH_O_CPUS = {0x01000007: "mac-x64", 0x0100000C: "mac-arm64"}
+
+
+def plugin_platform(root: Path) -> str:
+    """The Rack platform a plugin directory's loader binary is for: lin-x64, mac-x64 or mac-arm64."""
+    found = [name for name in LOADERS if (root / name).is_file()]
+    if len(found) != 1:
+        raise UsageError(f"{root} has no plugin.so or plugin.dylib; make it with `bin/rackpy-plugin build`")
+    with (root / found[0]).open("rb") as f:
+        header = f.read(8)
+    if header[:4] == b"\x7fELF" and found[0] == "plugin.so":
+        return "lin-x64"
+    if header[:4] == b"\xcf\xfa\xed\xfe" and found[0] == "plugin.dylib":  # MH_MAGIC_64, little-endian
+        cpu = int.from_bytes(header[4:8], "little")
+        if cpu in MACH_O_CPUS:
+            return MACH_O_CPUS[cpu]
+    raise UsageError(
+        f"{root / found[0]} is not a 64-bit loader for one platform Rack supports (a universal"
+        " binary is not: build one package per architecture)"
+    )
+
+
 def pack_tree(root: Path, out: Path, epoch: int) -> None:
     """root as root.name/ in a zstd tar: sorted, owned by root, dated epoch, modes 755 or 644, no bytecode."""
 
@@ -544,7 +568,10 @@ def pack_tree(root: Path, out: Path, epoch: int) -> None:
 def pack(
     plugin: Path, *, dest: Path = Path(), output: Path | None = None, source_date_epoch: int | None = None
 ) -> None:
-    """Make a plugin directory, as ``build`` makes it, a package Rack installs: DEST/<slug>-<version>-lin-x64.vcvplugin.
+    """Make a plugin directory, as ``build`` makes it, a package Rack installs: DEST/<slug>-<version>-<os>.vcvplugin.
+
+    The platform, <os> (``lin-x64``, ``mac-x64`` or ``mac-arm64``), is the one the plugin's loader
+    binary was built for.
 
     A ``.vcvplugin`` is a zstd-compressed tar of the plugin's folder, which Rack extracts
     when it finds one in its plugins folder. The package is reproducible: its files are
@@ -568,11 +595,10 @@ def pack(
     slug, version = manifest.get("slug", ""), manifest.get("version", "")
     if root.name != slug:
         raise UsageError(f"{root} must be named after its slug, {slug!r}: Rack extracts it to a folder of that name")
-    if not (root / "plugin.so").is_file():
-        raise UsageError(f"{root} has no plugin.so; make it with `bin/rackpy-plugin build`")
+    target = plugin_platform(root)
     if source_date_epoch is None:
         source_date_epoch = int(os.environ.get("SOURCE_DATE_EPOCH", "0"))
-    out = output if output is not None else dest / f"{slug}-{version}-lin-x64.vcvplugin"
+    out = output if output is not None else dest / f"{slug}-{version}-{target}.vcvplugin"
     out.parent.mkdir(parents=True, exist_ok=True)
     pack_tree(root, out, source_date_epoch)
     print(out)

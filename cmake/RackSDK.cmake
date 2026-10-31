@@ -130,3 +130,20 @@ else()
   target_link_options(rackpy_sdk_plugin INTERFACE -Wl,-rpath=/tmp/Rack2 -static-libstdc++ -static-libgcc)
   target_link_options(rackpy_sdk_program INTERFACE "-Wl,-rpath,${RACK_SDK_DIR}" -static-libstdc++ -static-libgcc)
 endif()
+
+# A macOS module's install name (LC_ID_DYLIB) is, by default, the path the linker wrote it to: a build-tree
+# path, which would ship in every plugin. Rack loads plugins by path, so the name is only a label; give each
+# module @rpath/<its file name> instead. Call after the target's OUTPUT_NAME and SUFFIX are set.
+function(rackpy_module_install_name target)
+  if(APPLE)
+    get_target_property(_output ${target} OUTPUT_NAME)
+    get_target_property(_suffix ${target} SUFFIX)
+    if(NOT _output)
+      set(_output ${target})
+    endif()
+    if(NOT _suffix)
+      set(_suffix "${CMAKE_SHARED_MODULE_SUFFIX}")
+    endif()
+    target_link_options(${target} PRIVATE "LINKER:-install_name,@rpath/${_output}${_suffix}")
+  endif()
+endfunction()
