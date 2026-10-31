@@ -73,6 +73,9 @@ uploaded, published or attached to a release.
 | Copying the runtime from the build cache would ship whatever local runs had written there | fresh extraction from the pinned archive |
 | `FILES.json` first recorded the toolchain's cache path, missed because the path scan ran before the list was written | toolchain recorded by build ID and target; the scan runs last |
 | Rack extracts a package over an existing folder without deleting it, so an upgrade can keep stale files | the install guide says to delete the folder first; the verifier tests exactly that |
+| CI's and a local build of the same commit differed by a few bytes per archive: the machines' `strip` (binutils 2.47 here, Ubuntu 24.04's on CI) and git's built-in gzip | the pinned toolchain's `strip` (binutils 2.44); the source archive's tar compressed by Python's gzip with mtime 0 |
+| With those fixed, contents matched (`licenses/FILES.json` byte-identical) but `plugin.so` and `rackpy_host.so` were 644 in CI's archives: CMake sets `CMAKE_INSTALL_SO_NO_EXE` on Debian and Ubuntu | `install(TARGETS)` names its permissions; `rackpy-plugin pack` reads mode bits, not `os.access` |
+| Since RP-38, CI's `-m` selections replaced `addopts`, so the native and host jobs ran the opt-in sanitizer and stress suites and timed out; the docs job outgrew 15 minutes | every selection repeats `not sanitizer and not stress`; docs gets 30 minutes |
 | Rack's "modules not installed" dialog blocks a headless Rack without a dialog program | Rack's behaviour, not RackPy's; the uninstall check empties the patch first, and the guide describes the dialog |
 
 ## Evidence
@@ -140,6 +143,7 @@ models in `plugin.json`: 2, 1, 1, 1, 3, 1, 1, 2, 1, 1.
 | `adc8245` twice from the same checkout, different build folders | all 15 files bit-identical ([record](rp-39-evidence/rebuild-adc8245-same-checkout.json)) |
 | `adc8245` from the checkout and from a fresh `git clone` in another folder with its own `uv sync` | all 15 files bit-identical ([record](rp-39-evidence/rebuild-adc8245-fresh-clone.json)) |
 | `adc8245` against `1ead7b4` | each `.vcvplugin` differs only in `licenses/FILES.json` and `licenses/THIRD-PARTY-NOTICES.md`, which record the commit and version; the wheel is identical ([record](rp-39-evidence/compare-adc8245-1ead7b4.json)) |
+| `49b1ae1` on this machine and on GitHub's `ubuntu-24.04` runner ([run 41200410232](https://github.com/feoh/RackPy/actions/runs/41200410232)) | all 15 files bit-identical ([`SHA256SUMS`](rp-39-evidence/SHA256SUMS-49b1ae1-ci-and-local)), after the three fixes in "Findings" (toolchain `strip`, Python's gzip, explicit install modes); the runner's clean-machine runs pass 209 of 209 on both images ([20.04](rp-39-evidence/ci-verify-ubuntu-20.04-49b1ae1.txt), [16.04](rp-39-evidence/ci-verify-ubuntu-16.04-49b1ae1.txt)) |
 | The source archive of `adc8245`, extracted without git, built with `bin/rackpy-dev build --toolchain rack-lin-x64` and bundled | `plugin.so`, `rackpy_host.so`, the three stripped kernels and `pythonpath/` byte-identical to the release's: the archive is the corresponding source |
 
 The packaging guide's commands were run as written (release bundle extracted
@@ -151,6 +155,12 @@ identical, the bundle's `FILES.json` was left out, and `rackpy-dev inspect
 
 - `prek run --all-files`, and strict mypy on `bin/rackpy-release` and
   `bin/rackpy-plugin`; `shellcheck -S warning` on the container script.
+- CI on `rp39` (workflow_dispatch): [41191273039](https://github.com/feoh/RackPy/actions/runs/41191273039),
+  [41193059916](https://github.com/feoh/RackPy/actions/runs/41193059916),
+  [41196730510](https://github.com/feoh/RackPy/actions/runs/41196730510) and
+  [41200410232](https://github.com/feoh/RackPy/actions/runs/41200410232): all nine jobs pass. The first
+  run, [41188943232](https://github.com/feoh/RackPy/actions/runs/41188943232), found the sanitizer/stress
+  selection, docs-timeout and link problems listed above.
 - Full `pytest`: 492 passed and 1 failed, then the failure fixed and its
   file re-run (15 passed). The failure was `test_conceptual_code_is_labelled_and_accepted`:
   the docs-build test's repository copy lacked `SECURITY.md`, which RP-38's
@@ -171,9 +181,12 @@ identical, the bundle's `FILES.json` was left out, and `rackpy-dev inspect
 - **Other distributions and GPU drivers**: Ubuntu 20.04 and 16.04 containers
   with Mesa llvmpipe, on this machine's kernel; not a VM, not real hardware
   GL. Fedora, Arch and others are untested.
-- **Other build machines**: the rebuilds were all on this machine (same
-  toolchain build, uv and CPython). CI's `release-candidate` job is the second
-  machine; its `SHA256SUMS` can be compared with the ones above.
+- **Other build machines**: two were compared, this one and GitHub's
+  `ubuntu-24.04` runner, with the same pinned toolchain build, uv 0.9.18 and
+  CPython 3.14.2 (zlib 1.3.1, zstd 1.5.7), which the manifest records. A
+  machine with another uv-managed Python could compress differently; the
+  manifest's `content_sha256` and each artifact's `FILES.json` still compare
+  the contents.
 - **The module browser previews** were checked by eye (the screenshots); the
   automated checks are that no widget failed and no Python error was logged.
 - **macOS and Windows**: RP-40 and RP-41.
