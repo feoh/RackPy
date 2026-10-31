@@ -54,9 +54,30 @@ The plan, the required layout of each example and the list of features are in
 their source sections and the RackPy task that covers each, are in
 [upstream/examples.json](../upstream/examples.json).
 
+## Provenance and licences
+
+Each example is original work under GPL-3.0-or-later. Its `PROVENANCE.md`
+says which official samples it covers, how it differs from them, and which
+SVG, font and code sources it uses:
+[template](../examples/template/PROVENANCE.md),
+[oscillator](../examples/oscillator/PROVENANCE.md),
+[configuration](../examples/configuration/PROVENANCE.md),
+[state and events](../examples/state-and-events/PROVENANCE.md),
+[menus](../examples/menus/PROVENANCE.md),
+[dark panels](../examples/dark-panels/PROVENANCE.md),
+[drawing](../examples/drawing/PROVENANCE.md),
+[polyphony](../examples/polyphony/PROVENANCE.md),
+[DSP](../examples/dsp/PROVENANCE.md) and
+[expanders](../examples/expanders/PROVENANCE.md).
+[Licensing](licensing.md) covers RackPy's own licence, the bundled Python's
+and the VCV manual's.
+
+## Runnable snippets
+
 Every code listing on this site that claims to run is a file in
 `docs/snippets/` that the test suite runs, in Rack where it needs Rack
-([conventions](contributing-docs.md)). Today there is one:
+([conventions](contributing-docs.md)), and so is every example. This one
+prints what runs inside Rack:
 
 ```{rackpy-example} rack_runtime.py
 :caption: Which RackPy and Python run inside Rack

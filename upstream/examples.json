@@ -1118,7 +1118,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "not-adapted",
-      "reason": "RackPy targets Rack 2 only; there is no v1 code to migrate"
+      "reason": "RackPy targets Rack 2 only; there is no v1 code to migrate",
+      "disposition": {
+        "how": "RackPy targets Rack 2 only: there is no v1 plugin to migrate (docs/how-to/migrate-from-cpp.md)",
+        "files": [
+          "docs/how-to/migrate-from-cpp.md"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_is_what_the_tool_generates"
+        ]
+      }
     },
     {
       "id": "migrate2-02",
@@ -1133,7 +1142,17 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "not-adapted",
-      "reason": "Covered by RackPy's manifest documentation"
+      "reason": "Covered by RackPy's manifest documentation",
+      "disposition": {
+        "how": "bin/rackpy-plugin create writes a Rack 2 version (2.0.0 unless --version); documented in the migration guide",
+        "files": [
+          "bin/rackpy-plugin",
+          "docs/how-to/migrate-from-cpp.md"
+        ],
+        "tests": [
+          "tests/examples/test_template.py::test_the_template_is_what_the_tool_generates"
+        ]
+      }
     },
     {
       "id": "migrate2-03",
@@ -1147,7 +1166,17 @@
       "port_task": "RP-37",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "Rebuilding is bin/rackpy-plugin build again; there is no Makefile (docs/how-to/migrate-from-cpp.md, docs/quickstart.md)",
+        "files": [
+          "docs/how-to/migrate-from-cpp.md",
+          "docs/quickstart.md"
+        ],
+        "tests": [
+          "tests/docs/test_tutorial.py::test_the_tutorial_plugin_on_a_production_bundle_and_a_broken_configure"
+        ]
+      }
     },
     {
       "id": "migrate2-04",
@@ -1382,7 +1411,17 @@
       "port_task": "RP-37",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "Windows is not supported yet (RP-41); the quickstart lists RackPy's own prerequisites",
+        "files": [
+          "docs/quickstart.md",
+          "docs/how-to/migrate-from-cpp.md"
+        ],
+        "tests": [
+          "tests/docs/test_tutorial.py::test_the_tutorial_plugin_on_a_production_bundle_and_a_broken_configure"
+        ]
+      }
     },
     {
       "id": "building-02",
@@ -1396,7 +1435,17 @@
       "port_task": "RP-37",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "Windows is not supported yet (RP-41); the quickstart lists RackPy's own prerequisites",
+        "files": [
+          "docs/quickstart.md",
+          "docs/how-to/migrate-from-cpp.md"
+        ],
+        "tests": [
+          "tests/docs/test_tutorial.py::test_the_tutorial_plugin_on_a_production_bundle_and_a_broken_configure"
+        ]
+      }
     },
     {
       "id": "building-03",
@@ -1410,7 +1459,17 @@
       "port_task": "RP-37",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "macOS is not supported yet (RP-40); the quickstart lists RackPy's own prerequisites",
+        "files": [
+          "docs/quickstart.md",
+          "docs/how-to/migrate-from-cpp.md"
+        ],
+        "tests": [
+          "tests/docs/test_tutorial.py::test_the_tutorial_plugin_on_a_production_bundle_and_a_broken_configure"
+        ]
+      }
     },
     {
       "id": "building-04",
@@ -1424,7 +1483,16 @@
       "port_task": "RP-37",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "Linux prerequisites are uv, CMake, Ninja, GCC and git; RackPy downloads the SDK and Python (docs/quickstart.md)",
+        "files": [
+          "docs/quickstart.md"
+        ],
+        "tests": [
+          "tests/docs/test_tutorial.py::test_the_tutorial_plugin_on_a_production_bundle_and_a_broken_configure"
+        ]
+      }
     },
     {
       "id": "building-05",
@@ -1438,7 +1506,16 @@
       "port_task": "RP-37",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "Linux prerequisites are uv, CMake, Ninja, GCC and git; RackPy downloads the SDK and Python (docs/quickstart.md)",
+        "files": [
+          "docs/quickstart.md"
+        ],
+        "tests": [
+          "tests/docs/test_tutorial.py::test_the_tutorial_plugin_on_a_production_bundle_and_a_broken_configure"
+        ]
+      }
     },
     {
       "id": "building-06",
@@ -1513,7 +1590,16 @@
       "provenance": "VCV Rack Manual",
       "license": "unclear",
       "port_gate": "not-adapted",
-      "note": "RackPy documents its own build; Fundamental source is not ported"
+      "note": "RackPy documents its own build; Fundamental source is not ported",
+      "disposition": {
+        "how": "Clone RackPy, not a C++ plugin: the quickstart's first step; Fundamental is not ported",
+        "files": [
+          "docs/quickstart.md"
+        ],
+        "tests": [
+          "tests/docs/test_tutorial.py::test_the_tutorial_plugin_on_a_production_bundle_and_a_broken_configure"
+        ]
+      }
     },
     {
       "id": "building-11",
@@ -1527,7 +1613,16 @@
       "port_task": "RP-37",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "Work in the RackPy checkout, where bin/rackpy-plugin creates the plugin project (docs/quickstart.md)",
+        "files": [
+          "docs/quickstart.md"
+        ],
+        "tests": [
+          "tests/docs/test_tutorial.py::test_the_tutorial_plugin_on_a_production_bundle_and_a_broken_configure"
+        ]
+      }
     },
     {
       "id": "building-12",
@@ -1541,7 +1636,18 @@
       "port_task": "RP-37",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "uv sync --frozen and bin/rackpy-dev build fetch and build every dependency (docs/quickstart.md)",
+        "files": [
+          "docs/quickstart.md",
+          "bin/rackpy-dev"
+        ],
+        "tests": [
+          "tests/docs/test_tutorial.py::test_the_tutorial_plugin_on_a_production_bundle_and_a_broken_configure",
+          "tests/docs/test_tutorial.py::test_the_tutorial_module_plays_in_rack"
+        ]
+      }
     },
     {
       "id": "building-13",
@@ -1555,7 +1661,18 @@
       "port_task": "RP-37",
       "provenance": "VCV Rack Manual",
       "license": "unclear",
-      "port_gate": "not-adapted"
+      "port_gate": "not-adapted",
+      "disposition": {
+        "how": "bin/rackpy-plugin build makes the plugin into Rack's plugins folder (docs/quickstart.md)",
+        "files": [
+          "docs/quickstart.md",
+          "bin/rackpy-plugin"
+        ],
+        "tests": [
+          "tests/docs/test_tutorial.py::test_the_tutorial_plugin_on_a_production_bundle_and_a_broken_configure",
+          "tests/docs/test_tutorial.py::test_the_tutorial_module_plays_in_rack"
+        ]
+      }
     },
     {
       "id": "building-14",

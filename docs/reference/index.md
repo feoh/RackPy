@@ -1,22 +1,25 @@
 # Reference
 
-:::{admonition} Incomplete
+:::{admonition} Bound, not yet verified
 :class: warning
 
-RackPy binds only part of the Rack API. These pages list what it **must** bind,
-with each declaration's status in the binding manifest that CI checks. The
-[coverage report](coverage.md) has the totals.
+On Linux x86_64, RackPy binds every public declaration of Rack's SDK that
+exists there, except Rack-internal ones, and each is tested; none is marked `verified`
+yet, and macOS and Windows are not built. The [coverage report](coverage.md)
+has the totals, and each declaration's status comes from the binding manifest
+that CI checks.
 :::
 
 ```{toctree}
 :maxdepth: 1
 
 coverage
+crosswalk
 mapping
 api-stability
 ```
 
-## Bound so far
+## By Rack namespace
 
 ```{toctree}
 :maxdepth: 1

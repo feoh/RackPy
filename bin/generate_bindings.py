@@ -22,10 +22,12 @@ Derived files (never edit them):
                                             native/bindings/<family>.cpp
   docs/reference/coverage.md                coverage report
   docs/reference/callback-paths.md          every public virtual's domain and Python path/blocker
+  docs/reference/crosswalk.md, crosswalk/   C++ -> Python crosswalk of every declaration, by family
 """
 
 import hashlib
 import json
+import os
 import re
 import sys
 from collections import defaultdict
@@ -198,6 +200,91 @@ def callback_paths(manifest: dict[str, Any], inputs: bm.Inputs) -> str:
     return "\n".join(out) + "\n"
 
 
+CROSSWALK_STATUS = {
+    "implemented": "bound",
+    "verified": "verified",
+    "excluded_internal": "excluded: Rack-internal",
+    "unreviewed": "not reviewed (another platform)",
+}
+
+
+def crosswalk(manifest: dict[str, Any], inputs: bm.Inputs, repo: Path) -> dict[Path, str]:
+    """The C++ -> Python crosswalk (RP-37): every manifest declaration's Python names and documentation, by family."""
+    index = inputs.index
+    folder = repo / "docs" / "reference" / "crosswalk"
+    by_family: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for r in manifest["entries"]:
+        entry = index.get(r["id"])
+        by_family[bm.family_of(inputs.inventory, entry) if entry else "unassigned"].append(r)
+
+    def cell(text: str) -> str:
+        return text.replace("|", "\\|").replace("\n", " ")
+
+    headings: dict[str, set[str]] = {}
+
+    def doc_link(ref: str) -> str:
+        """A heading anchor is a link to the page; a `(label)=` target, a reference to the label."""
+        path, _, anchor = ref.partition("#")
+        rel = os.path.relpath(repo / path, folder)
+        text = f"{Path(path).stem}{'#' + anchor if anchor else ''}"
+        if path not in headings:
+            page = (repo / path).read_text(encoding="utf-8")
+            headings[path] = {bm.slug(m) for m in re.findall(r"^#{1,6}\s+(.+?)\s*$", page, re.MULTILINE)}
+        if not anchor or anchor in headings[path]:
+            return f"[{text}]({rel}{'#' + anchor if anchor else ''})"
+        return f"{{ref}}`{text} <{anchor}>`"
+
+    pages: dict[Path, str] = {}
+    rows = []
+    for family in sorted(by_family):
+        slug = bm.FAMILY_SLUGS.get(family, family).replace("_", "-")
+        records = sorted(by_family[family], key=lambda r: r["id"])
+        counts: dict[str, int] = defaultdict(int)
+        for r in records:
+            counts[r["status"]] += 1
+        rows.append((family, slug, len(records), counts))
+        lines = [
+            f"# {family.split(' ', 1)[-1].capitalize()}: C++ to Python",
+            "",
+            f"**{GENERATED_NOTE}** Back to the [crosswalk](../crosswalk.md).",
+            "",
+            "Each public declaration of this family in Rack's SDK, the Python name or names it has in RackPy, and "
+            "where it is documented. *Bound* means implemented and tested on Linux x86_64, not `verified`.",
+            "",
+            "| C++ declaration | Kind | Status | Python | Documented in |",
+            "| --- | --- | --- | --- | --- |",
+        ]
+        for r in records:
+            kind, _, name = r["id"].partition(":")
+            python = r["python"] or {}
+            names = " / ".join(f"`{n}`" for n in (python.get("raw"), python.get("facade")) if n) or "—"
+            docs = ", ".join(doc_link(ref) for ref in r.get("docs") or []) or "—"
+            status = CROSSWALK_STATUS.get(r["status"], r["status"])
+            lines.append("| " + " | ".join(cell(c) for c in (f"`{name}`", kind, status, names, docs)) + " |")
+        pages[folder / f"{slug}.md"] = "\n".join(lines) + "\n"
+    index_lines = [
+        "# C++ to Python crosswalk",
+        "",
+        f"**{GENERATED_NOTE}**",
+        "",
+        "Every public declaration of Rack's SDK that RackPy accounts for, with its Python names (raw binding, "
+        "then facade) and its documentation, from the same manifest as the [coverage report](coverage.md). "
+        "Read the linked pages for restrictions, errors and defaults: a name alone does not say how to use it. "
+        "[Coming from Rack's C++ API](../how-to/migrate-from-cpp.md) explains the naming rules.",
+        "",
+        "| Family | Declarations | Bound | Excluded (Rack-internal) | Not reviewed |",
+        "| --- | --- | --- | --- | --- |",
+    ]
+    for family, slug, total, counts in rows:
+        index_lines.append(
+            f"| [{family}](crosswalk/{slug}.md) | {total} | {counts['implemented'] + counts['verified']} | "
+            f"{counts['excluded_internal']} | {counts['unreviewed']} |"
+        )
+    index_lines += ["", "```{toctree}", ":hidden:", "", *[f"crosswalk/{slug}" for _, slug, _, _ in rows], "```"]
+    pages[repo / "docs" / "reference" / "crosswalk.md"] = "\n".join(index_lines) + "\n"
+    return pages
+
+
 def generate_files(manifest: dict[str, Any], manifest_text: str, inputs: bm.Inputs, repo: Path) -> dict[Path, str]:
     """Every derived file and its content. Raises ManifestError for a manifest that must not be generated from."""
     index = inputs.index
@@ -294,6 +381,7 @@ def generate_files(manifest: dict[str, Any], manifest_text: str, inputs: bm.Inpu
         repo / "docs" / "reference" / "coverage.md": report,
         repo / "docs" / "reference" / "callback-paths.md": callback_paths(manifest, inputs),
         repo / "native" / "bindings" / "generated" / "boundary_constants.inc": "\n".join(declarations) + "\n",
+        **crosswalk(manifest, inputs, repo),
         **{
             repo / "src" / "rackpy" / "raw" / f"{module}.pyi": (f"# {GENERATED_NOTE}\n" + "\n".join(names) + "\n")
             for module, names in stubs.items()

@@ -8,24 +8,32 @@ RackPy.
 
 | Platform | Status |
 | --- | --- |
-| Linux x86_64 | Builds from source. The plugin loads into Rack Free {{rack_version}} and starts CPython {{python_version}}; it has no modules. |
+| Linux x86_64 | Builds from source, for Rack Free {{rack_version}}. Plugins written in Python load into Rack, add modules and process audio natively; the [examples](examples.md) run in Rack under test. Development builds work only on the computer that built them. |
 | macOS (arm64, x86_64) | Not built. Planned in RP-40. |
 | Windows x86_64 | Not built. Planned in RP-41. |
 | Linux arm64, Windows arm64 | Not planned: VCV publishes no SDK for them. |
 
+| Component | Version |
+| --- | --- |
+| RackPy | {{rackpy_version}} (unreleased) |
+| Rack | Rack Free {{rack_version}}, commit {{rack_commit}} |
+| Python inside the plugin | CPython {{python_version}}, bundled; the computer's own Python is never used |
+
 ## Building from source
 
-The developer setup, the commands and the test categories are in
-[CONTRIBUTING.md](../CONTRIBUTING.md). In short, on Linux x86_64 with uv,
-CMake, Ninja and GCC:
+The [quickstart](quickstart.md) builds RackPy and a plugin of your own, step
+by step. In short, on Linux x86_64 with uv, CMake, Ninja, GCC and git:
 
 ```bash
 uv sync --frozen
 bin/rackpy-dev build
-bin/rackpy-dev bundle /tmp/rackpy
+bin/rackpy-dev bundle /tmp/rackpy-bundle
 ```
 
-`/tmp/rackpy/RackPy` is then a Rack plugin directory. Copying it into your own
-Rack user folder is possible, but it does nothing useful yet, and the
-development build needs the glibc of the machine it was built on
-([ADR 005](decisions/005-build-and-ci.md)).
+`/tmp/rackpy-bundle/RackPy` is RackPy itself, which `bin/rackpy-plugin build`
+combines with your plugin project. The developer setup, the test categories and
+the other commands are in [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+A development build needs the glibc of the machine that built it, and links to
+RackPy's download cache for its Python runtime, so it is not for distribution
+([ADR 005](decisions/005-build-and-ci.md), [packaging](how-to/packaging.md)).

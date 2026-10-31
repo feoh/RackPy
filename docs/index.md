@@ -5,17 +5,17 @@
 :::{admonition} Development status
 :class: important
 
-RackPy is in **early development**. A Linux x86_64 development build loads
-into Rack Free and binds part of the Rack API (values, engine components and
-module construction; see the [coverage report](reference/coverage.md)), but
-the plugin registers no modules yet and there is **no release** to install.
-Pages describing unbuilt APIs are design proposals, labelled as such.
+RackPy is in **early development**, and there is **no release** to install.
+On Linux x86_64 it builds from source, loads into Rack Free, and binds the
+public Rack API ([coverage report](reference/coverage.md)): plugins written in
+Python add modules with controls, panels, menus, drawing, state and native
+audio processing, and the [examples](examples.md) run in Rack under test. No
+declaration is marked `verified` yet, and macOS and Windows are not built.
 :::
 
-RackPy will let you write Rack plugins in idiomatic Python, running inside
-Rack, while the audio path stays native. The goal is the complete supported
-public plugin API, proved symbol by symbol; see the
-[coverage contract](coverage.md).
+RackPy lets you write Rack plugins in idiomatic Python, running inside Rack,
+while the audio path stays native. The goal is the complete supported public
+plugin API, proved symbol by symbol; see the [coverage contract](coverage.md).
 
 ## Versions this documentation describes
 
@@ -29,24 +29,24 @@ public plugin API, proved symbol by symbol; see the
 
 ## Where to go
 
-- **Can I use it yet?** No. [Installation](installation.md) says what exists and
-  how to build it from source.
-- **How will it work?** Read the [architecture](architecture.md) and the
-  [decision records](decisions/index.md). [The embedded runtime](runtime.md)
-  explains what already works: start-up, threads, handles, shutdown and errors.
-- **What will be covered?** The [SDK reference](reference/index.md) lists every
-  declaration RackPy must bind, and which are bound so far.
-- **Examples?** None are written yet; the [example plan](examples.md) lists the
-  features each one must demonstrate.
+- **New here?** The [quickstart](quickstart.md) builds RackPy and makes a
+  plugin of your own; the [oscillator tutorial](tutorials/oscillator.md) makes
+  it play. [Installation](installation.md) says what exists on each platform.
+- **Something went wrong?** [Troubleshooting](troubleshooting.md) explains the
+  log messages.
+- **Doing a specific job?** The how-to guides cover
+  [plugins and models](how-to/plugins.md), [state](how-to/state.md),
+  [processing audio](how-to/dsp.md), [graphs](how-to/graphs.md) and
+  [drawing panels](how-to/draw-panels.md). The [examples](examples.md) are
+  complete plugins, tested in Rack, for the features of Rack's tutorial and API
+  guide.
+- **How does it work?** [The embedded runtime](runtime.md),
+  [callbacks and the laboratory](explanation/callbacks.md),
+  [security and trust](explanation/security.md), the
+  [architecture](architecture.md) and the [decision records](decisions/index.md).
+- **Exact answers?** The [reference](reference/index.md) covers every bound
+  declaration, by Rack namespace.
 - **Writing these docs?** See the [documentation conventions](contributing-docs.md).
-
-Tutorials and troubleshooting pages will follow the
-[documentation plan](documentation.md) once there is an API to teach. The
-how-to guides cover [registering models](how-to/plugins.md),
-[saving a module's state](how-to/state.md) and
-[processing audio](how-to/dsp.md). [Callbacks and the laboratory](explanation/callbacks.md)
-explains where Python may run, and the offline laboratory for audio callbacks;
-[security and trust](explanation/security.md) what RackPy runs and refuses to run.
 
 ```{toctree}
 :caption: Start here
@@ -54,6 +54,9 @@ explains where Python may run, and the offline laboratory for audio callbacks;
 :hidden:
 
 installation
+quickstart
+tutorials/oscillator
+troubleshooting
 examples
 ```
 
@@ -62,6 +65,7 @@ examples
 :maxdepth: 1
 :hidden:
 
+explanation/execution
 runtime
 explanation/callbacks
 explanation/security
@@ -76,7 +80,16 @@ how-to/plugins
 how-to/state
 how-to/dsp
 how-to/graphs
+how-to/polyphony
+how-to/menus
 how-to/draw-panels
+how-to/expanders
+how-to/audio-midi
+how-to/buffers
+how-to/testing
+how-to/profiling
+how-to/packaging
+how-to/migrate-from-cpp
 ```
 
 ```{toctree}
