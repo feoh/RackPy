@@ -322,6 +322,10 @@ jobs:
           for d in "$RUNNER_TEMP"/release/work/RackPy "$RUNNER_TEMP"/release/work/plugins/*; do
             cp "$d/licenses/FILES.json" "reports/files/$(basename "$d").json" || true
           done
+          mkdir -p reports/listings  # every member's mode, owner, size, date and name
+          for f in "$RUNNER_TEMP"/release/artifacts/*.vcvplugin "$RUNNER_TEMP"/release/artifacts/*.tar.zst; do
+            tar --zstd -tvf "$f" > "reports/listings/$(basename "$f").txt" || true
+          done
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
