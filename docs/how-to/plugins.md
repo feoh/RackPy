@@ -116,6 +116,12 @@ imports that the plugin does not ship: RackPy runs only the plugin's own
 files (`pythonpath/`) and Python's standard library, never packages
 installed elsewhere on the computer.
 
+The standard library comes first. A plugin file or folder named like a
+standard module, such as `json.py` or `random/`, is never imported: Python
+finds the standard one, for RackPy and for every other import. Rack's log
+names any such file as the plugin loads ("named like part of Python's
+standard library"); rename it.
+
 ## When a module factory fails
 
 Rack expects a module every time it asks for one and cannot handle a failure,

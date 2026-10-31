@@ -52,6 +52,9 @@ def download(
 
     With ``on_progress``, Rack's download runs on a worker thread and ``on_progress(fraction)`` is
     called on this thread every ``interval`` seconds while it runs, and once more at the end.
+    Rack's download cannot be cancelled: if ``on_progress`` raises, it is not called again, the
+    download runs to its end, as it would without ``on_progress``, and then the error propagates.
+    No thread is left writing ``filename`` after this returns or raises.
     """
     if on_progress is None:
         return _network.request_download(url, filename, None, cookies or {})
@@ -61,8 +64,11 @@ def download(
         target=lambda: result.append(_network.request_download(url, filename, progress, cookies or {}))
     )
     worker.start()
-    while worker.is_alive():
+    try:
+        while worker.is_alive():
+            on_progress(progress.value)
+            worker.join(interval)
         on_progress(progress.value)
-        worker.join(interval)
-    on_progress(progress.value)
+    finally:
+        worker.join()  # RP-38: never abandon it, still writing the file and holding up the interpreter's exit
     return bool(result and result[0])

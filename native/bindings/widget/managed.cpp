@@ -310,14 +310,16 @@ py::object wrapper(W* native) {
 		// teardown finishes before the Python peer is released. This is the
 		// same instance-map lookup used by pinned pybind11's get_override().
 		auto handle = py::detail::get_object_handle(s->peerPointer, py::detail::get_type_info(*s->peerType));
-		if (handle) {
+		// Refcount 0: Python is deallocating the peer, and clearing its __dict__ can run code that asks for it
+		// (a child's parent). A new reference would resurrect it, and pybind11 would deallocate it twice (RP-38).
+		if (handle && Py_REFCNT(handle.ptr()) > 0) {
 			auto self = py::reinterpret_borrow<py::object>(handle);
 			state(self);
 			return self;
 		}
 		// A worker's last Python owner can have gone away before deferred
-		// native teardown. Its children can still borrow the live SDK base.
-		// Do not manufacture a second owning/subclass wrapper.
+		// native teardown, or is being deallocated now. Its children can still
+		// borrow the live SDK base. Do not manufacture a second owning/subclass wrapper.
 	}
 	auto& owner = externalStates[native];
 	if (!owner || !owner->weak.get()) {

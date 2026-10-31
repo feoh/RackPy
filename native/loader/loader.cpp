@@ -52,6 +52,19 @@ void loadHost(Plugin* p) {
 			libpython.c_str(), marker.c_str()));
 	}
 
+	// RP-38: as for kernel libraries, the code the plugin ships (the host and its pythonpath) must resolve inside
+	// the plugin folder, so that a symlink cannot make RackPy run another folder's files. The runtime is
+	// identified by its version and stdlib marker instead: test bundles link the pinned runtime (rackpy-dev bundle).
+	std::string folder = system::getCanonical(dir);
+	for (const std::string& path : {system::join(dir, cfg.host), system::join(dir, cfg.pythonPath)}) {
+		std::string canonical = system::getCanonical(path);
+		if (canonical.empty())
+			continue;  // missing: reported where it is needed, as before
+		if (canonical.compare(0, folder.size() + 1, folder + "/") != 0)
+			return refuse(string::f("%s resolves outside the plugin folder (to %s); ship the files in the plugin",
+				path.c_str(), canonical.c_str()));
+	}
+
 	// Extension modules in the bundled runtime resolve Py* symbols globally.
 	if (!dlopen(libpython.c_str(), RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE))
 		return refuse(string::f("cannot load %s: %s", libpython.c_str(), dlerror()));

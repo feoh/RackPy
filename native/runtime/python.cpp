@@ -4,6 +4,7 @@
 #include <rack.hpp>
 
 #include <map>
+#include <mutex>
 #include <string>
 #include <utility>
 
@@ -59,7 +60,35 @@ void noteRaised(const char* what, const char* message) {
 	raised.fetch_add(1, std::memory_order_relaxed);
 	std::string text = std::string(what) + ": " + (message ? message : "");
 	diagnose(DiagnosticCode::CallbackRaised, text.c_str());
-	WARN("RackPy: Python raised in %s: %s", what, message ? message : "");
+	// RP-38: bounded log output. A callback that raises every frame (a widget's step or draw) must not grow
+	// Rack's log without limit. Every raise is counted and recorded above; the log gets the first
+	// RAISED_LOG_BURST of them, then at most one a second, which says how many it left out.
+	static constexpr uint64_t RAISED_LOG_BURST = 20;
+	static std::mutex mutex;  // Python runs only on Rack's main thread; this is for safety, never contended
+	static uint64_t logged = 0, omitted = 0;
+	static double lastLogged = 0;
+	static bool noticed = false;
+	std::lock_guard<std::mutex> lock(mutex);
+	double now = rack::system::getTime();
+	if (logged >= RAISED_LOG_BURST && now - lastLogged < 1.0) {
+		if (!noticed) {
+			WARN("RackPy: Python keeps raising; from now on its errors are logged at most once a second. "
+				"rackpy.runtime.diagnostics() records the latest %d, and rackpy's dispatch counts count all",
+				(int) DIAGNOSTIC_CAPACITY);
+			noticed = true;
+		}
+		omitted++;
+		return;
+	}
+	logged++;
+	lastLogged = now;
+	if (omitted) {
+		WARN("RackPy: Python raised in %s: %s (and %llu more since the last such message; "
+			"rackpy.runtime.diagnostics() has the latest)", what, message ? message : "", (unsigned long long) omitted);
+		omitted = 0;
+	}
+	else
+		WARN("RackPy: Python raised in %s: %s", what, message ? message : "");
 }
 
 void noteCall() {

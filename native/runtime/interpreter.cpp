@@ -154,9 +154,11 @@ int start(RackPyHostInit* args) {
 	bool ok = false;
 	try {
 		registerErrorTranslator();
-		// Trusted plugin-shipped code only; patch files never run code (ADR 002, decision 9).
-		py::module_::import("sys").attr("path").attr("insert")(0, args->python_path);
-		py::module_::import("rackpy._bootstrap").attr("start")(args->plugin_dir, args->entry);
+		// Trusted plugin-shipped code only; patch files never run code (ADR 002, decision 9). After the standard
+		// library (RP-38): a plugin file named like a standard module (json.py) must not replace it for RackPy and
+		// every other import in the process; the bootstrap names any such file.
+		py::module_::import("sys").attr("path").attr("append")(args->python_path);
+		py::module_::import("rackpy._bootstrap").attr("start")(args->plugin_dir, args->entry, args->python_path);
 		ok = true;
 	}
 	catch (const std::exception& e) {

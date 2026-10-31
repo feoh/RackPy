@@ -19,4 +19,6 @@ def test_the_boundaries_survive_fuzzing(make_hooks_bundle: Callable[[], Path], r
     assert result.exit == 0, result.summary()
     print("".join(line + "\n" for line in result.output.splitlines() if ":" in line and "refused" in line), end="")
     outcomes = result.outcomes()
-    assert len(outcomes) == 6 and set(outcomes.values()) == {"passed"}, result.summary()
+    assert len(outcomes) == 7 and set(outcomes.values()) == {"passed"}, result.summary()
+    # test_lifetime's dying widget: never resurrected, so never deallocated twice (an RP-38 finding).
+    assert "Tried to deallocate" not in result.run.log and not result.run.lines("RuntimeProbe step"), result.run.tail()

@@ -8,6 +8,7 @@ finalizing the interpreter.
 """
 
 import importlib
+import os
 import sys
 import traceback
 
@@ -24,7 +25,7 @@ except ImportError as e:
 HOST_ABI = 2
 
 
-def start(plugin_dir: str, entry: str) -> None:
+def start(plugin_dir: str, entry: str, python_path: str = "") -> None:
     """Check the host, log the runtime facts, then import the trusted entry module, if any."""
     if _rackpy_host.HOST_ABI != HOST_ABI:
         raise RuntimeError(
@@ -34,8 +35,33 @@ def start(plugin_dir: str, entry: str) -> None:
         f"rackpy {__version__}, Python {sys.version.split()[0]}, {_rackpy_host.BINDING}, "
         f"Rack {_rackpy_host.rack_version()}, plugin {plugin_dir}"
     )
+    shadowed = _shadowing(python_path) if python_path else []
+    if shadowed:
+        _rackpy_host.log_warning(
+            f"RackPy: the plugin's pythonpath has {', '.join(shadowed)}, named like part of Python's standard "
+            "library. Python imports the standard library's, never these files: rename them"
+        )
     if entry:
         _import_entry(plugin_dir, entry)
+
+
+def _shadowing(python_path: str) -> list[str]:
+    """Top-level names in the plugin's pythonpath that the standard library also has.
+
+    The host puts the pythonpath after the standard library, so that a plugin file
+    cannot replace a standard module for RackPy and every other import (RP-38).
+    """
+    names: set[str] = set()
+    try:
+        entries = list(os.scandir(python_path))
+    except OSError:
+        return []
+    for found in entries:
+        if found.is_dir():
+            names.add(found.name)
+        elif found.name.endswith((".py", ".pyc", ".so")):
+            names.add(found.name.split(".", 1)[0])
+    return sorted(names & sys.stdlib_module_names)
 
 
 def _import_entry(plugin_dir: str, entry: str) -> None:

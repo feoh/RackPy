@@ -7,6 +7,7 @@ import json
 import os
 import tarfile
 import threading
+import time
 from collections.abc import Callable, Iterator
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -171,7 +172,17 @@ class Handler(BaseHTTPRequestHandler):
     def answer(self) -> None:
         length = int(self.headers.get("Content-Length") or 0)
         body = self.rfile.read(length).decode() if length else ""
-        if self.path.startswith("/blob"):
+        if self.path.startswith("/slow"):  # BLOB in 20 pieces over about a second
+            self.send_response(200)
+            self.send_header("Content-Type", "application/octet-stream")
+            self.send_header("Content-Length", str(len(BLOB)))
+            self.end_headers()
+            piece = len(BLOB) // 20
+            for start in range(0, len(BLOB), piece):
+                self.wfile.write(BLOB[start : start + piece])
+                self.wfile.flush()
+                time.sleep(0.05)
+        elif self.path.startswith("/blob"):
             self.reply(200, BLOB, "application/octet-stream")
         elif self.path.startswith("/text"):
             self.reply(200, b"not json", "text/plain")
@@ -239,6 +250,25 @@ def test_downloads(server: str, tmp_path: Path) -> None:
     assert not rn.request_download(server + "/missing", tmp_path / "m.bin")  # an HTTP error fails
     progress = rn.DownloadProgress()
     assert rn.request_download(server + "/blob", tmp_path / "b2.bin", progress) and progress.value == 1.0
+
+
+def test_a_failing_progress_callback_leaves_no_download_running(server: str, tmp_path: Path) -> None:
+    """RP-38: on_progress raises mid-download; download() lets Rack's download finish, then raises."""
+    target, calls = tmp_path / "slow.bin", [0]
+
+    def fail_on_second(fraction: float) -> None:
+        calls[0] += 1
+        if calls[0] == 2:
+            raise RuntimeError("progress failed")
+
+    def workers() -> set[threading.Thread]:  # the test server's request threads are daemons; the download's is not
+        return {t for t in threading.enumerate() if not t.daemon}
+
+    threads = workers()
+    with pytest.raises(RuntimeError, match="progress failed"):
+        net.download(server + "/slow", target, fail_on_second, interval=0.01)
+    assert workers() == threads  # no worker left writing the file
+    assert calls[0] == 2 and target.read_bytes() == BLOB  # not called again; the file is complete, not growing
 
 
 def test_url_helpers() -> None:

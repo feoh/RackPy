@@ -120,6 +120,24 @@ void releaseFromSlot(Info* info) {
 		delete info;
 }
 
+#ifdef RACKPY_TEST_HOOKS
+/** Test-hooks builds only (RP-38): the RP-07 audio guard's marks around RackPy's own engine-thread code, when
+Rack runs with native/testing/audio_guard.c preloaded. testing::registerModels resolves them once, at plugin
+start on the main thread; process() only calls them. */
+inline void (*audioGuardEnter)() = nullptr;
+inline void (*audioGuardLeave)() = nullptr;
+struct AudioGuardMark {
+	AudioGuardMark() {
+		if (audioGuardEnter)
+			audioGuardEnter();
+	}
+	~AudioGuardMark() {
+		if (audioGuardLeave)
+			audioGuardLeave();
+	}
+};
+#endif
+
 struct Module : rack::engine::Module, engine::ExpanderChannels, io::Endpoints {
 	std::shared_ptr<runtime::ObjectToken> token = std::make_shared<runtime::ObjectToken>(nullptr);
 	// A callback-laboratory module (RP-22, native/laboratory): runs only on a
@@ -156,6 +174,9 @@ struct Module : rack::engine::Module, engine::ExpanderChannels, io::Endpoints {
 	std::vector<std::shared_ptr<engine::MessageBuffer>> expanderMessages;
 	// The module's audio port and MIDI inputs (RP-31J), in the io::Endpoints base: a frame of them around the kernel.
 	void process(const ProcessArgs& args) override {
+#ifdef RACKPY_TEST_HOOKS
+		AudioGuardMark mark;
+#endif
 		if (__builtin_expect(io::Endpoints::active, 0)) {
 			beginFrame(args.frame);
 			kernels.process(*this, args);
@@ -165,6 +186,9 @@ struct Module : rack::engine::Module, engine::ExpanderChannels, io::Endpoints {
 		kernels.process(*this, args);
 	}
 	void processBypass(const ProcessArgs& args) override {
+#ifdef RACKPY_TEST_HOOKS
+		AudioGuardMark mark;
+#endif
 		if (!bypassKernels.engaged()) {
 			rack::engine::Module::processBypass(args);
 			return;

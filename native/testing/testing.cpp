@@ -20,7 +20,10 @@
 
 #include <pybind11/stl.h>
 
+#include <dlfcn.h>
+
 #include <algorithm>
+#include <cstdlib>
 #include <functional>
 #include <map>
 #include <memory>
@@ -750,6 +753,21 @@ void define(py::module_ m) {
 	// RP-38: a deliberate one-byte heap overflow, so that a sanitized run can prove AddressSanitizer is
 	// active. Called only by tests/hardening/test_sanitizers.py's control run, in a sanitizer build.
 	m.def("sanitizer_canary", &sanitizerCanary);
+	// RP-38: the audio guard's counts inside RackPy's process() since the last reset; None unless it is preloaded.
+	m.def("audio_guard_report", []() -> py::object {
+		auto report = reinterpret_cast<void (*)(char*, size_t)>(dlsym(RTLD_DEFAULT, "audio_guard_report"));
+		if (!report || !module::audioGuardEnter)
+			return py::none();
+		char out[512];
+		report(out, sizeof out);
+		return py::module_::import("json").attr("loads")(std::string(out));
+	});
+	m.def("audio_guard_reset", [] {
+		auto reset = reinterpret_cast<void (*)()>(dlsym(RTLD_DEFAULT, "audio_guard_reset"));
+		if (!reset)
+			throw std::runtime_error("the audio guard is not preloaded");
+		reset();
+	});
 	m.def("last_frame_pixel", [](int x, int y) {
 		// The RGBA of the last frame Rack drew at framebuffer pixel (x, y), top-left origin. Call
 		// from a step(), before Rack draws again. It reads the back buffer, which Mesa's software
@@ -1515,6 +1533,18 @@ struct ProbeKernel : rackpy::Kernel {
 	}
 };
 
+/** RP-38: the audio guard's positive control. It allocates and frees every frame, exactly what the guard must
+see inside RackPy's process() in live Rack; the asm keeps the compiler from eliding the pair. */
+struct AllocateKernel : rackpy::Kernel {
+	bool process(rack::engine::Module& m, const rack::engine::Module::ProcessArgs&) noexcept override {
+		void* p = std::malloc(16);
+		asm volatile("" : : "r"(p) : "memory");
+		std::free(p);
+		m.outputs[0].setVoltage(1.f);
+		return true;
+	}
+};
+
 }  // namespace
 
 void registerModels(rack::plugin::Plugin* plugin) {
@@ -1526,8 +1556,21 @@ void registerModels(rack::plugin::Plugin* plugin) {
 			{"fail_after"},
 			[](const std::vector<double>& v) { return std::make_unique<ProbeKernel>(v); },
 		});
+	if (!rackpy::dsp::findType("rackpy_test.Allocate"))
+		rackpy::dsp::registerType(rackpy::KernelType{
+			"rackpy_test.Allocate",
+			"Test hook: allocates and frees every frame, the audio guard's positive control (RP-38).",
+			{},
+			{},
+			[](const std::vector<double>&) { return std::make_unique<AllocateKernel>(); },
+		});
 	model = rack::createModel<ProbeModule, ProbeWidget>("RuntimeProbe");
 	plugin->addModel(model);
+	// RP-38: mark RackPy's process() for the audio guard, when Rack runs with it preloaded.
+	module::audioGuardEnter = reinterpret_cast<void (*)()>(dlsym(RTLD_DEFAULT, "audio_guard_enter"));
+	module::audioGuardLeave = reinterpret_cast<void (*)()>(dlsym(RTLD_DEFAULT, "audio_guard_leave"));
+	if (!module::audioGuardEnter || !module::audioGuardLeave)
+		module::audioGuardEnter = module::audioGuardLeave = nullptr;
 }
 
 }  // namespace testing

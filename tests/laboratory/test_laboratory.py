@@ -45,6 +45,7 @@ NEEDS_RACK = [
     "test_midi_driver_teardown_detaches_ports_before_its_devices_go",
     "test_racks_own_menu_items_cannot_change_a_subscription_during_a_delivery",
     "test_a_delivery_started_while_a_laboratory_object_is_deallocated_does_not_resurrect_it",
+    "test_releases_drained_after_a_keyboard_delivery_still_count_as_inside_it",
     "test_a_driver_an_override_drops_inside_racks_port_code_goes_after_it",
     "test_an_audio_driver_an_override_drops_inside_racks_port_code_goes_after_it",
 ]

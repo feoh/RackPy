@@ -2,6 +2,7 @@
 """RP-22F: the laboratory MIDI driver, devices and inputs, called by Rack's own midi:: code, inside Rack."""
 
 import gc
+import time
 import weakref
 from typing import Any
 
@@ -745,6 +746,44 @@ def test_a_delivery_started_while_a_laboratory_object_is_deallocated_does_not_re
         assert gone() is None and watch() is None, make
     assert heard == [1, 2, 3]  # each delivery reached the listener, none the dying input
     assert keys.subscribed == [listener]
+
+
+@pytest.mark.skipif(not HOOKS, reason="needs the test hooks: Rack's keyboard route and an engine-thread drop")
+def test_releases_drained_after_a_keyboard_delivery_still_count_as_inside_it() -> None:
+    """RP-38 (an RP-22F follow-up): Rack's computer keyboard driver delivers outside any Python call into Rack, so
+    callPython drains the releases queued meanwhile after on_message returns, still inside Rack's loop over the
+    device's subscribers. A finalizer that drain runs cannot change a subscription either."""
+    from _rackpy_host import _testing
+
+    probe = _testing.add_module()
+    outcome: list[str] = []
+
+    class Finalizer:
+        def __del__(self) -> None:
+            try:
+                listener.set_device_id(-1)
+                outcome.append("changed")
+            except LaboratoryError:
+                outcome.append("refused")
+
+    class Listener(MidiInput):
+        def on_message(self, message: midi.Message) -> None:
+            before = _rackpy_host.pending_releases()
+            _testing.drop_on_engine_thread(probe, Finalizer())  # Rack's engine thread drops the last reference
+            deadline = time.monotonic() + 2.0
+            while _rackpy_host.pending_releases() == before and time.monotonic() < deadline:
+                time.sleep(0.001)
+            outcome.append("queued" if _rackpy_host.pending_releases() > before else "not queued")
+
+    listener = Listener()
+    listener.set_driver_id(LOOPBACK)
+    listener.set_device_id(13)
+    try:
+        _testing.deliver_as_racks_keyboard(listener, message(0x90, 60, 1))
+        assert outcome == ["queued", "refused"]  # drained inside the delivery, and refused there
+        listener.set_device_id(-1)  # after Rack's loop: allowed
+    finally:
+        _testing.remove_module(probe)
 
 
 @needs_ports

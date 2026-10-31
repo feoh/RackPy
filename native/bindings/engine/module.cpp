@@ -465,7 +465,23 @@ void dispatch(const ModuleRef& r, F handler) {
 	}
 }
 
-/** Python callables for Rack's dataToJson/dataFromJson (owner decision 2026-10-23). */
+/** Runs `call`, Python, and records slow_exclusive_callback when Rack's audio was stopped for longer than ADR 004's
+1 ms budget: when Rack called the module under its exclusive engine lock. */
+template <typename F>
+void timedExclusive(const char* name, F&& call) {
+	bool exclusive = runtime::insideExclusive();
+	double start = rack::system::getTime();
+	call();
+	double elapsed = rack::system::getTime() - start;
+	if (exclusive && elapsed > 0.001) {
+		std::string message =
+			rack::string::f("%s took %.1f ms with Rack's audio stopped (budget 1 ms)", name, elapsed * 1000.0);
+		runtime::diagnose(runtime::DiagnosticCode::SlowExclusiveCallback, message.c_str());
+	}
+}
+
+/** Python callables for Rack's dataToJson/dataFromJson (owner decision 2026-10-23). Rack calls dataFromJson
+under its exclusive engine lock (Engine::moduleFromJson), so it is timed (RP-38). */
 struct PyDataHandlers : module::DataHandlers {
 	runtime::PyRef toJsonFn, fromJsonFn;
 	json_t* toJson() noexcept override {
@@ -480,7 +496,9 @@ struct PyDataHandlers : module::DataHandlers {
 	}
 	void fromJson(json_t* data) noexcept override {
 		if (fromJsonFn)
-			runPythonHook("Module.data_from_json", [&] { fromJsonFn.get()(runtime::fromJson(data)); });
+			timedExclusive("Module.data_from_json", [&] {
+				runPythonHook("Module.data_from_json", [&] { fromJsonFn.get()(runtime::fromJson(data)); });
+			});
 	}
 };
 
@@ -508,15 +526,9 @@ struct PyEventHandlers : module::EventHandlers {
 		const runtime::PyRef& handler = handlers[(size_t) record.kind % handlers.size()];
 		if (!handler || !runtime::binding().current())
 			return;
-		bool exclusive = runtime::insideExclusive();
-		double start = rack::system::getTime();
-		runtime::callPython(name(record.kind), [&] { handler.get()(eventObject(record)); });
-		double elapsed = rack::system::getTime() - start;
-		if (exclusive && elapsed > 0.001) {
-			std::string message = rack::string::f("%s took %.1f ms with Rack's audio stopped (budget 1 ms)",
-				name(record.kind), elapsed * 1000.0);
-			runtime::diagnose(runtime::DiagnosticCode::SlowExclusiveCallback, message.c_str());
-		}
+		timedExclusive(name(record.kind), [&] {
+			runtime::callPython(name(record.kind), [&] { handler.get()(eventObject(record)); });
+		});
 	}
 };
 

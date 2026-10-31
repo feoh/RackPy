@@ -75,6 +75,7 @@ mypy_path = [
     "examples/polyphony/pythonpath",
     "examples/expanders/pythonpath",
     "examples/dsp/pythonpath",
+    "tests/hardening/in_rack_stress",
 ]
 explicit_package_bases = true
 # bin/ utilities without a .py suffix all map to module __main__, so
