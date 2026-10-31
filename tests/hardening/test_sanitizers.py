@@ -126,3 +126,33 @@ def test_live_rack_suites_under_asan_and_ubsan(
     assert result.exit == 0, result.summary()
     outcomes = result.outcomes()
     assert outcomes and set(outcomes.values()) <= {"passed", "skipped"}, result.summary()
+
+
+@pytest.mark.host
+@pytest.mark.gui
+def test_stress_suite_under_asan_and_ubsan(
+    make_asan_bundle: Callable[[], Path], rack_host: Path, tmp_path: Path
+) -> None:
+    """tests/hardening/in_rack_stress, its 1,000-cycle runs included, on the sanitized plugin (no audio guard)."""
+    from tests.hardening.test_stress import MODELS, SETUP, SUITE
+
+    logs, stderr = tmp_path / "logs", tmp_path / "stderr.txt"
+    logs.mkdir()
+    result = run_pytest_in_rack(
+        make_asan_bundle(),
+        rack_host,
+        tmp_path / "user",
+        SUITE,
+        args=["-s"],
+        during_ui=True,
+        timeout=3600,
+        entry_setup=SETUP,
+        extra_models=MODELS,
+        env=sanitizer_env(logs),
+        stderr=stderr,
+    )
+    found = reports(logs, stderr)
+    assert found == "", found[-6000:]
+    assert result.exit == 0, result.summary()
+    outcomes = result.outcomes()
+    assert len(outcomes) == 7 and set(outcomes.values()) == {"passed"}, result.summary()

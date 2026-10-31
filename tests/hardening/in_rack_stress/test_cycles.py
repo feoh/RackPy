@@ -47,7 +47,8 @@ def check_growth(name: str, start: dict[str, int], end: dict[str, int]) -> None:
     exact = ("native_references", "transferred_objects", "pending_releases", "identity_entries", "engine_modules")
     assert {k: end[k] for k in exact} == {k: start[k] for k in exact}
     assert end["python_objects"] - start["python_objects"] < 200, (start, end)
-    assert end["rss"] - start["rss"] < RSS_SLACK, (start, end)
+    if "ASAN_OPTIONS" not in os.environ:  # AddressSanitizer's quarantine holds freed memory on purpose
+        assert end["rss"] - start["rss"] < RSS_SLACK, (start, end)
 
 
 def add() -> tuple[int, Module, sm.Churn]:
