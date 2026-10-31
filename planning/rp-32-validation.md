@@ -2,7 +2,7 @@
 
 ## Initial checkpoint (2026-10-30)
 
-RP-32 is **in progress**. Corrected the package's stale assertion that no Rack
+RP-32 was in progress at this checkpoint; see the closing summary. Corrected the package's stale assertion that no Rack
 API is bound, without changing the private/do-not-upload package status. Added
 an explicitly provisional raw-to-facade discovery page. Its table is a guide,
 not a per-symbol coverage or completion claim.
@@ -270,8 +270,28 @@ errors in 75 files; unknown members, private internal uses and dynamic
 `__all__` constructions dominate. This is not a passing full-source check;
 the facade-test check above does not suppress these diagnostics globally.
 
-Still to do: a complete coherent facade and typing review, raw discoverability,
-strict mypy and pyright samples, signature and exception tests, representative
-user walkthroughs, measured wrapper overhead with explicit baseline, any
-resulting fixes, and versioning/freeze decision. Do not close RP-32 on this
-checkpoint.
+## Closing summary
+
+Each RP-32 step has evidence above: a facade-wide signature and naming review
+(keyword-only options, ambiguity errors, reprs, rollback wording), explicit
+context access and graph compilation, two-way C++ -> raw -> facade
+discoverability with a built-package check over every public facade module,
+strict mypy over `src/`, `tests/` and all snippets and strict pyright over every
+public facade module, the facade tests and the snippets, no `Any` in any public
+facade signature, a raw-versus-facade MIDI timing with raw data and baseline
+(and RP-18's bulk filter timings), a guide walkthrough whose findings were
+fixed with their tests, and a facade snapshot with a documented contract.
+
+Limitations that remain and are not claimed done:
+
+- The release compatibility policy on `docs/reference/api-stability.md` is a
+  proposal; the owner must approve it before release (comment on RP-44). The
+  snapshot is change control for an unreleased package, not a user promise.
+- Pyright does not check `rackpy.raw` stubs or private underscore modules;
+  template instantiations such as `IIRFilter[4, 4]` are `Any` to type checkers.
+- Timings are single shared-host diagnostics on one Linux machine, not
+  performance claims. Only the MIDI helper was measured against raw code here.
+- All host evidence is Linux x86_64 in Rack Free 2.6.6 (Xvfb/Mesa for
+  rendering). macOS and Windows were not built or run.
+- The download worker's lifecycle when `on_progress` raises is recorded for
+  RP-38, not fixed here.
