@@ -619,6 +619,10 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
     with tarfile.open(fetch(pin)) as tf:
         tf.extractall(staging, filter="data")
     (staging / pin["root"]).rename(bundle / "python")
+    # Paths the pinned runtime itself contains that look like this machine's: python-build-standalone builds
+    # macOS on GitHub runners, so its sysconfig data names /Users/runner, which is also a CI runner's home.
+    # Those are upstream's, recorded in the manifest; any other hit is this build's and fails it.
+    upstream_paths = {(p.relative_to(bundle).as_posix(), n) for p, n in machine_paths(bundle / "python")}
     staging.rmdir()
     if MACOS:
         finish = finish_mach_o
@@ -672,7 +676,11 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
         check = mach_o_problems if MACOS else elf_problems
         problems += check(root, work, binaries if root == bundle else None)
         problems += [f"{f}: no license rule covers it" for f in file_manifest(root, build_info)]
-        problems += [f"{p.relative_to(work)} names {m}" for p, m in machine_paths(root)]
+        problems += [
+            f"{p.relative_to(work)} names {m}"
+            for p, m in machine_paths(root)
+            if (p.relative_to(root).as_posix(), m) not in upstream_paths
+        ]
         floor = [] if MACOS else ["--max-glibc", GLIBC_FLOOR]
         run([BIN / "rackpy-dev", "inspect", root, *floor], capture=True)
     if problems:
@@ -742,6 +750,7 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
         **({"macos_floor": MACOS_FLOOR} if MACOS else {"glibc_floor": GLIBC_FLOOR}),
         "inputs": {**build_info, "uv_lock_sha256": sha256_file(REPO / "uv.lock"), "build_tools": build_tools()},
         "excluded_from_runtime": removed,
+        "upstream_machine_like_paths": sorted(f"{rel}: {needle}" for rel, needle in upstream_paths),
         "restricted_sources_excluded": RESTRICTED_SOURCES,
         "third_party": components,
         ("mach_o" if MACOS else "elf"): binaries | RECORDED,
