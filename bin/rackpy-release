@@ -18,6 +18,7 @@ compare  explain every difference between two builds of the same commit
 Nothing is ever uploaded or published: the artifacts stay in DEST, outside git.
 """
 
+import gzip
 import hashlib
 import html
 import json
@@ -25,6 +26,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import time
@@ -155,9 +157,34 @@ def elf_facts(path: Path) -> dict[str, Any]:
     }
 
 
+def toolchain_bin() -> Path:
+    return Path(run([BIN / "rack-toolchain", "path"], capture=True).strip().splitlines()[-1])
+
+
+def build_tools() -> dict[str, str]:
+    """The build machine's tools whose versions can change the bytes of an artifact."""
+    import compression.zstd
+    import zlib
+
+    git = run(["git", "--version"], capture=True).strip()
+    return {
+        "python": sys.version.split()[0],
+        "zlib": zlib.ZLIB_RUNTIME_VERSION,
+        "zstd": ".".join(map(str, compression.zstd.zstd_version_info)),
+        "git": git,
+        "uv": run(["uv", "--version"], capture=True).strip(),
+    }
+
+
+def content_digest(path: Path) -> str:
+    """A digest of an archive's members and their contents, whatever compressed them."""
+    members = archive_members(path)
+    return hashlib.sha256("".join(f"{n}\t{members[n]}\n" for n in sorted(members)).encode()).hexdigest()
+
+
 def toolchain_id() -> dict[str, str]:
     """The official toolchain by its recipe's hash and target, not by where this machine keeps it."""
-    bindir = Path(run([BIN / "rack-toolchain", "path"], capture=True).strip().splitlines()[-1])
+    bindir = toolchain_bin()
     recipe = REPO / "packaging" / "toolchain" / "lin-x64.Dockerfile"
     return {"build": bindir.parents[2].name, "target": bindir.parent.name, "recipe_sha256": sha256_file(recipe)}
 
@@ -177,7 +204,7 @@ def version_tuple(version: str) -> tuple[int, ...]:
     return tuple(int(p) for p in version.split("."))
 
 
-def prepare_runtime(python: Path) -> dict[str, str]:
+def prepare_runtime(python: Path, strip: Path) -> dict[str, str]:
     """Remove the excluded modules from a copied runtime and strip its ELF files; return what was removed."""
     removed = {}
     for rel, why in EXCLUDED_RUNTIME.items():
@@ -193,7 +220,7 @@ def prepare_runtime(python: Path) -> dict[str, str]:
     for path in elf_files(python):
         if ".so" in path.name:
             path.chmod(path.stat().st_mode | 0o200)
-            run(["strip", "--strip-unneeded", path])
+            run([strip, "--strip-unneeded", path])
     return removed
 
 
@@ -414,7 +441,9 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
         tf.extractall(staging, filter="data")
     (staging / pin["root"]).rename(bundle / "python")
     staging.rmdir()
-    removed = prepare_runtime(bundle / "python")
+    # The toolchain's strip, not the build machine's: binutils versions strip the same file differently.
+    strip = toolchain_bin() / "x86_64-ubuntu16.04-linux-gnu-strip"
+    removed = prepare_runtime(bundle / "python", strip)
     components = third_party_notices(bundle / "licenses", version)
     sdk = Path(run([BIN / "rack-sdk", "path"], capture=True).strip().splitlines()[-1])
     sdk_header_notices(bundle / "licenses", sdk)
@@ -441,7 +470,7 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
             args += ["--kernels", tree / "examples" / project.name / "kernels"]
         run(args)
         for kernel in sorted((plugins / manifest["slug"] / "kernels").glob("*.so")):
-            run(["strip", "--strip-unneeded", kernel])
+            run([strip, "--strip-unneeded", kernel])
         examples.append((project, manifest))
 
     # 3. What every ELF file needs: only the system's C library family, Rack and the bundled runtime, at most
@@ -482,7 +511,14 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
 
     def record(path: Path, role: str, **more: Any) -> None:
         artifacts.append(
-            {"file": path.name, "role": role, "sha256": sha256_file(path), "size": path.stat().st_size, **more}
+            {
+                "file": path.name,
+                "role": role,
+                "sha256": sha256_file(path),
+                "content_sha256": content_digest(path),
+                "size": path.stat().st_size,
+                **more,
+            }
         )
 
     # 4. The runtime bundle, what bin/rackpy-plugin build combines with a plugin project, and every example as
@@ -514,23 +550,14 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
     )
 
     # 6. The GPL corresponding source: the commit, without the files that are not RackPy's to license.
+    # git archive's tar, compressed here: git's own gzip output changes with its version.
     source = out / f"rackpy-{version}-source.tar.gz"
     pathspec = ["."] + [f":(exclude){p}" for p in RESTRICTED_SOURCES]
-    run(
-        [
-            "git",
-            "-C",
-            REPO,
-            "archive",
-            "--format=tar.gz",
-            f"--prefix=rackpy-{version}/",
-            "-o",
-            source,
-            facts["commit"],
-            "--",
-            *pathspec,
-        ]
-    )
+    tar = work / "source.tar"
+    run(["git", "-C", REPO, "archive", "--format=tar", f"--prefix=rackpy-{version}/", "-o", tar, facts["commit"],
+         "--", *pathspec])  # fmt: skip
+    with tar.open("rb") as raw, source.open("wb") as f, gzip.GzipFile("", "wb", 9, f, mtime=0) as gz:
+        shutil.copyfileobj(raw, gz)
     record(source, "corresponding source (GPL-3.0-or-later)")
 
     manifest_data = {
@@ -542,7 +569,7 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
         "source_date_epoch": epoch,
         "platform": PLATFORM,
         "glibc_floor": GLIBC_FLOOR,
-        "inputs": {**build_info, "uv_lock_sha256": sha256_file(REPO / "uv.lock")},
+        "inputs": {**build_info, "uv_lock_sha256": sha256_file(REPO / "uv.lock"), "build_tools": build_tools()},
         "excluded_from_runtime": removed,
         "restricted_sources_excluded": RESTRICTED_SOURCES,
         "third_party": components,
@@ -556,17 +583,19 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
 
 
 def archive_members(path: Path) -> dict[str, str]:
-    """Each regular file in an archive, by name: its SHA-256."""
+    """Each file in an archive, by name: its SHA-256 and mode, or a symlink's target."""
     out: dict[str, str] = {}
     if path.suffix == ".whl":
         with zipfile.ZipFile(path) as zf:
             return {n: hashlib.sha256(zf.read(n)).hexdigest() for n in zf.namelist()}
     with tarfile.open(path, "r:gz") if path.name.endswith(".tar.gz") else tarfile.open(path, "r:zst") as tf:
         for member in tf:
-            if member.isreg():
+            if member.issym():
+                out[member.name] = f"-> {member.linkname}"
+            elif member.isreg():
                 f = tf.extractfile(member)
                 assert f is not None
-                out[member.name] = hashlib.sha256(f.read()).hexdigest()
+                out[member.name] = f"{hashlib.sha256(f.read()).hexdigest()} {member.mode:o}"
     return out
 
 

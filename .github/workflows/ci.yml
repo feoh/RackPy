@@ -315,10 +315,13 @@ jobs:
           bin/rackpy-release verify "$RUNNER_TEMP/release/artifacts" --rack "$(bin/rack-sdk host | tail -1)"
           --logs reports/verify-ubuntu-16.04 --image ubuntu-16.04
       - if: always()
-        name: Keep the manifest and checksums with the logs
+        name: Keep the manifest, checksums and each artifact's file list with the logs
         run: |
-          mkdir -p reports
+          mkdir -p reports/files
           cp "$RUNNER_TEMP/release/artifacts/manifest.json" "$RUNNER_TEMP/release/artifacts/SHA256SUMS" reports/ || true
+          for d in "$RUNNER_TEMP"/release/work/RackPy "$RUNNER_TEMP"/release/work/plugins/*; do
+            cp "$d/licenses/FILES.json" "reports/files/$(basename "$d").json" || true
+          done
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
