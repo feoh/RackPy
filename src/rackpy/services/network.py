@@ -20,22 +20,22 @@ encode_url = _network.encode_url
 url_path = _network.url_path
 
 
-def get_json(url: str, params: dict[str, str] | None = None, cookies: dict[str, str] | None = None) -> JSON:
+def get_json(url: str, params: dict[str, str] | None = None, *, cookies: dict[str, str] | None = None) -> JSON:
     """GET a JSON API; ``params`` become the query (string values only, as Rack does). None on failure."""
     return cast(JSON, _network.request_json(_network.METHOD_GET, url, params, cookies or {}))
 
 
-def post_json(url: str, data: object = None, cookies: dict[str, str] | None = None) -> JSON:
+def post_json(url: str, data: object = None, *, cookies: dict[str, str] | None = None) -> JSON:
     """POST ``data`` as a JSON body. RackPy validates the value at runtime; None on failure."""
     return cast(JSON, _network.request_json(_network.METHOD_POST, url, data, cookies or {}))
 
 
-def put_json(url: str, data: object = None, cookies: dict[str, str] | None = None) -> JSON:
+def put_json(url: str, data: object = None, *, cookies: dict[str, str] | None = None) -> JSON:
     """Refuse to send: Rack 2.6.6's PUT with a JSON body actually sends POST."""
     raise NotImplementedError("Rack 2.6.6 cannot safely send a JSON PUT request")
 
 
-def delete_json(url: str, cookies: dict[str, str] | None = None) -> JSON:
+def delete_json(url: str, *, cookies: dict[str, str] | None = None) -> JSON:
     """DELETE. None on failure."""
     return cast(JSON, _network.request_json(_network.METHOD_DELETE, url, None, cookies or {}))
 

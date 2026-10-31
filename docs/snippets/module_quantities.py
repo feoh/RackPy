@@ -19,7 +19,8 @@ try:
     assert level.module is module
     assert level.display_multiplier == 100
     # Metadata/defaults work even at plugin startup, before Rack creates its engine.
-    assert level.get_param().value == level.default_value == 0.5
+    param = level.get_param()  # None once the module is gone
+    assert param is not None and param.value == level.default_value == 0.5
     assert level.get_range() == 1 and level.to_scaled(0.5) == 0.5
     mode = module.get_param_quantity(1)
     assert isinstance(mode, SwitchQuantityView)

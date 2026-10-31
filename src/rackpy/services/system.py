@@ -29,7 +29,7 @@ def write_bytes(path: str | os.PathLike[str], data: bytes) -> None:
     _system.write_file(path, data)
 
 
-def entries(directory: str | os.PathLike[str], depth: int = 0) -> list[Path]:
+def entries(directory: str | os.PathLike[str], *, depth: int = 0) -> list[Path]:
     """The directory's entries as paths (depth -1: all the way down)."""
     return [Path(p) for p in _system.get_entries(directory, depth)]
 
@@ -40,7 +40,7 @@ def temp_directory() -> Path:
 
 
 def archive(
-    directory: str | os.PathLike[str], to: str | os.PathLike[str] | None = None, level: int = 1
+    directory: str | os.PathLike[str], to: str | os.PathLike[str] | None = None, *, level: int = 1
 ) -> bytes | None:
     """The directory's contents as a .tar.zst: written to ``to``, or returned as bytes."""
     if to is None:

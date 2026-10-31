@@ -44,6 +44,12 @@ repos:
         language: system
         pass_filenames: false
         files: (\.pyi?$|^tests/facade/pyrightconfig\.json$|^pyproject\.toml$|^uv\.lock$)
+      - id: facade-surface
+        name: facade surface snapshot
+        entry: bin/facade-surface check
+        language: system
+        pass_filenames: false
+        files: ^(src/rackpy/|tests/facade/surface\.json$|bin/facade-surface$)
       - id: planning-check
         name: planning data
         entry: bin/planning-check

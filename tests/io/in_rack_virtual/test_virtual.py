@@ -5,6 +5,7 @@ that drives Rack's own ports (Core's Audio-2 and MIDI-CV modules) and Python's."
 import gc
 import inspect
 from array import array
+from collections.abc import Callable
 from typing import Any, get_type_hints
 
 import _rackpy_host
@@ -200,7 +201,7 @@ def test_a_python_midi_driver() -> None:
 
 def test_message_helpers() -> None:
     assert fm.note_on(60, 100, channel=2).bytes == [0x92, 60, 100]
-    assert fm.note_off(60).bytes == [0x80, 60, 0] and fm.control_change(7, 127, 15).bytes == [0xBF, 7, 127]
+    assert fm.note_off(60).bytes == [0x80, 60, 0] and fm.control_change(7, 127, channel=15).bytes == [0xBF, 7, 127]
     assert fm.message(0xF8, frame=5).frame == 5
     with pytest.raises(ValueError, match="channel"):
         fm.note_on(1, channel=16)
@@ -258,6 +259,26 @@ def test_facade_signatures_and_callback_annotations() -> None:
     assert midi_kind.kind is inspect.Parameter.KEYWORD_ONLY and midi_kind.default is midi.InputQueue
     hints = get_type_hints(ModuleClass.on_port_change)
     assert hints["event"] is raw.engine.Module.PortChangeEvent and hints["return"] is type(None)
+    options: dict[Callable[..., object], tuple[str, ...]] = {
+        fm.note_on: ("channel", "frame"),
+        fm.note_off: ("channel", "frame"),
+        fm.control_change: ("channel", "frame"),
+        fm.virtual_driver: ("inputs", "outputs"),
+        fa.virtual_driver: ("devices",),
+    }
+    for function, names in options.items():
+        parameters = inspect.signature(function).parameters
+        assert all(parameters[n].kind is inspect.Parameter.KEYWORD_ONLY for n in names), function
+    with pytest.raises(TypeError):
+        fm.note_on(60, 100, 2)  # type: ignore[call-arg]  # a channel must be named
+
+
+def test_stream_repr_names_its_device() -> None:
+    driver = fa.virtual_driver(4370, "Repr audio", devices=("Shown",))
+    device = driver.get_device(0)
+    assert device is not None
+    stream = fa.Stream(device)
+    assert repr(stream) == "<Stream 'Shown' running=False>"
 
 
 def test_duplicate_names_require_ids() -> None:

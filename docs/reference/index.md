@@ -13,6 +13,7 @@ with each declaration's status in the binding manifest that CI checks. The
 
 coverage
 mapping
+api-stability
 ```
 
 ## Bound so far

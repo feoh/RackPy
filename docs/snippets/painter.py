@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # rackpy-example: runs-in=rack
-from typing import Any
-
 from rackpy.drawing import Painter
 from rackpy.raw import widget as w
 from rackpy.raw.math import Rect, Vec
@@ -14,7 +12,7 @@ class Badge(w.Widget):
         super().__init__()
         self.label = label
 
-    def draw(self, args: Any) -> None:
+    def draw(self, args: w.DrawArgs) -> None:
         p = Painter(args)  # valid only in this call
         width, height = self.box.size.x, self.box.size.y
         p.rect(0, 0, width, height, radius=4).fill(p.linear_gradient(0, 0, 0, height, "#38424e", "#1c222a"))
@@ -23,7 +21,7 @@ class Badge(w.Widget):
             p.circle(0, 0, 4).stroke("#9aa8b6", width=1)
         p.text(self.label, 8, height / 2, size=11, color="#eef2f6", align="left middle")
 
-    def draw_layer(self, args: Any, layer: int) -> None:
+    def draw_layer(self, args: w.DrawArgs, layer: int) -> None:
         if layer == 1:  # Rack draws layer 1 after dimming the rack, so it stays bright
             p = Painter(args)
             p.circle(self.box.size.x - 12, self.box.size.y / 2, 3).fill("#40ff80")

@@ -68,6 +68,7 @@ files = [
     "src",
     "tests",
     "docs/conf.py",
+    "docs/snippets",
     "docs/_ext",
     "bin/inventory_sdk.py",
     "bin/binding_manifest.py",
@@ -75,6 +76,13 @@ files = [
     "bin/generate_bindings.py",
 ]
 warn_unreachable = true
+
+[[tool.mypy.overrides]]
+# Snippets demonstrate lifetime transitions (remove_child, close) that change an
+# attribute mypy has already narrowed, so it reports the following assertions
+# as unreachable. Every other strict check still applies to them.
+module = "docs.snippets.*"
+warn_unreachable = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

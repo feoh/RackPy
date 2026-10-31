@@ -1,10 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # rackpy-example: runs-in=rack modules=PyControls,PyNotes
-from typing import Any
-
 import rackpy.assets
 from rackpy.engine import Module
 from rackpy.plugin import ModuleClass, on_destroy, plugin
+from rackpy.types import JSON
 
 
 def controls(module: Module) -> None:
@@ -21,14 +20,15 @@ class Notes(ModuleClass):
         self.module.config(num_params=0, num_inputs=0, num_outputs=0)
         self.text = ""
 
-    def to_json(self) -> Any:
+    def to_json(self) -> object:
         return {"schema": self.SCHEMA, "text": self.text}
 
-    def from_json(self, data: Any) -> None:
-        if isinstance(data, dict) and isinstance(data.get("text"), str):
-            self.text = data["text"]
+    def from_json(self, data: JSON) -> None:
+        text = data.get("text") if isinstance(data, dict) else None
+        if isinstance(text, str):  # patch data is untrusted: keep only what you expect
+            self.text = text
 
-    def on_reset(self, event: Any) -> None:  # Initialize, after Rack reset the parameters
+    def on_reset(self, event: Module.ResetEvent) -> None:  # Initialize, after Rack reset the parameters
         self.text = ""
 
 

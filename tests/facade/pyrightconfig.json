@@ -1,6 +1,7 @@
 {
   "include": [
     ".",
+    "../../docs/snippets",
     "../../src/rackpy/__init__.py",
     "../../src/rackpy/_introspect.py",
     "../../src/rackpy/_selection.py",

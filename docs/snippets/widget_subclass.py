@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # rackpy-example: runs-in=rack
-from typing import Any
-
 from rackpy.raw import widget as w
 from rackpy.raw.math import Rect, Vec
 
@@ -14,11 +12,11 @@ class Swatch(w.OpaqueWidget):
         self.clicks = 0
         self.frames = 0
 
-    def on_button(self, event: Any) -> None:
+    def on_button(self, event: w.ButtonEvent) -> None:
         self.clicks += 1
         super().on_button(event)  # OpaqueWidget consumes the click
 
-    def draw(self, args: Any) -> None:
+    def draw(self, args: w.DrawArgs) -> None:
         self.frames += 1  # args and args.vg expire when this call returns
         super().draw(args)
 

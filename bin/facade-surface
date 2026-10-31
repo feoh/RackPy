@@ -1,0 +1,167 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["cyclopts>=5.2,<6"]
+#
+# [tool.uv]
+# exclude-newer = "2026-10-21T00:00:00Z"
+# ///
+"""Snapshot the public Pythonic facade's names and signatures (RP-32).
+
+The facade is every name in ``__all__`` of a public ``rackpy`` module outside
+``rackpy.raw`` (docs/reference/api-stability.md). This reads the source with
+``ast``, so it needs no Rack host, and records each function's and public
+method's signature, each class's bases and each re-export's origin. ``check``
+fails when the source no longer matches tests/facade/surface.json, so a facade
+change has to be made deliberately, with ``write``, and reviewed in the diff.
+"""
+
+import ast
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+import cyclopts
+
+REPO = Path(__file__).resolve().parent.parent
+SOURCE = REPO / "src" / "rackpy"
+SNAPSHOT = REPO / "tests" / "facade" / "surface.json"
+
+app = cyclopts.App(help=__doc__)
+
+
+def facade_modules() -> list[Path]:
+    """Public modules: not under raw/, and no underscore-prefixed module or package in the path."""
+    found = []
+    for path in sorted(SOURCE.rglob("*.py")):
+        parts = path.relative_to(SOURCE).parts
+        if parts[0] == "raw" or any(p.startswith("_") and p != "__init__.py" for p in parts):
+            continue
+        found.append(path)
+    return found
+
+
+def module_name(path: Path) -> str:
+    parts = ["rackpy", *path.relative_to(SOURCE).with_suffix("").parts]
+    return ".".join(parts[:-1] if parts[-1] == "__init__" else parts)
+
+
+def exported(tree: ast.Module, name: str) -> list[str]:
+    for node in tree.body:
+        targets: list[ast.expr]
+        value: ast.expr | None
+        if isinstance(node, ast.Assign):
+            targets, value = node.targets, node.value
+        elif isinstance(node, ast.AnnAssign):
+            targets, value = [node.target], node.value
+        else:
+            continue
+        if any(isinstance(t, ast.Name) and t.id == "__all__" for t in targets) and value is not None:
+            names = ast.literal_eval(value)
+            if not (isinstance(names, list) and all(isinstance(n, str) for n in names)):
+                raise SystemExit(f"{name}: __all__ must be a literal list of strings")
+            return sorted(names)
+    if public_names(tree):
+        raise SystemExit(f"{name}: a public facade module with public names needs a literal __all__")
+    return []  # a package that only documents its submodules
+
+
+def public_names(tree: ast.Module) -> list[str]:
+    names: list[str] = []
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            names.append(node.name)
+        elif isinstance(node, (ast.Import, ast.ImportFrom)):
+            names += [(a.asname or a.name).split(".")[0] for a in node.names]
+        elif isinstance(node, ast.Assign):
+            names += [t.id for t in node.targets if isinstance(t, ast.Name)]
+    return [n for n in names if not n.startswith("_")]
+
+
+def signature(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
+    decorators = "".join(f"@{ast.unparse(d)} " for d in node.decorator_list)
+    returns = f" -> {ast.unparse(node.returns)}" if node.returns else ""
+    kind = "async def" if isinstance(node, ast.AsyncFunctionDef) else "def"
+    return f"{decorators}{kind} {node.name}({ast.unparse(node.args)}){returns}"
+
+
+def public_member(name: str) -> bool:
+    return not name.startswith("_") or name in {"__init__", "__call__", "__enter__", "__exit__", "__iter__", "__len__"}
+
+
+def describe_class(node: ast.ClassDef) -> dict[str, Any]:
+    members: dict[str, list[str]] = {}
+    for item in node.body:
+        if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)) and public_member(item.name):
+            members.setdefault(item.name, []).append(signature(item))
+        elif isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name) and public_member(item.target.id):
+            members.setdefault(item.target.id, []).append(f"{item.target.id}: {ast.unparse(item.annotation)}")
+    bases = ", ".join(ast.unparse(b) for b in node.bases)
+    return {"class": f"class {node.name}({bases})", "members": members}
+
+
+def describe(tree: ast.Module, module: str, name: str) -> Any:
+    found: list[Any] = []
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
+            found.append(signature(node))
+        elif isinstance(node, ast.ClassDef) and node.name == name:
+            return describe_class(node)
+        elif isinstance(node, ast.ImportFrom) and any((a.asname or a.name) == name for a in node.names):
+            alias = next(a for a in node.names if (a.asname or a.name) == name)
+            return f"re-export {node.module}.{alias.name}"
+        elif isinstance(node, ast.TypeAlias) and node.name.id == name:
+            return f"type {name} = {ast.unparse(node.value)}"
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.target.id == name:
+            return f"{name}: {ast.unparse(node.annotation)}"
+        elif isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+            value = node.value
+            if isinstance(value, (ast.Name, ast.Attribute, ast.BinOp, ast.Subscript)):
+                return f"{name} = {ast.unparse(value)}"
+            return f"{name}: {type(ast.literal_eval(value)).__name__}" if isinstance(value, ast.Constant) else name
+    if found:
+        return found if len(found) > 1 else found[0]
+    raise SystemExit(f"{module}: __all__ names {name!r}, which the module does not define or import")
+
+
+def snapshot() -> dict[str, dict[str, Any]]:
+    result: dict[str, dict[str, Any]] = {}
+    for path in facade_modules():
+        tree = ast.parse(path.read_text(encoding="utf-8"), str(path))
+        module = module_name(path)
+        result[module] = {name: describe(tree, module, name) for name in exported(tree, module)}
+    return result
+
+
+def rendered(data: dict[str, dict[str, Any]]) -> str:
+    return json.dumps(data, indent=1, sort_keys=True, ensure_ascii=False) + "\n"
+
+
+@app.command
+def write() -> None:
+    """Rewrite tests/facade/surface.json from the source."""
+    SNAPSHOT.write_text(rendered(snapshot()), encoding="utf-8")
+
+
+@app.command
+def check(against: Path = SNAPSHOT) -> None:
+    """Fail if the facade differs from the snapshot (default tests/facade/surface.json), naming what changed."""
+    current = snapshot()
+    recorded: dict[str, dict[str, Any]] = json.loads(against.read_text(encoding="utf-8"))
+    changes = []
+    for module in sorted(set(current) | set(recorded)):
+        now, then = current.get(module, {}), recorded.get(module, {})
+        changes += [
+            f"{module}.{n}: {'added' if n not in then else 'removed' if n not in now else 'changed'}"
+            for n in sorted(set(now) | set(then))
+            if now.get(n) != then.get(n)
+        ]
+    if changes:
+        print(f"The public facade differs from {against}:", *changes, sep="\n  ", file=sys.stderr)
+        print("If the change is intended, run bin/facade-surface write and review the diff.", file=sys.stderr)
+        raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    app()

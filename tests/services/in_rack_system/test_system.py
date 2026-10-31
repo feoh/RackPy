@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """RP-30B: rack::system and rack::network inside Rack, with temporary directories and a loopback HTTP server."""
 
+import inspect
 import io
 import json
 import os
 import tarfile
 import threading
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -191,6 +192,19 @@ def server() -> Iterator[str]:
     yield f"http://127.0.0.1:{httpd.server_address[1]}"
     httpd.shutdown()
     httpd.server_close()
+
+
+def test_facade_options_are_keyword_only() -> None:
+    options: dict[Callable[..., object], str] = {
+        net.get_json: "cookies",
+        net.post_json: "cookies",
+        net.put_json: "cookies",
+        net.delete_json: "cookies",
+        files.entries: "depth",
+        files.archive: "level",
+    }
+    for function, name in options.items():
+        assert inspect.signature(function).parameters[name].kind is inspect.Parameter.KEYWORD_ONLY, function
 
 
 def test_json_requests(server: str) -> None:

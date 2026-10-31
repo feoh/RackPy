@@ -44,5 +44,6 @@ contract exercises these signatures without running callbacks outside Rack.
 
 For complete lookup, use the [surface inventory](surface-summary.md) and the
 family reference pages rather than assuming a declaration appears in this
-short table. Facade signatures and behavior are still being audited; this page
-does not freeze them or imply production readiness.
+short table. [Facade contract and versioning](api-stability.md) defines which
+names are public and how changes to them are controlled; neither page implies
+production readiness.

@@ -49,19 +49,19 @@ def message(*data: int, frame: int = -1) -> Message:
     return msg
 
 
-def note_on(note: int, velocity: int = 100, channel: int = 0, frame: int = -1) -> Message:
+def note_on(note: int, velocity: int = 100, *, channel: int = 0, frame: int = -1) -> Message:
     """Note on (status 9): note and velocity 0-127, channel 0-15."""
     _check(note=note, velocity=velocity, channel=channel)
     return message(0x90 | channel, note, velocity, frame=frame)
 
 
-def note_off(note: int, velocity: int = 0, channel: int = 0, frame: int = -1) -> Message:
+def note_off(note: int, velocity: int = 0, *, channel: int = 0, frame: int = -1) -> Message:
     """Note off (status 8)."""
     _check(note=note, velocity=velocity, channel=channel)
     return message(0x80 | channel, note, velocity, frame=frame)
 
 
-def control_change(controller: int, value: int, channel: int = 0, frame: int = -1) -> Message:
+def control_change(controller: int, value: int, *, channel: int = 0, frame: int = -1) -> Message:
     """Control change (status 0xb)."""
     _check(controller=controller, value=value, channel=channel)
     return message(0xB0 | channel, controller, value, frame=frame)
@@ -138,7 +138,7 @@ def open_output(driver: str | int, device: str | int | None = None, *, channel: 
 
 
 def virtual_driver(
-    driver_id: int, name: str, inputs: tuple[str, ...] = (), outputs: tuple[str, ...] = ()
+    driver_id: int, name: str, *, inputs: tuple[str, ...] = (), outputs: tuple[str, ...] = ()
 ) -> PythonDriver:
     """A Python MIDI driver with these input and output devices, given to Rack (which keeps it until it quits)."""
     driver = PythonDriver(name)

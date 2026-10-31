@@ -12,6 +12,7 @@ from array import array
 from typing import overload
 
 from rackpy._selection import by_name, unique_names
+from rackpy.errors import StaleHandleError
 from rackpy.raw.audio import Driver, Port, PythonDevice, PythonDriver, add_driver, get_driver, get_driver_ids
 
 __all__ = ["Stream", "drivers", "find_driver", "open_port", "virtual_driver"]
@@ -58,7 +59,7 @@ def open_port(driver: str | int, device: str | int | None = None, *, kind: type[
     return port
 
 
-def virtual_driver(driver_id: int, name: str, devices: tuple[str, ...] = ("Virtual 1",)) -> PythonDriver:
+def virtual_driver(driver_id: int, name: str, *, devices: tuple[str, ...] = ("Virtual 1",)) -> PythonDriver:
     """A Python audio driver with these devices (2 in, 2 out, 48 kHz, 256 frames), given to Rack until it quits."""
     driver = PythonDriver(name)
     for device in devices:
@@ -95,6 +96,13 @@ class Stream:
         out = array("f", bytes(4 * n * outs))
         self.device.process_buffer(data, ins, out, outs, n)
         return out
+
+    def __repr__(self) -> str:
+        try:
+            device = repr(self.device.name)
+        except StaleHandleError:
+            device = "(deleted device)"
+        return f"<Stream {device} running={self.running}>"
 
     def __enter__(self) -> Stream:
         self.start()

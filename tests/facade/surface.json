@@ -1,0 +1,928 @@
+{
+ "rackpy": {
+  "__version__": "__version__: str"
+ },
+ "rackpy.assets": {
+  "plugin": "def plugin(filename: str='') -> Path",
+  "system": "def system(filename: str='') -> Path",
+  "user": "def user(filename: str='') -> Path"
+ },
+ "rackpy.audio": {
+  "Stream": {
+   "class": "class Stream()",
+   "members": {
+    "__enter__": [
+     "def __enter__(self) -> Stream"
+    ],
+    "__exit__": [
+     "def __exit__(self, *exc: object) -> None"
+    ],
+    "__init__": [
+     "def __init__(self, device: PythonDevice) -> None"
+    ],
+    "process": [
+     "def process(self, frames: int | None=None, input: array[float] | None=None) -> array[float]"
+    ],
+    "start": [
+     "def start(self) -> None"
+    ],
+    "stop": [
+     "def stop(self) -> None"
+    ]
+   }
+  },
+  "drivers": "def drivers() -> dict[str, Driver]",
+  "find_driver": "def find_driver(driver: str | int) -> Driver",
+  "open_port": [
+   "@overload def open_port(driver: str | int, device: str | int | None=None, *, kind: type[P]) -> P",
+   "@overload def open_port(driver: str | int, device: str | int | None=None) -> Port",
+   "def open_port(driver: str | int, device: str | int | None=None, *, kind: type[Port]=Port) -> Port"
+  ],
+  "virtual_driver": "def virtual_driver(driver_id: int, name: str, *, devices: tuple[str, ...]=('Virtual 1',)) -> PythonDriver"
+ },
+ "rackpy.drawing": {
+  "Color": "Color = NVGcolor | str | tuple[float, float, float] | tuple[float, float, float, float]",
+  "DEFAULT_FONT": "DEFAULT_FONT: str",
+  "DrawTarget": {
+   "class": "class DrawTarget(Protocol)",
+   "members": {
+    "vg": [
+     "@property def vg(self) -> GraphicsContext | None"
+    ]
+   }
+  },
+  "Painter": {
+   "class": "class Painter()",
+   "members": {
+    "__init__": [
+     "def __init__(self, target: GraphicsContext | DrawTarget) -> None"
+    ],
+    "alpha": [
+     "def alpha(self, alpha: float) -> Self"
+    ],
+    "box_gradient": [
+     "def box_gradient(self, x: float, y: float, width: float, height: float, radius: float, feather: float, start: Color, end: Color) -> NVGpaint"
+    ],
+    "circle": [
+     "def circle(self, cx: float, cy: float, r: float) -> Path2D"
+    ],
+    "clipped": [
+     "@contextmanager def clipped(self, x: float, y: float, width: float, height: float) -> Iterator[Self]"
+    ],
+    "image": [
+     "def image(self, image: str | Path | Image, x: float, y: float, width: float, height: float, *, alpha: float=1) -> None"
+    ],
+    "line": [
+     "def line(self, x0: float, y0: float, x1: float, y1: float) -> Path2D"
+    ],
+    "linear_gradient": [
+     "def linear_gradient(self, x0: float, y0: float, x1: float, y1: float, start: Color, end: Color) -> NVGpaint"
+    ],
+    "measure": [
+     "def measure(self, text: str, x: float=0, y: float=0, *, size: float=12, font: str | Path | Font=DEFAULT_FONT, align: str='left baseline') -> TextBounds"
+    ],
+    "path": [
+     "def path(self) -> Path2D"
+    ],
+    "radial_gradient": [
+     "def radial_gradient(self, cx: float, cy: float, inner: float, outer: float, start: Color, end: Color) -> NVGpaint"
+    ],
+    "rect": [
+     "def rect(self, x: float, y: float, width: float, height: float, radius: float=0) -> Path2D"
+    ],
+    "rotate": [
+     "def rotate(self, angle: float) -> Self"
+    ],
+    "saved": [
+     "@contextmanager def saved(self) -> Iterator[Self]"
+    ],
+    "scale": [
+     "def scale(self, x: float, y: float | None=None) -> Self"
+    ],
+    "text": [
+     "def text(self, text: str, x: float, y: float, *, size: float=12, color: Color='#ffffff', font: str | Path | Font=DEFAULT_FONT, align: str='left baseline', width: float | None=None) -> float"
+    ],
+    "translate": [
+     "def translate(self, x: float, y: float) -> Self"
+    ]
+   }
+  },
+  "Path2D": {
+   "class": "class Path2D()",
+   "members": {
+    "__init__": [
+     "def __init__(self, vg: GraphicsContext) -> None"
+    ],
+    "arc": [
+     "def arc(self, cx: float, cy: float, r: float, a0: float, a1: float, *, clockwise: bool=True) -> Self"
+    ],
+    "arc_to": [
+     "def arc_to(self, x1: float, y1: float, x2: float, y2: float, radius: float) -> Self"
+    ],
+    "bezier_to": [
+     "def bezier_to(self, c1x: float, c1y: float, c2x: float, c2y: float, x: float, y: float) -> Self"
+    ],
+    "circle": [
+     "def circle(self, cx: float, cy: float, r: float) -> Self"
+    ],
+    "close": [
+     "def close(self) -> Self"
+    ],
+    "ellipse": [
+     "def ellipse(self, cx: float, cy: float, rx: float, ry: float) -> Self"
+    ],
+    "fill": [
+     "def fill(self, paint: Color | NVGpaint) -> Self"
+    ],
+    "hole": [
+     "def hole(self) -> Self"
+    ],
+    "line_to": [
+     "def line_to(self, x: float, y: float) -> Self"
+    ],
+    "move_to": [
+     "def move_to(self, x: float, y: float) -> Self"
+    ],
+    "quad_to": [
+     "def quad_to(self, cx: float, cy: float, x: float, y: float) -> Self"
+    ],
+    "rect": [
+     "def rect(self, x: float, y: float, width: float, height: float, radius: float=0) -> Self"
+    ],
+    "stroke": [
+     "def stroke(self, paint: Color | NVGpaint, width: float=1) -> Self"
+    ]
+   }
+  },
+  "TextBounds": {
+   "class": "class TextBounds()",
+   "members": {
+    "advance": [
+     "advance: float"
+    ],
+    "height": [
+     "@property def height(self) -> float"
+    ],
+    "width": [
+     "@property def width(self) -> float"
+    ],
+    "xmax": [
+     "xmax: float"
+    ],
+    "xmin": [
+     "xmin: float"
+    ],
+    "ymax": [
+     "ymax: float"
+    ],
+    "ymin": [
+     "ymin: float"
+    ]
+   }
+  },
+  "color": "def color(value: Color) -> NVGcolor"
+ },
+ "rackpy.dsp": {},
+ "rackpy.dsp.basic": {
+  "FREQ_A4": "re-export rackpy.raw.dsp.FREQ_A4",
+  "FREQ_C4": "re-export rackpy.raw.dsp.FREQ_C4",
+  "FREQ_SEMITONE": "re-export rackpy.raw.dsp.FREQ_SEMITONE",
+  "Frame": "re-export rackpy.raw.dsp.Frame",
+  "Int24": "re-export rackpy.raw.dsp.Int24",
+  "amplitude_to_db": "re-export rackpy.raw.dsp.amplitude_to_db",
+  "blackman": "re-export rackpy.raw.dsp.blackman",
+  "blackman_harris": "re-export rackpy.raw.dsp.blackman_harris",
+  "blackman_harris_window": "re-export rackpy.raw.dsp.blackman_harris_window",
+  "blackman_nuttall": "re-export rackpy.raw.dsp.blackman_nuttall",
+  "blackman_nuttall_window": "re-export rackpy.raw.dsp.blackman_nuttall_window",
+  "blackman_window": "re-export rackpy.raw.dsp.blackman_window",
+  "convert": "re-export rackpy.raw.dsp.convert",
+  "cubic": "re-export rackpy.raw.dsp.cubic",
+  "db_to_amplitude": "re-export rackpy.raw.dsp.db_to_amplitude",
+  "exp2_floor": "re-export rackpy.raw.dsp.exp2_floor",
+  "exp2_taylor5": "re-export rackpy.raw.dsp.exp2_taylor5",
+  "exponential_bipolar": "re-export rackpy.raw.dsp.exponential_bipolar",
+  "hann": "re-export rackpy.raw.dsp.hann",
+  "hann_window": "re-export rackpy.raw.dsp.hann_window",
+  "poly_direct": "re-export rackpy.raw.dsp.poly_direct",
+  "poly_estrin": "re-export rackpy.raw.dsp.poly_estrin",
+  "poly_horner": "re-export rackpy.raw.dsp.poly_horner",
+  "quadratic_bipolar": "re-export rackpy.raw.dsp.quadratic_bipolar",
+  "quartic_bipolar": "re-export rackpy.raw.dsp.quartic_bipolar",
+  "quintic": "re-export rackpy.raw.dsp.quintic",
+  "sinc": "re-export rackpy.raw.dsp.sinc",
+  "sqrt_bipolar": "re-export rackpy.raw.dsp.sqrt_bipolar",
+  "step_euler": "re-export rackpy.raw.dsp.step_euler",
+  "step_rk2": "re-export rackpy.raw.dsp.step_rk2",
+  "step_rk4": "re-export rackpy.raw.dsp.step_rk4"
+ },
+ "rackpy.dsp.digital": {
+  "BooleanTrigger": "re-export rackpy.raw.dsp.BooleanTrigger",
+  "ClockDivider": "re-export rackpy.raw.dsp.ClockDivider",
+  "PulseGenerator": "re-export rackpy.raw.dsp.PulseGenerator",
+  "SchmittTrigger": "re-export rackpy.raw.dsp.SchmittTrigger",
+  "TSchmittTrigger": "re-export rackpy.raw.dsp.TSchmittTrigger",
+  "TTimer": "re-export rackpy.raw.dsp.TTimer",
+  "Timer": "re-export rackpy.raw.dsp.Timer"
+ },
+ "rackpy.dsp.fft": {
+  "ComplexFFT": "re-export rackpy.raw.dsp.ComplexFFT",
+  "RealFFT": "re-export rackpy.raw.dsp.RealFFT",
+  "RealTimeConvolver": "re-export rackpy.raw.dsp.RealTimeConvolver",
+  "boxcar_lowpass_ir": "re-export rackpy.raw.dsp.boxcar_lowpass_ir",
+  "convolve_naive": "re-export rackpy.raw.dsp.convolve_naive"
+ },
+ "rackpy.dsp.filters": {
+  "BiquadFilter": "re-export rackpy.raw.dsp.BiquadFilter",
+  "ExponentialFilter": "re-export rackpy.raw.dsp.ExponentialFilter",
+  "ExponentialSlewLimiter": "re-export rackpy.raw.dsp.ExponentialSlewLimiter",
+  "IIRFilter": "re-export rackpy.raw.dsp.IIRFilter",
+  "PeakFilter": "re-export rackpy.raw.dsp.PeakFilter",
+  "RCFilter": "re-export rackpy.raw.dsp.RCFilter",
+  "SlewLimiter": "re-export rackpy.raw.dsp.SlewLimiter",
+  "TBiquadFilter": "re-export rackpy.raw.dsp.TBiquadFilter",
+  "TExponentialFilter": "re-export rackpy.raw.dsp.TExponentialFilter",
+  "TExponentialSlewLimiter": "re-export rackpy.raw.dsp.TExponentialSlewLimiter",
+  "TPeakFilter": "re-export rackpy.raw.dsp.TPeakFilter",
+  "TRCFilter": "re-export rackpy.raw.dsp.TRCFilter",
+  "TSlewLimiter": "re-export rackpy.raw.dsp.TSlewLimiter",
+  "process_block": "def process_block(filter: Any, in_: Buffer, out: Buffer, delta_time: float | None=None) -> None"
+ },
+ "rackpy.dsp.graph": {
+  "Control": {
+   "class": "class Control()",
+   "members": {
+    "default": [
+     "default: float"
+    ],
+    "name": [
+     "name: str"
+    ],
+    "node": [
+     "node: int"
+    ]
+   }
+  },
+  "Delay": {
+   "class": "class Delay(Signal)",
+   "members": {
+    "feed": [
+     "def feed(self, source: Signal | float) -> None"
+    ]
+   }
+  },
+  "EXPANDER_SCHEMA": "EXPANDER_SCHEMA: Final",
+  "Forward": {
+   "class": "class Forward(Signal)",
+   "members": {
+    "bind": [
+     "def bind(self, source: Signal | float) -> None"
+    ]
+   }
+  },
+  "Graph": {
+   "class": "class Graph()",
+   "members": {
+    "__init__": [
+     "def __init__(self) -> None"
+    ],
+    "audio_input": [
+     "def audio_input(self, channel: int=0) -> Signal"
+    ],
+    "audio_output": [
+     "def audio_output(self, channel: int, signal: Signal | float) -> None"
+    ],
+    "clamp": [
+     "def clamp(self, x: Signal | float, low: Signal | float=0.0, high: Signal | float=1.0) -> Signal"
+    ],
+    "compile": [
+     "def compile(self) -> Kernel"
+    ],
+    "constant": [
+     "def constant(self, value: float) -> Signal"
+    ],
+    "control": [
+     "def control(self, name: str, default: float=0.0) -> Signal"
+    ],
+    "delay": [
+     "def delay(self, initial: float=0.0) -> Delay"
+    ],
+    "expander_receive": [
+     "def expander_receive(self, side: int, lane: int=0) -> Signal"
+    ],
+    "expander_send": [
+     "def expander_send(self, side: int, signal: Signal | float, lane: int=0) -> None"
+    ],
+    "forward": [
+     "def forward(self) -> Forward"
+    ],
+    "input": [
+     "def input(self, port: int) -> Signal"
+    ],
+    "light": [
+     "def light(self, index: int, brightness: Signal | float) -> None"
+    ],
+    "maximum": [
+     "def maximum(self, a: Signal | float, b: Signal | float) -> Signal"
+    ],
+    "midi_cv": [
+     "def midi_cv(self, output: int=0, *, input: int=0, channels: int=1, mono_mode: int=0, poly_mode: int=0, pitch_bend_range: float=2.0, smooth: bool=True, clock_division: int=24, retrigger_on_resume: bool=False, release_velocity: bool=False) -> Signal"
+    ],
+    "minimum": [
+     "def minimum(self, a: Signal | float, b: Signal | float) -> Signal"
+    ],
+    "node": [
+     "def node(self, name: str, *inputs: Signal | float, **args: float) -> Signal"
+    ],
+    "output": [
+     "def output(self, port: int, signal: Signal | float) -> None"
+    ],
+    "param": [
+     "def param(self, index: int) -> Signal"
+    ],
+    "phasor": [
+     "def phasor(self, freq: Signal | float) -> Signal"
+    ],
+    "pitch_to_freq": [
+     "def pitch_to_freq(self, pitch: Signal | float) -> Signal"
+    ],
+    "plan": [
+     "def plan(self) -> Plan"
+    ],
+    "pulse": [
+     "def pulse(self, trigger: Signal | float, duration: float=0.001) -> Signal"
+    ],
+    "sample_rate": [
+     "def sample_rate(self) -> Signal"
+    ],
+    "sample_time": [
+     "def sample_time(self) -> Signal"
+    ],
+    "schmitt": [
+     "def schmitt(self, x: Signal | float, low: float=0.0, high: float=1.0) -> Signal"
+    ],
+    "sin2pi": [
+     "def sin2pi(self, phase: Signal | float) -> Signal"
+    ],
+    "where": [
+     "def where(self, condition: Signal | float, a: Signal | float, b: Signal | float) -> Signal"
+    ]
+   }
+  },
+  "GraphError": {
+   "class": "class GraphError(ValueError)",
+   "members": {}
+  },
+  "LANE": "LANE: Final",
+  "MAX_CHANNELS": "MAX_CHANNELS: Final",
+  "MAX_LANES": "MAX_LANES: Final",
+  "Node": {
+   "class": "class Node()",
+   "members": {
+    "args": [
+     "args: tuple[float, ...]"
+    ],
+    "inputs": [
+     "inputs: tuple[int, ...]"
+    ],
+    "names": [
+     "names: tuple[str, ...]"
+    ],
+    "op": [
+     "op: str"
+    ]
+   }
+  },
+  "NodeType": {
+   "class": "class NodeType()",
+   "members": {
+    "args": [
+     "args: tuple[str, ...]"
+    ],
+    "doc": [
+     "doc: str"
+    ],
+    "inputs": [
+     "inputs: int"
+    ],
+    "name": [
+     "name: str"
+    ]
+   }
+  },
+  "OPS": "OPS: Final[dict[str, Op]]",
+  "Op": {
+   "class": "class Op()",
+   "members": {
+    "args": [
+     "args: tuple[str, ...]"
+    ],
+    "doc": [
+     "doc: str"
+    ],
+    "inputs": [
+     "inputs: int"
+    ],
+    "name": [
+     "name: str"
+    ],
+    "signal": [
+     "signal: bool"
+    ]
+   }
+  },
+  "Plan": {
+   "class": "class Plan()",
+   "members": {
+    "controls": [
+     "controls: tuple[Control, ...]"
+    ],
+    "latches": [
+     "latches: tuple[tuple[int, int], ...]"
+    ],
+    "nodes": [
+     "nodes: tuple[Node, ...]"
+    ],
+    "to_dict": [
+     "def to_dict(self) -> dict[str, list[Any]]"
+    ]
+   }
+  },
+  "Signal": {
+   "class": "class Signal()",
+   "members": {
+    "__init__": [
+     "def __init__(self, graph: Graph, node_id: int) -> None"
+    ],
+    "clamp": [
+     "def clamp(self, low: Signal | float=0.0, high: Signal | float=1.0) -> Signal"
+    ],
+    "graph": [
+     "@property def graph(self) -> Graph"
+    ]
+   }
+  },
+  "node_types": "def node_types() -> tuple[NodeType, ...]"
+ },
+ "rackpy.dsp.graph_codegen": {
+  "emit": "def emit(graphs: Mapping[str, Graph | Plan], namespace: str, source: str='') -> str"
+ },
+ "rackpy.dsp.graph_reference": {
+  "Lane": "Lane = tuple[int, int]",
+  "Result": {
+   "class": "class Result()",
+   "members": {
+    "lights": [
+     "lights: dict[int, list[float]]"
+    ],
+    "outputs": [
+     "outputs: dict[int, list[list[float]]]"
+    ],
+    "sent": [
+     "sent: dict[tuple[int, int], list[list[float]]]"
+    ]
+   }
+  },
+  "run": "def run(graph: Graph | Plan, frames: int, *, sample_rate: float=44100.0, rate_changes: Mapping[int, float] | None=None, inputs: Mapping[int, Sequence[Sequence[float]]] | None=None, params: Mapping[int, float | Sequence[float]] | None=None, controls: Mapping[int, Mapping[str, float]] | None=None, received: Mapping[Lane, Sequence[Sequence[float]]] | None=None) -> Result",
+  "run_pair": "def run_pair(left: Graph | Plan, right: Graph | Plan, frames: int, *, sample_rate: float=44100.0, left_inputs: Mapping[str, Any] | None=None, right_inputs: Mapping[str, Any] | None=None) -> tuple[Result, Result]"
+ },
+ "rackpy.dsp.kernel": {
+  "AudioInterface": "AudioInterface: KernelType",
+  "CONTROL_CAPACITY": "CONTROL_CAPACITY: int",
+  "Gain": "Gain: KernelType",
+  "Kernel": "Kernel = _dsp.Kernel",
+  "KernelType": "KernelType = _dsp.KernelType",
+  "MidiToCV": "MidiToCV: KernelType",
+  "Sine": "Sine: KernelType",
+  "kernel_types": "def kernel_types() -> tuple[KernelType, ...]",
+  "load": "def load(name: str) -> KernelType"
+ },
+ "rackpy.dsp.midi": {
+  "MidiGenerator": "re-export rackpy.raw.dsp.MidiGenerator",
+  "MidiParser": "re-export rackpy.raw.dsp.MidiParser",
+  "VuMeter2": "re-export rackpy.raw.dsp.VuMeter2"
+ },
+ "rackpy.dsp.resampling": {
+  "Decimator": "re-export rackpy.raw.dsp.Decimator",
+  "MinBlepGenerator": "re-export rackpy.raw.dsp.MinBlepGenerator",
+  "SampleRateConverter": "re-export rackpy.raw.dsp.SampleRateConverter",
+  "Upsampler": "re-export rackpy.raw.dsp.Upsampler",
+  "min_blep_impulse": "re-export rackpy.raw.dsp.min_blep_impulse"
+ },
+ "rackpy.dsp.ringbuffer": {
+  "AppleRingBuffer": "re-export rackpy.raw.dsp.AppleRingBuffer",
+  "DoubleRingBuffer": "re-export rackpy.raw.dsp.DoubleRingBuffer",
+  "RingBuffer": "re-export rackpy.raw.dsp.RingBuffer"
+ },
+ "rackpy.engine": {
+  "Input": "re-export rackpy.engine.components.Input",
+  "Light": "re-export rackpy.engine.components.Light",
+  "LightInfo": "re-export rackpy.engine.components.LightInfo",
+  "Module": "re-export rackpy.engine.module.Module",
+  "Output": "re-export rackpy.engine.components.Output",
+  "PORT_MAX_CHANNELS": "re-export rackpy.engine.components.PORT_MAX_CHANNELS",
+  "Param": "re-export rackpy.engine.components.Param",
+  "ParamQuantity": "re-export rackpy.raw.engine.ParamQuantity",
+  "Port": "re-export rackpy.engine.components.Port",
+  "PortInfo": "re-export rackpy.engine.components.PortInfo",
+  "SwitchQuantity": "re-export rackpy.raw.engine.SwitchQuantity"
+ },
+ "rackpy.engine.components": {
+  "Input": "re-export rackpy.raw.engine.Input",
+  "Light": "re-export rackpy.raw.engine.Light",
+  "LightInfo": "re-export rackpy.raw.engine.LightInfo",
+  "Output": "re-export rackpy.raw.engine.Output",
+  "PORT_MAX_CHANNELS": "re-export rackpy.raw.engine.PORT_MAX_CHANNELS",
+  "Param": "re-export rackpy.raw.engine.Param",
+  "Port": "re-export rackpy.raw.engine.Port",
+  "PortInfo": "re-export rackpy.raw.engine.PortInfo"
+ },
+ "rackpy.engine.expanders": {
+  "Expander": "Expander = _engine.Module.Expander",
+  "ExpanderMessage": "ExpanderMessage = _engine.ExpanderMessage",
+  "ForeignMessage": "ForeignMessage = _engine.ForeignMessage",
+  "allocate_messages": "def allocate_messages(expander: Expander, schema: str, size: int) -> tuple[ExpanderMessage, ExpanderMessage]",
+  "graph_messages": "def graph_messages(expander: Expander, lanes: int=1) -> tuple[ExpanderMessage, ExpanderMessage]"
+ },
+ "rackpy.engine.host": {
+  "AnyModule": "AnyModule = Module | EngineModule",
+  "cables": "def cables() -> list[Cable]",
+  "connect": "def connect(output: tuple[Module, int], input: tuple[Module, int]) -> Cable",
+  "disconnect": "def disconnect(cable: Cable) -> None",
+  "engine": "def engine() -> Engine",
+  "history": "def history() -> State",
+  "map_param": "def map_param(target: AnyModule, param_id: int, *, text: str='', color: NVGcolor | None=None, overwrite: bool=True) -> ParamHandle",
+  "module": "def module(module_id: int) -> AnyModule | None",
+  "modules": "def modules() -> list[AnyModule]",
+  "undo_step": "@contextmanager def undo_step(name: str) -> Iterator[ComplexAction]",
+  "unmap_param": "def unmap_param(handle: ParamHandle) -> None"
+ },
+ "rackpy.engine.module": {
+  "Module": "Module = _engine.Module"
+ },
+ "rackpy.errors": {
+  "ContextError": {
+   "class": "class ContextError(RackPyError, RuntimeError)",
+   "members": {}
+  },
+  "EngineLockError": {
+   "class": "class EngineLockError(RackPyError, RuntimeError)",
+   "members": {}
+  },
+  "LaboratoryError": {
+   "class": "class LaboratoryError(RackPyError, RuntimeError)",
+   "members": {}
+  },
+  "OwnershipError": {
+   "class": "class OwnershipError(RackPyError, ValueError)",
+   "members": {}
+  },
+  "RackPyError": {
+   "class": "class RackPyError(Exception)",
+   "members": {}
+  },
+  "StaleHandleError": {
+   "class": "class StaleHandleError(RackPyError, ReferenceError)",
+   "members": {}
+  },
+  "ThreadError": {
+   "class": "class ThreadError(RackPyError, RuntimeError)",
+   "members": {}
+  }
+ },
+ "rackpy.laboratory": {
+  "AudioDevice": "AudioDevice = _lab.AudioDevice",
+  "AudioDriver": "AudioDriver = _lab.AudioDriver",
+  "Bench": "Bench = _lab.Bench",
+  "MidiDriver": "MidiDriver = _lab.MidiDriver",
+  "MidiGenerator": "MidiGenerator",
+  "MidiInput": {
+   "class": "class MidiInput(_midi.Input)",
+   "members": {
+    "__init__": [
+     "def __init__(self) -> None"
+    ],
+    "on_message": [
+     "def on_message(self, message: _midi.Message) -> None"
+    ]
+   }
+  },
+  "MidiInputDevice": "MidiInputDevice = _lab.MidiInputDevice",
+  "MidiInputQueue": "MidiInputQueue = _lab.MidiInputQueue",
+  "MidiOutputDevice": "MidiOutputDevice = _lab.MidiOutputDevice",
+  "ModuleClass": {
+   "class": "class ModuleClass(_plugin.ModuleClass)",
+   "members": {
+    "create": [
+     "@classmethod def create(cls, model: Model | None=None) -> Self"
+    ],
+    "data_from_json": [
+     "def data_from_json(self, data: Any) -> None"
+    ],
+    "data_to_json": [
+     "def data_to_json(self) -> Any"
+    ],
+    "module_from_json": [
+     "def module_from_json(self, data: Any) -> None"
+    ],
+    "module_to_json": [
+     "def module_to_json(self) -> Any"
+    ],
+    "on_add": [
+     "def on_add(self, event: Module.AddEvent) -> None"
+    ],
+    "on_add_legacy": [
+     "def on_add_legacy(self) -> None"
+    ],
+    "on_bypass": [
+     "def on_bypass(self, event: Module.BypassEvent) -> None"
+    ],
+    "on_expander_change": [
+     "def on_expander_change(self, event: Module.ExpanderChangeEvent) -> None"
+    ],
+    "on_port_change": [
+     "def on_port_change(self, event: Module.PortChangeEvent) -> None"
+    ],
+    "on_randomize": [
+     "def on_randomize(self, event: Module.RandomizeEvent) -> None"
+    ],
+    "on_randomize_legacy": [
+     "def on_randomize_legacy(self) -> None"
+    ],
+    "on_remove": [
+     "def on_remove(self, event: Module.RemoveEvent) -> None"
+    ],
+    "on_remove_legacy": [
+     "def on_remove_legacy(self) -> None"
+    ],
+    "on_reset": [
+     "def on_reset(self, event: Module.ResetEvent) -> None"
+    ],
+    "on_reset_legacy": [
+     "def on_reset_legacy(self) -> None"
+    ],
+    "on_sample_rate_change": [
+     "def on_sample_rate_change(self, event: Module.SampleRateChangeEvent) -> None"
+    ],
+    "on_sample_rate_change_legacy": [
+     "def on_sample_rate_change_legacy(self) -> None"
+    ],
+    "on_save": [
+     "def on_save(self, event: Module.SaveEvent) -> None"
+    ],
+    "on_set_master": [
+     "def on_set_master(self, event: Module.SetMasterEvent) -> None"
+    ],
+    "on_un_bypass": [
+     "def on_un_bypass(self, event: Module.UnBypassEvent) -> None"
+    ],
+    "on_unset_master": [
+     "def on_unset_master(self, event: Module.UnsetMasterEvent) -> None"
+    ],
+    "params_from_json": [
+     "def params_from_json(self, data: Any) -> None"
+    ],
+    "params_to_json": [
+     "def params_to_json(self) -> Any"
+    ],
+    "process": [
+     "def process(self, args: ProcessArgs) -> None"
+    ],
+    "process_bypass": [
+     "def process_bypass(self, args: ProcessArgs) -> None"
+    ],
+    "step": [
+     "def step(self) -> None"
+    ]
+   }
+  },
+  "ParamQuantity": {
+   "class": "class ParamQuantity(_engine.ParamQuantity)",
+   "members": {
+    "__init__": [
+     "def __init__(self) -> None"
+    ]
+   }
+  },
+  "ProcessArgs": "ProcessArgs = Module.ProcessArgs",
+  "Quantity": {
+   "class": "class Quantity(_raw.Quantity)",
+   "members": {
+    "__init__": [
+     "def __init__(self) -> None"
+    ]
+   }
+  },
+  "SwitchQuantity": {
+   "class": "class SwitchQuantity(_engine.SwitchQuantity)",
+   "members": {
+    "__init__": [
+     "def __init__(self) -> None"
+    ]
+   }
+  },
+  "disable": "def disable() -> None",
+  "enable": "def enable() -> None",
+  "enabled": "def enabled() -> bool"
+ },
+ "rackpy.math": {
+  "Rect": "re-export rackpy.raw.math.Rect",
+  "Vec": "re-export rackpy.raw.math.Vec",
+  "chop": "re-export rackpy.raw.math.chop",
+  "clamp": "re-export rackpy.raw.math.clamp",
+  "clamp_safe": "re-export rackpy.raw.math.clamp_safe",
+  "complex_mult": "re-export rackpy.raw.math.complex_mult",
+  "crossfade": "re-export rackpy.raw.math.crossfade",
+  "euc_div": "re-export rackpy.raw.math.euc_div",
+  "euc_div_mod": "re-export rackpy.raw.math.euc_div_mod",
+  "euc_mod": "re-export rackpy.raw.math.euc_mod",
+  "interpolate_linear": "re-export rackpy.raw.math.interpolate_linear",
+  "is_even": "re-export rackpy.raw.math.is_even",
+  "is_near": "re-export rackpy.raw.math.is_near",
+  "is_odd": "re-export rackpy.raw.math.is_odd",
+  "is_pow2": "re-export rackpy.raw.math.is_pow2",
+  "log2": "re-export rackpy.raw.math.log2",
+  "normalize_zero": "re-export rackpy.raw.math.normalize_zero",
+  "rescale": "re-export rackpy.raw.math.rescale",
+  "sgn": "re-export rackpy.raw.math.sgn"
+ },
+ "rackpy.midi": {
+  "LOOPBACK": "LOOPBACK",
+  "Message": "re-export rackpy.raw.midi.Message",
+  "control_change": "def control_change(controller: int, value: int, *, channel: int=0, frame: int=-1) -> Message",
+  "drivers": "def drivers() -> dict[str, Driver]",
+  "find_driver": "def find_driver(driver: str | int) -> Driver",
+  "message": "def message(*data: int, frame: int=-1) -> Message",
+  "note_off": "def note_off(note: int, velocity: int=0, *, channel: int=0, frame: int=-1) -> Message",
+  "note_on": "def note_on(note: int, velocity: int=100, *, channel: int=0, frame: int=-1) -> Message",
+  "open_input": [
+   "@overload def open_input(driver: str | int, device: str | int | None=None, *, channel: int=-1, kind: type[I]) -> I",
+   "@overload def open_input(driver: str | int, device: str | int | None=None, *, channel: int=-1) -> InputQueue",
+   "def open_input(driver: str | int, device: str | int | None=None, *, channel: int=-1, kind: type[Input]=InputQueue) -> Input"
+  ],
+  "open_output": "def open_output(driver: str | int, device: str | int | None=None, *, channel: int=0) -> Output",
+  "virtual_driver": "def virtual_driver(driver_id: int, name: str, *, inputs: tuple[str, ...]=(), outputs: tuple[str, ...]=()) -> PythonDriver"
+ },
+ "rackpy.plugin": {
+  "Model": "re-export rackpy.raw.plugin.Model",
+  "ModuleClass": {
+   "class": "class ModuleClass()",
+   "members": {
+    "__init__": [
+     "def __init__(self, module: Module) -> None"
+    ],
+    "configure": [
+     "def configure(self) -> None"
+    ],
+    "factory": [
+     "@classmethod def factory(cls) -> Callable[[Module], None]"
+    ],
+    "from_json": [
+     "def from_json(self, data: JSON) -> None"
+    ],
+    "module": [
+     "module: Module"
+    ],
+    "on_add": [
+     "def on_add(self, event: Module.AddEvent) -> None"
+    ],
+    "on_bypass": [
+     "def on_bypass(self, event: Module.BypassEvent) -> None"
+    ],
+    "on_port_change": [
+     "def on_port_change(self, event: Module.PortChangeEvent) -> None"
+    ],
+    "on_randomize": [
+     "def on_randomize(self, event: Module.RandomizeEvent) -> None"
+    ],
+    "on_remove": [
+     "def on_remove(self, event: Module.RemoveEvent) -> None"
+    ],
+    "on_reset": [
+     "def on_reset(self, event: Module.ResetEvent) -> None"
+    ],
+    "on_save": [
+     "def on_save(self, event: Module.SaveEvent) -> None"
+    ],
+    "on_un_bypass": [
+     "def on_un_bypass(self, event: Module.UnBypassEvent) -> None"
+    ],
+    "to_json": [
+     "def to_json(self) -> object"
+    ]
+   }
+  },
+  "Plugin": {
+   "class": "class Plugin()",
+   "members": {
+    "add_model": [
+     "def add_model(self, slug: str, module: Callable[[Module], object] | type[ModuleClass], *, widget: Callable[[Module | None], ModuleWidget] | None=None, hp: int=4) -> Model"
+    ],
+    "raw": [
+     "@property def raw(self) -> _raw.Plugin"
+    ],
+    "set_settings_handlers": [
+     "def set_settings_handlers(self, *, to_json: Callable[[], object] | None=None, from_json: Callable[[JSON], object] | None=None) -> None"
+    ]
+   }
+  },
+  "on_destroy": "def on_destroy(callback: Callable[[], None]) -> Callable[[], None]",
+  "plugin": "plugin"
+ },
+ "rackpy.runtime": {
+  "Diagnostic": {
+   "class": "class Diagnostic()",
+   "members": {
+    "code": [
+     "code: str"
+    ],
+    "message": [
+     "message: str"
+    ],
+    "sequence": [
+     "sequence: int"
+    ],
+    "thread": [
+     "thread: ThreadRole"
+    ],
+    "time": [
+     "time: float"
+    ]
+   }
+  },
+  "ThreadRole": "ThreadRole = Literal['main', 'rack', 'other']",
+  "diagnostics": "def diagnostics(after: int=0) -> list[Diagnostic]",
+  "is_main_thread": "def is_main_thread() -> bool",
+  "on_context_closing": "def on_context_closing(callback: Callable[[], None]) -> Callable[[], None]",
+  "thread_role": "def thread_role() -> ThreadRole"
+ },
+ "rackpy.services": {
+  "network": "re-export rackpy.services.network",
+  "system": "re-export rackpy.services.system"
+ },
+ "rackpy.services.network": {
+  "delete_json": "def delete_json(url: str, *, cookies: dict[str, str] | None=None) -> JSON",
+  "download": "def download(url: str, filename: str | os.PathLike[str], on_progress: Callable[[float], object] | None=None, *, interval: float=0.1, cookies: dict[str, str] | None=None) -> bool",
+  "encode_url": "encode_url = _network.encode_url",
+  "get_json": "def get_json(url: str, params: dict[str, str] | None=None, *, cookies: dict[str, str] | None=None) -> JSON",
+  "post_json": "def post_json(url: str, data: object=None, *, cookies: dict[str, str] | None=None) -> JSON",
+  "put_json": "def put_json(url: str, data: object=None, *, cookies: dict[str, str] | None=None) -> JSON",
+  "url_path": "url_path = _network.url_path"
+ },
+ "rackpy.services.system": {
+  "archive": "def archive(directory: str | os.PathLike[str], to: str | os.PathLike[str] | None=None, *, level: int=1) -> bytes | None",
+  "entries": "def entries(directory: str | os.PathLike[str], *, depth: int=0) -> list[Path]",
+  "open_url": "def open_url(url: str) -> None",
+  "read_bytes": "def read_bytes(path: str | os.PathLike[str]) -> bytes",
+  "temp_directory": "def temp_directory() -> Path",
+  "unarchive": "def unarchive(source: str | os.PathLike[str] | bytes, directory: str | os.PathLike[str], *, trust: bool=False) -> None",
+  "write_bytes": "def write_bytes(path: str | os.PathLike[str], data: bytes) -> None"
+ },
+ "rackpy.simd": {
+  "IMPLEMENTATION": "IMPLEMENTATION: str",
+  "Template": "re-export rackpy.raw.simd.Template",
+  "Vector": "re-export rackpy.raw.simd.Vector",
+  "abs": "re-export rackpy.raw.simd.abs",
+  "andnot": "re-export rackpy.raw.simd.andnot",
+  "arg": "re-export rackpy.raw.simd.arg",
+  "atan": "re-export rackpy.raw.simd.atan",
+  "atan2": "re-export rackpy.raw.simd.atan2",
+  "ceil": "re-export rackpy.raw.simd.ceil",
+  "clamp": "re-export rackpy.raw.simd.clamp",
+  "cos": "re-export rackpy.raw.simd.cos",
+  "crossfade": "re-export rackpy.raw.simd.crossfade",
+  "exp": "re-export rackpy.raw.simd.exp",
+  "fabs": "re-export rackpy.raw.simd.fabs",
+  "float_4": "re-export rackpy.raw.simd.float_4",
+  "floor": "re-export rackpy.raw.simd.floor",
+  "fmax": "re-export rackpy.raw.simd.fmax",
+  "fmin": "re-export rackpy.raw.simd.fmin",
+  "fmod": "re-export rackpy.raw.simd.fmod",
+  "hypot": "re-export rackpy.raw.simd.hypot",
+  "ifelse": "re-export rackpy.raw.simd.ifelse",
+  "int32_4": "re-export rackpy.raw.simd.int32_4",
+  "log": "re-export rackpy.raw.simd.log",
+  "log10": "re-export rackpy.raw.simd.log10",
+  "log2": "re-export rackpy.raw.simd.log2",
+  "movemask": "re-export rackpy.raw.simd.movemask",
+  "movemask_inverse": "re-export rackpy.raw.simd.movemask_inverse",
+  "pow": "re-export rackpy.raw.simd.pow",
+  "rcp": "re-export rackpy.raw.simd.rcp",
+  "rescale": "re-export rackpy.raw.simd.rescale",
+  "round": "re-export rackpy.raw.simd.round",
+  "rsqrt": "re-export rackpy.raw.simd.rsqrt",
+  "sgn": "re-export rackpy.raw.simd.sgn",
+  "sin": "re-export rackpy.raw.simd.sin",
+  "sqrt": "re-export rackpy.raw.simd.sqrt",
+  "tan": "re-export rackpy.raw.simd.tan",
+  "trunc": "re-export rackpy.raw.simd.trunc"
+ },
+ "rackpy.types": {
+  "Color": "re-export rackpy.raw.nanovg.NVGcolor",
+  "JSON": "type JSON = bool | int | float | str | list[JSON] | tuple[JSON, ...] | dict[str, JSON] | None",
+  "ValueQuantity": "re-export rackpy.raw._types.ValueQuantity"
+ },
+ "rackpy.widget": {
+  "WidgetNode": "re-export rackpy.raw.widget.WidgetNode"
+ }
+}

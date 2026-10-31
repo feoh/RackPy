@@ -74,6 +74,45 @@ facade operations. The production binary and source revision are identified in
 the artifact; no native changes were part of this checkpoint. A subsequent
 `uv run pytest -q -m unit` on the RP-32 tree passed 118 tests (215 deselected).
 
+## Walkthrough, keyword-only options and the facade snapshot
+
+A walkthrough of the four how-to guides and their 30 runnable snippets found
+that the guides taught `Any` for module state, settings, event and drawing
+handlers, although typed equivalents exist. The snippets now use
+`rackpy.types.JSON`, `Module.ResetEvent`, `w.DrawArgs` and `w.ButtonEvent`.
+Adding `docs/snippets` to strict mypy exposed one real gap in a snippet
+(`ParamQuantity.get_param()` may return `None`) and one unsafe teaching
+pattern: narrowing `data.get("text")` does not narrow a separate
+`data["text"]` lookup, so `register_models.py` now validates the value it
+assigns. Two other reports were mypy narrowing artifacts across
+`remove_child()`/`close()`; only `warn_unreachable` is disabled for
+`docs.snippets.*`, with the reason in `pyproject.toml`. Strict pyright also
+passes on the snippets and they are in its gated scope.
+
+A scan of every public facade signature found options accepted positionally.
+`channel`/`frame` (MIDI message helpers), `inputs`/`outputs`/`devices`
+(`virtual_driver`), `cookies` (network helpers), `depth` (`entries`) and
+`level` (`archive`) are now keyword-only; operands stay positional. One test
+call, `control_change(7, 127, 15)`, relied on a positional channel and was
+updated. `audio.Stream` gained a repr that cannot raise on a deleted device.
+Real-host tests check the parameter kinds with `inspect.signature`, a
+positional channel's `TypeError` and the repr.
+
+`bin/facade-surface` (cyclopts, `ast` only) records the names, signatures,
+class bases and re-export origins of all 272 names in 33 public facade
+modules in `tests/facade/surface.json`; `check` runs as a prek hook and a unit
+test, and a second test proves that changed, added and removed entries are
+reported. `docs/reference/api-stability.md` defines the public facade, the
+reviewed conventions and the typing scope. Its release compatibility policy is
+explicitly labelled as a proposal needing owner approval (RP-44); nothing is
+released or promised.
+
+Validation: prek (all hooks, including mypy over 320 files and both new
+hooks), Sphinx `-W -n`, and in actual Linux Rack with current RP-32 Python
+overlaid on the identified RP-31 integration binaries: `tests/docs/test_snippets.py`
+(every snippet, in Rack and in Python), `tests/io/test_virtual.py` and
+`tests/services/test_system.py`, 7 outer tests passed.
+
 ## Duplicate driver and device names
 
 Audio and MIDI name-based driver and device lookups now raise `LookupError`

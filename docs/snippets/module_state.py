@@ -1,8 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # rackpy-example: runs-in=rack
-from typing import Any
-
 from rackpy.engine import Module
+from rackpy.types import JSON
 
 SCHEMA = 2  # version 1 saved "mode" only; version 2 added "history"
 
@@ -10,12 +9,12 @@ SCHEMA = 2  # version 1 saved "mode" only; version 2 added "history"
 def build(module: Module) -> None:
     module.config(num_params=1, num_inputs=0, num_outputs=0)
     module.config_param(0, 0, 10, 5, "Level")
-    state: dict[str, Any] = {"mode": "warm", "history": [1, 2, 3]}
+    state: dict[str, JSON] = {"mode": "warm", "history": [1, 2, 3]}
 
-    def save() -> dict[str, Any]:
+    def save() -> JSON:
         return {"schema": SCHEMA, "mode": state["mode"], "history": state["history"]}
 
-    def load(data: Any) -> None:
+    def load(data: JSON) -> None:
         if not isinstance(data, dict):
             return  # malformed: keep the defaults
         schema = data.get("schema", 1)  # version 1 patches have no "schema"

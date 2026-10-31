@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # rackpy-example: runs-in=rack
-from typing import Any
-
 from rackpy import raw
 from rackpy.raw import asset
 from rackpy.raw import nanovg as nvg
@@ -16,8 +14,9 @@ class Meter(w.Widget):
         super().__init__()
         self.level = level
 
-    def draw(self, args: Any) -> None:
+    def draw(self, args: w.DrawArgs) -> None:
         vg = args.vg  # valid only in this call
+        assert vg is not None  # Rack always passes a context to draw()
         width, height = self.box.size.x, self.box.size.y
         nvg.begin_path(vg)
         nvg.rounded_rect(vg, 0, 0, width, height, 3)

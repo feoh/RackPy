@@ -1,13 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # rackpy-example: runs-in=rack
-from typing import Any
-
 from rackpy.plugin import plugin
+from rackpy.types import JSON
 
-prefs: dict[str, Any] = {"schema": 1, "theme": "dark"}
+prefs: dict[str, JSON] = {"schema": 1, "theme": "dark"}
 
 
-def load(data: Any) -> None:
+def load(data: JSON) -> None:
     if isinstance(data, dict) and data.get("theme") in {"dark", "light"}:
         prefs["theme"] = data["theme"]  # ignore anything else: users can edit settings.json
 
