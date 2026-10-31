@@ -1,0 +1,69 @@
+{
+  "RackPyConfiguration-2.0.0-lin-x64.vcvplugin": {
+    "differing_members": [
+      "RackPyConfiguration/licenses/FILES.json",
+      "RackPyConfiguration/licenses/THIRD-PARTY-NOTICES.md"
+    ]
+  },
+  "RackPyDarkPanels-2.0.0-lin-x64.vcvplugin": {
+    "differing_members": [
+      "RackPyDarkPanels/licenses/FILES.json",
+      "RackPyDarkPanels/licenses/THIRD-PARTY-NOTICES.md"
+    ]
+  },
+  "RackPyDrawing-2.0.0-lin-x64.vcvplugin": {
+    "differing_members": [
+      "RackPyDrawing/licenses/FILES.json",
+      "RackPyDrawing/licenses/THIRD-PARTY-NOTICES.md"
+    ]
+  },
+  "RackPyDsp-2.0.0-lin-x64.vcvplugin": {
+    "differing_members": [
+      "RackPyDsp/licenses/FILES.json",
+      "RackPyDsp/licenses/THIRD-PARTY-NOTICES.md"
+    ]
+  },
+  "RackPyExpanders-2.0.0-lin-x64.vcvplugin": {
+    "differing_members": [
+      "RackPyExpanders/licenses/FILES.json",
+      "RackPyExpanders/licenses/THIRD-PARTY-NOTICES.md"
+    ]
+  },
+  "RackPyMenus-2.0.0-lin-x64.vcvplugin": {
+    "differing_members": [
+      "RackPyMenus/licenses/FILES.json",
+      "RackPyMenus/licenses/THIRD-PARTY-NOTICES.md"
+    ]
+  },
+  "RackPyOscillator-2.0.0-lin-x64.vcvplugin": {
+    "differing_members": [
+      "RackPyOscillator/licenses/FILES.json",
+      "RackPyOscillator/licenses/THIRD-PARTY-NOTICES.md"
+    ]
+  },
+  "RackPyPolyphony-2.0.0-lin-x64.vcvplugin": {
+    "differing_members": [
+      "RackPyPolyphony/licenses/FILES.json",
+      "RackPyPolyphony/licenses/THIRD-PARTY-NOTICES.md"
+    ]
+  },
+  "RackPyStateEvents-2.0.0-lin-x64.vcvplugin": {
+    "differing_members": [
+      "RackPyStateEvents/licenses/FILES.json",
+      "RackPyStateEvents/licenses/THIRD-PARTY-NOTICES.md"
+    ]
+  },
+  "RackPyTemplate-2.0.0-lin-x64.vcvplugin": {
+    "differing_members": [
+      "RackPyTemplate/licenses/FILES.json",
+      "RackPyTemplate/licenses/THIRD-PARTY-NOTICES.md"
+    ]
+  },
+  "SHA256SUMS": "differs (it records the others' hashes)",
+  "manifest.json": "differs (it records the others' hashes)",
+  "rackpy-0.0.0.dev0+g1ead7b4ae-source.tar.gz": "only in 1ead7b4",
+  "rackpy-0.0.0.dev0+gadc824591-source.tar.gz": "only in adc8245",
+  "rackpy-0.0.0.dev0-py3-none-any.whl": "identical",
+  "rackpy-runtime-0.0.0.dev0+g1ead7b4ae-lin-x64.tar.zst": "only in 1ead7b4",
+  "rackpy-runtime-0.0.0.dev0+gadc824591-lin-x64.tar.zst": "only in adc8245"
+}

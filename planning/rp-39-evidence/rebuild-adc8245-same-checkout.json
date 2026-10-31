@@ -1,0 +1,17 @@
+{
+  "RackPyConfiguration-2.0.0-lin-x64.vcvplugin": "identical",
+  "RackPyDarkPanels-2.0.0-lin-x64.vcvplugin": "identical",
+  "RackPyDrawing-2.0.0-lin-x64.vcvplugin": "identical",
+  "RackPyDsp-2.0.0-lin-x64.vcvplugin": "identical",
+  "RackPyExpanders-2.0.0-lin-x64.vcvplugin": "identical",
+  "RackPyMenus-2.0.0-lin-x64.vcvplugin": "identical",
+  "RackPyOscillator-2.0.0-lin-x64.vcvplugin": "identical",
+  "RackPyPolyphony-2.0.0-lin-x64.vcvplugin": "identical",
+  "RackPyStateEvents-2.0.0-lin-x64.vcvplugin": "identical",
+  "RackPyTemplate-2.0.0-lin-x64.vcvplugin": "identical",
+  "SHA256SUMS": "identical",
+  "manifest.json": "identical",
+  "rackpy-0.0.0.dev0+gadc824591-source.tar.gz": "identical",
+  "rackpy-0.0.0.dev0-py3-none-any.whl": "identical",
+  "rackpy-runtime-0.0.0.dev0+gadc824591-lin-x64.tar.zst": "identical"
+}

@@ -1,0 +1,215 @@
+machine: Ubuntu 20.04.6 LTS, glibc 2.31
+python on the system: none
+network:       1 unknown
+ok    every artifact matches SHA256SUMS
+ok    no artifact fails SHA256SUMS
+example plugins: 10
+ok    RackPyConfiguration-1: Rack exited cleanly
+ok    RackPyConfiguration-1: RackPy started
+ok    RackPyConfiguration-1: loaded RackPyConfiguration
+ok    RackPyConfiguration-1: no module failed
+ok    RackPyConfiguration-1: no Python error
+ok    RackPyConfiguration-1: Python finalized
+ok    RackPyConfiguration-1: Rack extracted the package
+ok    RackPyConfiguration-1: the autosave keeps all 2 modules
+ok    RackPyConfiguration-2: Rack exited cleanly
+ok    RackPyConfiguration-2: RackPy started
+ok    RackPyConfiguration-2: loaded RackPyConfiguration
+ok    RackPyConfiguration-2: no module failed
+ok    RackPyConfiguration-2: no Python error
+ok    RackPyConfiguration-2: Python finalized
+ok    RackPyConfiguration-2: reopened, all 2 modules still there
+ok    RackPyConfiguration-window: Rack drew its window and quit cleanly
+ok    RackPyConfiguration-window: no module widget failed
+ok    RackPyConfiguration-window: no Python error
+ok    RackPyConfiguration-window: Python finalized
+ok    RackPyDarkPanels-1: Rack exited cleanly
+ok    RackPyDarkPanels-1: RackPy started
+ok    RackPyDarkPanels-1: loaded RackPyDarkPanels
+ok    RackPyDarkPanels-1: no module failed
+ok    RackPyDarkPanels-1: no Python error
+ok    RackPyDarkPanels-1: Python finalized
+ok    RackPyDarkPanels-1: Rack extracted the package
+ok    RackPyDarkPanels-1: the autosave keeps all 1 modules
+ok    RackPyDarkPanels-2: Rack exited cleanly
+ok    RackPyDarkPanels-2: RackPy started
+ok    RackPyDarkPanels-2: loaded RackPyDarkPanels
+ok    RackPyDarkPanels-2: no module failed
+ok    RackPyDarkPanels-2: no Python error
+ok    RackPyDarkPanels-2: Python finalized
+ok    RackPyDarkPanels-2: reopened, all 1 modules still there
+ok    RackPyDarkPanels-window: Rack drew its window and quit cleanly
+ok    RackPyDarkPanels-window: no module widget failed
+ok    RackPyDarkPanels-window: no Python error
+ok    RackPyDarkPanels-window: Python finalized
+ok    RackPyDrawing-1: Rack exited cleanly
+ok    RackPyDrawing-1: RackPy started
+ok    RackPyDrawing-1: loaded RackPyDrawing
+ok    RackPyDrawing-1: no module failed
+ok    RackPyDrawing-1: no Python error
+ok    RackPyDrawing-1: Python finalized
+ok    RackPyDrawing-1: Rack extracted the package
+ok    RackPyDrawing-1: the autosave keeps all 1 modules
+ok    RackPyDrawing-2: Rack exited cleanly
+ok    RackPyDrawing-2: RackPy started
+ok    RackPyDrawing-2: loaded RackPyDrawing
+ok    RackPyDrawing-2: no module failed
+ok    RackPyDrawing-2: no Python error
+ok    RackPyDrawing-2: Python finalized
+ok    RackPyDrawing-2: reopened, all 1 modules still there
+ok    RackPyDrawing-window: Rack drew its window and quit cleanly
+ok    RackPyDrawing-window: no module widget failed
+ok    RackPyDrawing-window: no Python error
+ok    RackPyDrawing-window: Python finalized
+ok    RackPyDsp-1: Rack exited cleanly
+ok    RackPyDsp-1: RackPy started
+ok    RackPyDsp-1: loaded RackPyDsp
+ok    RackPyDsp-1: no module failed
+ok    RackPyDsp-1: no Python error
+ok    RackPyDsp-1: Python finalized
+ok    RackPyDsp-1: Rack extracted the package
+ok    RackPyDsp-1: the autosave keeps all 1 modules
+ok    RackPyDsp-2: Rack exited cleanly
+ok    RackPyDsp-2: RackPy started
+ok    RackPyDsp-2: loaded RackPyDsp
+ok    RackPyDsp-2: no module failed
+ok    RackPyDsp-2: no Python error
+ok    RackPyDsp-2: Python finalized
+ok    RackPyDsp-2: reopened, all 1 modules still there
+ok    RackPyDsp-window: Rack drew its window and quit cleanly
+ok    RackPyDsp-window: no module widget failed
+ok    RackPyDsp-window: no Python error
+ok    RackPyDsp-window: Python finalized
+ok    RackPyExpanders-1: Rack exited cleanly
+ok    RackPyExpanders-1: RackPy started
+ok    RackPyExpanders-1: loaded RackPyExpanders
+ok    RackPyExpanders-1: no module failed
+ok    RackPyExpanders-1: no Python error
+ok    RackPyExpanders-1: Python finalized
+ok    RackPyExpanders-1: Rack extracted the package
+ok    RackPyExpanders-1: the autosave keeps all 3 modules
+ok    RackPyExpanders-2: Rack exited cleanly
+ok    RackPyExpanders-2: RackPy started
+ok    RackPyExpanders-2: loaded RackPyExpanders
+ok    RackPyExpanders-2: no module failed
+ok    RackPyExpanders-2: no Python error
+ok    RackPyExpanders-2: Python finalized
+ok    RackPyExpanders-2: reopened, all 3 modules still there
+ok    RackPyExpanders-window: Rack drew its window and quit cleanly
+ok    RackPyExpanders-window: no module widget failed
+ok    RackPyExpanders-window: no Python error
+ok    RackPyExpanders-window: Python finalized
+ok    RackPyMenus-1: Rack exited cleanly
+ok    RackPyMenus-1: RackPy started
+ok    RackPyMenus-1: loaded RackPyMenus
+ok    RackPyMenus-1: no module failed
+ok    RackPyMenus-1: no Python error
+ok    RackPyMenus-1: Python finalized
+ok    RackPyMenus-1: Rack extracted the package
+ok    RackPyMenus-1: the autosave keeps all 1 modules
+ok    RackPyMenus-2: Rack exited cleanly
+ok    RackPyMenus-2: RackPy started
+ok    RackPyMenus-2: loaded RackPyMenus
+ok    RackPyMenus-2: no module failed
+ok    RackPyMenus-2: no Python error
+ok    RackPyMenus-2: Python finalized
+ok    RackPyMenus-2: reopened, all 1 modules still there
+ok    RackPyMenus-window: Rack drew its window and quit cleanly
+ok    RackPyMenus-window: no module widget failed
+ok    RackPyMenus-window: no Python error
+ok    RackPyMenus-window: Python finalized
+ok    RackPyOscillator-1: Rack exited cleanly
+ok    RackPyOscillator-1: RackPy started
+ok    RackPyOscillator-1: loaded RackPyOscillator
+ok    RackPyOscillator-1: no module failed
+ok    RackPyOscillator-1: no Python error
+ok    RackPyOscillator-1: Python finalized
+ok    RackPyOscillator-1: Rack extracted the package
+ok    RackPyOscillator-1: the autosave keeps all 1 modules
+ok    RackPyOscillator-2: Rack exited cleanly
+ok    RackPyOscillator-2: RackPy started
+ok    RackPyOscillator-2: loaded RackPyOscillator
+ok    RackPyOscillator-2: no module failed
+ok    RackPyOscillator-2: no Python error
+ok    RackPyOscillator-2: Python finalized
+ok    RackPyOscillator-2: reopened, all 1 modules still there
+ok    RackPyOscillator-window: Rack drew its window and quit cleanly
+ok    RackPyOscillator-window: no module widget failed
+ok    RackPyOscillator-window: no Python error
+ok    RackPyOscillator-window: Python finalized
+ok    RackPyPolyphony-1: Rack exited cleanly
+ok    RackPyPolyphony-1: RackPy started
+ok    RackPyPolyphony-1: loaded RackPyPolyphony
+ok    RackPyPolyphony-1: no module failed
+ok    RackPyPolyphony-1: no Python error
+ok    RackPyPolyphony-1: Python finalized
+ok    RackPyPolyphony-1: Rack extracted the package
+ok    RackPyPolyphony-1: the autosave keeps all 2 modules
+ok    RackPyPolyphony-2: Rack exited cleanly
+ok    RackPyPolyphony-2: RackPy started
+ok    RackPyPolyphony-2: loaded RackPyPolyphony
+ok    RackPyPolyphony-2: no module failed
+ok    RackPyPolyphony-2: no Python error
+ok    RackPyPolyphony-2: Python finalized
+ok    RackPyPolyphony-2: reopened, all 2 modules still there
+ok    RackPyPolyphony-window: Rack drew its window and quit cleanly
+ok    RackPyPolyphony-window: no module widget failed
+ok    RackPyPolyphony-window: no Python error
+ok    RackPyPolyphony-window: Python finalized
+ok    RackPyStateEvents-1: Rack exited cleanly
+ok    RackPyStateEvents-1: RackPy started
+ok    RackPyStateEvents-1: loaded RackPyStateEvents
+ok    RackPyStateEvents-1: no module failed
+ok    RackPyStateEvents-1: no Python error
+ok    RackPyStateEvents-1: Python finalized
+ok    RackPyStateEvents-1: Rack extracted the package
+ok    RackPyStateEvents-1: the autosave keeps all 1 modules
+ok    RackPyStateEvents-2: Rack exited cleanly
+ok    RackPyStateEvents-2: RackPy started
+ok    RackPyStateEvents-2: loaded RackPyStateEvents
+ok    RackPyStateEvents-2: no module failed
+ok    RackPyStateEvents-2: no Python error
+ok    RackPyStateEvents-2: Python finalized
+ok    RackPyStateEvents-2: reopened, all 1 modules still there
+ok    RackPyStateEvents-window: Rack drew its window and quit cleanly
+ok    RackPyStateEvents-window: no module widget failed
+ok    RackPyStateEvents-window: no Python error
+ok    RackPyStateEvents-window: Python finalized
+ok    RackPyTemplate-1: Rack exited cleanly
+ok    RackPyTemplate-1: RackPy started
+ok    RackPyTemplate-1: loaded RackPyTemplate
+ok    RackPyTemplate-1: no module failed
+ok    RackPyTemplate-1: no Python error
+ok    RackPyTemplate-1: Python finalized
+ok    RackPyTemplate-1: Rack extracted the package
+ok    RackPyTemplate-1: the autosave keeps all 1 modules
+ok    RackPyTemplate-2: Rack exited cleanly
+ok    RackPyTemplate-2: RackPy started
+ok    RackPyTemplate-2: loaded RackPyTemplate
+ok    RackPyTemplate-2: no module failed
+ok    RackPyTemplate-2: no Python error
+ok    RackPyTemplate-2: Python finalized
+ok    RackPyTemplate-2: reopened, all 1 modules still there
+ok    RackPyTemplate-window: Rack drew its window and quit cleanly
+ok    RackPyTemplate-window: no module widget failed
+ok    RackPyTemplate-window: no Python error
+ok    RackPyTemplate-window: Python finalized
+ok    two RackPy plugins: one is refused, by name
+ok    two RackPy plugins: Rack exits cleanly
+ok    a loader of another RackPy version: refused with the reason
+ok    a loader of another RackPy version: Rack exits cleanly
+ok    an incomplete Python runtime: refused with the reason
+ok    a failing entry package: its traceback is logged
+ok    a failing entry package: host initialization fails, named
+ok    a failing entry package: Rack exits cleanly
+ok    upgrade: Rack exited cleanly
+ok    upgrade: RackPy started
+ok    upgrade: loaded RackPyConfiguration
+ok    upgrade: no module failed
+ok    upgrade: no Python error
+ok    upgrade: Python finalized
+ok    upgrade: the patch still has its 2 modules
+ok    uninstall: Rack exits cleanly
+ok    uninstall: RackPy is gone
+
+RESULT: all checks passed

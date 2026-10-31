@@ -1,0 +1,439 @@
+{
+  "artifacts": [
+    {
+      "file": "rackpy-runtime-0.0.0.dev0+g1ead7b4ae-lin-x64.tar.zst",
+      "role": "runtime bundle: input to bin/rackpy-plugin build; not itself a plugin to install",
+      "sha256": "9fd19a5a2fb4d0c6dac46fa3a602970c6ac444c75ca8d5b95c356a3b5fdcc780",
+      "size": 48185591
+    },
+    {
+      "example": "configuration",
+      "file": "RackPyConfiguration-2.0.0-lin-x64.vcvplugin",
+      "models": [
+        "Shaper",
+        "Splitter"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "cd16efec96b8d0b21e31b8cf8a5c7115e6fad7d1f6c939a6314ea895b5d32c3e",
+      "size": 48193676,
+      "slug": "RackPyConfiguration"
+    },
+    {
+      "example": "dark-panels",
+      "file": "RackPyDarkPanels-2.0.0-lin-x64.vcvplugin",
+      "models": [
+        "Lantern"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "55b2d7cd63af3bf6b7a74c9f999c7e3c7e5cf4aef54151eb0461f529550e03ba",
+      "size": 48196170,
+      "slug": "RackPyDarkPanels"
+    },
+    {
+      "example": "drawing",
+      "file": "RackPyDrawing-2.0.0-lin-x64.vcvplugin",
+      "models": [
+        "Meter"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "5ea01a9d3d591b8aa123781ed375b87f5bf7ca5118b645f0c45f954bb602ba62",
+      "size": 48201296,
+      "slug": "RackPyDrawing"
+    },
+    {
+      "example": "dsp",
+      "file": "RackPyDsp-2.0.0-lin-x64.vcvplugin",
+      "models": [
+        "Filter"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "2bcb545c6e36780bedf7429e030dd48e845f0f74b73ea3e7943364ffa2028a6b",
+      "size": 48220291,
+      "slug": "RackPyDsp"
+    },
+    {
+      "example": "expanders",
+      "file": "RackPyExpanders-2.0.0-lin-x64.vcvplugin",
+      "models": [
+        "Source",
+        "Receiver",
+        "Peeker"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "f38b4a9d7eb4f6dab8dd2fab69adabf8c398370004492dc1f1d442b044b2c580",
+      "size": 48215915,
+      "slug": "RackPyExpanders"
+    },
+    {
+      "example": "menus",
+      "file": "RackPyMenus-2.0.0-lin-x64.vcvplugin",
+      "models": [
+        "Switchboard"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "f0b39781cc57028fb07900e318175bad8fb619341a7b1efd58b415537de0c52d",
+      "size": 48197490,
+      "slug": "RackPyMenus"
+    },
+    {
+      "example": "oscillator",
+      "file": "RackPyOscillator-2.0.0-lin-x64.vcvplugin",
+      "models": [
+        "Oscillator"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "49ec4acb3a3c0dde2f6973ee43808e8f70d302ba748ba63d792e690a1a7e1d26",
+      "size": 48201305,
+      "slug": "RackPyOscillator"
+    },
+    {
+      "example": "polyphony",
+      "file": "RackPyPolyphony-2.0.0-lin-x64.vcvplugin",
+      "models": [
+        "PolySine",
+        "PolySineScalar"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "8c431f8db787dae8c9c4604adb26a82d395a17f004675668f925d789ca711846",
+      "size": 48209405,
+      "slug": "RackPyPolyphony"
+    },
+    {
+      "example": "state-and-events",
+      "file": "RackPyStateEvents-2.0.0-lin-x64.vcvplugin",
+      "models": [
+        "Sequencer"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "5793ee2ac5248507ec98669a7aabf7975c9ae8b805493be11361241242723ea2",
+      "size": 48197562,
+      "slug": "RackPyStateEvents"
+    },
+    {
+      "example": "template",
+      "file": "RackPyTemplate-2.0.0-lin-x64.vcvplugin",
+      "models": [
+        "Starter"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "453932b9de66e1446d48251f2467521ce6e3be8b49926bbc9ddfe08432bf6f68",
+      "size": 48199388,
+      "slug": "RackPyTemplate"
+    },
+    {
+      "file": "rackpy-0.0.0.dev0-py3-none-any.whl",
+      "role": "developer package: pip/uv-installable rackpy for editors, type checkers and offline graph tests; runs nothing in Rack",
+      "sha256": "7955987672e1ac1d1eadafa6c99987a40b88ec03acdbf99f78a56f40ee42d5c9",
+      "size": 145530
+    },
+    {
+      "file": "rackpy-0.0.0.dev0+g1ead7b4ae-source.tar.gz",
+      "role": "corresponding source (GPL-3.0-or-later)",
+      "sha256": "de325b8ccc29128bca515ca1c500218f34a2455c229c4f003abe1b33d457f0f0",
+      "size": 2174554
+    }
+  ],
+  "commit": "1ead7b4ae59f919f0788610301fc2e2c53dc775c",
+  "dirty": false,
+  "elf": {
+    "RackPy/plugin.so": {
+      "max_glibc": "2.14",
+      "needed": [
+        "libRack.so",
+        "libm.so.6",
+        "libc.so.6"
+      ],
+      "runpath": [
+        "/tmp/Rack2"
+      ]
+    },
+    "RackPy/python/bin/python3.14": {
+      "max_glibc": "2.17",
+      "needed": [
+        "libpthread.so.0",
+        "libdl.so.2",
+        "libutil.so.1",
+        "libm.so.6",
+        "librt.so.1",
+        "libc.so.6"
+      ],
+      "runpath": [
+        "$ORIGIN/../lib"
+      ]
+    },
+    "RackPy/python/lib/libpython3.14.so.1.0": {
+      "max_glibc": "2.17",
+      "needed": [
+        "libm.so.6",
+        "libpthread.so.0",
+        "librt.so.1",
+        "libdl.so.2",
+        "libutil.so.1",
+        "libc.so.6",
+        "ld-linux-x86-64.so.2"
+      ],
+      "runpath": []
+    },
+    "RackPy/python/lib/libpython3.so": {
+      "max_glibc": "2.2.5",
+      "needed": [
+        "$ORIGIN/../lib/libpython3.14.so.1.0",
+        "libpthread.so.0",
+        "libc.so.6"
+      ],
+      "runpath": []
+    },
+    "RackPy/rackpy_host.so": {
+      "max_glibc": "2.14",
+      "needed": [
+        "libRack.so",
+        "libpython3.14.so.1.0",
+        "libm.so.6",
+        "libc.so.6",
+        "ld-linux-x86-64.so.2"
+      ],
+      "runpath": [
+        "/tmp/Rack2:$ORIGIN/python/lib"
+      ]
+    },
+    "plugins/RackPyDsp/kernels/dsp.so": {
+      "max_glibc": "2.14",
+      "needed": [
+        "libRack.so",
+        "libm.so.6",
+        "libc.so.6"
+      ],
+      "runpath": [
+        "/tmp/Rack2"
+      ]
+    },
+    "plugins/RackPyExpanders/kernels/expanders.so": {
+      "max_glibc": "2.14",
+      "needed": [
+        "libRack.so",
+        "libm.so.6",
+        "libc.so.6"
+      ],
+      "runpath": [
+        "/tmp/Rack2"
+      ]
+    },
+    "plugins/RackPyPolyphony/kernels/polyphony.so": {
+      "max_glibc": "2.14",
+      "needed": [
+        "libRack.so",
+        "libm.so.6",
+        "libc.so.6"
+      ],
+      "runpath": [
+        "/tmp/Rack2"
+      ]
+    }
+  },
+  "excluded_from_runtime": {
+    "bin/idle3": "starts IDLE",
+    "bin/idle3.14": "starts IDLE",
+    "bin/pip": "starts pip",
+    "bin/pip3": "starts pip",
+    "bin/pip3.14": "starts pip",
+    "lib/itcl4.3.8": "Tcl's library, needed only by _tkinter",
+    "lib/libtcl9.0.so": "Tcl, needed only by _tkinter",
+    "lib/libtcl9tk9.0.so": "Tk, needed only by _tkinter",
+    "lib/python3.14/ensurepip": "bundles a pip wheel",
+    "lib/python3.14/idlelib": "IDLE, a Tk application",
+    "lib/python3.14/lib-dynload/_dbm.cpython-314-x86_64-linux-gnu.so": "Berkeley DB: the Sleepycat license adds its own source obligations, and Rack plugins have no use for it",
+    "lib/python3.14/lib-dynload/_tkinter.cpython-314-x86_64-linux-gnu.so": "Tk's GUI event loop cannot run in Rack",
+    "lib/python3.14/site-packages/pip": "pip cannot install into a running Rack; it vendors other libraries",
+    "lib/python3.14/site-packages/pip-26.2.2.dist-info": "pip's metadata",
+    "lib/python3.14/tkinter": "imports _tkinter",
+    "lib/python3.14/turtle.py": "imports tkinter",
+    "lib/python3.14/turtledemo": "Tk demonstrations",
+    "lib/tcl9": "Tcl's library, needed only by _tkinter",
+    "lib/tcl9.0": "Tcl's library, needed only by _tkinter",
+    "lib/thread3.0.6": "Tcl's thread extension, needed only by _tkinter",
+    "lib/tk9.0": "Tk's library, needed only by _tkinter"
+  },
+  "glibc_floor": "2.23",
+  "inputs": {
+    "commit": "1ead7b4ae59f919f0788610301fc2e2c53dc775c",
+    "dirty": false,
+    "glibc_floor": "2.23",
+    "python_runtime": {
+      "file": "cpython-3.14.9+20261021-x86_64-unknown-linux-gnu-install_only.tar.gz",
+      "flavor": "install_only",
+      "platform": "x86_64-unknown-linux-gnu",
+      "release": "20261021",
+      "root": "python",
+      "sha256": "dfa4c5a40c47f338f41658017be550c72247c391e6bfb1fa4da03ebc8451abdf",
+      "source": "https://github.com/astral-sh/python-build-standalone",
+      "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-unknown-linux-gnu-install_only.tar.gz",
+      "version": "3.14.9"
+    },
+    "rack": {
+      "commit": "061ccf63c1758599396ac1bb10d47345d9d34076",
+      "version": "2.6.6"
+    },
+    "rack_sdk": {
+      "platform": "lin-x64",
+      "root": "Rack-SDK",
+      "sha256": "420da2452def7b195f98e3a0650c35f1e0f058a98a71840b4347d3d203618532",
+      "size": 9325383,
+      "url": "https://vcvrack.com/downloads/Rack-SDK-2.6.6-lin-x64.zip"
+    },
+    "rackpy_version": "0.0.0.dev0+g1ead7b4ae",
+    "toolchain": {
+      "build": "4fd131870162",
+      "recipe_sha256": "ff003cd7c7c44b15704f2702931c4ae1daa2ce2661eeecdc956953c3f1eafa0a",
+      "target": "x86_64-ubuntu16.04-linux-gnu"
+    },
+    "uv_lock_sha256": "4c51b879f283f10e68732e9cbe0dd1fc8f88ae056db724dacb9122c691d05403"
+  },
+  "note": "RackPy release candidate. Not published: nothing here may be distributed without owner approval.",
+  "platform": "lin-x64",
+  "rackpy_version": "0.0.0.dev0+g1ead7b4ae",
+  "restricted_sources_excluded": [
+    "docs/_static/examples"
+  ],
+  "schema_version": 1,
+  "source_date_epoch": 1793437977,
+  "third_party": [
+    {
+      "component": "CPython 3.14.9",
+      "licenses": [
+        "Python-2.0",
+        "CNRI-Python"
+      ],
+      "text": "licenses/python/LICENSE.cpython.txt",
+      "used_by": "the interpreter"
+    },
+    {
+      "component": "libraries of the _bz2 module (bz2)",
+      "licenses": [
+        "bzip2-1.0.6"
+      ],
+      "text": "licenses/python/LICENSE.bzip2.txt",
+      "used_by": "_bz2"
+    },
+    {
+      "component": "libraries of the _ctypes module (ffi)",
+      "licenses": [
+        "MIT"
+      ],
+      "text": "licenses/python/LICENSE.libffi.txt",
+      "used_by": "_ctypes"
+    },
+    {
+      "component": "libraries of the _curses module (ncursesw)",
+      "licenses": [
+        "X11"
+      ],
+      "text": "licenses/python/LICENSE.ncurses.txt",
+      "used_by": "_curses"
+    },
+    {
+      "component": "libraries of the _curses_panel module (ncursesw, panelw)",
+      "licenses": [
+        "X11"
+      ],
+      "text": "licenses/python/LICENSE.ncurses.txt",
+      "used_by": "_curses_panel"
+    },
+    {
+      "component": "libraries of the _decimal module (mpdec)",
+      "licenses": [
+        "BSD-2-Clause"
+      ],
+      "text": "licenses/python/LICENSE.mpdecimal.txt",
+      "used_by": "_decimal"
+    },
+    {
+      "component": "libraries of the _hashlib module (crypto)",
+      "licenses": [
+        "Apache-2.0"
+      ],
+      "text": "licenses/python/LICENSE.openssl-3.txt",
+      "used_by": "_hashlib"
+    },
+    {
+      "component": "libraries of the _lzma module (lzma)",
+      "licenses": [
+        "0BSD"
+      ],
+      "text": "licenses/python/LICENSE.liblzma.txt",
+      "used_by": "_lzma"
+    },
+    {
+      "component": "libraries of the _sqlite3 module",
+      "licenses": [
+        "public domain"
+      ],
+      "text": "",
+      "used_by": "_sqlite3"
+    },
+    {
+      "component": "libraries of the _ssl module (crypto, ssl)",
+      "licenses": [
+        "Apache-2.0"
+      ],
+      "text": "licenses/python/LICENSE.openssl-3.txt",
+      "used_by": "_ssl"
+    },
+    {
+      "component": "libraries of the _uuid module (uuid)",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "text": "licenses/python/LICENSE.libuuid.txt",
+      "used_by": "_uuid"
+    },
+    {
+      "component": "libraries of the _zstd module (zstd)",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "text": "licenses/python/LICENSE.zstd.txt",
+      "used_by": "_zstd"
+    },
+    {
+      "component": "libraries of the binascii module (z)",
+      "licenses": [
+        "Zlib"
+      ],
+      "text": "licenses/python/LICENSE.zlib-ng.txt, licenses/python/LICENSE.zlib.txt",
+      "used_by": "binascii"
+    },
+    {
+      "component": "libraries of the pyexpat module (expat)",
+      "licenses": [
+        "MIT"
+      ],
+      "text": "licenses/python/LICENSE.expat.txt",
+      "used_by": "pyexpat"
+    },
+    {
+      "component": "libraries of the readline module (edit, ncursesw)",
+      "licenses": [
+        "BSD-3-Clause",
+        "X11"
+      ],
+      "text": "licenses/python/LICENSE.libedit.txt, licenses/python/LICENSE.ncurses.txt",
+      "used_by": "readline"
+    },
+    {
+      "component": "libraries of the zlib module (z)",
+      "licenses": [
+        "Zlib"
+      ],
+      "text": "licenses/python/LICENSE.zlib-ng.txt, licenses/python/LICENSE.zlib.txt",
+      "used_by": "zlib"
+    },
+    {
+      "component": "pybind11 3.1.0",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "text": "licenses/pybind11-LICENSE",
+      "used_by": "compiled into rackpy_host.so"
+    }
+  ]
+}
