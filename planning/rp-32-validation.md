@@ -113,6 +113,24 @@ overlaid on the identified RP-31 integration binaries: `tests/docs/test_snippets
 (every snippet, in Rack and in Python), `tests/io/test_virtual.py` and
 `tests/services/test_system.py`, 7 outer tests passed.
 
+## Two-way C++ -> raw -> facade discoverability
+
+`bindings/generated/mapping.json` records, per Rack declaration, its raw name
+and its facade name. Comparing it with the facade snapshot found every one of
+its 328 facade names resolving to a public facade name, but two facade
+re-exports whose mapping entries recorded no facade: `rackpy.midi.Message`
+(`record:` and constructor entries for `rack::midi::Message`) and
+`rackpy.simd.Vector` (`opaque_record:rack::simd::Vector<type, value>`). The
+manifest now records them; regenerating changed only the mapping and the
+input hash comment in the generated registry. Four re-exported raw names are
+not Rack declarations and are allowlisted with reasons: `Template` and
+`WidgetNode` (RackPy adapters), `ValueQuantity` (RackPy's own quantity) and
+`NVGcolor` (NanoVG's struct). `tests/facade/test_discoverability.py` checks
+both directions, fails on a stale allowlist entry, and proves with mutated
+data that a missing or wrong facade link is reported. Coverage status counts
+are unchanged (`check_coverage.py`: implemented 3098, excluded_internal 111,
+absent 15).
+
 ## Strict pyright over every public facade module
 
 `graph_reference.py` and `graph_codegen.py` were the last public facade
