@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+#include "rackpy/rtti.hpp"
 #include "model.hpp"
 
 #include <algorithm>
@@ -95,7 +96,7 @@ rack::engine::Module* Model::createModule() {
 
 rack::app::ModuleWidget* Model::createModuleWidget(rack::engine::Module* m) {
 	// A placeholder module (its Python factory failed) gets the plain panel below.
-	if (widgetFactory && !dynamic_cast<PlaceholderModule*>(m)) {
+	if (widgetFactory && !::rackpy::rttiCast<PlaceholderModule*>(m)) {
 		if (auto* mw = widgetFactory->create(*this, m))
 			return mw;
 		WARN("RackPy: model %s could not create its module widget; using a plain panel", slug.c_str());
@@ -108,7 +109,7 @@ rack::app::ModuleWidget* Model::createModuleWidget(rack::engine::Module* m) {
 	mw->box.size = rack::math::Vec(rack::RACK_GRID_WIDTH * hp, rack::RACK_GRID_HEIGHT);
 	auto* panel = new BlankPanel;
 	panel->box.size = mw->box.size;
-	panel->failed = dynamic_cast<PlaceholderModule*>(m) != nullptr;
+	panel->failed = ::rackpy::rttiCast<PlaceholderModule*>(m) != nullptr;
 	mw->addChild(panel);
 	auto* label = new rack::ui::Label;
 	label->box.pos = rack::math::Vec(0.f, 12.f);

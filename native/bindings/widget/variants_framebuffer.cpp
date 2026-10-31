@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+#include "rackpy/rtti.hpp"
 #include "variants.hpp"
 #include "../../widget/geometry.hpp"
 #include <pybind11/stl.h>
@@ -35,7 +36,7 @@ void bindFramebufferVariants(py::module_ mod) {
 			native<F>(self);
 			widget::GeometryOwner owner(std::function<W&()>([s]() -> W& { return checked(s); }));
 			return widget::VecView{owner, false, [s]() -> rack::math::Vec& {
-				auto* f = dynamic_cast<F*>(&checked(s));
+				auto* f = ::rackpy::rttiCast<F*>(&checked(s));
 				if (!f) throw runtime::StaleHandle("FramebufferWidget native base has been destroyed");
 				return f->viewportMargin;
 			}};
@@ -51,7 +52,7 @@ void bindFramebufferVariants(py::module_ mod) {
 			auto scope = std::make_shared<Scope>();
 			scope->context = s->token->context;
 			scope->validate = [s, ptr, generation] {
-				auto* f = dynamic_cast<F*>(&checked(s));
+				auto* f = ::rackpy::rttiCast<F*>(&checked(s));
 				if (!f || s->graphicsGeneration != generation || f->getFramebuffer() != ptr)
 					throw runtime::StaleHandle("framebuffer was rendered, replaced, deleted or its window context changed");
 			};

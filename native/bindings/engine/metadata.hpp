@@ -3,6 +3,7 @@
 // links (RP-14B2b2), and objects a module slot owns after a class factory
 // transferred them (RP-14B2b5).
 #pragma once
+#include "rackpy/rtti.hpp"
 #include <pybind11/pybind11.h>
 #include <pybind11/trampoline_self_life_support.h>
 
@@ -200,7 +201,7 @@ std::unique_ptr<Base> disownForSlot(py::object instance, Alias& alias, const std
 /** Every Python-visible PortInfo/LightInfo is the alias (py::init_alias). */
 template <typename Info>
 InfoTrampoline<Info>& infoAlias(Info& info) {
-	return dynamic_cast<InfoTrampoline<Info>&>(info);
+	return ::rackpy::rttiCast<InfoTrampoline<Info>&>(info);
 }
 
 /** The existing Python object of a transferred slot, or null for native metadata. Needs the GIL. */

@@ -8,6 +8,7 @@
 // pimpl), so those four views are final (RP-28F): their virtuals map to calls
 // on Rack's own instances.
 // Calls that take Rack's engine lock release the GIL (ADR 003, decision 2).
+#include "rackpy/rtti.hpp"
 #include <rack.hpp>
 
 #include <pybind11/stl.h>
@@ -72,7 +73,7 @@ py::list views(const std::vector<T*>& items) {
 
 template <class T>
 T* as(py::handle value, const char* what) {
-	auto* w = dynamic_cast<T*>(argument(value));
+	auto* w = ::rackpy::rttiCast<T*>(argument(value));
 	if (!w)
 		throw py::type_error(std::string("expected ") + what);
 	return w;
@@ -136,7 +137,7 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 				hostAs<app::Scene>(h).mousePos = v;
 			}, "Rack's deprecated raw field (Rack sets it as the mouse moves); use get_mouse_pos().")
 		.def("get_mouse_pos", [](const HostScene& h) { return hostAs<app::Scene>(h).getMousePos(); });
-	registerHostView([](W* w) { return dynamic_cast<app::Scene*>(w) != nullptr; },
+	registerHostView([](W* w) { return ::rackpy::rttiCast<app::Scene*>(w) != nullptr; },
 		[](const ExternalWidget& e) { return py::cast(HostScene{e}); });
 
 	py::class_<HostRackScroll, ExternalWidget>(appModule, "HostRackScrollWidget", py::is_final(), "Rack's RackScrollWidget, a borrowed view.")
@@ -167,7 +168,7 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 				throw std::invalid_argument("the bound must be finite, with a positive size");
 			hostAs<app::RackScrollWidget>(h).zoomToBound(bound);
 		}, py::arg("bound"));
-	registerHostView([](W* w) { return dynamic_cast<app::RackScrollWidget*>(w) != nullptr; },
+	registerHostView([](W* w) { return ::rackpy::rttiCast<app::RackScrollWidget*>(w) != nullptr; },
 		[](const ExternalWidget& e) { return py::cast(HostRackScroll{e}); });
 
 	using RW = app::RackWidget;
@@ -444,7 +445,7 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 		}, py::arg("port"))
 		.def("add_cable", [](const HostRack& h, py::object cwObject) {
 			auto& rack = hostAs<RW>(h);
-			auto* cw = dynamic_cast<app::CableWidget*>(argument(cwObject));
+			auto* cw = ::rackpy::rttiCast<app::CableWidget*>(argument(cwObject));
 			if (!cw || !isPythonCableWidget(cw))
 				throw py::type_error("add_cable takes a rackpy.raw.app.CableWidget that Python made");
 			cwObject.attr("input_port");  // drops ports that died while it was detached
@@ -455,7 +456,7 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 		.def("remove_cable", [](const HostRack& h, py::object cwObject) {
 			checkMutation();
 			auto& rack = hostAs<RW>(h);
-			auto* cw = dynamic_cast<app::CableWidget*>(argument(cwObject));
+			auto* cw = ::rackpy::rttiCast<app::CableWidget*>(argument(cwObject));
 			if (!cw || !isPythonCableWidget(cw))
 				throw runtime::Ownership("Rack's own cable widgets leave the rack with Rack's actions (history CableRemove, "
 					"delete_top_cable_action, disconnect_action)");
@@ -487,7 +488,7 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 		.def("set_next_cable_color_id", [](const HostRack& h, int id) { hostAs<RW>(h).setNextCableColorId(id); }, py::arg("id"),
 			"Rack's: wraps around its cable colour list.")
 		.def("get_next_cable_color", [](const HostRack& h) { return hostAs<RW>(h).getNextCableColor(); });
-	registerHostView([](W* w) { return dynamic_cast<RW*>(w) != nullptr; }, [](const ExternalWidget& e) { return py::cast(HostRack{e}); });
+	registerHostView([](W* w) { return ::rackpy::rttiCast<RW*>(w) != nullptr; }, [](const ExternalWidget& e) { return py::cast(HostRack{e}); });
 
 	using CW = app::CableWidget;
 	py::class_<HostCable, ExternalWidget>(appModule, "HostCableWidget", "A cable widget Rack made, a borrowed view.")
@@ -520,12 +521,12 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 			auto root = json(data);
 			hostAs<CW>(h).fromJson(root.get());
 		}, py::arg("data"), "Rack's: the cable's colour from its JSON.");
-	registerHostView([](W* w) { return dynamic_cast<CW*>(w) != nullptr; }, [](const ExternalWidget& e) { return py::cast(HostCable{e}); });
+	registerHostView([](W* w) { return ::rackpy::rttiCast<CW*>(w) != nullptr; }, [](const ExternalWidget& e) { return py::cast(HostCable{e}); });
 
 	py::class_<HostPlug, ExternalWidget>(appModule, "HostPlugWidget", py::is_final(), "A cable end Rack made, a borrowed view.")
 		.def("get_cable", [](const HostPlug& h) { return wrapper(hostAs<app::PlugWidget>(h).getCable()); })
 		.def("get_type", [](const HostPlug& h) { return hostAs<app::PlugWidget>(h).getType(); });
-	registerHostView([](W* w) { return dynamic_cast<app::PlugWidget*>(w) != nullptr; },
+	registerHostView([](W* w) { return ::rackpy::rttiCast<app::PlugWidget*>(w) != nullptr; },
 		[](const ExternalWidget& e) { return py::cast(HostPlug{e}); });
 
 	// LED displays: subclassable widgets, as Rack's own module widgets use them.

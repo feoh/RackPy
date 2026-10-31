@@ -20,6 +20,7 @@
 // laboratory/midi.cpp) are Unlisted ones: Rack never lists them, so only
 // Python's ports reach them, and the ports' teardown here leaves them without
 // running Python.
+#include "rackpy/rtti.hpp"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -211,10 +212,10 @@ struct TrackedPort : Base, Tracked {
 		// Python overrides of a laboratory driver's subscribe may have left this port in a device it does not hold.
 		for (auto* device : unlistedDevices) {
 			if constexpr (isInput) {
-				if (auto* in = dynamic_cast<m::InputDevice*>(device))
+				if (auto* in = ::rackpy::rttiCast<m::InputDevice*>(device))
 					in->unsubscribe(this);
 			}
-			else if (auto* out = dynamic_cast<m::OutputDevice*>(device))
+			else if (auto* out = ::rackpy::rttiCast<m::OutputDevice*>(device))
 				out->unsubscribe(this);
 		}
 		this->driver = nullptr;
@@ -314,7 +315,7 @@ void deliverMessages() noexcept {
 	for (auto* p : all) {
 		if (std::find(ports.begin(), ports.end(), p) == ports.end())
 			continue;  // a callback deleted it
-		auto* input = dynamic_cast<PyInput*>(p);
+		auto* input = ::rackpy::rttiCast<PyInput*>(p);
 		if (!input || input->released)
 			continue;
 		std::vector<m::Message> due = input->queue.take();
@@ -345,7 +346,7 @@ void hookDelivery() {
 /** A Python port, checked: main thread, not released, made in the live context. */
 Tracked& tracked(m::Port& port) {
 	runtime::requireMainThread("using a MIDI port");
-	auto* t = dynamic_cast<Tracked*>(&port);
+	auto* t = ::rackpy::rttiCast<Tracked*>(&port);
 	if (!t)
 		throw runtime::Ownership("this MIDI port is not one Python made");
 	if (t->released)
@@ -428,14 +429,14 @@ struct MidiPortView {
 
 /** The Python object of a port Python made, or nothing. */
 py::object portObject(m::Port* port) {
-	if (!dynamic_cast<Tracked*>(port))
+	if (!::rackpy::rttiCast<Tracked*>(port))
 		return py::object();
 	// pybind11 finds the existing Python object through the bound type it was made as.
-	if (auto* queue = dynamic_cast<m::InputQueue*>(port))
+	if (auto* queue = ::rackpy::rttiCast<m::InputQueue*>(port))
 		return py::cast(queue, py::return_value_policy::reference);
-	if (auto* input = dynamic_cast<m::Input*>(port))
+	if (auto* input = ::rackpy::rttiCast<m::Input*>(port))
 		return py::cast(input, py::return_value_policy::reference);
-	return py::cast(dynamic_cast<m::Output*>(port), py::return_value_policy::reference);
+	return py::cast(::rackpy::rttiCast<m::Output*>(port), py::return_value_policy::reference);
 }
 
 /** A Python port to subscribe or unsubscribe (`what`): refused during a synchronous delivery. */
@@ -671,7 +672,7 @@ void attachMidiInput(module::Module& module, int index, py::handle value) {
 		module.detachMidiInput(index);
 		return;
 	}
-	auto* port = dynamic_cast<PyInputQueue*>(&pythonMidiPort(value));
+	auto* port = ::rackpy::rttiCast<PyInputQueue*>(&pythonMidiPort(value));
 	if (!port)
 		throw py::type_error("a module MIDI input must be a rackpy.raw.midi.InputQueue");
 	if (port->owner && (port->owner != &module || port->ownerIndex != index))
@@ -698,7 +699,7 @@ void attachMidiInput(module::Module& module, int index, py::handle value) {
 
 void connectOutputDevice(py::handle output, m::OutputDevice& device) {
 	refuseDuringMidiDelivery("connecting a MIDI output device");
-	auto* port = dynamic_cast<m::Output*>(&pythonMidiPort(output));
+	auto* port = ::rackpy::rttiCast<m::Output*>(&pythonMidiPort(output));
 	if (!port)
 		throw py::type_error("expected a rackpy.raw.midi.Output");
 	Tracked& t = tracked(*port);
@@ -716,7 +717,7 @@ namespace {
 void dropDevice(m::Port& port) noexcept {
 	port.device = nullptr;
 	port.deviceId = -1;
-	if (auto* input = dynamic_cast<m::Input*>(&port))
+	if (auto* input = ::rackpy::rttiCast<m::Input*>(&port))
 		input->inputDevice = nullptr;
 	else
 		static_cast<m::Output&>(port).outputDevice = nullptr;
@@ -780,7 +781,7 @@ void UnlistedMidiDriver::detach() noexcept {
 		if (port.driver != this)
 			continue;
 		// Rack's own unsubscribe: no Python while the driver goes.
-		if (auto* input = dynamic_cast<m::Input*>(&port)) {
+		if (auto* input = ::rackpy::rttiCast<m::Input*>(&port)) {
 			if (input->inputDevice)
 				input->inputDevice->unsubscribe(input);
 		}
@@ -815,7 +816,7 @@ bool midiDeliveryInProgress() {
 }
 
 bool livePythonMidiPort(const m::Port* port) {
-	auto* t = dynamic_cast<const Tracked*>(port);
+	auto* t = ::rackpy::rttiCast<const Tracked*>(port);
 	return t && !t->released && livePythonObject(static_cast<const void*>(port));
 }
 
@@ -846,7 +847,7 @@ py::list midiSubscribers(py::object owner, m::OutputDevice& device) {
 }
 
 void markLaboratoryInput(py::handle input) {
-	auto* port = py::isinstance<m::Input>(input) ? dynamic_cast<PyInput*>(&input.cast<m::Input&>()) : nullptr;
+	auto* port = py::isinstance<m::Input>(input) ? ::rackpy::rttiCast<PyInput*>(&input.cast<m::Input&>()) : nullptr;
 	if (!port)
 		throw py::type_error("only a rackpy.raw.midi.Input (not an InputQueue) can be a laboratory input");
 	tracked(*port);
@@ -854,7 +855,7 @@ void markLaboratoryInput(py::handle input) {
 }
 
 bool isLaboratoryInput(py::handle input) {
-	auto* port = py::isinstance<m::Input>(input) ? dynamic_cast<PyInput*>(&input.cast<m::Input&>()) : nullptr;
+	auto* port = py::isinstance<m::Input>(input) ? ::rackpy::rttiCast<PyInput*>(&input.cast<m::Input&>()) : nullptr;
 	return port && port->laboratory.load();
 }
 
@@ -863,8 +864,8 @@ Input/Output implementation. Native ports still dispatch through their vtable. *
 template<class Base, class Virtual>
 auto portImplementation(m::Port& p, Base base, Virtual virtualCall) {
 	checked(p);
-	if (dynamic_cast<Tracked*>(&p)) {
-		if (auto* input = dynamic_cast<m::Input*>(&p)) return base(*input);
+	if (::rackpy::rttiCast<Tracked*>(&p)) {
+		if (auto* input = ::rackpy::rttiCast<m::Input*>(&p)) return base(*input);
 		return base(static_cast<m::Output&>(p));
 	}
 	return virtualCall(p);
@@ -1048,7 +1049,7 @@ void bindMidi(py::module_ mod) {
 		.def_property_readonly("driver", [](m::Port& p) { return checked(p).driver ? driverObject(p.driverId) : py::none(); })
 		.def_property_readonly("device", [](py::object self) {
 			auto& p = checked(self.cast<m::Port&>());
-			return deviceObject(self, p.device, dynamic_cast<m::Input*>(&p) != nullptr);
+			return deviceObject(self, p.device, ::rackpy::rttiCast<m::Input*>(&p) != nullptr);
 		})
 		.def_property_readonly("context", [](m::Port& p) -> py::object {
 			checked(p);
@@ -1064,7 +1065,7 @@ void bindMidi(py::module_ mod) {
 			"Rack's: the driver (an unknown ID falls back to Rack's first), then its default device.")
 		.def("get_device", [](py::object self) {
 			auto& p = checked(self.cast<m::Port&>());
-			return deviceObject(self, p.getDevice(), dynamic_cast<m::Input*>(&p) != nullptr);
+			return deviceObject(self, p.getDevice(), ::rackpy::rttiCast<m::Input*>(&p) != nullptr);
 		})
 		.def("get_device_id", [](m::Port& p) { return checked(p).getDeviceId(); })
 		// T is used (value.T::...); Clang reports such an alias in a generic lambda as unused.
@@ -1137,7 +1138,7 @@ void bindMidi(py::module_ mod) {
 			py::arg("message"), "Rack's base: does nothing. Override it; RackPy calls it on the UI thread (queued).")
 		.def_property_readonly("dropped", [](m::Input& p) -> uint64_t {
 			checked(p);
-			auto* py = dynamic_cast<PyInput*>(&p);
+			auto* py = ::rackpy::rttiCast<PyInput*>(&p);
 			return py ? py->queue.dropped.load() : 0;
 		}, "Messages that found the queue full or busy, and were dropped.");
 
@@ -1155,7 +1156,7 @@ void bindMidi(py::module_ mod) {
 		}, py::arg("message"), "Rack's: queues the message, as the driver does.")
 		.def("try_pop", [](m::InputQueue& q, int64_t maxFrame) -> py::object {
 			checked(q);
-			if (auto* p = dynamic_cast<PyInputQueue*>(&q); p && p->owner)
+			if (auto* p = ::rackpy::rttiCast<PyInputQueue*>(&q); p && p->owner)
 				throw runtime::Ownership("a module's MIDI input is consumed by its native kernel");
 			m::Message message;
 			if (!q.tryPop(&message, maxFrame))
@@ -1164,7 +1165,7 @@ void bindMidi(py::module_ mod) {
 		}, py::arg("max_frame"), "Rack's: the next message if its frame is max_frame or earlier, else None.")
 		.def("size", [](m::InputQueue& q) {
 			checked(q);
-			if (auto* p = dynamic_cast<PyInputQueue*>(&q); p && p->owner)
+			if (auto* p = ::rackpy::rttiCast<PyInputQueue*>(&q); p && p->owner)
 				throw runtime::Ownership("a module's MIDI input is consumed by its native kernel");
 			return q.size();
 		});

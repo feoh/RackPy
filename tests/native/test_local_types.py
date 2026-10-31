@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""RP-40: no two of RackPy's native sources declare a same-named class in an anonymous namespace.
+"""RP-40: rules for RackPy's native sources that only macOS would otherwise enforce, by failing at run time.
+
+No two of them declare a same-named class in an anonymous namespace, and none uses a plain dynamic_cast.
 
 Off libstdc++, pybind11 identifies C++ types by typeid(T).name() (detail/internals.h, type_hash and
 type_equal_to), and a class in an anonymous namespace has the same mangled name in every file that
@@ -56,3 +58,19 @@ def test_anonymous_namespace_class_names_are_unique_across_the_native_sources() 
 
 def test_the_scan_sees_a_known_local_type() -> None:
     assert "native/bindings/audio.cpp" in local_types()["AudioDriverView"]
+
+
+def test_native_code_casts_through_rtti_cast() -> None:
+    """RP-40: dynamic_cast fails on macOS for Rack classes without a key function (libRack and the host each
+    have a hidden copy of their type_info, and libc++abi compares addresses); rackpy::rttiCast
+    (native/include/rackpy/rtti.hpp) falls back to names. Linux cannot show a plain dynamic_cast's failure."""
+    plain = [
+        f"{path.relative_to(REPO).as_posix()}:{number}"
+        for path in sorted(NATIVE.rglob("*"))
+        if path.suffix in {".cpp", ".hpp", ".h"}
+        and not path.is_relative_to(NATIVE / "tests")
+        and path.name != "rtti.hpp"
+        for number, line in enumerate(path.read_text(errors="replace").splitlines(), 1)
+        if re.search(r"(?<![:\w])dynamic_cast\s*<", line)
+    ]
+    assert not plain, f"use rackpy::rttiCast instead of dynamic_cast: {plain}"

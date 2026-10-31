@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // UI-safe Quantity virtuals shared by standalone and native value quantities.
 #pragma once
+#include "rackpy/rtti.hpp"
 #include <atomic>
 #include <chrono>
 #include <type_traits>
@@ -43,7 +44,7 @@ struct LaboratoryQuantity {
 /** Base bindings bypass Python aliases only, never another plugin's C++ override.
 Keep access checks which would otherwise have run in the trampoline. */
 inline bool quantityTrampoline(rack::Quantity& q, bool engine = false, bool writing = false) {
-	if (auto* alias = dynamic_cast<LaboratoryQuantity*>(&q)) {
+	if (auto* alias = ::rackpy::rttiCast<LaboratoryQuantity*>(&q)) {
 		if (writing) alias->checkValueWrite();
 		else alias->checkAccess(engine);
 		return true;

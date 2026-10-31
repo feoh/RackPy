@@ -9,6 +9,7 @@
 // a RackPy module in Rack's engine, its IDs are checked against that module's
 // fixed counts, the pointer is cleared when Rack deletes the module, and a
 // Python port takes part in cables only inside its module's ModuleWidget.
+#include "rackpy/rtti.hpp"
 #include <rack.hpp>
 
 #include <pybind11/stl.h>
@@ -279,7 +280,7 @@ void markFactoryPort(const std::shared_ptr<State>& s) {
 	s->onDestroyed.push_back([key = s.get()] { factoryPorts.erase(key); });
 }
 rack::ui::Menu* menuArgument(py::handle value) {
-	auto* menu = dynamic_cast<rack::ui::Menu*>(argument(value));
+	auto* menu = ::rackpy::rttiCast<rack::ui::Menu*>(argument(value));
 	if (!menu)
 		throw py::type_error("expected a rackpy.raw.ui.Menu");
 	return menu;
@@ -446,7 +447,7 @@ void bindApp(py::module_ raw) {
 	auto multi = variant<ML, L, LightWidgetT<ML>>(mod, "MultiLightWidget");
 	lightMethods(multi);
 	auto checkColors = [](ML& w, size_t colors) {
-		if (auto* moduleLight = dynamic_cast<MLW*>(&w); moduleLight && moduleLight->module)
+		if (auto* moduleLight = ::rackpy::rttiCast<MLW*>(&w); moduleLight && moduleLight->module)
 			requireLights(*moduleLight->module, moduleLight->firstLightId, colors);
 	};
 	multi.def_property("base_colors", [](py::object self) { return native<ML>(self).baseColors; },
@@ -511,7 +512,7 @@ void bindApp(py::module_ raw) {
 			[](const HostShadow& h, float v) { hostAs<CS>(h).blurRadius = v; })
 		.def_property("opacity", [](const HostShadow& h) { return hostAs<CS>(h).opacity; },
 			[](const HostShadow& h, float v) { hostAs<CS>(h).opacity = v; });
-	registerHostView([](W* w) { return dynamic_cast<CS*>(w) != nullptr; }, [](const ExternalWidget& e) { return py::cast(HostShadow{e}); });
+	registerHostView([](W* w) { return ::rackpy::rttiCast<CS*>(w) != nullptr; }, [](const ExternalWidget& e) { return py::cast(HostShadow{e}); });
 
 	using SK = app::SvgKnob;
 	auto svgKnob = variant<SK, K, ParamWidgetT<SK>>(mod, "SvgKnob");

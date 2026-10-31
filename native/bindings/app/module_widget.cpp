@@ -8,6 +8,7 @@
 // Rack hands its widget factory (Rack's createModel<TModule, TModuleWidget>
 // passes it to the widget's constructor), once. A factory that fails gives
 // the module back, untouched, and Rack gets RackPy's plain panel instead.
+#include "rackpy/rtti.hpp"
 #include <rack.hpp>
 
 #include <pybind11/stl.h>
@@ -72,7 +73,7 @@ bool ownedElsewhere(const Module* module, const State* self) {
 	auto s = it->second.lock();
 	if (!s || s.get() == self || !s->native)
 		return false;
-	auto* mw = dynamic_cast<MW*>(s->native);
+	auto* mw = ::rackpy::rttiCast<MW*>(s->native);
 	return mw && mw->module == module;
 }
 
@@ -82,7 +83,7 @@ void releaseClaims(FactoryCall& call, const State* keep) noexcept {
 		auto s = weak.lock();
 		if (!s || s.get() == keep || !s->native)
 			continue;
-		if (auto* mw = dynamic_cast<MW*>(s->native); mw && mw->module == call.module) {
+		if (auto* mw = ::rackpy::rttiCast<MW*>(s->native); mw && mw->module == call.module) {
 			mw->module = nullptr;  // so its destructor does not delete Rack's module
 			owners.erase(call.module);
 		}
@@ -200,7 +201,7 @@ struct PyWidgetFactory : plugin::ModuleWidgetFactory {
 				throw std::runtime_error("the plugin's Python factories have been released");
 			py::object widget = build(fn.get(), model, module);
 			try {
-				result = dynamic_cast<MW*>(releaseDetached(widget));  // Rack owns it from here
+				result = ::rackpy::rttiCast<MW*>(releaseDetached(widget));  // Rack owns it from here
 			}
 			catch (...) {
 				native<MW>(widget).module = nullptr;  // give Rack its module back untouched
@@ -263,13 +264,13 @@ void bindModuleWidget(py::module_ app) {
 			"replacing and deleting the previous panel. The widget's width snaps to the rack grid.")
 		.def("add_param", [](py::object self, py::object param) {
 			auto& mw = native<MW>(self);
-			if (!dynamic_cast<rack::app::ParamWidget*>(argument(param)))
+			if (!::rackpy::rttiCast<rack::app::ParamWidget*>(argument(param)))
 				throw py::type_error("add_param takes a rackpy.raw.app.ParamWidget");
 			transferWith(mw, param, [&mw](W* p) { mw.addParam(static_cast<rack::app::ParamWidget*>(p)); });
 		}, py::arg("param"))
 		.def("add_input", [](py::object self, py::object port) {
 			auto& mw = native<MW>(self);
-			auto* p = dynamic_cast<rack::app::PortWidget*>(argument(port));
+			auto* p = ::rackpy::rttiCast<rack::app::PortWidget*>(argument(port));
 			if (!p)
 				throw py::type_error("add_input takes a rackpy.raw.app.PortWidget");
 			if (p->type != rack::engine::Port::INPUT)
@@ -280,7 +281,7 @@ void bindModuleWidget(py::module_ app) {
 		}, py::arg("input"))
 		.def("add_output", [](py::object self, py::object port) {
 			auto& mw = native<MW>(self);
-			auto* p = dynamic_cast<rack::app::PortWidget*>(argument(port));
+			auto* p = ::rackpy::rttiCast<rack::app::PortWidget*>(argument(port));
 			if (!p)
 				throw py::type_error("add_output takes a rackpy.raw.app.PortWidget");
 			if (p->type != rack::engine::Port::OUTPUT)
@@ -442,7 +443,7 @@ std::unique_ptr<plugin::ModuleWidgetFactory> makeWidgetFactory(py::object fn) {
 }
 
 py::object createModuleWidgetForPython(plugin::ModuleWidgetFactory& factory, rack::plugin::Model& model, py::object module) {
-	auto* python = dynamic_cast<appdetail::PyWidgetFactory*>(&factory);
+	auto* python = ::rackpy::rttiCast<appdetail::PyWidgetFactory*>(&factory);
 	if (!python || !python->fn)
 		throw std::runtime_error("this model's widget factory is not available");
 	rack::engine::Module* m = nullptr;
@@ -452,7 +453,7 @@ py::object createModuleWidgetForPython(plugin::ModuleWidgetFactory& factory, rac
 		m = &module.cast<const bindings::ModuleRef&>().get();
 		if (m->model != &model)
 			throw std::invalid_argument("the module is not of this model");
-		if (!dynamic_cast<module::Module*>(m)->engineOwned.load(std::memory_order_acquire))
+		if (!::rackpy::rttiCast<module::Module*>(m)->engineOwned.load(std::memory_order_acquire))
 			throw runtime::Ownership("a module widget owns its module, which must be in Rack's engine");
 		auto* context = rack::contextGet();
 		if (context && context->scene && context->scene->rack && context->scene->rack->getModule(m->id))

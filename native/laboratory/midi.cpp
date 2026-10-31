@@ -8,6 +8,7 @@
 // and get the native configured answer, which is also super(): the name and
 // devices Python configured, as RP-29C's PythonDriver gives them. The
 // laboratory MIDI inputs (MidiInput, MidiInputQueue) are in native/bindings/midi.cpp.
+#include "rackpy/rtti.hpp"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -268,7 +269,7 @@ MidiDriver& driver(MidiDriver& d) {
 template <class Port>
 Port& port(py::handle value, const char* what) {
 	bindings::refuseDuringMidiDelivery(what);
-	auto* p = dynamic_cast<Port*>(&bindings::pythonMidiPort(value));
+	auto* p = ::rackpy::rttiCast<Port*>(&bindings::pythonMidiPort(value));
 	if (!p)
 		throw py::type_error(std::string(what) + " takes a RackPy MIDI port of the right direction");
 	return *p;

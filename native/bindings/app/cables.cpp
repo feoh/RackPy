@@ -18,6 +18,7 @@
 // Its port fields are raw pointers. In the rack, Rack keeps them right (a
 // module's removal disconnects its cables first); while the widget is
 // detached, RackPy checks the ports Python set before each use.
+#include "rackpy/rtti.hpp"
 #include <pybind11/pybind11.h>
 
 #include <array>
@@ -81,7 +82,7 @@ bool inRack(const CW& cw) {
 /** Clears a port field whose widget died while the cable widget was detached. */
 CW& synced(py::handle self) {
 	auto& cw = native<CW>(self);
-	auto* t = dynamic_cast<CableWidgetT*>(&cw);
+	auto* t = ::rackpy::rttiCast<CableWidgetT*>(&cw);
 	if (!t)
 		return cw;
 	for (int i = 0; i < 4; ++i) {
@@ -107,14 +108,14 @@ CW& synced(py::handle self) {
 
 void setPort(py::handle self, int i, py::handle value) {
 	auto& cw = synced(self);
-	auto* t = dynamic_cast<CableWidgetT*>(&cw);
+	auto* t = ::rackpy::rttiCast<CableWidgetT*>(&cw);
 	if (value.is_none()) {
 		*field(cw, i) = nullptr;
 		if (t)
 			t->tracked[i] = Target{};
 		return;
 	}
-	auto* port = dynamic_cast<app::PortWidget*>(argument(value));
+	auto* port = ::rackpy::rttiCast<app::PortWidget*>(argument(value));
 	if (!port)
 		throw py::type_error("expected a port widget (rackpy.raw.app.PortWidget, or Rack's)");
 	Port::Type wanted = (i % 2 == 0) ? Port::INPUT : Port::OUTPUT;
@@ -152,7 +153,7 @@ void requireCablePorts(CW& cw) {
 }  // namespace
 
 bool isPythonCableWidget(const rack::widget::Widget* w) {
-	return dynamic_cast<const CableWidgetT*>(w) != nullptr;
+	return ::rackpy::rttiCast<const CableWidgetT*>(w) != nullptr;
 }
 
 void bindCableWidget(py::module_ mod) {
@@ -215,7 +216,7 @@ void bindCableWidget(py::module_ mod) {
 				bindings::undoEngineCableForWidget(cable, raw);
 				throw;
 			}
-			if (auto* t = dynamic_cast<CableWidgetT*>(&cw)) {
+			if (auto* t = ::rackpy::rttiCast<CableWidgetT*>(&cw)) {
 				t->tracked[0] = widgets::target(cw.inputPort);
 				t->tracked[1] = widgets::target(cw.outputPort);
 			}

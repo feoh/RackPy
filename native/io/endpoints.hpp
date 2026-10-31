@@ -12,6 +12,7 @@
 // MIDI queue's producers reach it through its port's atomic pointer, the port
 // keeping every queue it fed alive until it goes.
 #pragma once
+#include "rackpy/rtti.hpp"
 #include <rack.hpp>
 
 #include <functional>
@@ -70,7 +71,7 @@ inline Endpoints* resolve(Link& link, rack::engine::Module* m) noexcept {
 	if (m != link.module || (m && m->id != link.id)) {
 		link.module = m;
 		link.id = m ? m->id : -1;
-		link.endpoints = m ? dynamic_cast<Endpoints*>(m) : nullptr;
+		link.endpoints = m ? ::rackpy::rttiCast<Endpoints*>(m) : nullptr;
 	}
 	return static_cast<Endpoints*>(link.endpoints);
 }

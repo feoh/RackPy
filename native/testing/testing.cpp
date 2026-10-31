@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // RuntimeProbe: a module, a widget and a transferable child widget that let
 // tests exercise the runtime in Rack. Test hooks only; see testing.hpp.
+#include "rackpy/rtti.hpp"
 #include "../bindings/support/overrides.hpp"
 #include "testing.hpp"
 
@@ -373,7 +374,7 @@ void define(py::module_ m) {
 	py::classh<ProbeChild, PyProbeChild>(m, "ProbeChild")
 		.def(py::init<>())
 		.def("on_removed", [](ProbeChild& c) {
-			if (dynamic_cast<PyProbeChild*>(&c)) c.ProbeChild::onRemoved();
+			if (::rackpy::rttiCast<PyProbeChild*>(&c)) c.ProbeChild::onRemoved();
 			else c.onRemoved();
 		})
 		.def_property_readonly("alive", [](const ProbeChild& c) { return c.token->alive(); });
@@ -394,12 +395,12 @@ void define(py::module_ m) {
 			if (name == "get_unit") return py::cast(q.getUnit());
 			if (name == "get_string") return py::cast(q.getString());
 			if (name == "get_description") {
-				auto* p = dynamic_cast<rack::engine::ParamQuantity*>(&q);
+				auto* p = ::rackpy::rttiCast<rack::engine::ParamQuantity*>(&q);
 				if (!p) throw py::type_error("get_description needs ParamQuantity");
 				return py::cast(p->getDescription());
 			}
 			if (name == "to_json") {
-				auto* p = dynamic_cast<rack::engine::ParamQuantity*>(&q);
+				auto* p = ::rackpy::rttiCast<rack::engine::ParamQuantity*>(&q);
 				if (!p) throw py::type_error("to_json needs ParamQuantity");
 				bindings::ErrorCapture capture;
 				std::unique_ptr<json_t, decltype(&json_decref)> data(p->toJson(), json_decref);
@@ -430,7 +431,7 @@ void define(py::module_ m) {
 				return py::none();
 			}
 			if (name == "draw_framebuffer") {
-				auto* frame = dynamic_cast<rack::widget::FramebufferWidget*>(&w);
+				auto* frame = ::rackpy::rttiCast<rack::widget::FramebufferWidget*>(&w);
 				if (!frame || !frame->getFramebuffer()) throw py::value_error("render a framebuffer first");
 				frame->drawFramebuffer(); return py::none();
 			}
@@ -440,18 +441,18 @@ void define(py::module_ m) {
 			}
 			if (name == "get_relative_zoom") return py::cast(w.getRelativeZoom(nullptr));
 			if (name == "create_child_menu") {
-				auto* item = dynamic_cast<rack::ui::MenuItem*>(&w);
+				auto* item = ::rackpy::rttiCast<rack::ui::MenuItem*>(&w);
 				if (!item) throw py::type_error("create_child_menu needs MenuItem");
 				std::unique_ptr<rack::ui::Menu> menu(item->createChildMenu());
 				return py::bool_(bool(menu));
 			}
 			if (name == "get_text_position") {
-				auto* field = dynamic_cast<rack::ui::TextField*>(&w);
+				auto* field = ::rackpy::rttiCast<rack::ui::TextField*>(&w);
 				if (!field) throw py::type_error("get_text_position needs TextField");
 				return py::cast(field->getTextPosition(args[0].cast<rack::math::Vec>()));
 			}
 			if (name == "init_param_quantity") {
-				auto* p = dynamic_cast<rack::app::ParamWidget*>(&w);
+				auto* p = ::rackpy::rttiCast<rack::app::ParamWidget*>(&w);
 				if (!p) throw py::type_error("init_param_quantity needs ParamWidget");
 				p->initParamQuantity(); return py::none();
 			}
@@ -689,7 +690,7 @@ void define(py::module_ m) {
 		// its GL framebuffer (NanoVG draws y down; GL rows run bottom up). Premultiplied alpha.
 		requireMainThread("framebuffer_pixels");
 		liveContext();
-		auto* fbw = dynamic_cast<rack::widget::FramebufferWidget*>(widgets::argument(frame));
+		auto* fbw = ::rackpy::rttiCast<rack::widget::FramebufferWidget*>(widgets::argument(frame));
 		if (!fbw)
 			throw std::invalid_argument("framebuffer_pixels needs a FramebufferWidget");
 		if (!fbw->getFramebuffer())
@@ -848,15 +849,15 @@ void define(py::module_ m) {
 		liveContext();
 		rack::ui::MenuOverlay* overlay = nullptr;
 		for (auto* child : APP->scene->children)
-			if (auto* candidate = dynamic_cast<rack::ui::MenuOverlay*>(child))
+			if (auto* candidate = ::rackpy::rttiCast<rack::ui::MenuOverlay*>(child))
 				overlay = candidate;
 		if (!overlay)
 			throw std::runtime_error("no menu overlay in Rack's scene");
 		std::vector<std::string> labels;
 		for (auto* child : overlay->children) {
-			if (auto* menu = dynamic_cast<rack::ui::Menu*>(child)) {
+			if (auto* menu = ::rackpy::rttiCast<rack::ui::Menu*>(child)) {
 				for (auto* entry : menu->children)
-					if (auto* label = dynamic_cast<rack::ui::MenuLabel*>(entry))
+					if (auto* label = ::rackpy::rttiCast<rack::ui::MenuLabel*>(entry))
 						labels.push_back(label->text);
 			}
 		}
@@ -870,7 +871,7 @@ void define(py::module_ m) {
 		liveContext();
 		size_t count = 0;
 		for (auto* child : APP->scene->children)
-			if (dynamic_cast<rack::ui::Tooltip*>(child))
+			if (::rackpy::rttiCast<rack::ui::Tooltip*>(child))
 				++count;
 		return count;
 	});
@@ -966,7 +967,7 @@ void define(py::module_ m) {
 		std::unique_ptr<rack::app::ModuleWidget> mw(found->createModuleWidget(nullptr));
 		std::vector<std::string> labels;
 		for (auto* child : mw->children)
-			if (auto* label = dynamic_cast<rack::ui::Label*>(child))
+			if (auto* label = ::rackpy::rttiCast<rack::ui::Label*>(child))
 				labels.push_back(label->text);
 		bool hasModule = mw->module != nullptr;
 		return py::make_tuple(mw->box.size.x, mw->box.size.y, labels, hasModule, mw->model == found);
@@ -1008,7 +1009,7 @@ void define(py::module_ m) {
 			py::gil_scoped_acquire gil;
 			return py::none();
 		}
-		bool placeholder = dynamic_cast<rackpy::plugin::PlaceholderModule*>(module) != nullptr;
+		bool placeholder = ::rackpy::rttiCast<rackpy::plugin::PlaceholderModule*>(module) != nullptr;
 		std::string slug = module->model ? module->model->slug : "";
 		py::gil_scoped_acquire gil;
 		return py::make_tuple(slug, placeholder);
@@ -1111,8 +1112,8 @@ void define(py::module_ m) {
 		auto& d = laboratory::midiDriverForTesting(driver);
 		auto& in = laboratory::midiDeviceForTesting(inputDevice);
 		auto& outDevice = laboratory::midiDeviceForTesting(outputDevice);
-		auto* inputPort = dynamic_cast<rack::midi::Input*>(&bindings::pythonMidiPort(input));
-		auto* outputPort = dynamic_cast<rack::midi::Output*>(&bindings::pythonMidiPort(output));
+		auto* inputPort = ::rackpy::rttiCast<rack::midi::Input*>(&bindings::pythonMidiPort(input));
+		auto* outputPort = ::rackpy::rttiCast<rack::midi::Output*>(&bindings::pythonMidiPort(output));
 		if (!inputPort || !outputPort)
 			throw py::type_error("needs an input and an output port");
 		std::string driverName, inputName, outputName, inName, outName;
@@ -1155,7 +1156,7 @@ void define(py::module_ m) {
 	}, py::arg("driver"), py::arg("input_device"), py::arg("output_device"), py::arg("input"), py::arg("output"),
 		"Every midi::Driver virtual of a laboratory driver and its devices' getName, on a thread with a Rack context.");
 	m.def("midi_input_on_rack_thread", [](py::handle input, const rack::midi::Message& message) {
-		auto* port = dynamic_cast<rack::midi::Input*>(&bindings::pythonMidiPort(input));
+		auto* port = ::rackpy::rttiCast<rack::midi::Input*>(&bindings::pythonMidiPort(input));
 		if (!port)
 			throw py::type_error("needs a MIDI input port");
 		py::gil_scoped_release release;
@@ -1169,7 +1170,7 @@ void define(py::module_ m) {
 		// As Rack's computer keyboard driver delivers (src/keyboard.cpp): InputDevice::onMessage on the main thread,
 		// without the GIL and outside any Python call into Rack's code. The port's device is a Rack driver's.
 		requireMainThread("deliver_as_racks_keyboard");
-		auto* port = dynamic_cast<rack::midi::Input*>(&bindings::pythonMidiPort(input));
+		auto* port = ::rackpy::rttiCast<rack::midi::Input*>(&bindings::pythonMidiPort(input));
 		if (!port || !port->inputDevice)
 			throw py::type_error("needs a MIDI input port with a device");
 		rack::midi::InputDevice* device = port->inputDevice;
@@ -1274,7 +1275,7 @@ void define(py::module_ m) {
 			EngineLease lease(*ctx);
 			found = APP->engine->getModule(id);
 		}
-		auto* m = dynamic_cast<module::Module*>(found);
+		auto* m = ::rackpy::rttiCast<module::Module*>(found);
 		if (!m)
 			return py::none();
 		return bindings::moduleObject(module::Construction::handleState(*m));

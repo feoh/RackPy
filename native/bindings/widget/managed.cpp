@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+#include "rackpy/rtti.hpp"
 #include "trampoline.hpp"
 #include "behavior.hpp"
 #include "../../widget/geometry.hpp"
@@ -96,11 +97,11 @@ void attachChild(W& parent, const std::shared_ptr<runtime::ContextToken>& contex
     // cable widget's Add and Remove handlers move its plugs in and out of the plug container.
     if (auto* c = rack::contextGet(); c && c->scene && c->scene->rack) {
         auto* rackWidget = c->scene->rack;
-        bool cable = dynamic_cast<rack::app::CableWidget*>(&item) != nullptr;
+        bool cable = ::rackpy::rttiCast<rack::app::CableWidget*>(&item) != nullptr;
         if (cable != (&parent == rackWidget->getCableContainer()))
             throw runtime::Ownership(cable ? "a cable widget lives only in Rack's rack: RackWidget.add_cable"
                                            : "Rack's cable container holds only cable widgets");
-        if (&parent == rackWidget->getModuleContainer() && !dynamic_cast<rack::app::ModuleWidget*>(&item))
+        if (&parent == rackWidget->getModuleContainer() && !::rackpy::rttiCast<rack::app::ModuleWidget*>(&item))
             throw runtime::Ownership("Rack's module container holds only module widgets (RackWidget.add_module)");
         if (&parent == rackWidget->getPlugContainer())
             throw runtime::Ownership("Rack's plug container holds only the plugs of cable widgets in the rack");
@@ -176,14 +177,14 @@ void initialize() {
 			++s->graphicsGeneration;
 			// A Python override may omit super().on_context_destroy(). Owned
 			// native FBOs must still die before Rack destroys the GL context.
-			if (auto* fb = dynamic_cast<rack::widget::FramebufferWidget*>(pair.first))
+			if (auto* fb = ::rackpy::rttiCast<rack::widget::FramebufferWidget*>(pair.first))
 				fb->deleteFramebuffer();
 		}
 	});
 	runtime::onGraphicsContextCreate([] {
 		for (const auto& pair : nativeStates) {
 			++pair.second->graphicsGeneration;
-			if (auto* fb = dynamic_cast<rack::widget::FramebufferWidget*>(pair.first))
+			if (auto* fb = ::rackpy::rttiCast<rack::widget::FramebufferWidget*>(pair.first))
 				fb->dirty = true;
 		}
 	});

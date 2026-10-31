@@ -2,6 +2,7 @@
 // rack::ui -> rackpy.raw.ui (RP-26A): Rack's UI widgets as subclassable Python
 // classes on RP-25's managed Widget machinery. Main thread only; Python
 // overrides are contained; each widget has one native owner.
+#include "rackpy/rtti.hpp"
 #include "../support/overrides.hpp"
 #include <rack.hpp>
 
@@ -59,7 +60,7 @@ ui::Menu* handOver(py::object value) {
 		return nullptr;
 	auto s = state(value);
 	auto& w = checked(s);
-	auto* menu = dynamic_cast<ui::Menu*>(&w);
+	auto* menu = ::rackpy::rttiCast<ui::Menu*>(&w);
 	if (!menu)
 		throw py::type_error("create_child_menu must return a rackpy.raw.ui.Menu or None");
 	if (w.parent)
@@ -139,7 +140,7 @@ void focusField(py::classh<ui::TextField, OW, TextFieldWidget<ui::TextField>>& c
 				auto s = source.lock();
 				if (!s || !s->native)
 					return;
-				if (auto* owner = dynamic_cast<ui::TextField*>(s->native))
+				if (auto* owner = ::rackpy::rttiCast<ui::TextField*>(s->native))
 					if (owner->*field == w)
 						owner->*field = nullptr;
 			});
@@ -306,7 +307,7 @@ void bindUi(py::module_ raw) {
 			ui::Menu* next = nullptr;
 			if (!child.is_none()) {
 				auto s = state(child);
-				auto* candidate = dynamic_cast<ui::Menu*>(&checked(s));
+				auto* candidate = ::rackpy::rttiCast<ui::Menu*>(&checked(s));
 				if (!candidate)
 					throw py::type_error("set_child_menu takes a rackpy.raw.ui.Menu or None");
 				if (candidate->parent)

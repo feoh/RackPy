@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
+#include "rackpy/rtti.hpp"
 #include <rack.hpp>
 #include <pybind11/pybind11.h>
 #include <pybind11/trampoline_self_life_support.h>
@@ -146,7 +147,7 @@ struct ExternalWidget {
 W& checkedExternal(const ExternalWidget& ref);
 template <class T>
 T& hostAs(const ExternalWidget& ref) {
-	auto* value = dynamic_cast<T*>(&checkedExternal(ref));
+	auto* value = ::rackpy::rttiCast<T*>(&checkedExternal(ref));
 	if (!value)
 		throw runtime::StaleHandle("borrowed host Widget is not of its view's type");
 	return *value;

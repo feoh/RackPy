@@ -10,6 +10,7 @@
 // is a widgetless RackPy module, which Python takes back. Engine::clear and
 // Engine::fromJson delete what the engine holds, which only Rack's patch
 // manager may do, after clearing the rack's widgets.
+#include "rackpy/rtti.hpp"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -342,7 +343,7 @@ void bindEngine(py::module_ engine) {
 				throw std::invalid_argument("frames must be from 1 to 65536");
 			// Rack: "Only call this method from the master module." A RackPy master
 			// module's code steps the engine; Rack's own thread then waits.
-			auto* master = dynamic_cast<module::Module*>(h.get().getMasterModule());
+			auto* master = ::rackpy::rttiCast<module::Module*>(h.get().getMasterModule());
 			if (!master)
 				throw runtime::Ownership("only the master module steps Rack's engine: make a RackPy module the master "
 					"first (set_master_module)");

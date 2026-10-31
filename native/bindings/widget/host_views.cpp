@@ -2,6 +2,7 @@
 // Typed views of borrowed Rack-owned widgets (RP-28A). Rack's own widgets keep
 // internal children in public fields (SvgKnob::fb, ::sw, ::tw, ::shadow ...);
 // these views reach their public fields, checked and nonowning, like HostWidget.
+#include "rackpy/rtti.hpp"
 #include "variants.hpp"
 #include <pybind11/stl.h>
 #include <array>
@@ -35,7 +36,7 @@ void bindHostViews(py::module_ mod) {
 		.def("set_dirty", [](const HostFramebuffer& h, bool dirty) { hostAs<F>(h).setDirty(dirty); }, py::arg("dirty") = true)
 		.def("get_framebuffer_size", [](const HostFramebuffer& h) { return hostAs<F>(h).getFramebufferSize(); })
 		.def("get_image_handle", [](const HostFramebuffer& h) { return hostAs<F>(h).getImageHandle(); });
-	registerHostView([](W* w) { return dynamic_cast<F*>(w) != nullptr; },
+	registerHostView([](W* w) { return ::rackpy::rttiCast<F*>(w) != nullptr; },
 		[](const ExternalWidget& e) { return py::cast(HostFramebuffer{e}); });
 
 	py::class_<HostSvg, ExternalWidget>(mod, "HostSvgWidget", "A Rack-owned SvgWidget's public fields.")
@@ -45,7 +46,7 @@ void bindHostViews(py::module_ mod) {
 		.def("set_svg", [](const HostSvg& h, std::shared_ptr<rack::window::Svg> svg) { hostAs<S>(h).setSvg(drawableSvg(std::move(svg))); },
 			py::arg("svg"))
 		.def("wrap", [](const HostSvg& h) { hostAs<S>(h).wrap(); });
-	registerHostView([](W* w) { return dynamic_cast<S*>(w) != nullptr; }, [](const ExternalWidget& e) { return py::cast(HostSvg{e}); });
+	registerHostView([](W* w) { return ::rackpy::rttiCast<S*>(w) != nullptr; }, [](const ExternalWidget& e) { return py::cast(HostSvg{e}); });
 
 	py::class_<HostTransform, ExternalWidget>(mod, "HostTransformWidget", "A Rack-owned TransformWidget's public fields.")
 		.def_property("transform", [](const HostTransform& h) {
@@ -60,7 +61,7 @@ void bindHostViews(py::module_ mod) {
 		.def("rotate", [](const HostTransform& h, float angle) { hostAs<T>(h).rotate(angle); }, py::arg("angle"))
 		.def("rotate", [](const HostTransform& h, float angle, rack::math::Vec origin) { hostAs<T>(h).rotate(angle, origin); },
 			py::arg("angle"), py::arg("origin"));
-	registerHostView([](W* w) { return dynamic_cast<T*>(w) != nullptr; },
+	registerHostView([](W* w) { return ::rackpy::rttiCast<T*>(w) != nullptr; },
 		[](const ExternalWidget& e) { return py::cast(HostTransform{e}); });
 }
 } }

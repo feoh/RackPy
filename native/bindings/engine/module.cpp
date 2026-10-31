@@ -3,6 +3,7 @@
 // and metadata class factories. No Module virtual calls dispatch to Python.
 // Python runs only synchronously during construction on the main thread,
 // before publication: the constructor callback and class-factory constructors.
+#include "rackpy/rtti.hpp"
 #include "module.hpp"
 
 #include "expander.hpp"
@@ -393,7 +394,7 @@ py::object createOwned(py::object configure, rack::plugin::Model& model) {
 }
 
 py::object engineModuleObject(rack::engine::Module* module) {
-	auto* m = dynamic_cast<module::Module*>(module);
+	auto* m = ::rackpy::rttiCast<module::Module*>(module);
 	if (!m || !m->engineOwned.load(std::memory_order_acquire) || !m->token->alive())
 		return py::none();
 	return moduleObject(module::Construction::handleState(*m));
@@ -589,11 +590,11 @@ int traverseModule(PyObject* self, visitproc visit, void* arg) {
 	if (!ref.state || !ref.state->object)
 		return 0;
 	module::Module& m = *ref.state->object;
-	if (auto* handlers = dynamic_cast<PyDataHandlers*>(m.dataHandlers.get())) {
+	if (auto* handlers = ::rackpy::rttiCast<PyDataHandlers*>(m.dataHandlers.get())) {
 		Py_VISIT(handlers->toJsonFn.borrowed());
 		Py_VISIT(handlers->fromJsonFn.borrowed());
 	}
-	if (auto* handlers = dynamic_cast<PyEventHandlers*>(m.eventHandlers.get()))
+	if (auto* handlers = ::rackpy::rttiCast<PyEventHandlers*>(m.eventHandlers.get()))
 		for (const auto& handler : handlers->handlers)
 			Py_VISIT(handler.borrowed());
 	if (auto* lab = laboratory::laboratoryModule(m)) {

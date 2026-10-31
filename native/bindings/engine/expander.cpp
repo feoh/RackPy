@@ -12,6 +12,7 @@
 // ExpanderMessage only if the registry knows its address (native/engine/
 // expanders.hpp); any other pointer is an opaque ForeignMessage and is never
 // dereferenced.
+#include "rackpy/rtti.hpp"
 #include "expander.hpp"
 
 #include <pybind11/stl.h>
@@ -81,7 +82,7 @@ void refuseWhileEngineRuns(const Target& t, const char* what) {
 /** A neighbour as Python sees it: a RackPy module's own handle (engine- or Python-owned), an
 EngineModule for another plugin's, or None. */
 py::object moduleHandle(RackModule* m) {
-	if (auto* own = dynamic_cast<module::Module*>(m))
+	if (auto* own = ::rackpy::rttiCast<module::Module*>(m))
 		return liveModuleObject(*own);
 	return engineModuleHandle(m);
 }

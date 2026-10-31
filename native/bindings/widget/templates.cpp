@@ -3,6 +3,7 @@
 // over widget types take a class, including Python subclasses (docs/coverage.md,
 // policy 10); the recursion templates take the handler method that the C++
 // member pointer would name.
+#include "rackpy/rtti.hpp"
 #include "behavior.hpp"
 #include "rackpy/runtime/threads.hpp"
 
@@ -13,9 +14,9 @@ namespace {
 
 using Match = std::function<bool(W*)>;
 
-template<class T> Match castTo() { return [](W* w) { return dynamic_cast<T*>(w) != nullptr; }; }
+template<class T> Match castTo() { return [](W* w) { return ::rackpy::rttiCast<T*>(w) != nullptr; }; }
 
-/** dynamic_cast<T*> for the bound SDK classes; isinstance for Python subclasses of them. */
+/** ::rackpy::rttiCast<T*> for the bound SDK classes; isinstance for Python subclasses of them. */
 Match matcher(py::module_ mod, py::handle cls) {
 	py::handle widget = mod.attr("Widget");
 	if (!PyType_Check(cls.ptr()) || !PyObject_IsSubclass(cls.ptr(), widget.ptr()))

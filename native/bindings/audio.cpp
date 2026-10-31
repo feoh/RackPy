@@ -24,6 +24,7 @@
 // The callback laboratory's driver and devices (RP-22F, native/laboratory/
 // audio.cpp) are Unlisted ones: Rack never lists them, so only Python's ports
 // reach them, and the ports' teardown here leaves them without running Python.
+#include "rackpy/rtti.hpp"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -328,7 +329,7 @@ PyAudioPort& unbridged(a::Port& port) {
 
 PyAudioPort& checked(a::Port& port) {
 	runtime::requireMainThread("using an audio port");
-	auto* p = dynamic_cast<PyAudioPort*>(&port);
+	auto* p = ::rackpy::rttiCast<PyAudioPort*>(&port);
 	if (!p)
 		throw runtime::Ownership("this audio port is not one Python made");
 	if (p->released)
@@ -388,7 +389,7 @@ py::list subscriberList(a::Device& d, std::function<a::Device&()> resolve) {
 	py::list out;
 	std::lock_guard<std::mutex> lock(d.processMutex);  // Rack's: ports do not change while it is held
 	for (a::Port* port : d.subscribed) {
-		if (dynamic_cast<PyAudioPort*>(port))
+		if (::rackpy::rttiCast<PyAudioPort*>(port))
 			out.append(py::cast(port, py::return_value_policy::reference));
 		else
 			out.append(py::cast(AudioPortView{resolve, port}));
@@ -415,7 +416,7 @@ whose Python overrides then run with the GIL held, so that their errors reach th
 struct ReleaseForDriver {
 	std::optional<py::gil_scoped_release> release;
 	explicit ReleaseForDriver(a::Device* device) {
-		if (!dynamic_cast<UnlistedAudioDevice*>(device))
+		if (!::rackpy::rttiCast<UnlistedAudioDevice*>(device))
 			release.emplace();
 	}
 };
@@ -620,7 +621,7 @@ void UnlistedAudioDriver::detach() noexcept {
 }
 
 bool livePythonAudioPort(const a::Port* port) {
-	auto* p = dynamic_cast<const PyAudioPort*>(port);
+	auto* p = ::rackpy::rttiCast<const PyAudioPort*>(port);
 	return p && !p->released && livePythonObject(static_cast<const void*>(port));
 }
 
@@ -689,7 +690,7 @@ void attachAudioPort(module::Module& m, py::handle value, int inputs, int output
 	if (!p.driverSubscriptions.empty() || !p.deviceSubscriptions.empty())
 		throw runtime::Ownership("this audio port subscribes to other devices (Driver.subscribe, Device.subscribe); "
 			"a module's audio port has only its own device");
-	if (dynamic_cast<UnlistedAudioDriver*>(p.driver))
+	if (::rackpy::rttiCast<UnlistedAudioDriver*>(p.driver))
 		throw runtime::Ownership("a laboratory driver's port cannot be a module's audio port");
 	for (const char* name : {"process_input", "process_buffer", "process_output"})
 		if (rackpy::bindings::pythonOverride(static_cast<const a::Port*>(&p), name))

@@ -15,6 +15,7 @@
 // adds the engine cable before the cable widget throws for a missing port.
 // The trampolines check those first and otherwise do nothing, as Rack does for
 // a missing module.
+#include "rackpy/rtti.hpp"
 #include "../support/overrides.hpp"
 #include "history.hpp"
 
@@ -156,7 +157,7 @@ struct ActionT : Base, PyAction, py::trampoline_self_life_support {
 };
 
 PyAction* pyAction(const h::Action* a) {
-	return dynamic_cast<PyAction*>(const_cast<h::Action*>(a));
+	return ::rackpy::rttiCast<PyAction*>(const_cast<h::Action*>(a));
 }
 
 /** Python's half of an action, or nothing for one Rack made. */
@@ -179,7 +180,7 @@ bool contains(const Seq& actions, const h::Action* target) {
 	for (const h::Action* a : actions) {
 		if (a == target)
 			return true;
-		if (auto* c = dynamic_cast<const h::ComplexAction*>(a); c && contains(c->actions, target))
+		if (auto* c = ::rackpy::rttiCast<const h::ComplexAction*>(a); c && contains(c->actions, target))
 			return true;
 	}
 	return false;
@@ -268,7 +269,7 @@ void pythonRun(T& a, bool redo) {
 	runtime::requireMainThread(redo ? "redoing an action" : "undoing an action");
 	liveToken(redo ? "redo" : "undo");
 	runtime::refuseEngineReentry(redo ? "redo" : "undo");
-	if (dynamic_cast<PyAction*>(&a)) rackRun(a, redo);
+	if (::rackpy::rttiCast<PyAction*>(&a)) rackRun(a, redo);
 	else redo ? a.redo() : a.undo();
 }
 
@@ -329,7 +330,7 @@ void jsonField(Cls& cls, const char* name, json_t* T::*member) {
 }
 
 rack::app::ModuleWidget& moduleWidgetArgument(py::handle value) {
-	auto* mw = dynamic_cast<rack::app::ModuleWidget*>(widgets::argument(value));
+	auto* mw = ::rackpy::rttiCast<rack::app::ModuleWidget*>(widgets::argument(value));
 	if (!mw)
 		throw py::type_error("expected a module widget (rackpy.raw.app.ModuleWidget, or Rack's)");
 	if (!mw->getModule() || !mw->getModel())
@@ -338,7 +339,7 @@ rack::app::ModuleWidget& moduleWidgetArgument(py::handle value) {
 }
 
 rack::app::CableWidget& cableWidgetArgument(py::handle value) {
-	auto* cw = dynamic_cast<rack::app::CableWidget*>(widgets::argument(value));
+	auto* cw = ::rackpy::rttiCast<rack::app::CableWidget*>(widgets::argument(value));
 	if (!cw)
 		throw py::type_error("expected a cable widget (rackpy.raw.app.HostCableWidget)");
 	return *cw;
@@ -413,12 +414,12 @@ void bindHistory(py::module_ m) {
 		.def_property_readonly("type_name", [](const ActionView& v) { return typeName(&v.get()); },
 			"The action's C++ type (rack::history::ModuleMove, or a plugin's).")
 		.def_property_readonly("module_id", [](const ActionView& v) -> py::object {
-			if (auto* a = dynamic_cast<const h::ModuleAction*>(&v.get()))
+			if (auto* a = ::rackpy::rttiCast<const h::ModuleAction*>(&v.get()))
 				return py::int_(a->moduleId);
 			return py::none();
 		}, "A ModuleAction's module ID, else None.")
 		.def_property_readonly("actions", [](const ActionView& v) -> py::object {
-			auto* c = dynamic_cast<const h::ComplexAction*>(&v.get());
+			auto* c = ::rackpy::rttiCast<const h::ComplexAction*>(&v.get());
 			if (!c)
 				return py::none();
 			return actionList(c->actions, v.token, v.root);

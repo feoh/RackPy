@@ -124,6 +124,15 @@ if(RACKPY_BUILD_TESTS)
   target_link_libraries(rackpy_loader_tests PRIVATE rackpy_sdk_program)
   add_test(NAME loader_config COMMAND rackpy_loader_tests)
 
+  # rackpy::rttiCast (RP-40): the Itanium ABI walk on this platform, and a widget whose type_info is libRack's.
+  # Hidden visibility, as the host is built, so this program's copies of Rack's type_infos are its own.
+  add_executable(rackpy_rtti_tests native/tests/test_rtti.cpp)
+  set_target_properties(rackpy_rtti_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF
+    CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
+  target_include_directories(rackpy_rtti_tests PRIVATE native/include)
+  target_link_libraries(rackpy_rtti_tests PRIVATE rackpy_sdk_program)
+  add_test(NAME rtti COMMAND rackpy_rtti_tests)
+
   add_executable(rackpy_runtime_tests native/tests/test_runtime.cpp ${RACKPY_RUNTIME_CORE})
   set_target_properties(rackpy_runtime_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_include_directories(rackpy_runtime_tests PRIVATE native/include)

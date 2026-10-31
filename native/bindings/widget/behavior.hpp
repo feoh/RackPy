@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
+#include "rackpy/rtti.hpp"
 #include "events.hpp"
 #include "drawing.hpp"
 #include "../support/overrides.hpp"
@@ -7,7 +8,7 @@
 namespace rackpy { namespace widgets {
 
 template<class Base> Base& native(py::handle self) {
-	auto* value = dynamic_cast<Base*>(&checked(state(self)));
+	auto* value = ::rackpy::rttiCast<Base*>(&checked(state(self)));
 	if (!value) throw py::type_error("wrong native Widget base for this method");
 	return *value;
 }

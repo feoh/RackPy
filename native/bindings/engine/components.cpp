@@ -10,6 +10,7 @@
 // Rack's own C++ UI code reads ports and lights: a value may come from the
 // current or the previous engine block. Python never runs on the engine
 // thread, and nothing here is called from it.
+#include "rackpy/rtti.hpp"
 #include "components.hpp"
 #include "metadata.hpp"
 #include "module.hpp"
@@ -148,7 +149,7 @@ void identityField(py::classh<Info, InfoTrampoline<Info>>& cls, const char* name
 template <typename Info, typename R, typename Base>
 void infoMethod(py::classh<Info, InfoTrampoline<Info>>& cls, const char* name, R (Info::*method)(), Base base, const char* doc = "") {
 	cls.def(name, [method, base](Info& info) {
-		if (auto* alias = dynamic_cast<InfoTrampoline<Info>*>(&info)) {
+		if (auto* alias = ::rackpy::rttiCast<InfoTrampoline<Info>*>(&info)) {
 			alias->check();
 			return base(info);
 		}

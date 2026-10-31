@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // RP-14B2b3/b4: owned SDK quantities with weak module links. RP-14B2b6: the
 // same objects transferred into module slots by the class factories.
+#include "rackpy/rtti.hpp"
 #include "../support/overrides.hpp"
 #include "quantity.hpp"
 #include "components.hpp"
@@ -137,9 +138,9 @@ struct StandaloneQuantity : QuantityTrampoline<Base, StandaloneGuard>, SlotTrans
 
 template <typename F>
 decltype(auto) standalone(Q& q, F action) {
-	if (auto* s = dynamic_cast<StandaloneQuantity<S>*>(&q))
+	if (auto* s = ::rackpy::rttiCast<StandaloneQuantity<S>*>(&q))
 		return action(*s);
-	return action(dynamic_cast<StandaloneQuantity<Q>&>(q));
+	return action(::rackpy::rttiCast<StandaloneQuantity<Q>&>(q));
 }
 
 void guard(Q& q) {
@@ -190,7 +191,7 @@ void guardQuantity(Q& q) {
 /** Rack's engine thread reaches a module's slot quantities (Core MIDI-Map): a laboratory
 quantity, whose value methods are Python, goes only into a laboratory module. */
 void refuseLaboratoryQuantity(const ModuleRef& ref, Q& q) {
-	auto* flag = dynamic_cast<LaboratoryQuantity*>(&q);
+	auto* flag = ::rackpy::rttiCast<LaboratoryQuantity*>(&q);
 	if (flag && flag->laboratoryOverrides && !ref.get().laboratory)
 		throw runtime::Laboratory("a laboratory parameter quantity goes only into a laboratory module's slot: Rack's "
 			"engine can call an ordinary module's quantities on its own threads, where Python never runs");

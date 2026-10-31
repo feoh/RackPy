@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Checked built-in quantity adapters, not standalone/subclassable quantities.
+#include "rackpy/rtti.hpp"
 #include "quantity.hpp"
 #include "components.hpp"
 
@@ -35,7 +36,7 @@ py::object quantityView(const ModuleRef& ref, int id) {
 	auto token = m.paramQuantityTokens[id];
 	return runtime::identity(ptr, token->generation, [&]() -> py::object {
 		QuantityView view{ptr, token, ref.state};
-		if (dynamic_cast<rack::engine::SwitchQuantity*>(ptr))
+		if (::rackpy::rttiCast<rack::engine::SwitchQuantity*>(ptr))
 			return py::cast(SwitchQuantityView{view});
 		return py::cast(view);
 	});
@@ -79,7 +80,7 @@ void setValue(rack::engine::ParamQuantity& q, float value) {
 }
 
 void checkLabelIndex(rack::engine::ParamQuantity& q) {
-	if (dynamic_cast<rack::engine::SwitchQuantity*>(&q)) {
+	if (::rackpy::rttiCast<rack::engine::SwitchQuantity*>(&q)) {
 		double index = std::floor(q.getValue() - q.getMinValue());
 		if (!std::isfinite(index) || index < std::numeric_limits<int>::min() || index > std::numeric_limits<int>::max())
 			throw std::invalid_argument("switch label index cannot be represented as an integer");

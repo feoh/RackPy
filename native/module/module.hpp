@@ -2,6 +2,7 @@
 // Native construction transaction for RP-14A. No Python objects or virtual
 // trampolines live in the module. Engine integration is RP-14C/RP-16.
 #pragma once
+#include "rackpy/rtti.hpp"
 #include <rack.hpp>
 
 #include <algorithm>
@@ -75,7 +76,7 @@ struct TransferredMetadata {
 /** The transferred object in a slot, or null for native-created metadata. */
 template <typename Info>
 TransferredMetadata* transferredIn(Info* info) {
-	auto* t = dynamic_cast<TransferredMetadata*>(info);
+	auto* t = ::rackpy::rttiCast<TransferredMetadata*>(info);
 	return t && t->transferred() ? t : nullptr;
 }
 
@@ -298,7 +299,7 @@ keeps a raw pointer to its target and clears it only in removeModule
 (Engine.cpp:815), so only a module Rack's engine owns qualifies; Python's calls
 refuse smoothing otherwise. */
 inline bool smoothingAllowed(const rack::engine::Module* module) {
-	auto* m = dynamic_cast<const Module*>(module);
+	auto* m = ::rackpy::rttiCast<const Module*>(module);
 	return m && m->engineOwned.load(std::memory_order_acquire);
 }
 

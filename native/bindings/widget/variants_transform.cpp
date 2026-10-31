@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+#include "rackpy/rtti.hpp"
 #include "variants.hpp"
 #include <pybind11/stl.h>
 #include <array>
@@ -9,7 +10,7 @@ using T = rack::widget::TransformWidget;
 struct Matrix {
 	std::shared_ptr<State> owner;
 	T& get() const {
-		auto* value = dynamic_cast<T*>(&checked(owner));
+		auto* value = ::rackpy::rttiCast<T*>(&checked(owner));
 		if (!value) throw runtime::StaleHandle("TransformWidget native base has been destroyed");
 		return *value;
 	}

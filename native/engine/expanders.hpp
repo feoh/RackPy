@@ -17,6 +17,7 @@
 // that only succeeds for RackPy modules (RP-23B). Kernel libraries reach the
 // same checks through rackpy/expanders.hpp's Services (RP-23C).
 #pragma once
+#include "rackpy/rtti.hpp"
 #include <rack.hpp>
 
 #include <atomic>
@@ -161,7 +162,7 @@ inline ExpanderChannels* resolve(Link& link, rack::engine::Module* m) noexcept {
 	if (m != link.module || (m && m->id != link.id)) {
 		link.module = m;
 		link.id = m ? m->id : -1;
-		link.channels = m ? dynamic_cast<ExpanderChannels*>(m) : nullptr;
+		link.channels = m ? ::rackpy::rttiCast<ExpanderChannels*>(m) : nullptr;
 	}
 	return static_cast<ExpanderChannels*>(link.channels);
 }

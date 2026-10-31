@@ -2,6 +2,7 @@
 // Family 3 adapter: the generated registry calls bind_plugin(). rack::plugin
 // becomes rackpy.raw.plugin: plugins, models and createModel for Python module
 // factories (RP-16A). The native models are in native/plugin/.
+#include "rackpy/rtti.hpp"
 #include <pybind11/stl.h>
 
 #include <rack.hpp>
@@ -248,7 +249,7 @@ void addModel(const PluginHandle& h, ModelHandle& m) {
 		plugin::stage(m.detached->owned);
 	}
 	catch (const std::logic_error& e) {
-		if (dynamic_cast<const std::invalid_argument*>(&e))
+		if (::rackpy::rttiCast<const std::invalid_argument*>(&e))
 			throw;
 		throw runtime::Ownership(e.what());
 	}
@@ -453,7 +454,7 @@ void bind_plugin(py::module_ raw) {
 			py::arg("favorite"))
 		.def("create_module", [](const ModelHandle& h) {
 			RackModel& model = committedModel(h, "Model.create_module");
-			auto* m = dynamic_cast<plugin::Model*>(&model);
+			auto* m = ::rackpy::rttiCast<plugin::Model*>(&model);
 			if (!m) {  // another plugin's model: its own C++ code makes the module
 				runtime::requireMainThread("creating a module");
 				liveUi("create_module");
@@ -467,7 +468,7 @@ void bind_plugin(py::module_ raw) {
 					throw std::runtime_error("the model made no module");
 				return ownForeignModule(made);
 			}
-			auto* factory = dynamic_cast<PyModuleFactory*>(m->factory.get());
+			auto* factory = ::rackpy::rttiCast<PyModuleFactory*>(m->factory.get());
 			if (!factory || !factory->fn)
 				throw std::runtime_error("this model's module factory is not available");
 			return createOwned(factory->fn.get(), *m);
@@ -475,7 +476,7 @@ void bind_plugin(py::module_ raw) {
 			"hand theirs to its engine).")
 		.def("create_module_widget", [](const ModelHandle& h, py::object module) {
 			RackModel& model = committedModel(h, "Model.create_module_widget");
-			auto* m = dynamic_cast<plugin::Model*>(&model);
+			auto* m = ::rackpy::rttiCast<plugin::Model*>(&model);
 			if (m && m->widgetFactory)
 				return widgets::createModuleWidgetForPython(*m->widgetFactory, *m, module);
 			// The model's own C++ code (another plugin's, or RackPy's plain panel) makes the widget.
@@ -521,7 +522,7 @@ void bind_plugin(py::module_ raw) {
 			"Python widget for a RackPy model with a widget factory, else a ForeignModuleWidget.")
 		.def("append_context_menu", [](const ModelHandle& h, py::object menu, bool inBrowser) {
 			RackModel& m = addedModel(h, "append_context_menu");
-			auto* target = dynamic_cast<rack::ui::Menu*>(widgets::argument(menu));
+			auto* target = ::rackpy::rttiCast<rack::ui::Menu*>(widgets::argument(menu));
 			if (!target)
 				throw py::type_error("append_context_menu takes a rackpy.raw.ui.Menu");
 			widgets::checkMutationOf(*target);
