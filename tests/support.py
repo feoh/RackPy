@@ -30,6 +30,9 @@ def host_platform() -> str:
 
 PLATFORM = host_platform()
 MACOS = PLATFORM.startswith("mac-")
+# AddressSanitizer's options for the native sanitizer runs. Apple's ASan has no LeakSanitizer ("detect_leaks
+# is not supported on this platform", RP-40), so leaks are checked on Linux only; the code is the same.
+ASAN_OPTIONS = f"detect_leaks={0 if MACOS else 1}:abort_on_error=0"
 PLUGINS = f"plugins-{PLATFORM}"  # the plugins folder of a Rack user directory
 RACK_HOST = "mac-x64+arm64" if MACOS else PLATFORM  # Rack Free's archive: one universal app on macOS
 

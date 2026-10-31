@@ -20,7 +20,7 @@ from typing import Any
 
 import pytest
 
-from tests.support import rack_platforms
+from tests.support import PLATFORM, rack_platforms
 
 pytestmark = [pytest.mark.native, rack_platforms()]
 
@@ -105,6 +105,11 @@ def run(binary: Path) -> dict[str, Any]:
     return data
 
 
+@pytest.mark.skipif(
+    PLATFORM == "mac-arm64",
+    reason="arm64 has no SSE4.2: both builds are SIMDe there, so there are not two paths to compare; "
+    "tests/simd/test_simd.py checks rack::simd in Rack on arm64",
+)
 def test_sse42_and_simde_agree_within_the_documented_envelope(dev_build: Path) -> None:
     sse = run(dev_build / "rackpy_simd_reference")
     simde = run(dev_build / "rackpy_simd_reference_simde")

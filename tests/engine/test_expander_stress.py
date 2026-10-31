@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import rack_platforms
+from tests.support import ASAN_OPTIONS, rack_platforms
 
 pytestmark = [rack_platforms(), pytest.mark.native]
 
@@ -22,7 +22,7 @@ pytestmark = [rack_platforms(), pytest.mark.native]
 def test_hot_changes_and_snapshots_under_sanitizers(dev_build: Path, variant: str, workers: int, blocks: int) -> None:
     env = {
         **os.environ,
-        "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=0",
+        "ASAN_OPTIONS": ASAN_OPTIONS,
         "UBSAN_OPTIONS": "print_stacktrace=1",
         "TSAN_OPTIONS": "halt_on_error=1:second_deadlock_stack=1",
     }

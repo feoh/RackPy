@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import linux_x64_only
+from tests.support import ASAN_OPTIONS, linux_x64_only
 
 pytestmark = [linux_x64_only(), pytest.mark.native]
 
@@ -42,7 +42,7 @@ def test_the_audio_paths_make_no_forbidden_calls(dev_build: Path) -> None:
 def test_the_paths_under_sanitizers(dev_build: Path, variant: str, blocks: int) -> None:
     env = {
         **os.environ,
-        "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=0",
+        "ASAN_OPTIONS": ASAN_OPTIONS,
         "UBSAN_OPTIONS": "print_stacktrace=1",
         "TSAN_OPTIONS": "halt_on_error=1:second_deadlock_stack=1",
     }

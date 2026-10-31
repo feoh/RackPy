@@ -16,13 +16,13 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import rack_platforms
+from tests.support import ASAN_OPTIONS, rack_platforms
 
 pytestmark = [pytest.mark.native, rack_platforms()]
 
 
 def test_dsp_reference_runs_clean_under_sanitizers(dev_build: Path) -> None:
-    env = {**os.environ, "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=0", "UBSAN_OPTIONS": "print_stacktrace=1"}
+    env = {**os.environ, "ASAN_OPTIONS": ASAN_OPTIONS, "UBSAN_OPTIONS": "print_stacktrace=1"}
     sanitized = subprocess.run(
         [str(dev_build / "rackpy_dsp_reference_sanitized")], capture_output=True, text=True, env=env, check=False
     )

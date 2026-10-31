@@ -113,19 +113,34 @@ def fetch_archive(entry: dict[str, Any], cache: Path, fresh: bool) -> Path:
 
 
 def extract_pkg(archive: Path, staging: Path) -> None:
-    """A macOS installer package: a xar archive whose Payload is a gzipped cpio. libarchive's bsdtar reads
-    both (macOS's own tar is bsdtar); members outside the target are refused, as bsdtar does by default."""
-    tar = shutil.which("bsdtar") or (shutil.which("tar") if platform.system() == "Darwin" else None)
-    if tar is None:
-        raise SystemExit("extracting the macOS Rack package needs bsdtar (libarchive)")
+    """A macOS installer package: a xar archive whose Payload is a gzipped cpio. On a Mac, pkgutil expands
+    both; elsewhere libarchive's bsdtar reads both, refusing members outside the target by default. (macOS's
+    own bsdtar did not expand the Payload where bsdtar elsewhere does, RP-40.)"""
     expanded = staging / "expanded"
-    expanded.mkdir()
-    subprocess.run([tar, "-xf", str(archive), "-C", str(expanded)], check=True)
-    (payload,) = expanded.glob("*.pkg/Payload")
-    subprocess.run([tar, "-xf", str(payload), "-C", str(staging)], check=True)
+    if platform.system() == "Darwin":
+        subprocess.run(["pkgutil", "--expand-full", str(archive), str(expanded)], check=True)
+        payloads = list(expanded.glob("*.pkg/Payload"))
+        if len(payloads) != 1 or not payloads[0].is_dir():
+            raise SystemExit(f"{archive.name}: expected one expanded *.pkg/Payload, found {_listing(expanded)}")
+        for item in payloads[0].iterdir():
+            item.rename(staging / item.name)
+    else:
+        tar = shutil.which("bsdtar")
+        if tar is None:
+            raise SystemExit("extracting the macOS Rack package needs bsdtar (libarchive)")
+        expanded.mkdir()
+        subprocess.run([tar, "-xf", str(archive), "-C", str(expanded)], check=True)
+        payloads = list(expanded.glob("*.pkg/Payload"))
+        if len(payloads) != 1:
+            raise SystemExit(f"{archive.name}: expected one *.pkg/Payload, found {_listing(expanded)}")
+        subprocess.run([tar, "-xf", str(payloads[0]), "-C", str(staging)], check=True)
     shutil.rmtree(expanded)
     for apple_double in staging.rglob("._*"):  # extended attributes, as files when not on macOS
         apple_double.unlink()
+
+
+def _listing(root: Path) -> list[str]:
+    return sorted(p.relative_to(root).as_posix() for p in root.rglob("*"))[:40]
 
 
 def extract(archive: Path, entry: dict[str, Any], cache: Path) -> Path:

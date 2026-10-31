@@ -271,6 +271,11 @@ if(RACKPY_BUILD_TESTS)
   # Both are for GCC and libstdc++ only. Clang with libc++ (macOS) needs neither, and there -mno-sse3
   # would turn SIMDe's rounding into calls to roundevenf, which macOS's libm does not have (RP-40).
   target_compile_options(rackpy_simd_reference_simde PRIVATE "$<$<CXX_COMPILER_ID:GNU>:-mno-sse3;-Wno-maybe-uninitialized>")
+  # On an Intel Mac, -mno-sse4.2 alone takes common.hpp's SIMDe branch; SSE4.1 stays, so SIMDe's rounding
+  # is still an instruction. arm64 has no SSE: both builds are SIMDe there, and tests/simd says so.
+  if(RACKPY_PLATFORM STREQUAL "mac-x64")
+    target_compile_options(rackpy_simd_reference_simde PRIVATE -mno-sse4.2)
+  endif()
   target_compile_definitions(rackpy_simd_reference_simde PRIVATE SIMDE_NO_NATIVE)
   target_link_libraries(rackpy_simd_reference_simde PRIVATE rackpy_sdk_program)
   # Rack's own DSP results (RP-18); tests/dsp compares rackpy.raw.dsp against them inside Rack.
