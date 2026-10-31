@@ -317,6 +317,7 @@ jobs:
       - if: always()
         name: Keep the manifest, checksums and each artifact's file list with the logs
         run: |
+          shopt -s nullglob  # a failed build leaves no artifacts; a glob must not become a file name
           mkdir -p reports/files
           cp "$RUNNER_TEMP/release/artifacts/manifest.json" "$RUNNER_TEMP/release/artifacts/SHA256SUMS" reports/ || true
           for d in "$RUNNER_TEMP"/release/work/RackPy "$RUNNER_TEMP"/release/work/plugins/*; do
@@ -374,6 +375,7 @@ jobs:
       - if: always()
         name: Keep the manifest, checksums and each artifact's file list with the logs
         run: |
+          shopt -s nullglob  # a failed build leaves no artifacts; a glob must not become a file name
           mkdir -p reports/files reports/listings
           cp "$RUNNER_TEMP/release/artifacts/manifest.json" "$RUNNER_TEMP/release/artifacts/SHA256SUMS" reports/ || true
           for d in "$RUNNER_TEMP"/release/work/RackPy "$RUNNER_TEMP"/release/work/plugins/*; do
