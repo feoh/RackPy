@@ -429,6 +429,10 @@ jobs:
       - name: Native tests and Rack host tests
         env:
           MACOS_TESTS: ${{ inputs.macos_tests }}  # through the environment, never into the script's text
+          # Deliberately lacking: GitHub-hosted macOS runners give Rack no OpenGL window (GLFW 65545, no
+          # suitable pixel format), so windowed tests skip here, each with that reason. They are an open
+          # gate for a Mac with a GPU (planning/rp-40-validation.md), not a pass.
+          RACKPY_ALLOW_MISSING: macos-opengl
         run: >
           uv run --frozen pytest -m "(native or host) and not dist and not sanitizer and not stress and not inventory"
           ${MACOS_TESTS:+-k "$MACOS_TESTS"}

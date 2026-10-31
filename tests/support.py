@@ -8,6 +8,7 @@ import shutil
 import signal
 import subprocess
 import sys
+import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -178,6 +179,42 @@ def run_rack(
     return RackRun(returncode, log.read_text(errors="replace") if log.exists() else "")
 
 
+# What Rack logs once it has an OpenGL window, and what GLFW logs when the Mac offers it none.
+GL_READY = "Renderer: "
+GL_REFUSED = ("NSGL: Failed to find a suitable pixel format", "Could not create Window")
+_opengl_windows: dict[Path, bool] = {}
+
+
+def opens_gl_windows(rack: Path, timeout: float = 30) -> bool:
+    """Whether this Mac gives Rack an OpenGL window, probed once per Rack: Rack windowed, an empty user folder.
+
+    GitHub-hosted macOS runners offer no pixel format Rack's GLFW accepts (GLFW error 65545); Rack then shows
+    a modal "Could not open GLFW window" dialog and waits, so each windowed run would hang until killed.
+    """
+    if rack not in _opengl_windows:
+        with tempfile.TemporaryDirectory(prefix="rackpy-gl-probe-") as tmp:
+            user = Path(tmp)
+            (user / "settings.json").write_text('{"showTipsOnLaunch": false}')
+            proc = subprocess.Popen(
+                [str(rack_program(rack)), "-u", str(user)],
+                cwd=rack,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+            )
+            log, found = user / "log.txt", None
+            deadline = time.monotonic() + timeout
+            while found is None and time.monotonic() < deadline and proc.poll() is None:
+                text = log.read_text(errors="replace") if log.exists() else ""
+                found = True if GL_READY in text else False if any(r in text for r in GL_REFUSED) else None
+                time.sleep(0.2)
+            os.killpg(proc.pid, signal.SIGKILL)
+            proc.wait()
+            _opengl_windows[rack] = bool(found)
+    return _opengl_windows[rack]
+
+
 def run_rack_windowed(
     rack: Path,
     user: Path,
@@ -195,6 +232,13 @@ def run_rack_windowed(
     """
     if not MACOS:
         require("xvfb-run", shutil.which("xvfb-run") is not None, "install Xvfb (xorg-server-xvfb or xvfb)")
+    else:
+        require(
+            "macos-opengl",
+            opens_gl_windows(rack),
+            "a Mac that gives Rack an OpenGL window (a GPU and a logged-in session); GitHub-hosted macOS runners "
+            "offer no pixel format Rack's GLFW accepts",
+        )
     environ = (
         {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}
         | isolated_audio_env(user)

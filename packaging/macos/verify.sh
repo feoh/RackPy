@@ -101,6 +101,35 @@ clean_run() {  # $1: log name, $2: slug, $3: user folder: the plugin loaded, not
     fi
 }
 
+# Gates this machine cannot run: reported as OPEN, never as passed, and annotated on GitHub Actions.
+open_gates=0
+gate() {
+    note "OPEN  $*"
+    open_gates=$((open_gates + 1))
+    if [ -n "${GITHUB_ACTIONS:-}" ]; then echo "::warning title=RP-40 open gate::$*"; fi
+}
+gl_windows() {  # whether this Mac gives Rack an OpenGL window: Rack windowed on an empty user folder, then killed
+    local user=$USERS/gl-probe result=unknown
+    rm -rf "$user"; mkdir -p "$user"; echo '{"showTipsOnLaunch": false}' > "$user/settings.json"
+    "$RACK" -u "$user" > "$LOGS/gl-probe.out" 2>&1 &
+    local rack=$!
+    for _ in $(seq 150); do
+        if grep -qF "Renderer: " "$user/log.txt" 2>/dev/null; then result=yes; break; fi
+        if grep -qE "NSGL: Failed to find a suitable pixel format|Could not create Window" "$user/log.txt" 2>/dev/null; then
+            result=no; break
+        fi
+        kill -0 $rack 2>/dev/null || break
+        sleep 0.2
+    done
+    kill -9 $rack 2>/dev/null; wait $rack 2>/dev/null
+    cp "$user/log.txt" "$LOGS/gl-probe.log" 2>/dev/null
+    [ "$result" = yes ]
+}
+# Without an OpenGL window Rack shows a modal "Could not open GLFW window" dialog and waits: GitHub-hosted
+# macOS runners offer no pixel format its GLFW accepts (GLFW 65545).
+if gl_windows; then GL=yes; note "windowed: Rack opens OpenGL windows here ($(grep -oE 'Renderer: .*' "$LOGS/gl-probe.log" | head -1 | cut -c1-80))"
+else GL=no; note "windowed: Rack gets no OpenGL window here: $(grep -oE 'GLFW error .*' "$LOGS/gl-probe.log" | head -1 | cut -c1-100)"; fi
+
 manifest=$ARTIFACTS/manifest.json
 plugins=()
 while IFS= read -r line; do plugins+=("$line"); done < <(jqr -r '.artifacts[] | select(.slug) | .file' "$manifest")
@@ -126,6 +155,10 @@ for file in "${plugins[@]}"; do
     # In a window: Rack's screenshot mode (-t) loads the patch, then draws every model's widget without a
     # module, as the module browser's preview does, to screenshots/<plugin>/<model>.png with OpenGL, and
     # quits. Unlike keystrokes into the browser, it needs no Accessibility permission.
+    if [ "$GL" != yes ]; then
+        gate "$slug-window: windowed rendering of ${#models[@]} model(s) not run: this Mac gives Rack no OpenGL window"
+        continue
+    fi
     rm -f "$user/log.txt"; rm -rf "$user/screenshots"
     "$RACK" -u "$user" -t 1 > "$LOGS/$slug-window.out" 2>&1 &
     rack=$!; dog=$(watchdog $rack 300)
@@ -249,5 +282,7 @@ check "uninstall: RackPy is gone" lacks "$LOGS/uninstall.log" "RackPy"
 
 rm -rf "$USERS"
 note ""
-if [ "$failed" = 0 ]; then note "RESULT: all checks passed"; else note "RESULT: some checks FAILED"; fi
+if [ "$failed" != 0 ]; then note "RESULT: some checks FAILED"
+elif [ "$open_gates" != 0 ]; then note "RESULT: every check run here passed; $open_gates OPEN (not run on this machine, not passed)"
+else note "RESULT: all checks passed"; fi
 exit "$failed"

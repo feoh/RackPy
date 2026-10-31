@@ -880,6 +880,8 @@ def verify_mac(artifacts: Path, rack: Path, logs: Path) -> None:
         "LANG": "en_US.UTF-8",
         "JQ": shutil.which("jq") or "/usr/bin/jq",
         "ALIEN_LOADER": str(alien),
+        # So that open gates become GitHub annotations (packaging/macos/verify.sh); nothing else passes through.
+        **{k: os.environ[k] for k in ("GITHUB_ACTIONS",) if k in os.environ},
     }
     try:
         run(["/bin/bash", script, artifacts.resolve(), rack.resolve(), logs.resolve()], env=env)
