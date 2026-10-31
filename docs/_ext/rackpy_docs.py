@@ -291,7 +291,7 @@ class RackPyExampleSource(SphinxDirective):
 
     def run(self) -> list[nodes.Node]:
         path = (EXAMPLES / self.arguments[0]).resolve()
-        if not path.is_relative_to(EXAMPLES) or path.suffix != ".py" or not path.is_file():
+        if not path.is_relative_to(EXAMPLES.resolve()) or path.suffix != ".py" or not path.is_file():
             raise self.error(f"no example source {self.arguments[0]} in examples/")
         if "pyobject" not in self.options:
             raise self.error("rackpy-example-source needs :pyobject:")
