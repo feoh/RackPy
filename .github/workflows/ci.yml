@@ -11,6 +11,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      macos_tests:
+        description: "Optional pytest -k expression for the macOS host-test jobs (empty: all of them)"
+        required: false
+        default: ""
   schedule:
     - cron: "17 6 * * 1"  # weekly: external links, and a fresh look at the pinned downloads
 
@@ -422,8 +427,11 @@ jobs:
           key: rackpy-${{ matrix.platform }}-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json') }}
       - run: uv sync --frozen
       - name: Native tests and Rack host tests
+        env:
+          MACOS_TESTS: ${{ inputs.macos_tests }}  # through the environment, never into the script's text
         run: >
           uv run --frozen pytest -m "(native or host) and not dist and not sanitizer and not stress and not inventory"
+          ${MACOS_TESTS:+-k "$MACOS_TESTS"}
           -v --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/${{ matrix.platform }}.xml
       - if: always()
         name: Collect Rack logs

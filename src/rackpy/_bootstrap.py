@@ -17,8 +17,11 @@ from rackpy import __version__
 try:
     import _rackpy_host
 except ImportError as e:
+    # The host's own error report shows this message but not the chained cause, so name the cause here: a
+    # registered module whose initialization failed also raises ImportError (pybind11 converts the exception).
     raise ImportError(
-        "rackpy._bootstrap runs only inside the RackPy host in Rack; the _rackpy_host module is missing"
+        "rackpy._bootstrap runs only inside the RackPy host in Rack; importing _rackpy_host failed: "
+        f"{type(e).__name__}: {e}"
     ) from e
 
 # The host ABI this package was written for. It must equal the host's RACKPY_HOST_ABI.
