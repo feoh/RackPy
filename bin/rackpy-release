@@ -582,7 +582,7 @@ def third_party_notices(licenses_dir: Path, version: str) -> list[dict[str, Any]
         + ").",
         "",
     ]
-    (licenses_dir / "THIRD-PARTY-NOTICES.md").write_text("\n".join(lines))
+    (licenses_dir / "THIRD-PARTY-NOTICES.md").write_text("\n".join(lines), newline="\n")
     return components
 
 
@@ -606,7 +606,7 @@ def sdk_header_notices(licenses_dir: Path, sdk: Path) -> None:
         if comments is None or ("zlib" not in comments[1] and "Permission is granted" not in comments[1]):
             raise SystemExit(f"{header} has no license comment where expected")
         parts += ["", f"## include/simd/{header}", "", comments[1].strip()]
-    (licenses_dir / "rack-sdk-headers.txt").write_text("\n".join(parts) + "\n", encoding="utf-8")
+    (licenses_dir / "rack-sdk-headers.txt").write_text("\n".join(parts) + "\n", encoding="utf-8", newline="\n")
 
 
 # What each file of an artifact is, by the first pattern its path matches: the components (keys of
@@ -664,7 +664,7 @@ def file_manifest(root: Path, build: dict[str, Any]) -> list[str]:
         "components": COMPONENTS,
         "files": files,
     }
-    (root / "licenses" / "FILES.json").write_text(json.dumps(data, indent=1, sort_keys=True) + "\n")
+    (root / "licenses" / "FILES.json").write_text(json.dumps(data, indent=1, sort_keys=True) + "\n", newline="\n")
     return unmatched
 
 
@@ -909,9 +909,9 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
         ("mach_o" if MACOS else "pe" if WINDOWS else "elf"): binaries | RECORDED,
         "artifacts": artifacts,
     }
-    (out / "manifest.json").write_text(json.dumps(manifest_data, indent=2, sort_keys=True) + "\n")
+    (out / "manifest.json").write_text(json.dumps(manifest_data, indent=2, sort_keys=True) + "\n", newline="\n")
     sums = "".join(f"{sha256_file(p)}  {p.name}\n" for p in sorted(out.iterdir()) if p.name != "SHA256SUMS")
-    (out / "SHA256SUMS").write_text(sums)
+    (out / "SHA256SUMS").write_text(sums, newline="\n")
     print(f"\n{len(artifacts)} artifacts in {out}" + ("  (DIRTY CHECKOUT: do not distribute)" if dirty else ""))
 
 
@@ -993,10 +993,10 @@ def introspect(artifacts: Path, *, rack: Path, out: Path, example: str = "templa
         snapshot = scratch / "introspection.json"
         entry = "rackpy_release_introspect"
         source = INTROSPECT_ENTRY.format(original=config["entry"], out=str(snapshot))
-        (plugin / "pythonpath" / f"{entry}.py").write_text(source, encoding="utf-8")
-        config_path.write_text(json.dumps({**config, "entry": entry}))
+        (plugin / "pythonpath" / f"{entry}.py").write_text(source, encoding="utf-8", newline="\n")
+        config_path.write_text(json.dumps({**config, "entry": entry}), newline="\n")
         (user / "autosave").mkdir()
-        (user / "autosave" / "patch.json").write_text('{"version": "2.6.6", "modules": [], "cables": []}')
+        (user / "autosave" / "patch.json").write_text('{"version": "2.6.6", "modules": [], "cables": []}', newline="\n")
         program = rack / "Contents" / "MacOS" / "Rack" if MACOS else rack / ("Rack.exe" if WINDOWS else "Rack")
         # No display: headless Rack still shows a blocking dialog for a patch's missing module.
         env = {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}

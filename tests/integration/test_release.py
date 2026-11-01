@@ -49,8 +49,10 @@ def make_tree(root: Path, mtime: int) -> Path:
     (root / "plugin.so").chmod(0o750)
     (root / "python" / "lib" / "libpython3.14.so.1.0").write_bytes(b"lib")
     (root / "python" / "lib" / "libpython3.14.so").symlink_to("libpython3.14.so.1.0")
+    # Windows cannot set a symlink's own times (NotImplementedError): there it sets its target's, to the same time.
+    own = os.utime in os.supports_follow_symlinks
     for path in root.rglob("*"):
-        os.utime(path, (mtime, mtime), follow_symlinks=False)
+        os.utime(path, (mtime, mtime), follow_symlinks=not own)
     return root
 
 

@@ -77,7 +77,7 @@ def problems_doc(problems: list[bm.Problem]) -> dict[str, Any]:
 
 def write_json(path: Path, doc: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
 
 
 @app.command
@@ -141,7 +141,7 @@ def collect(run: int, *, dest: Path = DEST) -> None:
             "collected_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         },
     )
-    (dest / "SUMMARY.md").write_text(markdown(run, info, jobs, summary), encoding="utf-8")
+    (dest / "SUMMARY.md").write_text(markdown(run, info, jobs, summary), encoding="utf-8", newline="\n")
     print((dest / "SUMMARY.md").read_text(encoding="utf-8"))
 
 

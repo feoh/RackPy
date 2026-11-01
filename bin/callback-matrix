@@ -151,7 +151,7 @@ def check(*, write: bool = False) -> None:
     rows = classify(surface["entries"], doc["rules"])
     unmatched = [r["id"] for r in rows if r["strategy"] is None]
     if write:
-        OUTPUT.write_text(render(rows, doc), encoding="utf-8")
+        OUTPUT.write_text(render(rows, doc), encoding="utf-8", newline="\n")
     counts = Counter(r["strategy"] for r in rows)
     print(f"{len(rows)} public virtual methods: {dict(sorted((k or 'UNMATCHED', v) for k, v in counts.items()))}")
     if unmatched:

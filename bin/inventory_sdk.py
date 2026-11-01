@@ -1234,7 +1234,7 @@ def extract(
     """Extract the inventory and write it (default upstream/api-surface.json)."""
     doc = build(resolve_sdk(sdk), libclang, clangxx, variants)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(dumps(doc), encoding="utf-8")
+    output.write_text(dumps(doc), encoding="utf-8", newline="\n")
     print(f"{doc['summary']['entries']} entries; {doc['summary']['by_classification']}")
 
 
@@ -1333,7 +1333,7 @@ def summary(*, inventory: Path = OUTPUT, write: bool = False) -> None:
     text = summary_markdown(json.loads(inventory.read_text(encoding="utf-8")))
     if write:
         SUMMARY.parent.mkdir(parents=True, exist_ok=True)
-        SUMMARY.write_text(text, encoding="utf-8")
+        SUMMARY.write_text(text, encoding="utf-8", newline="\n")
     print(text)
 
 

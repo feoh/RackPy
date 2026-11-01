@@ -132,8 +132,10 @@ def bench_patch(user: Path, bench: Path, model: str, count: int, rate: float, fe
             {"id": 2, "outputModuleId": 101, "outputId": 0, "inputModuleId": 100, "inputId": 0},
         ]
     (user / "autosave").mkdir()
-    (user / "autosave" / "patch.json").write_text(json.dumps({"version": "2.6.6", "modules": mods, "cables": cables}))
-    (user / "settings.json").write_text(json.dumps({"sampleRate": rate, "threadCount": 1}))
+    (user / "autosave" / "patch.json").write_text(
+        json.dumps({"version": "2.6.6", "modules": mods, "cables": cables}), newline="\n"
+    )
+    (user / "settings.json").write_text(json.dumps({"sampleRate": rate, "threadCount": 1}), newline="\n")
 
 
 def parse_bench_lines(log: str) -> list[dict[str, Any]]:
@@ -166,7 +168,8 @@ def lifecycle_ui(paths: dict[str, Path]) -> dict[str, str]:
                     "author": "RackPy contributors",
                     "modules": [{"slug": "Probe", "name": "Probe", "tags": []}],
                 }
-            )
+            ),
+            newline="\n",
         )
         (plugin / "spike.json").write_text(
             json.dumps(
@@ -175,7 +178,8 @@ def lifecycle_ui(paths: dict[str, Path]) -> dict[str, str]:
                     "libpython": "lib/libpython3.14.so.1.0",
                     "stdlib_marker": "lib/python3.14/os.py",
                 }
-            )
+            ),
+            newline="\n",
         )
         (plugin / "scenario.json").write_text(
             json.dumps(
@@ -188,11 +192,14 @@ def lifecycle_ui(paths: dict[str, Path]) -> dict[str, str]:
                     "slow_ui_frames": 20,
                     "exclusive_stall_ms": 50,
                 }
-            )
+            ),
+            newline="\n",
         )
         mods = [{"id": 21, "plugin": "RackPyLifecycle", "model": "Probe", "version": "2.0.0", "pos": [0, 0]}]
         (user / "autosave").mkdir()
-        (user / "autosave" / "patch.json").write_text(json.dumps({"version": "2.6.6", "modules": mods, "cables": []}))
+        (user / "autosave" / "patch.json").write_text(
+            json.dumps({"version": "2.6.6", "modules": mods, "cables": []}), newline="\n"
+        )
         env = {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}
         subprocess.run(
             ["xvfb-run", "-a", "-s", "-screen 0 1600x1000x24", str(paths["rack"] / "Rack"), "-u", str(user)],
@@ -325,7 +332,7 @@ def run(
     print("ui checks")
     result["ui"] = lifecycle_ui(paths)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(result, indent=1, sort_keys=True) + "\n")
+    output.write_text(json.dumps(result, indent=1, sort_keys=True) + "\n", newline="\n")
     print(f"wrote {output}")
 
 

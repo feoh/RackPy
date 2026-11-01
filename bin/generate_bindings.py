@@ -225,7 +225,7 @@ def crosswalk(manifest: dict[str, Any], inputs: bm.Inputs, repo: Path) -> dict[P
     def doc_link(ref: str) -> str:
         """A heading anchor is a link to the page; a `(label)=` target, a reference to the label."""
         path, _, anchor = ref.partition("#")
-        rel = os.path.relpath(repo / path, folder)
+        rel = Path(os.path.relpath(repo / path, folder)).as_posix()  # a link, with / on Windows too (RP-42)
         text = f"{Path(path).stem}{'#' + anchor if anchor else ''}"
         if path not in headings:
             page = (repo / path).read_text(encoding="utf-8")
@@ -412,7 +412,7 @@ def seed(*, update: bool = False, manifest: Path = bm.MANIFEST) -> None:
         existing = bm.load_json(manifest)
     data, changes = bm.seed(inputs, existing)
     manifest.parent.mkdir(parents=True, exist_ok=True)
-    manifest.write_text(bm.dumps(data), encoding="utf-8")
+    manifest.write_text(bm.dumps(data), encoding="utf-8", newline="\n")
     statuses = {s: sum(1 for r in data["entries"] if r["status"] == s) for s in bm.STATUSES}
     print(f"{len(data['entries'])} records: " + ", ".join(f"{k} {v}" for k, v in statuses.items() if v))
     print(f"added {len(changes.added)}, removed {len(changes.removed)}, reset to unreviewed {len(changes.reset)}")
@@ -429,7 +429,7 @@ def generate(*, manifest: Path = bm.MANIFEST) -> None:
     inputs = bm.load_inputs()
     for path, content in generate_files(data, text, inputs, bm.REPO).items():
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(content, encoding="utf-8")
+        path.write_text(content, encoding="utf-8", newline="\n")
         print(f"wrote {path.relative_to(bm.REPO)}")
 
 

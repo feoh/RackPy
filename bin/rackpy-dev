@@ -571,7 +571,7 @@ def measure_rack(rack: Path, plugin: Path | None) -> dict[str, Any]:
         if plugin:
             shutil.copytree(plugin, user / "plugins-lin-x64" / SLUG, symlinks=True)
         (user / "autosave").mkdir()
-        (user / "autosave" / "patch.json").write_text('{"version": "2.6.6", "modules": [], "cables": []}')
+        (user / "autosave" / "patch.json").write_text('{"version": "2.6.6", "modules": [], "cables": []}', newline="\n")
         env = {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}
         proc = subprocess.Popen(
             [rack / "Rack", "-h", "-u", user],

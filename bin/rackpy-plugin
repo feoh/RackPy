@@ -95,7 +95,7 @@ def read_json(path: Path) -> Any:
 
 
 def write_json(path: Path, data: Any) -> None:
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
 
 
 # --- create ----------------------------------------------------------------------------------
@@ -172,9 +172,9 @@ def create(
     write_json(root / "plugin.json", manifest)
     write_json(root / PROJECT_FILE, {"entry": package})
     (root / "pythonpath" / package / "__init__.py").write_text(
-        ENTRY_SOURCE.format(name=manifest["name"], marker=MARKER), encoding="utf-8"
+        ENTRY_SOURCE.format(name=manifest["name"], marker=MARKER), encoding="utf-8", newline="\n"
     )
-    (root / ".gitignore").write_text(GITIGNORE, encoding="utf-8")
+    (root / ".gitignore").write_text(GITIGNORE, encoding="utf-8", newline="\n")
     print(f"Created the plugin project {root}. Add modules with: bin/rackpy-plugin add-module SLUG --project {root}")
 
 
@@ -371,7 +371,7 @@ def register(entry_file: Path, module: str, slug: str, ident: str) -> bool:
     else:
         head = head.rstrip("\n") + f"\n\nfrom . import {module}\n\n"
     tail = tail.rstrip("\n") + f'\nplugin.add_model("{slug}", {module}.configure, widget={module}.{ident}Widget)\n'
-    entry_file.write_text(head + MARKER + tail, encoding="utf-8")
+    entry_file.write_text(head + MARKER + tail, encoding="utf-8", newline="\n")
     return True
 
 
@@ -421,7 +421,7 @@ def add_module(
     source = root / "pythonpath" / package / f"{module}.py"
     if source.exists() and not overwrite:
         raise UsageError(f"{source} already exists; pass --overwrite to replace it")
-    source.write_text(module_source(slug, entry["name"], relative, components), encoding="utf-8")
+    source.write_text(module_source(slug, entry["name"], relative, components), encoding="utf-8", newline="\n")
     print(f"Wrote {source}")
     entry_file = root / "pythonpath" / package / "__init__.py"
     ident = identifier(slug)

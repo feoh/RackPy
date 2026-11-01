@@ -58,7 +58,7 @@ def emit(source: Path, namespace: str, /, *, output: Path | None = None, variabl
     if output is None:
         sys.stdout.write(text)
     else:
-        output.write_text(text, encoding="utf-8")
+        output.write_text(text, encoding="utf-8", newline="\n")
 
 
 if __name__ == "__main__":

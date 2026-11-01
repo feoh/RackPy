@@ -141,7 +141,7 @@ def rendered(data: dict[str, dict[str, Any]]) -> str:
 @app.command
 def write() -> None:
     """Rewrite tests/facade/surface.json from the source."""
-    SNAPSHOT.write_text(rendered(snapshot()), encoding="utf-8")
+    SNAPSHOT.write_text(rendered(snapshot()), encoding="utf-8", newline="\n")
 
 
 @app.command

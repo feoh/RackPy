@@ -16,6 +16,7 @@ import pytest
 from rackpy.dsp.graph import Graph, GraphError, Node, Plan
 from rackpy.dsp.graph_codegen import emit
 from rackpy.dsp.graph_reference import run
+from tests.support import bin_command
 
 pytestmark = pytest.mark.unit
 REPO = Path(__file__).resolve().parents[2]
@@ -32,7 +33,7 @@ def test_the_committed_library_is_current() -> None:
 def test_the_command_line_writes_the_same(tmp_path: Path) -> None:
     out = tmp_path / "graphs.cpp"
     proc = subprocess.run(
-        [str(REPO / "bin/rackpy-graph"), "emit", str(SOURCE), "graphs", "--output", str(out)],
+        [*bin_command("rackpy-graph"), "emit", str(SOURCE), "graphs", "--output", str(out)],
         capture_output=True,
         text=True,
         check=False,

@@ -120,7 +120,7 @@ def evidence(
             "records": dict(sorted(counts.items())),
             "problems": [{"code": p.code, "id": p.id, "message": p.message} for p in problems],
         }
-        output.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        output.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     summary = ", ".join(f"{k} {v}" for k, v in sorted(counts.items()))
     if problems:
         print(f"{platform}: {summary}")
@@ -151,7 +151,7 @@ def samples(
             "samples": per_sample,
             "problems": [{"code": p.code, "id": p.id, "message": p.message} for p in problems],
         }
-        output.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        output.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     summary = ", ".join(f"{k} {v}" for k, v in sorted(counts.items()))
     if problems:
         print(f"{platform}: {summary}")
@@ -171,7 +171,7 @@ def citations(*, manifest: Path = bm.MANIFEST, output: Path | None = None) -> No
     if output:
         output.parent.mkdir(parents=True, exist_ok=True)
         rows = [{"id": p.id, "message": p.message} for p in weak]
-        output.write_text(json.dumps(rows, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        output.write_text(json.dumps(rows, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     for p in weak:
         print(f"  {p}")
     print(f"{len(weak)} record(s) for a reviewer to check")
