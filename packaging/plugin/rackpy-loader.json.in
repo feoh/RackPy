@@ -1,6 +1,6 @@
 {
   "abi": @RACKPY_HOST_ABI@,
-  "host": "rackpy_host.so",
+  "host": "@RACKPY_HOST_FILE@",
   "libpython": "@RACKPY_LIBPYTHON@",
   "stdlib_marker": "@RACKPY_STDLIB_MARKER@",
   "python_path": "pythonpath",

@@ -43,6 +43,7 @@ REPO = Path(__file__).resolve().parent.parent
 INPUTS = REPO / "packaging" / "inputs.json"
 TOOLCHAIN_FILE = REPO / "cmake" / "toolchains" / "rack-lin-x64.cmake"
 ZIG_TOOLCHAIN_FILE = REPO / "cmake" / "toolchains" / "zig-macos.cmake"
+WIN_TOOLCHAIN_FILE = REPO / "cmake" / "toolchains" / "rack-win-x64.cmake"
 DEFAULT_CACHE = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "rackpy" / "build-inputs"
 DEFAULT_BUILD = REPO / "build" / "dev"
 SLUG = "RackPy"
@@ -57,8 +58,8 @@ LOADER_EXPORTS = {"init", "destroy", "settingsToJson", "settingsFromJson"}
 
 app = cyclopts.App(help=__doc__)
 CacheOpt = Annotated[Path, cyclopts.Parameter(help="Download cache outside git.")]
-Toolchain = Literal["host", "rack-lin-x64", "zig-macos"]
-Platform = Literal["lin-x64", "mac-x64", "mac-arm64"]
+Toolchain = Literal["host", "rack-lin-x64", "rack-win-x64", "zig-macos"]
+Platform = Literal["lin-x64", "mac-x64", "mac-arm64", "win-x64"]
 OSX_ARCHITECTURES = {"mac-x64": "x86_64", "mac-arm64": "arm64"}
 
 
@@ -66,6 +67,8 @@ def host_platform() -> Platform:
     """Rack's name for this computer's platform."""
     if sys.platform == "darwin":
         return "mac-arm64" if platform_module.machine() == "arm64" else "mac-x64"
+    if sys.platform == "win32":
+        return "win-x64"
     return "lin-x64"
 
 
@@ -85,6 +88,12 @@ def run(args: list[str | Path], **kwargs: Any) -> str:
 
 def capture(args: list[str | Path]) -> str:
     return run(args, capture_output=True).strip()
+
+
+def bin_tool(name: str) -> list[str | Path]:
+    """The command that runs another bin/ script: itself, or on Windows (no shebangs) through uv."""
+    path = REPO / "bin" / name
+    return ["uv", "run", "--script", path] if sys.platform == "win32" else [path]
 
 
 def project_tool(*args: str) -> list[str | Path]:
@@ -160,9 +169,14 @@ def configure(
     either kind of build.
     """
     target = platform or host_platform()
-    if (toolchain == "zig-macos") != (target != host_platform()):
-        raise SystemExit(f"a {target} build on {host_platform()} needs --toolchain zig-macos, and only it")
-    sdk = capture([REPO / "bin" / "rack-sdk", "path", target])
+    cross = {"zig-macos": ("mac-x64", "mac-arm64"), "rack-win-x64": ("win-x64",)}
+    if target != host_platform() and target not in cross.get(toolchain, ()):
+        raise SystemExit(
+            f"a {target} build on {host_platform()} needs a cross toolchain: zig-macos (macOS) or rack-win-x64"
+        )
+    if toolchain in cross and target not in cross[toolchain]:
+        raise SystemExit(f"--toolchain {toolchain} builds for {' or '.join(cross[toolchain])}, not {target}")
+    sdk = capture([*bin_tool("rack-sdk"), "path", target])
     python = runtime(cache, target)
     pybind11 = capture(project_tool("python", "-m", "pybind11", "--cmakedir"))
     args: list[str | Path] = [
@@ -183,11 +197,21 @@ def configure(
     ]
     if target in OSX_ARCHITECTURES:
         args.append(f"-DCMAKE_OSX_ARCHITECTURES={OSX_ARCHITECTURES[target]}")
+    if target == "win-x64" and toolchain == "host":
+        # The native tests run outside Rack and need Rack's DLLs beside them.
+        args.append(f"-DRACK_HOST_DIR={capture([*bin_tool('rack-sdk'), 'host', target]).splitlines()[-1]}")
+    if toolchain == "rack-win-x64":
+        bindir = capture([*bin_tool("rack-toolchain"), "path", "--target", "win-x64"])
+        args += [
+            f"-DCMAKE_TOOLCHAIN_FILE={WIN_TOOLCHAIN_FILE}",
+            f"-DRACK_TOOLCHAIN_BIN={bindir}",
+            "-DRACKPY_BUILD_TESTS=OFF",
+        ]
     if toolchain == "zig-macos":
         # A compile and link check only (see the module docstring); native tests cannot run here.
         args += [f"-DCMAKE_TOOLCHAIN_FILE={ZIG_TOOLCHAIN_FILE}", "-DRACKPY_BUILD_TESTS=OFF"]
     if toolchain == "rack-lin-x64":
-        bindir = capture([REPO / "bin" / "rack-toolchain", "path"])
+        bindir = capture([*bin_tool("rack-toolchain"), "path"])
         # Native tests link libRack's X11/GL/audio dependencies, which the toolchain sysroot lacks.
         args += [
             f"-DCMAKE_TOOLCHAIN_FILE={TOOLCHAIN_FILE}",
@@ -235,13 +259,16 @@ def bundle(
     """Install a built tree as DEST/RackPy, a Rack plugin directory, with the runtime as python/.
 
     `--runtime link` symlinks the cached runtime (fast, for tests on this
-    machine). `--runtime copy` copies it and strips the binaries.
+    machine; on Windows it copies). `--runtime copy` copies it and strips the binaries.
     """
     plugin = dest / SLUG
     if plugin.exists():
         raise SystemExit(f"{plugin} already exists; choose an empty destination")
     run(["cmake", "--install", build_dir, "--prefix", plugin, *(["--strip"] if runtime == "copy" else [])])
     python = Path(cmake_cache_value(build_dir, "RACKPY_PYTHON_HOME"))  # the runtime this tree was built for
+    if runtime == "link" and sys.platform == "win32":
+        runtime = "copy"  # a symlink needs administrator rights or Developer Mode on Windows
+        print("note: Windows: the runtime is copied, not linked")
     if runtime == "link":
         (plugin / "python").symlink_to(python, target_is_directory=True)
     else:
@@ -482,7 +509,7 @@ def startup(plugin: Path, *, runs: int = 5) -> None:
     (millisecond resolution) between "Loading plugin from .../RackPy" and
     "Loaded plugin RackPy"; RSS comes from /proc after the patch has loaded.
     """
-    rack = Path(capture([REPO / "bin" / "rack-sdk", "host"]))
+    rack = Path(capture([*bin_tool("rack-sdk"), "host"]))
     raw: dict[str, list[dict[str, Any]]] = {"without_rackpy": [], "with_rackpy": []}
     for _ in range(runs):
         raw["without_rackpy"].append(measure_rack(rack, None))

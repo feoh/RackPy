@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from tests.support import BIN, REPO
+from tests.support import REPO, bin_command
 
 EXAMPLES = REPO / "examples"
 
@@ -14,7 +14,7 @@ EXAMPLES = REPO / "examples"
 def plugin_tool(*args: str | Path, cwd: Path | None = None, ok: bool = True) -> subprocess.CompletedProcess[str]:
     """Run bin/rackpy-plugin; with ``ok``, a failure fails the test with the tool's output."""
     proc = subprocess.run(
-        [str(BIN / "rackpy-plugin"), *map(str, args)], capture_output=True, text=True, check=False, cwd=cwd
+        [*bin_command("rackpy-plugin"), *map(str, args)], capture_output=True, text=True, check=False, cwd=cwd
     )
     if ok:
         assert proc.returncode == 0, proc.stdout + proc.stderr

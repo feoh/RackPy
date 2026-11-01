@@ -4,13 +4,13 @@
 // library that defines RACKPY_EXPANDERS gets RackPy's expander services (RP-23C).
 // Trusted like the rest of the plugin, but confined to its folder, checked
 // against the kernel and graph ABIs, and loaded all-or-nothing per library.
-#include <dlfcn.h>
 
 #include <cctype>
 #include <set>
 #include <stdexcept>
 
 #include "../../engine/expanders.hpp"
+#include "rackpy/dynlib.hpp"
 #include "../../io/endpoints.hpp"
 #include "../graph/plan.hpp"
 #include "runtime.hpp"
@@ -63,12 +63,13 @@ void loadLibrary(const std::string& pluginDir, const std::string& relative) {
 	std::string folder = rack::system::getCanonical(pluginDir);
 	if (rack::system::getCanonical(path).compare(0, folder.size() + 1, folder + "/") != 0)
 		throw std::runtime_error("it resolves outside the plugin folder");
-	void* handle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL | RTLD_NODELETE);
+	std::string error;
+	void* handle = dynlib::openPinned(path, false, error);
 	if (!handle)
-		throw std::runtime_error(std::string("cannot load it: ") + dlerror());
-	auto abi = (int (*)()) dlsym(handle, "rackpy_kernel_abi");
-	auto ns = (const char* (*)()) dlsym(handle, "rackpy_kernel_namespace");
-	auto registerKernels = (void (*)(KernelRegistrar&)) dlsym(handle, "rackpy_register_kernels");
+		throw std::runtime_error("cannot load it: " + error);
+	auto abi = (int (*)()) dynlib::symbol(handle, "rackpy_kernel_abi");
+	auto ns = (const char* (*)()) dynlib::symbol(handle, "rackpy_kernel_namespace");
+	auto registerKernels = (void (*)(KernelRegistrar&)) dynlib::symbol(handle, "rackpy_register_kernels");
 	if (!abi || !ns || !registerKernels)
 		throw std::runtime_error("it does not define RACKPY_KERNEL_LIBRARY");
 	if (abi() != KERNEL_ABI)
@@ -83,8 +84,8 @@ void loadLibrary(const std::string& pluginDir, const std::string& relative) {
 	registration([&] { registerKernels(collected); });
 	// Graph node types are optional; when present they load with the kernels, all or nothing.
 	CollectingNodes nodes;
-	auto graphAbi = (int (*)()) dlsym(handle, "rackpy_graph_abi");
-	auto registerNodes = (void (*)(graph::NodeRegistrar&)) dlsym(handle, "rackpy_register_graph_nodes");
+	auto graphAbi = (int (*)()) dynlib::symbol(handle, "rackpy_graph_abi");
+	auto registerNodes = (void (*)(graph::NodeRegistrar&)) dynlib::symbol(handle, "rackpy_register_graph_nodes");
 	if (graphAbi || registerNodes) {
 		if (!graphAbi || !registerNodes)
 			throw std::runtime_error("it defines only part of RACKPY_GRAPH_NODES");
@@ -93,8 +94,8 @@ void loadLibrary(const std::string& pluginDir, const std::string& relative) {
 				std::to_string(graph::GRAPH_ABI) + "; rebuild it against this RackPy's rackpy/graph.hpp");
 		registration([&] { registerNodes(nodes); });
 	}
-	auto expanderAbi = (int (*)()) dlsym(handle, "rackpy_expander_abi");
-	auto setServices = (void (*)(expander::Services*)) dlsym(handle, "rackpy_set_expander_services");
+	auto expanderAbi = (int (*)()) dynlib::symbol(handle, "rackpy_expander_abi");
+	auto setServices = (void (*)(expander::Services*)) dynlib::symbol(handle, "rackpy_set_expander_services");
 	if (expanderAbi || setServices) {
 		if (!expanderAbi || !setServices)
 			throw std::runtime_error("it defines only part of RACKPY_EXPANDERS");
@@ -102,8 +103,8 @@ void loadLibrary(const std::string& pluginDir, const std::string& relative) {
 			throw std::runtime_error("it was built for expander ABI " + std::to_string(expanderAbi()) + ", but RackPy has " +
 				std::to_string(expander::EXPANDER_ABI) + "; rebuild it against this RackPy's rackpy/expanders.hpp");
 	}
-	auto ioAbi = (int (*)()) dlsym(handle, "rackpy_io_abi");
-	auto setIoServices = (void (*)(io::Services*)) dlsym(handle, "rackpy_set_io_services");
+	auto ioAbi = (int (*)()) dynlib::symbol(handle, "rackpy_io_abi");
+	auto setIoServices = (void (*)(io::Services*)) dynlib::symbol(handle, "rackpy_set_io_services");
 	if (ioAbi || setIoServices) {
 		if (!ioAbi || !setIoServices)
 			throw std::runtime_error("it defines only part of RACKPY_IO");

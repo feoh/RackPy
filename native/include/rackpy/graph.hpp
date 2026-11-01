@@ -13,6 +13,8 @@
 // Python. Semantics are documented in docs/how-to/graphs.md and mirrored by
 // rackpy.dsp.graph_reference.
 #pragma once
+
+#include "rackpy/export.h"
 #include <rack.hpp>
 
 #include "rackpy/io.hpp"
@@ -399,5 +401,5 @@ RACKPY_KERNEL_LIBRARY, whose namespace the node types share:
 	}
 */
 #define RACKPY_GRAPH_NODES(REGISTRAR) \
-	extern "C" __attribute__((visibility("default"))) int rackpy_graph_abi() { return rackpy::graph::GRAPH_ABI; } \
-	extern "C" __attribute__((visibility("default"))) void rackpy_register_graph_nodes(rackpy::graph::NodeRegistrar& REGISTRAR)
+	extern "C" RACKPY_EXPORT int rackpy_graph_abi() { return rackpy::graph::GRAPH_ABI; } \
+	extern "C" RACKPY_EXPORT void rackpy_register_graph_nodes(rackpy::graph::NodeRegistrar& REGISTRAR)

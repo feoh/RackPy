@@ -7,13 +7,13 @@ import subprocess
 import binding_manifest as bm
 import pytest
 
-from tests.support import BIN
+from tests.support import bin_command
 
 pytestmark = pytest.mark.unit
 
 
 def run(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run([str(BIN / args[0]), *args[1:]], capture_output=True, text=True, check=False)
+    return subprocess.run([*bin_command(args[0]), *args[1:]], capture_output=True, text=True, check=False)
 
 
 def test_manifest_is_consistent_apart_from_the_built_package() -> None:

@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import linux_x64_only, rack_platforms, run_pytest_in_rack
+from tests.support import bin_command, linux_x64_only, rack_platforms, run_pytest_in_rack
 
 pytestmark = [rack_platforms()]  # the LD_PRELOAD audio-path guard runs are Linux-only
 SUITE = Path(__file__).resolve().parent / "in_rack"
@@ -80,9 +80,8 @@ def test_kernel_objects_reference_no_python(dev_build: Path) -> None:
     objects = sorted(dev_build.glob("CMakeFiles/rackpy_host.dir/native/dsp/runtime/*.cpp.o"))
     objects += list(dev_build.glob("CMakeFiles/rackpy_host.dir/native/module/lifecycle.cpp.o"))
     assert len(objects) == 4, objects  # runtime, builtin, libraries, lifecycle
-    bin_dir = Path(__file__).resolve().parents[2] / "bin"
     proc = subprocess.run(
-        [str(bin_dir / "rackpy-dev"), "audio-symbols", *map(str, objects)], capture_output=True, text=True, check=False
+        [*bin_command("rackpy-dev"), "audio-symbols", *map(str, objects)], capture_output=True, text=True, check=False
     )
     assert proc.returncode == 0, proc.stdout + proc.stderr
 

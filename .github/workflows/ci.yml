@@ -16,6 +16,10 @@ on:
         description: "Optional pytest -k expression for the macOS host-test jobs (empty: all of them)"
         required: false
         default: ""
+      windows_tests:
+        description: "Optional pytest -k expression for the Windows host-test job (empty: all of them)"
+        required: false
+        default: ""
   schedule:
     - cron: "17 6 * * 1"  # weekly: external links, and a fresh look at the pinned downloads
 
@@ -397,6 +401,69 @@ jobs:
           name: macos-${{ matrix.platform }}-release-candidate-evidence
           path: reports/
           retention-days: 30
+          if-no-files-found: ignore
+
+  windows:
+    name: Windows x64, native build, CTest and Rack host tests
+    # RP-41. A native build with MSYS2's MINGW64 GCC (mingw-w64, msvcrt: the compiler family and C runtime
+    # Rack for Windows is built with), the native tests (CTest, through the dev_build fixture) and the host
+    # tests in Rack Free 2.6.6, unpacked from its installer by 7-Zip. The test harness runs on uv's
+    # Windows CPython; the plugin embeds the pinned MSVC-built CPython. Linux-only tests skip by platform.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: windows-2025
+    timeout-minutes: 180
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+      - id: msys2
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: MINGW64
+          update: false
+          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-binutils
+      - name: MINGW64 tools on PATH
+        env:
+          MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
+        run: |
+          echo "$MSYS2_LOCATION\mingw64\bin" >> "$GITHUB_PATH"
+          # The runner also has MSVC and LLVM; Rack's C++ ABI needs MinGW GCC.
+          { echo "CC=$MSYS2_LOCATION\mingw64\bin\gcc.exe"; echo "CXX=$MSYS2_LOCATION\mingw64\bin\g++.exe"; } >> "$GITHUB_ENV"
+          "$MSYS2_LOCATION/mingw64/bin/g++" --version | head -1
+          "$MSYS2_LOCATION/mingw64/bin/g++" -dM -E -x c++ -include stdio.h /dev/null | grep -E "^#define (_UCRT|__MSVCRT__) " || true
+          7z | head -2
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/rackpy/sdk
+            ~/.cache/rackpy/build-inputs
+          key: rackpy-win-x64-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json') }}
+      - run: uv sync --frozen
+      - name: Native tests and Rack host tests
+        env:
+          WINDOWS_TESTS: ${{ inputs.windows_tests }}  # through the environment, never into the script's text
+          # Deliberately lacking: GitHub-hosted Windows runners have no GPU, only Windows' OpenGL 1.1, and Rack
+          # needs 2.0, so windowed tests skip here, each with that reason (an open gate, not a pass).
+          RACKPY_ALLOW_MISSING: windows-opengl
+        run: >
+          uv run --frozen pytest -m "(native or host) and not dist and not sanitizer and not stress and not inventory"
+          ${WINDOWS_TESTS:+-k "$WINDOWS_TESTS"}
+          -v --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/win-x64.xml
+      - if: always()
+        name: Collect Rack logs
+        run: |
+          mkdir -p reports/rack-logs
+          cd "$RUNNER_TEMP/pytest" 2>/dev/null && find . -name log.txt -exec cp --parents {} "$GITHUB_WORKSPACE/reports/rack-logs/" \; || true
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-win-x64-reports
+          path: reports/
+          retention-days: 14
           if-no-files-found: ignore
 
   macos:

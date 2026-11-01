@@ -32,6 +32,8 @@
 //
 // Include it after <rack.hpp>; it uses only Rack's public API.
 #pragma once
+
+#include "rackpy/export.h"
 #include <rack.hpp>
 
 #include <cstddef>
@@ -104,7 +106,7 @@ gives the library its services before any of its kernels is made.
 	RACKPY_EXPANDERS
 */
 #define RACKPY_EXPANDERS \
-	extern "C" __attribute__((visibility("default"))) int rackpy_expander_abi() { return rackpy::expander::EXPANDER_ABI; } \
-	extern "C" __attribute__((visibility("default"))) void rackpy_set_expander_services(rackpy::expander::Services* given) { \
+	extern "C" RACKPY_EXPORT int rackpy_expander_abi() { return rackpy::expander::EXPANDER_ABI; } \
+	extern "C" RACKPY_EXPORT void rackpy_set_expander_services(rackpy::expander::Services* given) { \
 		rackpy::expander::services() = given; \
 	}

@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// RackPy plugin entry point (plugin.so). It has no Python dependency, so a
-// missing or wrong runtime produces a log message instead of a dlopen
+// RackPy plugin entry point (plugin.so, .dylib or .dll). It has no Python dependency, so a
+// missing or wrong runtime produces a log message instead of a loader
 // failure, and nothing can throw across init() or destroy().
 //
 // Promoted from the RP-04 spike loader (spikes/embedding/src/loader.cpp); the
 // loading order is ADR 002, decision 1.
 #include <rack.hpp>
 
-#include <dlfcn.h>
-
 #include "loader_config.hpp"
+#include "rackpy/dynlib.hpp"
+#include "rackpy/export.h"
 #include "rackpy/host_abi.h"
 
 using namespace rack;
@@ -35,8 +35,10 @@ void loadHost(Plugin* p) {
 	if (!readConfig(asset::plugin(p, "rackpy-loader.json"), cfg, err))
 		return refuse(err);
 
-	// One CPython owner per process (ADR 002, decision 4). dl_iterate_phdr also
-	// sees libraries other plugins opened with RTLD_LOCAL.
+	// One CPython owner per process (ADR 002, decision 4). The system's image list also
+	// shows libraries other plugins opened with RTLD_LOCAL. On Windows this matters twice:
+	// a python3XX.dll already loaded would silently stand in for ours, as Windows binds
+	// an import to a loaded DLL of the same name.
 	std::vector<std::string> pythons = loadedPythons();
 	if (!pythons.empty()) {
 		return refuse(string::f("a CPython runtime is already loaded in this process (%s). "
@@ -65,15 +67,18 @@ void loadHost(Plugin* p) {
 				path.c_str(), canonical.c_str()));
 	}
 
-	// Extension modules in the bundled runtime resolve Py* symbols globally.
-	if (!dlopen(libpython.c_str(), RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE))
-		return refuse(string::f("cannot load %s: %s", libpython.c_str(), dlerror()));
+	// Extension modules in the bundled runtime resolve Py* symbols globally (Linux, macOS). On
+	// Windows, loading it first by its full path makes the host's and every extension module's
+	// import of python3XX.dll bind to this one, with its vcruntime140.dll found beside it.
+	std::string dlError;
+	if (!rackpy::dynlib::openPinned(libpython, true, dlError))
+		return refuse(string::f("cannot load %s: %s", libpython.c_str(), dlError.c_str()));
 	std::string hostPath = system::join(dir, cfg.host);
-	void* handle = dlopen(hostPath.c_str(), RTLD_NOW | RTLD_LOCAL | RTLD_NODELETE);
+	void* handle = rackpy::dynlib::openPinned(hostPath, false, dlError);
 	if (!handle)
-		return refuse(string::f("cannot load host %s: %s", hostPath.c_str(), dlerror()));
-	auto hostInit = (RackPyHostInitFn) dlsym(handle, RACKPY_HOST_INIT_SYMBOL);
-	auto hostDestroy = (RackPyHostDestroyFn) dlsym(handle, RACKPY_HOST_DESTROY_SYMBOL);
+		return refuse(string::f("cannot load host %s: %s", hostPath.c_str(), dlError.c_str()));
+	auto hostInit = (RackPyHostInitFn) rackpy::dynlib::symbol(handle, RACKPY_HOST_INIT_SYMBOL);
+	auto hostDestroy = (RackPyHostDestroyFn) rackpy::dynlib::symbol(handle, RACKPY_HOST_DESTROY_SYMBOL);
 	if (!hostInit || !hostDestroy)
 		return refuse(hostPath + " does not export the RackPy host ABI");
 
@@ -90,14 +95,14 @@ void loadHost(Plugin* p) {
 		return;
 	}
 	hostHandle = handle;
-	hostSettingsToJson = (RackPyHostSettingsToJsonFn) dlsym(handle, RACKPY_HOST_SETTINGS_TO_JSON_SYMBOL);
-	hostSettingsFromJson = (RackPyHostSettingsFromJsonFn) dlsym(handle, RACKPY_HOST_SETTINGS_FROM_JSON_SYMBOL);
+	hostSettingsToJson = (RackPyHostSettingsToJsonFn) rackpy::dynlib::symbol(handle, RACKPY_HOST_SETTINGS_TO_JSON_SYMBOL);
+	hostSettingsFromJson = (RackPyHostSettingsFromJsonFn) rackpy::dynlib::symbol(handle, RACKPY_HOST_SETTINGS_FROM_JSON_SYMBOL);
 	INFO("RackPy host %s ready", cfg.host.c_str());
 }
 
 }  // namespace
 
-extern "C" void init(Plugin* p) {
+extern "C" RACKPY_EXPORT void init(Plugin* p) {
 	pluginInstance = p;
 	try {
 		loadHost(p);
@@ -110,26 +115,26 @@ extern "C" void init(Plugin* p) {
 	}
 }
 
-extern "C" void destroy() {
+extern "C" RACKPY_EXPORT void destroy() {
 	if (!hostHandle)
 		return;
-	auto hostDestroy = (RackPyHostDestroyFn) dlsym(hostHandle, RACKPY_HOST_DESTROY_SYMBOL);
+	auto hostDestroy = (RackPyHostDestroyFn) rackpy::dynlib::symbol(hostHandle, RACKPY_HOST_DESTROY_SYMBOL);
 	hostHandle = nullptr;
 	hostSettingsToJson = nullptr;
 	hostSettingsFromJson = nullptr;
 	if (hostDestroy)
 		hostDestroy();
-	// RTLD_NODELETE keeps the host and libpython mapped after Rack dlcloses this plugin.
+	// rackpy::dynlib::openPinned keeps the host and libpython loaded after Rack unloads this plugin.
 }
 
 // Plugin-wide settings (RP-15D). Rack stores what settingsToJson returns in
 // settings.json; NULL leaves the stored value as it is. Without a running
 // host there is nothing to save or load.
-extern "C" json_t* settingsToJson() {
+extern "C" RACKPY_EXPORT json_t* settingsToJson() {
 	return hostSettingsToJson ? static_cast<json_t*>(hostSettingsToJson()) : nullptr;
 }
 
-extern "C" void settingsFromJson(json_t* rootJ) {
+extern "C" RACKPY_EXPORT void settingsFromJson(json_t* rootJ) {
 	if (hostSettingsFromJson)
 		hostSettingsFromJson(rootJ);
 }

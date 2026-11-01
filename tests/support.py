@@ -22,16 +22,19 @@ READY = "Loading autosave"
 
 
 def host_platform() -> str:
-    """Rack's name for this computer's platform: lin-x64, mac-arm64 or mac-x64 (or "unsupported")."""
+    """Rack's name for this computer's platform: lin-x64, mac-arm64, mac-x64 or win-x64 (or "unsupported")."""
     if sys.platform == "darwin":
         return "mac-arm64" if platform.machine() == "arm64" else "mac-x64"
     if sys.platform == "linux" and platform.machine() == "x86_64":
         return "lin-x64"
+    if sys.platform == "win32" and platform.machine() == "AMD64":
+        return "win-x64"
     return "unsupported"
 
 
 PLATFORM = host_platform()
 MACOS = PLATFORM.startswith("mac-")
+WINDOWS = PLATFORM == "win-x64"
 # AddressSanitizer's options for the native sanitizer runs. Apple's ASan has no LeakSanitizer ("detect_leaks
 # is not supported on this platform", RP-40), so leaks are checked on Linux only; the code is the same.
 ASAN_OPTIONS = f"detect_leaks={0 if MACOS else 1}:abort_on_error=0"
@@ -41,7 +44,17 @@ RACK_HOST = "mac-x64+arm64" if MACOS else PLATFORM  # Rack Free's archive: one u
 
 def rack_program(rack: Path) -> Path:
     """Rack's executable in a Rack Free host directory (on macOS the .app)."""
-    return rack / "Contents" / "MacOS" / "Rack" if MACOS else rack / "Rack"
+    if MACOS:
+        return rack / "Contents" / "MacOS" / "Rack"
+    return rack / ("Rack.exe" if WINDOWS else "Rack")
+
+
+def kill_tree(proc: subprocess.Popen[bytes]) -> None:
+    """Kill a process started with start_new_session and its children (xvfb-run starts Xvfb and Rack)."""
+    if WINDOWS:
+        proc.kill()  # TerminateProcess: Rack is started directly there, with no helper processes
+    else:
+        os.killpg(proc.pid, signal.SIGKILL)
 
 
 def allowed_missing() -> set[str]:
@@ -70,10 +83,8 @@ def linux_x64_only() -> pytest.MarkDecorator:
 
 
 def rack_platforms() -> pytest.MarkDecorator:
-    """Platform gate: native and host tests run on Linux x86_64 and macOS (RP-40); Windows is RP-41."""
-    return pytest.mark.skipif(
-        PLATFORM == "unsupported", reason="RackPy builds and runs only on Linux x86_64 and macOS so far"
-    )
+    """Platform gate: native and host tests run on every Rack SDK platform (Linux x86_64, macOS, Windows x64)."""
+    return pytest.mark.skipif(PLATFORM == "unsupported", reason="Rack publishes no SDK for this platform")
 
 
 def nested_name(qualified: str) -> re.Pattern[str]:
@@ -97,9 +108,16 @@ def symbol_names(path: Path, *, undefined: bool = False) -> str:
     return subprocess.run(command, capture_output=True, text=True, check=True).stdout
 
 
+def bin_command(name: str) -> list[str]:
+    """The command that runs bin/NAME: the script itself, whose shebang is `uv run --script`, or on Windows,
+    which runs no shebang scripts, that command spelled out (RP-41)."""
+    path = str(BIN / name)
+    return ["uv", "run", "--script", path] if sys.platform == "win32" else [path]
+
+
 def tool(*args: str) -> str:
     """Run a bin/ utility and return its stdout; a failure is a setup error with the tool's message."""
-    proc = subprocess.run([str(BIN / args[0]), *args[1:]], capture_output=True, text=True, check=False)
+    proc = subprocess.run([*bin_command(args[0]), *args[1:]], capture_output=True, text=True, check=False)
     if proc.returncode:
         pytest.fail(f"bin/{' '.join(args)} failed ({proc.returncode}):\n{proc.stderr[-3000:]}", pytrace=False)
     return proc.stdout
@@ -201,17 +219,19 @@ def run_rack(
     return RackRun(returncode, log.read_text(errors="replace") if log.exists() else "")
 
 
-# What Rack logs once it has an OpenGL window, and what GLFW logs when the Mac offers it none.
+# What Rack logs once it has an OpenGL window, and what GLFW logs when the Mac or Windows offers it none.
 GL_READY = "Renderer: "
-GL_REFUSED = ("NSGL: Failed to find a suitable pixel format", "Could not create Window")
+GL_REFUSED = ("NSGL: Failed to find a suitable pixel format", "WGL: ", "Could not create Window")
 _opengl_windows: dict[Path, bool] = {}
 
 
 def opens_gl_windows(rack: Path, timeout: float = 30) -> bool:
-    """Whether this Mac gives Rack an OpenGL window, probed once per Rack: Rack windowed, an empty user folder.
+    """Whether this Mac or Windows PC gives Rack an OpenGL window, probed once per Rack: Rack windowed, an empty
+    user folder.
 
-    GitHub-hosted macOS runners offer no pixel format Rack's GLFW accepts (GLFW error 65545); Rack then shows
-    a modal "Could not open GLFW window" dialog and waits, so each windowed run would hang until killed.
+    GitHub-hosted macOS runners offer no pixel format Rack's GLFW accepts (GLFW error 65545), and Windows
+    runners only Windows' OpenGL 1.1, where Rack needs 2.0; Rack then shows a modal "Could not open GLFW
+    window" dialog and waits, so each windowed run would hang until killed.
     """
     if rack not in _opengl_windows:
         with tempfile.TemporaryDirectory(prefix="rackpy-gl-probe-") as tmp:
@@ -231,7 +251,7 @@ def opens_gl_windows(rack: Path, timeout: float = 30) -> bool:
                 text = log.read_text(errors="replace") if log.exists() else ""
                 found = True if GL_READY in text else False if any(r in text for r in GL_REFUSED) else None
                 time.sleep(0.2)
-            os.killpg(proc.pid, signal.SIGKILL)
+            kill_tree(proc)
             proc.wait()
             _opengl_windows[rack] = bool(found)
     return _opengl_windows[rack]
@@ -252,15 +272,22 @@ def run_rack_windowed(
     desktop. On macOS the window opens in the logged-in session (CI runners have one). On timeout the
     whole process group (Rack, xvfb-run and Xvfb) is killed and returncode is None.
     """
-    if not MACOS:
-        require("xvfb-run", shutil.which("xvfb-run") is not None, "install Xvfb (xorg-server-xvfb or xvfb)")
-    else:
+    if MACOS:
         require(
             "macos-opengl",
             opens_gl_windows(rack),
             "a Mac that gives Rack an OpenGL window (a GPU and a logged-in session); GitHub-hosted macOS runners "
             "offer no pixel format Rack's GLFW accepts",
         )
+    elif WINDOWS:
+        require(
+            "windows-opengl",
+            opens_gl_windows(rack),
+            "a Windows PC whose display driver gives Rack OpenGL 2.0 (a GPU, or Mesa's opengl32.dll beside "
+            "Rack.exe); GitHub-hosted Windows runners have only Windows' OpenGL 1.1",
+        )
+    else:
+        require("xvfb-run", shutil.which("xvfb-run") is not None, "install Xvfb (xorg-server-xvfb or xvfb)")
     environ = (
         {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}
         | isolated_audio_env(user)
@@ -268,7 +295,7 @@ def run_rack_windowed(
     )
     (user / "autosave").mkdir(parents=True, exist_ok=True)
     cmd = [str(rack_program(rack)), "-u", str(user)]
-    if not MACOS:
+    if not MACOS and not WINDOWS:
         cmd = ["xvfb-run", "-a", "-s", "-screen 0 1600x1000x24", *cmd]
     if patch is not None:
         cmd.append(str(patch))  # Rack opens it as File > Open does, instead of the autosave
@@ -284,7 +311,7 @@ def run_rack_windowed(
     try:
         returncode: int | None = proc.wait(timeout=timeout)
     except subprocess.TimeoutExpired:
-        os.killpg(proc.pid, signal.SIGKILL)
+        kill_tree(proc)
         proc.wait()
         returncode = None
     log = user / "log.txt"

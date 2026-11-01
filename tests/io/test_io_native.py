@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import ASAN_OPTIONS, linux_x64_only, nested_name, rack_platforms, symbol_names
+from tests.support import ASAN_OPTIONS, bin_command, linux_x64_only, nested_name, rack_platforms, symbol_names
 
 pytestmark = [rack_platforms(), pytest.mark.native]  # the guard and sanitizer runs are Linux-only
 
@@ -73,8 +73,7 @@ def test_bridge_calls_racks_public_master_clock(dev_build: Path) -> None:
 def test_io_objects_reference_no_python(dev_build: Path) -> None:
     objects = sorted(dev_build.glob("CMakeFiles/rackpy_host.dir/native/io/*.cpp.o"))
     assert [o.name for o in objects] == ["audio_bridge.cpp.o", "endpoints.cpp.o", "midi_queue.cpp.o"]
-    bin_dir = Path(__file__).resolve().parents[2] / "bin"
     proc = subprocess.run(
-        [str(bin_dir / "rackpy-dev"), "audio-symbols", *map(str, objects)], capture_output=True, text=True, check=False
+        [*bin_command("rackpy-dev"), "audio-symbols", *map(str, objects)], capture_output=True, text=True, check=False
     )
     assert proc.returncode == 0, proc.stdout + proc.stderr

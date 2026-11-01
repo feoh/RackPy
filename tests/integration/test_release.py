@@ -105,7 +105,12 @@ def test_compare_names_the_members_that_differ(
     }
 
 
-TRIPLES = {"lin-x64": "x86_64-unknown-linux-gnu", "mac-arm64": "aarch64-apple-darwin", "mac-x64": "x86_64-apple-darwin"}
+TRIPLES = {
+    "lin-x64": "x86_64-unknown-linux-gnu",
+    "mac-arm64": "aarch64-apple-darwin",
+    "mac-x64": "x86_64-apple-darwin",
+    "win-x64": "x86_64-pc-windows-msvc",
+}
 
 
 def test_every_platform_bundles_the_same_cpython_build_with_its_license_archive() -> None:
@@ -118,7 +123,10 @@ def test_every_platform_bundles_the_same_cpython_build_with_its_license_archive(
         tag = f"cpython-{runtime['version']}+{runtime['release']}-{triple}-"
         assert runtime["file"].startswith(tag) and license_archive["file"].startswith(tag), platform
         assert runtime["platform"] == triple
-        assert license_archive["file"].endswith("-pgo+lto-full.tar.zst")
+        # python-build-standalone publishes no LTO build for Windows, so its full archive there is pgo-full.
+        assert license_archive["file"].endswith(
+            "-pgo-full.tar.zst" if platform == "win-x64" else "-pgo+lto-full.tar.zst"
+        )
         assert len(runtime["sha256"]) == len(license_archive["sha256"]) == 64
         assert runtime["url"].endswith(runtime["file"].replace("+", "%2B"))
 

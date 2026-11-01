@@ -8,6 +8,8 @@
 // libraries that plugin authors build with the Rack SDK (owner decision
 // 2026-10-24). Include it after <rack.hpp>; it uses only Rack's public API.
 #pragma once
+
+#include "rackpy/export.h"
 #include <rack.hpp>
 
 #include <cstdint>
@@ -89,6 +91,6 @@ and RackPy loads it before the entry module runs:
 	}
 */
 #define RACKPY_KERNEL_LIBRARY(NAMESPACE, REGISTRAR) \
-	extern "C" __attribute__((visibility("default"))) int rackpy_kernel_abi() { return rackpy::KERNEL_ABI; } \
-	extern "C" __attribute__((visibility("default"))) const char* rackpy_kernel_namespace() { return NAMESPACE; } \
-	extern "C" __attribute__((visibility("default"))) void rackpy_register_kernels(rackpy::KernelRegistrar& REGISTRAR)
+	extern "C" RACKPY_EXPORT int rackpy_kernel_abi() { return rackpy::KERNEL_ABI; } \
+	extern "C" RACKPY_EXPORT const char* rackpy_kernel_namespace() { return NAMESPACE; } \
+	extern "C" RACKPY_EXPORT void rackpy_register_kernels(rackpy::KernelRegistrar& REGISTRAR)

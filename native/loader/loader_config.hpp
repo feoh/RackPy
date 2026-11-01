@@ -31,6 +31,10 @@ bool parseConfig(json_t* rootJ, Config& cfg, std::string& err);
 
 bool readConfig(const std::string& path, Config& cfg, std::string& err);
 
+/** Whether a loaded image's file is a CPython runtime: libpython*, a macOS framework build's
+Python.framework/Versions/X.Y/Python, or on Windows python3*.dll (any case; python3.dll too). */
+bool isPython(const std::string& path);
+
 /** File names of every libpython mapped into this process, including RTLD_LOCAL ones. */
 std::vector<std::string> loadedPythons();
 

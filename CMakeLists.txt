@@ -15,8 +15,8 @@ elseif(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
 endif()
 project(RackPy VERSION 0.0.0 DESCRIPTION "Python for VCV Rack plugins" LANGUAGES C CXX)
 
-if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64)$") AND NOT APPLE)
-  message(FATAL_ERROR "RackPy builds for Linux x86_64 and macOS (x86_64, arm64) so far; Windows is RP-41.")
+if(NOT (CMAKE_SYSTEM_NAME MATCHES "^(Linux|Windows)$" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64)$") AND NOT APPLE)
+  message(FATAL_ERROR "RackPy builds for Linux x86_64, macOS (x86_64, arm64) and Windows x86_64, Rack's SDK platforms.")
 endif()
 if(CMAKE_BUILD_TYPE)
   # The SDK's flags already choose -O3 -g; a CMake build type would add its own.
@@ -50,7 +50,7 @@ endif()
 
 # plugin.so (plugin.dylib on macOS, as Rack looks for): thin loader with no Python dependency
 # (ADR 002, decision 1).
-add_library(rackpy_loader MODULE native/loader/loader.cpp native/loader/loader_config.cpp)
+add_library(rackpy_loader MODULE native/loader/loader.cpp native/loader/loader_config.cpp native/runtime/dynlib.cpp)
 set_target_properties(rackpy_loader PROPERTIES
   PREFIX "" OUTPUT_NAME plugin
   CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF
@@ -79,7 +79,7 @@ file(GLOB RACKPY_LABORATORY CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/native/labo
 add_library(rackpy_host MODULE native/host/host.cpp native/host/host_module.cpp
   ${RACKPY_RUNTIME_CORE} native/runtime/python.cpp native/runtime/interpreter.cpp native/runtime/json.cpp
   native/bindings/generated/registry.cpp ${RACKPY_BINDING_ADAPTERS} native/module/lifecycle.cpp
-  native/plugin/model.cpp ${RACKPY_DSP_RUNTIME} native/dsp/runtime/libraries.cpp ${RACKPY_LABORATORY})
+  native/plugin/model.cpp ${RACKPY_DSP_RUNTIME} native/dsp/runtime/libraries.cpp native/runtime/dynlib.cpp ${RACKPY_LABORATORY})
 # Compiling a binding translation unit takes up to about 5 GB (pybind11 templates: dsp/filter.cpp and
 # dsp/resampler.cpp measured 4.8 GB with GCC 16), so parallel compiles are capped by memory rather than
 # by cores: one per 6 GB, which is 2 on a 16 GB CI runner. Ninja job pools; other generators ignore it.
@@ -103,25 +103,33 @@ set_target_properties(rackpy_host PROPERTIES
   BUILD_WITH_INSTALL_RPATH ON INSTALL_RPATH "$<IF:$<BOOL:${APPLE}>,@loader_path/python/lib,$ORIGIN/python/lib>")
 target_include_directories(rackpy_host PRIVATE native/include native/bindings/generated)
 target_link_libraries(rackpy_host PRIVATE rackpy_sdk_module rackpy_python pybind11::headers)
+# pybind11 dllexports the embedded module's PyInit__rackpy_host on Windows; the host registers that module
+# itself, so it stays private there, as the version script keeps it on Linux.
+if(WIN32)
+  target_compile_definitions(rackpy_host PRIVATE PYBIND11_EXPORT=)
+endif()
 rackpy_module_install_name(rackpy_host)
 # libstdc++ gives std:: instances and its static objects default visibility, so
 # -fvisibility=hidden is not enough; the version script (on macOS the exported symbols list)
 # exports the ABI only.
+# On Windows, RACKPY_EXPORT's __declspec(dllexport) does the same: a DLL with any exports exports only those.
 if(APPLE)
   set(_rackpy_host_exports "${PROJECT_SOURCE_DIR}/native/host/host.exp")
   target_link_options(rackpy_host PRIVATE "-Wl,-exported_symbols_list,${_rackpy_host_exports}")
-else()
+elseif(NOT WIN32)
   set(_rackpy_host_exports "${PROJECT_SOURCE_DIR}/native/host/host.map")
   target_link_options(rackpy_host PRIVATE "-Wl,--version-script=${_rackpy_host_exports}")
 endif()
-set_property(TARGET rackpy_host APPEND PROPERTY LINK_DEPENDS "${_rackpy_host_exports}")
+if(_rackpy_host_exports)
+  set_property(TARGET rackpy_host APPEND PROPERTY LINK_DEPENDS "${_rackpy_host_exports}")
+endif()
 
 if(RACKPY_BUILD_TESTS)
   enable_testing()
-  add_executable(rackpy_loader_tests native/tests/test_loader_config.cpp native/loader/loader_config.cpp)
+  add_executable(rackpy_loader_tests native/tests/test_loader_config.cpp native/loader/loader_config.cpp native/runtime/dynlib.cpp)
   set_target_properties(rackpy_loader_tests PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_include_directories(rackpy_loader_tests PRIVATE native/include native/loader)
-  target_link_libraries(rackpy_loader_tests PRIVATE rackpy_sdk_program)
+  target_link_libraries(rackpy_loader_tests PRIVATE rackpy_sdk_program ${CMAKE_DL_LIBS})
   add_test(NAME loader_config COMMAND rackpy_loader_tests)
 
   # rackpy::rttiCast (RP-40): the Itanium ABI walk on this platform, and a widget whose type_info is libRack's.
@@ -352,6 +360,11 @@ configure_file(packaging/plugin/plugin.json.in plugin.json @ONLY)
 # The loader refuses a configuration whose "abi" differs from the header's, so take it from there.
 file(STRINGS native/include/rackpy/host_abi.h _rackpy_abi_line REGEX "^#define RACKPY_HOST_ABI [0-9]+$")
 string(REGEX REPLACE "^#define RACKPY_HOST_ABI " "" RACKPY_HOST_ABI "${_rackpy_abi_line}")
+if(WIN32)
+  set(RACKPY_HOST_FILE rackpy_host.dll)
+else()
+  set(RACKPY_HOST_FILE rackpy_host.so)  # also on macOS: CMake names MODULE libraries .so there
+endif()
 configure_file(packaging/plugin/rackpy-loader.json.in rackpy-loader.json @ONLY)
 # Explicit modes: on Debian and Ubuntu CMake installs shared libraries without execute bits
 # (CMAKE_INSTALL_SO_NO_EXE), which made the same release differ between build machines (RP-39).

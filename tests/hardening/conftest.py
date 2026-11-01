@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import BIN, REPO, copy_sharing_binaries, tool
+from tests.support import REPO, bin_command, copy_sharing_binaries, tool
 
 
 def _run(cmd: list[str], timeout: float = 3600) -> subprocess.CompletedProcess[str]:
@@ -22,7 +22,7 @@ def asan_build(native_tools: None, tmp_path_factory: pytest.TempPathFactory) -> 
     build = tmp_path_factory.mktemp("asan-build")
     _run(
         [
-            str(BIN / "rackpy-dev"),
+            *bin_command("rackpy-dev"),
             "build",
             "--build-dir",
             str(build),
@@ -40,7 +40,7 @@ def tsan_build(native_tools: None, tmp_path_factory: pytest.TempPathFactory) -> 
     """Every native target under ThreadSanitizer; the test runs CTest. (CTest names no executable before it is
     built, so the whole tree is built.)"""
     build = tmp_path_factory.mktemp("tsan-build")
-    _run([str(BIN / "rackpy-dev"), "build", "--build-dir", str(build), "--sanitize", "thread", "--no-test"])
+    _run([*bin_command("rackpy-dev"), "build", "--build-dir", str(build), "--sanitize", "thread", "--no-test"])
     return build
 
 

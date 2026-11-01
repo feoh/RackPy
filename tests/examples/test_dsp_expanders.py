@@ -27,7 +27,15 @@ import rackpypolyphony_teaching as teaching
 
 from rackpy.dsp.graph_reference import run, run_pair
 from tests.examples.support import EXAMPLES, plugin_tool, saved_patch, write_patch
-from tests.support import BIN, PLUGINS, assert_clean_exit, linux_x64_only, rack_platforms, run_pytest_in_rack, run_rack
+from tests.support import (
+    PLUGINS,
+    assert_clean_exit,
+    bin_command,
+    linux_x64_only,
+    rack_platforms,
+    run_pytest_in_rack,
+    run_rack,
+)
 
 POLYPHONY, DSP, EXPANDERS = (EXAMPLES / name for name in ("polyphony", "dsp", "expanders"))
 PROJECTS = (POLYPHONY, DSP, EXPANDERS)
@@ -105,7 +113,7 @@ def test_the_example_kernels_reference_no_python(dev_build: Path) -> None:
     libraries = kernel_libraries(dev_build)
     assert len(libraries) == 3 and all(p.is_file() for p in libraries)
     symbols = subprocess.run(
-        [str(BIN / "rackpy-dev"), "audio-symbols", *map(str, libraries)], capture_output=True, text=True, check=False
+        [*bin_command("rackpy-dev"), "audio-symbols", *map(str, libraries)], capture_output=True, text=True, check=False
     )
     assert symbols.returncode == 0, symbols.stdout + symbols.stderr
 

@@ -17,7 +17,16 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import BIN, REPO, assert_clean_exit, linux_x64_only, require, run_rack, stage_plugin, tool
+from tests.support import (
+    REPO,
+    assert_clean_exit,
+    bin_command,
+    linux_x64_only,
+    require,
+    run_rack,
+    stage_plugin,
+    tool,
+)
 
 pytestmark = [pytest.mark.dist, pytest.mark.host, linux_x64_only()]
 GLIBC_FLOOR = "2.23"
@@ -25,12 +34,12 @@ GLIBC_FLOOR = "2.23"
 
 @pytest.fixture(scope="module")
 def dist_bundle(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    found = subprocess.run([str(BIN / "rack-toolchain"), "path"], capture_output=True, text=True, check=False)
+    found = subprocess.run([*bin_command("rack-toolchain"), "path"], capture_output=True, text=True, check=False)
     require(
         "rack-toolchain", found.returncode == 0, "build the official Linux toolchain with `bin/rack-toolchain build`"
     )
     build = tmp_path_factory.mktemp("dist-build")
-    cmd = [str(BIN / "rackpy-dev"), "build", "--build-dir", str(build), "--toolchain", "rack-lin-x64", "--werror"]
+    cmd = [*bin_command("rackpy-dev"), "build", "--build-dir", str(build), "--toolchain", "rack-lin-x64", "--werror"]
     proc = subprocess.run(cmd, capture_output=True, text=True, check=False, cwd=REPO)
     assert proc.returncode == 0, proc.stdout[-4000:] + proc.stderr[-4000:]
     dest = tmp_path_factory.mktemp("dist-bundle")
@@ -38,7 +47,7 @@ def dist_bundle(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 def test_dist_build_meets_the_glibc_floor(dist_bundle: Path) -> None:
-    cmd = [str(BIN / "rackpy-dev"), "inspect", str(dist_bundle), "--max-glibc", GLIBC_FLOOR]
+    cmd = [*bin_command("rackpy-dev"), "inspect", str(dist_bundle), "--max-glibc", GLIBC_FLOOR]
     proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
     assert proc.returncode == 0, proc.stdout + proc.stderr
     report = json.loads(proc.stdout[proc.stdout.index("{") :])

@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# The pinned Rack SDK and the flags its compile.mk/plugin.mk give Linux x64 and macOS (x64, arm64) plugins.
+# The pinned Rack SDK and the flags its compile.mk/plugin.mk give Linux x64, macOS (x64, arm64) and Windows x64
+# plugins.
 #
 # Defines:
-#   RACKPY_PLATFORM     lin-x64, mac-x64 or mac-arm64: Rack's name for the target
+#   RACKPY_PLATFORM     lin-x64, mac-x64, mac-arm64 or win-x64: Rack's name for the target
 #   rackpy_sdk_compile  compile flags and SDK headers (as -isystem, see ADR 004)
-#   rackpy_sdk_plugin   compile + link flags for a DSO that Rack loads (plugin.so / plugin.dylib)
+#   rackpy_sdk_plugin   compile + link flags for a DSO that Rack loads (plugin.so / .dylib / .dll)
 #   rackpy_sdk_module   compile + link flags for a DSO that RackPy loads once Rack has loaded the plugin
 #                       (rackpy_host.so, kernel libraries)
 #   rackpy_sdk_program  compile + link flags for a native test program outside Rack
@@ -18,6 +19,12 @@ if(APPLE)
     message(FATAL_ERROR "Set CMAKE_OSX_ARCHITECTURES to arm64 or x86_64 (one architecture per build), not \"${CMAKE_OSX_ARCHITECTURES}\".")
   endif()
   set(RACK_LIBRARY_NAME libRack.dylib)
+elseif(WIN32)
+  if(NOT MINGW)
+    message(FATAL_ERROR "Rack for Windows is built with MinGW-w64 GCC; its C++ API needs the same compiler and ABI (RP-41).")
+  endif()
+  set(RACKPY_PLATFORM win-x64)
+  set(RACK_LIBRARY_NAME libRack.dll.a)  # the SDK's import library; libRack.dll comes with Rack
 else()
   set(RACKPY_PLATFORM lin-x64)
   set(RACK_LIBRARY_NAME libRack.so)
@@ -81,7 +88,9 @@ target_compile_options(rackpy_sdk_compile INTERFACE
   -Wall -Wextra -Wno-unused-parameter
   $<$<COMPILE_LANGUAGE:CXX>:-Wsuggest-override>
   $<$<AND:$<BOOL:${APPLE}>,$<COMPILE_LANGUAGE:CXX>>:-stdlib=libc++>
-  $<$<CXX_COMPILER_ID:GNU>:-fno-gnu-unique>)
+  $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${WIN32}>>>:-fno-gnu-unique>
+  $<$<BOOL:${WIN32}>:-D_USE_MATH_DEFINES>
+  $<$<BOOL:${WIN32}>:-municode>)
 if(RACKPY_WERROR)
   target_compile_options(rackpy_sdk_compile INTERFACE -Werror)
 endif()
@@ -128,6 +137,21 @@ if(APPLE)
   set(CMAKE_SHARED_MODULE_CREATE_C_FLAGS "-dynamiclib -Wl,-headerpad_max_install_names")
   set(CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS "-dynamiclib -Wl,-headerpad_max_install_names")
   target_link_options(rackpy_sdk_program INTERFACE "-Wl,-rpath,${RACK_SDK_DIR}")
+elseif(WIN32)
+  target_link_libraries(rackpy_sdk_compile INTERFACE "${RACK_SDK_DIR}/libRack.dll.a")
+  # plugin.mk: libstdc++ static; libgcc_s_seh-1.dll and libwinpthread-1.dll are Rack's own, already loaded.
+  target_link_options(rackpy_sdk_plugin INTERFACE -static-libstdc++)
+  target_link_options(rackpy_sdk_program INTERFACE -static-libstdc++)
+  # The native test programs run outside Rack, so they need Rack's DLLs beside them, from the pinned host.
+  set(RACK_HOST_DIR "" CACHE PATH "Extracted pinned Rack Free for Windows, for the native tests' DLLs (bin/rack-sdk host win-x64)")
+  if(RACKPY_BUILD_TESTS AND NOT RACK_HOST_DIR)
+    message(FATAL_ERROR "RACK_HOST_DIR is not set; the native tests need libRack.dll. Pass -DRACK_HOST_DIR=$(bin/rack-sdk host win-x64) or use bin/rackpy-dev.")
+  endif()
+  if(RACK_HOST_DIR)
+    foreach(_dll libRack.dll libgcc_s_seh-1.dll libstdc++-6.dll libwinpthread-1.dll)
+      file(COPY_FILE "${RACK_HOST_DIR}/${_dll}" "${PROJECT_BINARY_DIR}/${_dll}" ONLY_IF_DIFFERENT)
+    endforeach()
+  endif()
 else()
   target_link_directories(rackpy_sdk_compile INTERFACE "${RACK_SDK_DIR}")
   # libRack.so has no SONAME, so link it by name (-lRack): a full path would be
@@ -144,6 +168,8 @@ endif()
 # already loaded by name (RP-40). On macOS such libraries therefore have no libRack load command; their
 # Rack symbols resolve, as plugin.mk's do, through -undefined dynamic_lookup against the libRack Rack
 # loaded.
+# On Windows a DLL's import of libRack.dll binds by name to the one Rack loaded, at any time, so modules
+# link as plugins do.
 add_library(rackpy_sdk_module INTERFACE)
 if(APPLE)
   target_link_libraries(rackpy_sdk_module INTERFACE rackpy_sdk_compile)

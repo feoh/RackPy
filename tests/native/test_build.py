@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import BIN, MACOS, PLATFORM, REPO, linux_x64_only, rack_platforms, require_tools
+from tests.support import MACOS, PLATFORM, REPO, bin_command, linux_x64_only, rack_platforms, require_tools
 
 pytestmark = [pytest.mark.native, rack_platforms()]
 LOADER = "plugin.dylib" if MACOS else "plugin.so"
@@ -49,7 +49,7 @@ def test_module_lifecycle_adapters_reference_no_python(dev_build: Path) -> None:
     objects = list(dev_build.glob("CMakeFiles/rackpy_host.dir/native/module/lifecycle.cpp.o"))
     assert len(objects) == 1, objects
     proc = subprocess.run(
-        [str(BIN / "rackpy-dev"), "audio-symbols", str(objects[0])], capture_output=True, text=True, check=False
+        [*bin_command("rackpy-dev"), "audio-symbols", str(objects[0])], capture_output=True, text=True, check=False
     )
     assert proc.returncode == 0, proc.stdout + proc.stderr
 
@@ -57,7 +57,7 @@ def test_module_lifecycle_adapters_reference_no_python(dev_build: Path) -> None:
 def test_bundle_has_the_expected_dynamic_shape(make_bundle: Callable[[], Path]) -> None:
     plugin = make_bundle()
     proc = subprocess.run(
-        [str(BIN / "rackpy-dev"), "inspect", str(plugin)], capture_output=True, text=True, check=False
+        [*bin_command("rackpy-dev"), "inspect", str(plugin)], capture_output=True, text=True, check=False
     )
     assert proc.returncode == 0, proc.stdout + proc.stderr
     report = json.loads(proc.stdout[proc.stdout.index("{") :])
@@ -82,7 +82,7 @@ def test_bundle_has_the_expected_dynamic_shape(make_bundle: Callable[[], Path]) 
 @linux_x64_only()
 def test_inspect_rejects_a_newer_glibc_than_allowed(make_bundle: Callable[[], Path]) -> None:
     plugin = make_bundle()
-    cmd = [str(BIN / "rackpy-dev"), "inspect", str(plugin), "--max-glibc", "2.0"]
+    cmd = [*bin_command("rackpy-dev"), "inspect", str(plugin), "--max-glibc", "2.0"]
     proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
     assert proc.returncode != 0
     assert "newer than 2.0" in errors(proc)
@@ -140,7 +140,7 @@ def test_audio_symbol_check_detects_python_references(tmp_path: Path, source: st
     obj = tmp_path / "kernel.o"
     subprocess.run(["cc", "-c", "-o", str(obj), str(tmp_path / "kernel.c")], check=True)
     proc = subprocess.run(
-        [str(BIN / "rackpy-dev"), "audio-symbols", str(obj)], capture_output=True, text=True, check=False
+        [*bin_command("rackpy-dev"), "audio-symbols", str(obj)], capture_output=True, text=True, check=False
     )
     assert (proc.returncode == 0) is clean, proc.stdout + proc.stderr
     if not clean:

@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "../bindings/plugin.hpp"
+#include "rackpy/export.h"
 #include "../plugin/model.hpp"
 #include "../dsp/runtime/runtime.hpp"
 #include "rackpy/runtime/interpreter.hpp"
@@ -46,7 +47,7 @@ std::vector<std::string> kernelLibraries(const std::string& pluginDir) {
 
 }  // namespace
 
-extern "C" __attribute__((visibility("default"))) int rackpy_host_init(RackPyHostInit* args) {
+extern "C" RACKPY_EXPORT int rackpy_host_init(RackPyHostInit* args) {
 	try {
 		if (args->abi != RACKPY_HOST_ABI) {
 			std::snprintf(args->error, args->error_size, "loader ABI %d does not match host ABI %d", args->abi, RACKPY_HOST_ABI);
@@ -83,7 +84,7 @@ extern "C" __attribute__((visibility("default"))) int rackpy_host_init(RackPyHos
 	}
 }
 
-extern "C" __attribute__((visibility("default"))) void rackpy_host_destroy() {
+extern "C" RACKPY_EXPORT void rackpy_host_destroy() {
 	try {
 		rackpy::runtime::finalize();
 	}
@@ -92,7 +93,7 @@ extern "C" __attribute__((visibility("default"))) void rackpy_host_destroy() {
 	}
 }
 
-extern "C" __attribute__((visibility("default"))) void* rackpy_host_settings_to_json() {
+extern "C" RACKPY_EXPORT void* rackpy_host_settings_to_json() {
 	try {
 		return rackpy::bindings::settingsToJson();
 	}
@@ -102,7 +103,7 @@ extern "C" __attribute__((visibility("default"))) void* rackpy_host_settings_to_
 	}
 }
 
-extern "C" __attribute__((visibility("default"))) void rackpy_host_settings_from_json(void* json) {
+extern "C" RACKPY_EXPORT void rackpy_host_settings_from_json(void* json) {
 	try {
 		rackpy::bindings::settingsFromJson(static_cast<json_t*>(json));
 	}

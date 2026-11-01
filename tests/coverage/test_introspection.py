@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import BIN, assert_clean_exit, rack_platforms, run_rack, stage_plugin
+from tests.support import assert_clean_exit, bin_command, rack_platforms, run_rack, stage_plugin
 
 pytestmark = [pytest.mark.host, rack_platforms()]
 
@@ -84,7 +84,7 @@ def test_introspection_comes_from_the_running_package(artifact: Path) -> None:
 
 def test_manifest_checks_against_the_built_package(artifact: Path) -> None:
     proc = subprocess.run(
-        [str(BIN / "check_coverage.py"), "check", "--introspection", str(artifact)],
+        [*bin_command("check_coverage.py"), "check", "--introspection", str(artifact)],
         capture_output=True,
         text=True,
         check=False,
@@ -96,7 +96,7 @@ def test_an_artifact_without_objects_is_refused(tmp_path: Path) -> None:
     empty = tmp_path / "empty.json"
     empty.write_text('{"objects": {}}')
     proc = subprocess.run(
-        [str(BIN / "check_coverage.py"), "check", "--introspection", str(empty)],
+        [*bin_command("check_coverage.py"), "check", "--introspection", str(empty)],
         capture_output=True,
         text=True,
         check=False,

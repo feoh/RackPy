@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 
 from rackpy.raw import blendish, glfw, ui
+from tests.support import bin_command
 
 REPO = Path(__file__).resolve().parents[3]
 
@@ -14,7 +15,7 @@ def test_boundary_constants_match_compiled_sdk(tmp_path: Path) -> None:
     inventory = json.loads((REPO / "upstream" / "api-surface.json").read_text())
     entries = [e for e in inventory["entries"] if e["kind"] == "boundary_constant"]
     assert entries and any(e["name"] == "BND_CORNER_ALL" for e in entries)
-    sdk = Path(subprocess.check_output([str(REPO / "bin" / "rack-sdk"), "path"], text=True).strip())
+    sdk = Path(subprocess.check_output([*bin_command("rack-sdk"), "path"], text=True).strip())
     lines = ["#include <rack.hpp>", "#include <cstdio>", "int main() {"]
     lines.extend(f'printf("{e["name"]} %d\\n", static_cast<int>({e["name"]}));' for e in entries)
     lines.append("}")

@@ -32,6 +32,16 @@ namespace s = rack::string;
 
 namespace {
 
+/** Whether t has a local time: Rack's formatTime passes strftime what localtime returns, null if not. */
+bool hasLocalTime(time_t t) {
+	struct tm check;
+#if defined(_WIN32)
+	return localtime_s(&check, &t) == 0;  // msvcrt has no localtime_r
+#else
+	return localtime_r(&t, &check) != nullptr;
+#endif
+}
+
 template <class T>
 T integer(py::handle value, const std::string& spec) {
 	if (!py::isinstance<py::int_>(value) || py::isinstance<py::bool_>(value))
@@ -254,8 +264,7 @@ void bindString(py::module_ m) {
 			timestamp > static_cast<double>(std::numeric_limits<time_t>::max()))
 			throw py::value_error("the timestamp is out of range");
 		time_t t = static_cast<time_t>(timestamp);
-		struct tm check;
-		if (!localtime_r(&t, &check))
+		if (!hasLocalTime(t))
 			throw py::value_error("the timestamp has no local time");  // Rack would pass strftime a null tm
 		return s::formatTime(format.c_str(), timestamp);
 	}, py::arg("format"), py::arg("timestamp"), "Rack's: strftime of the local time (up to 1023 bytes).");
@@ -263,8 +272,7 @@ void bindString(py::module_ m) {
 		if (!std::isfinite(timestamp))
 			throw py::value_error("the timestamp is out of range");
 		time_t t = static_cast<time_t>(timestamp);
-		struct tm check;
-		if (!localtime_r(&t, &check))
+		if (!hasLocalTime(t))
 			throw py::value_error("the timestamp has no local time");
 		return s::formatTimeISO(timestamp);
 	}, py::arg("timestamp"));

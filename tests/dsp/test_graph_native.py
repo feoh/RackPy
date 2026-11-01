@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import linux_x64_only, rack_platforms
+from tests.support import bin_command, linux_x64_only, rack_platforms
 
 pytestmark = [rack_platforms(), pytest.mark.native]  # the LD_PRELOAD guard run is Linux-only
 
@@ -53,8 +53,7 @@ def test_the_plan_cost_benchmark_runs(dev_build: Path) -> None:
 def test_plan_objects_reference_no_python(dev_build: Path) -> None:
     objects = sorted(dev_build.glob("CMakeFiles/rackpy_host.dir/native/dsp/graph/*.cpp.o"))
     assert [o.name for o in objects] == ["plan.cpp.o"]
-    bin_dir = Path(__file__).resolve().parents[2] / "bin"
     proc = subprocess.run(
-        [str(bin_dir / "rackpy-dev"), "audio-symbols", *map(str, objects)], capture_output=True, text=True, check=False
+        [*bin_command("rackpy-dev"), "audio-symbols", *map(str, objects)], capture_output=True, text=True, check=False
     )
     assert proc.returncode == 0, proc.stdout + proc.stderr

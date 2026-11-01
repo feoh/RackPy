@@ -6,14 +6,16 @@
 # [tool.uv]
 # exclude-newer = "2026-10-21T00:00:00Z"
 # ///
-"""Build and check the official Rack plugin toolchain for distributable Linux builds (RP-08).
+"""Build and check the official Rack plugin toolchains for distributable builds (RP-08, RP-41).
 
 A host-compiler build needs the host's glibc, so it is not distributable
 (docs/compatibility.md, finding 1). This builds the official
-rack-plugin-toolchain Linux toolchain (crosstool-ng x86_64-ubuntu16.04-linux-gnu)
-from the commit pinned in upstream/versions.json, inside the pinned Docker
-image packaging/toolchain/lin-x64.Dockerfile. The toolchain lives in a cache
-directory outside git. It takes about an hour on a fast machine.
+rack-plugin-toolchain toolchains from the commit pinned in upstream/versions.json,
+inside the pinned Docker image packaging/toolchain/lin-x64.Dockerfile: for
+lin-x64 crosstool-ng x86_64-ubuntu16.04-linux-gnu (about an hour on a fast
+machine), for win-x64 crosstool-ng x86_64-w64-mingw32 with mingw-w64 v10, the
+msvcrt-based MinGW GCC Rack itself is built with (RP-41). They live in a cache
+directory outside git.
 """
 
 import hashlib
@@ -24,7 +26,7 @@ import shutil
 import subprocess
 import urllib.request
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 import cyclopts
 
@@ -32,10 +34,13 @@ REPO = Path(__file__).resolve().parent.parent
 VERSIONS = REPO / "upstream" / "versions.json"
 DOCKERFILE = REPO / "packaging" / "toolchain" / "lin-x64.Dockerfile"
 DEFAULT_CACHE = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "rackpy" / "toolchain"
-TRIPLE = "x86_64-ubuntu16.04-linux-gnu"
+Target = Literal["lin-x64", "win-x64"]
+TRIPLES: dict[str, str] = {"lin-x64": "x86_64-ubuntu16.04-linux-gnu", "win-x64": "x86_64-w64-mingw32"}
+MAKE_TARGETS: dict[str, str] = {"lin-x64": "toolchain-lin", "win-x64": "toolchain-win"}
 
 app = cyclopts.App(help=__doc__)
 CacheOpt = Annotated[Path, cyclopts.Parameter(help="Cache directory outside git.")]
+TargetOpt = Annotated[Target, cyclopts.Parameter(help="Rack platform the toolchain builds for.")]
 
 
 def pins() -> dict[str, Any]:
@@ -52,8 +57,8 @@ def workdir(cache: Path) -> Path:
     return cache / commit[:12]
 
 
-def toolchain_root(cache: Path) -> Path:
-    return workdir(cache) / "local" / TRIPLE
+def toolchain_root(cache: Path, target: Target = "lin-x64") -> Path:
+    return workdir(cache) / "local" / TRIPLES[target]
 
 
 def image_tag() -> str:
@@ -61,12 +66,12 @@ def image_tag() -> str:
 
 
 @app.command
-def build(*, cache: CacheOpt = DEFAULT_CACHE, jobs: int = os.cpu_count() or 4) -> None:
-    """Build the Linux toolchain in Docker; a no-op when it already exists."""
+def build(*, target: TargetOpt = "lin-x64", cache: CacheOpt = DEFAULT_CACHE, jobs: int = os.cpu_count() or 4) -> None:
+    """Build a toolchain in Docker; a no-op when it already exists."""
     pin = pins()
     work = workdir(cache)
-    if toolchain_root(cache).is_dir():
-        print(f"already built: {toolchain_root(cache)}")
+    if toolchain_root(cache, target).is_dir():
+        print(f"already built: {toolchain_root(cache, target)}")
         return
     if shutil.which("docker") is None:
         raise SystemExit("docker is required to build the toolchain")
@@ -93,12 +98,12 @@ def build(*, cache: CacheOpt = DEFAULT_CACHE, jobs: int = os.cpu_count() or 4) -
             f"--env=PWD={work}",  # the official Makefile derives LOCAL_DIR from $PWD
             image_tag(),
             "make",
-            "toolchain-lin",
+            MAKE_TARGETS[target],
             f"JOBS={jobs}",
         ],
         check=True,
     )
-    check(cache=cache)
+    check(target=target, cache=cache)
 
 
 def run(args: list[str]) -> str:
@@ -106,28 +111,41 @@ def run(args: list[str]) -> str:
 
 
 @app.command
-def path(*, cache: CacheOpt = DEFAULT_CACHE) -> None:
+def path(*, target: TargetOpt = "lin-x64", cache: CacheOpt = DEFAULT_CACHE) -> None:
     """Print the toolchain's bin directory, or fail with setup instructions."""
-    root = toolchain_root(cache)
-    if not (root / "bin" / f"{TRIPLE}-g++").exists():
-        raise SystemExit(f"Rack Linux toolchain not found at {root}. Build it with: bin/rack-toolchain build")
+    root = toolchain_root(cache, target)
+    if not (root / "bin" / f"{TRIPLES[target]}-g++").exists():
+        raise SystemExit(
+            f"Rack {target} toolchain not found at {root}. Build it with: bin/rack-toolchain build --target {target}"
+        )
     print(root / "bin")
 
 
 @app.command
-def check(*, cache: CacheOpt = DEFAULT_CACHE) -> None:
-    """Report the compiler version and the sysroot glibc version; fail if glibc is newer than 2.23."""
-    root = toolchain_root(cache)
-    gxx = root / "bin" / f"{TRIPLE}-g++"
+def check(*, target: TargetOpt = "lin-x64", cache: CacheOpt = DEFAULT_CACHE) -> None:
+    """Report the compiler version and its C runtime: the sysroot glibc (at most 2.23), or msvcrt for Windows."""
+    triple = TRIPLES[target]
+    root = toolchain_root(cache, target)
+    gxx = root / "bin" / f"{triple}-g++"
     if not gxx.exists():
-        raise SystemExit(f"Rack Linux toolchain not found at {root}. Build it with: bin/rack-toolchain build")
+        raise SystemExit(
+            f"Rack {target} toolchain not found at {root}. Build it with: bin/rack-toolchain build --target {target}"
+        )
     version = run([str(gxx), "-dumpfullversion"]).strip()
-    libc = next((root / TRIPLE / "sysroot").glob("lib*/libc-*.so"), None)
+    if target == "win-x64":
+        # Rack's libRack.dll and Rack.exe import msvcrt.dll; a UCRT-default mingw-w64 would not match them.
+        macros = run([str(gxx), "-dM", "-E", "-x", "c++", "-include", "stdio.h", os.devnull])
+        crt = "ucrt" if re.search(r"^#define _UCRT\b", macros, re.M) else "msvcrt"
+        print(json.dumps({"triple": triple, "gcc": version, "crt": crt, "root": str(root)}))
+        if crt != "msvcrt":
+            raise SystemExit("the toolchain's mingw-w64 defaults to the UCRT; Rack for Windows uses msvcrt.dll")
+        return
+    libc = next((root / triple / "sysroot").glob("lib*/libc-*.so"), None)
     match = re.search(r"libc-(\d+)\.(\d+)\.so$", str(libc))
     if not match:
-        raise SystemExit(f"cannot find libc-<version>.so in {root / TRIPLE / 'sysroot'}")
+        raise SystemExit(f"cannot find libc-<version>.so in {root / triple / 'sysroot'}")
     glibc = (int(match[1]), int(match[2]))
-    print(json.dumps({"triple": TRIPLE, "gcc": version, "sysroot_glibc": f"{glibc[0]}.{glibc[1]}", "root": str(root)}))
+    print(json.dumps({"triple": triple, "gcc": version, "sysroot_glibc": f"{glibc[0]}.{glibc[1]}", "root": str(root)}))
     if glibc > (2, 23):
         raise SystemExit(f"sysroot glibc {glibc} is newer than the Ubuntu 16.04 floor (2.23)")
 

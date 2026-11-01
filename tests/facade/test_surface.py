@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import BIN, tool
+from tests.support import bin_command, tool
 
 pytestmark = pytest.mark.unit
 SNAPSHOT = Path(__file__).resolve().parent / "surface.json"
@@ -25,7 +25,10 @@ def test_a_changed_signature_or_name_is_reported(tmp_path: Path) -> None:
     altered = tmp_path / "surface.json"
     altered.write_text(json.dumps(recorded), encoding="utf-8")
     proc = subprocess.run(
-        [str(BIN / "facade-surface"), "check", "--against", str(altered)], capture_output=True, text=True, check=False
+        [*bin_command("facade-surface"), "check", "--against", str(altered)],
+        capture_output=True,
+        text=True,
+        check=False,
     )
     assert proc.returncode == 1
     assert "rackpy.midi.note_on: changed" in proc.stderr

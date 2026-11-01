@@ -35,6 +35,17 @@
         "platform": "x86_64-apple-darwin",
         "sha256": "600cf336dd007e7c72318214fd0708a56c555b516964175df4a748e4ff0487a2",
         "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-apple-darwin-install_only.tar.gz"
+      },
+      "win-x64": {
+        "release": "20261021",
+        "root": "python",
+        "source": "https://github.com/astral-sh/python-build-standalone",
+        "version": "3.14.9",
+        "file": "cpython-3.14.9+20261021-x86_64-pc-windows-msvc-install_only.tar.gz",
+        "flavor": "install_only",
+        "platform": "x86_64-pc-windows-msvc",
+        "sha256": "60739023ce2d9dee1dfde665c73bc61735cd8ecc5e0277345f1dc0ba6c0fc9ba",
+        "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-pc-windows-msvc-install_only.tar.gz"
       }
     }
   },
@@ -55,6 +66,11 @@
         "file": "cpython-3.14.9+20261021-x86_64-apple-darwin-pgo+lto-full.tar.zst",
         "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-apple-darwin-pgo%2Blto-full.tar.zst",
         "sha256": "b51b8a1f266a4b633cb75a754fa3ab712b5f4255c5a5d550a0412368e9bee605"
+      },
+      "win-x64": {
+        "file": "cpython-3.14.9+20261021-x86_64-pc-windows-msvc-pgo-full.tar.zst",
+        "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-pc-windows-msvc-pgo-full.tar.zst",
+        "sha256": "f03ccd79ff289757a8a721faecb99ea318754df3141406ca0e83b1caf3af84d2"
       }
     }
   }

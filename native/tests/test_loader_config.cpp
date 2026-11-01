@@ -9,6 +9,7 @@
 #include <string>
 
 #include "loader_config.hpp"
+#include "rackpy/dynlib.hpp"
 #include "rackpy/host_abi.h"
 
 using rackpy::loader::Config;
@@ -119,12 +120,27 @@ void testNoPythonLoaded() {
 	CHECK(rackpy::loader::loadedPythons().empty());
 }
 
+void testPythonImageNames() {
+	using rackpy::loader::isPython;
+	CHECK(isPython("/opt/rack/plugins/X/python/lib/libpython3.14.so.1.0"));
+	CHECK(isPython("/Library/Frameworks/Python.framework/Versions/3.12/Python"));
+	CHECK(isPython("C:\\Users\\me\\AppData\\Local\\Rack2\\plugins-win-x64\\X\\python\\python314.dll"));
+	CHECK(isPython("C:/Program Files/Other/PYTHON3.DLL"));  // Windows file names compare without case
+	CHECK(!isPython("C:\\Windows\\System32\\kernel32.dll"));
+	CHECK(!isPython("C:/plugins/X/python3_helper.pyd"));
+}
+
+void testLoadedImages() {
+	// The system's image list is never empty: at least the C runtime is loaded.
+	CHECK(!rackpy::dynlib::loadedImages().empty());
+}
+
 }  // namespace
 
 int main() {
 	const std::function<void()> tests[] = {
 		testValidConfig, testEntryIsOptional, testRejections, testContainedPaths, testReadConfigReportsPath,
-		testNoPythonLoaded};
+		testNoPythonLoaded, testPythonImageNames, testLoadedImages};
 	for (const auto& t : tests)
 		t();
 	if (failures) {

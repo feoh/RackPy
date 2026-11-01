@@ -7,7 +7,17 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import BIN, MACOS, PLATFORM, RACK_HOST, REPO, copy_sharing_binaries, require_tools, tool
+from tests.support import (
+    MACOS,
+    PLATFORM,
+    RACK_HOST,
+    REPO,
+    WINDOWS,
+    bin_command,
+    copy_sharing_binaries,
+    require_tools,
+    tool,
+)
 
 # Suites under */in_rack*/ run inside Rack (tests.support.run_pytest_in_rack); outside Rack they cannot import.
 collect_ignore_glob = ["*/in_rack", "*/in_rack/*", "*/in_rack_*", "*/in_rack_*/*"]
@@ -36,7 +46,14 @@ def rack_host() -> Path:
 
 @pytest.fixture(scope="session")
 def native_tools() -> None:
-    require_tools("cmake", "ninja", *(("c++", "otool", "nm") if MACOS else ("g++", "readelf", "nm", "objdump")))
+    compilers: tuple[str, ...]
+    if MACOS:
+        compilers = ("c++", "otool", "nm")
+    elif WINDOWS:
+        compilers = ("g++", "objdump", "nm")  # MSYS2's MINGW64 toolchain: msvcrt, as Rack for Windows
+    else:
+        compilers = ("g++", "readelf", "nm", "objdump")
+    require_tools("cmake", "ninja", *compilers)
 
 
 @pytest.fixture(scope="session")
@@ -44,7 +61,7 @@ def dev_build(native_tools: None, tmp_path_factory: pytest.TempPathFactory) -> P
     """A host-compiler build of the skeleton, with its CTest suite run."""
     build = tmp_path_factory.mktemp("build")
     proc = subprocess.run(
-        [str(BIN / "rackpy-dev"), "build", "--build-dir", str(build), "--werror"],
+        [*bin_command("rackpy-dev"), "build", "--build-dir", str(build), "--werror"],
         capture_output=True,
         text=True,
         check=False,
@@ -75,7 +92,7 @@ def make_bundle(dev_build: Path, tmp_path_factory: pytest.TempPathFactory) -> Ca
 @pytest.fixture(scope="session")
 def hooks_build(native_tools: None, tmp_path_factory: pytest.TempPathFactory) -> Path:
     build = tmp_path_factory.mktemp("hooks-build")
-    cmd = [str(BIN / "rackpy-dev"), "build", "--build-dir", str(build), "--werror", "--test-hooks"]
+    cmd = [*bin_command("rackpy-dev"), "build", "--build-dir", str(build), "--werror", "--test-hooks"]
     proc = subprocess.run(cmd, capture_output=True, text=True, check=False, cwd=REPO)
     assert proc.returncode == 0, proc.stdout[-4000:] + proc.stderr[-4000:]
     return build

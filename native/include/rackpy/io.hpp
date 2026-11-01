@@ -18,6 +18,8 @@
 //
 // Include it after <rack.hpp>; it uses only Rack's public API.
 #pragma once
+
+#include "rackpy/export.h"
 #include <rack.hpp>
 
 #include <cstdint>
@@ -106,7 +108,7 @@ library its services before any of its kernels is made.
 	RACKPY_IO
 */
 #define RACKPY_IO \
-	extern "C" __attribute__((visibility("default"))) int rackpy_io_abi() { return rackpy::io::IO_ABI; } \
-	extern "C" __attribute__((visibility("default"))) void rackpy_set_io_services(rackpy::io::Services* given) { \
+	extern "C" RACKPY_EXPORT int rackpy_io_abi() { return rackpy::io::IO_ABI; } \
+	extern "C" RACKPY_EXPORT void rackpy_set_io_services(rackpy::io::Services* given) { \
 		rackpy::io::services() = given; \
 	}
