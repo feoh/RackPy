@@ -10,6 +10,7 @@ import importlib.machinery
 import importlib.util
 import json
 import os
+import sys
 import tarfile
 import types
 from pathlib import Path
@@ -150,14 +151,24 @@ def test_the_file_manifest_covers_every_file_or_names_the_ones_it_cannot(
     release: types.ModuleType, tmp_path: Path
 ) -> None:
     tree = make_tree(tmp_path / "X", 1_000_000)
+    # This platform's names for RackPy's loader and libpython (on macOS and Windows a plugin.so is a stray file).
+    (tree / "plugin.so").rename(tree / release.LOADER)
+    lib = f"python/{release.LIBPYTHON}" if sys.platform == "win32" else f"python/lib/{release.LIBPYTHON}"
+    link = tree / "python" / "lib" / "libpython3.14.so"
+    if lib != "python/lib/libpython3.14.so.1.0":
+        link.unlink()
+        (tree / "python" / "lib" / "libpython3.14.so.1.0").rename(tree / lib)
+        link.symlink_to(os.path.relpath(tree / lib, link.parent))
+    target = str(link.readlink())
     (tree / "licenses").mkdir()
     (tree / "kernels").mkdir()
     (tree / "kernels" / "k.so").write_bytes(b"kernel")
     assert release.file_manifest(tree, {"commit": "c"}) == []
     files = json.loads((tree / "licenses" / "FILES.json").read_text())["files"]
     assert files["kernels/k.so"]["components"] == ["plugin", "rack-sdk-headers"]
-    assert files["python/lib/libpython3.14.so.1.0"]["components"] == ["cpython", "cpython-libraries"]
-    assert files["python/lib/libpython3.14.so"] == {"components": ["cpython"], "symlink": "libpython3.14.so.1.0"}
+    assert files[release.LOADER]["components"] == ["rackpy", "rack-sdk-headers"]
+    assert files[lib]["components"] == ["cpython", "cpython-libraries"]
+    assert files["python/lib/libpython3.14.so"] == {"components": ["cpython"], "symlink": target}
     assert not any("__pycache__" in name for name in files)  # as rackpy-plugin pack leaves them out
     (tree / "stray.bin").write_bytes(b"?")
     assert release.file_manifest(tree, {"commit": "c"}) == ["X/stray.bin"]
