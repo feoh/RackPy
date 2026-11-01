@@ -1,0 +1,10 @@
+{
+  "slug": "RackPyCISoftwareGL",
+  "name": "RackPy CI software OpenGL",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "RackPy CI",
+  "author": "RackPy",
+  "description": "Test fixture, never shipped: lets Rack open a window with Apple's software OpenGL on a Mac without a GPU (RP-42).",
+  "modules": []
+}

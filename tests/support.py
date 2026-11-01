@@ -257,6 +257,35 @@ def run_rack(
     return RackRun(returncode, log.read_text(errors="replace") if log.exists() else "")
 
 
+# CI on GitHub-hosted Macs (no GPU): a test-only Rack plugin lets Rack's window use Apple's software OpenGL
+# (tests/fixtures/macos-software-gl), as Linux CI renders with Mesa under Xvfb (RP-42).
+MACOS_SOFTWARE_GL = MACOS and os.environ.get("RACKPY_MACOS_SOFTWARE_GL") == "1"
+SOFTWARE_GL_SLUG = "RackPyCISoftwareGL"
+_software_gl: list[Path] = []
+
+
+def software_gl_plugin() -> Path:
+    """The fixture plugin, built once per session with the Mac's clang."""
+    if not _software_gl:
+        source = REPO / "tests" / "fixtures" / "macos-software-gl"
+        out = Path(tempfile.mkdtemp(prefix="rackpy-software-gl-")) / SOFTWARE_GL_SLUG
+        out.mkdir()
+        shutil.copy(source / "plugin.json", out / "plugin.json")
+        subprocess.run(
+            ["clang", "-dynamiclib", "-DGL_SILENCE_DEPRECATION", "-framework", "AppKit", "-framework", "OpenGL",
+             str(source / "shim.m"), "-o", str(out / "plugin.dylib")],
+            check=True,
+        )  # fmt: skip
+        _software_gl.append(out)
+    return _software_gl[0]
+
+
+def prepare_window_user(user: Path) -> None:
+    """What a windowed Rack run needs in its user folder beyond the test's own plugins (the CI Mac's renderer)."""
+    if MACOS_SOFTWARE_GL:
+        shutil.copytree(software_gl_plugin(), user / f"plugins-{PLATFORM}" / SOFTWARE_GL_SLUG, dirs_exist_ok=True)
+
+
 # What Rack logs once it has an OpenGL window, and what GLFW logs when the Mac or Windows offers it none.
 GL_READY = "Renderer: "
 GL_REFUSED = ("NSGL: Failed to find a suitable pixel format", "WGL: ", "Could not create Window")
@@ -275,6 +304,7 @@ def opens_gl_windows(rack: Path, timeout: float = 30) -> bool:
         with tempfile.TemporaryDirectory(prefix="rackpy-gl-probe-") as tmp:
             user = Path(tmp)
             (user / "settings.json").write_text('{"showTipsOnLaunch": false}')
+            prepare_window_user(user)
             proc = subprocess.Popen(
                 [str(rack_program(rack)), "-u", str(user)],
                 cwd=rack,
@@ -314,8 +344,8 @@ def run_rack_windowed(
         require(
             "macos-opengl",
             opens_gl_windows(rack),
-            "a Mac that gives Rack an OpenGL window (a GPU and a logged-in session); GitHub-hosted macOS runners "
-            "offer no pixel format Rack's GLFW accepts",
+            "a Mac that gives Rack an OpenGL window (a GPU and a logged-in session, or RACKPY_MACOS_SOFTWARE_GL=1 "
+            "for Apple's software renderer); GitHub-hosted macOS runners offer no pixel format Rack's GLFW accepts",
         )
     elif WINDOWS:
         require(
@@ -333,6 +363,7 @@ def run_rack_windowed(
         | (env or {})
     )
     (user / "autosave").mkdir(parents=True, exist_ok=True)
+    prepare_window_user(user)
     cmd = [str(rack_program(rack)), "-u", str(user)]
     if not MACOS and not WINDOWS:
         cmd = ["xvfb-run", "-a", "-s", "-screen 0 1600x1000x24", *cmd]
