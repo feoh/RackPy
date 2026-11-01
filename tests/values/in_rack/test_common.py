@@ -151,8 +151,8 @@ def test_fopen_u8_exists_on_windows_only(tmp_path: Path) -> None:
         assert missing.value.errno == errno.ENOENT and missing.value.filename == str(tmp_path / "missing ☃")
         with pytest.raises(ValueError, match="NUL"):
             raw.fopen_u8("a\0b", "rb")
-        with pytest.raises(TypeError, match="bytes"):
-            raw.fopen_u8(str(path), "rb").write("text")  # type: ignore[arg-type, unused-ignore]
+        with raw.fopen_u8(str(path), "rb") as f, pytest.raises(TypeError, match="incompatible function arguments"):
+            f.write("text")  # type: ignore[arg-type, unused-ignore]  # pybind11 refuses a str for the buffer
     else:
         assert not hasattr(raw, "fopen_u8") and not hasattr(raw, "CFile") and not hasattr(macros, "fopen")
 

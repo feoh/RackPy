@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """RP-11: the manifest's rules, on a miniature inventory where every failure can be provoked."""
 
+import json
+from pathlib import Path
 from typing import Any
 
 import binding_manifest as bm
@@ -16,6 +18,9 @@ VOLTAGE0 = "method:rack::engine::Port::getVoltage()"
 ADD = "method:rack::engine::Engine::addModule(rack::engine::Module *)"
 INTERNAL = "method:rack::engine::Engine::setSampleRate(float)"
 ALIAS = "alias:rack::app::SVGPanel"
+# The test bind() cites, passed on the platform: the evidence a release check needs (RP-42).
+BOUND_TEST = "tests/runtime/test_bound.py::test_bound"
+PASSED = {BOUND_TEST: "passed"}
 
 
 def by_id(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -285,8 +290,46 @@ def test_release_needs_everything_final_and_real_artifacts(mini: Mini) -> None:
         bind(record, mini, raw=raw, gil_release=True)
         record.update(status="verified", reviewer="test")
         objects[raw] = {}
-    assert bm.release_problems(mini.inputs(), manifest, "lin-x64", {"objects": objects}) == []
-    assert "missing-runtime-artifact" in codes(bm.release_problems(mini.inputs(), manifest, "lin-x64", None))
+    assert bm.release_problems(mini.inputs(), manifest, "lin-x64", {"objects": objects}, PASSED) == []
+    assert "missing-runtime-artifact" in codes(bm.release_problems(mini.inputs(), manifest, "lin-x64", None, PASSED))
+    assert "missing-test-evidence" in codes(
+        bm.release_problems(mini.inputs(), manifest, "lin-x64", {"objects": objects})
+    )
+
+
+def test_release_needs_a_passing_test_on_the_platform(mini: Mini, tmp_path: Path) -> None:
+    manifest = mini.seeded()
+    objects: dict[str, Any] = {}
+    for record in manifest["entries"]:
+        if record["status"] == "excluded_internal":
+            continue
+        raw = "rackpy.raw.x" + str(len(objects))
+        bind(record, mini, raw=raw, gil_release=True)
+        record.update(status="verified", reviewer="test")
+        objects[raw] = {}
+    artifact = {"objects": objects}
+    for outcome, code in (("failed", "evidence-failed"), ("skipped", "no-evidence")):
+        problems = bm.release_problems(mini.inputs(), manifest, "lin-x64", artifact, {BOUND_TEST: outcome})
+        assert code in codes(problems), outcome
+    assert "no-evidence" in codes(
+        bm.release_problems(mini.inputs(), manifest, "lin-x64", artifact, {"other": "passed"})
+    )
+    # Parametrized cases count together: one failing case fails the cited test.
+    cases = {f"{BOUND_TEST}[a]": "passed", f"{BOUND_TEST}[b]": "passed"}
+    assert bm.release_problems(mini.inputs(), manifest, "lin-x64", artifact, cases) == []
+    cases[f"{BOUND_TEST}[b]"] = "failed"
+    assert "evidence-failed" in codes(bm.release_problems(mini.inputs(), manifest, "lin-x64", artifact, cases))
+    # Evidence files: phases combine (a failed teardown fails the test), and only the named platform counts.
+    lines = [
+        {"platform": "lin-x64", "test": BOUND_TEST, "when": "call", "outcome": "passed"},
+        {"platform": "lin-x64", "test": "t2", "when": "call", "outcome": "passed"},
+        {"platform": "lin-x64", "test": "t2", "when": "teardown", "outcome": "failed"},
+        {"platform": "win-x64", "test": "t3", "when": "call", "outcome": "passed"},
+    ]
+    (tmp_path / "lin-x64-1.jsonl").write_text("".join(json.dumps(line) + "\n" for line in lines))
+    assert bm.load_evidence([tmp_path], "lin-x64") == {BOUND_TEST: "passed", "t2": "failed"}
+    with pytest.raises(bm.ManifestError, match="no test outcomes"):
+        bm.load_evidence([tmp_path], "mac-x64")
 
 
 def test_report_counts_every_declaration_once(mini: Mini) -> None:
@@ -325,7 +368,7 @@ def test_an_open_owner_review_item_blocks_a_release_and_is_reported(mini: Mini) 
     record = by_id(manifest)[VOLTAGE]
     record["notes"] = "Mapped for channels 0 to 15. Open owner review item: the channel bound of 16. Linux only."
     assert bm.validate(mini.inputs(), manifest, {"objects": objects}) == []  # check passes: partial coverage
-    problems = bm.release_problems(mini.inputs(), manifest, "lin-x64", {"objects": objects})
+    problems = bm.release_problems(mini.inputs(), manifest, "lin-x64", {"objects": objects}, PASSED)
     assert [(p.code, p.id) for p in problems] == [("owner-review", VOLTAGE)]  # even though it is verified
     assert "the channel bound of 16" in problems[0].message
     rep = bm.report(mini.inputs(), manifest)
@@ -334,7 +377,7 @@ def test_an_open_owner_review_item_blocks_a_release_and_is_reported(mini: Mini) 
     assert "**Open owner review items** (each blocks a release until the owner decides): 1" in text
     assert f"- `{VOLTAGE}`: the channel bound of 16" in text
     record["notes"] = "Owner-approved 2026-10-27: the channel bound of 16."
-    assert bm.release_problems(mini.inputs(), manifest, "lin-x64", {"objects": objects}) == []
+    assert bm.release_problems(mini.inputs(), manifest, "lin-x64", {"objects": objects}, PASSED) == []
     assert bm.report(mini.inputs(), manifest)["open_owner_reviews"] == {}
 
 

@@ -734,9 +734,14 @@ def report(inputs: Inputs, manifest: dict[str, Any]) -> dict[str, Any]:
 
 
 def release_problems(
-    inputs: Inputs, manifest: dict[str, Any], platform: str, introspection: dict[str, Any] | None
+    inputs: Inputs,
+    manifest: dict[str, Any],
+    platform: str,
+    introspection: dict[str, Any] | None,
+    outcomes: dict[str, str] | None = None,
 ) -> list[Problem]:
-    """The release bar for one platform: zero records outside FINAL, a real inventory and a real artifact."""
+    """The release bar for one platform: zero records outside FINAL, a real inventory, a real artifact, and a
+    passing test on that platform for every bound record (RP-42)."""
     if platform not in PLATFORMS:
         raise ManifestError(f"unknown platform {platform!r}; choose from {', '.join(PLATFORMS)}")
     problems = validate(inputs, manifest, introspection)
@@ -744,6 +749,10 @@ def release_problems(
         problems.append(
             Problem("missing-runtime-artifact", "-", "a release check needs the built package's introspection")
         )
+    if outcomes is None:
+        problems.append(Problem("missing-test-evidence", "-", f"a release check needs the test outcomes on {platform}"))
+    else:
+        problems += evidence_problems(inputs, manifest, platform, outcomes)[0]
     records = {r["id"]: r for r in manifest["entries"]}
     for ident, entry in sorted(inputs.index.items()):
         if not counted(entry):
@@ -760,6 +769,58 @@ def release_problems(
         for item in open_owner_reviews(records.get(ident, {})):
             problems.append(Problem("owner-review", ident, f"open owner review item, until the owner decides: {item}"))
     return sorted(set(problems))
+
+
+def load_evidence(paths: list[Path], platform: str) -> dict[str, str]:
+    """Each test's outcome on PLATFORM, from RACKPY_TEST_EVIDENCE files (tests/support.py): "failed" if any phase
+    failed, else "skipped" if any phase skipped, else "passed" (RP-42)."""
+    phases: dict[str, set[str]] = defaultdict(set)
+    for path in paths:
+        for file in sorted(path.glob("*.jsonl")) if path.is_dir() else [path]:
+            for line in file.read_text(encoding="utf-8").splitlines():
+                record = json.loads(line)
+                if record["platform"] == platform:
+                    phases[record["test"]].add(record["outcome"])
+    if not phases:
+        raise ManifestError(f"no test outcomes for {platform} in {', '.join(map(str, paths))}")
+    return {t: "failed" if "failed" in o else "skipped" if "skipped" in o else "passed" for t, o in phases.items()}
+
+
+def cited_outcome(outcomes: dict[str, str], test: str) -> str:
+    """A cited test's outcome: all its parametrized cases together; "not run" if none ran."""
+    seen = {o for t, o in outcomes.items() if t == test or t.startswith(test + "[")}
+    return "failed" if "failed" in seen else "passed" if "passed" in seen else "skipped" if seen else "not run"
+
+
+def evidence_problems(
+    inputs: Inputs, manifest: dict[str, Any], platform: str, outcomes: dict[str, str]
+) -> tuple[list[Problem], Counter[str]]:
+    """Semantic evidence on PLATFORM: every bound record available there cites a test that passed there, and none
+    that failed. Records whose mapping is "no runtime meaning" have nothing to run (their docs say why)."""
+    problems: list[Problem] = []
+    counts: Counter[str] = Counter()
+    records = {r["id"]: r for r in manifest["entries"]}
+    for ident, entry in sorted(inputs.index.items()):
+        r = records.get(ident)
+        if r is None or not counted(entry) or r["status"] not in BOUND:
+            continue
+        if availability(inputs.inventory, entry)[platform] != "yes":
+            continue
+        if (r.get("python") or {}).get("kind") == "no_runtime_meaning":
+            counts["no runtime meaning"] += 1
+            continue
+        results = {t: cited_outcome(outcomes, t) for t in r.get("tests", [])}
+        failed = sorted(t for t, o in results.items() if o == "failed")
+        if failed:
+            counts["failed"] += 1
+            problems.append(Problem("evidence-failed", ident, f"failed on {platform}: {', '.join(failed)}"))
+        elif "passed" in results.values():
+            counts["passed"] += 1
+        else:
+            counts["no evidence"] += 1
+            detail = ", ".join(f"{t} {o}" for t, o in sorted(results.items())) or "no tests cited"
+            problems.append(Problem("no-evidence", ident, f"no cited test passed on {platform}: {detail}"))
+    return problems, counts
 
 
 def markdown_report(rep: dict[str, Any]) -> str:

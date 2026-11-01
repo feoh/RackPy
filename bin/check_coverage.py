@@ -96,10 +96,48 @@ def report(*, manifest: Path = bm.MANIFEST, output_format: Literal["markdown", "
 
 
 @app.command
-def release(platform: str, *, manifest: Path = bm.MANIFEST, introspection: Path | None = None, limit: int = 20) -> None:
-    """Fail unless PLATFORM meets the full-coverage release bar."""
+def evidence(
+    platform: str, results: list[Path], *, manifest: Path = bm.MANIFEST, output: Path | None = None, limit: int = 20
+) -> None:
+    """Fail unless every bound record available on PLATFORM cites a test that passed there and none that failed.
+
+    RESULTS are RACKPY_TEST_EVIDENCE directories or files from test runs on that platform. --output writes the
+    per-record result as JSON (release-evidence/coverage/).
+    """
+    inputs, data, _ = load(manifest, None)
+    outcomes = bm.load_evidence(results, platform)
+    problems, counts = bm.evidence_problems(inputs, data, platform, outcomes)
+    if output:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        doc = {
+            "platform": platform,
+            "inventory_sha256": inputs.inventory_sha256,
+            "tests_run": len(outcomes),
+            "test_outcomes": dict(sorted(Counter(outcomes.values()).items())),
+            "records": dict(sorted(counts.items())),
+            "problems": [{"code": p.code, "id": p.id, "message": p.message} for p in problems],
+        }
+        output.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    summary = ", ".join(f"{k} {v}" for k, v in sorted(counts.items()))
+    if problems:
+        print(f"{platform}: {summary}")
+        fail(problems, limit)
+    print(f"ok: {platform}: {summary}; {len(outcomes)} tests ran")
+
+
+@app.command
+def release(
+    platform: str,
+    *,
+    manifest: Path = bm.MANIFEST,
+    introspection: Path | None = None,
+    evidence: list[Path] | None = None,
+    limit: int = 20,
+) -> None:
+    """Fail unless PLATFORM meets the full-coverage release bar (--evidence: its test outcomes)."""
     inputs, data, artifact = load(manifest, introspection)
-    problems = bm.release_problems(inputs, data, platform, artifact)
+    outcomes = bm.load_evidence(evidence, platform) if evidence else None
+    problems = bm.release_problems(inputs, data, platform, artifact, outcomes)
     if problems:
         fail(problems, limit)
     print(f"ok: {platform} meets the full-coverage release bar")

@@ -15,6 +15,7 @@ from tests.support import (
     WINDOWS,
     bin_command,
     copy_sharing_binaries,
+    record_evidence,
     require_tools,
     tool,
 )
@@ -30,6 +31,11 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     unmarked = [item.nodeid for item in items if not any(item.get_closest_marker(c) for c in CATEGORIES)]
     if unmarked:
         raise pytest.UsageError(f"tests without one of the markers {CATEGORIES}: {unmarked[:10]}")
+
+
+def pytest_runtest_logreport(report: pytest.TestReport) -> None:
+    """This platform's outcome of each test, for bin/check_coverage.py evidence (RACKPY_TEST_EVIDENCE)."""
+    record_evidence([{"test": report.nodeid, "when": report.when, "outcome": report.outcome}])
 
 
 @pytest.fixture(scope="session")

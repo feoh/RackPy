@@ -34,6 +34,22 @@ def host_platform() -> str:
 
 PLATFORM = host_platform()
 MACOS = PLATFORM.startswith("mac-")
+# A directory: every test's outcome on this platform, outside Rack and inside it, is appended there as JSON
+# lines, the per-platform evidence bin/check_coverage.py evidence reads (RP-42).
+EVIDENCE = os.environ.get("RACKPY_TEST_EVIDENCE")
+
+
+def record_evidence(results: list[dict[str, str]]) -> None:
+    """Append test outcomes ({"test", "when", "outcome"}) to this platform's evidence, if it is being kept."""
+    if not EVIDENCE or not results:
+        return
+    folder = Path(EVIDENCE)
+    folder.mkdir(parents=True, exist_ok=True)
+    with (folder / f"{PLATFORM}-{os.getpid()}.jsonl").open("a", encoding="utf-8") as out:
+        for result in results:
+            out.write(json.dumps({"platform": PLATFORM, **result}, sort_keys=True) + "\n")
+
+
 WINDOWS = PLATFORM == "win-x64"
 # CMake's names on this platform: object files (MinGW's CMake writes .obj) and MODULE libraries (kernels).
 OBJECT = ".cpp.obj" if WINDOWS else ".cpp.o"
@@ -557,4 +573,15 @@ def run_pytest_in_rack(
     assert run.returncode == 0, run.tail()
     assert result_path.exists(), "the in-Rack pytest run wrote no result:\n" + run.tail()
     data = json.loads(result_path.read_text())
+    try:
+        suite = tests.resolve().relative_to(REPO).as_posix()
+    except ValueError:
+        suite = ""  # a suite outside the repository (a test's scratch suite) is no evidence for a record
+    if suite:
+        record_evidence(
+            [
+                {"test": f"{suite}/{r['nodeid']}", "when": str(r["when"]), "outcome": str(r["outcome"])}
+                for r in data["reports"]
+            ]
+        )
     return InRackResult(int(data["exit"]), list(data["reports"]), str(data["output"]), run)

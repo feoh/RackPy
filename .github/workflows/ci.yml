@@ -40,6 +40,9 @@ env:
   RACKPY_ALLOW_MISSING: ""
   # A stalled mirror connection once held apt-get update for a job's whole 30 minutes: give up and retry.
   APT_OPTS: -o Acquire::Retries=3 -o Acquire::http::Timeout=60 -o Acquire::https::Timeout=60
+  # Every test's outcome, outside Rack and inside it, per platform (tests/support.py), uploaded with each job's
+  # reports: the per-platform evidence `bin/check_coverage.py evidence` and `release --evidence` read (RP-42).
+  RACKPY_TEST_EVIDENCE: ${{ github.workspace }}/reports/evidence
 
 jobs:
   planning:
