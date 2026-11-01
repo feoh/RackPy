@@ -28,6 +28,16 @@
 #include <string>
 #include <vector>
 
+#if defined(__MINGW32__) && defined(SIMDE_NO_NATIVE)
+// SIMDe's portable _mm_round_ps calls C23's roundevenf, which mingw-w64's msvcrt runtime does not have
+// (RP-41; macOS's libm lacks it too, RP-40). In the default rounding mode nearbyintf rounds halfway cases
+// to even, which is roundevenf. Only this SIMDe reference build needs it: the SDK's -march=nehalem code
+// rounds with SSE4.1's instruction.
+extern "C" float roundevenf(float x) {
+	return nearbyintf(x);
+}
+#endif
+
 using namespace rack;
 using simd::float_4;
 using simd::int32_4;

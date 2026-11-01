@@ -21,7 +21,9 @@
 
 #include <pybind11/stl.h>
 
+#if !defined(_WIN32)
 #include <dlfcn.h>
+#endif
 
 #include <algorithm>
 #include <cstdlib>
@@ -59,6 +61,17 @@ __attribute__((noinline, no_sanitize("undefined"))) int sanitizerCanary() {
 }
 
 namespace {
+
+/** A symbol of a library preloaded into Rack (the RP-38 audio guard, LD_PRELOAD), or null. The guard is
+Linux-only, so on Windows there is never one. */
+void* preloadedSymbol(const char* name) {
+#if defined(_WIN32)
+	(void) name;
+	return nullptr;
+#else
+	return dlsym(RTLD_DEFAULT, name);
+#endif
+}
 
 struct ProbeWidget;
 
@@ -756,7 +769,7 @@ void define(py::module_ m) {
 	m.def("sanitizer_canary", &sanitizerCanary);
 	// RP-38: the audio guard's counts inside RackPy's process() since the last reset; None unless it is preloaded.
 	m.def("audio_guard_report", []() -> py::object {
-		auto report = reinterpret_cast<void (*)(char*, size_t)>(dlsym(RTLD_DEFAULT, "audio_guard_report"));
+		auto report = reinterpret_cast<void (*)(char*, size_t)>(preloadedSymbol("audio_guard_report"));
 		if (!report || !module::audioGuardEnter)
 			return py::none();
 		char out[512];
@@ -764,7 +777,7 @@ void define(py::module_ m) {
 		return py::module_::import("json").attr("loads")(std::string(out));
 	});
 	m.def("audio_guard_reset", [] {
-		auto reset = reinterpret_cast<void (*)()>(dlsym(RTLD_DEFAULT, "audio_guard_reset"));
+		auto reset = reinterpret_cast<void (*)()>(preloadedSymbol("audio_guard_reset"));
 		if (!reset)
 			throw std::runtime_error("the audio guard is not preloaded");
 		reset();
@@ -1568,8 +1581,8 @@ void registerModels(rack::plugin::Plugin* plugin) {
 	model = rack::createModel<ProbeModule, ProbeWidget>("RuntimeProbe");
 	plugin->addModel(model);
 	// RP-38: mark RackPy's process() for the audio guard, when Rack runs with it preloaded.
-	module::audioGuardEnter = reinterpret_cast<void (*)()>(dlsym(RTLD_DEFAULT, "audio_guard_enter"));
-	module::audioGuardLeave = reinterpret_cast<void (*)()>(dlsym(RTLD_DEFAULT, "audio_guard_leave"));
+	module::audioGuardEnter = reinterpret_cast<void (*)()>(preloadedSymbol("audio_guard_enter"));
+	module::audioGuardLeave = reinterpret_cast<void (*)()>(preloadedSymbol("audio_guard_leave"));
 	if (!module::audioGuardEnter || !module::audioGuardLeave)
 		module::audioGuardEnter = module::audioGuardLeave = nullptr;
 }

@@ -93,6 +93,11 @@ set_property(GLOBAL APPEND PROPERTY JOB_POOLS rackpy_heavy=${RACKPY_COMPILE_JOBS
 set_property(TARGET rackpy_host PROPERTY JOB_POOL_COMPILE rackpy_heavy)
 if(RACKPY_TEST_HOOKS)
   target_sources(rackpy_host PRIVATE native/testing/testing.cpp)
+  # The hooks read back Rack's framebuffer with OpenGL. On Linux and macOS those symbols resolve against
+  # the GL library Rack loaded; a Windows DLL imports them by name, from opengl32.dll as libRack.dll does.
+  if(WIN32)
+    target_link_libraries(rackpy_host PRIVATE opengl32)
+  endif()
   target_compile_definitions(rackpy_host PRIVATE RACKPY_TEST_HOOKS)
   target_include_directories(rackpy_host PRIVATE native/testing)
 endif()
