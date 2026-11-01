@@ -30,6 +30,7 @@ import os
 import platform as platform_module
 import re
 import shutil
+import struct
 import subprocess
 import sys
 import tarfile
@@ -49,17 +50,24 @@ CACHE = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "rackpy
 DEFAULT_DEST = REPO / "build" / "release"
 if sys.platform == "darwin":
     PLATFORM = "mac-arm64" if platform_module.machine() == "arm64" else "mac-x64"
+elif sys.platform == "win32":
+    PLATFORM = "win-x64"
 else:
     PLATFORM = "lin-x64"
 MACOS = PLATFORM.startswith("mac-")
+WINDOWS = PLATFORM == "win-x64"
+# The oldest Windows a candidate claims: CPython 3.14 needs Windows 10 (PEP 11); Rack 2 runs there too.
+WINDOWS_FLOOR = "10"
 GLIBC_FLOOR = "2.23"  # the official toolchain's sysroot (Ubuntu 16.04)
 # The oldest macOS each architecture claims: CMakeLists.txt's deployment targets, which are the pinned
 # runtime's (CPython's minos; libRack's is 10.9 on x86_64, 11.0 on arm64).
 MACOS_FLOORS = {"mac-arm64": "11.0", "mac-x64": "10.15"}
 MACOS_FLOOR = MACOS_FLOORS.get(PLATFORM, "")
 MACH_O_CPUS = {0x01000007: "mac-x64", 0x0100000C: "mac-arm64"}
-LOADER = "plugin.dylib" if MACOS else "plugin.so"
-LIBPYTHON = "libpython3.14.dylib" if MACOS else "libpython3.14.so.1.0"
+LOADER = "plugin.dylib" if MACOS else "plugin.dll" if WINDOWS else "plugin.so"
+HOST = "rackpy_host.dll" if WINDOWS else "rackpy_host.so"
+KERNEL_SUFFIX = ".dll" if WINDOWS else ".so"
+LIBPYTHON = "libpython3.14.dylib" if MACOS else "python314.dll" if WINDOWS else "libpython3.14.so.1.0"
 _SHARED = ".dylib" if MACOS else ".so"
 _EXTENSION = ".cpython-314-darwin.so" if MACOS else ".cpython-314-x86_64-linux-gnu.so"
 # Shared libraries an artifact's ELF files may need from the system or from Rack. Anything else fails the build.
@@ -99,7 +107,33 @@ EXCLUDED_RUNTIME = {
     "bin/pip3": "starts pip",
     "bin/pip3.14": "starts pip",
 }
+# The same exclusions in the Windows runtime's layout (no _dbm there), and MSVC's debug symbols (*.pdb, about
+# 90 MB), which nothing in Rack reads.
+WINDOWS_EXCLUDED_RUNTIME = {
+    "DLLs/_tkinter.pyd": "Tk's GUI event loop cannot run in Rack",
+    "DLLs/tcl90.dll": "Tcl, needed only by _tkinter",
+    "DLLs/tcl9tk90.dll": "Tk, needed only by _tkinter",
+    "tcl": "Tcl's and Tk's libraries, needed only by _tkinter",
+    "Lib/tkinter": "imports _tkinter",
+    "Lib/idlelib": "IDLE, a Tk application",
+    "Lib/turtledemo": "Tk demonstrations",
+    "Lib/turtle.py": "imports tkinter",
+    "Lib/site-packages/pip": "pip cannot install into a running Rack; it vendors other libraries",
+    "Lib/site-packages/pip-26.2.2.dist-info": "pip's metadata",
+    "Lib/ensurepip": "bundles a pip wheel",
+}
+if WINDOWS:
+    EXCLUDED_RUNTIME = WINDOWS_EXCLUDED_RUNTIME
 EXCLUDED_EXTENSIONS = {"_dbm", "_tkinter"}
+# What a PE file in an artifact may import from outside its plugin, besides DLLs the plugin bundles: Rack's own
+# DLLs (Rack.exe loads them first, and Windows binds an import to a loaded DLL of the same name) and Windows'.
+# api-ms-win-* are Windows' API sets, the UCRT's among them (part of Windows 10).
+WINDOWS_RACK_DLLS = {"librack.dll", "libgcc_s_seh-1.dll", "libwinpthread-1.dll", "libstdc++-6.dll"}
+WINDOWS_SYSTEM_DLLS = {
+    "kernel32.dll", "msvcrt.dll", "user32.dll", "advapi32.dll", "shell32.dll", "ole32.dll", "oleaut32.dll",
+    "ws2_32.dll", "bcrypt.dll", "crypt32.dll", "version.dll", "shlwapi.dll", "rpcrt4.dll", "iphlpapi.dll",
+    "secur32.dll", "gdi32.dll", "comctl32.dll", "winmm.dll", "ntdll.dll", "psapi.dll", "mswsock.dll",
+}  # fmt: skip
 # Library search paths an artifact may have: Rack's, which it symlinks to its own folder while it loads a plugin
 # (the Rack SDK's plugin.mk adds it to every plugin), and the plugin's own runtime.
 ALLOWED_SEARCH_PATHS = {"/tmp/Rack2", "$ORIGIN/python/lib", "$ORIGIN/../lib", "$ORIGIN"}
@@ -123,6 +157,11 @@ def run(
         detail = f"\n{proc.stdout}\n{proc.stderr}" if capture else ""
         raise SystemExit(f"command failed with exit status {proc.returncode}: {printable}{detail}")
     return proc.stdout or ""
+
+
+def tool(name: str) -> list[str | Path]:
+    """The command that runs another bin/ script: itself, or on Windows (no shebangs) through uv."""
+    return ["uv", "run", "--script", BIN / name] if WINDOWS else [BIN / name]
 
 
 def sha256_file(path: Path) -> str:
@@ -252,6 +291,88 @@ def mach_o_facts(path: Path) -> dict[str, Any]:
     }
 
 
+PE_SUFFIXES = {".dll", ".pyd", ".exe"}
+
+
+def pe_files(root: Path) -> list[Path]:
+    """Every PE (Windows) executable or library under root."""
+    return sorted(
+        p for p in root.rglob("*") if p.is_file() and p.suffix.lower() in PE_SUFFIXES and p.read_bytes()[:2] == b"MZ"
+    )
+
+
+def pe_facts(path: Path) -> dict[str, Any]:
+    """A PE file's machine, imported DLL names and exported names, from its import and export tables."""
+    data = path.read_bytes()
+    pe = struct.unpack_from("<I", data, 0x3C)[0]
+    if data[pe : pe + 4] != b"PE\0\0":
+        raise SystemExit(f"{path} has no PE signature")
+    machine, sections, _, _, _, optional_size, _ = struct.unpack_from("<HHIIIHH", data, pe + 4)
+    optional = pe + 24
+    if struct.unpack_from("<H", data, optional)[0] != 0x20B:
+        raise SystemExit(f"{path} is not PE32+ (64-bit)")
+    directories = optional + 112  # PE32+: the data directories follow 112 bytes of fixed fields
+    table = optional + optional_size
+    spans = [struct.unpack_from("<IIII", data, table + 40 * i + 8) for i in range(sections)]
+
+    def offset(rva: int) -> int:
+        for vsize, va, rawsize, raw in spans:
+            if va <= rva < va + max(vsize, rawsize):
+                return int(raw + rva - va)
+        raise SystemExit(f"{path}: RVA {rva:#x} is in no section")
+
+    def text(rva: int) -> str:
+        start = offset(rva)
+        return data[start : data.index(b"\0", start)].decode("ascii")
+
+    export_rva, export_size = struct.unpack_from("<II", data, directories)
+    exports: list[str] = []
+    if export_rva and export_size:
+        names = struct.unpack_from("<I", data, offset(export_rva) + 24)[0]  # IMAGE_EXPORT_DIRECTORY
+        names_rva = struct.unpack_from("<I", data, offset(export_rva) + 32)[0]
+        exports = sorted(text(struct.unpack_from("<I", data, offset(names_rva) + 4 * i)[0]) for i in range(names))
+    import_rva = struct.unpack_from("<I", data, directories + 8)[0]
+    needed: list[str] = []
+    if import_rva:
+        descriptor = offset(import_rva)
+        while name_rva := struct.unpack_from("<I", data, descriptor + 12)[0]:
+            needed.append(text(name_rva))
+            descriptor += 20
+    return {"machine": hex(machine), "needed": needed, "exports": exports}
+
+
+def pe_problems(root: Path, work: Path, facts: dict[str, Any] | None) -> list[str]:
+    """What is wrong with root's PE files; their facts go in FACTS (the bundle's) or, for kernels, RECORDED.
+
+    Each import must be a DLL the plugin bundles, one of Rack's (loaded before any plugin) or Windows'. RackPy's
+    own DLLs (the loader, the host, kernels: MinGW-built) must use msvcrt, as Rack does, never the UCRT, which
+    only the bundled MSVC-built CPython uses."""
+    found: list[str] = []
+    recorded = facts if facts is not None else RECORDED
+    files = pe_files(root)
+    bundled = {p.name.lower() for p in files}
+    for path in files:
+        rel = path.relative_to(work).as_posix()
+        fact = pe_facts(path)
+        if facts is not None or path.parent.name == "kernels":
+            recorded[rel] = fact
+        if fact["machine"] != "0x8664":
+            found.append(f"{rel} is not an x86-64 binary ({fact['machine']})")
+        allowed = bundled | WINDOWS_RACK_DLLS | WINDOWS_SYSTEM_DLLS
+        unexpected = [n for n in fact["needed"] if n.lower() not in allowed and not n.lower().startswith("api-ms-win-")]
+        if unexpected:
+            found.append(f"{rel} needs {unexpected}")
+        ours = path.parent.name == "kernels" or path.name in {LOADER, HOST}
+        ucrt = [
+            n
+            for n in fact["needed"]
+            if n.lower().startswith("api-ms-win-crt") or n.lower() in {"ucrtbase.dll", "vcruntime140.dll"}
+        ]
+        if ours and ucrt:
+            found.append(f"{rel} uses the UCRT ({ucrt}); RackPy's own DLLs must use msvcrt.dll, as Rack does")
+    return found
+
+
 def finish_mach_o(path: Path) -> None:
     """Strip a Mach-O library as plugin.mk's dist does (debug symbols, and local symbols), then sign it ad hoc:
     editing a file invalidates its signature, and arm64 macOS loads no unsigned code."""
@@ -261,7 +382,7 @@ def finish_mach_o(path: Path) -> None:
 
 
 def toolchain_bin() -> Path:
-    return Path(run([BIN / "rack-toolchain", "path"], capture=True).strip().splitlines()[-1])
+    return Path(run([*tool("rack-toolchain"), "path"], capture=True).strip().splitlines()[-1])
 
 
 def build_tools() -> dict[str, str]:
@@ -295,6 +416,9 @@ def toolchain_id() -> dict[str, str]:
             "macos": run(["sw_vers", "-productVersion"], capture=True).strip(),
             "machine": platform_module.machine(),
         }
+    if WINDOWS:
+        gcc = run(["g++", "--version"], capture=True).splitlines()[0]
+        return {"compiler": gcc, "crt": "msvcrt", "windows": platform_module.version(), "source": "MSYS2 MINGW64"}
     bindir = toolchain_bin()
     recipe = REPO / "packaging" / "toolchain" / "lin-x64.Dockerfile"
     return {"build": bindir.parents[2].name, "target": bindir.parent.name, "recipe_sha256": sha256_file(recipe)}
@@ -311,6 +435,13 @@ def machine_paths(root: Path) -> list[tuple[Path, str]]:
     return found
 
 
+def floor_facts() -> dict[str, str]:
+    """The oldest system a candidate claims: macOS's version, Windows', or Linux's glibc."""
+    if MACOS:
+        return {"macos_floor": MACOS_FLOOR}
+    return {"windows_floor": WINDOWS_FLOOR} if WINDOWS else {"glibc_floor": GLIBC_FLOOR}
+
+
 def version_tuple(version: str) -> tuple[int, ...]:
     return tuple(int(p) for p in version.split("."))
 
@@ -319,6 +450,11 @@ def prepare_runtime(python: Path, finish: Any) -> dict[str, str]:
     """Remove the excluded modules from a copied runtime and strip its shared libraries with FINISH (on a Mac,
     signing them again); return what was removed."""
     removed = {}
+    if WINDOWS:
+        symbols = sorted(python.rglob("*.pdb"))
+        for path in symbols:
+            path.unlink()
+        removed["*.pdb"] = f"MSVC debug symbols ({len(symbols)} files); nothing in Rack reads them"
     for rel, why in EXCLUDED_RUNTIME.items():
         target = python / rel
         if target.is_dir():
@@ -328,6 +464,8 @@ def prepare_runtime(python: Path, finish: Any) -> dict[str, str]:
         else:
             raise SystemExit(f"the runtime has no {rel}: update EXCLUDED_RUNTIME for this runtime")
         removed[rel] = why
+    if WINDOWS:
+        return removed  # MSVC-built and already without symbols: GNU strip must not rewrite them
     # Only the shared libraries: strip warns on, and may break, the patchelf-edited executable, which Rack never runs.
     for path in mach_o_files(python) if MACOS else elf_files(python):
         if ".so" in path.name or path.suffix == ".dylib":
@@ -400,14 +538,15 @@ def third_party_notices(licenses_dir: Path, version: str) -> list[dict[str, Any]
                 )
     for path in sorted(used):
         (python_licenses / Path(path).name).write_bytes(texts[path])
-    pybind11 = next((REPO / ".venv").glob("lib/python3.*/site-packages/pybind11-*.dist-info"))
+    site = "Lib/site-packages" if WINDOWS else "lib/python3.*/site-packages"  # a venv's layout on Windows
+    pybind11 = next((REPO / ".venv").glob(f"{site}/pybind11-*.dist-info"))
     (licenses_dir / "pybind11-LICENSE").write_bytes((pybind11 / "licenses" / "LICENSE").read_bytes())
     components.append(
         {
             "component": f"pybind11 {pybind11.name.removesuffix('.dist-info').split('-')[1]}",
             "licenses": ["BSD-3-Clause"],
             "text": "licenses/pybind11-LICENSE",
-            "used_by": "compiled into rackpy_host.so",
+            "used_by": f"compiled into {HOST}",
         }
     )
     lines = [
@@ -476,6 +615,9 @@ COMPONENTS = {
     "pybind11": "pybind11, BSD-3-Clause: licenses/pybind11-LICENSE",
     "cpython": "CPython, PSF-2.0: licenses/python/LICENSE.cpython.txt",
     "cpython-libraries": "the libraries linked into libpython: licenses/THIRD-PARTY-NOTICES.md, licenses/python/",
+    "msvc-runtime": "Microsoft Visual C++ runtime DLLs of the Windows CPython build, Microsoft Distributable Code "
+    "redistributed under the conditions in python/LICENSE.txt, the Windows runtime's own license (Additional "
+    "Conditions for this Windows binary build)",
     "plugin": "the plugin's own files, under the license its plugin.json names",
     "notices": "license texts and this manifest",
 }
@@ -484,8 +626,9 @@ FILE_RULES = [
     (["plugin.json"], ["plugin"]),
     (["rackpy-loader.json", "pythonpath/rackpy/*"], ["rackpy"]),
     ([LOADER], ["rackpy", "rack-sdk-headers"]),
-    (["rackpy_host.so"], ["rackpy", "rack-sdk-headers", "pybind11"]),
-    ([f"python/lib/{LIBPYTHON}"], ["cpython", "cpython-libraries"]),
+    ([HOST], ["rackpy", "rack-sdk-headers", "pybind11"]),
+    ([f"python/{LIBPYTHON}" if WINDOWS else f"python/lib/{LIBPYTHON}"], ["cpython", "cpython-libraries"]),
+    (["python/vcruntime140.dll", "python/vcruntime140_1.dll"], ["msvc-runtime"]),
     (["python/*"], ["cpython"]),
     (["kernels/*"], ["plugin", "rack-sdk-headers"]),
     (["pythonpath/*", "res/*", "presets/*"], ["plugin"]),
@@ -614,9 +757,10 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
     # 1. The plugin skeleton and the example kernels: on Linux with the official toolchain (glibc floor 2.23),
     # on a Mac with Xcode's AppleClang for this Mac's architecture (CMakeLists.txt sets the deployment target).
     # The runtime is a fresh extraction of the pinned archive, not the build cache's copy that local runs touch.
-    toolchain = [] if MACOS else ["--toolchain", "rack-lin-x64"]
-    run([BIN / "rackpy-dev", "build", "--build-dir", tree, *toolchain, "--werror"])
-    run([BIN / "rackpy-dev", "bundle", work, "--build-dir", tree, "--runtime", "copy"])
+    # On Windows with MSYS2's MINGW64 GCC (msvcrt, Rack's C runtime) on the Windows machine itself (RP-41).
+    toolchain = [] if MACOS or WINDOWS else ["--toolchain", "rack-lin-x64"]
+    run([*tool("rackpy-dev"), "build", "--build-dir", tree, *toolchain, "--werror"])
+    run([*tool("rackpy-dev"), "bundle", work, "--build-dir", tree, "--runtime", "copy"])
     bundle = work / "RackPy"
     shutil.rmtree(bundle / "python")
     pin = json.loads((REPO / "packaging" / "inputs.json").read_text())["python_runtime"]["3.14"][PLATFORM]
@@ -631,6 +775,10 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
     staging.rmdir()
     if MACOS:
         finish = finish_mach_o
+    elif WINDOWS:
+
+        def finish(path: Path) -> None:
+            run(["strip", "--strip-unneeded", path])  # MSYS2's binutils, for the MinGW-built kernels
     else:
         # The toolchain's strip, not the build machine's: binutils versions strip the same file differently.
         strip = toolchain_bin() / "x86_64-ubuntu16.04-linux-gnu-strip"
@@ -640,10 +788,10 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
 
     removed = prepare_runtime(bundle / "python", finish)
     if MACOS:  # cmake --install --strip edited them after the linker signed them
-        for name in (LOADER, "rackpy_host.so"):
+        for name in (LOADER, HOST):
             finish(bundle / name)
     components = third_party_notices(bundle / "licenses", version)
-    sdk = Path(run([BIN / "rack-sdk", "path", PLATFORM], capture=True).strip().splitlines()[-1])
+    sdk = Path(run([*tool("rack-sdk"), "path", PLATFORM], capture=True).strip().splitlines()[-1])
     sdk_header_notices(bundle / "licenses", sdk)
     versions = json.loads((REPO / "upstream" / "versions.json").read_text())
     build_info = {
@@ -654,7 +802,7 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
         "rack_sdk": next(a for a in versions["sdk"]["archives"] if a["platform"] == PLATFORM),
         "python_runtime": pin,
         "toolchain": toolchain_id(),
-        **({"macos_floor": MACOS_FLOOR} if MACOS else {"glibc_floor": GLIBC_FLOOR}),
+        **floor_facts(),
     }
 
     # 2. Every example as a plugin directory, its kernel libraries stripped as cmake --install strips RackPy's.
@@ -663,11 +811,11 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
     for project in sorted(p.parent for p in (REPO / "examples").glob("*/plugin.json")):
         manifest = json.loads((project / "plugin.json").read_text())
         config = json.loads((project / "rackpy-plugin.json").read_text())
-        args: list[str | Path] = [BIN / "rackpy-plugin", "build", project, "--bundle", bundle, "--dest", plugins]
+        args: list[str | Path] = [*tool("rackpy-plugin"), "build", project, "--bundle", bundle, "--dest", plugins]
         if config.get("kernels"):
             args += ["--kernels", tree / "examples" / project.name / "kernels"]
         run(args)
-        for kernel in sorted((plugins / manifest["slug"] / "kernels").glob("*.so")):
+        for kernel in sorted((plugins / manifest["slug"] / "kernels").glob(f"*{KERNEL_SUFFIX}")):
             finish(kernel)
         examples.append((project, manifest))
 
@@ -678,7 +826,7 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
     binaries: dict[str, Any] = {}
     problems = []
     for root in [bundle, *(plugins / m["slug"] for _, m in examples)]:
-        check = mach_o_problems if MACOS else elf_problems
+        check = mach_o_problems if MACOS else pe_problems if WINDOWS else elf_problems
         problems += check(root, work, binaries if root == bundle else None)
         problems += [f"{f}: no license rule covers it" for f in file_manifest(root, build_info)]
         problems += [
@@ -686,8 +834,8 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
             for p, m in machine_paths(root)
             if (p.relative_to(root).as_posix(), m) not in upstream_paths
         ]
-        floor = [] if MACOS else ["--max-glibc", GLIBC_FLOOR]
-        run([BIN / "rackpy-dev", "inspect", root, *floor], capture=True)
+        floor = [] if MACOS or WINDOWS else ["--max-glibc", GLIBC_FLOOR]
+        run([*tool("rackpy-dev"), "inspect", root, *floor], capture=True)
     if problems:
         raise SystemExit("artifact problems:\n" + "\n".join(f"- {p}" for p in problems))
 
@@ -708,7 +856,7 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
     # 4. The runtime bundle, what bin/rackpy-plugin build combines with a plugin project, and every example as
     # a plugin package, Rack's own format.
     runtime_archive = out / f"rackpy-runtime-{version}-{PLATFORM}.tar.zst"
-    pack: list[str | Path] = [BIN / "rackpy-plugin", "pack", "--source-date-epoch", str(epoch)]
+    pack: list[str | Path] = [*tool("rackpy-plugin"), "pack", "--source-date-epoch", str(epoch)]
     run([*pack, bundle, "--output", runtime_archive])
     record(runtime_archive, "runtime bundle: input to bin/rackpy-plugin build; not itself a plugin to install")
     for project, manifest in examples:
@@ -750,12 +898,12 @@ def build(dest: Path = DEFAULT_DEST, *, allow_dirty: bool = False) -> None:
         "dirty": dirty,
         "source_date_epoch": epoch,
         "platform": PLATFORM,
-        **({"macos_floor": MACOS_FLOOR} if MACOS else {"glibc_floor": GLIBC_FLOOR}),
+        **floor_facts(),
         "inputs": {**build_info, "uv_lock_sha256": sha256_file(REPO / "uv.lock"), "build_tools": build_tools()},
         "excluded_from_runtime": removed,
         "upstream_machine_like_paths": sorted(f"{rel}: {needle}" for rel, needle in upstream_paths),
         "third_party": components,
-        ("mach_o" if MACOS else "elf"): binaries | RECORDED,
+        ("mach_o" if MACOS else "pe" if WINDOWS else "elf"): binaries | RECORDED,
         "artifacts": artifacts,
     }
     (out / "manifest.json").write_text(json.dumps(manifest_data, indent=2, sort_keys=True) + "\n")
@@ -805,6 +953,7 @@ def compare(first: Path, second: Path) -> None:
 
 VERIFY_SCRIPT = REPO / "packaging" / "linux" / "verify-in-container.sh"
 VERIFY_MAC_SCRIPT = REPO / "packaging" / "macos" / "verify.sh"
+VERIFY_WINDOWS_SCRIPT = REPO / "packaging" / "windows" / "verify.ps1"
 # Clean machines to install on: the oldest Linux claimed (glibc 2.23, the toolchain's floor) and a later one.
 VERIFY_IMAGES = {name: REPO / "packaging" / "linux" / f"{name}.Dockerfile" for name in ("ubuntu-20.04", "ubuntu-16.04")}
 
@@ -822,9 +971,16 @@ def verify(
     On a Mac, RACK is "VCV Rack 2 Free.app" and --image does not apply: packaging/macos/verify.sh installs
     the artifacts in fresh Rack user folders and runs Rack with an empty environment (no PATH beyond the
     system's, no PYTHON*, DYLD_* or developer variables), and records which libraries Rack mapped.
+
+    On Windows, RACK is the Rack2Free folder (bin/rack-sdk host win-x64) and --image does not apply:
+    packaging/windows/verify.ps1 does the same with Windows PowerShell, PATH limited to Windows' own folders,
+    and records which DLLs Rack loaded.
     """
     if MACOS:
         verify_mac(artifacts, rack, logs)
+        return
+    if WINDOWS:
+        verify_windows(artifacts, rack, logs)
         return
     dockerfile = VERIFY_IMAGES[image]
     tag = f"rackpy-verify-{image}:" + hashlib.sha256(dockerfile.read_bytes()).hexdigest()[:12]
@@ -884,6 +1040,34 @@ def verify_mac(artifacts: Path, rack: Path, logs: Path) -> None:
         shutil.rmtree(scratch)
         if (logs / "summary.txt").exists():
             print((logs / "summary.txt").read_text())
+
+
+def verify_windows(artifacts: Path, rack: Path, logs: Path) -> None:
+    if logs.exists():
+        shutil.rmtree(logs)
+    logs.mkdir(parents=True)
+    scratch = Path(tempfile.mkdtemp(prefix="rackpy-verify-"))
+    script = scratch / "verify.ps1"  # a copy, so that editing the script cannot change a run under way
+    shutil.copy(VERIFY_WINDOWS_SCRIPT, script)
+    root = os.environ.get("SYSTEMROOT", r"C:\Windows")  # os.environ is case-insensitive on Windows
+    system32 = rf"{root}\System32"
+    # Windows' own folders on PATH and the variables Windows itself sets; nothing from developer tools or Python.
+    keep = (
+        "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "COMSPEC", "PATHEXT", "TEMP", "TMP", "USERPROFILE", "USERNAME",
+        "USERDOMAIN", "COMPUTERNAME", "APPDATA", "LOCALAPPDATA", "PROGRAMDATA", "PROGRAMFILES",
+        "PROCESSOR_ARCHITECTURE", "NUMBER_OF_PROCESSORS", "OS", "GITHUB_ACTIONS",
+    )  # fmt: skip
+    env = {k: os.environ[k] for k in keep if k in os.environ}
+    env["PATH"] = ";".join([system32, root, rf"{system32}\Wbem", rf"{system32}\WindowsPowerShell\v1.0"])
+    powershell = rf"{system32}\WindowsPowerShell\v1.0\powershell.exe"
+    try:
+        command: list[str | Path] = [powershell, "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File"]
+        command.append(script)
+        run([*command, artifacts.resolve(), rack.resolve(), logs.resolve()], env=env)
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
+        if (logs / "summary.txt").exists():
+            print((logs / "summary.txt").read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

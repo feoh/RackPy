@@ -452,7 +452,8 @@ def build(project: Path = Path(), *, bundle: Path, dest: Path, kernels: Path | N
         Where to make the plugin directory, for example Rack's user folder's
         ``plugins-lin-x64`` (``plugins-mac-arm64`` or ``plugins-mac-x64`` on a Mac).
     kernels
-        Where the project's native kernel libraries were built, ``NAME.so`` for each
+        Where the project's native kernel libraries were built, ``NAME.so`` (``NAME.dll`` for a
+        Windows bundle) for each
         NAME its rackpy-plugin.json lists under ``"kernels"``: for RackPy's examples,
         ``build/dev/examples/<project>/kernels``. They are copied to ``kernels/`` and
         listed in rackpy-loader.json, which loads them before the entry package.
@@ -466,7 +467,8 @@ def build(project: Path = Path(), *, bundle: Path, dest: Path, kernels: Path | N
         raise UsageError(f'{PROJECT_FILE}\'s "kernels" must be a list of library names')
     if libraries and kernels is None:
         raise UsageError(f"{root.name} has native kernel libraries ({', '.join(libraries)}); pass --kernels")
-    built = [kernels / f"{name}.so" for name in libraries] if kernels is not None else []
+    suffix = ".dll" if (bundle / "plugin.dll").is_file() else ".so"  # CMake names MODULE libraries so
+    built = [kernels / f"{name}{suffix}" for name in libraries] if kernels is not None else []
     missing = [str(path) for path in built if not path.is_file()]
     if missing:
         raise UsageError(f"no kernel library {', '.join(missing)}; build it first")
@@ -509,18 +511,23 @@ def build(project: Path = Path(), *, bundle: Path, dest: Path, kernels: Path | N
     print(target)
 
 
-# Rack's loader file on Linux and on macOS, and the platform of a thin 64-bit Mach-O by its CPU type.
-LOADERS = ("plugin.so", "plugin.dylib")
+# Rack's loader file on Linux, macOS and Windows, and the platform of a thin 64-bit Mach-O by its CPU type.
+LOADERS = ("plugin.so", "plugin.dylib", "plugin.dll")
 MACH_O_CPUS = {0x01000007: "mac-x64", 0x0100000C: "mac-arm64"}
 
 
 def plugin_platform(root: Path) -> str:
-    """The Rack platform a plugin directory's loader binary is for: lin-x64, mac-x64 or mac-arm64."""
+    """The Rack platform a plugin directory's loader binary is for: lin-x64, mac-x64, mac-arm64 or win-x64."""
     found = [name for name in LOADERS if (root / name).is_file()]
     if len(found) != 1:
-        raise UsageError(f"{root} has no plugin.so or plugin.dylib; make it with `bin/rackpy-plugin build`")
+        raise UsageError(f"{root} has not exactly one of {', '.join(LOADERS)}; make it with `bin/rackpy-plugin build`")
     with (root / found[0]).open("rb") as f:
         header = f.read(8)
+    if header[:2] == b"MZ" and found[0] == "plugin.dll":
+        data = (root / found[0]).read_bytes()
+        pe = int.from_bytes(data[0x3C:0x40], "little")
+        if data[pe : pe + 4] == b"PE\0\0" and int.from_bytes(data[pe + 4 : pe + 6], "little") == 0x8664:
+            return "win-x64"
     if header[:4] == b"\x7fELF" and found[0] == "plugin.so":
         return "lin-x64"
     if header[:4] == b"\xcf\xfa\xed\xfe" and found[0] == "plugin.dylib":  # MH_MAGIC_64, little-endian
