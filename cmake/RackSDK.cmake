@@ -142,16 +142,8 @@ elseif(WIN32)
   # plugin.mk: libstdc++ static; libgcc_s_seh-1.dll and libwinpthread-1.dll are Rack's own, already loaded.
   target_link_options(rackpy_sdk_plugin INTERFACE -static-libstdc++)
   target_link_options(rackpy_sdk_program INTERFACE -static-libstdc++)
-  # The native test programs run outside Rack, so they need Rack's DLLs beside them, from the pinned host.
+  # The native test programs run outside Rack and need its DLLs beside them (CMakeLists.txt copies them).
   set(RACK_HOST_DIR "" CACHE PATH "Extracted pinned Rack Free for Windows, for the native tests' DLLs (bin/rack-sdk host win-x64)")
-  if(RACKPY_BUILD_TESTS AND NOT RACK_HOST_DIR)
-    message(FATAL_ERROR "RACK_HOST_DIR is not set; the native tests need libRack.dll. Pass -DRACK_HOST_DIR=$(bin/rack-sdk host win-x64) or use bin/rackpy-dev.")
-  endif()
-  if(RACK_HOST_DIR)
-    foreach(_dll libRack.dll libgcc_s_seh-1.dll libstdc++-6.dll libwinpthread-1.dll)
-      file(COPY_FILE "${RACK_HOST_DIR}/${_dll}" "${PROJECT_BINARY_DIR}/${_dll}" ONLY_IF_DIFFERENT)
-    endforeach()
-  endif()
 else()
   target_link_directories(rackpy_sdk_compile INTERFACE "${RACK_SDK_DIR}")
   # libRack.so has no SONAME, so link it by name (-lRack): a full path would be

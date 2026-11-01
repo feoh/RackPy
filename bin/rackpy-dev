@@ -377,6 +377,94 @@ def inspect_mac(plugin: Path) -> tuple[dict[str, Any], list[str]]:
     return report, found
 
 
+def pe_facts(path: Path) -> dict[str, Any]:
+    """A PE (Windows) DLL's imported DLL names and exported names, read from its import and export tables."""
+    import struct
+
+    data = path.read_bytes()
+    if data[:2] != b"MZ":
+        raise SystemExit(f"{path} is not a PE file")
+    pe = struct.unpack_from("<I", data, 0x3C)[0]
+    if data[pe : pe + 4] != b"PE\0\0":
+        raise SystemExit(f"{path} has no PE signature")
+    machine, sections, _, _, _, optional_size, _ = struct.unpack_from("<HHIIIHH", data, pe + 4)
+    optional = pe + 24
+    if struct.unpack_from("<H", data, optional)[0] != 0x20B:
+        raise SystemExit(f"{path} is not PE32+ (64-bit)")
+    directories = optional + 112  # PE32+: the data directories follow 112 bytes of fixed fields
+    table = optional + optional_size
+    spans = [struct.unpack_from("<IIII", data, table + 40 * i + 8) for i in range(sections)]  # vsize, va, rawsize, raw
+
+    def offset(rva: int) -> int:
+        for vsize, va, rawsize, raw in spans:
+            if va <= rva < va + max(vsize, rawsize):
+                return int(raw + rva - va)
+        raise SystemExit(f"{path}: RVA {rva:#x} is in no section")
+
+    def text(rva: int) -> str:
+        start = offset(rva)
+        return data[start : data.index(b"\0", start)].decode("ascii")
+
+    export_rva, export_size = struct.unpack_from("<II", data, directories)
+    exports: list[str] = []
+    if export_rva and export_size:
+        # IMAGE_EXPORT_DIRECTORY: NumberOfNames at 24, AddressOfNames at 32
+        names = struct.unpack_from("<I", data, offset(export_rva) + 24)[0]
+        names_rva = struct.unpack_from("<I", data, offset(export_rva) + 32)[0]
+        exports = sorted(text(struct.unpack_from("<I", data, offset(names_rva) + 4 * i)[0]) for i in range(names))
+    import_rva = struct.unpack_from("<I", data, directories + 8)[0]
+    needed: list[str] = []
+    if import_rva:
+        descriptor = offset(import_rva)
+        while name_rva := struct.unpack_from("<I", data, descriptor + 12)[0]:
+            needed.append(text(name_rva))
+            descriptor += 20
+    return {"machine": hex(machine), "needed": needed, "exports": exports}
+
+
+# What RackPy's own DLLs may import on Windows: Rack's DLLs (already loaded by Rack.exe), the C runtime Rack
+# uses, Windows itself, and for the host the bundled CPython, which the loader loads first by its full path.
+WINDOWS_RACK_DLLS = {"librack.dll", "libgcc_s_seh-1.dll", "libwinpthread-1.dll", "libstdc++-6.dll"}
+WINDOWS_SYSTEM_DLLS = {
+    "kernel32.dll",
+    "msvcrt.dll",
+    "user32.dll",
+    "advapi32.dll",
+    "shell32.dll",
+    "ole32.dll",
+    "ws2_32.dll",
+}
+
+
+def inspect_windows(plugin: Path) -> tuple[dict[str, Any], list[str]]:
+    """inspect's checks for a Windows bundle: plugin.dll and rackpy_host.dll."""
+    loader = pe_facts(plugin / "plugin.dll")
+    host = pe_facts(plugin / "rackpy_host.dll")
+    found: list[str] = []
+    for name, facts in (("plugin.dll", loader), ("rackpy_host.dll", host)):
+        if facts["machine"] != "0x8664":
+            found.append(f"{name} is not an x86-64 DLL ({facts['machine']})")
+        allowed = WINDOWS_RACK_DLLS | WINDOWS_SYSTEM_DLLS | ({"python314.dll"} if name == "rackpy_host.dll" else set())
+        if extra := sorted(d for d in facts["needed"] if d.lower() not in allowed):
+            found.append(f"{name} imports {extra}, outside Rack, Windows and (the host) the bundled python314.dll")
+        if any(
+            d.lower() in {"ucrtbase.dll", "vcruntime140.dll"} or d.lower().startswith("api-ms-win-crt")
+            for d in facts["needed"]
+        ):
+            found.append(f"{name} uses the UCRT; Rack for Windows and RackPy's DLLs use msvcrt.dll")
+    if any("python" in d.lower() for d in loader["needed"]):
+        found.append("plugin.dll imports Python; the loader must not depend on Python")
+    if set(loader["exports"]) != LOADER_EXPORTS:
+        found.append(
+            f"plugin.dll exports {sorted(set(loader['exports']) ^ LOADER_EXPORTS)} beyond Rack's plugin entry points"
+        )
+    if set(host["exports"]) != HOST_EXPORTS:
+        found.append(f"rackpy_host.dll exports {sorted(set(host['exports']) ^ HOST_EXPORTS)} beyond the host ABI")
+    if "python314.dll" not in [d.lower() for d in host["needed"]]:
+        found.append("rackpy_host.dll does not import python314.dll, the bundled runtime")
+    return {"plugin.dll": loader, "rackpy_host.dll": host}, found
+
+
 def version_tuple(version: str) -> tuple[int, ...]:
     return tuple(int(p) for p in version.split("."))
 
@@ -388,8 +476,16 @@ def inspect(plugin: Path, *, max_glibc: str | None = None) -> None:
     Fails if the loader references Python, if either library exports more than
     the RackPy ABI, if the RUNPATHs differ from ADR 002, or if a library needs a
     glibc newer than --max-glibc. A macOS bundle (plugin.dylib) gets the same checks
-    for Mach-O, with its install names and rpaths; --max-glibc does not apply.
+    for Mach-O, with its install names and rpaths, and a Windows bundle (plugin.dll) for PE:
+    imports only from Rack, msvcrt and Windows (the host also the bundled python314.dll), and
+    exports only the ABI; --max-glibc applies to neither.
     """
+    if (plugin / "plugin.dll").is_file():
+        win_report, problems = inspect_windows(plugin)
+        print(json.dumps(win_report, indent=2))
+        if problems:
+            raise SystemExit("bundle problems:\n" + "\n".join(f"- {p}" for p in problems))
+        return
     if (plugin / "plugin.dylib").is_file():
         mac_report, problems = inspect_mac(plugin)
         print(json.dumps(mac_report, indent=2))

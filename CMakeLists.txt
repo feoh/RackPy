@@ -126,6 +126,15 @@ endif()
 
 if(RACKPY_BUILD_TESTS)
   enable_testing()
+  if(WIN32)
+    # The native test programs run outside Rack, so they need Rack's DLLs beside them, from the pinned host.
+    if(NOT RACK_HOST_DIR)
+      message(FATAL_ERROR "RACK_HOST_DIR is not set; the native tests need libRack.dll. Pass -DRACK_HOST_DIR=$(bin/rack-sdk host win-x64) or use bin/rackpy-dev.")
+    endif()
+    foreach(_dll libRack.dll libgcc_s_seh-1.dll libstdc++-6.dll libwinpthread-1.dll)
+      file(COPY_FILE "${RACK_HOST_DIR}/${_dll}" "${PROJECT_BINARY_DIR}/${_dll}" ONLY_IF_DIFFERENT)
+    endforeach()
+  endif()
   add_executable(rackpy_loader_tests native/tests/test_loader_config.cpp native/loader/loader_config.cpp native/runtime/dynlib.cpp)
   set_target_properties(rackpy_loader_tests PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
   target_include_directories(rackpy_loader_tests PRIVATE native/include native/loader)
@@ -174,8 +183,9 @@ if(RACKPY_BUILD_TESTS)
   target_include_directories(rackpy_io_tests PRIVATE native/include)
   target_link_libraries(rackpy_io_tests PRIVATE rackpy_sdk_program)
   add_test(NAME io_paths COMMAND rackpy_io_tests)
-  # Dedicated sanitizer builds; a RACKPY_SANITIZE build instruments every target instead (RP-38).
-  if(NOT RACKPY_SANITIZE)
+  # Dedicated sanitizer builds; a RACKPY_SANITIZE build instruments every target instead (RP-38). MinGW GCC
+  # has no AddressSanitizer or ThreadSanitizer, so none on Windows.
+  if(NOT RACKPY_SANITIZE AND NOT WIN32)
     # RP-23C: expander exchange under stress (tests/engine/test_expander_stress.py), once with ASan and UBSan,
     # once with TSan; libRack is not instrumented.
     foreach(_variant asan tsan)
@@ -208,8 +218,8 @@ if(RACKPY_BUILD_TESTS)
   endif()
   # The RP-07 audio-path guard interposes on libc with LD_PRELOAD, which macOS has no equivalent of
   # for these tests (DYLD_INSERT_LIBRARIES is limited by SIP): Linux only (RP-40).
-  if(NOT APPLE)
-    # The RP-07 audio-path guard, preloaded by tests/dsp/test_runtime.py around rackpy_kernel_guard.
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    # The RP-07 audio-path guard, preloaded (LD_PRELOAD) by tests/dsp/test_runtime.py around rackpy_kernel_guard.
     add_library(rackpy_audio_guard MODULE native/testing/audio_guard.c)
     set_target_properties(rackpy_audio_guard PROPERTIES PREFIX "" OUTPUT_NAME audio_guard C_STANDARD 11)
     target_link_libraries(rackpy_audio_guard PRIVATE dl)
@@ -302,7 +312,7 @@ if(RACKPY_BUILD_TESTS)
   # The same reference under AddressSanitizer and UndefinedBehaviorSanitizer (tests/dsp/test_sanitizers.py):
   # every buffer boundary it exercises in Rack's inline DSP code is checked. libRack is not instrumented.
   set_property(TARGET rackpy_dsp_reference PROPERTY JOB_POOL_COMPILE rackpy_heavy)
-  if(NOT RACKPY_SANITIZE)
+  if(NOT RACKPY_SANITIZE AND NOT WIN32)
     add_executable(rackpy_dsp_reference_sanitized native/tests/dsp_reference.cpp)
     set_target_properties(rackpy_dsp_reference_sanitized PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
     target_compile_options(rackpy_dsp_reference_sanitized PRIVATE -fsanitize=address,undefined -fno-sanitize-recover=undefined)

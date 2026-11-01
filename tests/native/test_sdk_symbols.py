@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import MACOS, REPO, nested_name, rack_platforms, require_tools, symbol_names
+from tests.support import MACOS, REPO, WINDOWS, nested_name, rack_platforms, require_tools, symbol_names
 
 pytestmark = [pytest.mark.native, rack_platforms()]
 UNDEFINED = "Declared but never defined"
@@ -22,7 +22,8 @@ UNDEFINED = "Declared but never defined"
 
 def exported(rack_sdk: Path) -> str:
     require_tools("nm")
-    return symbol_names(rack_sdk / ("libRack.dylib" if MACOS else "libRack.so"))
+    # On Windows the SDK has libRack's import library, which lists what libRack.dll exports.
+    return symbol_names(rack_sdk / ("libRack.dylib" if MACOS else "libRack.dll.a" if WINDOWS else "libRack.so"))
 
 
 def test_declared_but_undefined_functions_have_no_symbol(rack_sdk: Path) -> None:

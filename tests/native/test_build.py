@@ -13,11 +13,13 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import MACOS, PLATFORM, REPO, bin_command, linux_x64_only, rack_platforms, require_tools
+from tests.support import MACOS, PLATFORM, REPO, WINDOWS, bin_command, linux_x64_only, rack_platforms, require_tools
 
 pytestmark = [pytest.mark.native, rack_platforms()]
-LOADER = "plugin.dylib" if MACOS else "plugin.so"
-LIBPYTHON = "@rpath/libpython3.14.dylib" if MACOS else "libpython3.14.so.1.0"
+LOADER = "plugin.dylib" if MACOS else "plugin.dll" if WINDOWS else "plugin.so"
+HOST = "rackpy_host.dll" if WINDOWS else "rackpy_host.so"
+LIBPYTHON = "@rpath/libpython3.14.dylib" if MACOS else "python314.dll" if WINDOWS else "libpython3.14.so.1.0"
+RACK_LIBRARY = "libRack.dylib" if MACOS else "libRack.dll.a" if WINDOWS else "libRack.so"  # what the SDK links
 
 
 def configure(build: Path, *args: str) -> subprocess.CompletedProcess[str]:
@@ -40,7 +42,7 @@ def errors(proc: subprocess.CompletedProcess[str]) -> str:
 def test_build_has_no_warnings_and_passes_ctest(dev_build: Path) -> None:
     # dev_build configures with RACKPY_WERROR=ON and runs CTest; reaching here means both passed.
     assert (dev_build / LOADER).is_file()
-    assert (dev_build / "rackpy_host.so").is_file()
+    assert (dev_build / HOST).is_file()
 
 
 def test_module_lifecycle_adapters_reference_no_python(dev_build: Path) -> None:
@@ -62,21 +64,21 @@ def test_bundle_has_the_expected_dynamic_shape(make_bundle: Callable[[], Path]) 
     assert proc.returncode == 0, proc.stdout + proc.stderr
     report = json.loads(proc.stdout[proc.stdout.index("{") :])
     assert report[LOADER]["python_references"] == []
-    assert sorted(report["rackpy_host.so"]["exports"]) == [
+    assert sorted(report[HOST]["exports"]) == [
         "rackpy_host_destroy",
         "rackpy_host_init",
         "rackpy_host_settings_from_json",
         "rackpy_host_settings_to_json",
     ]
-    assert LIBPYTHON in report["rackpy_host.so"]["needed"]
+    assert LIBPYTHON in report[HOST]["needed"]
     layout = {p.relative_to(plugin).as_posix() for p in plugin.rglob("*") if "python/" not in p.as_posix()}
-    expected = {LOADER, "rackpy_host.so", "plugin.json", "rackpy-loader.json", "LICENSE", "NOTICE"}
+    expected = {LOADER, HOST, "plugin.json", "rackpy-loader.json", "LICENSE", "NOTICE"}
     assert expected <= layout
     assert "pythonpath/rackpy/__init__.py" in layout
-    assert (plugin / "python").is_symlink()
+    assert (plugin / "python").is_symlink() is not WINDOWS  # Windows bundles copy the runtime
     manifest = json.loads((plugin / "plugin.json").read_text())
     assert manifest["modules"] == [] and manifest["name"] == "RackPy"
-    assert b"RuntimeProbe" not in (plugin / "rackpy_host.so").read_bytes(), "test hooks leaked into a production build"
+    assert b"RuntimeProbe" not in (plugin / HOST).read_bytes(), "test hooks leaked into a production build"
 
 
 @linux_x64_only()
@@ -99,7 +101,7 @@ def test_unpinned_sdk_is_rejected(tmp_path: Path) -> None:
     fake = tmp_path / "sdk"
     (fake / "include").mkdir(parents=True)
     (fake / "include" / "rack.hpp").write_text("// not the pinned SDK\n")
-    (fake / ("libRack.dylib" if MACOS else "libRack.so")).write_bytes(b"not a library")
+    (fake / RACK_LIBRARY).write_bytes(b"not a library")
     proc = configure(tmp_path / "build", f"-DRACK_SDK_DIR={fake}")
     assert proc.returncode != 0
     assert "not the pinned" in errors(proc)
@@ -107,7 +109,13 @@ def test_unpinned_sdk_is_rejected(tmp_path: Path) -> None:
 
 def test_modified_sdk_header_is_rejected(rack_sdk: Path, tmp_path: Path) -> None:
     copy = tmp_path / "sdk"
-    shutil.copytree(rack_sdk, copy, symlinks=True, ignore=shutil.ignore_patterns("*.a"))
+    # Without the SDK's static dependency archives (large), but with Windows' libRack import library.
+    shutil.copytree(
+        rack_sdk,
+        copy,
+        symlinks=True,
+        ignore=lambda _, names: [n for n in names if n.endswith(".a") and n != RACK_LIBRARY],
+    )
     header = copy / "include" / "engine" / "Module.hpp"
     header.write_text(header.read_text() + "\n// one changed byte is enough\n")
     proc = configure(tmp_path / "build", f"-DRACK_SDK_DIR={copy}")
