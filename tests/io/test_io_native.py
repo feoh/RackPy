@@ -17,9 +17,9 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import ASAN_OPTIONS, linux_x64_only
+from tests.support import ASAN_OPTIONS, linux_x64_only, nested_name, rack_platforms, symbol_names
 
-pytestmark = [linux_x64_only(), pytest.mark.native]
+pytestmark = [rack_platforms(), pytest.mark.native]  # the guard and sanitizer runs are Linux-only
 
 
 def test_native_audio_and_midi_match_rack(dev_build: Path) -> None:
@@ -28,6 +28,7 @@ def test_native_audio_and_midi_match_rack(dev_build: Path) -> None:
     assert "io paths: all checks passed" in proc.stdout
 
 
+@linux_x64_only()
 def test_the_audio_paths_make_no_forbidden_calls(dev_build: Path) -> None:
     env = {**os.environ, "LD_PRELOAD": str(dev_build / "audio_guard.so")}
     out = subprocess.run([str(dev_build / "rackpy_kernel_guard")], capture_output=True, text=True, check=True, env=env)
@@ -38,6 +39,7 @@ def test_the_audio_paths_make_no_forbidden_calls(dev_build: Path) -> None:
     assert report["inject"]["malloc"] >= report["frames"]  # the guard is live in this run
 
 
+@linux_x64_only()
 @pytest.mark.parametrize(("variant", "blocks"), [("asan", 30000), ("tsan", 30000)])
 def test_the_paths_under_sanitizers(dev_build: Path, variant: str, blocks: int) -> None:
     env = {
@@ -63,9 +65,9 @@ def test_the_paths_under_sanitizers(dev_build: Path, variant: str, blocks: int) 
 
 def test_bridge_calls_racks_public_master_clock(dev_build: Path) -> None:
     obj = dev_build / "CMakeFiles/rackpy_host.dir/native/io/audio_bridge.cpp.o"
-    proc = subprocess.run(["nm", "-uC", str(obj)], capture_output=True, text=True, check=True)
+    needed = symbol_names(obj, undefined=True)
     for method in ("stepBlock", "setMasterModule", "setMasterModule_NoLock", "setSuggestedSampleRate"):
-        assert f"rack::engine::Engine::{method}(" in proc.stdout
+        assert nested_name(f"rack::engine::Engine::{method}").search(needed), method
 
 
 def test_io_objects_reference_no_python(dev_build: Path) -> None:

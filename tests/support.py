@@ -4,6 +4,7 @@
 import json
 import os
 import platform
+import re
 import shutil
 import signal
 import subprocess
@@ -73,6 +74,27 @@ def rack_platforms() -> pytest.MarkDecorator:
     return pytest.mark.skipif(
         PLATFORM == "unsupported", reason="RackPy builds and runs only on Linux x86_64 and macOS so far"
     )
+
+
+def nested_name(qualified: str) -> re.Pattern[str]:
+    """The Itanium ABI mangling of a nested name up to its parameters: rack::a::f is 4rack1a1fE.
+
+    Every Rack platform's compiler mangles this way, so symbol lists compare without a demangler, and
+    Mach-O's extra leading underscore does not matter. GCC's string ABI may tag the name first
+    (getDeviceNameB5cxx11E). Searched without the N or NK (const) before it, so a symbol nested in the
+    function (a lambda, a local static) also matches."""
+    return re.compile("".join(f"{len(part)}{part}" for part in qualified.split("::")) + r"(?:B\d+\w+?)*E")
+
+
+def symbol_names(path: Path, *, undefined: bool = False) -> str:
+    """The external symbol names a library or object defines (or, with undefined, needs), one per line."""
+    if MACOS:  # -g -U -j: external, defined, names only, in Apple's nm and in llvm-nm alike
+        command = ["nm", "-uj" if undefined else "-gUj", str(path)]
+    elif undefined:
+        command = ["nm", "-uj", str(path)]
+    else:
+        command = ["nm", "-j", "--defined-only", "-D" if path.suffix == ".so" else "-g", str(path)]
+    return subprocess.run(command, capture_output=True, text=True, check=True).stdout
 
 
 def tool(*args: str) -> str:

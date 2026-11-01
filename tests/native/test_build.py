@@ -13,9 +13,11 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import BIN, REPO, linux_x64_only, require_tools
+from tests.support import BIN, MACOS, REPO, linux_x64_only, rack_platforms, require_tools
 
-pytestmark = [pytest.mark.native, linux_x64_only()]
+pytestmark = [pytest.mark.native, rack_platforms()]
+LOADER = "plugin.dylib" if MACOS else "plugin.so"
+LIBPYTHON = "@rpath/libpython3.14.dylib" if MACOS else "libpython3.14.so.1.0"
 
 
 def configure(build: Path, *args: str) -> subprocess.CompletedProcess[str]:
@@ -32,7 +34,7 @@ def errors(proc: subprocess.CompletedProcess[str]) -> str:
 
 def test_build_has_no_warnings_and_passes_ctest(dev_build: Path) -> None:
     # dev_build configures with RACKPY_WERROR=ON and runs CTest; reaching here means both passed.
-    assert (dev_build / "plugin.so").is_file()
+    assert (dev_build / LOADER).is_file()
     assert (dev_build / "rackpy_host.so").is_file()
 
 
@@ -54,16 +56,16 @@ def test_bundle_has_the_expected_dynamic_shape(make_bundle: Callable[[], Path]) 
     )
     assert proc.returncode == 0, proc.stdout + proc.stderr
     report = json.loads(proc.stdout[proc.stdout.index("{") :])
-    assert report["plugin.so"]["python_references"] == []
+    assert report[LOADER]["python_references"] == []
     assert sorted(report["rackpy_host.so"]["exports"]) == [
         "rackpy_host_destroy",
         "rackpy_host_init",
         "rackpy_host_settings_from_json",
         "rackpy_host_settings_to_json",
     ]
-    assert "libpython3.14.so.1.0" in report["rackpy_host.so"]["needed"]
+    assert LIBPYTHON in report["rackpy_host.so"]["needed"]
     layout = {p.relative_to(plugin).as_posix() for p in plugin.rglob("*") if "python/" not in p.as_posix()}
-    expected = {"plugin.so", "rackpy_host.so", "plugin.json", "rackpy-loader.json", "LICENSE", "NOTICE"}
+    expected = {LOADER, "rackpy_host.so", "plugin.json", "rackpy-loader.json", "LICENSE", "NOTICE"}
     assert expected <= layout
     assert "pythonpath/rackpy/__init__.py" in layout
     assert (plugin / "python").is_symlink()
@@ -72,6 +74,7 @@ def test_bundle_has_the_expected_dynamic_shape(make_bundle: Callable[[], Path]) 
     assert b"RuntimeProbe" not in (plugin / "rackpy_host.so").read_bytes(), "test hooks leaked into a production build"
 
 
+@linux_x64_only()
 def test_inspect_rejects_a_newer_glibc_than_allowed(make_bundle: Callable[[], Path]) -> None:
     plugin = make_bundle()
     cmd = [str(BIN / "rackpy-dev"), "inspect", str(plugin), "--max-glibc", "2.0"]
@@ -91,7 +94,7 @@ def test_unpinned_sdk_is_rejected(tmp_path: Path) -> None:
     fake = tmp_path / "sdk"
     (fake / "include").mkdir(parents=True)
     (fake / "include" / "rack.hpp").write_text("// not the pinned SDK\n")
-    (fake / "libRack.so").write_bytes(b"not a library")
+    (fake / ("libRack.dylib" if MACOS else "libRack.so")).write_bytes(b"not a library")
     proc = configure(tmp_path / "build", f"-DRACK_SDK_DIR={fake}")
     assert proc.returncode != 0
     assert "not the pinned" in errors(proc)
@@ -127,10 +130,10 @@ def test_build_type_is_refused(rack_sdk: Path, tmp_path: Path) -> None:
     ],
 )
 def test_audio_symbol_check_detects_python_references(tmp_path: Path, source: str, clean: bool) -> None:
-    require_tools("gcc", "nm")
+    require_tools("cc", "nm")
     (tmp_path / "kernel.c").write_text(source)
     obj = tmp_path / "kernel.o"
-    subprocess.run(["gcc", "-c", "-o", str(obj), str(tmp_path / "kernel.c")], check=True)
+    subprocess.run(["cc", "-c", "-o", str(obj), str(tmp_path / "kernel.c")], check=True)
     proc = subprocess.run(
         [str(BIN / "rackpy-dev"), "audio-symbols", str(obj)], capture_output=True, text=True, check=False
     )
