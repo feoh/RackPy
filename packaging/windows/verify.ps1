@@ -41,7 +41,12 @@ function Gate([string]$what) {
     $script:openGates++
     if ($env:GITHUB_ACTIONS) { Write-Host "::warning title=RP-41 open gate::$what" }
 }
-function ReadText([string]$path) { if (Test-Path -LiteralPath $path) { [IO.File]::ReadAllText($path) } else { "" } }
+function ReadText([string]$path) {
+    # Rack keeps log.txt open for writing: read it as a log viewer does, sharing it, or Windows refuses.
+    if (-not (Test-Path -LiteralPath $path)) { return "" }
+    $stream = [IO.File]::Open($path, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]"ReadWrite, Delete")
+    try { (New-Object IO.StreamReader($stream)).ReadToEnd() } finally { $stream.Dispose() }
+}
 function Has([string]$path, [string]$text) { (ReadText $path).Contains($text) }
 function WriteJson([string]$path, [string]$text) { [IO.File]::WriteAllText($path, $text, $Utf8) }
 
@@ -269,6 +274,21 @@ Headless $user "permission"
 & icacls $dll /remove:d $who | Out-Null
 Check "an unreadable python314.dll: refused with Windows' reason" { (ReadText (Join-Path $Logs "permission.log")) -match "cannot load .*python314\.dll: .*\(Windows error 5\)" }
 Check "an unreadable python314.dll: Rack exits cleanly" { (Rc "permission") -eq "0" }
+
+# The Mark of the Web, as a browser leaves on a download (a Zone.Identifier stream, zone 3: the Internet).
+# The package itself: Rack extracts it with its own code. Then every file of the extracted folder marked, as
+# extracting a downloaded zip with Explorer would. What Windows does then is recorded, not assumed.
+$motw = "[ZoneTransfer]`r`nZoneId=3`r`nReferrerUrl=https://example.invalid/`r`n"
+FreshUser $user @($first)
+Set-Content -LiteralPath (Join-Path $user "$Plugins\$first") -Stream Zone.Identifier -Value $motw
+Headless $user "motw-package"
+CleanRun "motw-package" $slug1
+$marked = @(Get-ChildItem -LiteralPath (& $plugin1) -Recurse -File | Where-Object { Get-Item -LiteralPath $_.FullName -Stream Zone.Identifier -ErrorAction SilentlyContinue })
+Note "info  a downloaded package: $($marked.Count) extracted file(s) carry the Mark of the Web"
+Get-ChildItem -LiteralPath (& $plugin1) -Recurse -File | ForEach-Object { Set-Content -LiteralPath $_.FullName -Stream Zone.Identifier -Value $motw }
+Headless $user "motw-folder"
+$loaded = Has (Join-Path $Logs "motw-folder.log") "Loaded plugin $slug1 "
+Note "info  a folder whose every file has the Mark of the Web: Rack's exit status $(Rc 'motw-folder'); plugin loaded: $loaded; RackPy started: $(Has (Join-Path $Logs 'motw-folder.log') 'RackPy interpreter started')"
 
 # A user folder whose path is not ASCII: Rack passes RackPy UTF-8 paths, and the loader turns them into UTF-16.
 # Built from code points: Windows PowerShell 5.1 reads a script without a byte order mark as ANSI, so it stays ASCII.

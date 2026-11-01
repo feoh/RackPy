@@ -16,7 +16,7 @@ from pathlib import Path
 import pytest
 
 import rackpy
-from tests.support import assert_clean_exit, rack_platforms, run_rack, stage_plugin
+from tests.support import MODULE, assert_clean_exit, rack_platforms, run_rack, stage_plugin
 
 pytestmark = [pytest.mark.host, rack_platforms()]
 
@@ -75,7 +75,10 @@ def test_skeleton_loads_into_rack_and_finalizes(
     assert_clean_exit(run)
     assert run.lines("Loaded plugin RackPy 2.0.0"), run.tail()
     assert run.lines("RackPy interpreter started: Python 3.14.9"), run.tail()
-    started = f"RackPy: rackpy {rackpy.__version__}, Python 3.14.9, pybind11 3.1.0, Rack 2.6.6, plugin {plugin}"
+    # Rack gives paths with '/' on every platform; Path compares Windows' separators and case as Windows does.
+    started = (
+        f"RackPy: rackpy {rackpy.__version__}, Python 3.14.9, pybind11 3.1.0, Rack 2.6.6, plugin {plugin.as_posix()}"
+    )
     assert run.lines(started), run.tail()
     (line,) = run.lines("smoke facts")
     seen = facts(line)
@@ -86,11 +89,11 @@ def test_skeleton_loads_into_rack_and_finalizes(
     assert seen["hijacked"] is False, "PYTHONPATH or the working directory leaked into sys.path"
     path = seen["path"]
     # After the standard library (RP-38): a plugin file named like a standard module never replaces it.
-    assert isinstance(path, list) and path[-1] == str(plugin / "pythonpath") and path.index(path[-1]) > 0
-    assert all(p.startswith(str(plugin)) for p in path), path
-    assert seen["prefix"] == str(plugin / "python")
-    assert seen["rackpy_file"] == str(plugin / "pythonpath" / "rackpy" / "__init__.py")
-    assert run.lines("RackPy host rackpy_host.so ready")
+    assert isinstance(path, list) and Path(path[-1]) == plugin / "pythonpath" and path.index(path[-1]) > 0
+    assert all(Path(p).is_relative_to(plugin) for p in path), path
+    assert Path(str(seen["prefix"])) == plugin / "python"
+    assert Path(str(seen["rackpy_file"])) == plugin / "pythonpath" / "rackpy" / "__init__.py"
+    assert run.lines(f"RackPy host rackpy_host{MODULE} ready")
     assert run.lines("RackPy interpreter finalized: Py_FinalizeEx returned 0"), run.tail()
     assert not run.lines("RackPy refused"), run.tail()
     assert not list(plugin.rglob("__pycache__")), "the host wrote bytecode into the installed plugin"

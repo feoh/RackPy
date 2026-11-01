@@ -116,7 +116,10 @@ def test_python_environment_variables_are_ignored(
     assert facts["dont_write_bytecode"] and facts["pycache_prefix"] is None and facts["warnings"] == [], facts
     plugin = tmp_path / PLUGINS
     assert Path(facts["rackpy"]).is_relative_to(plugin) and Path(facts["json"]).is_relative_to(plugin)
-    assert "/python/lib/python3.14/json/" in facts["json"]  # the bundled runtime's standard library
+    stdlib = (
+        "/python/Lib/json/" if WINDOWS else "/python/lib/python3.14/json/"
+    )  # the bundled runtime's standard library
+    assert stdlib in Path(facts["json"]).as_posix(), facts["json"]
 
 
 def test_plugin_files_never_replace_the_standard_library(
@@ -139,6 +142,8 @@ def test_plugin_files_never_replace_the_standard_library(
         imports=["json", "random"],
     )
     write_patch(tmp_path, [])
+    # The Windows runtime ships precompiled bytecode; what must not happen is Python writing more.
+    shipped = set(plugin.rglob("*.pyc"))
     run = run_rack(rack_host, tmp_path)
     assert_clean_exit(run)
     facts = json.loads(result.read_text())
@@ -151,7 +156,8 @@ def test_plugin_files_never_replace_the_standard_library(
     assert paths[-1] == pythonpath and paths.index(pythonpath) > 0  # after the standard library
     (warning,) = run.lines("named like part of Python's standard library")
     assert "json, random" in warning, warning
-    assert not list(plugin.rglob("__pycache__")), "Python wrote bytecode into the installed plugin"
+    written = sorted(set(plugin.rglob("*.pyc")) - shipped)
+    assert not written, f"Python wrote bytecode into the installed plugin: {written[:5]}"
 
 
 class _Reduce:
