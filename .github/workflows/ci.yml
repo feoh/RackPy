@@ -528,7 +528,7 @@ jobs:
           if-no-files-found: ignore
 
   windows:
-    name: Windows x64, native build, CTest and Rack host tests
+    name: Windows x64, native build, CTest, unit and Rack host tests
     # RP-41. A native build with MSYS2's MINGW64 GCC (mingw-w64, msvcrt: the compiler family and C runtime
     # Rack for Windows is built with), the native tests (CTest, through the dev_build fixture) and the host
     # tests in Rack Free 2.6.6, unpacked from its installer by 7-Zip. The test harness runs on uv's
@@ -572,7 +572,7 @@ jobs:
       # drawing on real Windows graphics drivers stays an open gate.
       - name: Mesa's software OpenGL beside the test copy of Rack
         run: uv run --script bin/rack-sdk mesa --into "$(uv run --script bin/rack-sdk host win-x64 | tail -1)"
-      - name: Native tests and Rack host tests
+      - name: Unit, native and Rack host tests
         env:
           WINDOWS_TESTS: ${{ inputs.windows_tests }}  # through the environment, never into the script's text
           GALLIUM_DRIVER: llvmpipe  # Mesa's CPU renderer, not its Direct3D 12 driver
@@ -580,7 +580,7 @@ jobs:
           # page unless Python's UTF-8 mode is on (inside Rack, RackPy turns it on itself).
           PYTHONUTF8: "1"
         run: >
-          uv run --frozen pytest -m "(native or host) and not dist and not sanitizer and not stress and not inventory"
+          uv run --frozen pytest -m "(unit or native or host) and not dist and not sanitizer and not stress and not inventory"
           ${WINDOWS_TESTS:+-k "$WINDOWS_TESTS"}
           -v --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/win-x64.xml
       - if: always()
@@ -597,7 +597,7 @@ jobs:
           if-no-files-found: ignore
 
   macos:
-    name: macOS ${{ matrix.platform }}, native build, CTest and Rack host tests
+    name: macOS ${{ matrix.platform }}, native build, CTest, unit and Rack host tests
     # RP-40. Native builds with the runner's AppleClang (one architecture each), the native tests
     # (CTest, through the dev_build fixture) and the host tests in Rack Free 2.6.6, headless and
     # windowed. Linux-only tests (ELF tools, LD_PRELOAD guards, the Linux toolchain) skip by platform.
@@ -625,7 +625,7 @@ jobs:
             ~/.cache/rackpy/build-inputs
           key: rackpy-${{ matrix.platform }}-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json') }}
       - run: uv sync --frozen
-      - name: Native tests and Rack host tests
+      - name: Unit, native and Rack host tests
         env:
           MACOS_TESTS: ${{ inputs.macos_tests }}  # through the environment, never into the script's text
           # GitHub-hosted macOS runners have no GPU, and Rack's GLFW asks only for accelerated pixel formats
@@ -633,7 +633,7 @@ jobs:
           # renders with Mesa (tests/fixtures/macos-software-gl, RP-42). Drawing on a Mac's GPU stays an open gate.
           RACKPY_MACOS_SOFTWARE_GL: "1"
         run: >
-          uv run --frozen pytest -m "(native or host) and not dist and not sanitizer and not stress and not inventory"
+          uv run --frozen pytest -m "(unit or native or host) and not dist and not sanitizer and not stress and not inventory"
           ${MACOS_TESTS:+-k "$MACOS_TESTS"}
           -v --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/${{ matrix.platform }}.xml
       - if: always()
