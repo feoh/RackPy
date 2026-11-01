@@ -15,12 +15,23 @@ here is an installable release.
 
 ## Set up a clean checkout
 
-Supported for development: **Linux x86_64**, and **macOS** on Apple silicon or
-Intel (RP-40): on a Mac, Xcode's command line tools replace GCC and binutils,
-there is no Xvfb (windowed tests need a Mac whose GPU gives Rack an OpenGL
-window), and the Linux-only checks (the official toolchain, the `LD_PRELOAD`
-audio-path guard, ELF inspection, the sanitizer and stress suites' Linux
-programs) skip with that reason. Windows builds do not exist yet (RP-41).
+Supported for development: **Linux x86_64**, **macOS** on Apple silicon or
+Intel (RP-40) and **Windows x64** (RP-41).
+
+- On a Mac, Xcode's command line tools replace GCC and binutils. There is no
+  Xvfb: windowed tests need a Mac whose GPU gives Rack an OpenGL window. The
+  Linux-only checks (the official toolchain, the `LD_PRELOAD` audio-path
+  guard, ELF inspection, the sanitizer and stress suites' Linux programs) skip
+  with that reason.
+- On Windows, build in MSYS2's MINGW64 shell with its GCC, CMake, Ninja and
+  binutils (`pacman -S mingw-w64-x86_64-{gcc,cmake,ninja,binutils}`), as Rack
+  itself is built, with uv for Windows. The host tests also need 7-Zip's `7z`,
+  to unpack Rack's installer, and Git for Windows' `bash.exe` for a few shell
+  checks. Windowed tests need a GPU driver with OpenGL 2.0. The Linux-only
+  checks skip as on a Mac; there are no ASan or TSan programs under MinGW.
+- On Linux, `bin/rackpy-dev build --toolchain rack-win-x64` cross-builds with
+  the official Windows toolchain. That is a build check only: a Wine run is
+  not Windows evidence.
 
 You need:
 

@@ -91,8 +91,10 @@ Official cross toolchain: [rack-plugin-toolchain](https://github.com/VCVRack/rac
 branch `v2` at `4fd13187`, pinned to SDK 2.6.6. It builds crosstool-ng
 `x86_64-ubuntu16.04-linux-gnu`, mingw-w64 v10.0.0 and osxcross with clang
 20.1.1 and the macOS 12.3 SDK. RP-08 built the **Linux** toolchain with
-`bin/rack-toolchain build` (GCC 15.1.0, sysroot glibc 2.23); the Windows and
-macOS toolchains have not been built.
+`bin/rack-toolchain build` (GCC 15.1.0, sysroot glibc 2.23); RP-41 built its
+Windows toolchain (`--target win-x64`, mingw-w64 v10, msvcrt) for local cross
+builds, while CI builds Windows natively with MSYS2's MinGW-w64 GCC. The macOS
+toolchain has not been built: macOS builds use Xcode's (RP-40).
 
 **Selected toolchains.**
 
@@ -117,8 +119,15 @@ macOS toolchains have not been built.
    Ubuntu 16.04 (glibc 2.23) and 20.04 containers
    ([install on Linux](installation/linux.md)).
 2. **Windows mixes C runtimes unless proven otherwise.** Plugins link against
-   a MinGW import library. python.org CPython is built with MSVC. RP-04 and
-   RP-41 must probe CRT and C++ runtime coexistence before choosing an ABI.
+   a MinGW import library. python.org CPython is built with MSVC. RP-41 chose:
+   RackPy's DLLs are built with MinGW-w64 GCC on msvcrt, as Rack is, and the
+   bundled CPython (python-build-standalone, MSVC and the Universal C Runtime)
+   is used only through its C API, with no `FILE*`, heap block or `errno`
+   crossing between the two runtimes. `bin/rackpy-release build` refuses a
+   RackPy DLL that imports the Universal C Runtime
+   ([install on Windows](installation/windows.md)). One consequence: file
+   descriptors 0 to 2 are separate in each runtime over the same console
+   handles, so Python code that closes them closes Rack's.
 3. **Headers accept newer C++.** `rack.hpp` parses with GCC 16.2.1 and clang
    23.1.3 under `-std=c++17`, `c++20` and `c++23` with no errors. Under C++20,
    GCC warns about implicit `this` capture in `helpers.hpp`. Header parsing does
@@ -176,7 +185,7 @@ evidence on a real host.
 | Linux x86_64 | yes | **Validated natively.** Builds, native and host tests (headless and in Xvfb); release candidates built with the official toolchain (glibc 2.23) and verified on clean Ubuntu 16.04 and 20.04 containers (RP-39). Not published. |
 | macOS arm64 | yes | **Validated natively** on GitHub's `macos-15` runners: builds, native and host tests (headless), release candidates installed in fresh user folders (RP-40, [validation](../planning/rp-40-validation.md)). Windowed drawing, Gatekeeper with SIP on and a clean Mac remain open. Not published. |
 | macOS x86_64 | yes | **Validated natively** on GitHub's `macos-15-intel` runners, as arm64 (RP-40). The same gates remain open. Not published. |
-| Windows x86_64 | yes | Candidate. Headers verified; **nothing built or run**. CRT risk above. |
+| Windows x86_64 | yes | **Validated natively** on GitHub's `windows-2025` runners: builds (MSYS2 MinGW-w64), native and host tests (headless), release candidates installed in fresh user folders (RP-41, [validation](../planning/rp-41-validation.md)). The C runtimes are kept apart (finding 2). Windowed drawing, a clean PC and Authenticode signing remain open. Not published. |
 | Linux arm64 | **no** | Not a target: no SDK published. |
 | Windows arm64 | **no** | Not a target: no SDK published. |
 

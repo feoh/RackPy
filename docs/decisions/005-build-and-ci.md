@@ -1,7 +1,7 @@
 # ADR 005: Build system, pins, test policy and CI
 
-- **Status:** Accepted for Linux x86_64. macOS and Windows have no build yet
-  (RP-40, RP-41).
+- **Status:** Accepted for Linux x86_64; extended to macOS (RP-40) and
+  Windows x64 (RP-41).
 - **Date:** 2026-10-22
 - **Task:** RP-08
 - **Evidence:** [tests/integration/test_host_smoke.py](../../tests/integration/test_host_smoke.py),
@@ -115,6 +115,9 @@ by `bin/rackpy-release build` and installed on clean Ubuntu 20.04 and 16.04
 containers by `bin/rackpy-release verify` (RP-39). Outside pull requests, four macOS jobs
 run on GitHub's `macos-15` (arm64) and `macos-15-intel` runners (RP-40): the native build,
 CTest and host tests, and each architecture's release candidate built and verified there.
+Two Windows jobs run on `windows-2025` the same way (RP-41), building with MSYS2's MinGW-w64
+GCC; the release candidate is verified by `packaging/windows/verify.ps1` in Windows PowerShell
+with `PATH` limited to Windows' own folders.
 Reports and Rack logs are kept 14 days,
 the release candidate's evidence 30. CI keeps no binaries, because
 distributing one needs owner approval (RP-44).
@@ -180,4 +183,4 @@ Ninja 1.13.2, uv 0.9.18, Rack Free 2.6.6 headless.
 - The plugin is rejected, and `destroy()` never runs, if `plugin.json` names a
   module that `init()` did not register. The skeleton names none; RP-10 and
   RP-16 must finalize correctly in that case.
-- No macOS or Windows build, and no CI for them.
+- No macOS or Windows build, and no CI for them. (Superseded: RP-40 added macOS, RP-41 Windows x64.)
