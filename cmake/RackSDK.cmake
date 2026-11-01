@@ -73,8 +73,9 @@ add_library(rackpy_sdk_compile INTERFACE)
 target_include_directories(rackpy_sdk_compile SYSTEM INTERFACE "${RACK_SDK_DIR}/include" "${RACK_SDK_DIR}/dep/include")
 # -ffp-contract=off is RackPy's, not the SDK's: Clang on arm64 fuses a*b+c into one FMA by default, so
 # the same inline SDK arithmetic (math::complexMult, Light::setBrightnessSmooth) rounded differently in
-# the host and in the reference programs, depending on what the optimizer saw (RP-40). Off, each
-# operation rounds once on every platform, as on x86_64's nehalem baseline, which has no FMA.
+# the host and in the reference programs, depending on what the optimizer saw (RP-40). Off, Clang
+# emits no FMA, as on x86_64's nehalem baseline, which has none. -funsafe-math-optimizations still
+# lets it reassociate, so two inline copies of one expression can still differ by an ulp.
 target_compile_options(rackpy_sdk_compile INTERFACE
   -fPIC -g -O3 -funsafe-math-optimizations -ffp-contract=off -fno-omit-frame-pointer ${_rackpy_march}
   -Wall -Wextra -Wno-unused-parameter

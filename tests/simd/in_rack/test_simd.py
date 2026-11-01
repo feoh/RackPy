@@ -582,7 +582,10 @@ def test_sse_mathfun() -> None:
     one = sse_mathfun.sse_mathfun_one_ps()
     assert one.tolist() == [1.0] * 4
     sin, cos = sse_mathfun.sse_mathfun_sincos_ps(float_4(0.0, 1.0, 2.0, 3.0))
-    assert sin.tolist() == sse_mathfun.sse_mathfun_sin_ps(float_4(0.0, 1.0, 2.0, 3.0)).tolist()
+    # The same polynomial in two inline functions; Rack's -funsafe-math-optimizations lets Clang reassociate
+    # each differently, and on arm64 they differ by one ulp (RP-40), so equal within float precision.
+    alone = sse_mathfun.sse_mathfun_sin_ps(float_4(0.0, 1.0, 2.0, 3.0)).tolist()
+    assert sin.tolist() == pytest.approx(alone, rel=4 * 2**-24, abs=1e-9)
     assert cos[0] == 1.0 and abs(sin[1] - math.sin(1.0)) < 1e-6
     assert sse_mathfun.sse_mathfun_tancot_ps(float_4(1.0), 1).tolist() == sse_mathfun.sse_mathfun_cot_ps(1.0).tolist()
     # Rack's simd.atan2(x, y) passes its arguments to sse_mathfun_atan2_ps(y, x) in order.
