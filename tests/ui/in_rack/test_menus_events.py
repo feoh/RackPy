@@ -2,6 +2,7 @@
 """RP-26B: Rack's context, input dispatch and menu helpers, run in Rack's live UI."""
 
 import gc
+import sys
 import threading
 from typing import Any
 
@@ -360,5 +361,7 @@ def test_model_context_menu_and_deprecated_aliases() -> None:
         assert raw.event.Action is w.ActionEvent
     with pytest.warns(DeprecationWarning):
         assert raw.event.Hover is w.HoverEvent
-    assert macros.RACK_MOD_CTRL == 2 and macros.RACK_MOD_CTRL_NAME == "Ctrl" and macros.RACK_MOD_SHIFT == 1
+    # Rack's Ctrl is GLFW's Super (Command, named ⌘) on macOS, its Control elsewhere.
+    ctrl = (8, "\u2318") if sys.platform == "darwin" else (2, "Ctrl")
+    assert ctrl == (macros.RACK_MOD_CTRL, macros.RACK_MOD_CTRL_NAME) and macros.RACK_MOD_SHIFT == 1
     assert macros.RACK_MOD_MASK == 15 and macros.RACK_HELD == 3 and macros.RACK_MOD_ALT_NAME == "Alt"

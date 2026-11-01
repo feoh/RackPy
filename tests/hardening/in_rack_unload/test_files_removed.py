@@ -8,8 +8,9 @@ needs a file fails where it is used, and Rack quits cleanly (the outer test chec
 """
 
 import importlib
+import sys
 import time
-from pathlib import Path
+from collections.abc import Callable
 
 import pytest
 from _rackpy_host import _testing as HOOKS
@@ -32,14 +33,33 @@ def counting_module() -> Module:
     return Module.create(configure)
 
 
-def test_the_plugin_folder_removed_under_a_running_plugin(tmp_path: Path) -> None:
+def rises(read: Callable[[], float], above: float, within: float = 5.0) -> bool:
+    """Whether a voltage the engine writes goes above a value within some seconds (a slow CI machine's engine may
+    not have run the module yet after a fixed short sleep, RP-42)."""
+    deadline = time.monotonic() + within
+    while time.monotonic() < deadline:
+        if read() > above:
+            return True
+        time.sleep(0.02)
+    return False
+
+
+def test_the_plugin_folder_removed_under_a_running_plugin() -> None:
     plugin = assets.plugin()
     (plugin / "pythonpath" / "rp38_late.py").write_text("VALUE = 1\n")  # shipped, never imported before the move
     (plugin / "res").mkdir(exist_ok=True)
     (plugin / "res" / "rp38.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>')
     module_id = HOOKS.engine_adopt(counting_module())
-    moved = tmp_path / "moved-away"
-    plugin.rename(moved)  # the folder is gone; open and mapped files stay valid
+    moved = plugin.with_name(plugin.name + ".moved-away")  # beside it: a rename cannot cross drives (Windows)
+    try:
+        plugin.rename(moved)  # the folder is gone; open and mapped files stay valid
+    except PermissionError:
+        # Windows refuses to move a folder whose DLLs are loaded: the files cannot go away under Rack there.
+        assert sys.platform == "win32"
+        running = HOOKS.engine_handle(module_id)
+        assert running is not None and rises(running.outputs[0].get_voltage, running.outputs[0].get_voltage())
+        HOOKS.engine_delete(running)
+        return
     try:
         assert not plugin.exists()
         importlib.invalidate_caches()
@@ -48,14 +68,11 @@ def test_the_plugin_folder_removed_under_a_running_plugin(tmp_path: Path) -> Non
         assert Svg.load(str(plugin / "res" / "rp38.svg")) is None  # Rack's loader reports it; no exception reaches Rack
         running = HOOKS.engine_handle(module_id)
         assert running is not None
-        before = running.outputs[0].get_voltage()
-        time.sleep(0.05)
-        assert running.outputs[0].get_voltage() > before  # the kernel loaded before still runs
+        assert rises(running.outputs[0].get_voltage, running.outputs[0].get_voltage())  # the loaded kernel still runs
         added = HOOKS.engine_adopt(counting_module())  # new modules and kernels still work: nothing reads the folder
         fresh = HOOKS.engine_handle(added)
         assert fresh is not None
-        time.sleep(0.05)
-        assert fresh.outputs[0].get_voltage() > 0
+        assert rises(fresh.outputs[0].get_voltage, 0.0)
         HOOKS.engine_delete(fresh)
     finally:
         moved.rename(plugin)  # Rack's later file reads (a patch save with this plugin's modules) find it again

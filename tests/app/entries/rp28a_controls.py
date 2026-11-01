@@ -69,6 +69,13 @@ def run() -> None:
     controls(kept_id)  # left in place: Rack deletes them when it quits
 
     at = centre(knob)
+    # Where the clicks land, against the window's size: a diagnostic for platforms whose first windowed runs
+    # missed (macOS CI, RP-42).
+    context = raw.context_get()
+    window = context.window if context is not None else None
+    size = window.get_size() if window is not None else None
+    RESULT["window_size"] = [size.x, size.y] if size is not None else None
+    RESULT["knob_at"] = [at.x, at.y]
     events.handle_button(at, LEFT, PRESS, 0)
     events.handle_button(at, LEFT, RELEASE, 0)
     RESULT["touched_is_knob"] = _testing.touched_param() is knob

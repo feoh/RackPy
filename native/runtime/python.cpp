@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+#include "rackpy/rtti.hpp"
 #include "rackpy/runtime/python.hpp"
 
 #include <rack.hpp>
@@ -258,9 +259,14 @@ void registerErrorTranslator() {
 		catch (const Laboratory& e) {
 			PyErr_SetString(errorType("LaboratoryError"), e.what());
 		}
-		catch (const py::cast_error& e) {
+		catch (const std::exception& e) {
 			// RP-38: a Python value of the wrong type met an explicit py::cast (a plan, an event field, a JSON key).
 			// pybind11 reports it as RuntimeError; Python, and pybind11's own argument checks, say TypeError.
+			// Identified by rttiCast, not a catch clause: py::cast_error has no key function, and on macOS a clause
+			// naming it did not match what pybind11 threw, so it stayed a RuntimeError there (RP-42, as RP-40
+			// found for rack::Exception). Anything else goes on to the next translator.
+			if (!::rackpy::rttiCast<const py::cast_error*>(&e))
+				throw;
 			PyErr_SetString(PyExc_TypeError, e.what());
 		}
 	});

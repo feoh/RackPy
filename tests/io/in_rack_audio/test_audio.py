@@ -1,12 +1,21 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""RP-29B: rack::audio in Rack's live UI. Tests isolate Rack from this machine's sound servers and devices
-(tests/support.isolated_audio_env): Rack's RtAudio drivers load and list no devices."""
+"""RP-29B: rack::audio in Rack's live UI. On Linux the tests isolate Rack from this machine's sound servers and
+devices (tests/support.isolated_audio_env): Rack's RtAudio drivers load and list no devices. macOS and Windows
+offer no such isolation, so there the drivers may list the machine's devices, and a port is put in the no-device
+state explicitly (RP-42)."""
+
+import sys
 
 import pytest
 
 from rackpy.raw import audio
 
 KEPT: list[audio.Port] = []  # alive when Rack quits: RackPy gives its device back while the drivers exist
+
+
+ISOLATED = sys.platform == "linux"
+# Rack's RtAudio drivers on each platform (some of their names; Windows also has ASIO).
+DRIVERS = {"linux": {"ALSA", "PulseAudio", "JACK"}, "darwin": set(), "win32": {"WASAPI", "DirectSound"}}[sys.platform]
 
 
 def test_racks_drivers_with_no_devices() -> None:
@@ -16,16 +25,27 @@ def test_racks_drivers_with_no_devices() -> None:
         driver = audio.get_driver(driver_id)
         assert driver is not None and driver.id == driver_id and driver == audio.get_driver(driver_id)
         names[driver.get_name()] = driver_id
-        assert driver.get_device_ids() == [] and driver.get_default_device_id() == -1  # isolated: no devices
-        assert driver.get_device_name(0) == "" and driver.get_device_num_inputs(0) == 0
-        assert driver.get_device_num_outputs(0) == 0
-    assert {"ALSA", "PulseAudio", "JACK"} <= set(names) and audio.get_driver(-123) is None
+        devices = driver.get_device_ids()
+        if ISOLATED:
+            assert devices == [] and driver.get_default_device_id() == -1  # isolated: no devices
+        assert driver.get_default_device_id() in [*devices, -1]
+        for device in devices:  # the machine's own, where Rack cannot be isolated from them
+            assert isinstance(driver.get_device_name(device), str)
+            assert driver.get_device_num_inputs(device) >= 0 and driver.get_device_num_outputs(device) >= 0
+        missing = max(devices, default=0) + 1000  # no such device: Rack's empty answers
+        assert driver.get_device_name(missing) == "" and driver.get_device_num_inputs(missing) == 0
+        assert driver.get_device_num_outputs(missing) == 0
+    assert set(names) >= DRIVERS and len(names) == len(ids) and audio.get_driver(-123) is None
+    if sys.platform == "darwin":
+        assert any("core" in name.lower() for name in names), names  # Core Audio
 
 
 def test_a_port_without_a_device() -> None:
-    port = audio.Port()  # Rack's: its first driver and that driver's default device (none here)
+    port = audio.Port()  # Rack's: its first driver and that driver's default device (none on Linux here)
     KEPT.append(port)
     first = audio.get_driver_ids()[0]
+    if not ISOLATED:
+        port.set_device_id(-1)  # the machine's default device may have opened: give it back
     assert port.get_driver_id() == first == port.driver_id and port.get_device_id() == -1 == port.device_id
     driver = port.get_driver()
     assert driver is not None and port.get_driver_name() == driver.get_name() and port.device is None
@@ -39,13 +59,17 @@ def test_a_port_without_a_device() -> None:
     port.set_sample_rate(48000)  # Rack does nothing without a device
     port.set_block_size(256)
     assert port.get_num_inputs() == 0 and port.get_num_outputs() == 0
-    port.set_device_id(3)  # the driver cannot open it: Rack logs it and the port keeps no device
-    assert port.get_device_id() == -1 and port.device is None
+    if ISOLATED:
+        port.set_device_id(3)  # the driver cannot open it: Rack logs it and the port keeps no device
+        assert port.get_device_id() == -1 and port.device is None
     port.set_driver_id(123456)  # unknown: Rack falls back to its first driver
     assert port.get_driver_id() == first
-    jack = next(i for i in audio.get_driver_ids() if audio.get_driver(i).get_name() == "JACK")  # type: ignore[union-attr]
-    port.set_driver_id(jack)
-    assert port.get_driver_name() == "JACK"
+    names = {audio.get_driver(i).get_name(): i for i in audio.get_driver_ids()}  # type: ignore[union-attr]
+    other = names["JACK"] if ISOLATED else audio.get_driver_ids()[-1]
+    port.set_driver_id(other)
+    if not ISOLATED:
+        port.set_device_id(-1)
+    assert port.get_driver_id() == other and port.get_driver_name() == audio.get_driver(other).get_name()  # type: ignore[union-attr]
     assert port.stream_stats == {
         "buffers": 0,
         "frames": 0,

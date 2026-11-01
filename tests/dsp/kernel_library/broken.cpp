@@ -20,10 +20,12 @@ rackpy::KernelType type(const char* name) {
 
 }  // namespace
 
+// RACKPY_EXPORT, as the real macros use: a visibility attribute alone does not export a symbol from a Windows
+// DLL, so there the wrong-ABI markers were invisible and the libraries loaded (RP-42).
 #if defined(VARIANT_WRONG_ABI)
-extern "C" __attribute__((visibility("default"))) int rackpy_kernel_abi() { return 999; }
-extern "C" __attribute__((visibility("default"))) const char* rackpy_kernel_namespace() { return "wrongabi"; }
-extern "C" __attribute__((visibility("default"))) void rackpy_register_kernels(rackpy::KernelRegistrar& r) { r.add(type("Never")); }
+extern "C" RACKPY_EXPORT int rackpy_kernel_abi() { return 999; }
+extern "C" RACKPY_EXPORT const char* rackpy_kernel_namespace() { return "wrongabi"; }
+extern "C" RACKPY_EXPORT void rackpy_register_kernels(rackpy::KernelRegistrar& r) { r.add(type("Never")); }
 #elif defined(VARIANT_THROWS)
 RACKPY_KERNEL_LIBRARY("throws", registrar) {
 	registrar.add(type("Partial"));  // must not be registered: the library fails as a whole
@@ -46,8 +48,8 @@ RACKPY_KERNEL_LIBRARY("badname", registrar) {
 RACKPY_KERNEL_LIBRARY("graphabi", registrar) {
 	registrar.add(type("Kept"));  // must not be registered: the library fails as a whole
 }
-extern "C" __attribute__((visibility("default"))) int rackpy_graph_abi() { return 999; }
-extern "C" __attribute__((visibility("default"))) void rackpy_register_graph_nodes(rackpy::graph::NodeRegistrar&) {}
+extern "C" RACKPY_EXPORT int rackpy_graph_abi() { return 999; }
+extern "C" RACKPY_EXPORT void rackpy_register_graph_nodes(rackpy::graph::NodeRegistrar&) {}
 #elif defined(VARIANT_GRAPH_BAD_NODE)
 RACKPY_KERNEL_LIBRARY("graphbad", registrar) {
 	registrar.add(type("Kept"));  // must not be registered: the library fails as a whole
@@ -61,20 +63,20 @@ RACKPY_GRAPH_NODES(registrar) {
 RACKPY_KERNEL_LIBRARY("expanderabi", registrar) {
 	registrar.add(type("Kept"));  // must not be registered: the library fails as a whole
 }
-extern "C" __attribute__((visibility("default"))) int rackpy_expander_abi() { return 999; }
-extern "C" __attribute__((visibility("default"))) void rackpy_set_expander_services(rackpy::expander::Services*) {}
+extern "C" RACKPY_EXPORT int rackpy_expander_abi() { return 999; }
+extern "C" RACKPY_EXPORT void rackpy_set_expander_services(rackpy::expander::Services*) {}
 #elif defined(VARIANT_EXPANDER_PARTIAL)
 RACKPY_KERNEL_LIBRARY("expanderpart", registrar) {
 	registrar.add(type("Kept"));
 }
-extern "C" __attribute__((visibility("default"))) int rackpy_expander_abi() { return rackpy::expander::EXPANDER_ABI; }
+extern "C" RACKPY_EXPORT int rackpy_expander_abi() { return rackpy::expander::EXPANDER_ABI; }
 #elif defined(VARIANT_IO_WRONG_ABI)
 RACKPY_KERNEL_LIBRARY("ioabi", registrar) { registrar.add(type("Kept")); }
-extern "C" __attribute__((visibility("default"))) int rackpy_io_abi() { return 999; }
-extern "C" __attribute__((visibility("default"))) void rackpy_set_io_services(rackpy::io::Services*) {}
+extern "C" RACKPY_EXPORT int rackpy_io_abi() { return 999; }
+extern "C" RACKPY_EXPORT void rackpy_set_io_services(rackpy::io::Services*) {}
 #elif defined(VARIANT_IO_PARTIAL)
 RACKPY_KERNEL_LIBRARY("iopart", registrar) { registrar.add(type("Kept")); }
-extern "C" __attribute__((visibility("default"))) int rackpy_io_abi() { return rackpy::io::IO_ABI; }
+extern "C" RACKPY_EXPORT int rackpy_io_abi() { return rackpy::io::IO_ABI; }
 #else
 #error "build broken.cpp with one VARIANT_* definition"
 #endif

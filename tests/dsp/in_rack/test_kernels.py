@@ -146,12 +146,19 @@ def test_sine_runs_polyphonic_and_its_amplitude_is_a_control() -> None:
         kernel = m.kernel
         assert kernel is not None
         kernel.set("amplitude", 1.0)
-        time.sleep(0.05)
-        late = []
-        for _ in range(50):  # Rack's engine renders in blocks: sample across several of them
-            late.append(out.get_voltage())
-            time.sleep(0.002)
-        assert max(map(abs, late)) <= 1.0 + 1e-6 and len(set(late)) > 1  # still running, quieter
+        late: list[float] = []
+
+        def quiet() -> bool:
+            # Rack's engine renders in blocks: sample across several of them. A fixed short wait was not enough on
+            # a slow CI machine, where the first readings still had the old amplitude (RP-42).
+            late.clear()
+            for _ in range(50):
+                late.append(out.get_voltage())
+                time.sleep(0.002)
+            return max(map(abs, late)) <= 1.0 + 1e-6
+
+        assert until(quiet, seconds=10.0), late
+        assert len(set(late)) > 1  # still running, quieter
     finally:
         HOOKS.engine_delete(m, None)
 

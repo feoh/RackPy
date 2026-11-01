@@ -19,31 +19,32 @@ def test_boundary_constants_match_compiled_sdk(tmp_path: Path) -> None:
     rack_sdk = str(REPO / "bin" / "rack-sdk")
     command = ["uv", "run", "--script", rack_sdk] if sys.platform == "win32" else [rack_sdk]
     sdk = Path(subprocess.check_output([*command, "path"], text=True).strip())
-    lines = ["#include <rack.hpp>", "#include <cstdio>", "int main() {"]
-    lines.extend(f'printf("{e["name"]} %d\\n", static_cast<int>({e["name"]}));' for e in entries)
-    lines.append("}")
-    source, binary = tmp_path / "constants.cpp", tmp_path / "constants"
-    source.write_text("\n".join(lines))
-    subprocess.run(
+    # One static_assert per constant, comparing the binding's value with the SDK's headers as compiled here:
+    # nothing to link or run, so it holds on every platform's compiler (RP-42; a linked program needed libRack).
+    lines = ["#include <rack.hpp>"]
+    for entry in entries:
+        module = glfw if entry["boundary"] == "input" else blendish
+        value = getattr(module, entry["name"])
+        lines.append(f'static_assert(static_cast<int>({entry["name"]}) == {value}, "{entry["name"]} is not {value}");')
+    source = tmp_path / "constants.cpp"
+    source.write_text("\n".join(lines) + "\n")
+    windows = ["-D_USE_MATH_DEFINES"] if sys.platform == "win32" else []
+    compiled = subprocess.run(
         [
             "c++",
             "-std=c++11",
+            "-fsyntax-only",
+            *windows,
             f"-I{sdk / 'include'}",
             f"-I{sdk / 'dep' / 'include'}",
             str(source),
-            f"-L{sdk}",
-            "-lRack",
-            f"-Wl,-rpath,{sdk}",
-            "-o",
-            str(binary),
         ],
-        check=True,
+        check=False,
+        capture_output=True,
+        text=True,
     )
-    values = dict(line.split() for line in subprocess.check_output([str(binary)], text=True).splitlines())
-    assert len(values) == len(entries)
-    for entry in entries:
-        module = glfw if entry["boundary"] == "input" else blendish
-        assert getattr(module, entry["name"]) == int(values[entry["name"]])
+    assert compiled.returncode == 0, compiled.stderr[-4000:]
+    assert len(lines) - 1 == len(entries)
     menu = ui.Menu()
     try:
         menu.corner_flags = blendish.BND_CORNER_TOP_LEFT | blendish.BND_CORNER_DOWN_RIGHT

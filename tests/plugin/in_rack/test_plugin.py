@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """RP-16A: plugins and models inside Rack, after this plugin has loaded (live UI suite)."""
 
+import sys
 import threading
 from collections.abc import Callable
 
@@ -278,9 +279,14 @@ def test_assets_are_rack_paths() -> None:
 
     this = rp.plugin_instance()
     assert asset.plugin(this, "res/x.json") == this.path + "/res/x.json" and asset.plugin(this) == this.path + "/"
-    assert asset.system("res") == asset.systemDir + "/res" and Path(asset.systemDir).is_dir()
-    assert asset.user("autosave") == asset.userDir + "/autosave" and Path(asset.userDir).is_dir()
-    assert isinstance(asset.oldUserDir, str) and asset.bundlePath == ""  # bundlePath is set on macOS only
+    # Rack joins with '/', where systemDir on Windows has '\\': compared as paths.
+    assert Path(asset.system("res")) == Path(asset.systemDir) / "res" and Path(asset.systemDir).is_dir()
+    assert Path(asset.user("autosave")) == Path(asset.userDir) / "autosave" and Path(asset.userDir).is_dir()
+    assert isinstance(asset.oldUserDir, str)
+    if sys.platform == "darwin":  # Rack's .app bundle, on macOS only
+        assert asset.bundlePath.endswith(".app") and Path(asset.bundlePath).is_dir()
+    else:
+        assert asset.bundlePath == ""
     assert rackpy.assets.plugin("res/x.json") == Path(this.path) / "res" / "x.json"
     assert rackpy.assets.system() == Path(asset.systemDir) and rackpy.assets.user("a") == Path(asset.userDir) / "a"
 

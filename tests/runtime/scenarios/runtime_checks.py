@@ -8,6 +8,7 @@ scenario is a generator; each `yield` waits one frame. Every check logs
 
 import functools
 import gc
+import sys
 import threading
 import time
 import weakref
@@ -53,8 +54,41 @@ def wait(frames: int) -> Iterator[None]:
 
 
 def rss_kib() -> int:
-    with Path("/proc/self/status").open() as f:
-        return next(int(line.split()[1]) for line in f if line.startswith("VmRSS:"))
+    """Rack's resident set in KiB: the current size on Linux and Windows; on macOS the peak (getrusage), an upper
+    bound on growth, which is what the check compares (RP-42: /proc exists on Linux only)."""
+    if sys.platform == "linux":
+        with Path("/proc/self/status").open() as f:
+            kib = next(int(line.split()[1]) for line in f if line.startswith("VmRSS:"))
+    elif sys.platform == "darwin":
+        import resource
+
+        kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss // 1024  # bytes on macOS
+    else:
+        import ctypes
+        from ctypes import wintypes
+
+        class Counters(ctypes.Structure):
+            _fields_ = [  # PROCESS_MEMORY_COUNTERS
+                ("cb", wintypes.DWORD),
+                ("PageFaultCount", wintypes.DWORD),
+                ("PeakWorkingSetSize", ctypes.c_size_t),
+                ("WorkingSetSize", ctypes.c_size_t),
+                ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                ("PagefileUsage", ctypes.c_size_t),
+                ("PeakPagefileUsage", ctypes.c_size_t),
+            ]
+
+        counters = Counters()
+        counters.cb = ctypes.sizeof(Counters)
+        kernel32 = ctypes.WinDLL("kernel32")
+        kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+        if not kernel32.K32GetProcessMemoryInfo(kernel32.GetCurrentProcess(), ctypes.byref(counters), counters.cb):
+            raise OSError("K32GetProcessMemoryInfo failed")
+        kib = int(counters.WorkingSetSize) // 1024
+    return kib
 
 
 class Marker:

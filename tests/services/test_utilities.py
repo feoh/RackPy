@@ -21,7 +21,10 @@ def test_utilities_in_rack(make_hooks_bundle: Callable[[], Path], rack_host: Pat
     assert "info rackpy_test.py:12 test_logging] rackpy-log marker 5" in log  # Rack's log, with the given location
     for level, marker in (("info", "informed"), ("warn", "warned"), ("fatal", "fatal")):
         assert any(
-            f" {level} " in line and "/test_utilities.py:" in line and f"test_logging] rackpy-macro {marker}" in line
+            # The caller's own path: '\\' separators on Windows.
+            f" {level} " in line
+            and ("/test_utilities.py:" in line or "\\test_utilities.py:" in line)
+            and f"test_logging] rackpy-macro {marker}" in line
             for line in log.splitlines()
         )
     for line, (level, label) in enumerate(

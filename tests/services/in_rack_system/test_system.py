@@ -5,6 +5,7 @@ import inspect
 import io
 import json
 import os
+import sys
 import tarfile
 import threading
 import time
@@ -76,12 +77,13 @@ def test_files_and_directories(tmp_path: Path) -> None:
     assert sorted(Path(p).name for p in rsys.get_entries(tmp_path)) == ["a.bin", "c.bin", "d", "link", "x"]
     assert len(rsys.get_entries(tmp_path, -1)) == 7
     assert rsys.remove(tmp_path / "c.bin") and rsys.remove_recursively(tmp_path / "x") == 3
-    assert rsys.get_canonical(tmp_path / "d" / ".." / "a.bin") == str((tmp_path / "a.bin").resolve())
-    assert rsys.get_absolute("rel") == str(Path.cwd() / "rel")
+    # Rack writes paths with '/' on Windows too, so they are compared as paths.
+    assert Path(rsys.get_canonical(tmp_path / "d" / ".." / "a.bin")) == (tmp_path / "a.bin").resolve()
+    assert Path(rsys.get_absolute("rel")) == Path.cwd() / "rel"
     here = rsys.get_working_directory()
     rsys.set_working_directory(tmp_path)
     try:
-        assert rsys.get_working_directory() == str(tmp_path)
+        assert Path(rsys.get_working_directory()) == tmp_path
     finally:
         rsys.set_working_directory(here)
     assert Path(rsys.get_temp_directory()).is_dir() and files.temp_directory().is_dir()
@@ -131,7 +133,8 @@ def test_time_processes_and_flags() -> None:
     assert rsys.get_time() - t0 >= 0.009 and rsys.get_unix_time() > 1.6e9 and rsys.get_thread_time() >= 0
     with pytest.raises(ValueError):
         rsys.sleep(-1)
-    assert rsys.get_logical_core_count() >= 1 and "Linux" in rsys.get_operating_system_info()
+    os_name = {"linux": "Linux", "darwin": "Mac", "win32": "Windows"}[sys.platform]
+    assert rsys.get_logical_core_count() >= 1 and os_name in rsys.get_operating_system_info()
     assert isinstance(rsys.get_stack_trace(), str)
     names: list[str] = []
 

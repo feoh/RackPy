@@ -94,7 +94,7 @@ def test_the_facade_reports_what_rack_ignores() -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("a file where the directory should be")
         # Rack's createPatchStorageDirectory ignores the failure and returns the path.
-        assert m.create_patch_storage_directory() == str(path)
+        assert pathlib.Path(m.create_patch_storage_directory()) == path  # Rack writes '/' on Windows too
         with pytest.raises(OSError, match="could not create the patch storage directory"):
             m.patch_storage()
         assert path.read_text() == "a file where the directory should be"

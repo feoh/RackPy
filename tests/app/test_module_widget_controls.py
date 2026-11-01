@@ -41,7 +41,7 @@ def test_python_controls_in_a_module_widget_survive_rack_delete_and_undo(
     assert run.returncode == 0 and not run.lines("Fatal signal"), run.tail()
     result = json.loads(result_path.read_text())
     assert "error" not in result, result["error"]
-    assert result["touched_is_knob"]
+    assert result["touched_is_knob"], {k: result.get(k) for k in ("window_size", "knob_at")}
     before, after = result["cables"]
     assert before == after  # ad-hoc Python ports make no cables (Rack's undo could not restore them)
     removed = result["after_remove"]

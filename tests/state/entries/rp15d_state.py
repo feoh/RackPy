@@ -10,11 +10,13 @@ from _rackpy_host import _testing
 
 from rackpy.engine import Module
 from rackpy.plugin import ModuleClass, plugin
+from rackpy.raw import macros as raw_macros
 
 CONFIG: dict[str, Any] = json.loads((Path(__file__).resolve().parent / "rp15d_config.json").read_text())
 RESULT: dict[str, Any] = {}
 SETTINGS: dict[str, Any] = {"schema": 1, "launches": 0}
-GLFW_KEY_S, RACK_MOD_CTRL = 83, 0x0002  # GLFW_MOD_CONTROL on Linux
+GLFW_KEY_S = 83
+RACK_MOD_CTRL = raw_macros.RACK_MOD_CTRL  # File > Save is Ctrl+S, and Command+S on macOS
 
 
 def load_settings(data: Any) -> None:

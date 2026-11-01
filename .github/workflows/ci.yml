@@ -576,6 +576,9 @@ jobs:
         env:
           WINDOWS_TESTS: ${{ inputs.windows_tests }}  # through the environment, never into the script's text
           GALLIUM_DRIVER: llvmpipe  # Mesa's CPU renderer, not its Direct3D 12 driver
+          # The tests read Rack's UTF-8 files with Python's default encoding, which on Windows is the ANSI code
+          # page unless Python's UTF-8 mode is on (inside Rack, RackPy turns it on itself).
+          PYTHONUTF8: "1"
         run: >
           uv run --frozen pytest -m "(native or host) and not dist and not sanitizer and not stress and not inventory"
           ${WINDOWS_TESTS:+-k "$WINDOWS_TESTS"}
