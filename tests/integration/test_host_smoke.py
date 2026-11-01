@@ -9,6 +9,7 @@ of the Python package outside Rack proves nothing about this; see tests/unit.
 """
 
 import json
+import shutil
 from collections.abc import Callable
 from pathlib import Path
 
@@ -24,7 +25,8 @@ import json, sys
 import _rackpy_host
 import rackpy
 
-for name in ("json", "decimal", "ssl", "sqlite3", "ctypes", "_dbm"):
+# _dbm is Berkeley DB, which python-build-standalone's Windows build has not got.
+for name in ("json", "decimal", "ssl", "sqlite3", "ctypes", *(() if sys.platform == "win32" else ("_dbm",))):
     __import__(name)
 try:
     import hijack  # only reachable through PYTHONPATH or the working directory
@@ -104,7 +106,8 @@ def test_skeleton_without_entry_module(rack_host: Path, bundle: Path, tmp_path: 
 
 def test_missing_runtime_is_refused_with_a_reason(rack_host: Path, bundle: Path, tmp_path: Path) -> None:
     plugin = stage_plugin(bundle, tmp_path)
-    (plugin / "python").unlink()
+    runtime = plugin / "python"  # a symlink to the cached runtime, or on Windows a copy
+    shutil.rmtree(runtime) if runtime.is_dir() and not runtime.is_symlink() else runtime.unlink()
     run = run_rack(rack_host, tmp_path, settle=0.3)
     assert_clean_exit(run)
     assert run.lines("RackPy refused to start: bundled Python runtime missing or incomplete"), run.tail()

@@ -132,7 +132,7 @@ WINDOWS_RACK_DLLS = {"librack.dll", "libgcc_s_seh-1.dll", "libwinpthread-1.dll",
 WINDOWS_SYSTEM_DLLS = {
     "kernel32.dll", "msvcrt.dll", "user32.dll", "advapi32.dll", "shell32.dll", "ole32.dll", "oleaut32.dll",
     "ws2_32.dll", "bcrypt.dll", "crypt32.dll", "version.dll", "shlwapi.dll", "rpcrt4.dll", "iphlpapi.dll",
-    "secur32.dll", "gdi32.dll", "comctl32.dll", "winmm.dll", "ntdll.dll", "psapi.dll", "mswsock.dll",
+    "secur32.dll", "gdi32.dll", "comctl32.dll", "winmm.dll", "ntdll.dll", "psapi.dll", "mswsock.dll", "propsys.dll",
 }  # fmt: skip
 # Library search paths an artifact may have: Rack's, which it symlinks to its own folder while it loads a plugin
 # (the Rack SDK's plugin.mk adds it to every plugin), and the plugin's own runtime.
@@ -309,9 +309,12 @@ def pe_facts(path: Path) -> dict[str, Any]:
         raise SystemExit(f"{path} has no PE signature")
     machine, sections, _, _, _, optional_size, _ = struct.unpack_from("<HHIIIHH", data, pe + 4)
     optional = pe + 24
-    if struct.unpack_from("<H", data, optional)[0] != 0x20B:
-        raise SystemExit(f"{path} is not PE32+ (64-bit)")
-    directories = optional + 112  # PE32+: the data directories follow 112 bytes of fixed fields
+    magic = struct.unpack_from("<H", data, optional)[0]
+    if magic not in (0x10B, 0x20B):
+        raise SystemExit(f"{path} has an unknown PE optional header ({magic:#x})")
+    # The data directories follow 112 bytes of fixed fields in PE32+ (64-bit), 96 in PE32: a 32-bit file is
+    # read too, so that the machine check can name it.
+    directories = optional + (112 if magic == 0x20B else 96)
     table = optional + optional_size
     spans = [struct.unpack_from("<IIII", data, table + 40 * i + 8) for i in range(sections)]
 

@@ -17,7 +17,7 @@ from typing import Any
 
 import pytest
 
-from tests.support import PLUGINS, assert_clean_exit, rack_platforms, run_rack, stage_plugin, write_patch
+from tests.support import PLUGINS, WINDOWS, assert_clean_exit, rack_platforms, run_rack, stage_plugin, write_patch
 
 pytestmark = [pytest.mark.host, rack_platforms()]
 
@@ -109,7 +109,8 @@ def test_python_environment_variables_are_ignored(
     facts = json.loads(result.read_text())
     no_markers(marker)
     assert not any(str(bad) in entry for entry in facts["path"]), facts["path"]
-    assert "" not in facts["path"] and str(rack_host) not in facts["path"]  # not the working directory either
+    # Not the working directory, nor Rack's folder (which CPython's Windows path calculation would add, RP-41).
+    assert "" not in facts["path"] and rack_host not in [Path(entry) for entry in facts["path"]], facts["path"]
     assert facts["isolated"] and facts["ignore_environment"] and facts["safe_path"], facts
     assert facts["no_site"] and not facts["site_loaded"] and facts["no_user_site"], facts
     assert facts["dont_write_bytecode"] and facts["pycache_prefix"] is None and facts["warnings"] == [], facts
@@ -142,10 +143,12 @@ def test_plugin_files_never_replace_the_standard_library(
     assert_clean_exit(run)
     facts = json.loads(result.read_text())
     no_markers(marker)
+    stdlib = "/python/Lib/" if WINDOWS else "/python/lib/python3.14/"  # the runtime's layout on this platform
     for name in ("json", "random"):
-        assert f"/python/lib/python3.14/{name}" in facts[name], facts[name]
-    pythonpath = str(plugin / "pythonpath")
-    assert facts["path"][-1] == pythonpath and facts["path"].index(pythonpath) > 0  # after the standard library
+        assert f"{stdlib}{name}" in Path(facts[name]).as_posix(), facts[name]
+    pythonpath = plugin / "pythonpath"
+    paths = [Path(entry) for entry in facts["path"]]  # Path compares Windows' separators and case as Windows does
+    assert paths[-1] == pythonpath and paths.index(pythonpath) > 0  # after the standard library
     (warning,) = run.lines("named like part of Python's standard library")
     assert "json, random" in warning, warning
     assert not list(plugin.rglob("__pycache__")), "Python wrote bytecode into the installed plugin"

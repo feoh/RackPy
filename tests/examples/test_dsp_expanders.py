@@ -28,6 +28,7 @@ import rackpypolyphony_teaching as teaching
 from rackpy.dsp.graph_reference import run, run_pair
 from tests.examples.support import EXAMPLES, plugin_tool, saved_patch, write_patch
 from tests.support import (
+    MODULE,
     PLUGINS,
     assert_clean_exit,
     bin_command,
@@ -44,7 +45,7 @@ ENTRY_SETUP = "import rackpypolyphony, rackpydsp, rackpyexpanders  # add the exa
 
 
 def kernel_libraries(build: Path) -> list[Path]:
-    return [build / "examples" / p.name / "kernels" / f"{name}.so" for p in PROJECTS for name in kernels_of(p)]
+    return [build / "examples" / p.name / "kernels" / f"{name}{MODULE}" for p in PROJECTS for name in kernels_of(p)]
 
 
 def kernels_of(project: Path) -> list[str]:
@@ -194,7 +195,7 @@ def test_each_example_loads_as_its_own_plugin(
     plugin_tool("build", project, "--bundle", make_bundle(), "--dest", plugins, "--kernels", kernels)
     slug = manifest["slug"]
     built = json.loads((plugins / slug / "rackpy-loader.json").read_text())
-    assert built["kernels"] == [f"kernels/{name}.so" for name in kernels_of(project)]
+    assert built["kernels"] == [f"kernels/{name}{MODULE}" for name in kernels_of(project)]
     modules: list[dict[str, object]] = [
         {"plugin": slug, "model": e["slug"], "version": manifest["version"], "id": 2 + i, "pos": [12 * i, 0]}
         for i, e in enumerate(manifest["modules"])

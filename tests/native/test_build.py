@@ -13,7 +13,17 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import MACOS, PLATFORM, REPO, WINDOWS, bin_command, linux_x64_only, rack_platforms, require_tools
+from tests.support import (
+    MACOS,
+    OBJECT,
+    PLATFORM,
+    REPO,
+    WINDOWS,
+    bin_command,
+    linux_x64_only,
+    rack_platforms,
+    require_tools,
+)
 
 pytestmark = [pytest.mark.native, rack_platforms()]
 LOADER = "plugin.dylib" if MACOS else "plugin.dll" if WINDOWS else "plugin.so"
@@ -48,7 +58,7 @@ def test_build_has_no_warnings_and_passes_ctest(dev_build: Path) -> None:
 def test_module_lifecycle_adapters_reference_no_python(dev_build: Path) -> None:
     # RP-14C3: Rack may dispatch sample-rate and master events on an audio
     # driver thread, so the native adapters' object must not touch CPython.
-    objects = list(dev_build.glob("CMakeFiles/rackpy_host.dir/native/module/lifecycle.cpp.o"))
+    objects = list(dev_build.glob(f"CMakeFiles/rackpy_host.dir/native/module/lifecycle{OBJECT}"))
     assert len(objects) == 1, objects
     proc = subprocess.run(
         [*bin_command("rackpy-dev"), "audio-symbols", str(objects[0])], capture_output=True, text=True, check=False
@@ -63,7 +73,10 @@ def test_bundle_has_the_expected_dynamic_shape(make_bundle: Callable[[], Path]) 
     )
     assert proc.returncode == 0, proc.stdout + proc.stderr
     report = json.loads(proc.stdout[proc.stdout.index("{") :])
-    assert report[LOADER]["python_references"] == []
+    if WINDOWS:  # a PE report lists imported DLLs, not symbols: the loader imports no CPython DLL
+        assert not [d for d in report[LOADER]["needed"] if d.lower().startswith("python")], report[LOADER]
+    else:
+        assert report[LOADER]["python_references"] == []
     assert sorted(report[HOST]["exports"]) == [
         "rackpy_host_destroy",
         "rackpy_host_init",

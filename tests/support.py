@@ -35,6 +35,9 @@ def host_platform() -> str:
 PLATFORM = host_platform()
 MACOS = PLATFORM.startswith("mac-")
 WINDOWS = PLATFORM == "win-x64"
+# CMake's names on this platform: object files (MinGW's CMake writes .obj) and MODULE libraries (kernels).
+OBJECT = ".cpp.obj" if WINDOWS else ".cpp.o"
+MODULE = ".dll" if WINDOWS else ".so"
 # AddressSanitizer's options for the native sanitizer runs. Apple's ASan has no LeakSanitizer ("detect_leaks
 # is not supported on this platform", RP-40), so leaks are checked on Linux only; the code is the same.
 ASAN_OPTIONS = f"detect_leaks={0 if MACOS else 1}:abort_on_error=0"
@@ -113,6 +116,22 @@ def bin_command(name: str) -> list[str]:
     which runs no shebang scripts, that command spelled out (RP-41)."""
     path = str(BIN / name)
     return ["uv", "run", "--script", path] if sys.platform == "win32" else [path]
+
+
+def posix_shell() -> str:
+    """bash, for commands the docs give for a POSIX shell. On Windows that is Git for Windows' bash: plain
+    `bash` there is System32's WSL launcher, which runs a Linux distribution, not this machine's tools."""
+    if not WINDOWS:
+        return "bash"
+    git_bash = Path(os.environ.get("PROGRAMFILES", r"C:\Program Files")) / "Git" / "bin" / "bash.exe"
+    require("git-bash", git_bash.is_file(), f"install Git for Windows ({git_bash}); the docs' commands are bash")
+    return str(git_bash)
+
+
+def sanitizer_platforms() -> pytest.MarkDecorator:
+    """Platform gate for the dedicated AddressSanitizer and ThreadSanitizer programs: MinGW GCC, Rack's compiler
+    on Windows, has neither (RP-41), so CMake builds none there."""
+    return pytest.mark.skipif(WINDOWS, reason="MinGW GCC has no AddressSanitizer or ThreadSanitizer")
 
 
 def tool(*args: str) -> str:
@@ -208,8 +227,11 @@ def run_rack(
             time.sleep(0.1)
         time.sleep(settle)
         assert proc.stdin is not None
-        proc.stdin.write(b"\n")
-        proc.stdin.close()
+        try:
+            proc.stdin.write(b"\n")
+            proc.stdin.close()
+        except OSError:  # Rack already quit (Windows: EINVAL, elsewhere EPIPE); its log and status say why
+            pass
         returncode = proc.wait(timeout=max(1.0, deadline - time.monotonic()))
     except subprocess.TimeoutExpired:
         proc.kill()
@@ -505,10 +527,15 @@ def run_pytest_in_rack(
         "--rootdir",
         str(tests),
         "-c",
-        "/dev/null",
+        os.devnull,
         "--confcutdir",
         str(tests),
     ]
+    # On Windows, pytest's default fd-level capture dup2s descriptors 0-2 in the embedded CPython's UCRT, and
+    # replacing UCRT descriptor 0 closes the console handle Rack's msvcrt stdin also uses: headless Rack then
+    # reads end-of-file and quits (RP-41). sys-level capture leaves the descriptors alone.
+    if WINDOWS:
+        argv.append("--capture=sys")
     argv += args or []
     header = f"DEPS = {str(deps)!r}\nRESULT = {str(result_path)!r}\nARGS = {argv!r}\n"
     if during_ui:

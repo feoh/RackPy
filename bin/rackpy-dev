@@ -389,9 +389,12 @@ def pe_facts(path: Path) -> dict[str, Any]:
         raise SystemExit(f"{path} has no PE signature")
     machine, sections, _, _, _, optional_size, _ = struct.unpack_from("<HHIIIHH", data, pe + 4)
     optional = pe + 24
-    if struct.unpack_from("<H", data, optional)[0] != 0x20B:
-        raise SystemExit(f"{path} is not PE32+ (64-bit)")
-    directories = optional + 112  # PE32+: the data directories follow 112 bytes of fixed fields
+    magic = struct.unpack_from("<H", data, optional)[0]
+    if magic not in (0x10B, 0x20B):
+        raise SystemExit(f"{path} has an unknown PE optional header ({magic:#x})")
+    # The data directories follow 112 bytes of fixed fields in PE32+ (64-bit), 96 in PE32: a 32-bit file is
+    # read too, so that the machine check can name it.
+    directories = optional + (112 if magic == 0x20B else 96)
     table = optional + optional_size
     spans = [struct.unpack_from("<IIII", data, table + 40 * i + 8) for i in range(sections)]  # vsize, va, rawsize, raw
 
@@ -523,9 +526,16 @@ def inspect(plugin: Path, *, max_glibc: str | None = None) -> None:
 
 @app.command(name="audio-symbols")
 def audio_symbols(objects: list[Path]) -> None:
-    """Fail if any object or library references a CPython symbol (ADR 004 audio-path rule)."""
+    """Fail if any object or library references a CPython symbol (ADR 004 audio-path rule).
+
+    A Windows DLL fails if it imports a CPython DLL; object files are read with nm everywhere."""
     offenders: dict[str, list[str]] = {}
     for obj in objects:
+        if obj.read_bytes()[:2] == b"MZ":  # a Windows DLL: what it uses from CPython is what it imports from it
+            pythons = [d for d in pe_facts(obj)["needed"] if d.lower().startswith("python")]
+            if pythons:
+                offenders[str(obj)] = pythons
+            continue
         if sys.platform == "darwin":  # Apple's nm; Mach-O prefixes C names with one more underscore
             listing = capture(["nm", "-u", "-j", obj])
             names = [s.removeprefix("_") for s in listing.split()]

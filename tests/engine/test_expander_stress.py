@@ -13,11 +13,12 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import ASAN_OPTIONS, rack_platforms
+from tests.support import ASAN_OPTIONS, rack_platforms, sanitizer_platforms
 
 pytestmark = [rack_platforms(), pytest.mark.native]
 
 
+@sanitizer_platforms()
 @pytest.mark.parametrize(("variant", "workers", "blocks"), [("asan", 1, 1500), ("asan", 4, 3000), ("tsan", 4, 1500)])
 def test_hot_changes_and_snapshots_under_sanitizers(dev_build: Path, variant: str, workers: int, blocks: int) -> None:
     env = {

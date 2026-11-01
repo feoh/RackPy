@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import rack_platforms, run_pytest_in_rack
+from tests.support import MODULE, rack_platforms, run_pytest_in_rack
 
 pytestmark = [pytest.mark.host, pytest.mark.gui, rack_platforms()]
 SUITE = Path(__file__).resolve().parent / "in_rack_io_paths"
@@ -19,10 +19,10 @@ def test_io_paths_in_live_rack(
 ) -> None:
     bundle = make_hooks_bundle()
     (bundle / "kernels").mkdir()
-    shutil.copy(hooks_build / "kernels_graphs.so", bundle / "kernels")
+    shutil.copy(hooks_build / f"kernels_graphs{MODULE}", bundle / "kernels")
     config_path = bundle / "rackpy-loader.json"
     config = json.loads(config_path.read_text())
-    config["kernels"] = ["kernels/kernels_graphs.so"]
+    config["kernels"] = [f"kernels/kernels_graphs{MODULE}"]
     config_path.write_text(json.dumps(config))
     setup = """
 from rackpy.plugin import plugin

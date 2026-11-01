@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import bin_command, linux_x64_only, rack_platforms, run_pytest_in_rack
+from tests.support import MODULE, OBJECT, bin_command, linux_x64_only, rack_platforms, run_pytest_in_rack
 
 pytestmark = [rack_platforms()]  # the LD_PRELOAD audio-path guard runs are Linux-only
 SUITE = Path(__file__).resolve().parent / "in_rack"
@@ -77,8 +77,8 @@ def test_the_guard_run_needs_the_preload(dev_build: Path) -> None:
 
 @pytest.mark.native
 def test_kernel_objects_reference_no_python(dev_build: Path) -> None:
-    objects = sorted(dev_build.glob("CMakeFiles/rackpy_host.dir/native/dsp/runtime/*.cpp.o"))
-    objects += list(dev_build.glob("CMakeFiles/rackpy_host.dir/native/module/lifecycle.cpp.o"))
+    objects = sorted(dev_build.glob(f"CMakeFiles/rackpy_host.dir/native/dsp/runtime/*{OBJECT}"))
+    objects += list(dev_build.glob(f"CMakeFiles/rackpy_host.dir/native/module/lifecycle{OBJECT}"))
     assert len(objects) == 4, objects  # runtime, builtin, libraries, lifecycle
     proc = subprocess.run(
         [*bin_command("rackpy-dev"), "audio-symbols", *map(str, objects)], capture_output=True, text=True, check=False
@@ -104,14 +104,14 @@ def test_kernel_libraries_load_and_bad_ones_are_skipped(
     bundle = make_hooks_bundle()
     (bundle / "kernels").mkdir()
     for name in LIBRARIES:
-        shutil.copy(hooks_build / f"kernels_{name}.so", bundle / "kernels")
-    (tmp_path / "outside.so").write_bytes((hooks_build / "kernels_example.so").read_bytes())
+        shutil.copy(hooks_build / f"kernels_{name}{MODULE}", bundle / "kernels")
+    (tmp_path / "outside.so").write_bytes((hooks_build / f"kernels_example{MODULE}").read_bytes())
     (bundle / "kernels" / "escape.so").symlink_to(tmp_path / "outside.so")
     config = json.loads((bundle / "rackpy-loader.json").read_text())
     config["kernels"] = [
-        *(f"kernels/kernels_{name}.so" for name in LIBRARIES),
+        *(f"kernels/kernels_{name}{MODULE}" for name in LIBRARIES),
         "kernels/missing.so",
-        "../RackPy/kernels/kernels_example.so",
+        f"../RackPy/kernels/kernels_example{MODULE}",
         "kernels/escape.so",
         3,
     ]
@@ -121,25 +121,25 @@ def test_kernel_libraries_load_and_bad_ones_are_skipped(
     assert result.exit == 0, result.summary()
     assert result.outcomes() and set(result.outcomes().values()) == {"passed"}, result.summary()
     log = result.run
-    assert log.lines("kernel type example.Fold from kernels/kernels_example.so")
-    assert log.lines("graph node type example.Hold from kernels/kernels_example.so")
-    assert log.lines("kernel type graphs.Tutorial from kernels/kernels_graphs.so")
-    assert log.lines("kernel type levels.Send from kernels/kernels_levels.so")
-    assert log.lines("kernel type iotest.Probe from kernels/kernels_io.so")
+    assert log.lines(f"kernel type example.Fold from kernels/kernels_example{MODULE}")
+    assert log.lines(f"graph node type example.Hold from kernels/kernels_example{MODULE}")
+    assert log.lines(f"kernel type graphs.Tutorial from kernels/kernels_graphs{MODULE}")
+    assert log.lines(f"kernel type levels.Send from kernels/kernels_levels{MODULE}")
+    assert log.lines(f"kernel type iotest.Probe from kernels/kernels_io{MODULE}")
     expected = {
-        "kernels_wrong_abi.so": "built for kernel ABI 999",
-        "kernels_throws.so": "registration raised: kernel-library-intentional-error",
-        "kernels_duplicate.so": "kernel type example.Fold is already registered",
-        "kernels_reserved.so": "namespace rackpy is reserved",
-        "kernels_bad_name.so": 'kernel type name "not.good" is not an identifier',
-        "kernels_graph_wrong_abi.so": "built for graph ABI 999",
-        "kernels_graph_bad_node.so": "graph node type graphbad.Wide reads 9 signals; at most 8",
-        "kernels_expander_wrong_abi.so": "built for expander ABI 999",
-        "kernels_expander_partial.so": "defines only part of RACKPY_EXPANDERS",
-        "kernels_io_wrong_abi.so": "built for I/O ABI 999",
-        "kernels_io_partial.so": "defines only part of RACKPY_IO",
+        f"kernels_wrong_abi{MODULE}": "built for kernel ABI 999",
+        f"kernels_throws{MODULE}": "registration raised: kernel-library-intentional-error",
+        f"kernels_duplicate{MODULE}": "kernel type example.Fold is already registered",
+        f"kernels_reserved{MODULE}": "namespace rackpy is reserved",
+        f"kernels_bad_name{MODULE}": 'kernel type name "not.good" is not an identifier',
+        f"kernels_graph_wrong_abi{MODULE}": "built for graph ABI 999",
+        f"kernels_graph_bad_node{MODULE}": "graph node type graphbad.Wide reads 9 signals; at most 8",
+        f"kernels_expander_wrong_abi{MODULE}": "built for expander ABI 999",
+        f"kernels_expander_partial{MODULE}": "defines only part of RACKPY_EXPANDERS",
+        f"kernels_io_wrong_abi{MODULE}": "built for I/O ABI 999",
+        f"kernels_io_partial{MODULE}": "defines only part of RACKPY_IO",
         "missing.so": "no such file",
-        "../RackPy/kernels/kernels_example.so": 'without ".."',
+        f"../RackPy/kernels/kernels_example{MODULE}": 'without ".."',
         "escape.so": "resolves outside the plugin folder",
     }
     for library, reason in expected.items():

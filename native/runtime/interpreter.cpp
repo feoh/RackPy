@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <limits>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "rackpy/runtime/diagnostics.hpp"
@@ -73,6 +74,26 @@ bool initializeInterpreter(RackPyHostInit* args) {
 		if (PyStatus_Exception(status))
 			failure = "PyConfig program_name";
 	}
+#if defined(_WIN32)
+	// CPython's Windows path calculation adds the running executable's folder to sys.path: here Rack.exe's,
+	// so a .py file in Rack's folder could shadow the standard library or rackpy (RP-41). Set the search path
+	// instead to what that calculation gives for the runtime itself: its python3XY.zip, DLLs and Lib. The
+	// buffers are Python's own (Py_DecodeLocale, UTF-8 here), freed by Python: no C runtime memory crosses.
+	if (!failure) {
+		config.module_search_paths_set = 1;
+		const std::string home(args->python_home);
+		const std::string zip = "python" + std::to_string(PY_MAJOR_VERSION) + std::to_string(PY_MINOR_VERSION) + ".zip";
+		for (const std::string& entry : {home + "/" + zip, home + "/DLLs", home + "/Lib"}) {
+			wchar_t* wide = Py_DecodeLocale(entry.c_str(), nullptr);
+			status = wide ? PyWideStringList_Append(&config.module_search_paths, wide) : PyStatus_NoMemory();
+			PyMem_RawFree(wide);
+			if (PyStatus_Exception(status)) {
+				failure = "PyConfig module_search_paths";
+				break;
+			}
+		}
+	}
+#endif
 	if (!failure) {
 		status = Py_InitializeFromConfig(&config);
 		if (PyStatus_Exception(status))

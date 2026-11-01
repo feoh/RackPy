@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import ASAN_OPTIONS, bin_command, linux_x64_only, nested_name, rack_platforms, symbol_names
+from tests.support import ASAN_OPTIONS, OBJECT, bin_command, linux_x64_only, nested_name, rack_platforms, symbol_names
 
 pytestmark = [rack_platforms(), pytest.mark.native]  # the guard and sanitizer runs are Linux-only
 
@@ -64,15 +64,15 @@ def test_the_paths_under_sanitizers(dev_build: Path, variant: str, blocks: int) 
 
 
 def test_bridge_calls_racks_public_master_clock(dev_build: Path) -> None:
-    obj = dev_build / "CMakeFiles/rackpy_host.dir/native/io/audio_bridge.cpp.o"
+    obj = dev_build / f"CMakeFiles/rackpy_host.dir/native/io/audio_bridge{OBJECT}"
     needed = symbol_names(obj, undefined=True)
     for method in ("stepBlock", "setMasterModule", "setMasterModule_NoLock", "setSuggestedSampleRate"):
         assert nested_name(f"rack::engine::Engine::{method}").search(needed), method
 
 
 def test_io_objects_reference_no_python(dev_build: Path) -> None:
-    objects = sorted(dev_build.glob("CMakeFiles/rackpy_host.dir/native/io/*.cpp.o"))
-    assert [o.name for o in objects] == ["audio_bridge.cpp.o", "endpoints.cpp.o", "midi_queue.cpp.o"]
+    objects = sorted(dev_build.glob(f"CMakeFiles/rackpy_host.dir/native/io/*{OBJECT}"))
+    assert [o.name for o in objects] == [f"{n}{OBJECT}" for n in ("audio_bridge", "endpoints", "midi_queue")]
     proc = subprocess.run(
         [*bin_command("rackpy-dev"), "audio-symbols", *map(str, objects)], capture_output=True, text=True, check=False
     )

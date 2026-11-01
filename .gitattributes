@@ -1,0 +1,6 @@
+# Every text file is checked out with LF line endings, on Windows too (Git for Windows converts to CRLF by
+# default): checksums of repository files (upstream/api-surface.json, the release candidates' file lists and
+# the Python files they ship) must be the same on every platform (RP-41).
+* text=auto eol=lf
+# Binary files, whatever git guesses.
+*.png binary

@@ -26,6 +26,7 @@ from tests.support import (
     PLUGINS,
     REPO,
     assert_clean_exit,
+    posix_shell,
     rack_platforms,
     run_rack,
     run_rack_windowed,
@@ -42,15 +43,16 @@ def blocks(page: str) -> list[str]:
 
 
 def run_block(block: str, cwd: Path, user: Path, bundle: Path) -> None:
+    # Forward slashes: bash on Windows (Git Bash) reads backslashes as escapes, and takes D:/... paths.
     script = (
-        block.replace("bin/", f"{REPO}/bin/")
-        .replace("examples/", f"{REPO}/examples/")
-        .replace("~/.local/share/Rack2", str(user))
-        .replace("plugins-lin-x64", PLUGINS)  # the pages give Linux's folder; this machine's, on a Mac
-        .replace("/tmp/rackpy-bundle/RackPy", str(bundle))
+        block.replace("bin/", f"{REPO.as_posix()}/bin/")
+        .replace("examples/", f"{REPO.as_posix()}/examples/")
+        .replace("~/.local/share/Rack2", user.as_posix())
+        .replace("plugins-lin-x64", PLUGINS)  # the pages give Linux's folder; this machine's, elsewhere
+        .replace("/tmp/rackpy-bundle/RackPy", bundle.as_posix())
     )
     proc = subprocess.run(
-        ["bash", "-euo", "pipefail", "-c", script], cwd=cwd, capture_output=True, text=True, check=False
+        [posix_shell(), "-euo", "pipefail", "-c", script], cwd=cwd, capture_output=True, text=True, check=False
     )
     assert proc.returncode == 0, f"{script}\n{proc.stdout}\n{proc.stderr}"
 
