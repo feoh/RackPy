@@ -129,6 +129,8 @@ def describe(obj: object) -> dict[str, Any]:
 
 def snapshot() -> dict[str, Any]:
     """Every public name reachable from rackpy's modules, two levels deep (module.Class.member)."""
+    from rackpy import raw
+
     objects: dict[str, dict[str, Any]] = {}
     queue: list[tuple[str, object, int]] = [(name, importlib.import_module(name), 0) for name in MODULES]
     while queue:
@@ -162,6 +164,7 @@ def snapshot() -> dict[str, Any]:
         "schema_version": 1,
         "rackpy_version": rackpy.__version__,
         "rack_version": _rackpy_host.rack_version(),
+        "platform": f"{raw.APP_OS}-{raw.APP_CPU}",  # Rack's name for the platform: lin-x64, mac-arm64...
         "binding": _rackpy_host.BINDING,
         "objects": dict(sorted(objects.items())),
     }

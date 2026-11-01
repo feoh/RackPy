@@ -20,7 +20,8 @@ def check_key_names() -> None:
     assert w.get_key_name(10) == ""  # control codes have no name
     assert w.get_key_command_name(65, 0) == "A"
     shift = w.get_key_command_name(65, GLFW_MOD_SHIFT)
-    both = w.get_key_command_name(65, GLFW_MOD_SHIFT | GLFW_MOD_CONTROL)
+    # Rack's Ctrl is RACK_MOD_CTRL: GLFW_MOD_CONTROL, but Command (GLFW_MOD_SUPER, named ⌘) on macOS.
+    both = w.get_key_command_name(65, GLFW_MOD_SHIFT | macros.RACK_MOD_CTRL)
     assert shift.endswith("+A") and len(shift) > 2
     assert both.endswith(shift) and both.count("+") == 2  # Ctrl comes before Shift
 

@@ -4,6 +4,7 @@
 // rack::Exception. The semantic mappings that are plain Python (Exception,
 // construct, get, DeferWrapper and the other macros) are in
 // src/rackpy/raw/_common.py and src/rackpy/raw/macros.py.
+#include "rackpy/rtti.hpp"
 #include <cstring>
 #include <string>
 
@@ -165,14 +166,20 @@ void bindCommon(py::module_ raw) {
 #endif
 
 	// rack::Exception thrown by Rack becomes rackpy.raw.Exception (defined in Python, src/rackpy/raw/_common.py).
+	// Caught as std::exception and identified by rttiCast: rack::Exception has no key function, so libRack
+	// and the host each have a type_info for it, and on macOS a catch clause naming the host's copy does not
+	// match what libRack throws (RP-40). std::exception's type_info is the C++ library's own, one copy.
 	py::register_exception_translator([](std::exception_ptr p) {
 		try {
 			if (p)
 				std::rethrow_exception(p);
 		}
-		catch (const rack::Exception& e) {
+		catch (const std::exception& e) {
+			const auto* rackException = ::rackpy::rttiCast<const rack::Exception*>(&e);
+			if (!rackException)
+				throw;
 			py::object type = py::module_::import("rackpy.raw").attr("Exception");
-			PyErr_SetObject(type.ptr(), py::str(e.msg).ptr());
+			PyErr_SetObject(type.ptr(), py::str(rackException->msg).ptr());
 		}
 	});
 }

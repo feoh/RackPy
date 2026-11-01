@@ -12,6 +12,7 @@ import array
 import copy
 import math
 import struct
+import sys
 from collections import Counter
 from collections.abc import Callable
 from typing import Any
@@ -303,10 +304,14 @@ CALLS: dict[str, Callable[..., Any]] = {
 }
 
 
-def test_reference_is_racks_x64_implementation(reference: dict[str, Any]) -> None:
+def test_reference_is_racks_implementation_for_this_cpu(reference: dict[str, Any]) -> None:
+    import platform
+
     import rackpy.raw
 
-    assert reference["implementation"] == "sse4.2" == rackpy.simd.IMPLEMENTATION
+    # simd/common.hpp: SSE4.2 where the compiler targets it (x86_64), SIMDe on arm64.
+    expected = "simde" if platform.machine().lower() in {"arm64", "aarch64"} else "sse4.2"
+    assert reference["implementation"] == expected == rackpy.simd.IMPLEMENTATION
     assert len(reference["cases"]) > 20000
     assert rackpy.raw.APP_VERSION == "2.6.6"
 
@@ -519,11 +524,17 @@ def test_functions_dispatch_scalars_and_vectors() -> None:
         return s.sin(x) + s.cos(x)
 
     assert isinstance(sin_plus_cos(1.0), float) and isinstance(sin_plus_cos(float_4(1.0)), float_4)
-    # Rack's documented differences from std::: round ties to even, fmod is floored, sin(inf) is -inf.
+    # Rack's documented differences from std::: round ties to even, fmod is floored.
     assert s.round(float_4(0.5, 1.5, 2.5, -0.5)).tolist() == [0.0, 2.0, 2.0, -0.0]
     assert s.round(2.5) == 3.0  # std::round, for a scalar, rounds ties away from zero
     assert s.fmod(float_4(-1.0), 3.0).tolist() == [2.0] * 4 and s.fmod(-1.0, 3.0) == -1.0
-    assert s.sin(float_4(math.inf, -math.inf, 0.0, 0.0)).tolist()[:2] == [-math.inf, math.inf]
+    # sin(±inf) depends on the compiler that built the plugin (sse_mathfun is header code): ∓inf with GCC on
+    # Linux, NaN with Clang on macOS, as Rack's own plugins get there (RP-40).
+    infinite = s.sin(float_4(math.inf, -math.inf, 0.0, 0.0)).tolist()[:2]
+    if sys.platform == "darwin":
+        assert all(map(math.isnan, infinite))
+    else:
+        assert infinite == [-math.inf, math.inf]
     # sse_mathfun's edge cases: log(0) is NaN, exp saturates (even for inf and NaN), so pow(a <= 0, b) is huge.
     assert all(map(math.isnan, s.log(float_4(0.0, -0.0, -1.0, -math.inf))))
     ceiling = s.exp(float_4(math.inf))[0]

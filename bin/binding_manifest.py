@@ -93,6 +93,16 @@ ENTRY_FIELDS = (
     "reviewer",
 )
 PYTHON_FIELDS = frozenset({"raw", "facade", "kind", "gil_release"})
+# arch.hpp defines each of these macros only on some platforms, so a package built for another one cannot
+# export it. The export check of an introspection artifact that names its platform skips them there; every
+# other record must be exported everywhere (RP-40).
+PLATFORM_MACROS = {
+    "macro:ARCH_LIN": frozenset({"lin-x64"}),
+    "macro:ARCH_MAC": frozenset({"mac-x64", "mac-arm64"}),
+    "macro:ARCH_WIN": frozenset({"win-x64"}),
+    "macro:ARCH_X64": frozenset({"lin-x64", "mac-x64", "win-x64"}),
+    "macro:ARCH_ARM64": frozenset({"mac-arm64"}),
+}
 DOTTED = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*$")
 FAMILY_SLUGS = {
     "0 entry point": "entry_point",
@@ -618,7 +628,12 @@ def validate(inputs: Inputs, manifest: dict[str, Any], introspection: dict[str, 
                         "records claim bound Python names but no introspection of the built package was given",
                     )
                     missing_artifact_reported = True
-            elif python:
+            elif python and not (
+                # arch.hpp does not define it on the platform the artifact was built for
+                ident in PLATFORM_MACROS
+                and introspection.get("platform")
+                and introspection["platform"] not in PLATFORM_MACROS[ident]
+            ):
                 for key in ("raw", "facade"):
                     value = python.get(key)
                     if value and value not in names:

@@ -179,7 +179,10 @@ scalar mixed with a vector broadcasts.
     approximations, and `log10`/`log2` divide its `log`. Their edge cases are
     not the standard ones: `log(x)` is NaN for `x <= 0`, zero included (not
     `-inf`); `exp` saturates at about `2.406e38`, which it returns for `inf`
-    and NaN too; and `sin(±inf)` is `∓inf`, not NaN.
+    and NaN too; and `sin(±inf)` depends on the compiler that built the
+    plugin, because `sse_mathfun` is header code: `∓inf` with GCC on Linux,
+    NaN with Clang on macOS (both CPUs), as for Rack's own plugins there.
+    Do not rely on either.
   - `round` rounds ties to even (`_mm_round_ps`); the scalar `std::round`
     rounds them away from zero.
   - `fmod(a, b)` is `a - floor(a / b) * b`, a floored modulus with the sign

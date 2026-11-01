@@ -46,6 +46,7 @@ def run_block(block: str, cwd: Path, user: Path, bundle: Path) -> None:
         block.replace("bin/", f"{REPO}/bin/")
         .replace("examples/", f"{REPO}/examples/")
         .replace("~/.local/share/Rack2", str(user))
+        .replace("plugins-lin-x64", PLUGINS)  # the pages give Linux's folder; this machine's, on a Mac
         .replace("/tmp/rackpy-bundle/RackPy", str(bundle))
     )
     proc = subprocess.run(

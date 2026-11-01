@@ -2,7 +2,9 @@
 """common.hpp and arch.hpp inside Rack: configuration strings, bitCast, literals, Exception,
 construct, get, DeferWrapper and the macros."""
 
+import platform
 import struct
+import sys
 import warnings
 
 import pytest
@@ -16,12 +18,17 @@ try:
 except ImportError:
     _testing = None  # type: ignore[assignment]
 
+# Rack's names for the platform this Rack runs on: APP_OS and APP_CPU, and the arch.hpp macros defined there.
+OS = {"linux": "lin", "darwin": "mac", "win32": "win"}[sys.platform]
+CPU = "arm64" if platform.machine().lower() in {"arm64", "aarch64"} else "x64"
+ARCH = {f"ARCH_{OS.upper()}", f"ARCH_{CPU.upper()}"}
+
 hooks = pytest.mark.skipif(_testing is None, reason="needs the test-hooks build (the production run covers the rest)")
 
 
 def test_app_configuration_strings_are_the_running_racks() -> None:
     assert raw.APP_VERSION == "2.6.6" and raw.APP_VERSION_MAJOR == "2"
-    assert raw.APP_NAME == "VCV Rack" and raw.APP_OS == "lin" and raw.APP_CPU == "x64"
+    assert raw.APP_NAME == "VCV Rack" and raw.APP_OS == OS and raw.APP_CPU == CPU
     for name in ("APP_EDITION", "APP_EDITION_NAME", "APP_OS_NAME", "APP_CPU_NAME", "API_URL"):
         assert isinstance(getattr(raw, name), str) and getattr(raw, name)
 
@@ -105,9 +112,11 @@ def test_defer_runs_at_the_end_of_the_block_even_on_error() -> None:
 
 
 def test_arch_macros_are_the_built_platform() -> None:
-    assert macros.ARCH_LIN == 1 and macros.ARCH_X64 == 1  # type: ignore[attr-defined]
-    for absent in ("ARCH_WIN", "ARCH_MAC", "ARCH_ARM64"):
-        assert not hasattr(macros, absent)
+    for name in ("ARCH_LIN", "ARCH_MAC", "ARCH_WIN", "ARCH_X64", "ARCH_ARM64"):
+        if name in ARCH:
+            assert getattr(macros, name) == 1, name
+        else:
+            assert not hasattr(macros, name), name
 
 
 def test_value_macros() -> None:

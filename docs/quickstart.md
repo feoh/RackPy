@@ -14,10 +14,13 @@ It takes about 30 minutes, most of it the first build.
 
 ## What you need
 
-- **Linux x86_64**, with a desktop to run Rack in.
+- **Linux x86_64**, with a desktop to run Rack in, or **a Mac** (Apple silicon
+  or Intel).
 - **VCV Rack Free {{rack_version}}**, from <https://vcvrack.com/Rack>. Start it
-  once, so that it creates its user folder (usually `~/.local/share/Rack2`).
-- **[uv](https://docs.astral.sh/uv/)**, **CMake**, **Ninja**, **GCC** and **git**.
+  once, so that it creates its user folder (usually `~/.local/share/Rack2`; on a
+  Mac, `~/Library/Application Support/Rack2`).
+- **[uv](https://docs.astral.sh/uv/)**, **CMake**, **Ninja**, **GCC** and **git**
+  (on a Mac, Xcode's command line tools instead of GCC: `xcode-select --install`).
   RackPy downloads everything else it builds with, pinned: the Rack SDK, its
   own Python ({{python_version}}) and its Python packages.
 - An editor for SVG files, such as [Inkscape](https://inkscape.org/), to draw a
@@ -78,6 +81,9 @@ Quit Rack first: it reads plugins only when it starts. Then:
 ```bash
 bin/rackpy-plugin build MyPlugin --bundle /tmp/rackpy-bundle/RackPy --dest ~/.local/share/Rack2/plugins-lin-x64
 ```
+
+On a Mac, give `--dest ~/Library/Application\ Support/Rack2/plugins-mac-arm64`
+(`plugins-mac-x64` on an Intel Mac) instead, here and in the rest of these pages.
 
 Start Rack. Its log, `~/.local/share/Rack2/log.txt`, now says
 `Loaded plugin MyPlugin 2.0.0`, and the module browser lists *My Module*. Add
