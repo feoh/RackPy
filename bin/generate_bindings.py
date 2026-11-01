@@ -249,7 +249,9 @@ def crosswalk(manifest: dict[str, Any], inputs: bm.Inputs, repo: Path) -> dict[P
             f"**{GENERATED_NOTE}** Back to the [crosswalk](../crosswalk.md).",
             "",
             "Each public declaration of this family in Rack's SDK, the Python name or names it has in RackPy, and "
-            "where it is documented. *Bound* means implemented and tested on Linux x86_64, not `verified`.",
+            "where it is documented. *Bound* means implemented, tested and documented, not yet `verified` "
+            "([release bar](../../coverage.md#release-bar)); *no runtime meaning* means there is nothing to call at "
+            "run time (a build macro, or a declaration Rack never defines), as the linked page explains.",
             "",
             "| C++ declaration | Kind | Status | Python | Documented in |",
             "| --- | --- | --- | --- | --- |",
@@ -260,6 +262,8 @@ def crosswalk(manifest: dict[str, Any], inputs: bm.Inputs, repo: Path) -> dict[P
             names = " / ".join(f"`{n}`" for n in (python.get("raw"), python.get("facade")) if n) or "—"
             docs = ", ".join(doc_link(ref) for ref in r.get("docs") or []) or "—"
             status = CROSSWALK_STATUS.get(r["status"], r["status"])
+            if python.get("kind") == "no_runtime_meaning" and r["status"] == "implemented":
+                status = "no runtime meaning"
             lines.append("| " + " | ".join(cell(c) for c in (f"`{name}`", kind, status, names, docs)) + " |")
         pages[folder / f"{slug}.md"] = "\n".join(lines) + "\n"
     index_lines = [

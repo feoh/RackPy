@@ -28,8 +28,19 @@ def test_printf_through_racks_formatting() -> None:
         rs.f("%d", 2**40)  # an int is 32 bits
     with pytest.raises(ValueError, match="not supported"):
         rs.f("%n", 1)
-    with pytest.raises(ValueError, match=r"\* widths"):
-        rs.f("%*d", 3, 1)
+    # A * width or precision takes an int argument first, as printf does (RP-42); Rack's printf applies C's rules:
+    # a negative width is the - flag, a negative precision as if none were given.
+    assert rs.f("%*d|%-*d|%.*f|%*.*f|%.*s", 4, 7, 3, 7, 2, 3.14159, 8, 3, 2.5, 2, "abc") == "   7|7  |3.14|   2.500|ab"
+    assert rs.f("%*d|%.*f", -4, 7, -1, 1.5) == "7   |1.500000"
+    assert rs.fv("%0*x", [6, 255]) == "0000ff"
+    with pytest.raises(TypeError, match="more arguments"):
+        rs.f("%*d", 3)
+    with pytest.raises(TypeError, match="needs an int"):
+        rs.f("%*d", "3", 1)
+    with pytest.raises(ValueError, match="cannot represent"):
+        rs.f("%.*f", 2**40, 1.0)
+    with pytest.raises(ValueError, match="as a width"):
+        rs.f("%*d", -(2**31), 1)  # C has no positive width for INT_MIN
     with pytest.raises(ValueError, match="NUL"):
         rs.f("%s", "a\0b")
 

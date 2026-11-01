@@ -13,6 +13,9 @@ check    fail on any inconsistency: missing or orphaned records, stale
          bound records whose Python names, implementation, tests or docs do
          not exist. Partial coverage passes; false claims do not.
 report   print coverage by family and platform (Markdown or JSON).
+evidence every bound record available on a platform cites a test that
+         passed there (test outcomes from RACKPY_TEST_EVIDENCE).
+samples  every official sample's disposition tests passed on a platform.
 release  the full-coverage release bar for one platform: zero records that
          are not verified or excluded_internal, none naming an open owner
          review item, a real inventory for the platform, and introspection
@@ -123,6 +126,37 @@ def evidence(
         print(f"{platform}: {summary}")
         fail(problems, limit)
     print(f"ok: {platform}: {summary}; {len(outcomes)} tests ran")
+
+
+@app.command
+def samples(
+    platform: str, results: list[Path], *, examples: Path = bm.EXAMPLES, output: Path | None = None, limit: int = 20
+) -> None:
+    """Fail unless every official sample's disposition tests passed on PLATFORM (sample parity, RP-42).
+
+    RESULTS are RACKPY_TEST_EVIDENCE directories or files from test runs on that platform; a skipped or unrun test
+    is not a pass. --output writes the per-sample result as JSON (release-evidence/samples/).
+    """
+    data: dict[str, Any] = bm.load_json(examples)
+    outcomes = bm.load_evidence(results, platform)
+    problems, per_sample = bm.sample_problems(data["samples"], platform, outcomes)
+    counts = Counter(r["status"] for r in per_sample.values())
+    if output:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        doc = {
+            "platform": platform,
+            "examples_retrieved_at": data["retrieved_at"],
+            "tests_run": len(outcomes),
+            "counts": dict(sorted(counts.items())),
+            "samples": per_sample,
+            "problems": [{"code": p.code, "id": p.id, "message": p.message} for p in problems],
+        }
+        output.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    summary = ", ".join(f"{k} {v}" for k, v in sorted(counts.items()))
+    if problems:
+        print(f"{platform}: {summary}")
+        fail(problems, limit)
+    print(f"ok: {platform}: {summary}")
 
 
 @app.command

@@ -72,7 +72,7 @@ missing or different SDK is a configure error, not a warning.
 | `bin/rackpy-dev lint`, `bin/rackpy-dev typecheck` | Ruff, and strict mypy including each `bin/` script |
 | `bin/rack-sdk verify\|closure\|probe` | SDK pins ([compatibility](docs/compatibility.md#reproduce)) |
 | `bin/rack-toolchain build\|check\|path` | The official Linux toolchain for distributable builds (about an hour, once) |
-| `bin/rackpy-release build\|verify\|compare` | Release candidates for this computer's platform (Linux, or the Mac's own architecture) from a clean commit; install and run them on a clean container (Linux) or in fresh Rack user folders (a Mac); explain the differences between two builds ([Linux](docs/installation/linux.md), [macOS](docs/installation/macos.md)) |
+| `bin/rackpy-release build\|verify\|introspect\|compare` | Release candidates for this computer's platform (Linux, the Mac's own architecture, or Windows x64) from a clean commit; install and run them on a clean container (Linux) or in fresh Rack user folders (a Mac, Windows); write what a candidate's RackPy exports inside Rack, for `bin/check_coverage.py check --introspection`; explain the differences between two builds ([Linux](docs/installation/linux.md), [macOS](docs/installation/macos.md), [Windows](docs/installation/windows.md)) |
 | `bin/rackpy-plugin pack DIR` | A plugin directory as a reproducible `.vcvplugin` package |
 | `bin/planning-check` | `planning/` files agree with each other and form a DAG |
 | `uv run sphinx-build -W --keep-going -n -b html docs build/docs/html` | The documentation site; conventions in [docs/contributing-docs.md](docs/contributing-docs.md) |
@@ -141,12 +141,17 @@ and on pull requests, on `ubuntu-24.04`:
 | Documentation external links (weekly and on demand) | `sphinx-build -b linkcheck` |
 | Rack host smoke tests | `pytest -m "host and not dist"`: the skeleton, the docs snippets that run in Rack, the RP-04 spike and the RP-06 probe in Rack Free 2.6.6 |
 | Distributable build (pushes to `main` and on demand) | builds or restores the official toolchain, then `pytest -m dist` |
-| macOS arm64 and x86_64 (pushes to `main` and on demand) | `macos-15` and `macos-15-intel`: the native build, CTest and `pytest -m "(native or host) and not dist ..."`; windowed tests skip there with `RACKPY_ALLOW_MISSING=macos-opengl`, as the runners give Rack no OpenGL window. `macos_tests` (a dispatch input) narrows the selection |
-| macOS release candidates (pushes to `main` and on demand) | `bin/rackpy-release build` and `verify` on each architecture: Mach-O, signature and deployment-target checks, then every example installed into fresh Rack user folders with an empty environment; keeps the manifest, checksums and logs |
-| Linux release candidate (pushes to `main` and on demand) | `bin/rackpy-release build`, then `bin/rackpy-release verify` installs it on clean Ubuntu 20.04 and 16.04 containers with no Python and no network; keeps the manifest, checksums, logs and screenshots |
+| SDK inventory on mac-arm64, mac-x64 and win-x64 (pushes to `main` and on demand) | `bin/inventory_sdk.py platform-check`: each platform's SDK extracted natively and compared with the committed inventory |
+| macOS arm64 and x86_64 (pushes to `main` and on demand) | `macos-15` and `macos-15-intel`: the native build, CTest and `pytest -m "(unit or native or host) and not dist ..."`. The runners have no GPU, so a test-only plugin (`tests/fixtures/macos-software-gl`) gives Rack's window Apple's software OpenGL. `macos_tests` (a dispatch input) narrows the selection |
+| Windows x64 (pushes to `main` and on demand) | `windows-2025` with MSYS2's MINGW64 toolchain: the native build, CTest and `pytest -m "(unit or native or host) and not dist ..."`. Rack's window renders with the pinned Mesa llvmpipe (`bin/rack-sdk mesa`). `windows_tests` (a dispatch input) narrows the selection |
+| macOS release candidates (pushes to `main` and on demand) | `bin/rackpy-release build` and `verify` on each architecture: Mach-O, signature and deployment-target checks, then every example installed into fresh Rack user folders with an empty environment; then `introspect` and `check_coverage.py check --introspection` against the candidate; keeps the manifest, checksums, introspection and logs |
+| Windows x64 release candidate (pushes to `main` and on demand) | `bin/rackpy-release build` and `verify`: PE and DLL checks, then every example installed into fresh Rack user folders with Windows' own `PATH`; then `introspect` and `check_coverage.py check --introspection` against the candidate; keeps the manifest, checksums, introspection and logs |
+| Linux release candidate (pushes to `main` and on demand) | `bin/rackpy-release build`, then `bin/rackpy-release verify` installs it on clean Ubuntu 20.04 and 16.04 containers with no Python and no network; then `introspect` and `check_coverage.py check --introspection` against the candidate; keeps the manifest, checksums, introspection, logs and screenshots |
 
 Each job keeps its JUnit report, the host jobs keep every Rack `log.txt`, and
-the docs job keeps the built site, for 14 days. CI keeps no binaries:
+the docs job keeps the built site, for 14 days. The test jobs also keep each
+test's outcome (`RACKPY_TEST_EVIDENCE`), from which `bin/check_coverage.py
+evidence` and `samples` judge each platform ([release evidence](release-evidence/README.md)). CI keeps no binaries:
 distributing a build needs owner approval (RP-44).
 
 **Known gap.** `upstream/api-surface.json` records the libclang build that

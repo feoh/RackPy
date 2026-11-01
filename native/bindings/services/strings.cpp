@@ -6,7 +6,9 @@
 // each conversion against its Python argument and converts it to the C type
 // the conversion and its length modifier name, then calls Rack's string::f on
 // that single conversion: Rack's own formatting, one checked argument at a
-// time. %n, %p and * widths are refused; a wrong count or type raises.
+// time. A * width or precision takes its int argument first, as printf does,
+// and passes it on to Rack's string::f with the value, so Rack's printf applies
+// C's rules for it (RP-42). %n and %p are refused; a wrong count or type raises.
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -74,33 +76,52 @@ std::string bytesOf(py::handle value, const std::string& spec) {
 	throw py::type_error("%" + spec + " needs a str or bytes, not " + std::string(py::str(py::type::of(value))));
 }
 
+/** The int arguments of a conversion's * width and precision, in order: printf reads them before the value. */
+struct Stars {
+	int count = 0;
+	int values[2] = {0, 0};
+};
+
+/** Rack's string::f on one conversion: its * arguments, then the value. */
+template <class T>
+std::string call(const char* f, const Stars& stars, T value) {
+	switch (stars.count) {
+		case 1:
+			return s::f(f, stars.values[0], value);
+		case 2:
+			return s::f(f, stars.values[0], stars.values[1], value);
+		default:
+			return s::f(f, value);
+	}
+}
+
 /** One conversion, through Rack's string::f with the C type the format names. */
-std::string convert(const std::string& spec, const std::string& length, char conv, py::handle value) {
+std::string convert(const std::string& spec, const std::string& length, char conv, const Stars& stars, py::handle value) {
 	std::string format = "%" + spec;
 	const char* f = format.c_str();
 	switch (conv) {
 		case 'd':
 		case 'i':
-			if (length == "hh") return s::f(f, static_cast<int>(integer<signed char>(value, spec)));
-			if (length == "h") return s::f(f, static_cast<int>(integer<short>(value, spec)));
-			if (length == "") return s::f(f, integer<int>(value, spec));
-			if (length == "l") return s::f(f, integer<long>(value, spec));
-			if (length == "ll") return s::f(f, integer<long long>(value, spec));
-			if (length == "j") return s::f(f, integer<intmax_t>(value, spec));
-			if (length == "z") return s::f(f, integer<ssize_t>(value, spec));
-			if (length == "t") return s::f(f, integer<ptrdiff_t>(value, spec));
+			if (length == "hh") return call(f, stars, static_cast<int>(integer<signed char>(value, spec)));
+			if (length == "h") return call(f, stars, static_cast<int>(integer<short>(value, spec)));
+			if (length == "") return call(f, stars, integer<int>(value, spec));
+			if (length == "l") return call(f, stars, integer<long>(value, spec));
+			if (length == "ll") return call(f, stars, integer<long long>(value, spec));
+			if (length == "j") return call(f, stars, integer<intmax_t>(value, spec));
+			if (length == "z") return call(f, stars, integer<ssize_t>(value, spec));
+			if (length == "t") return call(f, stars, integer<ptrdiff_t>(value, spec));
 			break;
 		case 'o':
 		case 'u':
 		case 'x':
 		case 'X':
-			if (length == "hh") return s::f(f, static_cast<unsigned>(integer<unsigned char>(value, spec)));
-			if (length == "h") return s::f(f, static_cast<unsigned>(integer<unsigned short>(value, spec)));
-			if (length == "") return s::f(f, integer<unsigned>(value, spec));
-			if (length == "l") return s::f(f, integer<unsigned long>(value, spec));
-			if (length == "ll") return s::f(f, integer<unsigned long long>(value, spec));
-			if (length == "j") return s::f(f, integer<uintmax_t>(value, spec));
-			if (length == "z") return s::f(f, integer<size_t>(value, spec));
+			if (length == "hh") return call(f, stars, static_cast<unsigned>(integer<unsigned char>(value, spec)));
+			if (length == "h") return call(f, stars, static_cast<unsigned>(integer<unsigned short>(value, spec)));
+			if (length == "") return call(f, stars, integer<unsigned>(value, spec));
+			if (length == "l") return call(f, stars, integer<unsigned long>(value, spec));
+			if (length == "ll") return call(f, stars, integer<unsigned long long>(value, spec));
+			if (length == "j") return call(f, stars, integer<uintmax_t>(value, spec));
+			if (length == "z") return call(f, stars, integer<size_t>(value, spec));
 			break;
 		case 'e':
 		case 'E':
@@ -113,15 +134,15 @@ std::string convert(const std::string& spec, const std::string& length, char con
 			if (!py::isinstance<py::float_>(value) && !py::isinstance<py::int_>(value))
 				throw py::type_error("%" + spec + " needs a float, not " + std::string(py::str(py::type::of(value))));
 			double x = value.cast<double>();
-			if (length == "" || length == "l") return s::f(f, x);
-			if (length == "L") return s::f(f, static_cast<long double>(x));
+			if (length == "" || length == "l") return call(f, stars, x);
+			if (length == "L") return call(f, stars, static_cast<long double>(x));
 			break;
 		}
 		case 'c':
 			if (length == "") {
 				if (py::isinstance<py::str>(value) && py::len(value) == 1)
-					return s::f(f, static_cast<int>(value.cast<std::string>()[0] & 0xff));
-				return s::f(f, static_cast<int>(integer<unsigned char>(value, spec)));
+					return call(f, stars, static_cast<int>(value.cast<std::string>()[0] & 0xff));
+				return call(f, stars, static_cast<int>(integer<unsigned char>(value, spec)));
 			}
 			break;
 		case 's':
@@ -129,7 +150,7 @@ std::string convert(const std::string& spec, const std::string& length, char con
 				std::string text = bytesOf(value, spec);
 				if (text.find('\0') != std::string::npos)
 					throw py::value_error("%s cannot format a string with NUL characters (C strings end there)");
-				return s::f(f, text.c_str());
+				return call(f, stars, text.c_str());
 			}
 			break;
 		default:
@@ -157,16 +178,36 @@ std::string formatPrintf(const char* format, py::sequence args) {
 		}
 		while (*p && std::strchr("-+ #0'", *p))
 			++p;
-		if (*p == '*')
-			throw py::value_error("* widths are not supported: write the width into the format");
-		while (*p >= '0' && *p <= '9')
+		Stars stars;
+		// A * takes an int argument before the value (C11 7.21.6.1p5): a negative width is the - flag, a negative
+		// precision as if none were given. Rack's printf applies that; INT_MIN as a width has no positive width.
+		auto star = [&](const char* what, bool width) {
+			if (next >= count)
+				throw py::type_error("the format needs more arguments than were given");
+			std::string seen(start, p + 1);
+			int value = integer<int>(args[next++], seen);
+			if (width && value == std::numeric_limits<int>::min())
+				throw py::value_error("%" + seen + " cannot use " + std::to_string(value) + " as a " + what);
+			stars.values[stars.count++] = value;
+		};
+		if (*p == '*') {
+			star("width", true);
 			++p;
-		if (*p == '.') {
-			++p;
-			if (*p == '*')
-				throw py::value_error("* precisions are not supported: write the precision into the format");
+		}
+		else {
 			while (*p >= '0' && *p <= '9')
 				++p;
+		}
+		if (*p == '.') {
+			++p;
+			if (*p == '*') {
+				star("precision", false);
+				++p;
+			}
+			else {
+				while (*p >= '0' && *p <= '9')
+					++p;
+			}
 		}
 		std::string length;
 		if ((p[0] == 'h' && p[1] == 'h') || (p[0] == 'l' && p[1] == 'l')) {
@@ -186,7 +227,7 @@ std::string formatPrintf(const char* format, py::sequence args) {
 		std::string spec(start, p);
 		if (next >= count)
 			throw py::type_error("the format needs more arguments than were given");
-		out += convert(spec, length, conv, args[next++]);
+		out += convert(spec, length, conv, stars, args[next++]);
 	}
 	if (next != count)
 		throw py::type_error("the format takes " + std::to_string(next) + " argument(s), but " + std::to_string(count) +
@@ -206,7 +247,8 @@ void bindString(py::module_ m) {
 	m.def("f", [](const std::string& format, py::args args) { return formatPrintf(format.c_str(), args); },
 		py::arg("format"),
 		"Rack's string::f (printf): each conversion goes through Rack's formatting with the C type it names "
-		"(%d int, %lld long long, %u unsigned, %f double, %s str, ...). %n, %p and * are refused, and a wrong count "
+		"(%d int, %lld long long, %u unsigned, %f double, %s str, ...); a * width or precision takes an int argument "
+		"first, as printf does. %n and %p are refused, and a wrong count "
 		"or type raises.");
 	m.def("fv", [](const std::string& format, py::sequence args) { return formatPrintf(format.c_str(), args); },
 		py::arg("format"), py::arg("args"), "Rack's string::fV: as f, with the arguments as a sequence (Python's va_list).");

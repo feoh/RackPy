@@ -396,3 +396,35 @@ def test_an_owner_review_item_the_gate_cannot_read_fails_the_check(mini: Mini, n
     by_id(manifest)[VOLTAGE]["notes"] = notes
     assert "owner-review-marker" in codes(bm.validate(mini.inputs(), manifest, {"objects": {}}))
     assert bm.open_owner_reviews(by_id(manifest)[VOLTAGE]) == []
+
+
+def test_sample_parity_needs_every_cited_test_passed_on_the_platform() -> None:
+    # RP-42: a sample passes only if all its disposition's tests passed there; skipped and unrun are not passes.
+    samples: list[dict[str, Any]] = [
+        {"id": "s-pass", "disposition": {"how": "x", "files": ["f"], "tests": ["t1", "t2"]}},
+        {"id": "s-skip", "disposition": {"how": "x", "files": ["f"], "tests": ["t1", "t3"]}},
+        {"id": "s-unrun", "disposition": {"how": "x", "files": ["f"], "tests": ["t4"]}},
+        {"id": "s-fail", "disposition": {"how": "x", "files": ["f"], "tests": ["t5"]}},
+        {"id": "s-out", "classification": "out-of-scope", "reason": "Rack development"},
+        {"id": "s-open", "classification": "port"},
+        {"id": "s-empty", "disposition": {"how": "x", "files": ["f"], "tests": []}},
+    ]
+    outcomes = {"t1": "passed", "t2[a]": "passed", "t2[b]": "passed", "t3": "skipped", "t5": "failed"}
+    problems, results = bm.sample_problems(samples, "mac-x64", outcomes)
+    assert {r: v["status"] for r, v in results.items()} == {
+        "s-pass": "passed",
+        "s-skip": "not passed",
+        "s-unrun": "not passed",
+        "s-fail": "not passed",
+        "s-out": "out of scope",
+        "s-open": "unresolved",
+        "s-empty": "not passed",
+    }
+    assert sorted((p.code, p.id) for p in problems) == [
+        ("sample-failed", "s-fail"),
+        ("sample-not-run", "s-unrun"),
+        ("sample-skipped", "s-skip"),
+        ("sample-unresolved", "s-open"),
+        ("sample-untested", "s-empty"),
+    ]
+    assert results["s-pass"]["tests"] == {"t1": "passed", "t2": "passed"}  # parametrized cases count together

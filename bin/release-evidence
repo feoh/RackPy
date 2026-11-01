@@ -1,0 +1,188 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["cyclopts>=5.2,<6"]
+#
+# [tool.uv]
+# exclude-newer = "2026-10-21T00:00:00Z"
+# ///
+"""Collect RackPy's release evidence from one CI run: coverage and sample parity on every platform (RP-42).
+
+collect  download a finished run's reports (gh), then judge each advertised platform with the checks
+         bin/check_coverage.py runs: every bound record's cited tests passed there (evidence), every official
+         sample's tests passed there (samples), and the full-coverage release bar against what that
+         platform's release candidate exports inside Rack (release). Writes release-evidence/: the run, its
+         commit and its jobs; per-platform JSON; and SUMMARY.md. A check that fails is recorded, not hidden:
+         the summary says which gates are closed and why.
+"""
+
+import contextlib
+import hashlib
+import json
+import subprocess
+import sys
+import tempfile
+from collections import Counter
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+
+import cyclopts
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import binding_manifest as bm
+
+app = cyclopts.App(help=__doc__)
+REPO_SLUG = "feoh/rackpy"
+DEST = bm.REPO / "release-evidence"
+# Where each platform's test outcomes and its release candidate's introspection are in a run's artifacts.
+TESTS = {
+    "lin-x64": [
+        "python-reports",
+        "native-reports",
+        "host-reports",
+        "docs-reports",
+        "dist-reports",
+        "inventory-reports",
+    ],
+    "mac-arm64": ["macos-mac-arm64-reports"],
+    "mac-x64": ["macos-mac-x64-reports"],
+    "win-x64": ["windows-win-x64-reports"],
+}
+CANDIDATES = {
+    "lin-x64": "release-candidate-evidence",
+    "mac-arm64": "macos-mac-arm64-release-candidate-evidence",
+    "mac-x64": "macos-mac-x64-release-candidate-evidence",
+    "win-x64": "windows-win-x64-release-candidate-evidence",
+}
+SHOWN = 40  # problems listed per platform and check; the counts cover all of them
+
+
+def gh(*args: str) -> str:
+    return subprocess.run(["gh", *args], capture_output=True, text=True, check=True).stdout
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def problems_doc(problems: list[bm.Problem]) -> dict[str, Any]:
+    ordered = sorted(problems, key=lambda p: (p.code, p.id))
+    return {
+        "count": len(problems),
+        "by_code": dict(sorted(Counter(p.code for p in problems).items())),
+        "first": [{"code": p.code, "id": p.id, "message": p.message} for p in ordered[:SHOWN]],
+    }
+
+
+def write_json(path: Path, doc: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+@app.command
+def collect(run: int, *, dest: Path = DEST) -> None:
+    """Judge every platform from CI run RUN (finished, on a commit pushed to GitHub) and write DEST."""
+    info = json.loads(gh("run", "view", str(run), "-R", REPO_SLUG, "--json", "headSha,headBranch,url,status,jobs"))
+    if info["status"] != "completed":
+        raise SystemExit(f"run {run} is {info['status']}; collect evidence from a finished run")
+    jobs = {j["name"]: j["conclusion"] for j in info["jobs"]}
+    inputs = bm.load_inputs()
+    manifest: dict[str, Any] = bm.load_json(bm.MANIFEST)
+    examples: dict[str, Any] = bm.load_json(bm.EXAMPLES)
+    summary: dict[str, Any] = {}
+    with tempfile.TemporaryDirectory(prefix="rackpy-evidence-") as scratch:
+        root = Path(scratch)
+        for name in {n for names in TESTS.values() for n in names} | set(CANDIDATES.values()):
+            # Not uploaded (the job did not run, or failed early): that platform shows no evidence.
+            with contextlib.suppress(subprocess.CalledProcessError):
+                gh("run", "download", str(run), "-R", REPO_SLUG, "-n", name, "-D", str(root / name))
+        for platform, names in TESTS.items():
+            folders = [root / n / "evidence" for n in names if (root / n / "evidence").is_dir()]
+            entry: dict[str, Any] = {}
+            try:
+                outcomes = bm.load_evidence(folders, platform)
+            except bm.ManifestError as e:
+                entry["error"] = str(e)
+                summary[platform] = entry
+                continue
+            entry["tests"] = dict(sorted(Counter(outcomes.values()).items()))
+            problems, counts = bm.evidence_problems(inputs, manifest, platform, outcomes)
+            entry["records"] = dict(sorted(counts.items()))
+            entry["evidence_problems"] = problems_doc(problems)
+            sample_issues, per_sample = bm.sample_problems(examples["samples"], platform, outcomes)
+            entry["samples"] = dict(sorted(Counter(r["status"] for r in per_sample.values()).items()))
+            entry["sample_problems"] = problems_doc(sample_issues)
+            write_json(dest / "samples" / f"{platform}.json", {"platform": platform, "samples": per_sample})
+            introspection = root / CANDIDATES[platform] / f"introspection-{platform}.json"
+            if introspection.exists():
+                artifact: dict[str, Any] = bm.load_json(introspection)
+                entry["candidate_introspection"] = {
+                    "sha256": sha256(introspection),
+                    "objects": len(artifact.get("objects") or {}),
+                }
+                release = bm.release_problems(inputs, manifest, platform, artifact, outcomes)
+                entry["release_problems"] = problems_doc(release)
+            else:
+                entry["candidate_introspection"] = None  # no candidate: the release bar cannot be judged
+            summary[platform] = entry
+            write_json(dest / "coverage" / f"{platform}.json", {"platform": platform, **entry})
+    write_json(
+        dest / "run.json",
+        {
+            "run": run,
+            "url": info["url"],
+            "commit": info["headSha"],
+            "branch": info["headBranch"],
+            "jobs": dict(sorted(jobs.items())),
+            "inventory_sha256": inputs.inventory_sha256,
+            "manifest_sha256": sha256(bm.MANIFEST),
+            "examples_sha256": sha256(bm.EXAMPLES),
+            "collected_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        },
+    )
+    (dest / "SUMMARY.md").write_text(markdown(run, info, jobs, summary), encoding="utf-8")
+    print((dest / "SUMMARY.md").read_text(encoding="utf-8"))
+
+
+def markdown(run: int, info: dict[str, Any], jobs: dict[str, str], summary: dict[str, Any]) -> str:
+    def counts(d: dict[str, int] | None) -> str:
+        return ", ".join(f"{k} {v}" for k, v in (d or {}).items()) or "—"
+
+    def issues(entry: dict[str, Any], key: str) -> str:
+        doc = entry.get(key)
+        return "not judged" if doc is None else "none" if not doc["count"] else counts(doc["by_code"])
+
+    unsuccessful = ", ".join(f"{n} ({c})" for n, c in sorted(jobs.items()) if c != "success")
+    lines = [
+        "# Release evidence",
+        "",
+        "**Generated by `bin/release-evidence collect`; do not edit by hand.** What it means: [README](README.md).",
+        "",
+        f"- CI run: [{run}]({info['url']}), commit `{info['headSha']}` (branch `{info['headBranch']}`)",
+        f"- Jobs not successful: {unsuccessful or 'none'}",
+        "",
+        "| Platform | Tests | Bound records | Record problems | Samples | Sample problems | Release bar |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for platform, entry in summary.items():
+        if "error" in entry:
+            lines.append(f"| {platform} | {entry['error']} | | | | | |")
+            continue
+        lines.append(
+            f"| {platform} | {counts(entry['tests'])} | {counts(entry['records'])} | "
+            f"{issues(entry, 'evidence_problems')} | {counts(entry['samples'])} | "
+            f"{issues(entry, 'sample_problems')} | {issues(entry, 'release_problems')} |"
+        )
+    lines += [
+        "",
+        "Each platform's problems are listed in `coverage/<platform>.json` (the first 40 of each kind of check).",
+    ]
+    return "\n".join(lines) + "\n"
+
+
+if __name__ == "__main__":
+    try:
+        app()
+    except bm.ManifestError as e:
+        raise SystemExit(f"error: {e}") from None

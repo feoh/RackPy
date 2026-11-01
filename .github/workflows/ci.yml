@@ -363,7 +363,10 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
-      - run: sudo apt-get $APT_OPTS update && sudo apt-get $APT_OPTS install -y --no-install-recommends ninja-build jq
+      - name: Ninja, jq, and Rack's runtime libraries (for the candidate's introspection, run on this runner)
+        run: >
+          sudo apt-get $APT_OPTS update && sudo apt-get $APT_OPTS install -y --no-install-recommends ninja-build jq
+          libgl1 libx11-6 libasound2t64 libjack-jackd2-0 libpulse0 libpulse-mainloop-glib0
       - name: Restore the toolchain
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -388,6 +391,11 @@ jobs:
         run: >
           bin/rackpy-release verify "$RUNNER_TEMP/release/artifacts" --rack "$(bin/rack-sdk host | tail -1)"
           --logs reports/verify-ubuntu-16.04 --image ubuntu-16.04
+      - name: The binding manifest against what the candidate's RackPy exports inside Rack
+        run: |
+          bin/rackpy-release introspect "$RUNNER_TEMP/release/artifacts" --rack "$(bin/rack-sdk host | tail -1)" \
+            --out reports/introspection-lin-x64.json
+          uv run bin/check_coverage.py check --introspection reports/introspection-lin-x64.json
       - if: always()
         name: Keep the manifest, checksums and each artifact's file list with the logs
         run: |
@@ -446,6 +454,13 @@ jobs:
         run: >
           bin/rackpy-release verify "$RUNNER_TEMP/release/artifacts"
           --rack "$(bin/rack-sdk host mac-x64+arm64 | tail -1)" --logs reports/verify
+      - name: The binding manifest against what the candidate's RackPy exports inside Rack
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          bin/rackpy-release introspect "$RUNNER_TEMP/release/artifacts" \
+            --rack "$(bin/rack-sdk host mac-x64+arm64 | tail -1)" --out "reports/introspection-$PLATFORM.json"
+          uv run bin/check_coverage.py check --introspection "reports/introspection-$PLATFORM.json"
       - if: always()
         name: Keep the manifest, checksums and each artifact's file list with the logs
         run: |
@@ -510,6 +525,11 @@ jobs:
         run: >
           uv run --script bin/rackpy-release verify "$RUNNER_TEMP/release/artifacts"
           --rack "$(uv run --script bin/rack-sdk host win-x64 | tail -1)" --logs reports/verify
+      - name: The binding manifest against what the candidate's RackPy exports inside Rack
+        run: |
+          uv run --script bin/rackpy-release introspect "$RUNNER_TEMP/release/artifacts" \
+            --rack "$(uv run --script bin/rack-sdk host win-x64 | tail -1)" --out reports/introspection-win-x64.json
+          uv run --script bin/check_coverage.py check --introspection reports/introspection-win-x64.json
       - if: always()
         name: Keep the manifest, checksums and each artifact's file list with the logs
         run: |

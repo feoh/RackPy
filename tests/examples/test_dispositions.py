@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Every official sample of a completed example task has a tested disposition (upstream/examples.json).
+"""Every official sample has a tested disposition, or is out of scope with a reason (upstream/examples.json).
 
-RP-42 later requires one for every sample; until then the tasks that are done are listed here.
+These tests check that the dispositions name files and tests that exist. Whether those tests passed on each
+platform is RP-42's sample parity: bin/check_coverage.py samples, from each platform's test outcomes.
 """
 
 import json

@@ -37,6 +37,7 @@ DEPRECATION_EVIDENCE = REPO / "bindings" / "deprecation-evidence.json"
 ENGINE_LOCKS = REPO / "upstream" / "engine-locks.json"
 CALLBACK_RULES = REPO / "upstream" / "callback-rules.json"
 CALLBACK_MATRIX = REPO / "bin" / "callback-matrix"
+EXAMPLES = REPO / "upstream" / "examples.json"
 
 SCHEMA_VERSION = 1
 STATUSES = ("unreviewed", "planned", "implemented", "verified", "unrepresentable", "excluded_internal")
@@ -790,6 +791,36 @@ def cited_outcome(outcomes: dict[str, str], test: str) -> str:
     """A cited test's outcome: all its parametrized cases together; "not run" if none ran."""
     seen = {o for t, o in outcomes.items() if t == test or t.startswith(test + "[")}
     return "failed" if "failed" in seen else "passed" if "passed" in seen else "skipped" if seen else "not run"
+
+
+def sample_problems(
+    samples: list[dict[str, Any]], platform: str, outcomes: dict[str, str]
+) -> tuple[list[Problem], dict[str, dict[str, Any]]]:
+    """Official sample parity on PLATFORM (RP-42): every test a sample's disposition cites passed there. A skipped or
+    unrun test is not a pass. A sample without a disposition must be out of scope, with its reason."""
+    problems: list[Problem] = []
+    results: dict[str, dict[str, Any]] = {}
+    for sample in samples:
+        ident = sample["id"]
+        disposition = sample.get("disposition")
+        if disposition is None:
+            if sample.get("classification") == "out-of-scope" and sample.get("reason"):
+                results[ident] = {"status": "out of scope", "reason": sample["reason"]}
+            else:
+                problems.append(Problem("sample-unresolved", ident, "neither a disposition nor an out-of-scope reason"))
+                results[ident] = {"status": "unresolved"}
+            continue
+        tests = {test: cited_outcome(outcomes, test) for test in disposition["tests"]}
+        if not tests:
+            problems.append(Problem("sample-untested", ident, "its disposition cites no test"))
+        for test, outcome in tests.items():
+            if outcome != "passed":
+                problems.append(
+                    Problem("sample-" + outcome.replace(" ", "-"), ident, f"{test} {outcome} on {platform}")
+                )
+        passed = bool(tests) and all(o == "passed" for o in tests.values())
+        results[ident] = {"status": "passed" if passed else "not passed", "tests": tests}
+    return problems, results
 
 
 def evidence_problems(

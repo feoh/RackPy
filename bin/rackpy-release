@@ -954,6 +954,86 @@ def compare(first: Path, second: Path) -> None:
     print(json.dumps(report, indent=2))
 
 
+INTROSPECT_ENTRY = """import importlib
+import json
+from rackpy import _introspect
+
+importlib.import_module({original!r})  # the example's own entry first: the plugin loads as it would
+with open({out!r}, "w", encoding="utf-8") as f:
+    json.dump(_introspect.snapshot(), f, indent=2, sort_keys=True)
+"""
+
+
+@app.command
+def introspect(artifacts: Path, *, rack: Path, out: Path, example: str = "template", timeout: float = 180) -> None:
+    """What the candidate's RackPy exports, from inside Rack Free at RACK: input to check_coverage.py --introspection.
+
+    One example plugin from ARTIFACTS (each carries the whole RackPy runtime) goes into a fresh Rack user folder
+    unchanged, but for a second entry module that imports the example's own and then writes
+    rackpy._introspect.snapshot() to OUT. So the coverage check runs against the candidate's own binaries, not a
+    source build (RP-42). Rack runs headless, and quits through stdin once its log says it loaded the patch.
+    """
+    data = json.loads((artifacts / "manifest.json").read_text())
+    matches = [a for a in data["artifacts"] if a.get("example") == example]
+    if len(matches) != 1:
+        raise SystemExit(f"{artifacts / 'manifest.json'} lists no example plugin {example!r}")
+    artifact = artifacts / matches[0]["file"]
+    if sha256_file(artifact) != matches[0]["sha256"]:
+        raise SystemExit(f"{artifact} does not match its SHA-256 in the manifest")
+    scratch = Path(tempfile.mkdtemp(prefix="rackpy-introspect-"))
+    try:
+        user = scratch / "user"
+        plugins = user / f"plugins-{PLATFORM}"
+        plugins.mkdir(parents=True)
+        with tarfile.open(artifact, "r:zst") as tf:
+            tf.extractall(plugins, filter="tar")
+        plugin = plugins / matches[0]["slug"]
+        config_path = plugin / "rackpy-loader.json"
+        config = json.loads(config_path.read_text())
+        snapshot = scratch / "introspection.json"
+        entry = "rackpy_release_introspect"
+        source = INTROSPECT_ENTRY.format(original=config["entry"], out=str(snapshot))
+        (plugin / "pythonpath" / f"{entry}.py").write_text(source, encoding="utf-8")
+        config_path.write_text(json.dumps({**config, "entry": entry}))
+        (user / "autosave").mkdir()
+        (user / "autosave" / "patch.json").write_text('{"version": "2.6.6", "modules": [], "cables": []}')
+        program = rack / "Contents" / "MacOS" / "Rack" if MACOS else rack / ("Rack.exe" if WINDOWS else "Rack")
+        # No display: headless Rack still shows a blocking dialog for a patch's missing module.
+        env = {k: v for k, v in os.environ.items() if k not in {"DISPLAY", "WAYLAND_DISPLAY"}}
+        log = user / "log.txt"
+        proc = subprocess.Popen(
+            [str(program), "-h", "-u", str(user)], cwd=rack, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, env=env
+        )
+        deadline = time.monotonic() + timeout
+        try:
+            while time.monotonic() < deadline and proc.poll() is None:
+                if log.exists() and "Loading autosave" in log.read_text(errors="replace"):
+                    break
+                time.sleep(0.2)
+            assert proc.stdin is not None
+            try:
+                proc.stdin.write(b"\n")
+                proc.stdin.close()
+            except OSError:  # Rack already quit; its log says why
+                pass
+            proc.wait(timeout=60)
+        finally:
+            if proc.poll() is None:
+                proc.kill()
+                proc.wait()
+        tail = log.read_text(errors="replace")[-4000:] if log.exists() else "(no log)"
+        if proc.returncode != 0 or not snapshot.exists():
+            raise SystemExit(f"Rack exited with {proc.returncode} and wrote no introspection:\n{tail}")
+        objects = json.loads(snapshot.read_text(encoding="utf-8")).get("objects")
+        if not objects:
+            raise SystemExit(f"the introspection lists no objects:\n{tail}")
+        out.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(snapshot, out)
+        print(f"{len(objects)} objects from {artifact.name} ({matches[0]['sha256'][:12]}) in {out}")
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
+
+
 VERIFY_SCRIPT = REPO / "packaging" / "linux" / "verify-in-container.sh"
 VERIFY_MAC_SCRIPT = REPO / "packaging" / "macos" / "verify.sh"
 VERIFY_WINDOWS_SCRIPT = REPO / "packaging" / "windows" / "verify.ps1"

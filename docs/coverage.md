@@ -292,6 +292,14 @@ If an infinite C++ template space cannot have a faithful Python generic/extensio
 mapping, propose a precise contract to the owner; do not silently trim scope.
 The release task remains blocked while that contract is unresolved.
 
+Each platform is judged on its own (RP-42): every bound record available there cites
+a test that passed there (`bin/check_coverage.py evidence`, from each test's outcome
+that the CI jobs keep), every official sample's tests passed there (`samples`), and
+the manifest matches what that platform's release candidate exports inside Rack
+(`bin/rackpy-release introspect`, then `check --introspection`). A skipped test is
+not a pass. `bin/release-evidence collect` records all of it from one CI run in
+`release-evidence/`, with the run's commit, and says which gates are still closed.
+
 Early **preview** releases may be partial only if they say so and link to all gaps.
 Changing the target SDK requires an inventory diff, compatibility work, sample
 reruns and owner-visible release notes, not a tag edit.
