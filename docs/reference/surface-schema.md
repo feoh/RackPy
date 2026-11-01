@@ -25,9 +25,14 @@ The Python bindings are pinned to `clang==21.1.7`.
 
 ## How extraction works
 
-1. Parse an in-memory `#include <rack.hpp>` translation unit with the SDK's
-   Linux x64 flags (`-std=c++11 -march=nehalem -fPIC -funsafe-math-optimizations`)
-   and a detailed preprocessing record. Function bodies are skipped.
+1. Parse an in-memory `#include <rack.hpp>` translation unit with each
+   variant's flags: the SDK's `compile.mk` flags for every platform
+   (`-std=c++11 -O3 -funsafe-math-optimizations -fno-omit-frame-pointer`) and
+   the platform's own (below), with a detailed preprocessing record. Function
+   bodies are skipped. `-O3` matters: headers branch on `__OPTIMIZE__` and
+   `__NO_INLINE__`, and without optimization mingw's `string.h` would turn
+   Rack's `string::strcasecmp` into `_stricmp`, which `libRack.dll` does not
+   export.
 2. **Any error diagnostic aborts the run and nothing is written.** So does an
    inventory with no declarations, or two distinct declarations that would
    share an ID.
@@ -39,13 +44,33 @@ The Python bindings are pinned to `clang==21.1.7`.
    `boundary_constant` entries when their headers are reached (policy 13).
 4. Record every macro defined in a Rack header, and every range the
    preprocessor skipped, as a conditional block.
-5. Repeat for each **variant** and merge by ID.
+5. Repeat for each **variant** and merge by ID. The first variant that has an
+   entry gives it; a field another variant sees differently goes under
+   `per_variant`, so an alternative definition is recorded rather than dropped
+   (`RACK_MOD_CTRL` is `GLFW_MOD_SUPER` on macOS).
 
 | Variant | What it is |
 | --- | --- |
-| `lin-x64` | The SDK's Linux x64 flags. |
+| `lin-x64` | The SDK's Linux x64 flags (`-march=nehalem -fPIC`), with this machine's C and C++ headers. |
 | `lin-x64-simde` | The same without `-march=nehalem`. `__SSE4_2__` is then undefined and `simd/common.hpp` takes the SIMDe path that arm64 uses. This approximates the arm64 declaration surface; it is **not** an arm64 extraction. |
-| `mac-arm64`, `mac-x64`, `win-x64` | Cross-target attempts. Without a macOS SDK or MinGW sysroot they fail at the first system header and are recorded as `not_extracted` with the reason. They become real extractions on native runners or with sysroots (RP-40, RP-41). |
+| `mac-arm64`, `mac-x64` | The SDK's macOS flags (`--target=arm64-apple-macos11 -march=armv8-a+fp+simd`, or `--target=x86_64-apple-macos10.9 -march=nehalem`, with `-stdlib=libc++`), with the libc++ and macOS C headers zig ships (Apple's SDK headers) and libc++'s configuration as zig passes it. |
+| `win-x64` | The SDK's Windows flags (`--target=x86_64-w64-mingw32 -march=nehalem -D_USE_MATH_DEFINES -municode`), with the C and C++ headers of Rack's own Windows toolchain (`bin/rack-toolchain build --target win-x64`: mingw-w64 v10, GCC 15.1.0's libstdc++). `-mno-ms-bitfields` gives GCC's bit-field layout, which Rack's `dsp/convert.hpp` asserts and clang's MinGW default is not. |
+
+The Rack headers are byte-identical in the four platforms' SDK archives, so
+what differs per platform is only the preprocessor's view: the target's
+macros and its library headers. Each cross variant's extraction record names
+where its library headers came from (`system_headers`, with placeholders for
+this machine's paths) and how many it read, with a digest of their contents.
+If a variant's headers are missing (no Windows toolchain, no zig), it is
+recorded as `not_extracted` with the reason, and the manifest then treats that
+platform as `not inventoried`.
+
+`bin/inventory_sdk.py platform-check VARIANT`, run on the platform itself,
+extracts that variant again with the machine's own compiler headers (Xcode's
+SDK on a Mac, MSYS2's MinGW on Windows) and the platform's own SDK archive,
+and fails on any difference from the committed inventory: an entry, a
+per-variant field or a skipped branch. CI runs it on `macos-15`,
+`macos-15-intel` and `windows-2025` (job `inventory-platforms`).
 
 Output is deterministic: entries sorted by ID, keys sorted, one entry per line.
 Two runs with the same SDK and toolchain are byte-identical (tested).
@@ -79,11 +104,14 @@ platform inventories must reconcile each placeholder with its semantic entry;
 until then a placeholder cannot be implemented, verified or excluded.
 
 For a successful extraction, a branch listed as skipped is absent on that
-exact variant; all other availability is `not inventoried`. Thus the Linux
-inventory proves the recorded skipped branches absent on lin-x64; it does not
-prove anything about their macOS or Windows availability. Unresolved availability
-blocks release on the affected platform. RP-40/RP-41 supply the deferred native
-platform evidence. The checker requires the conditional-block list and rejects
+exact variant (`no`). Where a successful extraction did not skip the branch,
+the placeholder is `superseded` only if that extraction has a semantic entry
+of the same kind and name, available there and defined there inside the
+branch's lines (`bin/binding_manifest.py`'s `carried_by`): that entry is then
+the one counted. Otherwise the placeholder stays `not inventoried`, which
+blocks release on that platform, as does any platform without a successful
+extraction. Since RP-42 every platform is extracted and every placeholder is
+`no` or `superseded`. The checker requires the conditional-block list and rejects
 missing placeholder records rather than silently shrinking the denominator.
 
 ## Entry IDs
@@ -158,6 +186,7 @@ Every entry has `id`, `kind`, `name` (qualified), `header`, `line` and
 | `types` | declarations | Types referenced in the signature, as `header:Type` for dependency headers, `std:Name` or `system:Name` |
 | `conditions` | anything inside `#if` | The enclosing directive stack, such as `!(defined ARCH_MAC)` |
 | `absent_in` | entries missing from some variants | Variant names |
+| `per_variant` | entries a variant sees differently | Per variant, each field whose value differs there (`null`: the field is missing there) |
 | `private` | PRIVATE declarations | From the attribute's message, found through libclang availability, not tokens |
 | `deprecated` | `DEPRECATED` declarations | `true`, or the attribute message |
 | `comment_deprecated` | documentation says deprecated | Matches `DEPRECATED` or `Deprecated` in the doc comment |
@@ -189,10 +218,8 @@ the entry: extraction stops instead.
 
 ## What it does not do yet
 
-- macOS and Windows have not been extracted: there are no sysroots on the
-  planning machine. Their Rack-only declarations are visible as conditional
-  blocks (for example `string::UTF16toUTF8` on Windows).
 - Inherited members are not copied into derived records. Consumers walk
   `bases`, so nothing is double-counted.
 - Conditional blocks are scanned lexically, because the preprocessor removed
-  them. Native extraction on that platform supersedes the lexical names.
+  them. Where a branch is active on an extracted platform, the semantic entry
+  supersedes the lexical name (see below).

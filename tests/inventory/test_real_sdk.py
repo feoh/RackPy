@@ -45,12 +45,43 @@ def test_committed_inventory_is_current(inventory: ModuleType, real_sdk: Path, s
     assert inventory.dumps(fresh) == SURFACE.read_text(encoding="utf-8"), inventory.diff(surface, fresh)
 
 
-def test_native_extractions_succeeded_and_gaps_are_explicit(surface: dict[str, Any]) -> None:
-    status = {r["variant"]: r["status"] for r in surface["extractions"]}
-    assert status["lin-x64"] == "ok" and status["lin-x64-simde"] == "ok"
-    for gap in ("mac-arm64", "mac-x64", "win-x64"):
-        run = next(r for r in surface["extractions"] if r["variant"] == gap)
-        assert run["status"] == "ok" or run["reason"], run
+def test_every_advertised_platform_was_extracted(surface: dict[str, Any]) -> None:
+    # RP-42: macOS with libc++ and Apple's C headers (as zig ships them), Windows with Rack's own MinGW toolchain;
+    # each records which target headers it read, by digest, not by this machine's paths.
+    runs = {r["variant"]: r for r in surface["extractions"]}
+    assert set(runs) == {"lin-x64", "lin-x64-simde", "mac-arm64", "mac-x64", "win-x64"}
+    assert all(r["status"] == "ok" for r in runs.values()), runs
+    for variant in ("mac-arm64", "mac-x64", "win-x64"):
+        assert runs[variant]["system_headers_read"] > 100 and len(runs[variant]["system_headers_sha256"]) == 64
+        assert "<" in runs[variant]["system_headers"] and "/home/" not in json.dumps(runs[variant])
+    for r in runs.values():
+        assert "-O3" in r["flags"], r  # compile.mk's: mingw's string.h renames strcasecmp without optimization
+
+
+def test_platform_only_declarations(entries: dict[str, dict[str, Any]]) -> None:
+    def only(*variants: str) -> set[str]:
+        everywhere = {"lin-x64", "lin-x64-simde", "mac-arm64", "mac-x64", "win-x64"}
+        return {
+            i
+            for i, e in entries.items()
+            if e["classification"] != "import" and everywhere - set(e.get("absent_in", ())) == set(variants)
+        }
+
+    assert only("win-x64") == {
+        "function:fopen_u8(const char *, const char *)",
+        "function:rack::string::UTF16toUTF8(const std::wstring &)",
+        "function:rack::string::UTF8toUTF16(const std::string &)",
+        "macro:ARCH_WIN",
+        "macro:fopen",
+    }
+    assert only("mac-arm64", "mac-x64") == {"macro:ARCH_MAC"}
+    assert only("mac-arm64") == {"macro:ARCH_ARM64"}
+    assert only("lin-x64", "lin-x64-simde") == {"macro:ARCH_LIN"}
+    # libRack.dll exports rack::string::strcasecmp: with -O3 it is not mingw's _stricmp macro.
+    assert "absent_in" not in entries["function:rack::string::strcasecmp(const char *, const char *)"]
+    ctrl = entries["macro:RACK_MOD_CTRL"]
+    assert ctrl["body"] == "GLFW_MOD_CONTROL" and ctrl["per_variant"]["mac-arm64"]["body"] == "GLFW_MOD_SUPER"
+    assert set(ctrl["per_variant"]) == {"mac-arm64", "mac-x64"}
 
 
 def test_module(entries: dict[str, dict[str, Any]]) -> None:
@@ -84,9 +115,17 @@ def test_simd(entries: dict[str, dict[str, Any]], surface: dict[str, Any]) -> No
     assert "specialization:rack::simd::Vector<float, 4>" in entries
     assert "specialization:rack::simd::Vector<int32_t, 4>" in entries
     assert "constructor:rack::simd::Vector<float, 4>::Vector(float, float, float, float)" in entries
-    # The SSE4.2 and SIMDe paths expose the same rack:: declarations; only SIMDe's own macros differ.
-    differing = sorted(e["id"] for e in surface["entries"] if e.get("absent_in"))
-    assert differing == ["macro:SIMDE_ENABLE_NATIVE_ALIASES", "macro:_MM_FROUND_NO_EXC"]
+
+    # The SSE4.2 and SIMDe paths expose the same rack:: declarations; only SIMDe's own macros differ, on Linux
+    # (lin-x64 against lin-x64-simde) and between the two Macs (and there the ARCH_ macros).
+    def between(a: str, b: str) -> list[str]:
+        return sorted(
+            e["id"] for e in surface["entries"] if (a in e.get("absent_in", ())) != (b in e.get("absent_in", ()))
+        )
+
+    simde = ["macro:SIMDE_ENABLE_NATIVE_ALIASES", "macro:_MM_FROUND_NO_EXC"]
+    assert between("lin-x64", "lin-x64-simde") == simde
+    assert between("mac-x64", "mac-arm64") == ["macro:ARCH_ARM64", "macro:ARCH_X64", *simde]
 
 
 def test_context(entries: dict[str, dict[str, Any]]) -> None:

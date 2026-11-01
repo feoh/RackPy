@@ -39,6 +39,21 @@
   ],
   "conditional_blocks": [
     {
+      "condition": "#if defined __x86_64__",
+      "declarations": [
+        "macro ARCH_X64"
+      ],
+      "header": "include/arch.hpp",
+      "lines": [
+        4,
+        6
+      ],
+      "sha256": "1aa3fd4170ccc7c719967aad94e622edfb5282ba6a88deeb714d0051f6c3b076",
+      "skipped_in": [
+        "mac-arm64"
+      ]
+    },
+    {
       "condition": "#if defined __aarch64__",
       "declarations": [
         "macro ARCH_ARM64"
@@ -51,7 +66,9 @@
       "sha256": "402c4c8490722cfe9701b66f251a6d0527ee2d9b558005bd3a02a2b7b597d959",
       "skipped_in": [
         "lin-x64",
-        "lin-x64-simde"
+        "lin-x64-simde",
+        "mac-x64",
+        "win-x64"
       ]
     },
     {
@@ -67,7 +84,9 @@
       "sha256": "3b3ed7577eb09d38a9434addab41b6283c501896188b7fc8fc3d0606d47c0a36",
       "skipped_in": [
         "lin-x64",
-        "lin-x64-simde"
+        "lin-x64-simde",
+        "mac-arm64",
+        "mac-x64"
       ]
     },
     {
@@ -83,7 +102,25 @@
       "sha256": "8a45cd3662dd37652f3fcf1a7da26d53cb798d2cbca38cecd4c81baa98fbc3c5",
       "skipped_in": [
         "lin-x64",
-        "lin-x64-simde"
+        "lin-x64-simde",
+        "win-x64"
+      ]
+    },
+    {
+      "condition": "#if defined __linux__",
+      "declarations": [
+        "macro ARCH_LIN"
+      ],
+      "header": "include/arch.hpp",
+      "lines": [
+        18,
+        20
+      ],
+      "sha256": "935c9bd0a30a6ab3b3e8888aaff92ccb84cbd314fe959c881c4316bf3adbdd8d",
+      "skipped_in": [
+        "mac-arm64",
+        "mac-x64",
+        "win-x64"
       ]
     },
     {
@@ -99,7 +136,10 @@
       "sha256": "f587a2c93298c5744e5eb213e0e7a5caa26df1dd5c56ecbca23fe333200fdc28",
       "skipped_in": [
         "lin-x64",
-        "lin-x64-simde"
+        "lin-x64-simde",
+        "mac-arm64",
+        "mac-x64",
+        "win-x64"
       ]
     },
     {
@@ -116,7 +156,9 @@
       "sha256": "c5df80b48b91736fe96b7e5056d38761c38c8a09475107afe31d1a13e9ddf502",
       "skipped_in": [
         "lin-x64",
-        "lin-x64-simde"
+        "lin-x64-simde",
+        "mac-arm64",
+        "mac-x64"
       ]
     },
     {
@@ -130,7 +172,10 @@
       "sha256": "89c7aa2c8a803ff568e341d47ad63f35223376cc15ce5666ffdbd0daa138506e",
       "skipped_in": [
         "lin-x64",
-        "lin-x64-simde"
+        "lin-x64-simde",
+        "mac-arm64",
+        "mac-x64",
+        "win-x64"
       ]
     },
     {
@@ -144,7 +189,10 @@
       "sha256": "6c4d89500c62ce0329519efd4376e799b7aed6f0a4f932ef966e285ded756b25",
       "skipped_in": [
         "lin-x64",
-        "lin-x64-simde"
+        "lin-x64-simde",
+        "mac-arm64",
+        "mac-x64",
+        "win-x64"
       ]
     },
     {
@@ -158,7 +206,10 @@
       "sha256": "cc2b87dff706a70666d7acba024d04de58362bfe1a28716392f93b1373f73384",
       "skipped_in": [
         "lin-x64",
-        "lin-x64-simde"
+        "lin-x64-simde",
+        "mac-arm64",
+        "mac-x64",
+        "win-x64"
       ]
     },
     {
@@ -174,7 +225,10 @@
       "sha256": "c1ad0a709742793f468151118d31bd4660aec834f22e19d9a3184951c24c5bef",
       "skipped_in": [
         "lin-x64",
-        "lin-x64-simde"
+        "lin-x64-simde",
+        "mac-arm64",
+        "mac-x64",
+        "win-x64"
       ]
     },
     {
@@ -187,7 +241,8 @@
       ],
       "sha256": "20c164241e3388bf43c69088f1f29b6e8080a86b94259448e105bdfd68bbd232",
       "skipped_in": [
-        "lin-x64-simde"
+        "lin-x64-simde",
+        "mac-arm64"
       ]
     },
     {
@@ -202,7 +257,9 @@
       ],
       "sha256": "30492abcb3e5997e9421a4967adb97e39ebe79dadfc80ec4133e94e8cc7e99ca",
       "skipped_in": [
-        "lin-x64"
+        "lin-x64",
+        "mac-x64",
+        "win-x64"
       ]
     },
     {
@@ -217,7 +274,9 @@
       ],
       "sha256": "a8758fd1e47e81d9417b42d30f962dd637a3c4279516d790200bf0e6fa5d37cc",
       "skipped_in": [
-        "lin-x64"
+        "lin-x64",
+        "mac-x64",
+        "win-x64"
       ]
     },
     {
@@ -234,7 +293,9 @@
       "sha256": "98c60b713f9b83e36a0fc897fbe20df6f94f0add9b0659140c538c9c69b7d1e6",
       "skipped_in": [
         "lin-x64",
-        "lin-x64-simde"
+        "lin-x64-simde",
+        "mac-arm64",
+        "mac-x64"
       ]
     },
     {
@@ -251,7 +312,25 @@
       "sha256": "c791f7550fcfa86bf90f25c648e443f1446f05985dffef9b63973c8945cbd3e6",
       "skipped_in": [
         "lin-x64",
-        "lin-x64-simde"
+        "lin-x64-simde",
+        "win-x64"
+      ]
+    },
+    {
+      "condition": "#else",
+      "declarations": [
+        "macro RACK_MOD_CTRL",
+        "macro RACK_MOD_CTRL_NAME"
+      ],
+      "header": "include/widget/event.hpp",
+      "lines": [
+        16,
+        19
+      ],
+      "sha256": "2df6d0afdd4e077f58363720e35e88f11010976a3e4b535040bbfba32c6be58a",
+      "skipped_in": [
+        "mac-arm64",
+        "mac-x64"
       ]
     }
   ],
@@ -262,8 +341,10 @@
         "-x",
         "c++",
         "-std=c++11",
-        "-fPIC",
+        "-O3",
         "-funsafe-math-optimizations",
+        "-fno-omit-frame-pointer",
+        "-fPIC",
         "-march=nehalem"
       ],
       "headers": 112,
@@ -278,8 +359,10 @@
         "-x",
         "c++",
         "-std=c++11",
-        "-fPIC",
-        "-funsafe-math-optimizations"
+        "-O3",
+        "-funsafe-math-optimizations",
+        "-fno-omit-frame-pointer",
+        "-fPIC"
       ],
       "headers": 112,
       "note": "Linux x64 without -march=nehalem, so __SSE4_2__ is undefined and simd/common.hpp takes the SIMDe path that arm64 uses. Approximates the arm64 declaration surface; it is not an arm64 extraction.",
@@ -288,47 +371,71 @@
       "variant": "lin-x64-simde"
     },
     {
+      "declarations": 3248,
       "flags": [
         "-x",
         "c++",
         "-std=c++11",
+        "-O3",
+        "-funsafe-math-optimizations",
+        "-fno-omit-frame-pointer",
         "-stdlib=libc++",
+        "-march=armv8-a+fp+simd",
         "--target=arm64-apple-macos11"
       ],
-      "note": "Cross attempt",
+      "headers": 112,
+      "note": "SDK flags for macOS arm64, with libc++ and macOS C headers as zig ships them (Apple's SDK headers)",
       "platform": "mac-arm64",
-      "reason": "mac-arm64: 1 error(s); first: 'cstddef' file not found",
-      "status": "not_extracted",
+      "status": "ok",
+      "system_headers": "zig 0.17.0 lib directory, <zig-lib>",
+      "system_headers_read": 852,
+      "system_headers_sha256": "7252858c978fe5c966f4171f6e229f59bd3d31dc9f8555f3537a75338ff2c472",
       "variant": "mac-arm64"
     },
     {
+      "declarations": 3246,
       "flags": [
         "-x",
         "c++",
         "-std=c++11",
+        "-O3",
+        "-funsafe-math-optimizations",
+        "-fno-omit-frame-pointer",
         "-stdlib=libc++",
         "-march=nehalem",
         "--target=x86_64-apple-macos10.9"
       ],
-      "note": "Cross attempt",
+      "headers": 112,
+      "note": "SDK flags for macOS x64, with libc++ and macOS C headers as zig ships them (Apple's SDK headers)",
       "platform": "mac-x64",
-      "reason": "mac-x64: 1 error(s); first: 'cstddef' file not found",
-      "status": "not_extracted",
+      "status": "ok",
+      "system_headers": "zig 0.17.0 lib directory, <zig-lib>",
+      "system_headers_read": 849,
+      "system_headers_sha256": "f3190786885caba75d1f765bbe02620ce5f73d3a64e5af36700f6cf0aa0a3368",
       "variant": "mac-x64"
     },
     {
+      "declarations": 3251,
       "flags": [
         "-x",
         "c++",
         "-std=c++11",
+        "-O3",
+        "-funsafe-math-optimizations",
+        "-fno-omit-frame-pointer",
         "-march=nehalem",
         "-D_USE_MATH_DEFINES",
+        "-municode",
+        "-mno-ms-bitfields",
         "--target=x86_64-w64-mingw32"
       ],
-      "note": "Cross attempt",
+      "headers": 112,
+      "note": "SDK flags for Windows x64, with the C and C++ headers of Rack's own Windows toolchain (rack-plugin-toolchain: mingw-w64 v10, GCC 15.1.0's libstdc++)",
       "platform": "win-x64",
-      "reason": "win-x64: 1 error(s); first: 'cstddef' file not found",
-      "status": "not_extracted",
+      "status": "ok",
+      "system_headers": "rack-plugin-toolchain win-x64 (bin/rack-toolchain), <mingw-root>",
+      "system_headers_read": 205,
+      "system_headers_sha256": "3e10782d0306cb8ac7229b90ad9b994ba630d5f83474e1cf8a1883fd8ea6dc46",
       "variant": "win-x64"
     }
   ],
@@ -460,8 +567,8 @@
   "summary": {
     "by_classification": {
       "excluded_internal": 111,
-      "import": 37,
-      "public": 3097,
+      "import": 38,
+      "public": 3104,
       "public_opaque": 3
     },
     "by_family": {
@@ -470,7 +577,7 @@
       },
       "1 common/value": {
         "excluded_internal": 3,
-        "public": 336
+        "public": 343
       },
       "2 engine": {
         "excluded_internal": 22,
@@ -517,12 +624,12 @@
       "enum": 16,
       "enumerator": 65,
       "field": 528,
-      "function": 334,
+      "function": 337,
       "function_macro": 20,
       "function_template": 67,
       "method": 1199,
       "method_template": 17,
-      "object_macro": 20,
+      "object_macro": 24,
       "opaque_record": 24,
       "record": 272,
       "specialization": 3,
@@ -530,10 +637,10 @@
       "variable": 100
     },
     "deprecated": 92,
-    "entries": 3248,
-    "platform_conditional": 7,
+    "entries": 3256,
+    "platform_conditional": 14,
     "unstable": 6,
-    "variant_differences": 2
+    "variant_differences": 11
   },
   "toolchain": {
     "bindings": "clang==21.1.7",
@@ -999,12 +1106,12 @@
     {"access": "public", "classification": "public", "header": "include/random.hpp", "id": "constructor:rack::random::Xoroshiro128Plus::Xoroshiro128Plus()", "kind": "constructor", "line": 31, "name": "rack::random::Xoroshiro128Plus::Xoroshiro128Plus", "params": []},
     {"access": "public", "classification": "public", "explicit": true, "header": "include/random.hpp", "id": "constructor:rack::random::Xoroshiro128Plus::Xoroshiro128Plus(uint64_t, uint64_t)", "kind": "constructor", "line": 33, "name": "rack::random::Xoroshiro128Plus::Xoroshiro128Plus", "params": [{"name": "s0", "type": "uint64_t"}, {"default": "0", "name": "s1", "type": "uint64_t"}], "types": ["system:uint64_t"]},
     {"access": "public", "classification": "public", "defaulted": true, "header": "include/simd/Vector.hpp", "id": "constructor:rack::simd::Vector<float, 4>::Vector()", "kind": "constructor", "line": 46, "name": "rack::simd::Vector<float, 4>::Vector", "params": []},
-    {"access": "public", "classification": "public", "header": "include/simd/Vector.hpp", "id": "constructor:rack::simd::Vector<float, 4>::Vector(__m128)", "kind": "constructor", "line": 49, "name": "rack::simd::Vector<float, 4>::Vector", "params": [{"name": "v", "type": "__m128"}], "types": ["system:__m128"]},
+    {"access": "public", "classification": "public", "header": "include/simd/Vector.hpp", "id": "constructor:rack::simd::Vector<float, 4>::Vector(__m128)", "kind": "constructor", "line": 49, "name": "rack::simd::Vector<float, 4>::Vector", "params": [{"name": "v", "type": "__m128"}], "per_variant": {"mac-arm64": {"types": ["simde/x86/sse.h:__m128"]}}, "types": ["system:__m128"]},
     {"access": "public", "classification": "public", "header": "include/simd/Vector.hpp", "id": "constructor:rack::simd::Vector<float, 4>::Vector(float)", "kind": "constructor", "line": 52, "name": "rack::simd::Vector<float, 4>::Vector", "params": [{"name": "x", "type": "float"}]},
     {"access": "public", "classification": "public", "header": "include/simd/Vector.hpp", "id": "constructor:rack::simd::Vector<float, 4>::Vector(float, float, float, float)", "kind": "constructor", "line": 57, "name": "rack::simd::Vector<float, 4>::Vector", "params": [{"name": "x1", "type": "float"}, {"name": "x2", "type": "float"}, {"name": "x3", "type": "float"}, {"name": "x4", "type": "float"}]},
     {"access": "public", "classification": "public", "header": "include/simd/Vector.hpp", "id": "constructor:rack::simd::Vector<float, 4>::Vector(rack::simd::Vector<int32_t, 4>)", "kind": "constructor", "line": 101, "name": "rack::simd::Vector<float, 4>::Vector", "params": [{"name": "a", "type": "rack::simd::Vector<int32_t, 4>"}], "types": ["system:int32_t"]},
     {"access": "public", "classification": "public", "defaulted": true, "header": "include/simd/Vector.hpp", "id": "constructor:rack::simd::Vector<int32_t, 4>::Vector()", "kind": "constructor", "line": 117, "name": "rack::simd::Vector<int32_t, 4>::Vector", "params": []},
-    {"access": "public", "classification": "public", "header": "include/simd/Vector.hpp", "id": "constructor:rack::simd::Vector<int32_t, 4>::Vector(__m128i)", "kind": "constructor", "line": 118, "name": "rack::simd::Vector<int32_t, 4>::Vector", "params": [{"name": "v", "type": "__m128i"}], "types": ["system:__m128i"]},
+    {"access": "public", "classification": "public", "header": "include/simd/Vector.hpp", "id": "constructor:rack::simd::Vector<int32_t, 4>::Vector(__m128i)", "kind": "constructor", "line": 118, "name": "rack::simd::Vector<int32_t, 4>::Vector", "params": [{"name": "v", "type": "__m128i"}], "per_variant": {"mac-arm64": {"types": ["simde/x86/sse2.h:__m128i"]}}, "types": ["system:__m128i"]},
     {"access": "public", "classification": "public", "header": "include/simd/Vector.hpp", "id": "constructor:rack::simd::Vector<int32_t, 4>::Vector(int32_t)", "kind": "constructor", "line": 119, "name": "rack::simd::Vector<int32_t, 4>::Vector", "params": [{"name": "x", "type": "int32_t"}], "types": ["system:int32_t"]},
     {"access": "public", "classification": "public", "header": "include/simd/Vector.hpp", "id": "constructor:rack::simd::Vector<int32_t, 4>::Vector(int32_t, int32_t, int32_t, int32_t)", "kind": "constructor", "line": 122, "name": "rack::simd::Vector<int32_t, 4>::Vector", "params": [{"name": "x1", "type": "int32_t"}, {"name": "x2", "type": "int32_t"}, {"name": "x3", "type": "int32_t"}, {"name": "x4", "type": "int32_t"}], "types": ["system:int32_t"]},
     {"access": "public", "classification": "public", "header": "include/simd/Vector.hpp", "id": "constructor:rack::simd::Vector<int32_t, 4>::Vector(rack::simd::Vector<float, 4>)", "kind": "constructor", "line": 147, "name": "rack::simd::Vector<int32_t, 4>::Vector", "params": [{"name": "a", "type": "rack::simd::Vector<float, 4>"}]},
@@ -1582,9 +1689,9 @@
     {"access": "public", "classification": "public", "header": "include/settings.hpp", "id": "field:rack::settings::PluginWhitelist::moduleSlugs", "kind": "field", "line": 127, "name": "rack::settings::PluginWhitelist::moduleSlugs", "type": "std::set<std::string>", "types": ["std:std::set", "std:std::string"]},
     {"access": "public", "classification": "public", "header": "include/settings.hpp", "id": "field:rack::settings::PluginWhitelist::subscribed", "kind": "field", "line": 126, "name": "rack::settings::PluginWhitelist::subscribed", "type": "bool"},
     {"access": "public", "anonymous_group": "rack::simd::Vector<float, 4>@38", "classification": "public", "header": "include/simd/Vector.hpp", "id": "field:rack::simd::Vector<float, 4>::s", "kind": "field", "line": 42, "name": "rack::simd::Vector<float, 4>::s", "type": "float[4]"},
-    {"access": "public", "anonymous_group": "rack::simd::Vector<float, 4>@38", "classification": "public", "header": "include/simd/Vector.hpp", "id": "field:rack::simd::Vector<float, 4>::v", "kind": "field", "line": 39, "name": "rack::simd::Vector<float, 4>::v", "type": "__m128", "types": ["system:__m128"]},
+    {"access": "public", "anonymous_group": "rack::simd::Vector<float, 4>@38", "classification": "public", "header": "include/simd/Vector.hpp", "id": "field:rack::simd::Vector<float, 4>::v", "kind": "field", "line": 39, "name": "rack::simd::Vector<float, 4>::v", "per_variant": {"mac-arm64": {"types": ["simde/x86/sse.h:__m128"]}}, "type": "__m128", "types": ["system:__m128"]},
     {"access": "public", "anonymous_group": "rack::simd::Vector<int32_t, 4>@112", "classification": "public", "header": "include/simd/Vector.hpp", "id": "field:rack::simd::Vector<int32_t, 4>::s", "kind": "field", "line": 114, "name": "rack::simd::Vector<int32_t, 4>::s", "type": "int32_t[4]", "types": ["system:int32_t"]},
-    {"access": "public", "anonymous_group": "rack::simd::Vector<int32_t, 4>@112", "classification": "public", "header": "include/simd/Vector.hpp", "id": "field:rack::simd::Vector<int32_t, 4>::v", "kind": "field", "line": 113, "name": "rack::simd::Vector<int32_t, 4>::v", "type": "__m128i", "types": ["system:__m128i"]},
+    {"access": "public", "anonymous_group": "rack::simd::Vector<int32_t, 4>@112", "classification": "public", "header": "include/simd/Vector.hpp", "id": "field:rack::simd::Vector<int32_t, 4>::v", "kind": "field", "line": 113, "name": "rack::simd::Vector<int32_t, 4>::v", "per_variant": {"mac-arm64": {"types": ["simde/x86/sse2.h:__m128i"]}}, "type": "__m128i", "types": ["system:__m128i"]},
     {"access": "public", "classification": "public", "header": "include/string.hpp", "id": "field:rack::string::Location::column", "kind": "field", "line": 54, "name": "rack::string::Location::column", "type": "size_t", "types": ["system:size_t"]},
     {"access": "public", "classification": "public", "header": "include/string.hpp", "id": "field:rack::string::Location::line", "kind": "field", "line": 52, "name": "rack::string::Location::line", "type": "size_t", "types": ["system:size_t"]},
     {"access": "public", "classification": "public", "header": "include/string.hpp", "id": "field:rack::string::Version::parts", "kind": "field", "line": 174, "name": "rack::string::Version::parts", "type": "std::vector<std::string>", "types": ["std:std::string", "std:std::vector"]},
@@ -1695,6 +1802,7 @@
     {"access": "public", "classification": "public", "header": "include/window/Window.hpp", "id": "field:rack::window::Window::win", "kind": "field", "line": 59, "name": "rack::window::Window::win", "type": "GLFWwindow *", "types": ["GLFW/glfw3.h:GLFWwindow"]},
     {"access": "public", "classification": "public", "header": "include/window/Window.hpp", "id": "field:rack::window::Window::windowRatio", "kind": "field", "line": 67, "name": "rack::window::Window::windowRatio", "type": "float"},
     {"access": "namespace", "classification": "public", "header": "include/plugin/callbacks.hpp", "id": "function:destroy()", "kind": "function", "line": 18, "name": "destroy", "params": [], "returns": "void"},
+    {"absent_in": ["lin-x64", "lin-x64-simde", "mac-arm64", "mac-x64"], "access": "namespace", "classification": "public", "conditions": ["defined ARCH_WIN"], "header": "include/common.hpp", "id": "function:fopen_u8(const char *, const char *)", "kind": "function", "line": 141, "name": "fopen_u8", "params": [{"name": "filename", "type": "const char *"}, {"name": "mode", "type": "const char *"}], "returns": "FILE *", "types": ["system:FILE"]},
     {"access": "namespace", "classification": "public", "header": "include/plugin/callbacks.hpp", "id": "function:init(rack::plugin::Plugin *)", "kind": "function", "line": 11, "name": "init", "params": [{"name": "plugin", "type": "rack::plugin::Plugin *"}], "returns": "void"},
     {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/common.hpp", "id": "function:operator\"\"_f32(long double)", "inline": true, "kind": "function", "line": 127, "name": "operator\"\"_f32", "params": [{"name": "x", "type": "long double"}], "returns": "float"},
     {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/common.hpp", "id": "function:operator\"\"_f32(unsigned long long)", "inline": true, "kind": "function", "line": 128, "name": "operator\"\"_f32", "params": [{"name": "x", "type": "unsigned long long"}], "returns": "float"},
@@ -1926,12 +2034,14 @@
     {"access": "namespace", "classification": "public", "header": "include/simd/functions.hpp", "id": "function:rack::simd::sqrt(rack::simd::float_4)", "inline": true, "kind": "function", "line": 102, "name": "rack::simd::sqrt", "params": [{"name": "x", "type": "rack::simd::float_4"}], "returns": "rack::simd::float_4"},
     {"access": "namespace", "classification": "public", "header": "include/simd/functions.hpp", "id": "function:rack::simd::tan(rack::simd::float_4)", "inline": true, "kind": "function", "line": 144, "name": "rack::simd::tan", "params": [{"name": "x", "type": "rack::simd::float_4"}], "returns": "rack::simd::float_4"},
     {"access": "namespace", "classification": "public", "header": "include/simd/functions.hpp", "id": "function:rack::simd::trunc(rack::simd::float_4)", "inline": true, "kind": "function", "line": 167, "name": "rack::simd::trunc", "params": [{"name": "a", "type": "rack::simd::float_4"}], "returns": "rack::simd::float_4"},
+    {"absent_in": ["lin-x64", "lin-x64-simde", "mac-arm64", "mac-x64"], "access": "namespace", "classification": "public", "conditions": ["defined ARCH_WIN"], "header": "include/string.hpp", "id": "function:rack::string::UTF16toUTF8(const std::wstring &)", "kind": "function", "line": 149, "name": "rack::string::UTF16toUTF8", "params": [{"name": "w", "type": "const std::wstring &"}], "returns": "std::string", "types": ["std:std::string", "std:std::wstring"]},
     {"access": "namespace", "classification": "public", "header": "include/string.hpp", "id": "function:rack::string::UTF32toUTF8(const std::u32string &)", "kind": "function", "line": 112, "name": "rack::string::UTF32toUTF8", "params": [{"name": "s32", "type": "const std::u32string &"}], "returns": "std::string", "types": ["std:std::string", "std:std::u32string"]},
     {"access": "namespace", "classification": "public", "header": "include/string.hpp", "id": "function:rack::string::UTF8CodepointIndex(const std::string &, size_t)", "kind": "function", "line": 135, "name": "rack::string::UTF8CodepointIndex", "params": [{"name": "s8", "type": "const std::string &"}, {"name": "pos", "type": "size_t"}], "returns": "size_t", "types": ["std:std::string", "system:size_t"]},
     {"access": "namespace", "classification": "public", "header": "include/string.hpp", "id": "function:rack::string::UTF8CodepointPos(const std::string &, size_t)", "kind": "function", "line": 140, "name": "rack::string::UTF8CodepointPos", "params": [{"name": "s8", "type": "const std::string &"}, {"name": "index", "type": "size_t"}], "returns": "size_t", "types": ["std:std::string", "system:size_t"]},
     {"access": "namespace", "classification": "public", "header": "include/string.hpp", "id": "function:rack::string::UTF8Length(const std::string &)", "kind": "function", "line": 130, "name": "rack::string::UTF8Length", "params": [{"name": "s8", "type": "const std::string &"}], "returns": "size_t", "types": ["std:std::string", "system:size_t"]},
     {"access": "namespace", "classification": "public", "header": "include/string.hpp", "id": "function:rack::string::UTF8NextCodepoint(const std::string &, size_t)", "kind": "function", "line": 121, "name": "rack::string::UTF8NextCodepoint", "params": [{"name": "s8", "type": "const std::string &"}, {"name": "pos", "type": "size_t"}], "returns": "size_t", "types": ["std:std::string", "system:size_t"]},
     {"access": "namespace", "classification": "public", "header": "include/string.hpp", "id": "function:rack::string::UTF8PrevCodepoint(const std::string &, size_t)", "kind": "function", "line": 126, "name": "rack::string::UTF8PrevCodepoint", "params": [{"name": "s8", "type": "const std::string &"}, {"name": "pos", "type": "size_t"}], "returns": "size_t", "types": ["std:std::string", "system:size_t"]},
+    {"absent_in": ["lin-x64", "lin-x64-simde", "mac-arm64", "mac-x64"], "access": "namespace", "classification": "public", "conditions": ["defined ARCH_WIN"], "header": "include/string.hpp", "id": "function:rack::string::UTF8toUTF16(const std::string &)", "kind": "function", "line": 150, "name": "rack::string::UTF8toUTF16", "params": [{"name": "s", "type": "const std::string &"}], "returns": "std::wstring", "types": ["std:std::string", "std:std::wstring"]},
     {"access": "namespace", "classification": "public", "header": "include/string.hpp", "id": "function:rack::string::UTF8toUTF32(const std::string &)", "kind": "function", "line": 116, "name": "rack::string::UTF8toUTF32", "params": [{"name": "s8", "type": "const std::string &"}], "returns": "std::u32string", "types": ["std:std::string", "std:std::u32string"]},
     {"access": "namespace", "classification": "public", "header": "include/string.hpp", "id": "function:rack::string::convertFArg(const std::string &)", "inline": true, "kind": "function", "line": 23, "name": "rack::string::convertFArg", "params": [{"name": "s", "type": "const std::string &"}], "returns": "const char *", "types": ["std:std::string"]},
     {"access": "namespace", "classification": "public", "header": "include/string.hpp", "id": "function:rack::string::ellipsize(const std::string &, size_t)", "kind": "function", "line": 42, "name": "rack::string::ellipsize", "params": [{"name": "s", "type": "const std::string &"}, {"name": "maxCodepoints", "type": "size_t"}], "returns": "std::string", "types": ["std:std::string", "system:size_t"]},
@@ -2017,17 +2127,17 @@
     {"access": "namespace", "classification": "public", "header": "include/window/Svg.hpp", "id": "function:rack::window::svgDraw(NVGcontext *, NSVGimage *)", "kind": "function", "line": 62, "name": "rack::window::svgDraw", "params": [{"name": "vg", "type": "NVGcontext *"}, {"name": "svg", "type": "NSVGimage *"}], "returns": "void", "types": ["nanosvg.h:NSVGimage", "nanovg.h:NVGcontext"]},
     {"access": "namespace", "classification": "public", "header": "include/plugin/callbacks.hpp", "id": "function:settingsFromJson(json_t *)", "kind": "function", "line": 34, "name": "settingsFromJson", "params": [{"name": "rootJ", "type": "json_t *"}], "returns": "void", "types": ["jansson.h:json_t"]},
     {"access": "namespace", "classification": "public", "header": "include/plugin/callbacks.hpp", "id": "function:settingsToJson()", "kind": "function", "line": 27, "name": "settingsToJson", "params": [], "returns": "json_t *", "types": ["jansson.h:json_t"]},
-    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun_extension.h", "id": "function:sse_mathfun_atan2_ps(__m128, __m128)", "inline": true, "kind": "function", "line": 247, "name": "sse_mathfun_atan2_ps", "params": [{"name": "y", "type": "__m128"}, {"name": "x", "type": "__m128"}], "returns": "__m128", "types": ["system:__m128"]},
-    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun_extension.h", "id": "function:sse_mathfun_atan_ps(__m128)", "inline": true, "kind": "function", "line": 176, "name": "sse_mathfun_atan_ps", "params": [{"name": "x", "type": "__m128"}], "returns": "__m128", "types": ["system:__m128"]},
-    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun.h", "id": "function:sse_mathfun_cos_ps(__m128)", "inline": true, "kind": "function", "line": 297, "name": "sse_mathfun_cos_ps", "params": [{"name": "x", "type": "__m128"}], "returns": "__m128", "types": ["system:__m128"]},
-    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun_extension.h", "id": "function:sse_mathfun_cot_ps(__m128)", "inline": true, "kind": "function", "line": 171, "name": "sse_mathfun_cot_ps", "params": [{"name": "x", "type": "__m128"}], "returns": "__m128", "types": ["system:__m128"]},
-    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun.h", "id": "function:sse_mathfun_exp_ps(__m128)", "inline": true, "kind": "function", "line": 129, "name": "sse_mathfun_exp_ps", "params": [{"name": "x", "type": "__m128"}], "returns": "__m128", "types": ["system:__m128"]},
-    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun.h", "id": "function:sse_mathfun_log_ps(__m128)", "inline": true, "kind": "function", "line": 58, "name": "sse_mathfun_log_ps", "params": [{"name": "x", "type": "__m128"}], "returns": "__m128", "types": ["system:__m128"]},
-    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun.h", "id": "function:sse_mathfun_one_ps()", "inline": true, "kind": "function", "line": 50, "name": "sse_mathfun_one_ps", "params": [], "returns": "__m128", "types": ["system:__m128"]},
-    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun.h", "id": "function:sse_mathfun_sin_ps(__m128)", "inline": true, "kind": "function", "line": 209, "name": "sse_mathfun_sin_ps", "params": [{"name": "x", "type": "__m128"}], "returns": "__m128", "types": ["system:__m128"]},
-    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun.h", "id": "function:sse_mathfun_sincos_ps(__m128, __m128 *, __m128 *)", "inline": true, "kind": "function", "line": 377, "name": "sse_mathfun_sincos_ps", "params": [{"name": "x", "type": "__m128"}, {"name": "s", "type": "__m128 *"}, {"name": "c", "type": "__m128 *"}], "returns": "void", "types": ["system:__m128"]},
-    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun_extension.h", "id": "function:sse_mathfun_tan_ps(__m128)", "inline": true, "kind": "function", "line": 167, "name": "sse_mathfun_tan_ps", "params": [{"name": "x", "type": "__m128"}], "returns": "__m128", "types": ["system:__m128"]},
-    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun_extension.h", "id": "function:sse_mathfun_tancot_ps(__m128, int)", "inline": true, "kind": "function", "line": 75, "name": "sse_mathfun_tancot_ps", "params": [{"name": "x", "type": "__m128"}, {"name": "cotFlag", "type": "int"}], "returns": "__m128", "types": ["system:__m128"]},
+    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun_extension.h", "id": "function:sse_mathfun_atan2_ps(__m128, __m128)", "inline": true, "kind": "function", "line": 247, "name": "sse_mathfun_atan2_ps", "params": [{"name": "y", "type": "__m128"}, {"name": "x", "type": "__m128"}], "per_variant": {"mac-arm64": {"types": ["simde/x86/sse.h:__m128"]}}, "returns": "__m128", "types": ["system:__m128"]},
+    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun_extension.h", "id": "function:sse_mathfun_atan_ps(__m128)", "inline": true, "kind": "function", "line": 176, "name": "sse_mathfun_atan_ps", "params": [{"name": "x", "type": "__m128"}], "per_variant": {"mac-arm64": {"types": ["simde/x86/sse.h:__m128"]}}, "returns": "__m128", "types": ["system:__m128"]},
+    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun.h", "id": "function:sse_mathfun_cos_ps(__m128)", "inline": true, "kind": "function", "line": 297, "name": "sse_mathfun_cos_ps", "params": [{"name": "x", "type": "__m128"}], "per_variant": {"mac-arm64": {"types": ["simde/x86/sse.h:__m128"]}}, "returns": "__m128", "types": ["system:__m128"]},
+    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun_extension.h", "id": "function:sse_mathfun_cot_ps(__m128)", "inline": true, "kind": "function", "line": 171, "name": "sse_mathfun_cot_ps", "params": [{"name": "x", "type": "__m128"}], "per_variant": {"mac-arm64": {"types": ["simde/x86/sse.h:__m128"]}}, "returns": "__m128", "types": ["system:__m128"]},
+    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun.h", "id": "function:sse_mathfun_exp_ps(__m128)", "inline": true, "kind": "function", "line": 129, "name": "sse_mathfun_exp_ps", "params": [{"name": "x", "type": "__m128"}], "per_variant": {"mac-arm64": {"types": ["simde/x86/sse.h:__m128"]}}, "returns": "__m128", "types": ["system:__m128"]},
+    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun.h", "id": "function:sse_mathfun_log_ps(__m128)", "inline": true, "kind": "function", "line": 58, "name": "sse_mathfun_log_ps", "params": [{"name": "x", "type": "__m128"}], "per_variant": {"mac-arm64": {"types": ["simde/x86/sse.h:__m128"]}}, "returns": "__m128", "types": ["system:__m128"]},
+    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun.h", "id": "function:sse_mathfun_one_ps()", "inline": true, "kind": "function", "line": 50, "name": "sse_mathfun_one_ps", "params": [], "per_variant": {"mac-arm64": {"types": ["simde/x86/sse.h:__m128"]}}, "returns": "__m128", "types": ["system:__m128"]},
+    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun.h", "id": "function:sse_mathfun_sin_ps(__m128)", "inline": true, "kind": "function", "line": 209, "name": "sse_mathfun_sin_ps", "params": [{"name": "x", "type": "__m128"}], "per_variant": {"mac-arm64": {"types": ["simde/x86/sse.h:__m128"]}}, "returns": "__m128", "types": ["system:__m128"]},
+    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun.h", "id": "function:sse_mathfun_sincos_ps(__m128, __m128 *, __m128 *)", "inline": true, "kind": "function", "line": 377, "name": "sse_mathfun_sincos_ps", "params": [{"name": "x", "type": "__m128"}, {"name": "s", "type": "__m128 *"}, {"name": "c", "type": "__m128 *"}], "per_variant": {"mac-arm64": {"types": ["simde/x86/sse.h:__m128"]}}, "returns": "void", "types": ["system:__m128"]},
+    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun_extension.h", "id": "function:sse_mathfun_tan_ps(__m128)", "inline": true, "kind": "function", "line": 167, "name": "sse_mathfun_tan_ps", "params": [{"name": "x", "type": "__m128"}], "per_variant": {"mac-arm64": {"types": ["simde/x86/sse.h:__m128"]}}, "returns": "__m128", "types": ["system:__m128"]},
+    {"access": "namespace", "classification": "public", "extern_c": true, "header": "include/simd/sse_mathfun_extension.h", "id": "function:sse_mathfun_tancot_ps(__m128, int)", "inline": true, "kind": "function", "line": 75, "name": "sse_mathfun_tancot_ps", "params": [{"name": "x", "type": "__m128"}, {"name": "cotFlag", "type": "int"}], "per_variant": {"mac-arm64": {"types": ["simde/x86/sse.h:__m128"]}}, "returns": "__m128", "types": ["system:__m128"]},
     {"access": "namespace", "classification": "public", "header": "include/common.hpp", "id": "function_template:rack::bitCast<type, type>($1)", "kind": "function_template", "line": 156, "name": "rack::bitCast", "params": [{"name": "from", "type": "$1"}], "returns": "$0", "template_params": [{"default": null, "kind": "type", "name": "To"}, {"default": null, "kind": "type", "name": "From"}]},
     {"access": "namespace", "classification": "public", "header": "include/common.hpp", "id": "function_template:rack::construct<type, type, type, type...>($1, $2, $3...)", "kind": "function_template", "line": 176, "name": "rack::construct", "params": [{"name": "f", "type": "$1"}, {"name": "v", "type": "$2"}, {"name": "args", "type": "$3..."}], "returns": "$0 *", "template_params": [{"default": null, "kind": "type", "name": "T"}, {"default": null, "kind": "type", "name": "F"}, {"default": null, "kind": "type", "name": "V"}, {"default": null, "kind": "type", "name": "Args", "pack": true}]},
     {"access": "namespace", "classification": "public", "header": "include/common.hpp", "id": "function_template:rack::construct<type>()", "kind": "function_template", "line": 171, "name": "rack::construct", "params": [], "returns": "$0 *", "template_params": [{"default": null, "kind": "type", "name": "T"}]},
@@ -2132,9 +2242,13 @@
     {"access": "namespace", "classification": "import", "evidence": "using-declaration or directive; not a declaration", "header": "include/rack.hpp", "id": "import:rack:using namespace window", "kind": "import", "line": 134, "name": "rack", "target": "using namespace window"},
     {"access": "namespace", "classification": "import", "evidence": "using-declaration or directive; not a declaration", "header": "include/rack.hpp", "id": "import:rack:using plugin::Model", "kind": "import", "line": 139, "name": "rack", "target": "using plugin::Model"},
     {"access": "namespace", "classification": "import", "evidence": "using-declaration or directive; not a declaration", "header": "include/rack.hpp", "id": "import:rack:using plugin::Plugin", "kind": "import", "line": 138, "name": "rack", "target": "using plugin::Plugin"},
+    {"absent_in": ["lin-x64", "lin-x64-simde", "mac-arm64", "mac-x64"], "access": "namespace", "classification": "import", "conditions": ["defined ARCH_WIN"], "evidence": "using-declaration or directive; not a declaration", "header": "include/common.hpp", "id": "import:std:using::fopen_u8", "kind": "import", "line": 145, "name": "std", "target": "using::fopen_u8"},
     {"body": "rack :: contextGet ( )", "classification": "public", "header": "include/context.hpp", "id": "macro:APP", "kind": "object_macro", "line": 71, "name": "APP"},
-    {"body": "1", "classification": "public", "conditions": ["defined __linux__"], "header": "include/arch.hpp", "id": "macro:ARCH_LIN", "kind": "object_macro", "line": 19, "name": "ARCH_LIN"},
-    {"body": "1", "classification": "public", "conditions": ["defined __x86_64__"], "header": "include/arch.hpp", "id": "macro:ARCH_X64", "kind": "object_macro", "line": 5, "name": "ARCH_X64"},
+    {"absent_in": ["lin-x64", "lin-x64-simde", "mac-x64", "win-x64"], "body": "1", "classification": "public", "conditions": ["defined __aarch64__"], "header": "include/arch.hpp", "id": "macro:ARCH_ARM64", "kind": "object_macro", "line": 8, "name": "ARCH_ARM64"},
+    {"absent_in": ["mac-arm64", "mac-x64", "win-x64"], "body": "1", "classification": "public", "conditions": ["defined __linux__"], "header": "include/arch.hpp", "id": "macro:ARCH_LIN", "kind": "object_macro", "line": 19, "name": "ARCH_LIN"},
+    {"absent_in": ["lin-x64", "lin-x64-simde", "win-x64"], "body": "1", "classification": "public", "conditions": ["defined __APPLE__"], "header": "include/arch.hpp", "id": "macro:ARCH_MAC", "kind": "object_macro", "line": 16, "name": "ARCH_MAC"},
+    {"absent_in": ["lin-x64", "lin-x64-simde", "mac-arm64", "mac-x64"], "body": "1", "classification": "public", "conditions": ["defined _WIN32"], "header": "include/arch.hpp", "id": "macro:ARCH_WIN", "kind": "object_macro", "line": 13, "name": "ARCH_WIN"},
+    {"absent_in": ["mac-arm64"], "body": "1", "classification": "public", "conditions": ["defined __x86_64__"], "header": "include/arch.hpp", "id": "macro:ARCH_X64", "kind": "object_macro", "line": 5, "name": "ARCH_X64"},
     {"body": "extern \"C\" { extern const unsigned char sym [ ] ; extern const unsigned int sym ## _len ; }", "classification": "public", "header": "include/common.hpp", "id": "macro:BINARY", "kind": "function_macro", "line": 104, "name": "BINARY", "params": ["sym"]},
     {"body": "( sym + sym ## _len )", "classification": "public", "header": "include/common.hpp", "id": "macro:BINARY_END", "kind": "function_macro", "line": 106, "name": "BINARY_END", "params": ["sym"]},
     {"body": "( sym ## _len )", "classification": "public", "header": "include/common.hpp", "id": "macro:BINARY_SIZE", "kind": "function_macro", "line": 107, "name": "BINARY_SIZE", "params": ["sym"]},
@@ -2159,19 +2273,20 @@
     {"body": "3", "classification": "public", "header": "include/widget/event.hpp", "id": "macro:RACK_HELD", "kind": "object_macro", "line": 36, "name": "RACK_HELD"},
     {"body": "GLFW_MOD_ALT", "classification": "public", "header": "include/widget/event.hpp", "id": "macro:RACK_MOD_ALT", "kind": "object_macro", "line": 24, "name": "RACK_MOD_ALT"},
     {"body": "\"Alt\"", "classification": "public", "header": "include/widget/event.hpp", "id": "macro:RACK_MOD_ALT_NAME", "kind": "object_macro", "line": 25, "name": "RACK_MOD_ALT_NAME"},
-    {"body": "GLFW_MOD_CONTROL", "classification": "public", "conditions": ["!(defined ARCH_MAC)"], "header": "include/widget/event.hpp", "id": "macro:RACK_MOD_CTRL", "kind": "object_macro", "line": 17, "name": "RACK_MOD_CTRL"},
-    {"body": "\"Ctrl\"", "classification": "public", "conditions": ["!(defined ARCH_MAC)"], "header": "include/widget/event.hpp", "id": "macro:RACK_MOD_CTRL_NAME", "kind": "object_macro", "line": 18, "name": "RACK_MOD_CTRL_NAME"},
+    {"body": "GLFW_MOD_CONTROL", "classification": "public", "conditions": ["!(defined ARCH_MAC)"], "header": "include/widget/event.hpp", "id": "macro:RACK_MOD_CTRL", "kind": "object_macro", "line": 17, "name": "RACK_MOD_CTRL", "per_variant": {"mac-arm64": {"body": "GLFW_MOD_SUPER", "conditions": ["defined ARCH_MAC"], "line": 14}, "mac-x64": {"body": "GLFW_MOD_SUPER", "conditions": ["defined ARCH_MAC"], "line": 14}}},
+    {"body": "\"Ctrl\"", "classification": "public", "conditions": ["!(defined ARCH_MAC)"], "header": "include/widget/event.hpp", "id": "macro:RACK_MOD_CTRL_NAME", "kind": "object_macro", "line": 18, "name": "RACK_MOD_CTRL_NAME", "per_variant": {"mac-arm64": {"body": "\"⌘\"", "conditions": ["defined ARCH_MAC"], "line": 15}, "mac-x64": {"body": "\"⌘\"", "conditions": ["defined ARCH_MAC"], "line": 15}}},
     {"body": "( GLFW_MOD_SHIFT | GLFW_MOD_CONTROL | GLFW_MOD_ALT | GLFW_MOD_SUPER )", "classification": "public", "header": "include/widget/event.hpp", "id": "macro:RACK_MOD_MASK", "kind": "object_macro", "line": 32, "name": "RACK_MOD_MASK"},
     {"body": "GLFW_MOD_SHIFT", "classification": "public", "header": "include/widget/event.hpp", "id": "macro:RACK_MOD_SHIFT", "kind": "object_macro", "line": 21, "name": "RACK_MOD_SHIFT"},
     {"body": "\"Shift\"", "classification": "public", "header": "include/widget/event.hpp", "id": "macro:RACK_MOD_SHIFT_NAME", "kind": "object_macro", "line": 22, "name": "RACK_MOD_SHIFT_NAME"},
     {"body": "( r ) . pos . x , ( r ) . pos . y , ( r ) . size . x , ( r ) . size . y", "classification": "public", "header": "include/math.hpp", "id": "macro:RECT_ARGS", "kind": "function_macro", "line": 542, "name": "RECT_ARGS", "params": ["r"]},
     {"body": "\"▸\"", "classification": "public", "header": "include/ui/common.hpp", "id": "macro:RIGHT_ARROW", "kind": "object_macro", "line": 13, "name": "RIGHT_ARROW"},
-    {"absent_in": ["lin-x64"], "body": "", "classification": "public", "conditions": ["!(defined __SSE4_2__)"], "header": "include/simd/common.hpp", "id": "macro:SIMDE_ENABLE_NATIVE_ALIASES", "kind": "object_macro", "line": 6, "name": "SIMDE_ENABLE_NATIVE_ALIASES"},
+    {"absent_in": ["lin-x64", "mac-x64", "win-x64"], "body": "", "classification": "public", "conditions": ["!(defined __SSE4_2__)"], "header": "include/simd/common.hpp", "id": "macro:SIMDE_ENABLE_NATIVE_ALIASES", "kind": "object_macro", "line": 6, "name": "SIMDE_ENABLE_NATIVE_ALIASES"},
     {"body": "TOSTRING_LITERAL ( x )", "classification": "public", "header": "include/common.hpp", "id": "macro:TOSTRING", "kind": "function_macro", "line": 63, "name": "TOSTRING", "params": ["x"]},
     {"body": "# x", "classification": "public", "header": "include/common.hpp", "id": "macro:TOSTRING_LITERAL", "kind": "function_macro", "line": 62, "name": "TOSTRING_LITERAL", "params": ["x"]},
     {"body": "( v ) . x , ( v ) . y", "classification": "public", "header": "include/math.hpp", "id": "macro:VEC_ARGS", "kind": "function_macro", "line": 541, "name": "VEC_ARGS", "params": ["v"]},
     {"body": "rack :: logger :: log ( rack :: logger :: WARN_LEVEL , __FILE__ , __LINE__ , __FUNCTION__ , format , ## __VA_ARGS__ )", "classification": "public", "header": "include/logger.hpp", "id": "macro:WARN", "kind": "function_macro", "line": 15, "name": "WARN", "params": ["format", "..."]},
-    {"absent_in": ["lin-x64"], "body": "SIMDE_MM_FROUND_NO_EXC", "classification": "public", "conditions": ["!defined _MM_FROUND_NO_EXC"], "header": "include/simd/functions.hpp", "id": "macro:_MM_FROUND_NO_EXC", "kind": "object_macro", "line": 164, "name": "_MM_FROUND_NO_EXC"},
+    {"absent_in": ["lin-x64", "mac-x64", "win-x64"], "body": "SIMDE_MM_FROUND_NO_EXC", "classification": "public", "conditions": ["!defined _MM_FROUND_NO_EXC"], "header": "include/simd/functions.hpp", "id": "macro:_MM_FROUND_NO_EXC", "kind": "object_macro", "line": 164, "name": "_MM_FROUND_NO_EXC"},
+    {"absent_in": ["lin-x64", "lin-x64-simde", "mac-arm64", "mac-x64"], "body": "fopen_u8", "classification": "public", "conditions": ["defined ARCH_WIN"], "header": "include/common.hpp", "id": "macro:fopen", "kind": "object_macro", "line": 138, "name": "fopen"},
     {"access": "public", "classification": "public", "header": "include/common.hpp", "id": "method:rack::Exception::what() const", "kind": "method", "line": 220, "name": "rack::Exception::what", "noexcept": true, "override": true, "params": [], "returns": "const char *", "virtual": true},
     {"access": "public", "classification": "public", "header": "include/Quantity.hpp", "id": "method:rack::Quantity::fromScaled(float)", "kind": "method", "line": 104, "name": "rack::Quantity::fromScaled", "params": [{"name": "scaledValue", "type": "float"}], "returns": "float"},
     {"access": "public", "classification": "public", "header": "include/Quantity.hpp", "id": "method:rack::Quantity::getDefaultValue()", "kind": "method", "line": 40, "name": "rack::Quantity::getDefaultValue", "params": [], "returns": "float", "virtual": true},

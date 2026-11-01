@@ -5,7 +5,11 @@
 // construct, get, DeferWrapper and the other macros) are in
 // src/rackpy/raw/_common.py and src/rackpy/raw/macros.py.
 #include "rackpy/rtti.hpp"
+#include <algorithm>
+#include <cerrno>
+#include <cstdio>
 #include <cstring>
+#include <memory>
 #include <string>
 
 #include "values.hpp"
@@ -35,6 +39,40 @@ const PrimInfo& prim(const std::string& name) {
 	}
 	throw py::value_error("bit_cast: type must be one of i8, u8, i16, u16, i32, u32, i64, u64, f32, f64, not " + name);
 }
+
+#if defined ARCH_WIN
+/** What fopen_u8 returns: an owned FILE*, closed by close(), at the end of a with block, or when Python frees it.
+Its C runtime is msvcrt, Rack's, which RackPy's MinGW DLLs use too, so fread and fclose here match _wfopen; and
+errno is read here, in msvcrt, and handed to Python as a number (RP-42). Every call holds the GIL, so a close
+cannot race a read. */
+struct CFile {
+	FILE* file = nullptr;
+	CFile() = default;
+	CFile(const CFile&) = delete;
+	CFile& operator=(const CFile&) = delete;
+	~CFile() {
+		if (file)
+			std::fclose(file);
+	}
+	FILE* open() const {
+		if (!file)
+			throw py::value_error("I/O operation on a closed CFile");
+		return file;
+	}
+};
+
+[[noreturn]] void raiseErrno(int error, py::object filename = py::none()) {
+	py::object exc = py::reinterpret_borrow<py::object>(PyExc_OSError)(error, std::strerror(error), filename);
+	PyErr_SetObject(reinterpret_cast<PyObject*>(Py_TYPE(exc.ptr())), exc.ptr());
+	throw py::error_already_set();
+}
+
+std::string noNul(const std::string& text, const char* what) {
+	if (text.find('\0') != std::string::npos)
+		throw py::value_error(std::string("fopen_u8: ") + what + " contains a NUL character");
+	return text;
+}
+#endif
 
 unsigned long long toU64(const py::int_& v, const char* what) {
 	unsigned long long x = PyLong_AsUnsignedLongLong(v.ptr());
@@ -163,6 +201,78 @@ void bindCommon(py::module_ raw) {
 #endif
 #if defined ARCH_LIN
 	arch.attr("ARCH_LIN") = ARCH_LIN;
+#endif
+
+#if defined ARCH_WIN
+	// common.hpp on Windows: fopen_u8 (and `#define fopen fopen_u8`, rackpy.raw.macros.fopen) opens a file by its
+	// UTF-8 name, where the C runtime's own fopen reads names in the ANSI code page.
+	py::class_<CFile>(raw, "CFile", "fopen_u8's FILE* (Windows only): owned, closed by close() or a with block.")
+		.def("read", [](CFile& f, long long size) {
+			FILE* file = f.open();
+			std::string out;
+			char buffer[65536];
+			while (size < 0 || (long long) out.size() < size) {
+				size_t want = size < 0 ? sizeof(buffer) : std::min(sizeof(buffer), (size_t) (size - out.size()));
+				size_t got = std::fread(buffer, 1, want, file);
+				out.append(buffer, got);
+				if (got < want) {
+					if (std::ferror(file))
+						raiseErrno(errno);
+					break;
+				}
+			}
+			return py::bytes(out);
+		}, py::arg("size") = -1, "fread: up to size bytes (all of them if negative); b'' at the end of the file.")
+		.def("write", [](CFile& f, py::buffer data) {
+			py::buffer_info info = data.request();
+			if (info.ndim != 1 || info.itemsize != 1)
+				throw py::type_error("CFile.write takes bytes (a 1-D byte buffer)");
+			size_t wrote = std::fwrite(info.ptr, 1, (size_t) info.size, f.open());
+			if (wrote < (size_t) info.size)
+				raiseErrno(errno);
+			return wrote;
+		}, py::arg("data"), "fwrite: writes all of data, or raises OSError; returns its length.")
+		.def("seek", [](CFile& f, long long offset, int whence) {
+			if (whence != SEEK_SET && whence != SEEK_CUR && whence != SEEK_END)
+				throw py::value_error("CFile.seek: whence must be 0, 1 or 2");
+			if (_fseeki64(f.open(), offset, whence) != 0)
+				raiseErrno(errno);
+			return (long long) _ftelli64(f.file);
+		}, py::arg("offset"), py::arg("whence") = 0, "fseek (64-bit); returns the new position.")
+		.def("tell", [](CFile& f) { return (long long) _ftelli64(f.open()); }, "ftell (64-bit).")
+		.def("flush", [](CFile& f) {
+			if (std::fflush(f.open()) != 0)
+				raiseErrno(errno);
+		}, "fflush.")
+		.def("close", [](CFile& f) {
+			if (!f.file)
+				return;
+			FILE* file = f.file;
+			f.file = nullptr;
+			if (std::fclose(file) != 0)
+				raiseErrno(errno);
+		}, "fclose; closing twice does nothing.")
+		.def_property_readonly("closed", [](const CFile& f) { return f.file == nullptr; })
+		.def("__enter__", [](CFile& f) -> CFile& {
+			f.open();
+			return f;
+		}, py::return_value_policy::reference)
+		.def("__exit__", [](CFile& f, py::args) {
+			if (f.file) {
+				std::fclose(f.file);
+				f.file = nullptr;
+			}
+		});
+	raw.def("fopen_u8", [](const std::string& filename, const std::string& mode) {
+		std::unique_ptr<CFile> f(new CFile());
+		errno = 0;
+		f->file = fopen_u8(noNul(filename, "the file name").c_str(), noNul(mode, "the mode").c_str());
+		if (!f->file)
+			raiseErrno(errno ? errno : EINVAL, py::str(filename));
+		return f;
+	}, py::arg("filename"), py::arg("mode"),
+		"Rack's (Windows only): _wfopen of the UTF-8 file name and mode. A CFile; OSError (with the C runtime's "
+		"errno) where C returns NULL.");
 #endif
 
 	// rack::Exception thrown by Rack becomes rackpy.raw.Exception (defined in Python, src/rackpy/raw/_common.py).

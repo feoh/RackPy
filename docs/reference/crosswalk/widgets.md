@@ -251,6 +251,8 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::componentlibrary::VCVSliderLight<type>` | class_template | bound | `rackpy.raw.componentlibrary.VCVSliderLight` | {ref}`componentlibrary#cl-templates <cl-templates>` |
 | `include/widget/event.hpp:13:macro RACK_MOD_CTRL` | conditional | not reviewed (another platform) | — | [surface-schema#conditional-branch-accountability](../surface-schema.md#conditional-branch-accountability) |
 | `include/widget/event.hpp:13:macro RACK_MOD_CTRL_NAME` | conditional | not reviewed (another platform) | — | [surface-schema#conditional-branch-accountability](../surface-schema.md#conditional-branch-accountability) |
+| `include/widget/event.hpp:16:macro RACK_MOD_CTRL` | conditional | not reviewed (another platform) | — | — |
+| `include/widget/event.hpp:16:macro RACK_MOD_CTRL_NAME` | conditional | not reviewed (another platform) | — | — |
 | `rack::app::CableWidget::CableWidget()` | constructor | bound | `rackpy.raw.app.CableWidget` | {ref}`app#app-cable-widgets <app-cable-widgets>` |
 | `rack::app::CircularShadow::CircularShadow()` | constructor | bound | `rackpy.raw.app.CircularShadow` | {ref}`app#app-svg <app-svg>` |
 | `rack::app::Knob::Knob()` | constructor | bound | `rackpy.raw.app.Knob` | [app#app-controls](../app.md#app-controls) |
@@ -661,8 +663,8 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `RACK_HELD` | macro | bound | `rackpy.raw.macros.RACK_HELD` | {ref}`ui#ui-input <ui-input>` |
 | `RACK_MOD_ALT` | macro | bound | `rackpy.raw.macros.RACK_MOD_ALT` | {ref}`ui#ui-input <ui-input>` |
 | `RACK_MOD_ALT_NAME` | macro | bound | `rackpy.raw.macros.RACK_MOD_ALT_NAME` | {ref}`ui#ui-input <ui-input>` |
-| `RACK_MOD_CTRL` | macro | bound | `rackpy.raw.macros.RACK_MOD_CTRL` | {ref}`ui#ui-input <ui-input>` |
-| `RACK_MOD_CTRL_NAME` | macro | bound | `rackpy.raw.macros.RACK_MOD_CTRL_NAME` | {ref}`ui#ui-input <ui-input>` |
+| `RACK_MOD_CTRL` | macro | bound | `rackpy.raw.macros.RACK_MOD_CTRL` | {ref}`ui#ui-input <ui-input>`, {ref}`values#values-macros <values-macros>` |
+| `RACK_MOD_CTRL_NAME` | macro | bound | `rackpy.raw.macros.RACK_MOD_CTRL_NAME` | {ref}`ui#ui-input <ui-input>`, {ref}`values#values-macros <values-macros>` |
 | `RACK_MOD_MASK` | macro | bound | `rackpy.raw.macros.RACK_MOD_MASK` | {ref}`ui#ui-input <ui-input>` |
 | `RACK_MOD_SHIFT` | macro | bound | `rackpy.raw.macros.RACK_MOD_SHIFT` | {ref}`ui#ui-input <ui-input>` |
 | `RACK_MOD_SHIFT_NAME` | macro | bound | `rackpy.raw.macros.RACK_MOD_SHIFT_NAME` | {ref}`ui#ui-input <ui-input>` |

@@ -155,9 +155,13 @@ The include closure contains only these platform conditionals:
 | `simd/common.hpp` | `__SSE4_2__` | Native SSE4.2 intrinsics or SIMDe |
 
 `rtaudio.hpp` also branches on `ARCH_MAC`, but it is not in the closure.
-System headers differ per platform as well. The Linux extraction resolved 303
-system headers. macOS and Windows extraction needs native SDKs or sysroots,
-which this machine does not have. RP-05 records that gap.
+System headers differ per platform as well. RP-42 extracts macOS with the
+libc++ and Apple C headers zig ships and Windows with Rack's own MinGW
+toolchain, and CI extracts both again natively and compares
+([surface schema](reference/surface-schema.md)). Of these branches, the
+inventory confirms each platform's side: `fopen_u8`, `fopen`, `UTF16toUTF8`
+and `UTF8toUTF16` on Windows only, `RACK_MOD_CTRL` per platform, and SIMDe's
+macros on arm64 only.
 
 ## Python candidates
 

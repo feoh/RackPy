@@ -5,16 +5,18 @@
 Each counted declaration in the [SDK inventory](surface-schema.md), by family and platform. A
 full-coverage release needs every available declaration `verified` or `excluded_internal`
 ([release bar](../coverage.md#release-bar)). `not inventoried` means platform or conditional-branch
-availability is unresolved, which blocks a release there.
+availability is unresolved, which blocks a release there. `superseded` counts a
+[conditional placeholder](surface-schema.md#conditional-branch-accountability) whose branch that
+platform's own extraction parsed: the semantic entry it names is counted instead.
 
 ## Totals
 
-| Platform | unreviewed | planned | implemented | verified | unrepresentable | excluded_internal | unknown | absent | not inventoried |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lin-x64 | 0 | 0 | 3098 | 0 | 0 | 111 | 0 | 15 | 0 |
-| mac-arm64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3224 |
-| mac-x64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3224 |
-| win-x64 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3224 |
+| Platform | unreviewed | planned | implemented | verified | unrepresentable | excluded_internal | unknown | absent | superseded | not inventoried |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| lin-x64 | 0 | 0 | 3098 | 0 | 0 | 111 | 0 | 22 | 4 | 0 |
+| mac-arm64 | 0 | 0 | 3100 | 0 | 0 | 111 | 0 | 18 | 6 | 0 |
+| mac-x64 | 0 | 0 | 3098 | 0 | 0 | 111 | 0 | 22 | 4 | 0 |
+| win-x64 | 0 | 0 | 3102 | 0 | 0 | 111 | 0 | 14 | 8 | 0 |
 
 ## Needs attention
 
@@ -25,15 +27,15 @@ availability is unresolved, which blocks a release there.
 
 ## By family (lin-x64)
 
-| Family | unreviewed | planned | implemented | verified | unrepresentable | excluded_internal | unknown | absent | not inventoried |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 0 entry point | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 0 |
-| 1 common/value | 0 | 0 | 336 | 0 | 0 | 3 | 0 | 8 | 0 |
-| 2 engine | 0 | 0 | 276 | 0 | 0 | 22 | 0 | 0 | 0 |
-| 3 plugin/model/assets/helpers | 0 | 0 | 90 | 0 | 0 | 4 | 0 | 0 | 0 |
-| 4 widgets/ui/app/componentlibrary | 0 | 0 | 1379 | 0 | 0 | 50 | 0 | 2 | 0 |
-| 5 window/rendering/context | 0 | 0 | 73 | 0 | 0 | 12 | 0 | 0 | 0 |
-| 6 dsp/simd | 0 | 0 | 558 | 0 | 0 | 0 | 0 | 4 | 0 |
-| 7 audio/midi | 0 | 0 | 169 | 0 | 0 | 6 | 0 | 0 | 0 |
-| 8 services | 0 | 0 | 128 | 0 | 0 | 9 | 0 | 0 | 0 |
-| 9 history | 0 | 0 | 88 | 0 | 0 | 5 | 0 | 0 | 0 |
+| Family | unreviewed | planned | implemented | verified | unrepresentable | excluded_internal | unknown | absent | superseded | not inventoried |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 entry point | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
+| 1 common/value | 0 | 0 | 336 | 0 | 0 | 3 | 0 | 15 | 2 | 0 |
+| 2 engine | 0 | 0 | 276 | 0 | 0 | 22 | 0 | 0 | 0 | 0 |
+| 3 plugin/model/assets/helpers | 0 | 0 | 90 | 0 | 0 | 4 | 0 | 0 | 0 | 0 |
+| 4 widgets/ui/app/componentlibrary | 0 | 0 | 1379 | 0 | 0 | 50 | 0 | 2 | 2 | 0 |
+| 5 window/rendering/context | 0 | 0 | 73 | 0 | 0 | 12 | 0 | 0 | 0 | 0 |
+| 6 dsp/simd | 0 | 0 | 558 | 0 | 0 | 0 | 0 | 4 | 0 | 0 |
+| 7 audio/midi | 0 | 0 | 169 | 0 | 0 | 6 | 0 | 0 | 0 | 0 |
+| 8 services | 0 | 0 | 128 | 0 | 0 | 9 | 0 | 0 | 0 | 0 |
+| 9 history | 0 | 0 | 88 | 0 | 0 | 5 | 0 | 0 | 0 | 0 |

@@ -11,16 +11,16 @@ Rack commit `061ccf63c1758599396ac1bb10d47345d9d34076`; clang version 23.1.4.
 | --- | --- | --- | --- |
 | lin-x64 | ok | 3246 | SDK flags for Linux x64 |
 | lin-x64-simde | ok | 3248 | Linux x64 without -march=nehalem, so __SSE4_2__ is undefined and simd/common.hpp takes the SIMDe path that arm64 uses. Approximates the arm64 declaration surface; it is not an arm64 extraction. |
-| mac-arm64 | not_extracted |  | mac-arm64: 1 error(s); first: 'cstddef' file not found |
-| mac-x64 | not_extracted |  | mac-x64: 1 error(s); first: 'cstddef' file not found |
-| win-x64 | not_extracted |  | win-x64: 1 error(s); first: 'cstddef' file not found |
+| mac-arm64 | ok | 3248 | SDK flags for macOS arm64, with libc++ and macOS C headers as zig ships them (Apple's SDK headers) |
+| mac-x64 | ok | 3246 | SDK flags for macOS x64, with libc++ and macOS C headers as zig ships them (Apple's SDK headers) |
+| win-x64 | ok | 3251 | SDK flags for Windows x64, with the C and C++ headers of Rack's own Windows toolchain (rack-plugin-toolchain: mingw-w64 v10, GCC 15.1.0's libstdc++) |
 
 ## By family
 
 | Family | excluded_internal | public | public_opaque |
 | --- | --- | --- | --- |
 | 0 entry point | 0 | 1 | 0 |
-| 1 common/value | 3 | 336 | 0 |
+| 1 common/value | 3 | 343 | 0 |
 | 2 engine | 22 | 276 | 0 |
 | 3 plugin/model/assets/helpers | 4 | 90 | 0 |
 | 4 widgets/ui/app/componentlibrary | 50 | 1379 | 0 |
@@ -44,12 +44,12 @@ Rack commit `061ccf63c1758599396ac1bb10d47345d9d34076`; clang version 23.1.4.
 | enum | 16 |
 | enumerator | 65 |
 | field | 528 |
-| function | 334 |
+| function | 337 |
 | function_macro | 20 |
 | function_template | 67 |
 | method | 1199 |
 | method_template | 17 |
-| object_macro | 20 |
+| object_macro | 24 |
 | opaque_record | 24 |
 | record | 272 |
 | specialization | 3 |
@@ -58,10 +58,10 @@ Rack commit `061ccf63c1758599396ac1bb10d47345d9d34076`; clang version 23.1.4.
 
 ## Other counts
 
-- Imports (`using` declarations and directives; not declarations): 37
+- Imports (`using` declarations and directives; not declarations): 38
 - Deprecated (attribute or comment): 92
 - Documented as unstable: 6
-- Inside a platform conditional: 7
-- Present in only some variants: 2
-- Conditional blocks skipped by a variant: 14
+- Inside a platform conditional: 14
+- Present in only some variants: 11
+- Conditional blocks skipped by a variant: 17
 - Dependency boundary types used by public declarations: 9

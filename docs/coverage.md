@@ -8,8 +8,10 @@ by `bin/inventory_sdk.py`, described in the [surface schema](reference/surface-s
 and counted in the [surface summary](reference/surface-summary.md). The tool parses
 a translation unit including only `rack.hpp` with the SDK's defines, dependency
 headers and compiler flags, and combines AST data with preprocessor records. It
-uses regular expressions only for code the preprocessor skipped. So far only
-Linux x64 has been extracted; macOS and Windows are recorded gaps.
+uses regular expressions only for code the preprocessor skipped. Linux x64
+(with its SIMDe variant), macOS arm64 and x64, and Windows x64 are all
+extracted (RP-42), and CI extracts the macOS and Windows variants again on
+those platforms and compares them.
 
 Keep stable IDs from qualified C++ name, kind, canonical signature, template
 parameters, source provenance and conditional availability. Enumerate inherited

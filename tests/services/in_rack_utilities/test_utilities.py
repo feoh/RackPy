@@ -2,6 +2,7 @@
 """RP-30A: rack::string, rack::random and rack::logger inside Rack."""
 
 import itertools
+import sys
 import time
 
 import pytest
@@ -68,6 +69,20 @@ def test_time_and_unicode() -> None:
     text = "aé€"
     assert rs.utf8_length(text) == 3 and rs.utf8_next_codepoint(text, 1) == 3 and rs.utf8_prev_codepoint(text, 3) == 1
     assert rs.utf8_codepoint_index(text, 3) == 2 and rs.utf8_codepoint_pos(text, 2) == 3
+
+
+def test_utf16_conversions_exist_on_windows_only() -> None:
+    # string.hpp declares UTF16toUTF8 and UTF8toUTF16 only under ARCH_WIN (RP-42).
+    if sys.platform == "win32":
+        units = [0x48, 0xE9, 0x20AC, 0xD83C, 0xDFB5]  # H, é, €, and a surrogate pair for U+1F3B5
+        assert rs.utf16_to_utf8(units) == "Hé€🎵".encode()
+        assert rs.utf8_to_utf16("Hé€🎵") == units and rs.utf8_to_utf16("Hé€🎵".encode()) == units
+        assert rs.utf16_to_utf8([]) == b"" and rs.utf8_to_utf16("") == []
+        # Windows' converters without flags replace what they cannot convert.
+        assert rs.utf16_to_utf8([0x41, 0xD800, 0x42]) == "A\ufffdB".encode()
+        assert rs.utf8_to_utf16(b"A\xffB") == [0x41, 0xFFFD, 0x42]
+    else:
+        assert not hasattr(rs, "utf16_to_utf8") and not hasattr(rs, "utf8_to_utf16")
 
 
 def test_versions_and_translations() -> None:

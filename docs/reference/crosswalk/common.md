@@ -12,6 +12,8 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::WeakPtr<type>` | class_template | bound | `rackpy.raw.WeakPtr` | {ref}`services#services-weakptr <services-weakptr>`, {ref}`services#services-weakptr-contract <services-weakptr-contract>` |
 | `include/arch.hpp:12:macro ARCH_WIN` | conditional | not reviewed (another platform) | — | [surface-schema#conditional-branch-accountability](../surface-schema.md#conditional-branch-accountability) |
 | `include/arch.hpp:15:macro ARCH_MAC` | conditional | not reviewed (another platform) | — | [surface-schema#conditional-branch-accountability](../surface-schema.md#conditional-branch-accountability) |
+| `include/arch.hpp:18:macro ARCH_LIN` | conditional | not reviewed (another platform) | — | — |
+| `include/arch.hpp:4:macro ARCH_X64` | conditional | not reviewed (another platform) | — | — |
 | `include/arch.hpp:7:macro ARCH_ARM64` | conditional | not reviewed (another platform) | — | [surface-schema#conditional-branch-accountability](../surface-schema.md#conditional-branch-accountability) |
 | `include/common.hpp:133:function fopen_u8` | conditional | not reviewed (another platform) | — | [surface-schema#conditional-branch-accountability](../surface-schema.md#conditional-branch-accountability) |
 | `include/common.hpp:133:macro fopen` | conditional | not reviewed (another platform) | — | [surface-schema#conditional-branch-accountability](../surface-schema.md#conditional-branch-accountability) |
@@ -68,6 +70,7 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::string::Location::column` | field | bound | `rackpy.raw.string.Location.column` | {ref}`services#services-string <services-string>` |
 | `rack::string::Location::line` | field | bound | `rackpy.raw.string.Location.line` | {ref}`services#services-string <services-string>` |
 | `rack::string::Version::parts` | field | bound | `rackpy.raw.string.Version.parts` | {ref}`services#services-string <services-string>` |
+| `fopen_u8(const char *, const char *)` | function | bound | `rackpy.raw.fopen_u8` | {ref}`values#values-fopen <values-fopen>` |
 | `operator""_f32(long double)` | function | bound | `rackpy.raw.literals.f32` | {ref}`values#values-common <values-common>` |
 | `operator""_f32(unsigned long long)` | function | bound | `rackpy.raw.literals.f32` | {ref}`values#values-common <values-common>` |
 | `operator""_f64(long double)` | function | bound | `rackpy.raw.literals.f64` | {ref}`values#values-common <values-common>` |
@@ -144,12 +147,14 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::random::u64()` | function | bound | `rackpy.raw.random.u64` | {ref}`services#services-random <services-random>` |
 | `rack::random::uniform()` | function | bound | `rackpy.raw.random.uniform` | {ref}`services#services-random <services-random>` |
 | `rack::random::vector(size_t)` | function | bound | `rackpy.raw.random.vector` | {ref}`services#services-random <services-random>` |
+| `rack::string::UTF16toUTF8(const std::wstring &)` | function | bound | `rackpy.raw.string.utf16_to_utf8` | {ref}`services#services-string <services-string>` |
 | `rack::string::UTF32toUTF8(const std::u32string &)` | function | bound | `rackpy.raw.string.utf32_to_utf8` | {ref}`services#services-string <services-string>` |
 | `rack::string::UTF8CodepointIndex(const std::string &, size_t)` | function | bound | `rackpy.raw.string.utf8_codepoint_index` | {ref}`services#services-string <services-string>` |
 | `rack::string::UTF8CodepointPos(const std::string &, size_t)` | function | bound | `rackpy.raw.string.utf8_codepoint_pos` | {ref}`services#services-string <services-string>` |
 | `rack::string::UTF8Length(const std::string &)` | function | bound | `rackpy.raw.string.utf8_length` | {ref}`services#services-string <services-string>` |
 | `rack::string::UTF8NextCodepoint(const std::string &, size_t)` | function | bound | `rackpy.raw.string.utf8_next_codepoint` | {ref}`services#services-string <services-string>` |
 | `rack::string::UTF8PrevCodepoint(const std::string &, size_t)` | function | bound | `rackpy.raw.string.utf8_prev_codepoint` | {ref}`services#services-string <services-string>` |
+| `rack::string::UTF8toUTF16(const std::string &)` | function | bound | `rackpy.raw.string.utf8_to_utf16` | {ref}`services#services-string <services-string>` |
 | `rack::string::UTF8toUTF32(const std::string &)` | function | bound | `rackpy.raw.string.utf8_to_utf32` | {ref}`services#services-string <services-string>` |
 | `rack::string::convertFArg(const std::string &)` | function | bound | `rackpy.raw.string.f` | {ref}`services#services-string <services-string>` |
 | `rack::string::ellipsize(const std::string &, size_t)` | function | bound | `rackpy.raw.string.ellipsize` | {ref}`services#services-string <services-string>` |
@@ -190,7 +195,10 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::string::convertFArg<type>(const $0 &)` | function_template | bound | `rackpy.raw.string.f` | {ref}`services#services-string <services-string>` |
 | `rack::string::f<type...>($0...)` | function_template | bound | `rackpy.raw.string.f` | {ref}`services#services-string <services-string>` |
 | `rack::string::join<type>(const $0 &, std::string)` | function_template | bound | `rackpy.raw.string.join` | {ref}`services#services-string <services-string>` |
+| `ARCH_ARM64` | macro | bound | `rackpy.raw.macros.ARCH_ARM64` | {ref}`values#values-macros <values-macros>` |
 | `ARCH_LIN` | macro | bound | `rackpy.raw.macros.ARCH_LIN` | {ref}`values#values-macros <values-macros>` |
+| `ARCH_MAC` | macro | bound | `rackpy.raw.macros.ARCH_MAC` | {ref}`values#values-macros <values-macros>` |
+| `ARCH_WIN` | macro | bound | `rackpy.raw.macros.ARCH_WIN` | {ref}`values#values-macros <values-macros>` |
 | `ARCH_X64` | macro | bound | `rackpy.raw.macros.ARCH_X64` | {ref}`values#values-macros <values-macros>` |
 | `BINARY` | macro | bound | — | {ref}`values#values-macros <values-macros>` |
 | `BINARY_END` | macro | bound | — | {ref}`values#values-macros <values-macros>` |
@@ -210,6 +218,7 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `TOSTRING_LITERAL` | macro | bound | — | {ref}`values#values-macros <values-macros>` |
 | `VEC_ARGS` | macro | bound | `rackpy.raw.macros.VEC_ARGS` | {ref}`values#values-macros <values-macros>` |
 | `WARN` | macro | bound | `rackpy.raw.macros.WARN` | {ref}`services#services-logger <services-logger>` |
+| `fopen` | macro | bound | `rackpy.raw.macros.fopen` | {ref}`values#values-macros <values-macros>`, {ref}`values#values-fopen <values-fopen>` |
 | `rack::Exception::what() const` | method | bound | `rackpy.raw.Exception.what` | {ref}`values#values-exception <values-exception>` |
 | `rack::Quantity::fromScaled(float)` | method | bound | `rackpy.raw.Quantity.from_scaled` | {ref}`values#values-quantity <values-quantity>`, {ref}`engine-module#borrowed-quantity-helpers <borrowed-quantity-helpers>` |
 | `rack::Quantity::getDefaultValue()` | method | bound | `rackpy.raw.Quantity.get_default_value` | {ref}`values#values-quantity <values-quantity>`, [callbacks#laboratory-quantities](../../explanation/callbacks.md#laboratory-quantities) |

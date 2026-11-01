@@ -56,6 +56,14 @@ for _name in ("ARCH_X64", "ARCH_ARM64", "ARCH_WIN", "ARCH_MAC", "ARCH_LIN"):
         globals()[_name] = getattr(_arch, _name)
         __all__.append(_name)
 
+if sys.platform == "win32":
+    # common.hpp on Windows: `#define fopen fopen_u8`, so a C++ plugin's fopen takes UTF-8 names (RP-42).
+    from rackpy.raw import fopen_u8 as _fopen_u8
+
+    fopen = _fopen_u8
+
+    __all__.append("fopen")
+
 
 def DEFER(f: Callable[[], object]) -> DeferWrapper:
     """``DEFER({ ... })``: run ``f`` when the ``with`` block exits."""

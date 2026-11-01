@@ -2,10 +2,12 @@
 """common.hpp and arch.hpp inside Rack: configuration strings, bitCast, literals, Exception,
 construct, get, DeferWrapper and the macros."""
 
+import errno
 import platform
 import struct
 import sys
 import warnings
+from pathlib import Path
 
 import pytest
 
@@ -117,6 +119,42 @@ def test_arch_macros_are_the_built_platform() -> None:
             assert getattr(macros, name) == 1, name
         else:
             assert not hasattr(macros, name), name
+
+
+def test_rack_mod_ctrl_is_the_built_platform() -> None:
+    # widget/event.hpp: Rack's "Ctrl" is GLFW's Super (Command) on macOS, its Control elsewhere (RP-42).
+    if sys.platform == "darwin":
+        assert (macros.RACK_MOD_CTRL, macros.RACK_MOD_CTRL_NAME) == (0x0008, "⌘")
+    else:
+        assert (macros.RACK_MOD_CTRL, macros.RACK_MOD_CTRL_NAME) == (0x0002, "Ctrl")
+    assert macros.RACK_MOD_CTRL & macros.RACK_MOD_MASK == macros.RACK_MOD_CTRL
+
+
+def test_fopen_u8_exists_on_windows_only(tmp_path: Path) -> None:
+    # common.hpp declares fopen_u8, and #defines fopen to it, only under ARCH_WIN (RP-42).
+    if sys.platform == "win32":
+        assert macros.fopen is raw.fopen_u8
+        path = tmp_path / "Ünïcødé 音楽.bin"  # outside the ANSI code page, which plain fopen would use
+        with raw.fopen_u8(str(path), "wb") as f:
+            assert isinstance(f, raw.CFile) and not bool(f.closed)
+            assert f.write(b"0123456789") == 10 and f.tell() == 10
+        assert bool(f.closed) and path.read_bytes() == b"0123456789"
+        f = macros.fopen(str(path), "rb")
+        assert f.read(4) == b"0123" and f.seek(-2, 2) == 8 and f.read() == b"89" and f.read() == b""
+        assert f.seek(1) == 1 and f.read(100) == b"123456789"
+        f.close()
+        f.close()  # closing twice does nothing
+        with pytest.raises(ValueError, match="closed"):
+            f.read()
+        with pytest.raises(FileNotFoundError) as missing:
+            raw.fopen_u8(str(tmp_path / "missing ☃"), "rb")
+        assert missing.value.errno == errno.ENOENT and missing.value.filename == str(tmp_path / "missing ☃")
+        with pytest.raises(ValueError, match="NUL"):
+            raw.fopen_u8("a\0b", "rb")
+        with pytest.raises(TypeError, match="bytes"):
+            raw.fopen_u8(str(path), "rb").write("text")  # type: ignore[arg-type, unused-ignore]
+    else:
+        assert not hasattr(raw, "fopen_u8") and not hasattr(raw, "CFile") and not hasattr(macros, "fopen")
 
 
 def test_value_macros() -> None:

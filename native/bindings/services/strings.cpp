@@ -297,6 +297,19 @@ void bindString(py::module_ m) {
 		return std::vector<uint32_t>(s32.begin(), s32.end());
 	}, py::arg("s8"), "Rack's: UTF-8 (a str, or valid UTF-8 bytes) to codepoints. Rack 2.6.6 loops forever on invalid "
 		"UTF-8, so invalid bytes raise ValueError.");
+#if defined ARCH_WIN
+	// string.hpp declares these on Windows only (they call Windows' converters), so they exist only there.
+	m.def("utf16_to_utf8", [](std::vector<uint16_t> s16) {
+		std::wstring w(s16.begin(), s16.end());
+		return py::bytes(s::UTF16toUTF8(w));
+	}, py::arg("w"), "Rack's (Windows only): UTF-16 code units to UTF-8 bytes. Windows' converter, without flags: an "
+		"unpaired surrogate becomes U+FFFD.");
+	m.def("utf8_to_utf16", [](py::handle s8) {
+		std::wstring w = s::UTF8toUTF16(utf8(s8));
+		return std::vector<uint16_t>(w.begin(), w.end());
+	}, py::arg("s"), "Rack's (Windows only): UTF-8 (a str, or bytes) to UTF-16 code units. Windows' converter, "
+		"without flags: an invalid sequence becomes U+FFFD.");
+#endif
 	m.def("utf8_next_codepoint", [](py::handle s8, size_t pos) { return s::UTF8NextCodepoint(utf8(s8), pos); },
 		py::arg("s8"), py::arg("pos"), "Byte positions of the UTF-8 text (a str is encoded as UTF-8).");
 	m.def("utf8_prev_codepoint", [](py::handle s8, size_t pos) { return s::UTF8PrevCodepoint(utf8(s8), pos); },

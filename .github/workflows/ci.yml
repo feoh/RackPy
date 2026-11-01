@@ -201,6 +201,66 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
+  inventory-platforms:
+    name: SDK inventory on ${{ matrix.platform }}, extracted natively
+    # RP-42. The committed inventory's macOS and Windows variants are extracted on Linux with each target's own
+    # library headers. This extracts each one again on the platform itself, with that machine's compiler headers
+    # (Xcode's SDK; MSYS2's MinGW) and that platform's SDK archive, and fails on any difference.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            platform: mac-arm64
+          - runner: macos-15-intel
+            platform: mac-x64
+          - runner: windows-2025
+            platform: win-x64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+      # The pinned clang==21.1.7 Python bindings need libclang 21 or newer; Xcode's is older. Homebrew's LLVM
+      # moves with releases, so the job prints its version and the SDK's.
+      - if: runner.os == 'macOS'
+        name: libclang from Homebrew's LLVM, headers from Xcode's SDK
+        run: |
+          brew install llvm
+          prefix="$(brew --prefix llvm)"
+          { echo "CLANGXX=$prefix/bin/clang++"; echo "LIBCLANG=$prefix/lib/libclang.dylib"; } >> "$GITHUB_ENV"
+          "$prefix/bin/clang++" --version | head -1
+          echo "SDK $(xcrun --show-sdk-version): $(xcrun --show-sdk-path)"
+      - if: runner.os == 'Windows'
+        id: msys2
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: MINGW64
+          update: false
+          install: mingw-w64-x86_64-clang
+      - if: runner.os == 'Windows'
+        name: libclang and headers from MSYS2's MINGW64 clang
+        env:
+          MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
+        run: |
+          echo "$MSYS2_LOCATION\mingw64\bin" >> "$GITHUB_PATH"
+          { echo "CLANGXX=$MSYS2_LOCATION\mingw64\bin\clang++.exe"; echo "LIBCLANG=$MSYS2_LOCATION\mingw64\bin\libclang.dll"; } >> "$GITHUB_ENV"
+          "$MSYS2_LOCATION/mingw64/bin/clang++" --version | head -1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/rackpy/sdk
+          key: rackpy-sdk-${{ matrix.platform }}-${{ hashFiles('upstream/versions.json') }}
+      - name: Extract natively and compare with the committed inventory
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: uv run --script bin/inventory_sdk.py platform-check "$PLATFORM" --clangxx "$CLANGXX" --libclang "$LIBCLANG"
+
   host:
     name: Rack host smoke tests (headless and Xvfb, no audio device)
     runs-on: ubuntu-24.04

@@ -208,6 +208,8 @@ Each of Rack's macros has a reviewed disposition (coverage policy 9):
 | Macro | Python |
 | --- | --- |
 | `ARCH_LIN`, `ARCH_X64` (and `ARCH_WIN`, `ARCH_MAC`, `ARCH_ARM64` on their platforms) | constants in `rackpy.raw.macros`, defined only on the platform the plugin was built for |
+| `RACK_MOD_CTRL`, `RACK_MOD_CTRL_NAME` | constants in `rackpy.raw.macros`: GLFW's Super modifier and `"⌘"` on macOS, its Control modifier and `"Ctrl"` elsewhere, as `widget/event.hpp` defines them per platform |
+| `fopen` (Windows only) | `macros.fopen`, which is [`fopen_u8`](#values-fopen) |
 | `VEC_ARGS(v)`, `RECT_ARGS(r)` | `macros.VEC_ARGS(v)` is `(v.x, v.y)`; `macros.RECT_ARGS(r)` is the four floats |
 | `LENGTHOF(arr)` | `macros.LENGTHOF(arr)`, which is `len(arr)` |
 | `ENUMS(name, count)` | `macros.ENUMS(name, count, start)` returns `{name: start, name_LAST: start + count - 1}` |
@@ -215,6 +217,27 @@ Each of Rack's macros has a reviewed disposition (coverage policy 9):
 | `DEPRECATED` | `macros.DEPRECATED`, a decorator whose target emits `DeprecationWarning` |
 | `CONCAT`, `CONCAT_LITERAL`, `TOSTRING`, `TOSTRING_LITERAL` | **no runtime meaning**: they paste and quote tokens for the preprocessor; Python builds strings directly |
 | `BINARY`, `BINARY_START`, `BINARY_END`, `BINARY_SIZE` | **no runtime meaning**: they name data the linker embeds in a C++ plugin; a Python plugin reads its files through asset paths (RP-30) |
+
+(values-fopen)=
+## Files by UTF-8 name: `fopen_u8` (Windows only)
+
+On Windows, the C runtime's `fopen` reads a file name in the ANSI code page,
+so `common.hpp` declares `fopen_u8`, which converts the UTF-8 name and mode
+to UTF-16 and calls `_wfopen`, and `#define`s `fopen` to it. RackPy maps
+both: `rackpy.raw.fopen_u8(filename, mode)` and `rackpy.raw.macros.fopen`,
+the same function. On Linux and macOS neither name exists, as in C++.
+
+It returns a `rackpy.raw.CFile`, which owns the `FILE*`: `read(size=-1)`
+(`fread`; `b''` at the end), `write(data)` (`fwrite` of all of a bytes-like
+object), `seek(offset, whence=0)` and `tell()` (64-bit), `flush()` and
+`close()`. A `with` block closes it, and so does Python when it frees the
+object; closing twice does nothing, and any other call on a closed file raises
+`ValueError`. Where C returns `NULL` or a call fails, it raises `OSError`
+(`FileNotFoundError` and so on) with the C runtime's `errno`, read where
+Rack's `_wfopen` set it, in msvcrt, and passed to Python as a number. A file
+name or mode with a NUL character raises `ValueError`, as C would stop at it.
+Calls hold the GIL, so a `close` cannot race a `read`; it is file I/O, not for
+the audio thread.
 
 (values-json)=
 ## JSON

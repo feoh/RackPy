@@ -48,6 +48,12 @@ The rest are Rack's functions under snake-case names:
   raise `ValueError`. `utf8_next_codepoint`, `utf8_prev_codepoint`,
   `utf8_length`, `utf8_codepoint_index` and `utf8_codepoint_pos` stop at
   an invalid byte, as Rack's do.
+- **UTF-16, on Windows only.** `utf16_to_utf8(w)` takes UTF-16 code units
+  (ints, so an unpaired surrogate can be passed) and returns UTF-8 bytes;
+  `utf8_to_utf16(s)` takes a str or bytes and returns code units. Rack
+  declares `UTF16toUTF8` and `UTF8toUTF16` only on Windows, where they call
+  Windows' own converters without flags, which replace what they cannot
+  convert with U+FFFD. Elsewhere the two names do not exist.
 - **Versions.** `Version` is Rack's version: dotted `parts`, compared part
   by part with integers as numbers (`1.a.0 < 1.0.0 < 1.10.0`), with
   `get_major`, `get_minor` and `get_revision`.

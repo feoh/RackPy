@@ -24,6 +24,7 @@ import json
 import re
 import shutil
 import subprocess
+import sys
 from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -95,9 +96,13 @@ class Variant:
     flags: tuple[str, ...]
     note: str
     target: str | None = None
+    system: str | None = None  # "mingw" or "darwin": the target's C and C++ library headers (SystemHeaders)
 
 
-LINUX_FLAGS = ("-x", "c++", "-std=c++11", "-fPIC", "-funsafe-math-optimizations")
+# compile.mk's FLAGS for every platform: -O3 matters, as headers branch on __OPTIMIZE__ and __NO_INLINE__ (mingw's
+# string.h renames strcasecmp to _stricmp without optimization; libRack.dll exports rack::string::strcasecmp).
+RACK_FLAGS = ("-x", "c++", "-std=c++11", "-O3", "-funsafe-math-optimizations", "-fno-omit-frame-pointer")
+LINUX_FLAGS = (*RACK_FLAGS, "-fPIC")
 VARIANTS = {
     "lin-x64": Variant("lin-x64", "lin-x64", (*LINUX_FLAGS, "-march=nehalem"), "SDK flags for Linux x64"),
     "lin-x64-simde": Variant(
@@ -108,24 +113,137 @@ VARIANTS = {
         "arm64 uses. Approximates the arm64 declaration surface; it is not an arm64 extraction.",
     ),
     "mac-arm64": Variant(
-        "mac-arm64", "mac-arm64", ("-x", "c++", "-std=c++11", "-stdlib=libc++"), "Cross attempt", "arm64-apple-macos11"
+        "mac-arm64",
+        "mac-arm64",
+        (*RACK_FLAGS, "-stdlib=libc++", "-march=armv8-a+fp+simd"),
+        "SDK flags for macOS arm64, with libc++ and macOS C headers as zig ships them (Apple's SDK headers)",
+        "arm64-apple-macos11",
+        "darwin",
     ),
     "mac-x64": Variant(
         "mac-x64",
         "mac-x64",
-        ("-x", "c++", "-std=c++11", "-stdlib=libc++", "-march=nehalem"),
-        "Cross attempt",
+        (*RACK_FLAGS, "-stdlib=libc++", "-march=nehalem"),
+        "SDK flags for macOS x64, with libc++ and macOS C headers as zig ships them (Apple's SDK headers)",
         "x86_64-apple-macos10.9",
+        "darwin",
     ),
     "win-x64": Variant(
         "win-x64",
         "win-x64",
-        ("-x", "c++", "-std=c++11", "-march=nehalem", "-D_USE_MATH_DEFINES"),
-        "Cross attempt",
+        # -mno-ms-bitfields: clang's MinGW default is MSVC's bit-field layout, which fails dsp/convert.hpp's
+        # sizeof(Int24) == 3; Rack builds Windows plugins with GCC, whose layout (gcc_struct) this is.
+        (*RACK_FLAGS, "-march=nehalem", "-D_USE_MATH_DEFINES", "-municode", "-mno-ms-bitfields"),
+        "SDK flags for Windows x64, with the C and C++ headers of Rack's own Windows toolchain "
+        "(rack-plugin-toolchain: mingw-w64 v10, GCC 15.1.0's libstdc++)",
         "x86_64-w64-mingw32",
+        "mingw",
     ),
 }
 NATIVE = ("lin-x64", "lin-x64-simde")
+
+# libc++'s configuration as zig passes it for macOS (zig ships no __config_site; `zig c++ -###` shows these).
+LIBCXX_CONFIG = (
+    "-D_LIBCPP_ABI_VERSION=1",
+    "-D_LIBCPP_ABI_NAMESPACE=__1",
+    "-D_LIBCPP_HAS_THREADS=1",
+    "-D_LIBCPP_HAS_MONOTONIC_CLOCK",
+    "-D_LIBCPP_HAS_TERMINAL",
+    "-D_LIBCPP_HAS_MUSL_LIBC=0",
+    "-D_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS",
+    "-D_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS",
+    "-D_LIBCPP_HAS_VENDOR_AVAILABILITY_ANNOTATIONS=0",
+    "-D_LIBCPP_HAS_FILESYSTEM=1",
+    "-D_LIBCPP_HAS_RANDOM_DEVICE",
+    "-D_LIBCPP_HAS_LOCALIZATION",
+    "-D_LIBCPP_HAS_UNICODE",
+    "-D_LIBCPP_HAS_WIDE_CHARACTERS",
+    "-D_LIBCPP_HAS_NO_STD_MODULES",
+    "-D_LIBCPP_PSTL_BACKEND_SERIAL",
+    "-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_NONE",
+    "-D_LIBCPP_ASSERTION_SEMANTIC_DEFAULT=_LIBCPP_ASSERTION_SEMANTIC_IGNORE",
+)
+
+
+@dataclass(frozen=True)
+class SystemHeaders:
+    """Where the cross variants' C and C++ library headers are (RP-42). The Rack headers are the same in every
+    platform's SDK archive; what differs per platform is the preprocessor's view of them, which needs the
+    target's own library headers. Either may be None: that variant is then not extracted, and says why."""
+
+    mingw: Path | None  # rack-plugin-toolchain's x86_64-w64-mingw32 root (bin/rack-toolchain path --target win-x64)
+    zig: Path | None  # zig's lib directory (`zig env`), for libc++ and the macOS C headers
+    zig_version: str | None = None
+    # On the platform itself (platform-check): the compiler's own library headers, and on macOS the SDK Xcode has.
+    native_root: Path | None = None
+    native_flags: tuple[str, ...] = ()
+
+    @classmethod
+    def native(cls, kind: str, clangxx: str) -> SystemHeaders:
+        if kind == "darwin":
+            sdk = subprocess.run(["xcrun", "--show-sdk-path"], capture_output=True, text=True, check=True).stdout
+            root = Path(sdk.strip())
+            return cls(None, None, native_root=root, native_flags=("-isysroot", str(root)))
+        # MSYS2's MINGW64 clang finds its own MinGW headers; they are under its installation prefix.
+        clang = shutil.which(clangxx)
+        if clang is None:
+            raise ExtractionError(f"platform-check on Windows needs MSYS2's MINGW64 clang++ ({clangxx})")
+        return cls(None, None, native_root=Path(clang).resolve().parents[1])
+
+    def flags(self, kind: str) -> list[str]:
+        if self.native_root is not None:
+            return list(self.native_flags)
+        if kind == "mingw":
+            if self.mingw is None:
+                raise ExtractionError("no Rack Windows toolchain: bin/rack-toolchain build --target win-x64")
+            libc = self.mingw / "x86_64-w64-mingw32" / "sysroot" / "usr" / "x86_64-w64-mingw32" / "include"
+            return [f"--sysroot={self.mingw}", "-idirafter", str(libc)]
+        if kind == "darwin":
+            if self.zig is None:
+                raise ExtractionError("no zig (its lib directory has libc++ and the macOS C headers)")
+            dirs = ("libcxx/include", "libcxxabi/include", "libc/include/any-darwin-any")
+            return ["-nostdinc++", "-nostdlibinc", *(f"-isystem{self.zig / d}" for d in dirs), *LIBCXX_CONFIG]
+        raise ValueError(kind)
+
+    def root(self, kind: str) -> Path:
+        root = self.native_root or (self.mingw if kind == "mingw" else self.zig)
+        assert root is not None
+        return root
+
+    def describe(self, kind: str) -> str:
+        if kind == "mingw":
+            return "rack-plugin-toolchain win-x64 (bin/rack-toolchain), <mingw-root>"
+        return f"zig {self.zig_version} lib directory, <zig-lib>"
+
+
+def bin_tool(name: str) -> list[str]:
+    """The command for bin/NAME: the script, or on Windows, which runs no shebangs, `uv run --script` of it."""
+    path = str(REPO / "bin" / name)
+    return ["uv", "run", "--script", path] if sys.platform == "win32" else [path]
+
+
+def find_system_headers() -> SystemHeaders:
+    """The Rack Windows toolchain if it is built, and zig if it is installed; either may be missing."""
+    mingw = None
+    out = subprocess.run(
+        [*bin_tool("rack-toolchain"), "path", "--target", "win-x64"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if out.returncode == 0 and out.stdout.strip():
+        candidate = Path(out.stdout.strip().splitlines()[-1]).parent
+        if (candidate / "x86_64-w64-mingw32" / "include" / "c++").is_dir():
+            mingw = candidate
+    zig = zig_version = None
+    if shutil.which("zig"):
+        env = subprocess.run(["zig", "env"], capture_output=True, text=True, check=True).stdout
+        lib = re.search(r'\.lib_dir = "([^"]+)"', env) or re.search(r'"lib_dir":\s*"([^"]+)"', env)
+        version = re.search(r'\.version = "([^"]+)"', env) or re.search(r'"version":\s*"([^"]+)"', env)
+        if lib:
+            zig = Path(lib.group(1))
+            zig_version = version.group(1) if version else "unknown"
+    return SystemHeaders(mingw, zig, zig_version)
 
 
 # --- libclang helpers -------------------------------------------------------
@@ -268,6 +386,7 @@ class Extraction:
     closure: list[str] = field(default_factory=list)
     collisions: list[str] = field(default_factory=list)
     deprecated_scopes: set[str] = field(default_factory=set)
+    system_headers: tuple[int, str] | None = None  # (count, digest) of the target library headers read
 
     def header(self, cursor: ci.Cursor) -> str | None:
         f = cursor.location.file
@@ -279,10 +398,12 @@ class Extraction:
         return f"include/{path.relative_to(include).as_posix()}" if path.is_relative_to(include) else None
 
 
-def parse(sdk: Path, variant: Variant, resource: str) -> ci.TranslationUnit:
+def parse(sdk: Path, variant: Variant, resource: str, system: SystemHeaders) -> ci.TranslationUnit:
     args = ["-resource-dir", resource, *variant.flags, f"-I{sdk / 'include'}", f"-I{sdk / 'dep' / 'include'}"]
     if variant.target:
         args += [f"--target={variant.target}"]
+    if variant.system:
+        args += system.flags(variant.system)
     index = ci.Index.create()
     options = ci.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD | ci.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES
     tu = index.parse(
@@ -834,9 +955,23 @@ def boundary_constants(ex: Extraction) -> None:
                     )
 
 
-def extract_variant(sdk: Path, variant: Variant, resource: str) -> Extraction:
-    tu = parse(sdk, variant, resource)
+def system_digest(tu: ci.TranslationUnit, root: Path) -> tuple[int, str]:
+    """How many library headers under ROOT the translation unit read, and a digest of their paths (relative to
+    ROOT) and contents: which target headers an extraction saw, without recording this machine's paths."""
+    files: dict[str, str] = {}
+    for inc in tu.get_includes():
+        path = Path(inc.include.name).resolve()
+        if path.is_relative_to(root.resolve()):
+            files[path.relative_to(root.resolve()).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
+    listing = "".join(f"{digest}  {name}\n" for name, digest in sorted(files.items()))
+    return len(files), hashlib.sha256(listing.encode()).hexdigest()
+
+
+def extract_variant(sdk: Path, variant: Variant, resource: str, system: SystemHeaders) -> Extraction:
+    tu = parse(sdk, variant, resource, system)
     ex = Extraction(sdk=sdk, variant=variant, tu=tu)
+    if variant.system:
+        ex.system_headers = system_digest(tu, system.root(variant.system))
     closure = sorted(
         {h for h in (ex.header_of(inc.include.name) for inc in tu.get_includes()) if h} | {"include/rack.hpp"}
     )
@@ -895,10 +1030,18 @@ def family(header: str) -> str:
 
 
 def merge(extractions: dict[str, Extraction]) -> list[dict[str, Any]]:
+    """One entry per ID. The first variant that has it gives the entry; a field another variant sees differently
+    (RACK_MOD_CTRL's value on macOS, a SIMD type that SIMDe provides on arm64) goes under per_variant, so an
+    alternative definition is recorded, not dropped (RP-42)."""
     merged: dict[str, dict[str, Any]] = {}
     for name, ex in extractions.items():
         for ident, entry in ex.entries.items():
-            merged.setdefault(ident, {**entry, "availability": set()})["availability"].add(name)
+            base = merged.setdefault(ident, {**entry, "availability": set()})
+            base["availability"].add(name)
+            delta = {k: v for k, v in entry.items() if base.get(k) != v}
+            delta.update({k: None for k in base if k not in entry and k not in ("availability", "per_variant")})
+            if delta:
+                base.setdefault("per_variant", {})[name] = dict(sorted(delta.items()))
     for entry in merged.values():
         present = entry.pop("availability")
         absent = sorted(name for name in extractions if name not in present)
@@ -921,8 +1064,11 @@ def sdk_facts(sdk: Path) -> dict[str, Any]:
     }
 
 
-def build(sdk: Path, libclang: Path | None, clangxx: str, variants: tuple[str, ...]) -> dict[str, Any]:
+def build(
+    sdk: Path, libclang: Path | None, clangxx: str, variants: tuple[str, ...], system: SystemHeaders | None = None
+) -> dict[str, Any]:
     lib_path, resource = configure_libclang(libclang, clangxx)
+    system = system if system is not None else find_system_headers()
     extractions: dict[str, Extraction] = {}
     runs: list[dict[str, Any]] = []
     for name in variants:
@@ -933,8 +1079,10 @@ def build(sdk: Path, libclang: Path | None, clangxx: str, variants: tuple[str, .
             "note": variant.note,
             "flags": list(variant.flags) + ([f"--target={variant.target}"] if variant.target else []),
         }
+        if variant.system:
+            record_run["system_headers"] = system.describe(variant.system)
         try:
-            ex = extract_variant(sdk, variant, resource)
+            ex = extract_variant(sdk, variant, resource, system)
         except ExtractionError as e:
             if name in NATIVE:
                 raise
@@ -945,6 +1093,8 @@ def build(sdk: Path, libclang: Path | None, clangxx: str, variants: tuple[str, .
         record_run["status"] = "ok"
         record_run["headers"] = len(ex.closure)
         record_run["declarations"] = len(ex.entries)
+        if ex.system_headers:
+            record_run["system_headers_read"], record_run["system_headers_sha256"] = ex.system_headers
         extractions[name] = ex
         runs.append(record_run)
     entries = merge(extractions)
@@ -1068,7 +1218,7 @@ LibOpt = Annotated[Path | None, cyclopts.Parameter(help="libclang.so from the sa
 def resolve_sdk(sdk: Path | None) -> Path:
     if sdk is not None:
         return sdk
-    out = subprocess.run([str(REPO / "bin" / "rack-sdk"), "path"], capture_output=True, text=True, check=True)
+    out = subprocess.run([*bin_tool("rack-sdk"), "path"], capture_output=True, text=True, check=True)
     return Path(out.stdout.strip())
 
 
@@ -1108,6 +1258,73 @@ def diff_cmd(old: Path, new: Path) -> None:
     print(json.dumps(delta, indent=2))
     if any(delta.values()):
         raise SystemExit(1)
+
+
+def effective(entry: dict[str, Any], variant: str) -> dict[str, Any]:
+    """An inventory entry as VARIANT's own extraction saw it: per_variant applied, merge-only fields dropped."""
+    out = {k: v for k, v in entry.items() if k not in ("absent_in", "per_variant", "classification", "evidence")}
+    for k, v in entry.get("per_variant", {}).get(variant, {}).items():
+        if v is None:
+            out.pop(k, None)
+        else:
+            out[k] = v
+    return out
+
+
+@app.command(name="platform-check")
+def platform_check(
+    variant: str,
+    *,
+    sdk: SdkOpt = None,
+    libclang: LibOpt = None,
+    clangxx: str = "clang++",
+    against: Path = OUTPUT,
+    cross: bool = False,
+) -> None:
+    """On the platform itself, extract VARIANT with this machine's compiler headers and this platform's SDK
+    archive, and fail unless it matches what the committed inventory says for that variant (RP-42). With
+    --cross, use the headers `extract` uses instead: a check of the comparison, not of the platform."""
+    target = VARIANTS[variant]
+    if not target.system:
+        raise SystemExit(f"{variant} is extracted natively by `extract` already")
+    recorded = json.loads(against.read_text(encoding="utf-8"))
+    if sdk is None:
+        out = subprocess.run(
+            [*bin_tool("rack-sdk"), "path", target.platform], capture_output=True, text=True, check=True
+        )
+        sdk = Path(out.stdout.strip().splitlines()[-1])
+    _, resource = configure_libclang(libclang, clangxx)
+    system = find_system_headers() if cross else SystemHeaders.native(target.system, clangxx)
+    ex = extract_variant(sdk, target, resource, system)
+    expected = {e["id"]: effective(e, variant) for e in recorded["entries"] if variant not in e.get("absent_in", ())}
+    actual = {ident: {k: v for k, v in e.items() if k != "_in_scope"} for ident, e in ex.entries.items()}
+    problems = [f"only in the committed inventory: {i}" for i in sorted(expected.keys() - actual.keys())]
+    problems += [f"only on this machine: {i}" for i in sorted(actual.keys() - expected.keys())]
+    for ident in sorted(expected.keys() & actual.keys()):
+        if expected[ident] != actual[ident]:
+            keys = sorted(
+                k
+                for k in expected[ident].keys() | actual[ident].keys()
+                if expected[ident].get(k) != actual[ident].get(k)
+            )
+            problems.append(
+                f"differs: {ident}: "
+                + ", ".join(f"{k} committed {expected[ident].get(k)!r}, here {actual[ident].get(k)!r}" for k in keys)
+            )
+    skipped = {
+        (b["header"], b["lines"][0], b["sha256"]) for b in recorded["conditional_blocks"] if variant in b["skipped_in"]
+    }
+    here = {(b["header"], b["lines"][0], b["sha256"]) for b in ex.blocks}
+    problems += [f"skipped only in the committed inventory: {b}" for b in sorted(skipped - here)]
+    problems += [f"skipped only on this machine: {b}" for b in sorted(here - skipped)]
+    count, digest = system_digest(ex.tu, system.root(target.system))
+    print(
+        f"{variant}: libclang {clang_version()}; {len(actual)} declarations, {len(ex.closure)} Rack headers; "
+        f"{count} system headers under {system.root(target.system)} (sha256 {digest})"
+    )
+    if problems:
+        raise SystemExit(f"{len(problems)} difference(s) from {against}:\n" + "\n".join(problems[:60]))
+    print(f"ok: the {'cross' if cross else 'native'} {variant} extraction matches the committed inventory")
 
 
 @app.command

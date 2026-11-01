@@ -93,16 +93,6 @@ ENTRY_FIELDS = (
     "reviewer",
 )
 PYTHON_FIELDS = frozenset({"raw", "facade", "kind", "gil_release"})
-# arch.hpp defines each of these macros only on some platforms, so a package built for another one cannot
-# export it. The export check of an introspection artifact that names its platform skips them there; every
-# other record must be exported everywhere (RP-40).
-PLATFORM_MACROS = {
-    "macro:ARCH_LIN": frozenset({"lin-x64"}),
-    "macro:ARCH_MAC": frozenset({"mac-x64", "mac-arm64"}),
-    "macro:ARCH_WIN": frozenset({"win-x64"}),
-    "macro:ARCH_X64": frozenset({"lin-x64", "mac-x64", "win-x64"}),
-    "macro:ARCH_ARM64": frozenset({"mac-arm64"}),
-}
 DOTTED = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*$")
 FAMILY_SLUGS = {
     "0 entry point": "entry_point",
@@ -190,8 +180,13 @@ def inventory_index(inventory: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 
 def fingerprint(entry: dict[str, Any]) -> str:
-    """Everything that defines a declaration except its line number, so moving it is not a change."""
-    canonical = json.dumps({k: v for k, v in entry.items() if k != "line"}, sort_keys=True, ensure_ascii=False)
+    """Everything that defines a declaration except its line numbers, so moving it is not a change."""
+    stable = {k: v for k, v in entry.items() if k != "line"}
+    if "per_variant" in stable:
+        stable["per_variant"] = {
+            variant: {k: v for k, v in delta.items() if k != "line"} for variant, delta in stable["per_variant"].items()
+        }
+    canonical = json.dumps(stable, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(canonical.encode()).hexdigest()[:16]
 
 
@@ -229,16 +224,44 @@ def is_engine_method(entry: dict[str, Any]) -> bool:
     return entry["kind"] == "method" and entry["name"].startswith("rack::engine::Engine::") and counted(entry)
 
 
+def carried_by(inventory: dict[str, Any], placeholder: dict[str, Any], platform: str) -> str | None:
+    """The semantic entry that carries a conditional placeholder on PLATFORM, if any: one of the same kind and
+    name, available there, defined there inside the placeholder's branch (docs/reference/surface-schema.md)."""
+    kind, _, name = placeholder["name"].partition(" ")
+    kinds = {"macro": ("object_macro", "function_macro"), "function": ("function",)}.get(kind, ())
+    block = next(
+        b
+        for b in inventory["conditional_blocks"]
+        if b["header"] == placeholder["header"] and b["lines"][0] == placeholder["line"]
+    )
+    first, last = block["lines"]
+    for e in inventory["entries"]:
+        if e["kind"] not in kinds or e["name"].rpartition("::")[2] != name or e["header"] != placeholder["header"]:
+            continue
+        if platform in e.get("absent_in", ()):
+            continue
+        line = e.get("per_variant", {}).get(platform, {}).get("line", e["line"])
+        if first <= line <= last:
+            return str(e["id"])
+    return None
+
+
 def availability(inventory: dict[str, Any], entry: dict[str, Any]) -> dict[str, str]:
-    """Per platform: "yes", "no" (absent there) or "not inventoried" (no extraction yet, so unknown)."""
+    """Per platform: "yes", "no" (absent there), "superseded" (a conditional placeholder whose branch a semantic
+    entry carries there) or "not inventoried" (no extraction, or an active branch nothing carries)."""
     if entry["kind"] == "conditional_declaration":
-        # A skipped range proves absence in that exact successful extraction,
-        # not presence elsewhere. Active branches need semantic extraction.
+        # A skipped range proves absence in that exact successful extraction. Where the branch is active, the
+        # platform's own extraction must have a semantic entry for it, or the placeholder stays unresolved.
         ok = {r["variant"] for r in inventory["extractions"] if r["status"] == "ok"}
-        return {
-            platform: "no" if platform in ok and platform in entry["skipped_in"] else "not inventoried"
-            for platform in PLATFORMS
-        }
+        out = {}
+        for platform in PLATFORMS:
+            if platform not in ok:
+                out[platform] = "not inventoried"
+            elif platform in entry["skipped_in"]:
+                out[platform] = "no"
+            else:
+                out[platform] = "superseded" if carried_by(inventory, entry, platform) else "not inventoried"
+        return out
     ok = {r["variant"] for r in inventory["extractions"] if r["status"] == "ok"}
     absent = set(entry.get("absent_in", ()))
     out = {}
@@ -629,10 +652,10 @@ def validate(inputs: Inputs, manifest: dict[str, Any], introspection: dict[str, 
                     )
                     missing_artifact_reported = True
             elif python and not (
-                # arch.hpp does not define it on the platform the artifact was built for
-                ident in PLATFORM_MACROS
-                and introspection.get("platform")
-                and introspection["platform"] not in PLATFORM_MACROS[ident]
+                # The inventory says the declaration does not exist on the platform the artifact was built for
+                # (ARCH_MAC off macOS, fopen_u8 off Windows), so that package cannot export it (RP-40, RP-42).
+                introspection.get("platform") in PLATFORMS
+                and availability(inputs.inventory, entry)[introspection["platform"]] == "no"
             ):
                 for key in ("raw", "facade"):
                     value = python.get(key)
@@ -696,7 +719,7 @@ def report(inputs: Inputs, manifest: dict[str, Any]) -> dict[str, Any]:
             continue
         status = records.get(ident, {}).get("status", "unknown")
         for platform, available in availability(inputs.inventory, entry).items():
-            key = status if available == "yes" else ("absent" if available == "no" else "not inventoried")
+            key = {"yes": status, "no": "absent", "superseded": "superseded"}.get(available, "not inventoried")
             families[family_of(inputs.inventory, entry)][platform][key] += 1
             totals[platform][key] += 1
     return {
@@ -729,7 +752,7 @@ def release_problems(
         if available == "not inventoried":
             problems.append(Problem("not-inventoried", ident, f"availability on {platform} is not inventoried"))
             break
-        if available == "no":
+        if available in ("no", "superseded"):
             continue
         status = records.get(ident, {}).get("status", "unknown")
         if status not in FINAL:
@@ -741,7 +764,7 @@ def release_problems(
 
 def markdown_report(rep: dict[str, Any]) -> str:
     """docs/reference/coverage.md."""
-    order = [*STATUSES, "unknown", "absent", "not inventoried"]
+    order = [*STATUSES, "unknown", "absent", "superseded", "not inventoried"]
     lines = [
         "# Binding coverage",
         "",
@@ -750,7 +773,9 @@ def markdown_report(rep: dict[str, Any]) -> str:
         "Each counted declaration in the [SDK inventory](surface-schema.md), by family and platform. A",
         "full-coverage release needs every available declaration `verified` or `excluded_internal`",
         "([release bar](../coverage.md#release-bar)). `not inventoried` means platform or conditional-branch",
-        "availability is unresolved, which blocks a release there.",
+        "availability is unresolved, which blocks a release there. `superseded` counts a",
+        "[conditional placeholder](surface-schema.md#conditional-branch-accountability) whose branch that",
+        "platform's own extraction parsed: the semantic entry it names is counted instead.",
         "",
         "## Totals",
         "",
