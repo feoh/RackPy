@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include <rack.hpp>
 #include <cassert>
+#include <cstdio>
 #include <cstdlib>
 #include <new>
 #include <thread>
@@ -65,7 +66,16 @@ int main() {
 	failAllocation.store(true);
 	try { manager->add(*allocationParent, *allocationChild); }
 	catch (const std::bad_alloc&) { failed = true; }
+#if defined(_WIN32)
+	// The child list is allocated inside libRack.dll, by its own libstdc++-6.dll: a PE executable cannot
+	// replace another DLL's operator new, as ELF and Mach-O symbol interposition do. The rollback this checks
+	// is RackPy's own code, the same on every platform, and is checked on Linux and macOS (RP-41).
+	assert(!failed && failAllocation.exchange(false));
+	std::puts("widget_tree: allocation-failure injection into libRack is not possible on Windows; skipped");
+	manager->remove(*allocationParent, *allocationChild);
+#else
 	assert(failed && !failAllocation.load());
+#endif
 	assert(allocationChild->get().parent == nullptr);
 	assert(allocationParent->get().children.empty() && manager->roots.size() == 2);
 	manager->add(*allocationParent, *allocationChild);
