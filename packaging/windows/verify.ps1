@@ -167,14 +167,18 @@ function Headless([string]$user, [string]$name, [string]$workDir = "", [string]$
 function Rc([string]$name) { ReadText (Join-Path $Logs "$name.rc") }
 function Images([string]$name) { [IO.File]::ReadAllLines((Join-Path $Logs "$name.images")) }
 function OwnPython([string]$name, [string]$user) {
-    # Exactly one CPython DLL, the plugin's bundled one; its vcruntime140 is the bundled one or Windows' own.
-    $pythons = @(Images $name | Where-Object { (Split-Path $_ -Leaf) -match '^python3\d*\.dll$' })
+    # Exactly one CPython DLL (python314.dll), the plugin's bundled one; python3.dll, CPython's stable-ABI
+    # forwarder that extension modules such as _ctypes.pyd load, must be the bundled one too.
     $prefix = (Join-Path $user $Plugins) + "\"
-    ($pythons.Count -eq 1) -and $pythons[0].StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)
+    $pythons = @(Images $name | Where-Object { (Split-Path $_ -Leaf) -match '^python3\d*\.dll$' })
+    $versioned = @($pythons | Where-Object { (Split-Path $_ -Leaf) -match '^python3\d+\.dll$' })
+    $outside = @($pythons | Where-Object { -not $_.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase) })
+    ($versioned.Count -eq 1) -and ($outside.Count -eq 0)
 }
 function ForeignImages([string]$name, [string]$user) {
     # Every DLL Rack loaded comes from Rack's folder, the user folder (plugins) or Windows.
-    $allowed = @($RackDir + "\", $user + "\", $env:SystemRoot + "\")
+    # Parenthesized: a comma binds tighter than +, so without them this is one string (RP-41, run 41298939078).
+    $allowed = @(($RackDir + "\"), ($user + "\"), ($env:SystemRoot + "\"))
     $outside = @(Images $name | Where-Object { $img = $_; -not ($allowed | Where-Object { $img.StartsWith($_, [StringComparison]::OrdinalIgnoreCase) }) })
     if ($outside.Count) { [IO.File]::WriteAllLines((Join-Path $Logs "$name.foreign"), [string[]]$outside) }
     $outside.Count -eq 0
