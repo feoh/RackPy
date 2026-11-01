@@ -44,6 +44,18 @@ def centre(widget: w.Widget) -> Vec:
     return widget.get_relative_offset(widget.box.size.div(2), context.event.root_widget)
 
 
+def point_at_the_rack() -> None:
+    """Hover the middle of the scene, as a real pointer would be, before Rack adds a module. Rack places a module
+    chosen in its browser where the mouse last hovered over the rack (RackWidget::onHover, addModuleAtMouse). A CI
+    window that never had a pointer event (macOS) leaves that at the rack's origin, far outside the view, so the
+    modules landed off screen and the clicks on them missed (RP-42)."""
+    context = raw.context_get()
+    assert context is not None and context.event is not None
+    root = context.event.root_widget
+    assert root is not None
+    context.event.handle_hover(root.get_box().size.div(2), Vec())
+
+
 def controls(module_id: int) -> list[w.Widget]:
     module = _testing.engine_handle(module_id)
     assert module is not None
@@ -63,6 +75,7 @@ def controls(module_id: int) -> list[w.Widget]:
 def run() -> None:
     events = raw.context_get().event  # type: ignore[union-attr]
     assert events is not None
+    point_at_the_rack()
     removed_id = _testing.browser_add_module("RackPy", "PyJacks")
     knob, out, inp, light = controls(removed_id)
     kept_id = _testing.browser_add_module("RackPy", "PyJacks")

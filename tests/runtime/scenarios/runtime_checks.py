@@ -85,6 +85,9 @@ def rss_kib() -> int:
         counters.cb = ctypes.sizeof(Counters)
         kernel32 = ctypes.WinDLL("kernel32")
         kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+        # Declared, or ctypes passes the pseudo-handle (-1 as an unsigned 64-bit value) as a C int and overflows.
+        kernel32.K32GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(Counters), wintypes.DWORD]
+        kernel32.K32GetProcessMemoryInfo.restype = wintypes.BOOL
         if not kernel32.K32GetProcessMemoryInfo(kernel32.GetCurrentProcess(), ctypes.byref(counters), counters.cb):
             raise OSError("K32GetProcessMemoryInfo failed")
         kib = int(counters.WorkingSetSize) // 1024

@@ -236,7 +236,12 @@ PyObject* errorType(const char* name) {
 }  // namespace
 
 void registerErrorTranslator() {
-	py::register_exception_translator([](std::exception_ptr p) {
+	// Module-local, so it runs before every global translator: off libstdc++ (macOS), pybind11 puts its own
+	// translate_local_exception in front of the global ones whenever it fetches existing internals
+	// (internals.h, check_internals_local_exception_translator), and that turns every builtin_exception,
+	// py::cast_error included, into RuntimeError before a global translator registered here is asked (RP-42).
+	// Every RackPy binding is dispatched from this image, so its local translators see all of them.
+	py::register_local_exception_translator([](std::exception_ptr p) {
 		try {
 			if (p)
 				std::rethrow_exception(p);
@@ -262,9 +267,8 @@ void registerErrorTranslator() {
 		catch (const std::exception& e) {
 			// RP-38: a Python value of the wrong type met an explicit py::cast (a plan, an event field, a JSON key).
 			// pybind11 reports it as RuntimeError; Python, and pybind11's own argument checks, say TypeError.
-			// Identified by rttiCast, not a catch clause: py::cast_error has no key function, and on macOS a clause
-			// naming it did not match what pybind11 threw, so it stayed a RuntimeError there (RP-42, as RP-40
-			// found for rack::Exception). Anything else goes on to the next translator.
+			// Identified by rttiCast rather than a catch clause, as RP-40 does for rack::Exception: py::cast_error
+			// has no key function. Anything else goes on to the next translator.
 			if (!::rackpy::rttiCast<const py::cast_error*>(&e))
 				throw;
 			PyErr_SetString(PyExc_TypeError, e.what());

@@ -459,6 +459,11 @@ class Collector:
             self.reports.append({"nodeid": report.nodeid, "when": report.when, "outcome": report.outcome,
                                  "longrepr": str(report.longrepr) if report.outcome != "passed" else None})
 
+    def pytest_runtest_logstart(self, nodeid, location):
+        # Which test was running, should Rack hang or die before the result is written.
+        with open(RESULT + ".progress", "a", encoding="utf-8") as f:
+            f.write(nodeid + "\\n")
+
     def pytest_collectreport(self, report):
         if report.failed:
             self.reports.append({"nodeid": report.nodeid, "when": "collect", "outcome": "failed",
@@ -602,8 +607,11 @@ def run_pytest_in_rack(
         if during_ui
         else run_rack(rack, user, settle=0.3, timeout=timeout, env=env, stderr=stderr)
     )
-    assert run.returncode == 0, run.tail()
-    assert result_path.exists(), "the in-Rack pytest run wrote no result:\n" + run.tail()
+    progress = result_path.with_name(result_path.name + ".progress")
+    started = progress.read_text(encoding="utf-8").splitlines() if progress.exists() else []
+    running = f"the last in-Rack test started: {started[-1]}\n" if started and not result_path.exists() else ""
+    assert run.returncode == 0, running + run.tail()
+    assert result_path.exists(), "the in-Rack pytest run wrote no result:\n" + running + run.tail()
     data = json.loads(result_path.read_text())
     try:
         suite = tests.resolve().relative_to(REPO).as_posix()

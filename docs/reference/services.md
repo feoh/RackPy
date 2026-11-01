@@ -144,15 +144,19 @@ runs on Rack's audio path; on the main thread, Rack's window waits.
 - **System.** `get_logical_core_count`, `get_operating_system_info`,
   `get_stack_trace` and `set_thread_name` (the calling thread's).
 - **FPU flags.** `get_fpu_flags`, `set_fpu_flags` and `reset_fpu_flags`
-  act on the calling thread's floating-point flags; `reset` sets
-  flush-to-zero and denormals-are-zero, as Rack's engine threads run, and
-  Python's own arithmetic on that thread follows them.
+  act on the calling thread's floating-point flags (MXCSR on x64, FPCR on
+  arm64); `reset` sets flush-to-zero, and on x64 denormals-are-zero (arm64
+  always treats denormal inputs as zero), with round-to-nearest, as Rack's
+  engine threads run, and Python's own arithmetic on that thread follows
+  them.
 - **Opening things.** `open_browser(url)` and `open_directory(path)` open
   the desktop's handler without blocking. Rack runs `xdg-open "<string>"`
   through the shell, so RackPy refuses `"`, `\`, `$` and `` ` ``, which
   would run shell code. `run_process_detached` is implemented by Rack on
   Windows only and asserts elsewhere, so RackPy refuses it on Linux and
-  macOS.
+  macOS. On Windows it asks for elevation (a UAC prompt) and shows Windows'
+  error box if the program is missing; both block Rack's UI thread until
+  answered. It has no unattended test there.
 
 (services-network)=
 ## HTTP: `rackpy.raw.network`

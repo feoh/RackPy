@@ -5,6 +5,7 @@ import inspect
 import io
 import json
 import os
+import platform
 import sys
 import tarfile
 import threading
@@ -149,7 +150,12 @@ def test_time_processes_and_flags() -> None:
     flags = rsys.get_fpu_flags()
     try:
         rsys.reset_fpu_flags()
-        assert rsys.get_fpu_flags() & 0x8040 == 0x8040  # Rack's flush-to-zero and denormals-are-zero
+        # Rack's resetFpuFlags (system.cpp:956-973): on x64 MXCSR's flush-to-zero and denormals-are-zero, with
+        # round-to-nearest; on arm64 FPCR's flush-to-zero (ARM64 always treats denormals as zero), round-to-nearest.
+        if platform.machine().lower() in ("arm64", "aarch64"):
+            assert rsys.get_fpu_flags() & (1 << 24) and not rsys.get_fpu_flags() & (0b11 << 22)
+        else:
+            assert rsys.get_fpu_flags() & 0xE040 == 0x8040
     finally:
         rsys.set_fpu_flags(flags)
     assert rsys.get_fpu_flags() == flags
@@ -157,6 +163,14 @@ def test_time_processes_and_flags() -> None:
     rsys.open_directory("")
     with pytest.raises(ValueError, match="shell"):
         rsys.open_browser('https://example.com/"; touch /tmp/x; "')
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="Rack's runProcessDetached asks Windows to elevate (ShellExecuteExW, verb runas, without "
+    "SEE_MASK_FLAG_NO_UI): a UAC prompt or an error box blocks Rack's UI thread, so it is a manual check on Windows",
+)
+def test_run_process_detached_is_windows_only() -> None:
     with pytest.raises(ValueError, match="Windows only"):
         rsys.run_process_detached("/bin/true")
 

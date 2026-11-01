@@ -49,7 +49,10 @@ def test_a_port_without_a_device() -> None:
     assert port.get_driver_id() == first == port.driver_id and port.get_device_id() == -1 == port.device_id
     driver = port.get_driver()
     assert driver is not None and port.get_driver_name() == driver.get_name() and port.device is None
-    assert port.get_device() is None and port.get_device_ids() == []
+    # Rack's Port::getDeviceIds is its driver's list (audio.cpp:141-145): none when isolated, else the machine's.
+    assert port.get_device() is None and port.get_device_ids() == driver.get_device_ids()
+    if ISOLATED:
+        assert port.get_device_ids() == []
     assert (port.get_sample_rates(), port.get_sample_rate(), port.get_block_sizes(), port.get_block_size()) == (
         [],
         0,
