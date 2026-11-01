@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import BIN, MACOS, REPO, linux_x64_only, rack_platforms, require_tools
+from tests.support import BIN, MACOS, PLATFORM, REPO, linux_x64_only, rack_platforms, require_tools
 
 pytestmark = [pytest.mark.native, rack_platforms()]
 LOADER = "plugin.dylib" if MACOS else "plugin.so"
@@ -22,8 +22,13 @@ LIBPYTHON = "@rpath/libpython3.14.dylib" if MACOS else "libpython3.14.so.1.0"
 
 def configure(build: Path, *args: str) -> subprocess.CompletedProcess[str]:
     require_tools("cmake", "ninja")
+    # On a Mac, CMake must be told the one architecture first (cmake/RackSDK.cmake refuses none, or two).
+    arch = [f"-DCMAKE_OSX_ARCHITECTURES={'arm64' if PLATFORM == 'mac-arm64' else 'x86_64'}"] if MACOS else []
     return subprocess.run(
-        ["cmake", "-S", str(REPO), "-B", str(build), "-G", "Ninja", *args], capture_output=True, text=True, check=False
+        ["cmake", "-S", str(REPO), "-B", str(build), "-G", "Ninja", *arch, *args],
+        capture_output=True,
+        text=True,
+        check=False,
     )
 
 
