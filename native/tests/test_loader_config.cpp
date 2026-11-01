@@ -115,6 +115,20 @@ void testReadConfigReportsPath() {
 	CHECK(err.find("/nonexistent/rackpy-loader.json") != std::string::npos);
 }
 
+void testReadConfigFromANonAsciiFolder() {
+	// RP-41: Rack gives UTF-8 paths; on Windows jansson's own fopen read them in the ANSI code page.
+	std::string dir = rack::system::join(rack::system::getTempDirectory(), "rackpy \xc3\x9c" "n\xc3\xaf" "c\xc3\xb8" "d\xc3\xa9 \xe9\x9f\xb3\xe6\xa5\xbd");
+	rack::system::createDirectories(dir);
+	std::string path = rack::system::join(dir, "rackpy-loader.json");
+	std::string text = valid();
+	rack::system::writeFile(path, std::vector<uint8_t>(text.begin(), text.end()));
+	Config cfg;
+	std::string err;
+	CHECK(rackpy::loader::readConfig(path, cfg, err));
+	CHECK(err.empty() && cfg.abi == RACKPY_HOST_ABI);
+	rack::system::removeRecursively(dir);
+}
+
 void testNoPythonLoaded() {
 	// This executable does not link libpython, so the collision check must see none.
 	CHECK(rackpy::loader::loadedPythons().empty());
@@ -149,7 +163,8 @@ void testLoadedImages() {
 int main() {
 	const std::function<void()> tests[] = {
 		testValidConfig, testEntryIsOptional, testRejections, testContainedPaths, testReadConfigReportsPath,
-		testNoPythonLoaded, testPythonImageNames, testLoadedImages, testCanonicalPath};
+		testReadConfigFromANonAsciiFolder, testNoPythonLoaded, testPythonImageNames, testLoadedImages,
+		testCanonicalPath};
 	for (const auto& t : tests)
 		t();
 	if (failures) {

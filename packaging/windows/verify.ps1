@@ -50,6 +50,45 @@ function ReadText([string]$path) {
 function Has([string]$path, [string]$text) { (ReadText $path).Contains($text) }
 function WriteJson([string]$path, [string]$text) { [IO.File]::WriteAllText($path, $text, $Utf8) }
 
+# The DLLs a process has loaded, from Windows' Toolhelp API (the call RackPy's loader uses too), compiled by
+# Windows PowerShell's own C# compiler. Process.Modules gave nothing here (RP-41, run 41288915853).
+Add-Type -TypeDefinition @"
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+public static class RackPyToolhelp {
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    struct MODULEENTRY32W {
+        public uint dwSize; public uint th32ModuleID; public uint th32ProcessID; public uint GlblcntUsage;
+        public uint ProccntUsage; public IntPtr modBaseAddr; public uint modBaseSize; public IntPtr hModule;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)] public string szModule;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)] public string szExePath;
+    }
+    [DllImport("kernel32.dll", SetLastError = true)] static extern IntPtr CreateToolhelp32Snapshot(uint flags, uint pid);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] static extern bool Module32FirstW(IntPtr snap, ref MODULEENTRY32W entry);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] static extern bool Module32NextW(IntPtr snap, ref MODULEENTRY32W entry);
+    [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr handle);
+    public static string[] Modules(int pid) {
+        for (int attempt = 0; ; attempt++) {
+            IntPtr snap = CreateToolhelp32Snapshot(0x8, (uint) pid);  // TH32CS_SNAPMODULE
+            if (snap == new IntPtr(-1)) {
+                int code = Marshal.GetLastWin32Error();
+                if (code == 24 && attempt < 5) { System.Threading.Thread.Sleep(100); continue; }  // ERROR_BAD_LENGTH: retry
+                throw new System.ComponentModel.Win32Exception(code);
+            }
+            var result = new List<string>();
+            try {
+                var entry = new MODULEENTRY32W();
+                entry.dwSize = (uint) Marshal.SizeOf(typeof(MODULEENTRY32W));
+                for (bool more = Module32FirstW(snap, ref entry); more; more = Module32NextW(snap, ref entry))
+                    result.Add(entry.szExePath);
+            } finally { CloseHandle(snap); }
+            return result.ToArray();
+        }
+    }
+}
+"@
+
 $os = Get-CimInstance Win32_OperatingSystem
 Note "machine: $($os.Caption) $($os.Version) (build $($os.BuildNumber)), $env:PROCESSOR_ARCHITECTURE, $Platform"
 Note "Rack: $((Get-Item $Rack).VersionInfo.ProductVersion) at $RackDir"
@@ -110,7 +149,7 @@ function Headless([string]$user, [string]$name, [string]$workDir = "", [string]$
     }
     Start-Sleep -Seconds 3
     $images = @()
-    try { $proc.Refresh(); $images = $proc.Modules | ForEach-Object { $_.FileName } } catch { $images = @("(modules unavailable: $_)") }
+    try { $images = [RackPyToolhelp]::Modules($proc.Id) } catch { $images = @("(modules unavailable: $_)") }
     [IO.File]::WriteAllLines((Join-Path $Logs "$name.images"), [string[]]($images | Sort-Object -Unique))
     try { $proc.StandardInput.WriteLine(""); $proc.StandardInput.Close() } catch {}
     if (-not $proc.WaitForExit(60000)) { $proc.Kill(); $proc.WaitForExit(); $rc = "killed" } else { $rc = [string]$proc.ExitCode }

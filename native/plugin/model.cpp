@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+#include "rackpy/json_file.hpp"
 #include "rackpy/rtti.hpp"
 #include "model.hpp"
 
@@ -161,7 +162,7 @@ namespace {
 
 std::string manifestSlugs(const std::string& path, std::vector<std::string>& slugs) {
 	json_error_t error;
-	json_t* rootJ = json_load_file(path.c_str(), 0, &error);
+	json_t* rootJ = rackpy::loadJsonFile(path, &error);
 	if (!rootJ)
 		return "cannot read " + path + ": " + error.text;
 	std::string problem;

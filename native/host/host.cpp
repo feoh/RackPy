@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include "rackpy/json_file.hpp"
 #include "../bindings/plugin.hpp"
 #include "rackpy/export.h"
 #include "../plugin/model.hpp"
@@ -27,7 +28,7 @@ namespace {
 std::vector<std::string> kernelLibraries(const std::string& pluginDir) {
 	std::vector<std::string> out;
 	json_error_t error;
-	json_t* rootJ = json_load_file(rack::system::join(pluginDir, "rackpy-loader.json").c_str(), 0, &error);
+	json_t* rootJ = rackpy::loadJsonFile(rack::system::join(pluginDir, "rackpy-loader.json"), &error);
 	if (!rootJ)
 		return out;  // the loader already read and checked it
 	json_t* kernelsJ = json_object_get(rootJ, "kernels");

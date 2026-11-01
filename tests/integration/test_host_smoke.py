@@ -69,6 +69,7 @@ def test_skeleton_loads_into_rack_and_finalizes(
     monkeypatch.setenv("PYTHONPATH", str(hijack))
     user = tmp_path / "user"
     plugin = stage_plugin(bundle, user, entry="smoke_entry", files={"pythonpath/smoke_entry.py": ENTRY})
+    shipped = set(plugin.rglob("*.pyc"))  # the Windows runtime comes with precompiled bytecode
 
     run = run_rack(rack_host, user)
 
@@ -96,7 +97,8 @@ def test_skeleton_loads_into_rack_and_finalizes(
     assert run.lines(f"RackPy host rackpy_host{MODULE} ready")
     assert run.lines("RackPy interpreter finalized: Py_FinalizeEx returned 0"), run.tail()
     assert not run.lines("RackPy refused"), run.tail()
-    assert not list(plugin.rglob("__pycache__")), "the host wrote bytecode into the installed plugin"
+    written = sorted(set(plugin.rglob("*.pyc")) - shipped)
+    assert not written, f"the host wrote bytecode into the installed plugin: {written[:5]}"
 
 
 def test_skeleton_without_entry_module(rack_host: Path, bundle: Path, tmp_path: Path) -> None:

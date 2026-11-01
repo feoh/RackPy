@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+#include "rackpy/json_file.hpp"
 #include "loader_config.hpp"
 
 #include <cctype>
@@ -81,7 +82,7 @@ bool parseConfig(json_t* rootJ, Config& cfg, std::string& err) {
 
 bool readConfig(const std::string& path, Config& cfg, std::string& err) {
 	json_error_t error;
-	json_t* rootJ = json_load_file(path.c_str(), 0, &error);
+	json_t* rootJ = loadJsonFile(path, &error);
 	if (!rootJ) {
 		err = rack::string::f("cannot read %s: %s", path.c_str(), error.text);
 		return false;

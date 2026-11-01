@@ -77,8 +77,15 @@ void* openPinned(const std::string& path, bool global, std::string& error) {
 	for (wchar_t& c : file)
 		if (c == L'/')
 			c = L'\\';
+	// Without this, a file that is not a valid DLL makes Windows show a modal "Bad Image" error box, and Rack
+	// waits on it (headless, forever); with it, LoadLibraryExW returns error 193 to log instead (RP-41).
+	DWORD previousMode = 0;
+	SetThreadErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX, &previousMode);
 	HMODULE module = LoadLibraryExW(file.c_str(), nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_SYSTEM32);
+	DWORD loadError = module ? 0 : GetLastError();
+	SetThreadErrorMode(previousMode, nullptr);
 	if (!module) {
+		SetLastError(loadError);
 		error = lastError();
 		return nullptr;
 	}
