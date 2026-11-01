@@ -322,7 +322,8 @@ def run_rack_windowed(
             "windows-opengl",
             opens_gl_windows(rack),
             "a Windows PC whose display driver gives Rack OpenGL 2.0 (a GPU, or Mesa's opengl32.dll beside "
-            "Rack.exe); GitHub-hosted Windows runners have only Windows' OpenGL 1.1",
+            "Rack.exe: bin/rack-sdk mesa --into <Rack folder>); GitHub-hosted Windows runners have only Windows' "
+            "OpenGL 1.1",
         )
     else:
         require("xvfb-run", shutil.which("xvfb-run") is not None, "install Xvfb (xorg-server-xvfb or xvfb)")
@@ -581,6 +582,7 @@ def run_pytest_in_rack(
         record_evidence(
             [
                 {"test": f"{suite}/{r['nodeid']}", "when": str(r["when"]), "outcome": str(r["outcome"])}
+                | ({"reason": str(r["longrepr"])[:300]} if r["outcome"] == "skipped" and r.get("longrepr") else {})
                 for r in data["reports"]
             ]
         )

@@ -33,6 +33,7 @@ import cyclopts
 
 REPO = Path(__file__).resolve().parent.parent
 VERSIONS = REPO / "upstream" / "versions.json"
+TEST_INPUTS = REPO / "upstream" / "test-inputs.json"
 FIXTURE = REPO / "tests" / "fixtures" / "sdk-provenance.json"
 PROBE = REPO / "tests" / "fixtures" / "sdk-probe"
 DEFAULT_CACHE = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "rackpy" / "sdk"
@@ -224,6 +225,42 @@ def host(platform: str = "lin-x64", *, cache: CacheOpt = DEFAULT_CACHE) -> None:
     (entry,) = archives([platform], "host")
     archive = fetch_archive(entry, cache / "host", fresh=False)
     print(extract(archive, entry, cache / "host"))
+
+
+@app.command
+def mesa(*, into: Path, cache: CacheOpt = DEFAULT_CACHE) -> None:
+    """Put the pinned Mesa software OpenGL (upstream/test-inputs.json) into INTO, a test copy of Rack for Windows.
+
+    For CI on GitHub-hosted Windows runners, which have only Windows' OpenGL 1.1 where Rack needs 2.0: with
+    Mesa's opengl32.dll beside Rack.exe (and GALLIUM_DRIVER=llvmpipe), Rack renders in software, as Linux CI does
+    under Xvfb. Never for a user's Rack, and never shipped with RackPy.
+    """
+    (entry,) = [a for a in load_json(TEST_INPUTS)["test_renderer"]["archives"] if a["platform"] == "win-x64"]
+    if not (into / "Rack.exe").is_file():
+        raise SystemExit(f"{into} has no Rack.exe: pass the Rack folder (bin/rack-sdk host win-x64)")
+    archive = fetch_archive(entry, cache / "test-renderer", fresh=False)
+    seven = shutil.which("7z") or shutil.which("7zz") or shutil.which("7za")
+    if seven is None:
+        raise SystemExit("extracting Mesa needs 7-Zip (7z)")
+    listing = subprocess.run([seven, "l", "-ba", "-slt", str(archive)], capture_output=True, text=True, check=True)
+    members = {
+        line[len("Path = ") :].replace("\\", "/") for line in listing.stdout.splitlines() if line.startswith("Path = ")
+    }
+    for member in members:
+        if member.startswith("/") or ":" in member or ".." in member.split("/"):
+            raise SystemExit(f"{archive.name}: refusing member outside archive root: {member}")
+    wanted = [f"{entry['root']}/{name}" for name in entry["files"]]
+    missing = [w for w in wanted if w not in members]
+    if missing:
+        raise SystemExit(f"{archive.name}: missing {missing}")
+    staging = Path(tempfile.mkdtemp(prefix="mesa-", dir=cache))
+    try:
+        subprocess.run([seven, "e", "-y", f"-o{staging}", str(archive), *wanted], check=True, stdout=subprocess.DEVNULL)
+        for name in entry["files"]:
+            shutil.copy2(staging / name, into / name)
+            print(f"{into / name}  sha256 {sha256_file(into / name)}")
+    finally:
+        shutil.rmtree(staging, ignore_errors=True)
 
 
 def sdk_flags(sdk: Path) -> list[str]:

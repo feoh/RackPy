@@ -19,9 +19,10 @@ from typing import Any
 
 import pytest
 
-from tests.support import PROBE_MODULE, linux_x64_only, run_rack_windowed, stage_plugin, write_patch
+from tests.support import PROBE_MODULE, linux_x64_only, rack_platforms, run_rack_windowed, stage_plugin, write_patch
 
-pytestmark = [pytest.mark.host, pytest.mark.gui, linux_x64_only()]
+# The dialog stub is an LD_PRELOAD shim, so that case is Linux-only; the native case runs on every platform (RP-42).
+pytestmark = [pytest.mark.host, pytest.mark.gui, rack_platforms()]
 HERE = Path(__file__).resolve().parent
 DOCS = HERE.parents[1] / "docs"
 PANEL = (
@@ -44,7 +45,9 @@ def launch(rack: Path, user: Path, plugin: Path, phase: int) -> dict[str, Any]:
     return data
 
 
-@pytest.mark.parametrize("dialog_stub", [False, True], ids=["native", "dialog-stub"])
+@pytest.mark.parametrize(
+    "dialog_stub", [False, pytest.param(True, marks=linux_x64_only())], ids=["native", "dialog-stub"]
+)
 def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     make_hooks_bundle: Callable[[], Path],
     rack_host: Path,

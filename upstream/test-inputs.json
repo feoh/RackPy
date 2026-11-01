@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "test_renderer": {
+    "note": "Mesa's software OpenGL (llvmpipe) for Windows CI only, as Linux CI renders with Mesa under Xvfb: GitHub-hosted Windows runners have only Windows' OpenGL 1.1, and Rack needs 2.0. Placed beside Rack.exe in the test copy of Rack; never shipped with RackPy (RP-42).",
+    "archives": [
+      {
+        "platform": "win-x64",
+        "url": "https://github.com/pal1000/mesa-dist-win/releases/download/26.2.5/mesa3d-26.2.5-release-msvc.7z",
+        "sha256": "997123ef4ce8896204ab912d5b54f19372c487ff9835bcefafa2fca23b8953c2",
+        "size": 70248244,
+        "root": "x64",
+        "format": "7z",
+        "files": [
+          "opengl32.dll",
+          "libgallium_wgl.dll"
+        ],
+        "source": "https://github.com/pal1000/mesa-dist-win (Mesa 26.2.5, MSVC build)"
+      }
+    ]
+  }
+}

@@ -567,12 +567,15 @@ jobs:
             ~/.cache/rackpy/build-inputs
           key: rackpy-win-x64-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json') }}
       - run: uv sync --frozen
+      # GitHub-hosted Windows runners have no GPU, only Windows' OpenGL 1.1, and Rack needs 2.0. Mesa's software
+      # OpenGL beside the test copy of Rack renders as Linux CI does under Xvfb (RP-42); it is not a GPU, so
+      # drawing on real Windows graphics drivers stays an open gate.
+      - name: Mesa's software OpenGL beside the test copy of Rack
+        run: uv run --script bin/rack-sdk mesa --into "$(uv run --script bin/rack-sdk host win-x64 | tail -1)"
       - name: Native tests and Rack host tests
         env:
           WINDOWS_TESTS: ${{ inputs.windows_tests }}  # through the environment, never into the script's text
-          # Deliberately lacking: GitHub-hosted Windows runners have no GPU, only Windows' OpenGL 1.1, and Rack
-          # needs 2.0, so windowed tests skip here, each with that reason (an open gate, not a pass).
-          RACKPY_ALLOW_MISSING: windows-opengl
+          GALLIUM_DRIVER: llvmpipe  # Mesa's CPU renderer, not its Direct3D 12 driver
         run: >
           uv run --frozen pytest -m "(native or host) and not dist and not sanitizer and not stress and not inventory"
           ${WINDOWS_TESTS:+-k "$WINDOWS_TESTS"}

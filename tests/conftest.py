@@ -35,7 +35,10 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
 
 def pytest_runtest_logreport(report: pytest.TestReport) -> None:
     """This platform's outcome of each test, for bin/check_coverage.py evidence (RACKPY_TEST_EVIDENCE)."""
-    record_evidence([{"test": report.nodeid, "when": report.when, "outcome": report.outcome}])
+    result = {"test": report.nodeid, "when": report.when, "outcome": report.outcome}
+    if report.skipped and isinstance(report.longrepr, tuple):
+        result["reason"] = str(report.longrepr[2])  # why it did not run here (a platform gate, a missing tool)
+    record_evidence([result])
 
 
 @pytest.fixture(scope="session")
