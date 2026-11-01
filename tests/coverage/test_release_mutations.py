@@ -7,6 +7,7 @@ name it claims exported, and every cited test passing. It shows the gate can ope
 evidence that RackPy meets the bar (that needs the real introspection, test outcomes and review)."""
 
 import copy
+import dataclasses
 from typing import Any
 
 import binding_manifest as bm
@@ -21,11 +22,14 @@ PLATFORM = "lin-x64"
 def ready() -> tuple[bm.Inputs, dict[str, Any], dict[str, Any], dict[str, str]]:
     inputs = bm.load_inputs()
     manifest = copy.deepcopy(bm.load_json(bm.MANIFEST))
+    reviewer = "agent-review:synthetic (tests/coverage/test_release_mutations.py)"
+    inputs.reviews = {}
     objects: dict[str, Any] = {}
     outcomes: dict[str, str] = {}
     for record in manifest["entries"]:
         if record["status"] in bm.BOUND:
-            record.update(status="verified", reviewer="synthetic (tests/coverage/test_release_mutations.py)")
+            record.update(status="verified", reviewer=reviewer)
+            inputs.reviews[record["id"]] = {reviewer}
             for key in ("raw", "facade"):
                 if name := (record.get("python") or {}).get(key):
                     objects[name] = {}
@@ -63,6 +67,8 @@ def test_the_gate_opens_only_with_everything_in_place(
         ("drop its Python name", "unbound"),
         ("leave it implemented, not verified", "incomplete"),
         ("verified without a reviewer", "reviewer"),
+        ("no verdict file accepts it", "reviewer"),
+        ("verified in another reviewer's name", "reviewer"),
         ("its name missing from the package", "not-exported"),
         ("its tests failed on the platform", "evidence-failed"),
         ("its tests did not run on the platform", "no-evidence"),
@@ -91,6 +97,10 @@ def test_each_removal_closes_the_gate(
         record.update(status="implemented", reviewer=None)
     elif mutation == "verified without a reviewer":
         record["reviewer"] = None
+    elif mutation == "no verdict file accepts it":
+        inputs = dataclasses.replace(inputs, reviews={k: v for k, v in inputs.reviews.items() if k != record["id"]})
+    elif mutation == "verified in another reviewer's name":
+        record["reviewer"] = "agent-review:someone else"
     elif mutation == "its name missing from the package":
         del artifact["objects"][record["python"]["raw"]]
     elif mutation == "its tests failed on the platform":

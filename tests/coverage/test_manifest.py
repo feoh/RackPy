@@ -289,6 +289,7 @@ def test_release_needs_everything_final_and_real_artifacts(mini: Mini) -> None:
         raw = "rackpy.raw.x" + str(len(objects))
         bind(record, mini, raw=raw, gil_release=True)
         record.update(status="verified", reviewer="test")
+        mini.reviews[record["id"]] = {"test"}
         objects[raw] = {}
     assert bm.release_problems(mini.inputs(), manifest, "lin-x64", {"objects": objects}, PASSED) == []
     assert "missing-runtime-artifact" in codes(bm.release_problems(mini.inputs(), manifest, "lin-x64", None, PASSED))
@@ -306,6 +307,7 @@ def test_release_needs_a_passing_test_on_the_platform(mini: Mini, tmp_path: Path
         raw = "rackpy.raw.x" + str(len(objects))
         bind(record, mini, raw=raw, gil_release=True)
         record.update(status="verified", reviewer="test")
+        mini.reviews[record["id"]] = {"test"}
         objects[raw] = {}
     artifact = {"objects": objects}
     for outcome, code in (("failed", "evidence-failed"), ("skipped", "no-evidence")):
@@ -364,6 +366,7 @@ def test_an_open_owner_review_item_blocks_a_release_and_is_reported(mini: Mini) 
         raw = "rackpy.raw.x" + str(len(objects))
         bind(record, mini, raw=raw, gil_release=True)
         record.update(status="verified", reviewer="test")
+        mini.reviews[record["id"]] = {"test"}
         objects[raw] = {}
     record = by_id(manifest)[VOLTAGE]
     record["notes"] = "Mapped for channels 0 to 15. Open owner review item: the channel bound of 16. Linux only."
@@ -428,3 +431,51 @@ def test_sample_parity_needs_every_cited_test_passed_on_the_platform() -> None:
         ("sample-untested", "s-empty"),
     ]
     assert results["s-pass"]["tests"] == {"t1": "passed", "t2": "passed"}  # parametrized cases count together
+
+
+def verdicts(records: dict[str, Any], reviewer: str = "agent-review:r1") -> dict[str, Any]:
+    return {"slice": "s", "reviewer": reviewer, "commit": "a" * 40, "records": records}
+
+
+def test_a_verdict_file_names_its_reviewer_commit_and_a_verdict_per_record(tmp_path: Path) -> None:
+    # RP-42 step 6: verified only with an accepting verdict on file.
+    assert bm.review_file_problems(verdicts({"x": {"verdict": "accept"}})) == []
+    assert bm.review_file_problems(verdicts({"x": {"verdict": "accept"}}, reviewer="me"))
+    assert bm.review_file_problems({**verdicts({"x": {"verdict": "accept"}}), "commit": "main"})
+    assert bm.review_file_problems(verdicts({}))
+    assert bm.review_file_problems(verdicts({"x": {"verdict": "fine"}}))
+    assert bm.review_file_problems(verdicts({"x": {"verdict": "finding"}}))  # a finding needs its text
+    folder = tmp_path / "review"
+    folder.mkdir()
+    (folder / "a.verdicts.json").write_text(
+        json.dumps(verdicts({"x": {"verdict": "accept"}, "y": {"verdict": "finding", "finding": "wrong"}}))
+    )
+    (folder / "slices.json").write_text("{}")  # not a verdict file
+    assert bm.load_reviews(folder) == {"x": {"agent-review:r1"}}
+    (folder / "b.verdicts.json").write_text(json.dumps(verdicts({"x": {"verdict": "maybe"}})))
+    with pytest.raises(bm.ManifestError, match=r"b\.verdicts\.json"):
+        bm.load_reviews(folder)
+
+
+def test_promotion_needs_an_accepting_verdict_and_passing_evidence(mini: Mini) -> None:
+    manifest = mini.seeded()
+    records = [r for r in manifest["entries"] if r["status"] != "excluded_internal"][:4]
+    for record in records:
+        bind(record, mini, raw="rackpy.raw." + record["id"].split("::")[-1].split("(")[0])
+    a, b, c, d = (r["id"] for r in records)
+    doc = verdicts(
+        {
+            a: {"verdict": "accept"},
+            b: {"verdict": "finding", "finding": "no test of the edge"},
+            c: {"verdict": "accept"},
+            "nope": {"verdict": "accept"},
+        }
+    )
+    promoted, skipped = bm.promote_records(manifest, [doc], {c: ["win-x64"]})
+    assert promoted == [a]
+    assert skipped == {b: "finding: no test of the edge", c: "evidence fails on win-x64", "nope": "not in the manifest"}
+    statuses = {r["id"]: (r["status"], r.get("reviewer")) for r in manifest["entries"]}
+    assert statuses[a] == ("verified", "agent-review:r1") and statuses[d][0] == "implemented"
+    assert any(p.id == a and p.code == "reviewer" for p in bm.validate(mini.inputs(), manifest, None))
+    mini.reviews = {a: {"agent-review:r1"}}
+    assert not any(p.id == a and p.code == "reviewer" for p in bm.validate(mini.inputs(), manifest, None))

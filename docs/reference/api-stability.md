@@ -64,13 +64,9 @@ the private underscore modules. `rackpy.dsp.filters.process_block` is typed with
 for the time-step and IIR filters; IIR orders other than 3-3 come from the
 `IIRFilter[b_order, a_order]` template, which type checkers see as `Any`.
 
-## Proposed release policy
+## Release policy
 
-:::{admonition} Proposed, not in effect
-:class: warning
-
-This policy needs the owner's approval before the first release (RP-44).
-:::
+The owner approved this policy on 2026-11-01 (RP-42); it applies from the first release.
 
 - Versions follow PEP 440. Releases before 1.0 may change the facade in any
   minor release, with each change listed in the release notes.

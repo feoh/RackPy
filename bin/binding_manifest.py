@@ -38,6 +38,9 @@ ENGINE_LOCKS = REPO / "upstream" / "engine-locks.json"
 CALLBACK_RULES = REPO / "upstream" / "callback-rules.json"
 CALLBACK_MATRIX = REPO / "bin" / "callback-matrix"
 EXAMPLES = REPO / "upstream" / "examples.json"
+# Verdict files of record reviews (RP-42 step 6): a record is verified only with an accepting verdict here.
+REVIEWS = REPO / "release-evidence" / "review"
+VERDICTS = ("accept", "finding")
 
 SCHEMA_VERSION = 1
 STATUSES = ("unreviewed", "planned", "implemented", "verified", "unrepresentable", "excluded_internal")
@@ -283,6 +286,7 @@ class Inputs:
     locks: dict[str, str]
     deprecation_evidence: dict[str, str] = field(default_factory=dict)
     repo: Path = REPO
+    reviews: dict[str, set[str]] = field(default_factory=dict)  # record ID -> reviewers whose verdict accepts it
 
     @property
     def index(self) -> dict[str, dict[str, Any]]:
@@ -296,6 +300,7 @@ def load_inputs(
     locks: Path = ENGINE_LOCKS,
     deprecation_evidence: Path = DEPRECATION_EVIDENCE,
     repo: Path = REPO,
+    reviews: Path = REVIEWS,
 ) -> Inputs:
     inv = load_json(inventory)
     inventory_index(inv)  # fail early on an empty or broken inventory
@@ -308,7 +313,46 @@ def load_inputs(
         locks=engine_locks(load_json(locks)),
         deprecation_evidence=load_json(deprecation_evidence)["entries"],
         repo=repo,
+        reviews=load_reviews(reviews),
     )
+
+
+def review_file_problems(doc: Any) -> list[str]:
+    """What is wrong with a verdict file: {"slice", "reviewer": "agent-review:<run>" or "owner:<name>", "commit":
+    the full SHA it reviewed, "records": {ID: {"verdict": "accept"} or {"verdict": "finding", "finding": text}}}."""
+    if not isinstance(doc, dict):
+        return ["a verdict file is a JSON object"]
+    errors = []
+    if not str(doc.get("reviewer", "")).startswith(("agent-review:", "owner:")):
+        errors.append("reviewer must be agent-review:<run> or owner:<name>")
+    if not re.fullmatch(r"[0-9a-f]{40}", str(doc.get("commit", ""))):
+        errors.append("commit must be the full SHA of the reviewed commit")
+    records = doc.get("records")
+    if not isinstance(records, dict) or not records:
+        errors.append("records must be a non-empty object")
+        return errors
+    for ident, verdict in records.items():
+        if not isinstance(verdict, dict) or verdict.get("verdict") not in VERDICTS:
+            errors.append(f"{ident}: verdict must be one of {', '.join(VERDICTS)}")
+        elif verdict["verdict"] == "finding" and not str(verdict.get("finding", "")).strip():
+            errors.append(f"{ident}: a finding needs its text")
+    return errors
+
+
+def load_reviews(folder: Path = REVIEWS) -> dict[str, set[str]]:
+    """Record ID -> the reviewers whose verdict file accepts it. A malformed verdict file is an error."""
+    accepted: dict[str, set[str]] = defaultdict(set)
+    if not folder.is_dir():
+        return {}
+    for path in sorted(folder.glob("*.verdicts.json")):
+        doc = load_json(path)
+        errors = review_file_problems(doc)
+        if errors:
+            raise ManifestError(f"{path}: {errors[0]}")
+        for ident, verdict in doc["records"].items():
+            if verdict["verdict"] == "accept":
+                accepted[ident].add(doc["reviewer"])
+    return dict(accepted)
 
 
 # --- seeding ---------------------------------------------------------------------
@@ -666,6 +710,8 @@ def validate(inputs: Inputs, manifest: dict[str, Any], introspection: dict[str, 
                         add("not-implemented", ident, f"{value} reports itself as not implemented")
         if status == "verified" and not r.get("reviewer"):
             add("reviewer", ident, "verified needs a reviewer")
+        elif status == "verified" and r["reviewer"] not in inputs.reviews.get(ident, set()):
+            add("reviewer", ident, f"no verdict file in release-evidence/review/ by {r['reviewer']} accepts it")
         marker = owner_review_marker_problem(r)
         if marker:
             add("owner-review-marker", ident, marker)
@@ -821,6 +867,32 @@ def sample_problems(
         passed = bool(tests) and all(o == "passed" for o in tests.values())
         results[ident] = {"status": "passed" if passed else "not passed", "tests": tests}
     return problems, results
+
+
+def promote_records(
+    manifest: dict[str, Any], verdicts: list[dict[str, Any]], blocked: dict[str, list[str]]
+) -> tuple[list[str], dict[str, str]]:
+    """Mark `verified` each implemented record a verdict accepts, naming its reviewer, unless BLOCKED lists
+    platforms where its evidence fails (RP-42 step 6). Returns the promoted IDs and, for every other record a
+    verdict names, why it was not promoted. Nothing else changes."""
+    records = {r["id"]: r for r in manifest["entries"]}
+    promoted: list[str] = []
+    skipped: dict[str, str] = {}
+    for doc in verdicts:
+        for ident, verdict in doc["records"].items():
+            record = records.get(ident)
+            if record is None:
+                skipped[ident] = "not in the manifest"
+            elif verdict["verdict"] != "accept":
+                skipped[ident] = "finding: " + verdict["finding"]
+            elif record["status"] not in BOUND:
+                skipped[ident] = f"status is {record['status']}"
+            elif ident in blocked:
+                skipped[ident] = "evidence fails on " + ", ".join(sorted(blocked[ident]))
+            elif record["status"] != "verified":
+                record.update(status="verified", reviewer=doc["reviewer"])
+                promoted.append(ident)
+    return promoted, skipped
 
 
 def evidence_problems(

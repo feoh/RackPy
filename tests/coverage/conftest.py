@@ -64,6 +64,7 @@ class Mini:
     exclusions: dict[str, dict[str, Any]]
     strategies: dict[str, str | None] = field(default_factory=dict)
     locks: dict[str, str] = field(default_factory=dict)
+    reviews: dict[str, set[str]] = field(default_factory=dict)  # record ID -> reviewers whose verdict accepts it
 
     def inputs(self) -> bm.Inputs:
         text = json.dumps(self.inventory, sort_keys=True)
@@ -76,6 +77,7 @@ class Mini:
             strategies=self.strategies,
             locks=self.locks,
             repo=self.repo,
+            reviews=self.reviews,
         )
 
     def seeded(self) -> dict[str, Any]:

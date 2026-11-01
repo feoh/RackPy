@@ -119,6 +119,19 @@ closed the integer and float template gaps, set the weak-pointer and
 open owner review item ([Adding bindings](../docs/contributing-bindings.md#open-owner-review-items)).
 Still open: ADR 004's `ui-exclusive` budget.
 
+**2026-11-01: who reviews records, and the facade policy.** For RP-42's
+step 6 the owner authorized an agent review workflow: for each binding family
+(a large family in slices), a reviewer agent that did not write the bindings
+checks every record against Rack's declaration, RackPy's implementation, the
+tests it cites and its documentation, and accepts it or reports a finding.
+Findings are fixed or answered and reviewed again. A record becomes `verified`
+only when its reviewer accepted it and its cited tests passed on every platform
+where it is available; its `reviewer` field names the review run
+(`agent-review:<run>`). The owner spot-checks a sample of the accepted records
+from each family. The same day the owner approved the facade's
+[release policy](../docs/reference/api-stability.md#release-policy), which was
+proposed in RP-32.
+
 ## Witan project and recovery history
 
 The initial WorkflowProject search/create returned:
