@@ -126,6 +126,24 @@ def evidence(
 
 
 @app.command
+def citations(*, manifest: Path = bm.MANIFEST, output: Path | None = None) -> None:
+    """A review aid, never a gate: bound records whose cited tests never name their Python binding.
+
+    A data-driven test or a syntax call can exercise a binding without naming it, so each listed record needs a
+    reviewer's look, not an automatic fix. --output writes the list as JSON.
+    """
+    data: dict[str, Any] = bm.load_json(manifest)
+    weak = bm.weak_citations(data)
+    if output:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        rows = [{"id": p.id, "message": p.message} for p in weak]
+        output.write_text(json.dumps(rows, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    for p in weak:
+        print(f"  {p}")
+    print(f"{len(weak)} record(s) for a reviewer to check")
+
+
+@app.command
 def release(
     platform: str,
     *,

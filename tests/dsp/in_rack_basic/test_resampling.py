@@ -273,3 +273,32 @@ def test_decimator_and_upsampler() -> None:
     with pytest.raises(ValueError, match="0 to 7"):
         u.in_index = 8
     assert simd.float_4 is float_4
+
+
+def test_decimator_and_upsampler_reset() -> None:
+    # Rack's reset(): in_index 0 and a zeroed history, the kernel kept; then it behaves as a fresh one (RP-42).
+    block = array.array("f", [1.0, -2.0, 3.0, 0.5])
+    d, fresh = dsp.Decimator[4, 8](0.7), dsp.Decimator[4, 8](0.7)
+    kernel = d.kernel.tolist()
+    for _ in range(3):
+        d.process(block)
+    assert d.in_index == 12 and any(d.in_buffer.tolist())
+    d.reset()
+    assert d.in_index == 0 and d.in_buffer.tolist() == [0.0] * 32 and d.kernel.tolist() == kernel
+    assert [d.process(block) for _ in range(5)] == [fresh.process(block) for _ in range(5)]
+    v, fresh_v = dsp.Decimator[4, 8, float_4](), dsp.Decimator[4, 8, float_4]()
+    vblock = [float_4(1.0, 2.0, 3.0, 4.0)] * 4
+    v.process(vblock)
+    v.reset()
+    assert v.in_index == 0 and list(v.process(vblock)) == list(fresh_v.process(vblock))
+    u, fresh_u = dsp.Upsampler[4, 8](0.7), dsp.Upsampler[4, 8](0.7)
+    out, expected = floats(4), floats(4)
+    for x in (1.0, -1.0, 0.5):
+        u.process(x, out)
+    assert u.in_index == 3 and any(u.in_buffer.tolist())
+    u.reset()
+    assert u.in_index == 0 and u.in_buffer.tolist() == [0.0] * 8 and u.kernel.tolist() == fresh_u.kernel.tolist()
+    for x in (0.25, 1.0, -0.5):
+        u.process(x, out)
+        fresh_u.process(x, expected)
+        assert out.tolist() == expected.tolist()

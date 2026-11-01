@@ -823,6 +823,46 @@ def evidence_problems(
     return problems, counts
 
 
+# Test files that walk the inventory or the manifest and look names up (getattr), so a record's name need not
+# appear in them literally: the boundary constants against the compiled SDK, the deprecated aliases, and so on.
+DATA_DRIVEN = re.compile(r"api-surface|manifest\.json|bindings/manifest|mapping\.json|crosswalk|getattr\(")
+# Python syntax that calls a binding without naming it.
+SYNTAX = {"__getitem__": r"\w\[", "__setitem__": r"\w\[[^]]*\]\s*=", "__call__": r"\w\("}
+
+
+def weak_citations(manifest: dict[str, Any]) -> list[Problem]:
+    """A review aid, not a gate (RP-42): bound records none of whose cited tests mentions the bound Python name,
+    counting the entry scripts a test loads (tests/*/entries/*.py) and skipping data-driven test files. Each
+    one needs a reviewer to confirm the test exercises it, or a better citation, or a test."""
+    cache: dict[str, list[str]] = {}
+
+    def texts(test_file: str) -> list[str]:
+        if test_file not in cache:
+            path = REPO / test_file
+            text = path.read_text(encoding="utf-8") if path.is_file() else ""
+            found = [text]
+            for a, b in re.findall(r'"entries"\s*/\s*"([\w.]+\.py)"|entries/([\w.]+\.py)', text):
+                entry = path.parent / "entries" / (a or b)
+                if entry.is_file():
+                    found.append(entry.read_text(encoding="utf-8"))
+            cache[test_file] = found
+        return cache[test_file]
+
+    out = []
+    for r in manifest["entries"]:
+        raw = (r.get("python") or {}).get("raw")
+        if r["status"] not in BOUND or not raw:
+            continue
+        name = raw.rsplit(".", 1)[-1]
+        pattern = SYNTAX.get(name, rf"\b{re.escape(name)}\b")
+        files = sorted({t.split("::")[0] for t in r.get("tests", [])})
+        bodies = [t for f in files for t in texts(f)]
+        if any(DATA_DRIVEN.search(t) for t in bodies[:1] + bodies) or any(re.search(pattern, t) for t in bodies):
+            continue
+        out.append(Problem("weak-citation", r["id"], f"{raw}: no cited test names it ({', '.join(files)})"))
+    return out
+
+
 def markdown_report(rep: dict[str, Any]) -> str:
     """docs/reference/coverage.md."""
     order = [*STATUSES, "unknown", "absent", "superseded", "not inventoried"]
