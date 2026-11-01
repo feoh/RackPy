@@ -17,8 +17,13 @@ void* operator new(std::size_t size) {
 		return ptr;
 	throw std::bad_alloc();
 }
+// The replacement operator new above allocates with malloc, so free is the matching release. GCC
+// (MSYS2's 16.2 for Windows) cannot see that pairing and warns that free meets operator new.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmismatched-new-delete"
 void operator delete(void* ptr) noexcept { std::free(ptr); }
 void operator delete(void* ptr, std::size_t) noexcept { std::free(ptr); }
+#pragma GCC diagnostic pop
 
 int main() {
 	using namespace rackpy;
