@@ -142,14 +142,20 @@ function Headless([string]$user, [string]$name, [string]$workDir = "", [string]$
     $proc = [Diagnostics.Process]::Start($info)
     $stdout = $proc.StandardOutput.ReadToEndAsync()
     $stderr = $proc.StandardError.ReadToEndAsync()
+    # Every DLL seen in Toolhelp snapshots taken while Rack runs. One snapshot after the autosave is not enough:
+    # here headless Rack can pass "Press enter to exit" at once and be gone (RP-41, run 41292904958).
+    $seen = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+    $snapError = $null
+    $loaded = $null
     $deadline = (Get-Date).AddSeconds(120)
     while ((Get-Date) -lt $deadline -and -not $proc.HasExited) {
-        if ((ReadText $log).Contains("Loading autosave")) { break }
+        try { foreach ($image in [RackPyToolhelp]::Modules($proc.Id)) { [void]$seen.Add($image) } }
+        catch { $snapError = "$_" }
+        if ($null -eq $loaded) { if ((ReadText $log).Contains("Loading autosave")) { $loaded = (Get-Date).AddSeconds(3) } }
+        elseif ((Get-Date) -gt $loaded) { break }
         Start-Sleep -Milliseconds 100
     }
-    Start-Sleep -Seconds 3
-    $images = @()
-    try { $images = [RackPyToolhelp]::Modules($proc.Id) } catch { $images = @("(modules unavailable: $_)") }
+    $images = if ($seen.Count) { [string[]]$seen } else { @("(modules unavailable: $snapError)") }
     [IO.File]::WriteAllLines((Join-Path $Logs "$name.images"), [string[]]($images | Sort-Object -Unique))
     try { $proc.StandardInput.WriteLine(""); $proc.StandardInput.Close() } catch {}
     if (-not $proc.WaitForExit(60000)) { $proc.Kill(); $proc.WaitForExit(); $rc = "killed" } else { $rc = [string]$proc.ExitCode }
