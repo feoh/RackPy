@@ -112,7 +112,10 @@ guard; the inventory; real-host smoke tests (headless and Xvfb); and, outside
 pull requests, the distributable build with the official toolchain (restored
 from cache, or built in about an hour) and the Linux release candidate, built
 by `bin/rackpy-release build` and installed on clean Ubuntu 20.04 and 16.04
-containers by `bin/rackpy-release verify` (RP-39). Reports and Rack logs are kept 14 days,
+containers by `bin/rackpy-release verify` (RP-39). Outside pull requests, four macOS jobs
+run on GitHub's `macos-15` (arm64) and `macos-15-intel` runners (RP-40): the native build,
+CTest and host tests, and each architecture's release candidate built and verified there.
+Reports and Rack logs are kept 14 days,
 the release candidate's evidence 30. CI keeps no binaries, because
 distributing one needs owner approval (RP-44).
 

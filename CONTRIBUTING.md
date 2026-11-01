@@ -15,8 +15,12 @@ here is an installable release.
 
 ## Set up a clean checkout
 
-Supported for development: **Linux x86_64** only. macOS and Windows builds do
-not exist yet (RP-40, RP-41).
+Supported for development: **Linux x86_64**, and **macOS** on Apple silicon or
+Intel (RP-40): on a Mac, Xcode's command line tools replace GCC and binutils,
+there is no Xvfb (windowed tests need a Mac whose GPU gives Rack an OpenGL
+window), and the Linux-only checks (the official toolchain, the `LD_PRELOAD`
+audio-path guard, ELF inspection, the sanitizer and stress suites' Linux
+programs) skip with that reason. Windows builds do not exist yet (RP-41).
 
 You need:
 
@@ -52,12 +56,12 @@ missing or different SDK is a configure error, not a warning.
 | --- | --- |
 | `bin/rackpy-dev build [--werror] [--toolchain rack-lin-x64] [--test-hooks]` | Configure, build, run the native unit tests. `--test-hooks` adds the RuntimeProbe module the runtime tests drive; never distribute that build |
 | `bin/rackpy-dev bundle DEST [--runtime link\|copy]` | Install the build as the Rack plugin directory `DEST/RackPy` |
-| `bin/rackpy-dev inspect DEST/RackPy [--max-glibc 2.23]` | Check exports, `NEEDED`, `RUNPATH`, Python references and the glibc floor |
+| `bin/rackpy-dev inspect DEST/RackPy [--max-glibc 2.23]` | Check exports, `NEEDED`, `RUNPATH`, Python references and the glibc floor; on a Mac, the Mach-O load commands, install names and rpaths |
 | `bin/rackpy-dev audio-symbols FILE...` | Fail if an object references CPython (ADR 004's audio-path rule) |
 | `bin/rackpy-dev lint`, `bin/rackpy-dev typecheck` | Ruff, and strict mypy including each `bin/` script |
 | `bin/rack-sdk verify\|closure\|probe` | SDK pins ([compatibility](docs/compatibility.md#reproduce)) |
 | `bin/rack-toolchain build\|check\|path` | The official Linux toolchain for distributable builds (about an hour, once) |
-| `bin/rackpy-release build\|verify\|compare` | Linux release candidates from a clean commit; install and run them on a clean container; explain the differences between two builds ([install on Linux](docs/installation/linux.md)) |
+| `bin/rackpy-release build\|verify\|compare` | Release candidates for this computer's platform (Linux, or the Mac's own architecture) from a clean commit; install and run them on a clean container (Linux) or in fresh Rack user folders (a Mac); explain the differences between two builds ([Linux](docs/installation/linux.md), [macOS](docs/installation/macos.md)) |
 | `bin/rackpy-plugin pack DIR` | A plugin directory as a reproducible `.vcvplugin` package |
 | `bin/planning-check` | `planning/` files agree with each other and form a DAG |
 | `uv run sphinx-build -W --keep-going -n -b html docs build/docs/html` | The documentation site; conventions in [docs/contributing-docs.md](docs/contributing-docs.md) |
@@ -126,6 +130,8 @@ and on pull requests, on `ubuntu-24.04`:
 | Documentation external links (weekly and on demand) | `sphinx-build -b linkcheck` |
 | Rack host smoke tests | `pytest -m "host and not dist"`: the skeleton, the docs snippets that run in Rack, the RP-04 spike and the RP-06 probe in Rack Free 2.6.6 |
 | Distributable build (pushes to `main` and on demand) | builds or restores the official toolchain, then `pytest -m dist` |
+| macOS arm64 and x86_64 (pushes to `main` and on demand) | `macos-15` and `macos-15-intel`: the native build, CTest and `pytest -m "(native or host) and not dist ..."`; windowed tests skip there with `RACKPY_ALLOW_MISSING=macos-opengl`, as the runners give Rack no OpenGL window. `macos_tests` (a dispatch input) narrows the selection |
+| macOS release candidates (pushes to `main` and on demand) | `bin/rackpy-release build` and `verify` on each architecture: Mach-O, signature and deployment-target checks, then every example installed into fresh Rack user folders with an empty environment; keeps the manifest, checksums and logs |
 | Linux release candidate (pushes to `main` and on demand) | `bin/rackpy-release build`, then `bin/rackpy-release verify` installs it on clean Ubuntu 20.04 and 16.04 containers with no Python and no network; keeps the manifest, checksums, logs and screenshots |
 
 Each job keeps its JUnit report, the host jobs keep every Rack `log.txt`, and

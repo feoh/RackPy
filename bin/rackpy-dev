@@ -403,8 +403,12 @@ def audio_symbols(objects: list[Path]) -> None:
     """Fail if any object or library references a CPython symbol (ADR 004 audio-path rule)."""
     offenders: dict[str, list[str]] = {}
     for obj in objects:
-        listing = capture(["nm", "--undefined-only", "--format=just-symbols", obj])
-        refs = sorted({s for s in listing.split() if s.startswith(("Py", "_Py"))})
+        if sys.platform == "darwin":  # Apple's nm; Mach-O prefixes C names with one more underscore
+            listing = capture(["nm", "-u", "-j", obj])
+            names = [s.removeprefix("_") for s in listing.split()]
+        else:
+            names = capture(["nm", "--undefined-only", "--format=just-symbols", obj]).split()
+        refs = sorted({s for s in names if s.startswith(("Py", "_Py"))})
         if refs:
             offenders[str(obj)] = refs
     if offenders:

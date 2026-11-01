@@ -27,7 +27,7 @@ import rackpypolyphony_teaching as teaching
 
 from rackpy.dsp.graph_reference import run, run_pair
 from tests.examples.support import EXAMPLES, plugin_tool, saved_patch, write_patch
-from tests.support import BIN, PLUGINS, assert_clean_exit, linux_x64_only, run_pytest_in_rack, run_rack
+from tests.support import BIN, PLUGINS, assert_clean_exit, linux_x64_only, rack_platforms, run_pytest_in_rack, run_rack
 
 POLYPHONY, DSP, EXPANDERS = (EXAMPLES / name for name in ("polyphony", "dsp", "expanders"))
 PROJECTS = (POLYPHONY, DSP, EXPANDERS)
@@ -82,7 +82,7 @@ def test_the_expander_pair_is_one_frame_apart_offline() -> None:
 
 
 @pytest.mark.native
-@linux_x64_only()
+@rack_platforms()
 def test_the_cpp_reference_scalar_and_simd_agree(dev_build: Path) -> None:
     reference = polyphony_reference(dev_build)
     rate = reference["rate"]
@@ -100,14 +100,20 @@ def test_the_cpp_reference_scalar_and_simd_agree(dev_build: Path) -> None:
 
 
 @pytest.mark.native
-@linux_x64_only()
-def test_the_example_kernels_make_no_audio_path_calls(dev_build: Path) -> None:
+@rack_platforms()
+def test_the_example_kernels_reference_no_python(dev_build: Path) -> None:
     libraries = kernel_libraries(dev_build)
     assert len(libraries) == 3 and all(p.is_file() for p in libraries)
     symbols = subprocess.run(
         [str(BIN / "rackpy-dev"), "audio-symbols", *map(str, libraries)], capture_output=True, text=True, check=False
     )
     assert symbols.returncode == 0, symbols.stdout + symbols.stderr
+
+
+@pytest.mark.native
+@linux_x64_only()  # the LD_PRELOAD audio-path guard
+def test_the_example_kernels_make_no_audio_path_calls(dev_build: Path) -> None:
+    libraries = kernel_libraries(dev_build)
     guard = subprocess.run(
         [str(dev_build / "rackpy_example_kernel_guard"), *map(str, libraries)],
         capture_output=True,
@@ -143,7 +149,7 @@ def manifest_entries() -> list[dict[str, object]]:
 
 @pytest.mark.host
 @pytest.mark.gui
-@linux_x64_only()
+@rack_platforms()
 def test_the_modules_in_live_rack(
     make_hooks_bundle: Callable[[], Path], hooks_build: Path, rack_host: Path, tmp_path: Path
 ) -> None:
@@ -167,7 +173,7 @@ def test_the_modules_in_live_rack(
 
 
 @pytest.mark.host
-@linux_x64_only()
+@rack_platforms()
 @pytest.mark.parametrize("project", PROJECTS, ids=lambda p: p.name)
 def test_each_example_loads_as_its_own_plugin(
     make_bundle: Callable[[], Path], dev_build: Path, rack_host: Path, tmp_path: Path, project: Path

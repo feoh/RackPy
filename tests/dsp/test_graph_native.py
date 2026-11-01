@@ -15,9 +15,9 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import linux_x64_only
+from tests.support import linux_x64_only, rack_platforms
 
-pytestmark = [linux_x64_only(), pytest.mark.native]
+pytestmark = [rack_platforms(), pytest.mark.native]  # the LD_PRELOAD guard run is Linux-only
 
 
 def test_plans_match_direct_cpp(dev_build: Path) -> None:
@@ -26,6 +26,7 @@ def test_plans_match_direct_cpp(dev_build: Path) -> None:
     assert "graph plans: all checks passed" in proc.stdout
 
 
+@linux_x64_only()
 def test_a_sixteen_channel_plan_makes_no_forbidden_calls(dev_build: Path) -> None:
     env = {**os.environ, "LD_PRELOAD": str(dev_build / "audio_guard.so")}
     out = subprocess.run([str(dev_build / "rackpy_kernel_guard")], capture_output=True, text=True, check=True, env=env)

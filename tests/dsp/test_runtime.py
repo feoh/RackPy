@@ -16,9 +16,9 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import linux_x64_only, run_pytest_in_rack
+from tests.support import linux_x64_only, rack_platforms, run_pytest_in_rack
 
-pytestmark = [linux_x64_only()]
+pytestmark = [rack_platforms()]  # the LD_PRELOAD audio-path guard runs are Linux-only
 SUITE = Path(__file__).resolve().parent / "in_rack"
 LIBRARY_SUITE = Path(__file__).resolve().parent / "in_rack_libraries"
 LIBRARIES = [
@@ -48,6 +48,7 @@ def test_kernels_match_direct_cpp_and_hand_over_safely(dev_build: Path) -> None:
 
 
 @pytest.mark.native
+@linux_x64_only()
 def test_the_kernel_path_makes_no_forbidden_calls(dev_build: Path) -> None:
     env = {**os.environ, "LD_PRELOAD": str(dev_build / "audio_guard.so")}
     out = subprocess.run([str(dev_build / "rackpy_kernel_guard")], capture_output=True, text=True, check=True, env=env)
@@ -68,6 +69,7 @@ def test_the_overhead_benchmark_runs(dev_build: Path) -> None:
 
 
 @pytest.mark.native
+@linux_x64_only()
 def test_the_guard_run_needs_the_preload(dev_build: Path) -> None:
     proc = subprocess.run([str(dev_build / "rackpy_kernel_guard")], capture_output=True, text=True, check=False)
     assert proc.returncode == 2 and "LD_PRELOAD" in proc.stderr
