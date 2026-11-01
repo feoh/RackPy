@@ -2,15 +2,16 @@
 
 **There is nothing to download yet.** RackPy has no release, no plugin in the
 VCV Library and no package on PyPI. Do not install anything that claims to be
-a RackPy release. On Linux you can build the release candidates yourself and
-[install them](installation/linux.md).
+a RackPy release. On Linux and on a Mac you can build the release candidates
+yourself and install them ([Linux](installation/linux.md),
+[macOS](installation/macos.md)).
 
 ## What exists today
 
 | Platform | Status |
 | --- | --- |
 | Linux x86_64 | Builds from source, for Rack Free {{rack_version}}. Plugins written in Python load into Rack, add modules and process audio natively; the [examples](examples.md) run in Rack under test. Development builds work only on the computer that built them; [release candidates](installation/linux.md) (`bin/rackpy-release build`) install on any Linux with glibc 2.23 or newer, and are tested on a clean machine. |
-| macOS (arm64, x86_64) | Not built. Planned in RP-40. |
+| macOS (arm64, x86_64) | Builds from source on each architecture with Xcode's command line tools, for Rack Free {{rack_version}}; the native and host tests pass on both, headless. [Release candidates](installation/macos.md) (`bin/rackpy-release build` on a Mac, one package per architecture, macOS 11.0 or newer on Apple silicon, 10.15 or newer on Intel) are signed ad hoc, not with a Developer ID, and not notarized. Not yet checked: drawing in a window (the CI Macs have no OpenGL window), a Mac with SIP on, and a truly clean Mac. |
 | Windows x86_64 | Not built. Planned in RP-41. |
 | Linux arm64, Windows arm64 | Not planned: VCV publishes no SDK for them. |
 
@@ -45,4 +46,5 @@ official toolchain: see [install on Linux](installation/linux.md).
 :hidden:
 
 installation/linux
+installation/macos
 ```

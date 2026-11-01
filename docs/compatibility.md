@@ -173,9 +173,9 @@ evidence on a real host.
 
 | Target | SDK | Status |
 | --- | --- | --- |
-| Linux x86_64 | yes | **Initial validation target.** SDK verified; the RP-08 skeleton (no bindings) builds and loads in Rack Free 2.6.6, headless and in Xvfb. No release artifact. |
-| macOS arm64 | yes | Candidate. Headers verified; **nothing built or run**. Needs native hardware. |
-| macOS x86_64 | yes | Candidate. Headers verified; **nothing built or run**. Needs native hardware. |
+| Linux x86_64 | yes | **Validated natively.** Builds, native and host tests (headless and in Xvfb); release candidates built with the official toolchain (glibc 2.23) and verified on clean Ubuntu 16.04 and 20.04 containers (RP-39). Not published. |
+| macOS arm64 | yes | **Validated natively** on GitHub's `macos-15` runners: builds, native and host tests (headless), release candidates installed in fresh user folders (RP-40, [validation](../planning/rp-40-validation.md)). Windowed drawing, Gatekeeper with SIP on and a clean Mac remain open. Not published. |
+| macOS x86_64 | yes | **Validated natively** on GitHub's `macos-15-intel` runners, as arm64 (RP-40). The same gates remain open. Not published. |
 | Windows x86_64 | yes | Candidate. Headers verified; **nothing built or run**. CRT risk above. |
 | Linux arm64 | **no** | Not a target: no SDK published. |
 | Windows arm64 | **no** | Not a target: no SDK published. |
