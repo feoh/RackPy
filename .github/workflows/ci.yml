@@ -34,6 +34,8 @@ env:
   UV_VERSION: "0.9.18"
   # Missing tools or inputs fail tests (tests/support.py); jobs list what they deliberately lack.
   RACKPY_ALLOW_MISSING: ""
+  # A stalled mirror connection once held apt-get update for a job's whole 30 minutes: give up and retry.
+  APT_OPTS: -o Acquire::Retries=3 -o Acquire::http::Timeout=60 -o Acquire::https::Timeout=60
 
 jobs:
   planning:
@@ -131,7 +133,7 @@ jobs:
         with:
           version: ${{ env.UV_VERSION }}
       - name: Libraries libRack links (native tests run outside Rack)
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build jq libgl1 libx11-6 libasound2t64 libjack-jackd2-0 libpulse0
+        run: sudo apt-get $APT_OPTS update && sudo apt-get $APT_OPTS install -y --no-install-recommends ninja-build jq libgl1 libx11-6 libasound2t64 libjack-jackd2-0 libpulse0
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
@@ -178,7 +180,7 @@ jobs:
         run: |
           curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/llvm.gpg
           echo "deb [signed-by=/usr/share/keyrings/llvm.gpg] http://apt.llvm.org/noble/ llvm-toolchain-noble-21 main" | sudo tee /etc/apt/sources.list.d/llvm.list
-          sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 libclang-21-dev
+          sudo apt-get $APT_OPTS update && sudo apt-get $APT_OPTS install -y --no-install-recommends clang-21 libclang-21-dev
           echo /usr/lib/llvm-21/bin >> "$GITHUB_PATH"
       - run: clang++ --version
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -207,7 +209,7 @@ jobs:
           version: ${{ env.UV_VERSION }}
       - name: Rack's runtime libraries, Mesa for the Xvfb window, and Xvfb
         run: >
-          sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build jq
+          sudo apt-get $APT_OPTS update && sudo apt-get $APT_OPTS install -y --no-install-recommends ninja-build jq
           libgl1 libgl1-mesa-dri libx11-6 libasound2t64 libjack-jackd2-0 libpulse0 libpulse-mainloop-glib0 xvfb xauth
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -247,7 +249,7 @@ jobs:
         with:
           version: ${{ env.UV_VERSION }}
       - run: >
-          sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build jq
+          sudo apt-get $APT_OPTS update && sudo apt-get $APT_OPTS install -y --no-install-recommends ninja-build jq
           libgl1 libx11-6 libasound2t64 libjack-jackd2-0 libpulse0
       - name: Restore the toolchain
         id: toolchain
@@ -294,7 +296,7 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build jq
+      - run: sudo apt-get $APT_OPTS update && sudo apt-get $APT_OPTS install -y --no-install-recommends ninja-build jq
       - name: Restore the toolchain
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:

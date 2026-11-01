@@ -253,7 +253,7 @@ xattr -r "$user/$PLUGINS/$slug1" 2>/dev/null | grep -c com.apple.quarantine > "$
 check "a quarantined package: the extracted files are not quarantined" test "$(cat "$LOGS/quarantined-package.xattr-count")" = 0
 xattr -r -w com.apple.quarantine "$QUARANTINE" "$user/$PLUGINS/$slug1"
 headless "$user" quarantined-folder
-note "info  a quarantined folder: Rack's exit status $(cat "$LOGS/quarantined-folder.rc") (137: killed after 180 s)"
+note "info  a quarantined folder: Rack's exit status $(cat "$LOGS/quarantined-folder.rc") (137 would mean killed after 180 s)"
 if has "$LOGS/quarantined-folder.log" "Loaded plugin $slug1 "; then note "info  a quarantined folder: loaded"; else note "info  a quarantined folder: refused"; fi
 grep -iE "$slug1|quarantine|not opened|malware|verify" "$LOGS/quarantined-folder.log" | head -5 > "$LOGS/quarantined-folder.excerpt"
 xattr -r -d com.apple.quarantine "$user/$PLUGINS/$slug1"
