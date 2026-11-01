@@ -130,6 +130,15 @@ void testPythonImageNames() {
 	CHECK(!isPython("C:/plugins/X/python3_helper.pyd"));
 }
 
+void testCanonicalPath() {
+	using rackpy::dynlib::canonicalPath;
+	std::string here = canonicalPath(".");
+	CHECK(!here.empty() && here.find('\\') == std::string::npos);  // resolved, with '/' separators
+	CHECK(canonicalPath(here) == here);  // idempotent
+	CHECK(canonicalPath(here + "/.") == here);
+	CHECK(canonicalPath(here + "/no-such-file-rackpy").empty());  // fails closed
+}
+
 void testLoadedImages() {
 	// The system's image list is never empty: at least the C runtime is loaded.
 	CHECK(!rackpy::dynlib::loadedImages().empty());
@@ -140,7 +149,7 @@ void testLoadedImages() {
 int main() {
 	const std::function<void()> tests[] = {
 		testValidConfig, testEntryIsOptional, testRejections, testContainedPaths, testReadConfigReportsPath,
-		testNoPythonLoaded, testPythonImageNames, testLoadedImages};
+		testNoPythonLoaded, testPythonImageNames, testLoadedImages, testCanonicalPath};
 	for (const auto& t : tests)
 		t();
 	if (failures) {

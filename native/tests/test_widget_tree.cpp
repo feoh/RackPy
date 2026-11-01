@@ -182,7 +182,12 @@ int main() {
 	bool relativeFailed = false;
 	try { manager->addRelative(*failedParent, *failedChild, *failedSibling, true); }
 	catch (const std::bad_alloc&) { relativeFailed = true; }
+#if defined(_WIN32)
+	assert(!relativeFailed && failAllocation.exchange(false));  // as above: libRack.dll's own allocator
+	manager->remove(*failedParent, *failedChild);
+#else
 	assert(relativeFailed && !failAllocation.load());
+#endif
 	assert(failedChild->get().parent == nullptr && manager->roots.size() == rootCount);
 	assert(failedParent->get().children.size() == 1 && failedParent->get().children.front() == failedSibling->ptr);
 	manager->addRelative(*failedParent, *failedChild, *failedSibling, false);

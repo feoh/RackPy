@@ -60,8 +60,8 @@ void loadLibrary(const std::string& pluginDir, const std::string& relative) {
 	std::string path = rack::system::join(pluginDir, relative);
 	if (!rack::system::isFile(path))
 		throw std::runtime_error("no such file");
-	std::string folder = rack::system::getCanonical(pluginDir);
-	if (rack::system::getCanonical(path).compare(0, folder.size() + 1, folder + "/") != 0)
+	std::string folder = dynlib::canonicalPath(pluginDir);
+	if (folder.empty() || dynlib::canonicalPath(path).compare(0, folder.size() + 1, folder + "/") != 0)
 		throw std::runtime_error("it resolves outside the plugin folder");
 	std::string error;
 	void* handle = dynlib::openPinned(path, false, error);

@@ -7,6 +7,8 @@
 // loading order is ADR 002, decision 1.
 #include <rack.hpp>
 
+#include <typeinfo>
+
 #include "loader_config.hpp"
 #include "rackpy/dynlib.hpp"
 #include "rackpy/export.h"
@@ -57,9 +59,11 @@ void loadHost(Plugin* p) {
 	// RP-38: as for kernel libraries, the code the plugin ships (the host and its pythonpath) must resolve inside
 	// the plugin folder, so that a symlink cannot make RackPy run another folder's files. The runtime is
 	// identified by its version and stdlib marker instead: test bundles link the pinned runtime (rackpy-dev bundle).
-	std::string folder = system::getCanonical(dir);
+	std::string folder = rackpy::dynlib::canonicalPath(dir);
+	if (folder.empty())
+		return refuse(string::f("cannot resolve the plugin folder %s", dir.c_str()));
 	for (const std::string& path : {system::join(dir, cfg.host), system::join(dir, cfg.pythonPath)}) {
-		std::string canonical = system::getCanonical(path);
+		std::string canonical = rackpy::dynlib::canonicalPath(path);
 		if (canonical.empty())
 			continue;  // missing: reported where it is needed, as before
 		if (canonical.compare(0, folder.size() + 1, folder + "/") != 0)
@@ -109,6 +113,10 @@ extern "C" RACKPY_EXPORT void init(Plugin* p) {
 	}
 	catch (Exception& e) {
 		refuse(e.what());
+	}
+	catch (const std::exception& e) {
+		// Not Rack's own exception type (or one whose type_info this library cannot match): say what it was.
+		refuse(string::f("C++ exception in the loader (%s): %s", typeid(e).name(), e.what()));
 	}
 	catch (...) {
 		refuse("unexpected C++ exception in the loader");

@@ -26,5 +26,11 @@ void* symbol(void* handle, const char* name);
 /** The file of every image (executable or library) loaded in this process, as the system reports it. */
 std::vector<std::string> loadedImages();
 
+/** PATH with every symlink (on Windows also junction) resolved, as the system itself resolves it, in UTF-8 with
+'/' separators; "" if it cannot be resolved (it does not exist, or the system refuses). RackPy's containment
+checks use it instead of rack::system::getCanonical, whose std::filesystem::canonical can throw on Windows
+(MinGW's libstdc++: std::logic_error for a Wine Z: path, RP-41), which that function does not catch. */
+std::string canonicalPath(const std::string& path);
+
 }  // namespace dynlib
 }  // namespace rackpy

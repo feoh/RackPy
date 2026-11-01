@@ -20,6 +20,7 @@
 #endif
 
 #include <cstdint>
+#include <cstdlib>
 
 namespace rackpy {
 namespace dynlib {
@@ -94,6 +95,38 @@ void* symbol(void* handle, const char* name) {
 	return reinterpret_cast<void*>(GetProcAddress(static_cast<HMODULE>(handle), name));
 }
 
+std::string canonicalPath(const std::string& path) {
+	std::wstring file = wide(path);
+	if (file.empty())
+		return std::string();
+	// FILE_FLAG_BACKUP_SEMANTICS opens folders too; no access rights are needed to ask for the final path.
+	HANDLE handle = CreateFileW(file.c_str(), 0, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
+		OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
+	if (handle == INVALID_HANDLE_VALUE)
+		return std::string();
+	std::wstring out(MAX_PATH, L'\0');
+	DWORD n = GetFinalPathNameByHandleW(handle, &out[0], (DWORD) out.size(), FILE_NAME_NORMALIZED | VOLUME_NAME_DOS);
+	if (n >= out.size()) {
+		out.resize(n + 1);
+		n = GetFinalPathNameByHandleW(handle, &out[0], (DWORD) out.size(), FILE_NAME_NORMALIZED | VOLUME_NAME_DOS);
+	}
+	CloseHandle(handle);
+	if (n == 0 || n >= out.size())
+		return std::string();
+	out.resize(n);
+	if (out.compare(0, 8, L"\\\\?\\UNC\\") == 0)
+		out = L"\\\\" + out.substr(8);  // \\?\UNC\server\share -> \\server\share
+	else if (out.compare(0, 4, L"\\\\?\\") == 0)
+		out = out.substr(4);  // \\?\C:\... -> C:\...
+	std::string result = narrow(out.c_str(), (int) out.size());
+	for (char& c : result)
+		if (c == '\\')
+			c = '/';
+	while (result.size() > 3 && result.back() == '/')
+		result.pop_back();
+	return result;
+}
+
 std::vector<std::string> loadedImages() {
 	std::vector<std::string> images;
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 0);
@@ -120,6 +153,15 @@ void* openPinned(const std::string& path, bool global, std::string& error) {
 
 void* symbol(void* handle, const char* name) {
 	return dlsym(handle, name);
+}
+
+std::string canonicalPath(const std::string& path) {
+	char* resolved = realpath(path.c_str(), nullptr);
+	if (!resolved)
+		return std::string();
+	std::string result(resolved);
+	std::free(resolved);
+	return result;
 }
 
 #if defined(__APPLE__)
