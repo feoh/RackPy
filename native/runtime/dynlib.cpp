@@ -10,7 +10,8 @@
 #define NOMINMAX
 #endif
 #include <windows.h>
-#include <tlhelp32.h>
+#define PSAPI_VERSION 2  // EnumProcessModules is kernel32's K32EnumProcessModules: no psapi.dll
+#include <psapi.h>
 #elif defined(__APPLE__)
 #include <dlfcn.h>
 #include <mach-o/dyld.h>
@@ -135,15 +136,28 @@ std::string canonicalPath(const std::string& path) {
 }
 
 std::vector<std::string> loadedImages() {
+	// The loader's own module list, with full UTF-16 paths. Not Toolhelp: its szExePath holds 260 characters,
+	// so a CPython DLL deeper than that could be cut short and missed, and on Windows Server 2025 it gave
+	// characters outside the ANSI code page as '?' (RP-41, run 41302010771).
 	std::vector<std::string> images;
-	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 0);
-	if (snapshot == INVALID_HANDLE_VALUE)
-		return images;
-	MODULEENTRY32W entry;
-	entry.dwSize = sizeof(entry);
-	for (BOOL more = Module32FirstW(snapshot, &entry); more; more = Module32NextW(snapshot, &entry))
-		images.push_back(narrow(entry.szExePath));
-	CloseHandle(snapshot);
+	HANDLE process = GetCurrentProcess();
+	std::vector<HMODULE> modules(256);
+	DWORD needed = 0;
+	for (;;) {
+		DWORD size = (DWORD) (modules.size() * sizeof(HMODULE));
+		if (!EnumProcessModules(process, modules.data(), size, &needed))
+			return images;
+		if (needed <= size)
+			break;
+		modules.resize(needed / sizeof(HMODULE));
+	}
+	modules.resize(needed / sizeof(HMODULE));
+	std::vector<wchar_t> name(32768);
+	for (HMODULE module : modules) {
+		DWORD length = GetModuleFileNameW(module, name.data(), (DWORD) name.size());
+		if (length > 0 && length < name.size())
+			images.push_back(narrow(name.data(), (int) length));
+	}
 	return images;
 }
 

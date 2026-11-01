@@ -50,41 +50,44 @@ function ReadText([string]$path) {
 function Has([string]$path, [string]$text) { (ReadText $path).Contains($text) }
 function WriteJson([string]$path, [string]$text) { [IO.File]::WriteAllText($path, $text, $Utf8) }
 
-# The DLLs a process has loaded, from Windows' Toolhelp API (the call RackPy's loader uses too), compiled by
-# Windows PowerShell's own C# compiler. Process.Modules gave nothing here (RP-41, run 41288915853).
+# The DLLs a process has loaded, as the loader records them (PSAPI's EnumProcessModulesEx and
+# GetModuleFileNameExW, full UTF-16 paths of any length), compiled by Windows PowerShell's own C# compiler.
+# Process.Modules gave no file names here, and Toolhelp snapshots gave paths outside the ANSI code page with
+# '?' in them (RP-41, runs 41288915853 and 41302010771).
 Add-Type -TypeDefinition @"
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-public static class RackPyToolhelp {
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    struct MODULEENTRY32W {
-        public uint dwSize; public uint th32ModuleID; public uint th32ProcessID; public uint GlblcntUsage;
-        public uint ProccntUsage; public IntPtr modBaseAddr; public uint modBaseSize; public IntPtr hModule;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)] public string szModule;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)] public string szExePath;
-    }
-    [DllImport("kernel32.dll", SetLastError = true)] static extern IntPtr CreateToolhelp32Snapshot(uint flags, uint pid);
-    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] static extern bool Module32FirstW(IntPtr snap, ref MODULEENTRY32W entry);
-    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] static extern bool Module32NextW(IntPtr snap, ref MODULEENTRY32W entry);
+using System.Text;
+public static class RackPyModules {
+    [DllImport("kernel32.dll", SetLastError = true)] static extern IntPtr OpenProcess(uint access, bool inherit, int pid);
     [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr handle);
+    [DllImport("psapi.dll", SetLastError = true)]
+    static extern bool EnumProcessModulesEx(IntPtr process, [Out] IntPtr[] modules, int size, out int needed, uint filter);
+    [DllImport("psapi.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    static extern int GetModuleFileNameExW(IntPtr process, IntPtr module, StringBuilder name, int size);
     public static string[] Modules(int pid) {
-        for (int attempt = 0; ; attempt++) {
-            IntPtr snap = CreateToolhelp32Snapshot(0x8, (uint) pid);  // TH32CS_SNAPMODULE
-            if (snap == new IntPtr(-1)) {
-                int code = Marshal.GetLastWin32Error();
-                if (code == 24 && attempt < 5) { System.Threading.Thread.Sleep(100); continue; }  // ERROR_BAD_LENGTH: retry
-                throw new System.ComponentModel.Win32Exception(code);
+        IntPtr process = OpenProcess(0x0410, false, pid);  // PROCESS_QUERY_INFORMATION | PROCESS_VM_READ
+        if (process == IntPtr.Zero) throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+        try {
+            IntPtr[] modules = new IntPtr[1024];
+            int needed;
+            int size = modules.Length * IntPtr.Size;
+            if (!EnumProcessModulesEx(process, modules, size, out needed, 0x3))  // LIST_MODULES_ALL
+                throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+            if (needed > size) {
+                modules = new IntPtr[needed / IntPtr.Size];
+                if (!EnumProcessModulesEx(process, modules, needed, out needed, 0x3))
+                    throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
             }
             var result = new List<string>();
-            try {
-                var entry = new MODULEENTRY32W();
-                entry.dwSize = (uint) Marshal.SizeOf(typeof(MODULEENTRY32W));
-                for (bool more = Module32FirstW(snap, ref entry); more; more = Module32NextW(snap, ref entry))
-                    result.Add(entry.szExePath);
-            } finally { CloseHandle(snap); }
+            var name = new StringBuilder(32768);
+            for (int i = 0; i < Math.Min(modules.Length, needed / IntPtr.Size); i++) {
+                int length = GetModuleFileNameExW(process, modules[i], name, name.Capacity);
+                if (length > 0) result.Add(name.ToString(0, length));
+            }
             return result.ToArray();
-        }
+        } finally { CloseHandle(process); }
     }
 }
 "@
@@ -142,14 +145,14 @@ function Headless([string]$user, [string]$name, [string]$workDir = "", [string]$
     $proc = [Diagnostics.Process]::Start($info)
     $stdout = $proc.StandardOutput.ReadToEndAsync()
     $stderr = $proc.StandardError.ReadToEndAsync()
-    # Every DLL seen in Toolhelp snapshots taken while Rack runs. One snapshot after the autosave is not enough:
+    # Every DLL seen in module lists taken while Rack runs. One list after the autosave is not enough:
     # here headless Rack can pass "Press enter to exit" at once and be gone (RP-41, run 41292904958).
     $seen = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
     $snapError = $null
     $loaded = $null
     $deadline = (Get-Date).AddSeconds(120)
     while ((Get-Date) -lt $deadline -and -not $proc.HasExited) {
-        try { foreach ($image in [RackPyToolhelp]::Modules($proc.Id)) { [void]$seen.Add($image) } }
+        try { foreach ($image in [RackPyModules]::Modules($proc.Id)) { [void]$seen.Add($image) } }
         catch { $snapError = "$_" }
         if ($null -eq $loaded) { if ((ReadText $log).Contains("Loading autosave")) { $loaded = (Get-Date).AddSeconds(3) } }
         elseif ((Get-Date) -gt $loaded) { break }
