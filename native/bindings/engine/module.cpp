@@ -683,7 +683,8 @@ void bindModule(py::module_ engine) {
 		type->tp_flags |= Py_TPFLAGS_HAVE_GC;
 		type->tp_traverse = traverseModule;
 		type->tp_clear = clearModule;
-	}), "An owned native Rack module, built with Module.create(configure). Not yet registerable as a plugin model.");
+	}), "An owned native Rack module, built with Module.create(configure) or by the factory of a model made with "
+		"rackpy.raw.plugin.create_model, which is how Rack makes it for a patch.");
 	bindExpanders(engine, cls);  // RP-23A (expander.cpp)
 	py::class_<rack::engine::Module::BypassRoute>(cls, "BypassRoute", "A route value; module.bypass_routes returns copies.")
 		.def(py::init<>())
@@ -773,7 +774,10 @@ void bindModule(py::module_ engine) {
 		}, py::arg("e"))
 		.def("on_save", [](const ModuleRef& r, const M::SaveEvent& e) { dispatch(r, [&](module::Module& m) { m.onSave(e); }); }, py::arg("e"))
 		.def("on_set_master", [](const ModuleRef& r, const M::SetMasterEvent& e) { dispatch(r, [&](module::Module& m) { m.onSetMaster(e); }); }, py::arg("e"))
-		.def("on_unset_master", [](const ModuleRef& r, const M::UnsetMasterEvent& e) { dispatch(r, [&](module::Module& m) { m.onUnsetMaster(e); }); }, py::arg("e"));
+		.def("on_unset_master", [](const ModuleRef& r, const M::UnsetMasterEvent& e) { dispatch(r, [&](module::Module& m) { m.onUnsetMaster(e); }); }, py::arg("e"))
+		.def("on_expander_change", [](const ModuleRef& r, const M::ExpanderChangeEvent& e) {
+			dispatch(r, [&](module::Module& m) { m.onExpanderChange(e); });
+		}, py::arg("e"));
 	// Rack's deprecated no-argument events: empty in Rack, called by the default handlers.
 	for (const char* name : {"on_add", "on_remove", "on_reset", "on_randomize", "on_sample_rate_change"}) {
 		std::string pyName = name;

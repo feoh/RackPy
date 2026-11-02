@@ -154,7 +154,12 @@ runs on Rack's audio path; on the main thread, Rack's window waits.
   arm64); `reset` sets flush-to-zero, and on x64 denormals-are-zero (arm64
   always treats denormal inputs as zero), with round-to-nearest, as Rack's
   engine threads run, and Python's own arithmetic on that thread follows
-  them.
+  them. `set_fpu_flags` refuses, with `ValueError`, flags that would kill the
+  process: Rack hands any value to the CPU, where a reserved MXCSR bit (16 to
+  31) faults and a cleared exception mask (bits 7 to 12) makes Python's own
+  float arithmetic die with `SIGFPE`, and on arm64 an FPCR trap-enable bit
+  (8 to 12 and 15) does the same where the CPU traps. Everything else Rack
+  accepts goes through.
 - **Opening things.** `open_browser(url)` and `open_directory(path)` open
   the desktop's handler without blocking. On Linux and macOS Rack runs
   `xdg-open "<string>"` or `open "<string>"` through the shell, so RackPy

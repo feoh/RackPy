@@ -66,20 +66,23 @@ def test_create_model_checks_its_arguments() -> None:
 def test_model_fields_are_this_plugins_to_change() -> None:
     probe = rp.get_model("RackPy", "RuntimeProbe")
     assert probe is not None
-    name, tags, hidden = probe.name, probe.tag_ids, probe.hidden
+    name, tags, hidden, manual = probe.name, probe.tag_ids, probe.hidden, probe.manual_url
     try:
         probe.name, probe.tag_ids, probe.hidden = "Renamed probe", [1, 2], True
         assert (probe.name, probe.tag_ids, probe.hidden) == ("Renamed probe", [1, 2], True)
         assert probe.get_full_name() == "RackPy Renamed probe"
+        probe.manual_url = "https://example.org/probe-manual"
+        assert probe.manual_url == "https://example.org/probe-manual"
+        assert probe.get_manual_url() == "https://example.org/probe-manual"  # Rack's getter reads the same field
     finally:
-        probe.name, probe.tag_ids, probe.hidden = name, tags, hidden
+        probe.name, probe.tag_ids, probe.hidden, probe.manual_url = name, tags, hidden, manual
     with pytest.raises(OwnershipError, match="cannot change once it is added"):
         probe.slug = "Other"
     core = rp.get_plugin("Core")
     assert core is not None and core.models
     foreign = core.models[0]
     assert foreign.plugin is core and foreign.name
-    for field, value in (("name", "x"), ("description", "x"), ("hidden", True), ("tag_ids", [0])):
+    for field, value in (("name", "x"), ("description", "x"), ("manual_url", "x"), ("hidden", True), ("tag_ids", [0])):
         with pytest.raises(OwnershipError, match="read-only"):
             setattr(foreign, field, value)
 

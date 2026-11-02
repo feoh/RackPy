@@ -126,6 +126,31 @@ def test_a_laboratory_param_quantity_drives_racks_parameter_code() -> None:
     assert s.get_display_value_string() == "Half"
 
 
+def test_deprecated_smooth_values_reach_python_value_methods_as_racks_do() -> None:
+    # Rack's ParamQuantity::setSmoothValue and getSmoothValue call the virtual setValue and getValue, so a laboratory
+    # override sees them; the binding once called the base value methods instead and skipped it (RP-42).
+    class Tracked(ParamQuantity):
+        def __init__(self) -> None:
+            super().__init__()
+            self.stored = 0.0
+            self.calls: list[str] = []
+
+        def set_value(self, value: float) -> None:
+            self.calls.append("set_value")
+            self.stored = value
+
+        def get_value(self) -> float:
+            self.calls.append("get_value")
+            return self.stored
+
+    q = Tracked()
+    with pytest.warns(DeprecationWarning, match="set_smooth_value"):
+        q.set_smooth_value(0.5)
+    with pytest.warns(DeprecationWarning, match="get_smooth_value"):
+        assert q.get_smooth_value() == 0.5
+    assert q.calls == ["set_value", "get_value"]
+
+
 def test_only_laboratory_modules_take_laboratory_parameter_quantities() -> None:
     class Knob(ParamQuantity):
         def get_value(self) -> float:

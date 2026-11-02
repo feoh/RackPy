@@ -88,7 +88,10 @@ setter.
 ## PortInfo and LightInfo
 
 Names and descriptions shown in Rack's UI. `PortInfo.get_full_name()` appends
-" input" or " output" to `get_name()`. `LightInfo.light_id` identifies the light
+" input" or " output" to `get_name()`. A port with no `name` is called "#"
+followed by `port_id + 1`. Rack computes that with int arithmetic, which is
+undefined for the largest `port_id` (2\*\*31 - 1), so RackPy returns the true
+number there; every other ID gets Rack's text. `LightInfo.light_id` identifies the light
 in its module. `PortInfo.type` (a `Port.Type`) and `PortInfo.port_id` are
 identity fields: you can assign them while the object is standalone, but once
 a module slot owns it they can change only during that module's construction,

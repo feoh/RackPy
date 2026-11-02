@@ -9,6 +9,7 @@ import warnings
 from collections.abc import Iterator
 
 import pytest
+from _rackpy_host import _testing as HOOKS
 
 from rackpy import raw
 from rackpy.errors import EngineLockError, OwnershipError
@@ -81,7 +82,9 @@ def test_a_param_handle_python_makes(probe: EngineModule) -> None:
     h = ParamHandle()
     assert h.ours and not registered(h) and h.module_id == -1 and h.param_id == 0 and h.text == "" and h.module is None
     h.text = "Cutoff"
+    assert h.color == raw.nanovg.rgbf(0, 0, 0)  # RackPy starts a handle opaque black
     h.color = raw.nanovg.rgb(255, 128, 0)
+    assert h.color == raw.nanovg.rgb(255, 128, 0)  # and the setter reaches the field
     e.add_param_handle(h)
     try:
         assert registered(h)
@@ -160,3 +163,19 @@ def test_another_owners_handle_is_updated_through_racks_lookup(probe: EngineModu
         assert e.get_param_handle(probe.id, 0) is None
     finally:
         e.remove_module(midi_map)
+
+
+def test_updating_another_owners_param_handle_does_not_crash(probe: EngineModule) -> None:
+    # Rack's MIDI-Map module registers handles of its own. Updating one of them from Python released the GIL a second
+    # time inside the engine lock, which is fatal in pybind11 (RP-42), so the path needs a handle RackPy does not own.
+    e = engine()
+    HOOKS.engine_add_foreign_param_handle(probe.id, 0)
+    try:
+        view = e.get_param_handle(probe.id, 0)
+        assert view is not None and not view.ours and view.text == "foreign"
+        with pytest.raises(OwnershipError, match="read-only"):
+            view.text = "mine"
+        e.update_param_handle(view, probe.id, 0)  # Rack 2.6.6: re-mapped to its own param it finds itself and unmaps
+        assert e.get_param_handle(probe.id, 0) is None
+    finally:
+        HOOKS.engine_remove_foreign_param_handle()

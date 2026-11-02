@@ -275,12 +275,16 @@ void bindStandaloneQuantities(py::module_ engine) {
 		.def("set_smooth_value", [](Q& q, float value) {
 			guard(q);
 			deprecated("set_smooth_value is deprecated in Rack; use set_value");
-			quantityTrampoline(q, true, true) ? q.Q::setValue(value) : q.setValue(value);
+			// Rack's setSmoothValue calls the virtual setValue, so a laboratory override of set_value is reached, as in C++
+			// (the qualified base setValue skipped it, RP-42). The access checks of a Python quantity still run first.
+			(void) quantityTrampoline(q, true, true);
+			RACKPY_CALL_DEPRECATED(q.setSmoothValue(value);)
 		}, py::arg("value"))
 		.def("get_smooth_value", [](Q& q) {
 			guard(q);
 			deprecated("get_smooth_value is deprecated in Rack; use get_value");
-			return quantityTrampoline(q, true) ? q.Q::getValue() : q.getValue();
+			(void) quantityTrampoline(q, true);  // as above: Rack's getSmoothValue calls the virtual getValue
+			RACKPY_CALL_DEPRECATED(return q.getSmoothValue();)
 		});
 	cls.def_property("param_id", [](Q& q) { guard(q); return q.paramId; }, [](Q& q, int id) {
 		standalone(q, [](auto& alias) { alias.guard(); alias.requireIdentityEdit(); });

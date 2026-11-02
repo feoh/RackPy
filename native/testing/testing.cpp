@@ -1359,6 +1359,28 @@ void define(py::module_ m) {
 		engineCall("engine_set_master", [&] { APP->engine->setMasterModule(mod); });
 	});
 	m.def("engine_prepare_save", [engineCall] { engineCall("engine_prepare_save", [] { APP->engine->prepareSave(); }); });
+	// A parameter handle another owner registered (Rack's MIDI-Map module does): not RackPy's, so Python sees only a view
+	// of it. For Engine.update_param_handle on a handle RackPy does not own, which once released the GIL twice (RP-42).
+	// Rack asserts that no handle is left when its engine is destroyed: the test removes it in a finally block.
+	static std::unique_ptr<rack::engine::ParamHandle> foreignParamHandle;
+	m.def("engine_add_foreign_param_handle", [engineCall](int64_t moduleId, int paramId) {
+		if (foreignParamHandle)  // checked here: a Python exception is not raised with the GIL released
+			throw py::value_error("a foreign parameter handle is already registered");
+		engineCall("engine_add_foreign_param_handle", [&] {
+			foreignParamHandle = std::make_unique<rack::engine::ParamHandle>();
+			foreignParamHandle->text = "foreign";
+			APP->engine->addParamHandle(foreignParamHandle.get());
+			APP->engine->updateParamHandle(foreignParamHandle.get(), moduleId, paramId);
+		});
+	}, py::arg("module_id"), py::arg("param_id"));
+	m.def("engine_remove_foreign_param_handle", [engineCall] {
+		engineCall("engine_remove_foreign_param_handle", [&] {
+			if (!foreignParamHandle)
+				return;
+			APP->engine->removeParamHandle(foreignParamHandle.get());
+			foreignParamHandle.reset();
+		});
+	});
 	m.def("engine_connect", [engineCall, owned](const bindings::ModuleRef& out, int outId, const bindings::ModuleRef& in, int inId) {
 		auto* cable = new rack::engine::Cable;
 		cable->outputModule = &owned(out);

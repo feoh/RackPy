@@ -126,6 +126,12 @@ Both C++ `getCableIds` overloads map to `get_cable_ids()`, which returns a
 list rather than writing a caller-provided buffer; it has no length-cap
 argument.
 
+A `Cable` compares by identity while Python owns it and by ID once Rack's
+engine does, and `add_cable` changes a handle from one to the other. So its
+hash is constant: a cable you already keep in a set or dict is still found
+after `add_cable`, and two handles for one engine cable stay equal with equal
+hashes. A constant hash makes big containers slow, so key those by `cable.id`.
+
 `add_cable(cable)` gives Rack's engine a cable Python made, and the handle
 then finds it by ID. Rack asserts, as it deletes a module, that no cable in
 the engine still touches it, and a module widget deletes its module. A cable
