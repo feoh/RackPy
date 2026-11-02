@@ -165,6 +165,9 @@ def phase1() -> Frames:
     old_squeeze = raw.settings.settings.squeeze_modules
     raw.settings.settings.squeeze_modules = False
     try:
+        context = raw.context_get()
+        assert context is not None and context.history is not None
+        drag_history_index = context.history.action_index
         start_pos = before_pos.plus(Vec(0, 190))
         rw.on_hover(w.HoverEvent(pos=start_pos))
         a.on_drag_start(w.DragStartEvent(button=LEFT))
@@ -175,9 +178,29 @@ def phase1() -> Frames:
         a.on_drag_move(w.DragMoveEvent(button=LEFT))
         RESULT["direct_module_drag"] = [right_ignored, a.box.pos != before_pos]
         a.on_drag_end(w.DragEndEvent(button=LEFT))
+        dragged_pos = Vec(a.box.pos.x, a.box.pos.y)
+        pushed_drag = context.history.action_index == drag_history_index + 1
+        _testing.history_undo()
+        undo_restored = Vec(a.box.pos.x, a.box.pos.y) == before_pos
+        _testing.history_redo()
+        redo_restored = Vec(a.box.pos.x, a.box.pos.y) == dragged_pos
+        RESULT["module_drag_history"] = [pushed_drag, undo_restored, redo_restored]
         rw.set_module_pos_nearest(a, before_pos)
     finally:
         raw.settings.settings.squeeze_modules = old_squeeze
+    rw.select(a)
+    hover = w.HoverEvent(pos=Vec(), context=w.EventContext())
+    a.on_hover(hover)
+    drag_hover = w.DragHoverEvent(button=LEFT, pos=Vec(), context=w.EventContext())
+    a.on_drag_hover(drag_hover)
+    shift_click = w.ButtonEvent(button=LEFT, action=PRESS, mods=SHIFT, context=w.EventContext())
+    a.on_button(shift_click)
+    RESULT["module_events"] = [
+        hover.is_consumed(),
+        drag_hover.is_consumed(),
+        shift_click.is_consumed(),
+        not rw.is_selected(a),
+    ]
     out, inp = a.get_output(0), b.get_input(0)
     assert isinstance(out, app.PortWidget) and isinstance(inp, app.PortWidget)
     # Exercise output hover while both ports are initially unconnected.
@@ -298,12 +321,30 @@ def phase1() -> Frames:
         RESULT["outside_factory"] = "refused"
     RESULT["owner_module"] = owner.module is made
     # RP-28D: a Python module widget into Rack's rack and out again.
-    rack().add_module_at_mouse(owner)
+    rack().add_module(owner)
     in_rack = [rack().get_module(module_id) is owner, owner.parent is not None]
     rack().remove_module(owner)
     RESULT["rack_add_remove"] = [*in_rack, owner.parent is None, owner.alive, _testing.engine_has_module(module_id)]
     owner.close()  # a module widget deletes its module with it
     RESULT["owner_closed"] = _testing.engine_has_module(module_id)
+    direct_module = model.create_module()
+    assert isinstance(direct_module, Module)
+    direct_module_id = _testing.engine_adopt(direct_module)
+    with warnings.catch_warnings(record=True) as emitted:
+        warnings.simplefilter("always")
+        direct_widget = app.ModuleWidget(direct_module)
+    direct_constructor = direct_widget.module is direct_module and bool(emitted)
+    direct_widget.close()
+    RESULT["deprecated_direct_constructor"] = [direct_constructor, not _testing.engine_has_module(direct_module_id)]
+    json_module = model.create_module()
+    assert isinstance(json_module, Module)
+    json_module_id = _testing.engine_adopt(json_module)
+    rack().from_json({"modules": [{"id": json_module_id, "pos": [0, 0]}], "cables": []})
+    json_widget = rack().get_module(json_module_id)
+    RESULT["from_json"] = json_widget is not None and json_widget.module is json_module
+    if json_widget is not None:
+        rack().remove_module(json_widget)
+        json_widget.close()
     RESULT["final_cables"] = list(_testing.rack_cables())
 
     # The documentation's example, through Rack's own add path.
@@ -355,6 +396,27 @@ def cable_views(out: app.PortWidget, inp: app.PortWidget) -> Frames:
         and centre_in_rack(inp) != centre_in_rack(out),
         "json": "color" in cable.merge_json({}),
     }
+    cable.update_cable()
+    found["update_cable"] = cable.is_complete() and rack().get_complete_cables() == [cable]
+    calls: list[str] = []
+
+    class CableRenderer(w.Widget):
+        def draw(self, args: Any) -> None:
+            cable.draw(args)
+            calls.append("draw")
+            cable.draw_layer(args, 0)
+            calls.append("layer-0")
+
+    frame = w.FramebufferWidget()
+    frame.box = Rect(Vec(), Vec(100, 100))
+    renderer = CableRenderer()
+    renderer.box = frame.box.copy()
+    frame.add_child(renderer)
+    try:
+        frame.render()
+        found["draw"] = calls == ["draw", "layer-0"]
+    finally:
+        frame.close()
     colour = cable.color
     cable.color = raw.color.from_hex_string("#102030")  # another one: from_json must be what changes it
     cable.from_json({"color": "#3060f0"})
@@ -517,7 +579,28 @@ def actions(module_id: int) -> Frames:
     rack().deselect_all()
     mw.reset_action()
     found["reset"] = module.params[0].value
+    old_bypassed = module.is_bypassed()
+    context = raw.context_get()
+    assert context is not None and context.history is not None
+    history_index = context.history.action_index
+    shortcut = w.HoverKeyEvent(
+        key=raw.glfw.GLFW_KEY_E,
+        action=PRESS,
+        mods=raw.macros.RACK_MOD_CTRL,
+        context=w.EventContext(),
+    )
+    mw.on_hover_key(shortcut)
+    found["module_shortcut"] = [shortcut.is_consumed(), module.is_bypassed() != old_bypassed]
+    _testing.history_undo()
+    found["module_shortcut"].append(
+        module.is_bypassed() == old_bypassed and context.history.action_index == history_index
+    )
+    module.param_quantities[0].set_value(0.0)
     mw.randomize_action()
+    randomized = module.params[0].value
+    _testing.history_undo()
+    found["randomize"] = [randomized, module.params[0].value]
+    _testing.history_redo()
     mw.bypass_action(True)
     found["bypassed"] = module.is_bypassed()
     mw.bypass_action(False)

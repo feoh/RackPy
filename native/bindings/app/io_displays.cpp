@@ -225,11 +225,13 @@ void bindIoDisplays(py::module_ raw, py::module_ mod) {
 	mod.def("append_midi_menu", [](py::object menu, py::object port) {
 		auto* m = menuArgument(menu);
 		checkMutationOf(*m);
-		auto& p = bindings::pythonMidiPort(port);
-		pin(m, port);
-		app::appendMidiMenu(m, &p);
+		rack::midi::Port* p = port.is_none() ? nullptr : &bindings::pythonMidiPort(port);
+		if (p)
+			pin(m, port);
+		app::appendMidiMenu(m, p);
 	}, py::arg("menu"), py::arg("port"), "Rack's: driver, device and channel items for the port, which RackPy keeps "
-		"alive while the menu is.");
+		"alive while the menu. With None, Rack keeps the labels, separators and channel submenu, but has no "
+		"port-specific driver or device rows.");
 
 	// The component library's audio and MIDI buttons: Rack's classes, with Rack's artwork.
 	py::module_ library = raw.attr("componentlibrary").cast<py::module_>();

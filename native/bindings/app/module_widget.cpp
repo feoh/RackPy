@@ -4,10 +4,10 @@
 //
 // A ModuleWidget owns its module: Rack's setModule deletes a module it
 // replaces, after Engine::removeModule, which assumes the module is in the
-// engine and has no cables. So a Python ModuleWidget takes only the module
-// Rack hands its widget factory (Rack's createModel<TModule, TModuleWidget>
-// passes it to the widget's constructor), once. A factory that fails gives
-// the module back, untouched, and Rack gets RackPy's plain panel instead.
+// engine and has no cables. A widget factory may claim the module Rack
+// passes to it; the deprecated ModuleWidget(module) constructor may also claim
+// an unclaimed RackPy engine module with no engine cable. A factory that fails
+// gives the module back, untouched, and Rack gets RackPy's plain panel instead.
 #include "rackpy/rtti.hpp"
 #include <rack.hpp>
 
@@ -90,8 +90,8 @@ void releaseClaims(FactoryCall& call, const State* keep) noexcept {
 	}
 }
 
-/** Takes `value` (a RackPy module) as this widget's module, as only a widget factory may. */
-void claim(const std::shared_ptr<State>& s, MW& mw, py::handle value) {
+/** Claims a RackPy module from its factory, or via Rack's deprecated constructor after validation. */
+void claim(const std::shared_ptr<State>& s, MW& mw, py::handle value, bool allowUnclaimedEngineModule = false) {
 	runtime::requireMainThread("setting a module widget's module");
 	if (value.is_none()) {
 		if (mw.module)
@@ -103,11 +103,23 @@ void claim(const std::shared_ptr<State>& s, MW& mw, py::handle value) {
 	if (!py::isinstance<bindings::ModuleRef>(value))
 		throw py::type_error("set_module takes a rackpy.raw.engine.Module or None");
 	Module* module = &value.cast<const bindings::ModuleRef&>().get();
-	if (!currentCall || currentCall->module != module)
-		throw runtime::Ownership("a ModuleWidget takes only the module Rack passes its widget factory");
+	if (!currentCall || currentCall->module != module) {
+		if (currentCall || !allowUnclaimedEngineModule)
+			throw runtime::Ownership("only the module's widget factory may call set_module");
+		auto* rackModule = ::rackpy::rttiCast<module::Module*>(module);
+		if (!rackModule || !rackModule->engineOwned.load(std::memory_order_acquire))
+			throw runtime::Ownership("a ModuleWidget takes only a RackPy module owned by Rack's engine");
+		auto* context = rack::contextGet();
+		if (context && context->scene && context->scene->rack && context->scene->rack->getModule(module->id))
+			throw runtime::Ownership("this module already has its module widget in Rack's rack");
+		if (bindings::engineCablesTouch(*module))
+			throw runtime::Ownership("cables Python added to Rack's engine touch this module; Rack would assert when its "
+				"widget deletes it (remove the cables first)");
+	}
 	if (ownedElsewhere(module, s.get()))
 		throw runtime::Ownership("another module widget already took this module");
-	currentCall->claimed.push_back(s);
+	if (currentCall && currentCall->module == module)
+		currentCall->claimed.push_back(s);
 	owners[module] = s;
 	mw.setModule(module);  // it had none, so Rack deletes nothing
 }
@@ -223,7 +235,7 @@ void bindModuleWidget(py::module_ app) {
 				throw py::error_already_set();
 			auto* value = new ModuleWidgetT<MW>();
 			std::unique_ptr<MW, UiDelete> owned(value, UiDelete{value->lifetime});
-			claim(value->lifetime, *value, module);
+			claim(value->lifetime, *value, module, true);
 			return owned;
 		}), py::arg("module"))
 		.def_property_readonly("model", [](py::object self) { return bindings::modelObject(native<MW>(self).model); },

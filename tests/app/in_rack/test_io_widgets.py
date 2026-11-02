@@ -67,6 +67,7 @@ def test_choices_show_their_ports() -> None:
         names.append(c.text)
     assert names[0] == "Loopback" and names[1] == "Loopback 3"
     assert names[2] == loop.get_channel_name(loop.get_channel())  # MidiChannelChoice::step: the port's channel name
+    assert c.port is loop
     with pytest.raises(TypeError):
         choice.port = loop  # type: ignore[assignment]  # an audio choice takes an audio port
 
@@ -179,6 +180,10 @@ def test_buttons_and_menus() -> None:
     app.append_audio_menu(no_port, None)  # Rack accepts a null port: its sub-menus return early, the labels remain
     assert len(no_port.children) == 7  # Rack 2.6.6's four labels and three separators, and no driver or device items
     no_port.close()
+    midi_no_port = ui.Menu()
+    app.append_midi_menu(midi_no_port, None)  # type: ignore[arg-type]  # Rack accepts a null MIDI port
+    assert len(midi_no_port.children) == 5  # Rack's driver/device labels, separators and channel submenu
+    midi_no_port.close()
     button.close()
     midi_button.close()
 

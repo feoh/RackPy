@@ -77,7 +77,10 @@ creates take part in cables (see [Ports](#app-ports)).
   `get_grid_box()` are rack grid coordinates. `on_drag_move` moves a rack-owned
   module after the left-button drag passes Rack's grid-width threshold; other
   buttons do not move it.
-- `ModuleWidget(module)` is Rack's deprecated constructor, and warns.
+- `ModuleWidget(module)` is Rack's deprecated constructor, and warns. It can
+  take an unclaimed RackPy module already owned by Rack's engine if no engine
+  cable touches it; the widget then owns and deletes the module. The
+  `set_module()` method remains limited to its widget factory.
 
 Calls that take Rack's engine lock (the JSON, preset and clipboard calls,
 and the actions) release the GIL while they run. Closing a Python-owned
@@ -209,7 +212,9 @@ that hover, and `on_drag_drop` completes the connection when permitted.
 `SvgPanel` draw SVGs and cache them in a framebuffer. Rack's `on_change`
 updates the knob's rotation, slider's handle position or switch's frame from
 its parameter value. `SvgButton` dispatches its action on mouse-down, not a
-second time on drag-drop. The `ThemedSvgPort`,
+second time on drag-drop. A latched `SvgSwitch` with at least two frames shows
+frame 1 during a left-button drag and restores frame 0 on left-button release;
+other buttons do not change these frames. The `ThemedSvgPort`,
 `ThemedSvgScrew` and `ThemedSvgPanel` versions take a light and a dark SVG,
 and show the dark one while Rack prefers dark panels. Each has Rack's
 setters:
@@ -250,7 +255,9 @@ deletes with it:
 - a slider's `background` and `handle`;
 - a panel's `panel_border`.
 
-They are typed host views, and stale once the control is deleted:
+`SvgPanel.panel_border` is its owned `PanelBorder` child: Rack draws a 1 px,
+half-alpha grey outline around the panel box. It is a typed host view and
+stales when the panel is deleted:
 
 - `rackpy.raw.widget.HostFramebufferWidget`: `dirty`, `bypassed`,
   `oversample` (finite, above 0 and at most 16, because Rack renders it
@@ -446,7 +453,9 @@ Rack's audio and MIDI widgets show a port and open its menus:
   `AudioButton_ADAT`, `AudioButton_USB_B` and `MidiButton_MIDI_DIN`, which
   use Rack's artwork.
 - `append_audio_menu(menu, port)` and `append_midi_menu(menu, port)`. Rack
-  accepts no port for the audio menu: with `None` it adds only its labels.
+  accepts no port: with `None` it adds labels and separators but no
+  port-specific driver or device rows. The MIDI menu still has its channel
+  submenu item.
 
 Each choice's `on_action()` opens Rack's corresponding menu; the buttons
 open the combined menus. In Rack 2.6.6 the combined MIDI menu has the driver
