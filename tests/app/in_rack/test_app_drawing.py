@@ -140,8 +140,14 @@ def test_port_and_module_widgets_draw_their_children_and_a_bypassed_module_dimme
             self.draws.append(1)
             super().draw(args)
 
+        def draw_layer(self, args: Any, layer: int) -> None:
+            self.draws.append(layer)
+            super().draw_layer(args, layer)
+
     widget = Body()
     holder = w.SvgWidget()
+    layer_frame: w.FramebufferWidget | None = None
+    layer_room: w.Widget | None = None
     try:
         holder.set_svg(disc())
         holder.wrap()
@@ -149,5 +155,26 @@ def test_port_and_module_widgets_draw_their_children_and_a_bypassed_module_dimme
         widget.add_child(holder)
         opaque = pixel(rendered(widget, Vec(30, 30)), 15, 15, 30)
         assert widget.draws and opaque[3] == 255
+
+        class LayerRoom(w.Widget):
+            def draw(self, args: Any) -> None:
+                for child in self.children:
+                    self.draw_child(child, args, 1)
+
+        layer_room = LayerRoom()
+        layer_room.box = Rect(Vec(), Vec(30, 30))
+        layer_room.add_child(widget)
+        layer_frame = w.FramebufferWidget()
+        layer_frame.box = Rect(Vec(), Vec(30, 30))
+        layer_frame.add_child(layer_room)
+        layer_frame.render()
+        assert 1 in widget.draws  # the parent dispatched Rack's module drawLayer on layer 1
     finally:
+        if layer_frame is not None and layer_frame.alive:
+            if layer_room is not None:
+                layer_frame.remove_child(layer_room)
+            layer_frame.close()
+        if layer_room is not None and layer_room.alive:
+            layer_room.remove_child(widget)
+            layer_room.close()
         widget.close()

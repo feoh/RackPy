@@ -45,12 +45,11 @@ def test_a_module_widget_takes_its_module_only_from_its_factory(widget: app.Modu
     try:
         with pytest.raises(OwnershipError, match="widget factory"):
             widget.set_module(m)  # Rack deletes a module widget's module with it
-        with pytest.warns(DeprecationWarning, match="set_module"), pytest.raises(OwnershipError):
-            app.ModuleWidget(m)
         with pytest.warns(DeprecationWarning):
             app.ModuleWidget(None).close()
     finally:
-        HOOKS.engine_delete(m, None)
+        if m.alive:
+            HOOKS.engine_delete(m, None)
     model = raw.plugin.get_model("RackPy", "RuntimeProbe")
     assert model is not None
     widget.set_model(model)

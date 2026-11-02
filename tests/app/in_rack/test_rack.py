@@ -516,13 +516,22 @@ def app_mm2px_28_over_3() -> float:
 def test_led_displays() -> None:
     display, separator = app.LedDisplay(), app.LedDisplaySeparator()
     choice = app.LedDisplayChoice()
-    field = app.LedDisplayTextField()
+    draws: list[bool] = []
+
+    class DrawingField(app.LedDisplayTextField):
+        def draw(self, args: Any) -> None:
+            draws.append(True)
+            super().draw(args)
+
+    field = DrawingField()
+    frame: w.FramebufferWidget | None = None
+    room: w.Widget | None = None
     try:
         choice.text, choice.font_path = "Gate", "res/fonts/ShareTechMono-Regular.ttf"
         choice.text_offset, choice.color, choice.bg_color = Vec(2, 3), nvg.rgb(255, 0, 0), nvg.rgb(0, 0, 0)
         assert (choice.text, choice.text_offset) == ("Gate", Vec(2, 3))
         field.text = "abc"
-        field.text_offset, field.color, field.bg_color = Vec(1, 1), nvg.rgb(1, 2, 3), nvg.rgb(4, 5, 6)
+        field.text_offset, field.color, field.bg_color = Vec(1, 1), nvg.rgb(0, 255, 0), nvg.rgb(4, 5, 6)
         field.font_path = "res/fonts/ShareTechMono-Regular.ttf"
         field.box = Rect(Vec(), Vec(60, 20))
         assert isinstance(field, ui.TextField) and 0 <= field.get_text_position(Vec(30, 10)) <= 3
@@ -530,12 +539,35 @@ def test_led_displays() -> None:
         for child in (separator, choice, field):
             child.box = Rect(Vec(), Vec(60, 20))
             display.add_child(child)
+
+        class LayeredRoom(w.Widget):
+            def draw(self, args: Any) -> None:
+                for child in self.children:
+                    self.draw_child(child, args, 0)
+                    self.draw_child(child, args, 1)
+
+        room = LayeredRoom()
+        room.box = Rect(Vec(), Vec(60, 40))
+        room.add_child(display)
         frame = w.FramebufferWidget()
         frame.box = Rect(Vec(), Vec(60, 40))
-        frame.add_child(display)
-        frame.render()  # Rack draws them, text included
-        frame.close()
+        frame.add_child(room)
+        frame.render()  # Rack draws the display and its children on layers 0 and 1
+        assert draws  # the Python override ran and super() reached LedDisplayTextField::draw
+        _, _, pixels = HOOKS.framebuffer_pixels(frame)
+        colors = [tuple(pixels[i : i + 3]) for i in range(0, len(pixels), 4)]
+        assert any(r > 160 and g < 80 and b < 80 for r, g, b in colors)  # choice's layer-1 red text
+        assert any(g > 160 and r < 80 and b < 80 for r, g, b in colors)  # text field's layer-1 green text
     finally:
+        if frame is not None and frame.alive:
+            if room is not None:
+                frame.remove_child(room)
+            frame.close()
+        if room is not None and room.alive:
+            room.remove_child(display)
+            room.close()
         for widget in (separator, choice, field, display):
             if widget.alive:
+                if widget.parent is not None:
+                    widget.remove_from_parent()
                 widget.close()

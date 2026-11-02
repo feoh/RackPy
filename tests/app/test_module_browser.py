@@ -108,6 +108,8 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     assert all(one["incomplete_lookup"])  # singular deprecated lookup finds the actual incomplete cable
     assert all(one["direct_port_drag"])  # leave, enter, and drop called through Python
     assert all(one["direct_module_drag"])  # only left drag moves the module
+    assert one["module_drag_history"] == [True, True, True]
+    assert one["module_events"] == [True, True, True, True]
     assert one["cable"] == [1, 0, 1] and one["connected"]  # two Python modules' factory ports
     assert one["cable_removals"] == [
         [0, 0, 0],
@@ -121,6 +123,7 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     views = one["cable_views"]  # RP-28D: Rack's cable through its host views
     assert views["views"] == ["HostCableWidget", "HostPlugWidget"] and views["ports"] == [True, True, True]
     assert all(views["plug"]) and all(views["lookups"]) and views["positions"] and views["json"]
+    assert views["update_cable"] and views["draw"]
     assert views["color"] == "#3060f0" and views["color_default"]
     first = one["removed_id"]
     assert one["removed"] == {"removes": [f"module-{first}"], "widget": False, "cables": [0, 0, 0]}
@@ -130,6 +133,8 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     assert one["preview_call"] == [True, True]
     assert one["second_owner"] == "refused" and one["outside_factory"] == "refused"
     assert one["owner_module"] and one["owner_closed"] is False
+    assert one["deprecated_direct_constructor"] == [True, True]
+    assert one["from_json"]
     assert one["rack_add_remove"] == [True, True, True, True, True]  # into the rack and back to Python
     actions = one["actions"]
     assert actions["to_json"] == ["PyVoice", "RackPy"] and actions["from_json"] == 5.0
@@ -155,6 +160,8 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     assert actions["selection_paste_count"] == 1 and actions["selection_paste_undo"]
     assert actions["module_paste_count"] == 1 and actions["module_paste_undo"]
     assert actions["reset"] == 5.0 and actions["bypassed"] and actions["cloned"]
+    assert actions["module_shortcut"] == [True, True, True]
+    assert 0.0 < actions["randomize"][0] <= 10.0 and actions["randomize"][1] == 0.0
     # The clone copies the cable into its input too (Rack's Duplicate with cables): two cables, then none.
     assert actions["disconnected"][2] < actions["reconnected"][2]
     assert actions["plain_disconnect"][0][2] < actions["reconnected"][2]

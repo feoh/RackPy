@@ -344,6 +344,9 @@ def test_slider_knob_takes_hover_and_buttons_over_its_whole_box_unlike_a_knob(mo
             press = w.ButtonEvent(pos=corner, button=LEFT, action=PRESS, context=w.EventContext())
             widget.on_button(press)
             assert press.is_consumed() is inside
+        inside_circle = w.HoverEvent(pos=Vec(20, 20), context=w.EventContext())
+        knob.on_hover(inside_circle)
+        assert inside_circle.is_consumed()
         assert HOOKS.touched_param() is slider  # ParamWidget's left press: Rack's MIDI-Map would learn it
     finally:
         knob.close()
@@ -378,6 +381,13 @@ def test_svg_controls_apply_change_to_native_children(module: Module) -> None:
         slider.set_handle_pos(Vec(1, 2), Vec(11, 22))
         switch.add_frame(first)
         switch.add_frame(second)
+        assert isinstance(switch.fb, w.HostFramebufferWidget)
+        switch.latch = True
+        switch.on_drag_start(w.DragStartEvent(button=LEFT, context=w.EventContext()))
+        assert switch.sw.svg is second
+        switch.on_drag_end(w.DragEndEvent(button=LEFT, context=w.EventContext()))
+        assert switch.sw.svg is first
+        switch.latch = False
         module.param_quantities[0].set_value(0)
         knob.on_change(w.ChangeEvent())
         slider.on_change(w.ChangeEvent())
@@ -628,6 +638,31 @@ def test_ports_outside_their_module_widget_make_no_cables(module: Module) -> Non
             p.close()
 
 
+def test_module_light_hover_consumes_only_when_it_has_light_info_and_close_removes_tooltip(module: Module) -> None:
+    light = app.ModuleLightWidget()
+    settings = raw.settings.settings
+    old_tooltips = settings.tooltips
+    try:
+        event = w.HoverEvent(context=w.EventContext())
+        light.on_hover(event)
+        assert not event.is_consumed()
+        light.first_light_id = 0
+        light.module = module
+        event = w.HoverEvent(context=w.EventContext())
+        light.on_hover(event)
+        assert event.is_consumed()
+        settings.tooltips = True
+        before = HOOKS.scene_tooltip_count()
+        light.create_tooltip()
+        assert HOOKS.scene_tooltip_count() == before + 1
+        light.close()  # Rack's destructor removes its tooltip
+        assert HOOKS.scene_tooltip_count() == before
+    finally:
+        settings.tooltips = old_tooltips
+        if light.alive:
+            light.close()
+
+
 def test_module_lights_follow_the_engine(module: Module) -> None:
     light = raw.create_light_centered(app.ModuleLightWidget, Vec(10, 10), None, 0)
     try:
@@ -702,6 +737,7 @@ def test_light_drawing_overrides_and_layers() -> None:
         assert calls == ["background", "light", "halo"]
         _, _, pixels = HOOKS.framebuffer_pixels(frame)
         assert tuple(pixels[(5 * 10 + 5) * 4 : (5 * 10 + 5) * 4 + 3]) == (255, 255, 0)
+        assert tuple(lamp.border_color.rgba) == pytest.approx((9 / 255, 9 / 255, 9 / 255, 1))
     finally:
         frame.close()
 
@@ -764,6 +800,8 @@ def test_switches_buttons_sliders_ports_screws_and_panels() -> None:
         assert switch.frames[-1] is None
         switch.frames = [light, dark]
         slider.set_background_svg(dark)
+        assert slider.background.svg is dark
+        assert isinstance(slider.fb, w.HostFramebufferWidget)
         slider.set_handle_svg(light)
         slider.set_handle_pos(Vec(0, 10), Vec(0, 0))
         assert slider.min_handle_pos == Vec(0, 10) and slider.max_handle_pos == Vec(0, 0)
@@ -782,10 +820,17 @@ def test_switches_buttons_sliders_ports_screws_and_panels() -> None:
         assert slider.background.svg is dark and slider.handle.svg is light
         port.set_svg(light)
         assert port.box.size == Vec(30, 30)
+        with pytest.warns(DeprecationWarning):
+            port.set_svg_legacy(dark)
+        assert port.sw.svg is dark and port.box.size == Vec(12, 24)
+        port.set_svg(light)
+        assert isinstance(port.fb, w.HostFramebufferWidget) and isinstance(port.shadow, w.HostCircularShadow)
         themed_port.set_svg(light, dark)
         assert themed_port.light_svg is light and themed_port.dark_svg is dark
         assert themed_port.sw.svg is light  # Rack shows the light SVG unless dark panels are preferred
         screw.set_svg(light)
+        assert screw.sw.svg is light and screw.box.size == Vec(30, 30)
+        assert isinstance(screw.fb, w.HostFramebufferWidget)
         themed_screw.set_svg(light, dark)
         assert themed_screw.light_svg is light and themed_screw.dark_svg is dark
         assert themed_screw.sw.svg is light
@@ -803,6 +848,7 @@ def test_switches_buttons_sliders_ports_screws_and_panels() -> None:
         assert themed_port.sw.svg is light and themed_screw.sw.svg is light
         panel.set_background(dark)
         assert panel.svg is dark and isinstance(panel.panel_border, w.HostWidget)
+        assert isinstance(panel.fb, w.HostFramebufferWidget) and panel.sw.svg is dark
         # SvgPanel::step oversamples the framebuffer twice below a pixel ratio of 2, once at or above it.
         context = raw.context_get()
         assert context is not None and context.window is not None
@@ -811,6 +857,15 @@ def test_switches_buttons_sliders_ports_screws_and_panels() -> None:
         assert panel.box.size == Vec(15, 0) or panel.box.size.x > 0  # Rack rounds panels to the rack grid
         themed_panel.set_background(light, dark)
         assert themed_panel.light_svg is light and themed_panel.dark_svg is dark and themed_panel.svg is light
+        preferred = settings.settings.prefer_dark_panels
+        try:
+            settings.settings.prefer_dark_panels = True
+            themed_panel.step()
+            assert themed_panel.svg is dark
+        finally:
+            settings.settings.prefer_dark_panels = preferred
+        themed_panel.step()
+        assert themed_panel.svg is light
         for cls in (app.RailWidget, app.PanelBorder, app.CircularShadow):
             cls().close()
         shadow = app.CircularShadow()
@@ -895,7 +950,16 @@ def test_rack_asks_python_controls_for_context_menu_items(module: Module) -> Non
     knob.remove_from_parent()
     knob.close()  # closes its open menu too: Rack's menu items point at the knob
     assert not alive(item)
-    port = raw.create_output(app.PortWidget, Vec(0, 0), module, 0)
+
+    class LabelledPort(app.PortWidget):
+        def append_context_menu(self, menu: Any) -> None:
+            item = raw.create_menu_item("Port menu item", "", lambda: None)
+            menu.add_child(item)
+            added.append((menu, item))
+
+    port = raw.create_output(LabelledPort, Vec(0, 0), module, 0)
     port.attach_to_scene()
     port.create_context_menu()
+    port_menu, port_item = added[-1]
+    assert isinstance(port_item, ui.MenuItem) and port_item.parent is port_menu and port_item.alive
     _kept.append(port)  # its menu closes on the next frame; Rack deletes the port at exit
