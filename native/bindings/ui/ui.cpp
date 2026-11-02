@@ -294,8 +294,22 @@ void bindUi(py::module_ raw) {
 	auto menu = variant<ui::Menu, OW>(mod, "Menu");
 	menu.def_property_readonly("parent_menu", [](py::object self) { return wrapper(native<ui::Menu>(self).parentMenu); },
 			"Rack's field; Rack 2.6.6 itself never sets it.")
-		.def_property_readonly("child_menu", [](py::object self) { return wrapper(native<ui::Menu>(self).childMenu); })
-		.def_property_readonly("active_entry", [](py::object self) { return wrapper(native<ui::Menu>(self).activeEntry); })
+		// Rack never clears activeEntry when that entry goes, nor childMenu when the overlay deletes it: each is given only
+		// while it is still in the tree where Rack keeps it (the menu's children, its parent's), compared by address and
+		// never dereferenced, or None (RP-42: wrapping a deleted widget was a use-after-free).
+		.def_property_readonly("child_menu", [](py::object self) -> py::object {
+			auto& m = native<ui::Menu>(self);
+			if (!m.childMenu || !m.parent) return py::none();
+			for (W* sibling : m.parent->children)
+				if (sibling == m.childMenu) return wrapper(sibling);
+			return py::none();
+		})
+		.def_property_readonly("active_entry", [](py::object self) -> py::object {
+			auto& m = native<ui::Menu>(self);
+			for (W* child : m.children)
+				if (child == m.activeEntry) return wrapper(child);
+			return py::none();
+		})
 		.def_property("corner_flags", [](py::object self) { return (int) native<ui::Menu>(self).cornerFlags; },
 			[](py::object self, int flags) { native<ui::Menu>(self).cornerFlags = (BNDcornerFlags) flags; },
 			"blendish's BNDcornerFlags as an int (0: none, 15: all).")

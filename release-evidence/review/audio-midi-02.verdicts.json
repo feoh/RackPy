@@ -1,0 +1,326 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "constructor:rack::midi::Input::Input()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::midi::InputQueue::InputQueue()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::midi::Message::Message()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::midi::Output::Output()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::midi::Port::Port()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::midi::Device::~Device()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::midi::Driver::~Driver()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::midi::Input::~Input()": {
+      "finding": "P1: no cited test asserts that dropping a Python Input takes it out of its device's subscribers. tests/io/in_rack_midi/test_midi.py never deletes a port, and the windowed entry (tests/io/entries/rp29a_midi.py) only checks for a clean exit at quit. The uncited tests/laboratory/in_rack/test_midi_devices.py::test_midi_teardown_runs_no_python_and_leaves_ports_pointing_nowhere does check it (lines 397-400: del port; gc.collect(); second.subscribed == []). Smallest fix: cite that test.",
+      "verdict": "finding"
+    },
+    "destructor:rack::midi::InputQueue::~InputQueue()": {
+      "finding": "P1: no test, cited or not, deletes an InputQueue and checks that it left its device. The lifecycle is only implied by fixture teardown in tests/io/in_rack_midi/test_midi.py (the loop fixture). ~PyInputQueue (native/bindings/midi.cpp, PyInputQueue::release/detachNative) is never asserted. Smallest fix: add 'del queue; gc.collect(); assert queue not in device.subscribed' (and module detach) to the in-Rack MIDI suite and cite it.",
+      "verdict": "finding"
+    },
+    "destructor:rack::midi::Output::~Output()": {
+      "finding": "P1: no test, cited or not, deletes a Python Output and checks that it left its output device. tests/io/in_rack_midi/test_midi.py has no 'del' of a port, and the laboratory deletion tests use Inputs only. Smallest fix: add a deletion test that checks output_device.subscribed afterwards, and cite it.",
+      "verdict": "finding"
+    },
+    "destructor:rack::midi::Port::~Port()": {
+      "finding": "P1: no cited test asserts what the destructor does ('unsubscribes as Rack's does; deferred to the main thread'). None of the cited tests delete a port (tests/io/in_rack_midi/test_midi.py, tests/io/test_midi.py). Smallest fix: cite tests/laboratory/in_rack/test_midi_devices.py::test_midi_teardown_runs_no_python_and_leaves_ports_pointing_nowhere (lines 397-400), plus an Output/InputQueue deletion test.",
+      "verdict": "finding"
+    },
+    "field:rack::midi::Input::inputDevice": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::InputDevice::subscribed": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Message::bytes": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Message::frame": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Output::outputDevice": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::OutputDevice::subscribed": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Port::channel": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Port::context": {
+      "finding": "P1: rackpy.raw.midi.Port.context has no test and no doc. No test in tests/io/in_rack_midi/test_midi.py or tests/io/test_midi.py reads port.context. docs/reference/midi.md#midi-ports never mentions the property, or that it returns rackpy.raw.context_get() after checking the port's context (native/bindings/midi.cpp:1054-1057) rather than reading Rack's field. Smallest fix: assert port.context == raw.context_get() in the in-Rack suite, and add 'context' to the property list in midi.md#midi-ports.",
+      "verdict": "finding"
+    },
+    "field:rack::midi::Port::device": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Port::deviceId": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Port::driver": {
+      "finding": "P1: rackpy.raw.midi.Port.driver is never read in the cited tests (they use get_driver()), and docs/reference/midi.md#midi-ports lists only 'driver_id, device_id and device' as properties. The property also returns None when Rack's field points at an unlisted (laboratory) driver (native/bindings/midi.cpp:1050, driverObject(p.driverId) with driverId -1). That is asserted only in the uncited tests/laboratory/in_rack/test_midi_devices.py:194 and not documented in midi.md. Smallest fix: cite that laboratory test plus a Loopback assertion (queue.driver.id == -12), and document the property and its None case in midi.md#midi-ports.",
+      "verdict": "finding"
+    },
+    "field:rack::midi::Port::driverId": {
+      "verdict": "accept"
+    },
+    "function:rack::midi::addDriver(int, rack::midi::Driver *)": {
+      "finding": "P2: the manifest notes say '-1 and taken IDs are refused', but add_driver only refuses taken IDs (native/bindings/midi.cpp:1297-1305, 'if (m::getDriver(id))'). A driver registered as -1 would be found by Rack's Port::setDriverId(-1) (src/midi.cpp getDriver), so it would replace the fallback to the first driver for every reset port. The docs ('Taken IDs are refused') are accurate. Smallest fix: refuse id == -1 in add_driver (and test it), or correct the note.",
+      "verdict": "finding"
+    },
+    "function:rack::midi::getDriver(int)": {
+      "verdict": "accept"
+    },
+    "function:rack::midi::getDriverIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Device::getName()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::getDefaultInputDeviceId()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::getDefaultOutputDeviceId()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::getInputDeviceIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::getInputDeviceName(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::getName()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::getOutputDeviceIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::getOutputDeviceName(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::subscribeInput(int, rack::midi::Input *)": {
+      "finding": "P0: Driver.subscribe_input (native/bindings/midi.cpp:916-925) does not refuse a device the port already holds through set_device_id. Rack's set holds the port once, but RackPy then tracks two holdings, and they get out of step. Two paths: (a) unsubscribe_input takes the port out of device.subscribed while port.device/inputDevice still points at the device; (b) set_device_id(-1) leaves while the driver-subscription view still counts as held (MidiDeviceView::get, midi.cpp:396, via t.holds). Once the driver deletes the device, MidiDeviceView::get and Rack's Port::toJson (device->getName(), src/midi.cpp) read freed memory. A driver deletes a device in PythonDriver.remove_input_device with an empty set (midi.cpp:645-650), in ConfiguredMidiDriver::unsubscribeInput (midi.cpp:558), or in RtMidi when its last port leaves (src/rtmidi.cpp:322-325). Repro (b): q.set_driver_id(pyid) (device 0); v = get_driver(pyid).subscribe_input(0, q); drv.remove_input_device(dev0); q.set_device_id(-1); v.get_name(). Smallest fix: raise OwnershipError when port.device == device or tracked(port).holds(device), and add a regression test.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Driver::subscribeOutput(int, rack::midi::Output *)": {
+      "finding": "P0: Driver.subscribe_output (native/bindings/midi.cpp:936-944) has the same double-holding defect as subscribe_input. It accepts the device the Output already holds through set_device_id. The later unsubscribe_output, or set_device_id(-1), leaves a port field or a 'held' view (MidiDeviceView::get, midi.cpp:396) pointing at a device the driver then deletes. Deletion sites: ConfiguredMidiDriver::unsubscribeOutput midi.cpp:588, removeDevice midi.cpp:645-650, RtMidi src/rtmidi.cpp:385-388. After that, get_name and to_json are use-after-free. Smallest fix: refuse a device the port already holds, and add a regression test.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Driver::unsubscribeInput(int, rack::midi::Input *)": {
+      "finding": "P0: Driver.unsubscribe_input (native/bindings/midi.cpp:927-935) removes the port from the device even when that device is also the port's own (from set_device_id), because subscribe_input accepted the duplicate. Rack's set then no longer holds the port, but port.device/inputDevice still points at the device. If the driver then deletes the device (e.g. PythonDriver.remove_input_device with an empty set, midi.cpp:645-650), q.input_device.get_name() (midi.cpp:396 accepts port.device == device) and q.to_json() (Rack's Port::toJson calls device->getName()) read freed memory. The port also silently stops hearing its own device. Smallest fix: refuse duplicate subscriptions in subscribe_input (or reject this unsubscribe when port.device == device), and add a regression test.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Driver::unsubscribeOutput(int, rack::midi::Output *)": {
+      "finding": "P0: Driver.unsubscribe_output (native/bindings/midi.cpp:945-953) has the same defect as unsubscribe_input. It can remove an Output from the device it holds through set_device_id, which leaves port.device/outputDevice pointing at a device the driver may then delete (midi.cpp:588, 645-650; RtMidi src/rtmidi.cpp:385-388). After that, output_device.get_name() (midi.cpp:396) and to_json() are use-after-free, and send_message no longer reaches the device. Smallest fix: refuse duplicate subscriptions or this unsubscribe, and add a regression test.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Input::getChannels()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Input::getDefaultDeviceId()": {
+      "finding": "P1: no cited test would fail if Input::getDefaultDeviceId were wrong. tests/io/in_rack_midi/test_midi.py never calls get_default_device_id on an Input; the loop fixture calls set_device_id(0) right after set_driver_id(LOOPBACK), which hides Rack's default-device choice; and test_python_overrides_of_racks_port_virtuals overrides the method. The uncited tests/laboratory/in_rack/test_midi_devices.py::test_racks_midi_ports_and_widgets_call_a_python_driver_and_devices asserts port.get_default_device_id() == 0 (line 199). Smallest fix: cite it, or assert midi.Input() then set_driver_id(-12) gives get_default_device_id() == 0 and device_id == 0.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Input::getDeviceIds()": {
+      "finding": "P1: no cited test calls get_device_ids on a MIDI Input (grep of tests/io finds no midi-port get_device_ids call). Port.from_json's name search goes through it, but the device ID is already 0 from setDriverId, so a broken binding would not fail test_json_and_devices. The uncited tests/laboratory/in_rack/test_midi_devices.py::test_racks_midi_ports_and_widgets_call_a_python_driver_and_devices asserts port.get_device_ids() == [0, 1] (line 198). Smallest fix: cite it, or assert queue.get_device_ids() == list(range(16)) on Loopback.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Input::getDeviceName(int)": {
+      "finding": "P1: the cited tests call get_device_name only on Outputs (tests/io/in_rack_midi/test_midi.py:85, 252), never on an Input. The uncited tests/laboratory/in_rack/test_midi_devices.py::test_racks_midi_ports_and_widgets_call_a_python_driver_and_devices asserts port.get_device_name(1) == 'SECOND' on an Input (line 200). Smallest fix: cite it, or assert queue.get_device_name(0) == 'Loopback 1'.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Input::onMessage(const rack::midi::Message &)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Input::reset()": {
+      "finding": "P1: Input.reset (native/bindings/midi.cpp, the Input 'reset' def) has no test of what it does. No test in tests/io calls .reset() on a MIDI port; the laboratory only checks that it is refused during a delivery (test_midi_devices.py:536). docs/reference/midi.md#midi-ports lists Rack's port methods but leaves out reset. Smallest fix: add a test (set channel 5 and a Loopback device, reset(), assert channel == -1 and driver_id == first of get_driver_ids()), and document reset in midi.md#midi-ports.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Input::setDeviceId(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::InputDevice::onMessage(const rack::midi::Message &)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::InputDevice::subscribe(rack::midi::Input *)": {
+      "finding": "P0: InputDevice.subscribe (native/bindings/midi.cpp:975-980) accepts the port's own device: there is no check that port.inputDevice == device or tracked(port).holds(device). The matching InputDevice.unsubscribe then finds the entry and removes the port from Rack's set while port.inputDevice still points at the device. The tests confirm the subscribe is allowed (test_midi.py only checks that unsubscribing the own device without a prior subscribe raises). If the driver then deletes the device (PythonDriver.remove_input_device erases it when the set is empty, midi.cpp:645-650), q.input_device.get_name() (midi.cpp:396) and q.to_json() (Rack's Port::toJson) read freed memory. Repro: q.set_driver_id(pyid); d = q.input_device; d.subscribe(q); d.unsubscribe(q); drv.remove_input_device(dev0); q.to_json(). Smallest fix: raise OwnershipError when the port already holds the device, and add a regression test.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::InputDevice::unsubscribe(rack::midi::Input *)": {
+      "finding": "P0: InputDevice.unsubscribe (native/bindings/midi.cpp:981-990) can remove a port from the device it holds through set_device_id, because subscribe accepted the duplicate (midi.cpp:975-980). Rack's InputDevice::unsubscribe erases the port from subscribed (src/midi.cpp), but port.device/inputDevice still points at the device. Once the driver deletes it (midi.cpp:645-650 or 558; RtMidi src/rtmidi.cpp:322-325 when another port leaves), the device view (midi.cpp:396) and Port::toJson are use-after-free, and the port silently stops hearing its own device. Smallest fix: refuse the duplicate subscribe, or refuse unsubscribing the port's own device, and add a regression test.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::InputQueue::onMessage(const rack::midi::Message &)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::InputQueue::size()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::InputQueue::tryPop(rack::midi::Message *, int64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::getChannel() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::getFrame() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::getNote() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::getSize() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::getStatus() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::getValue() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::setChannel(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::setFrame(int64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::setNote(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::setSize(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::setStatus(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::setValue(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::toString() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Output::getChannels()": {
+      "finding": "P1: no test anywhere calls get_channels() on a MIDI Output. tests/io/in_rack_midi/test_midi.py:84 checks only the InputQueue (range(-1, 16)), and :205 checks a Python override. A binding that returned Input's list for an Output would pass. Smallest fix: assert out.get_channels() == list(range(16)) in test_through_the_loopback.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Output::getDefaultDeviceId()": {
+      "finding": "P1: no cited test calls get_default_device_id on an Output or would fail if it were wrong. The loop fixture calls set_device_id(0) right after set_driver_id, and from_json's device_id == 0 would hold either way. The uncited tests/laboratory/in_rack/test_midi_devices.py::test_racks_midi_ports_and_widgets_call_a_python_driver_and_devices asserts out.get_default_device_id() == 0 (line 233). Smallest fix: cite it, or add a Loopback assertion.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Output::getDeviceIds()": {
+      "finding": "P1: no cited test calls get_device_ids on a MIDI Output (no such call in tests/io). The uncited tests/laboratory/in_rack/test_midi_devices.py::test_racks_midi_ports_and_widgets_call_a_python_driver_and_devices asserts out.get_device_ids() == [0] (line 233). Smallest fix: cite it, or assert out.get_device_ids() == list(range(16)) on Loopback.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Output::getDeviceName(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Output::reset()": {
+      "finding": "P1: Output.reset has no test of what it does: no .reset() call on a MIDI Output in tests/. docs/reference/midi.md#midi-ports does not mention reset (Rack's: the first driver, its default device, channel 0). Smallest fix: add a test asserting channel == 0 and the first driver after reset(), and document reset in midi.md#midi-ports.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Output::sendMessage(const rack::midi::Message &)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Output::setDeviceId(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::OutputDevice::sendMessage(const rack::midi::Message &)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::OutputDevice::subscribe(rack::midi::Output *)": {
+      "finding": "P0: OutputDevice.subscribe (native/bindings/midi.cpp:1004-1009) accepts the Output's own device (no port.outputDevice == device or holds() check). The matching OutputDevice.unsubscribe (midi.cpp:1010-1019) then removes the port from Rack's set while port.outputDevice still points at the device. After the driver deletes it (removeDevice midi.cpp:645-650, midi.cpp:588, RtMidi src/rtmidi.cpp:385-388), output_device.get_name() (midi.cpp:396) and to_json() read freed memory. Smallest fix: refuse a device the port already holds, and add a regression test.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::OutputDevice::unsubscribe(rack::midi::Output *)": {
+      "finding": "P0: OutputDevice.unsubscribe (native/bindings/midi.cpp:1010-1019) can take an Output out of the device it holds through set_device_id, because subscribe accepted the duplicate. Rack's OutputDevice::unsubscribe erases it from subscribed (src/midi.cpp) while port.outputDevice is unchanged. If the driver then deletes the device, the view (midi.cpp:396) and Port::toJson dereference freed memory. Smallest fix: refuse the duplicate subscribe, or this unsubscribe, and add a regression test.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Port::fromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getChannel()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getChannelName(int)": {
+      "finding": "P1: the only cited check is truthiness, out.get_channel_name(-1) (tests/io/in_rack_midi/test_midi.py:85). It would still pass if the binding passed the wrong channel (e.g. 'Channel 1' for -1) or called a different name function. Smallest fix: assert get_channel_name(4) differs from get_channel_name(-1) and contains '5', the 1-based number Rack's string::f('midi.channelNum', channel + 1) adds (src/midi.cpp).",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Port::getChannels()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getDefaultDeviceId()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getDevice()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getDeviceId()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getDeviceIds()": {
+      "finding": "P1: none of the cited tests (test_through_the_loopback, test_json_and_devices, test_python_overrides_of_racks_port_virtuals) calls get_device_ids or overrides it. The override test overrides only get_default_device_id and get_channels (tests/io/in_rack_midi/test_midi.py:196-205). So neither the raw method nor Rack's call into a Python override is exercised. Smallest fix: cite tests/laboratory/in_rack/test_midi_devices.py::test_racks_midi_ports_and_widgets_call_a_python_driver_and_devices (lines 198, 233), and override get_device_ids in the override test to show Rack's from_json calls it.",
+      "verdict": "finding"
+    },
+    "method:rack::midi::Port::getDeviceName(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getDriver()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getDriverId()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::setChannel(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::setDeviceId(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::setDriverId(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::toJson()": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::Device": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::Driver": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::Input": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::InputDevice": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::InputQueue": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::Message": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::Output": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::OutputDevice": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::Port": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/audio-midi-02",
+  "slice": "audio-midi-02"
+}

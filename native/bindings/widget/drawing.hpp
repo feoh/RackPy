@@ -40,7 +40,38 @@ inline void validateFramebuffer(rack::widget::FramebufferWidget& w, rack::math::
 		throw std::invalid_argument("framebuffer area exceeds Rack's integer accounting range");
 }
 
+/** Rack's Scrollbar code asserts that its parent is a ScrollWidget (Scrollbar.cpp draw, onButton, onDragMove). */
+template<class Base> void requireScrollParent(Base& w, const char* what) {
+	if (!::rackpy::rttiCast<rack::ui::ScrollWidget*>(w.parent))
+		throw runtime::Ownership(std::string("a Scrollbar's ") + what + " needs a ScrollWidget parent: Rack's code asserts it");
+}
+
+/** What Rack's own code would assert or dereference before a widget's step runs (RP-42): a Menu nudges itself inside its
+ parent and asserts it (Menu.cpp:52), a MenuOverlay adopts its parent's size without a check (MenuOverlay.cpp:27). */
+template<class Base> void checkNativeStep(Base& w) {
+	if constexpr (std::is_base_of<rack::ui::Menu, Base>::value || std::is_base_of<rack::ui::MenuOverlay, Base>::value) {
+		if (!w.parent)
+			throw runtime::Ownership("step needs this menu to have a parent (a MenuOverlay or the scene): Rack's code uses it");
+	}
+}
+
+/** The same for events (RP-42): a Scrollbar's left press and drag move assert a ScrollWidget parent; a MenuItem's
+ enter opens its child menu through its Menu's setChildMenu, which asserts that the Menu has a parent (Menu.cpp:24). */
+template<class Base, class E> void checkNativeEvent(Base& w) {
+	if constexpr (std::is_base_of<rack::ui::Scrollbar, Base>::value &&
+		(std::is_same<E, W::DragMoveEvent>::value || std::is_same<E, W::ButtonEvent>::value)) {
+		requireScrollParent(w, std::is_same<E, W::ButtonEvent>::value ? "on_button" : "on_drag_move");
+	}
+	if constexpr (std::is_base_of<rack::ui::MenuItem, Base>::value && std::is_same<E, W::EnterEvent>::value) {
+		auto* menu = ::rackpy::rttiCast<rack::ui::Menu*>(w.parent);
+		if (menu && !menu->parent)
+			throw runtime::Ownership("on_enter needs its Menu to have a parent: Rack's code opens the child menu there");
+	}
+}
+
 template<class Base> void validateNativeDraw(Base& w, const W::DrawArgs& args) {
+	if constexpr (std::is_base_of<rack::ui::Scrollbar, Base>::value)
+		requireScrollParent(w, "draw");
 	if constexpr (std::is_base_of<rack::widget::SvgWidget, Base>::value) {
 		if (w.svg && !w.svg->handle)
 			throw std::invalid_argument("SvgWidget has an unloaded SVG; use None or a successfully loaded Svg");

@@ -11,6 +11,7 @@ import pytest
 from _rackpy_host import _testing as HOOKS
 
 from rackpy import raw
+from rackpy.errors import OwnershipError
 from rackpy.raw import macros, ui
 from rackpy.raw import plugin as rp
 from rackpy.raw import widget as w
@@ -355,6 +356,14 @@ def test_model_context_menu_and_deprecated_aliases() -> None:
     try:
         probe.append_context_menu(menu)
         assert len(menu.children) > 0  # Rack's own items for the model
+        staged = rp.Plugin()
+        model = rp.create_model("Staged", lambda m: None)
+        staged.add_model(model)
+        try:
+            with pytest.raises(OwnershipError, match="committed model"):
+                model.append_context_menu(menu)  # its items would outlive a model that can be deleted (RP-42)
+        finally:
+            staged.close()
     finally:
         menu.close()
     with pytest.warns(DeprecationWarning, match="rack::event::Action"):

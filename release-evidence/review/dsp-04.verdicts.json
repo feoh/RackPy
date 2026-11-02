@@ -1,0 +1,295 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "alias:rack::dsp::VUMeter": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::AppleRingBuffer<type, value, value>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::Decimator<value, value, type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::DoubleRingBuffer<type, value>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::RingBuffer<type, value>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::SampleRateConverter<value>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::Upsampler<value, value>": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::Decimator::Decimator<OVERSAMPLE, QUALITY, T>(float)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::SampleRateConverter::SampleRateConverter<MAX_CHANNELS>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::Upsampler::Upsampler<OVERSAMPLE, QUALITY>(float)": {
+      "verdict": "accept"
+    },
+    "destructor:rack::dsp::SampleRateConverter::~SampleRateConverter<MAX_CHANNELS>()": {
+      "verdict": "accept"
+    },
+    "enum:rack::dsp::VuMeter2::Mode": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::VuMeter2::Mode::PEAK": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::VuMeter2::Mode::RMS": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::AppleRingBuffer::data": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::AppleRingBuffer::end": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::AppleRingBuffer::start": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::Decimator::inBuffer": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::Decimator::inIndex": {
+      "finding": "P0: the in_index setter accepts any value from 0 to OVERSAMPLE*(QUALITY-1) (native/bindings/dsp/resampler.cpp:225-229). That range only checks the next copy. Rack's Decimator::process (Rack-SDK include/dsp/resampler.hpp:125-129) does memcpy(&inBuffer[inIndex], in, OVERSAMPLE) and then inIndex = (inIndex + OVERSAMPLE) % (OVERSAMPLE*QUALITY), so Rack only ever leaves inIndex at multiples of OVERSAMPLE. With a value that is not a multiple, a later call writes past inBuffer. Example: Decimator[4, 8], in_index = 1. After 7 process() calls inIndex is 29, and the 8th call copies into elements 29..32 of a 32-element array. Element 32 is kernel[0] (kernel[0..3] for float_4), so Python can silently corrupt memory, which is undefined behaviour. This also makes docs/reference/dsp.md:563-565 ('keep in_index within the range Rack's code keeps it in') and the manifest note wrong. tests/dsp/in_rack_basic/test_resampling.py:261-263 only checks 28 and 29. Smallest fix: in the setter, also require in_index % OVERSAMPLE == 0 (ValueError); add a test that in_index = 1 raises; update the doc and the note.",
+      "verdict": "finding"
+    },
+    "field:rack::dsp::Decimator::kernel": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::DoubleRingBuffer::data": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::DoubleRingBuffer::end": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::DoubleRingBuffer::start": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RingBuffer::data": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RingBuffer::end": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RingBuffer::start": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::SampleRateConverter::channels": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::SampleRateConverter::inRate": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::SampleRateConverter::outRate": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::SampleRateConverter::quality": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::SampleRateConverter::st": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::Upsampler::inBuffer": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::Upsampler::inIndex": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::Upsampler::kernel": {
+      "finding": "P1: none of the cited tests checks Upsampler.kernel. In tests/dsp/in_rack_basic/test_resampling.py:124-134 the reference runner returns only [outs, in_index, in_buffer], unlike the decimator runner (line 120), which includes d.kernel.tolist(). test_decimator_and_upsampler (lines 270-277) never reads u.kernel. The uncited test_decimator_and_upsampler_reset (line 296) only compares one RackPy kernel with another, so a view of the wrong array or the wrong length (native/bindings/dsp/resampler.cpp:254) would still pass. Smallest fix: add u.kernel.tolist() to the upsampler reference result in native/tests/dsp_reference.cpp and in the Python runner, as the decimator does, or at least assert len(u.kernel) == OVERSAMPLE*QUALITY plus a value against Rack.",
+      "verdict": "finding"
+    },
+    "field:rack::dsp::VuMeter2::lambda": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::VuMeter2::mode": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::VuMeter2::v": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::VuMeter::dBInterval": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::VuMeter::dBScaled": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::blackmanHarrisWindow(float *, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::blackmanNuttallWindow(float *, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::blackmanWindow(float, float *, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::hannWindow(float *, int)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::blackman<type>($0, $0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::blackmanHarris<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::blackmanNuttall<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::hann<type>($0)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::AppleRingBuffer::capacity() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::AppleRingBuffer::empty() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::AppleRingBuffer::endData(size_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::AppleRingBuffer::endIncr(size_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::AppleRingBuffer::full() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::AppleRingBuffer::push($c0)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::AppleRingBuffer::returnBuffer()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::AppleRingBuffer::shift()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::AppleRingBuffer::size() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::AppleRingBuffer::startData() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::AppleRingBuffer::startIncr(size_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::Decimator::process($c2 *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::Decimator::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::DoubleRingBuffer::capacity() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::DoubleRingBuffer::clear()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::DoubleRingBuffer::empty() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::DoubleRingBuffer::endData()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::DoubleRingBuffer::endIncr(size_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::DoubleRingBuffer::full() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::DoubleRingBuffer::push($c0)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::DoubleRingBuffer::shift()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::DoubleRingBuffer::size() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::DoubleRingBuffer::startData() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::DoubleRingBuffer::startIncr(size_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RingBuffer::capacity() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RingBuffer::clear()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RingBuffer::empty() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RingBuffer::full() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RingBuffer::push($c0)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RingBuffer::pushBuffer(const $c0 *, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RingBuffer::shift()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RingBuffer::shiftBuffer($c0 *, size_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RingBuffer::size() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::SampleRateConverter::process(const float *, int, int *, float *, int, int *)": {
+      "finding": "P1: the binding refuses in_stride or out_stride below channels, and strides below 1 (native/bindings/dsp/resampler.cpp:179-182; documented at docs/reference/dsp.md:546 and in the manifest note), but nothing justifies this. Rack's process (Rack-SDK include/dsp/resampler.hpp:68-99) passes any stride to speex_resampler_set_input/output_stride, or uses it in the copy loop, without asserting. The binding's own size check (inNeed/outNeed = stride*(frames-1) + channels, resampler.cpp:183-184) already keeps every access inside the buffers for any stride of 0 or more, so smaller strides would not crash or be undefined. They are only unusual: overlapping reads, or channels overwriting each other's output. Smallest fix: drop the stride >= channels check (keep only stride >= 0 and the size check), or record a real justification in the doc and the note.",
+      "verdict": "finding"
+    },
+    "method:rack::dsp::SampleRateConverter::process(const rack::dsp::Frame<$c0> *, int *, rack::dsp::Frame<$c0> *, int *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::SampleRateConverter::refreshState()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::SampleRateConverter::setChannels(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::SampleRateConverter::setQuality(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::SampleRateConverter::setRates(int, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::Upsampler::process(float, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::Upsampler::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::VuMeter2::getBrightness(float, float)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::VuMeter2::process(float, float)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::VuMeter2::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::VuMeter::getBrightness(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::VuMeter::setValue(float)": {
+      "verdict": "accept"
+    },
+    "record:rack::dsp::VuMeter": {
+      "verdict": "accept"
+    },
+    "record:rack::dsp::VuMeter2": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/dsp-04",
+  "slice": "dsp-04"
+}

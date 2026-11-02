@@ -47,7 +47,8 @@ has Rack's methods:
   The setters release the GIL, because the driver may reopen its stream.
 - `get_num_inputs` and `get_num_outputs` count the port's active channels
   after `input_offset`/`output_offset` and `max_inputs`/`max_outputs`, which
-  are writable.
+  are writable; the offsets are not negative, since Rack adds them to the
+  device's buffer.
 - `to_json` and `from_json` save and restore the driver, the device (by
   name), its rate and block size, and the offsets.
 

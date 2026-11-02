@@ -187,6 +187,33 @@ def test_port_getters_and_device_subscriptions(loop: tuple[midi.Output, midi.Inp
         sender.set_device_id(-1)
 
 
+def test_a_port_holds_each_device_once(loop: tuple[midi.Output, midi.InputQueue]) -> None:
+    # Rack's subscriber sets ignore a second subscription. RackPy recorded one anyway, so unsubscribing it could leave
+    # the port pointing at a device its driver had deleted (RP-42: a use-after-free). A port now holds a device once.
+    _, queue = loop
+    driver = queue.get_driver()
+    own = queue.input_device
+    assert driver is not None and own is not None
+    with pytest.raises(OwnershipError, match="already holds"):
+        own.subscribe(queue)  # its own device
+    with pytest.raises(OwnershipError, match="already holds"):
+        driver.subscribe_input(queue.device_id, queue)
+    extra = driver.subscribe_input(4, queue)
+    assert extra is not None and extra.get_name() == "Loopback 5"
+    with pytest.raises(OwnershipError, match="already holds"):
+        driver.subscribe_input(4, queue)  # a second subscription through the driver
+    with pytest.raises(OwnershipError, match="already holds"):
+        extra.subscribe(queue)  # and through the device
+    before = queue.device_id
+    queue.set_device_id(4)  # its own device now: the subscription is folded into it
+    with pytest.raises(OwnershipError, match="did not subscribe"):
+        driver.unsubscribe_input(4, queue)
+    held = queue.input_device
+    assert held is not None and held.get_name() == "Loopback 5" and extra.alive
+    queue.set_device_id(before)
+    assert queue.get_device_id() == before and not extra.alive
+
+
 def test_ports_need_the_live_context() -> None:
     with pytest.raises(TypeError):
         midi.Port()  # Rack's abstract port

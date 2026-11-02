@@ -1,0 +1,370 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "boundary_constant:BND_CORNER_ALL": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_DOWN": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_DOWN_LEFT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_DOWN_RIGHT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_LEFT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_NONE": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_RIGHT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_TOP": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_TOP_LEFT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_TOP_RIGHT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_3": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_4": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_5": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_6": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_7": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_8": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_LAST": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_LEFT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_MIDDLE": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_RIGHT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_PRESS": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_RELEASE": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_REPEAT": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::CableWidget::CableWidget()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::CircularShadow::CircularShadow()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::Knob::Knob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::PlugWidget::PlugWidget()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::CableWidget::~CableWidget()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::Knob::~Knob()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::PlugWidget::~PlugWidget()": {
+      "verdict": "accept"
+    },
+    "field:rack::app::AudioBlockSizeChoice::port": {
+      "finding": "P1: no cited test asserts this property. tests/app/in_rack/test_io_widgets.py:37-45 sets `other.port = port`, then only checks `isinstance(other.text, str)`; test_choices_and_buttons_open_their_rack_menus (:65-84) checks menu labels, which Rack adds even with a null port (Rack src/app/AudioDisplay.cpp:238-239 returns early, labels at :325-339). A setter or getter bound to the wrong field would still pass. Only AudioDriverChoice asserts `choice.port is port` (:31). Smallest fix: in that loop, add `assert other.port is other_port_obj` (and that it is None before assignment).",
+      "verdict": "finding"
+    },
+    "field:rack::app::AudioButton::port": {
+      "verdict": "accept"
+    },
+    "field:rack::app::AudioDeviceChoice::port": {
+      "finding": "P1: no cited test asserts this property. tests/app/in_rack/test_io_widgets.py:37-45 only checks `isinstance(other.text, str)` after setting the port, and the menu-label test (:65-84) passes with a null port because Rack's appendAudioDeviceMenu returns early (AudioDisplay.cpp:94-95) while the label is added anyway. Smallest fix: assert `other.port is port` after assignment, as done for AudioDriverChoice at :31.",
+      "verdict": "finding"
+    },
+    "field:rack::app::AudioDisplay::bufferSizeChoice": {
+      "verdict": "accept"
+    },
+    "field:rack::app::AudioDisplay::deviceChoice": {
+      "verdict": "accept"
+    },
+    "field:rack::app::AudioDisplay::deviceSeparator": {
+      "verdict": "accept"
+    },
+    "field:rack::app::AudioDisplay::driverChoice": {
+      "verdict": "accept"
+    },
+    "field:rack::app::AudioDisplay::driverSeparator": {
+      "verdict": "accept"
+    },
+    "field:rack::app::AudioDisplay::sampleRateChoice": {
+      "verdict": "accept"
+    },
+    "field:rack::app::AudioDisplay::sampleRateSeparator": {
+      "verdict": "accept"
+    },
+    "field:rack::app::AudioDriverChoice::port": {
+      "verdict": "accept"
+    },
+    "field:rack::app::AudioSampleRateChoice::port": {
+      "finding": "P1: no cited test asserts this property. tests/app/in_rack/test_io_widgets.py:37-45 only checks `isinstance(other.text, str)`, and the menu-label test passes with a null port (AudioDisplay.cpp:175-176 returns early; the label is added regardless). Smallest fix: assert `other.port is port` after assignment (as at :31).",
+      "verdict": "finding"
+    },
+    "field:rack::app::CableWidget::cable": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CableWidget::color": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CableWidget::hoveredInputPort": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CableWidget::hoveredOutputPort": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CableWidget::inputPlug": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CableWidget::inputPort": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CableWidget::outputPlug": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CableWidget::outputPort": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CircularShadow::blurRadius": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CircularShadow::opacity": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Knob::forceLinear": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Knob::horizontal": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Knob::maxAngle": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Knob::minAngle": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Knob::smooth": {
+      "finding": "P1: no test can tell a broken binding from a working one. tests/app/in_rack/test_controls.py:305 sets `knob.smooth = True`, which is Rack's default (SDK include/app/Knob.hpp:20), and :307 does not read it back; the init_param_quantity check at :312 passes with the default. No other test reads or sets Knob.smooth. Smallest fix: set `knob.smooth = False`, assert it reads back False, and assert init_param_quantity() leaves pq.smooth_enabled False (Rack src/app/Knob.cpp:44-46).",
+      "verdict": "finding"
+    },
+    "field:rack::app::Knob::snap": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Knob::speed": {
+      "verdict": "accept"
+    },
+    "function:rack::app::appendAudioMenu(rack::ui::Menu *, rack::audio::Port *)": {
+      "finding": "P2: an undocumented restriction. Rack's appendAudioMenu accepts a null port (each sub-appender returns early, AudioDisplay.cpp:37,95,176,239, and the four labels and separators are still added, :325-339), but native/bindings/app/io_displays.cpp:213-221 passes `port` straight to bindings::pythonAudioPort, so None is rejected, and the stub src/rackpy/raw/app.pyi:529 types it as non-optional. docs/reference/app.md#app-io-displays does not mention the restriction. Smallest fix: accept None and call app::appendAudioMenu(m, nullptr) without pinning, or document why None is refused.",
+      "verdict": "finding"
+    },
+    "method:rack::app::AudioBlockSizeChoice::onAction(const rack::widget::Widget::ActionEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::AudioBlockSizeChoice::step()": {
+      "finding": "P1: the test cannot fail. tests/app/in_rack/test_io_widgets.py:43-45 calls `other.step()` and asserts only `isinstance(other.text, str)`, which holds even if step() never ran (text starts as a str). Rack's AudioBlockSizeChoice::step always writes concrete text: \"---\" with no block size, or the number (src/app/AudioDisplay.cpp:268-280). Smallest fix: assert the resulting text, e.g. that it ends with the port's get_block_size() or with \"---\".",
+      "verdict": "finding"
+    },
+    "method:rack::app::AudioButton::onAction(const rack::widget::Widget::ActionEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::AudioButton::setAudioPort(rack::audio::Port *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::AudioDeviceChoice::onAction(const rack::widget::Widget::ActionEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::AudioDeviceChoice::step()": {
+      "finding": "P1: the test cannot fail. tests/app/in_rack/test_io_widgets.py:43-45 only asserts `isinstance(other.text, str)` after `other.step()`. Rack's AudioDeviceChoice::step sets the text to the device detail or the translated \"no device\" string (src/app/AudioDisplay.cpp:139-154), but nothing checks it. Smallest fix: assert the text Rack produces, e.g. the no-device label, since tests list no devices.",
+      "verdict": "finding"
+    },
+    "method:rack::app::AudioDeviceMenuChoice::onAction(const rack::widget::Widget::ActionEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::AudioDisplay::setAudioPort(rack::audio::Port *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::AudioDriverChoice::onAction(const rack::widget::Widget::ActionEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::AudioDriverChoice::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::AudioSampleRateChoice::onAction(const rack::widget::Widget::ActionEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::AudioSampleRateChoice::step()": {
+      "finding": "P1: the test cannot fail. tests/app/in_rack/test_io_widgets.py:43-45 only asserts `isinstance(other.text, str)`. Rack's AudioSampleRateChoice::step always ends the text with \" kHz\", after \"---\" or the rate (src/app/AudioDisplay.cpp:204-218). Smallest fix: assert `other.text.endswith(\" kHz\")` or the exact expected text.",
+      "verdict": "finding"
+    },
+    "method:rack::app::CableWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "finding": "P1: no cited test draws a cable widget. tests/app/in_rack/test_rack.py:205-229 (test_host_widgets_dispatch_and_draw) draws only the scene's menu bar, and tests/app/entries/rp28b_browser.py cable_views (:324-350) never calls draw on the HostCableWidget, so CableWidget::draw is never reached through rackpy.raw.widget.HostWidget.draw. Smallest fix: in a framebuffer draw callback (as in test_rack.py:213-225), call `cable.draw(args)` on a HostCableWidget (or Python CableWidget), and assert that it runs and that a Python override's super() reaches Rack's draw.",
+      "verdict": "finding"
+    },
+    "method:rack::app::CableWidget::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
+      "finding": "P1: no cited test calls draw_layer on a cable widget. test_rack.py:215-216 calls `bar.draw_layer(args, 1)` on the menu bar only, and rp28b_browser.py cable_views (:324-350) never draws. Smallest fix: call `cable.draw_layer(args, -1)` and `(args, 0)` (Rack's shadow and cable layers, src/app/CableWidget.cpp:322-346) on a cable view inside a drawing callback.",
+      "verdict": "finding"
+    },
+    "method:rack::app::CableWidget::fromJson(json_t *)": {
+      "finding": "P1: the test cannot fail, and the note is wrong. tests/app/entries/rp28b_browser.py:346-348 sets `cable.color` to #3060f0 and then calls `cable.from_json({\"color\": \"#3060f0\"})` with the same colour, so a no-op from_json still passes. Separately, the manifest note (\"for modules and cables Rack's engine already has; ones that already have widgets are refused\") describes RackWidget::fromJson, not CableWidget::fromJson, which only reads the colour (Rack src/app/CableWidget.cpp:266-277; native/bindings/app/rack.cpp:518-521). Smallest fix: call from_json with a colour different from the current one and assert the change; correct the note.",
+      "verdict": "finding"
+    },
+    "method:rack::app::CableWidget::getCable()": {
+      "finding": "P1: no test calls rackpy.raw.app.CableWidget.get_cable(). The cited tests use the `cw.cable` property (tests/app/entries/rp28e_cables.py:72,98,101) and the plug or rack `get_cable` (rp28b_browser.py:220,333; test_rack.py:257), never the CableWidget method bound at native/bindings/app/cables.cpp:274-277. Smallest fix: in rp28e_cables.py after update_cable/set_cable, add `cw.get_cable() is not None and cw.get_cable().id == cw.cable.id`, and None after release_cable.",
+      "verdict": "finding"
+    },
+    "method:rack::app::CableWidget::getHoveredPort(rack::engine::Port::Type)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::getInputPos()": {
+      "finding": "P1: the assertion is too weak to catch a wrong binding. tests/app/entries/rp28b_browser.py:342 only checks `cable.get_input_pos().is_finite()`. A binding that returned the output position, the mouse position (Rack's fallback, src/app/CableWidget.cpp:216-227) or any finite Vec would pass. Smallest fix: assert that it equals the input port's centre in rack coordinates, e.g. `inp.get_relative_offset(inp.box.zero_pos().get_center(), rack())`, and differs from get_output_pos().",
+      "verdict": "finding"
+    },
+    "method:rack::app::CableWidget::getOutputPos()": {
+      "finding": "P1: the assertion is too weak to catch a wrong binding. tests/app/entries/rp28b_browser.py:342 only checks `cable.get_output_pos().is_finite()`, so a swapped or fallback (mouse) position would pass (Rack src/app/CableWidget.cpp:230-241). Smallest fix: compare with the output port's centre in rack coordinates.",
+      "verdict": "finding"
+    },
+    "method:rack::app::CableWidget::getPlug(rack::engine::Port::Type)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::getPort(rack::engine::Port::Type)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::isComplete()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::mergeJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::onAdd(const rack::widget::Widget::AddEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::onRemove(const rack::widget::Widget::RemoveEvent &)": {
+      "finding": "P2: the Python method is never called directly. The guard in rackpy.raw.app.CableWidget.on_remove (native/bindings/app/cables.cpp:305-312) is not tested; test_io_widgets.py:176-177 checks the refusal only for on_add. Rack's removal of the plugs is checked only indirectly: rp28e_cables.py:100-101 asserts the cable widget's own parent, and cw2.close() would hit Rack's `assert(!parent)` if the plugs stayed. Smallest fix: add `with pytest.raises(OwnershipError, match=\"Remove event\"): cable.on_remove(w.RemoveEvent())`, and after rack.remove_cable assert `cw2.input_plug.parent is None`.",
+      "verdict": "finding"
+    },
+    "method:rack::app::CableWidget::releaseCable()": {
+      "finding": "P2: the record's flags disagree with the code. native/bindings/app/cables.cpp:285-290 releases the GIL (py::gil_scoped_release) and takes an EngineLease to call engine->removeCable, but the record has gil_release=false and locks_engine=null. Engine.add_cable/remove_cable-style records use locks_engine=\"exclusive\" (manifest.json:2198). Smallest fix: set gil_release=true and locks_engine to match the engine-lock convention.",
+      "verdict": "finding"
+    },
+    "method:rack::app::CableWidget::setCable(rack::engine::Cable *)": {
+      "finding": "P2: locks_engine is null, but Rack's setCable calls APP->engine->removeCable on the old cable (src/app/CableWidget.cpp:180-185), and RackPy first adds the Python cable to the engine (bindings::engineCableForWidget, native/bindings/app/cables.cpp:245-266), so the call takes Rack's engine lock exclusively. Smallest fix: set locks_engine to \"exclusive\" (gil_release=true is already correct).",
+      "verdict": "finding"
+    },
+    "method:rack::app::CableWidget::step()": {
+      "finding": "P1: no cited test steps a cable widget. test_rack.py:205-229 steps or draws only the menu bar, and rp28b_browser.py cable_views never calls step on the cable; step() is called only on a plug (test_rack.py:258). Rack's CableWidget::step positions the plugs at getOutputPos/getInputPos (src/app/CableWidget.cpp:289-313), which is observable. Smallest fix: call `cable.step()` and assert `cable.input_plug.get_box().pos == cable.get_input_pos()` (likewise for output).",
+      "verdict": "finding"
+    },
+    "method:rack::app::CableWidget::updateCable()": {
+      "finding": "P1: the mapped binding is never tested, and the record's flags are wrong. The record maps to rackpy.raw.app.HostCableWidget.update_cable and cites only test_module_browser, whose entry (tests/app/entries/rp28b_browser.py) never calls update_cable; only the Python CableWidget.update_cable is exercised (rp28e_cables.py:68-71, test_io_widgets.py:178). Also, native/bindings/app/rack.cpp:507-511 runs it inside `unlocked`, which releases the GIL, while the record says gil_release=false (and locks_engine=null although Rack's updateCable calls engine removeCable/addCable, src/app/CableWidget.cpp:155-171). Smallest fix: call update_cable() on Rack's complete HostCableWidget in cable_views and assert the engine cable is replaced (new cable_id preserved, cable count unchanged), and set gil_release=true and locks_engine.",
+      "verdict": "finding"
+    },
+    "method:rack::app::CircularShadow::draw(const rack::widget::Widget::DrawArgs &)": {
+      "finding": "P1: no test draws a CircularShadow. The cited tests (tests/app/in_rack/test_controls.py:514-543, :546-603) only construct shadows and round-trip blur_radius and opacity; no test anywhere calls CircularShadow.draw or overrides it (grep for CircularShadow in tests/ finds only test_controls.py:522,595,597,622). Smallest fix: add a CircularShadow subclass inside a FramebufferWidget (as in test_rack.py:213-225) whose draw override calls super().draw(args), render it, and assert the override ran; also check that draw with an owned DrawArgs raises ValueError.",
+      "verdict": "finding"
+    },
+    "method:rack::app::Knob::initParamQuantity()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onAction(const rack::widget::Widget::ActionEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onDragLeave(const rack::widget::Widget::DragLeaveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onDragMove(const rack::widget::Widget::DragMoveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "finding": "P1: Knob.on_hover is never exercised. The cited tests never call knob.on_hover, and test_rack_turns_a_knob_and_flips_a_switch (tests/app/in_rack/test_controls.py:324-353) presses before any hover and then drags; while dragging, Rack sends DragMove/DragHover, not Hover, so Knob::onHover (src/app/Knob.cpp:51-57, which forwards only inside the knob's circle) is never reached. Smallest fix: call knob.on_hover with a HoverEvent inside the circle and one outside it, and assert consumption or the hovered target differs (e.g. through the event context target).",
+      "verdict": "finding"
+    },
+    "method:rack::app::Knob::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onLeave(const rack::widget::Widget::LeaveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PlugWidget::getCable()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PlugWidget::getType()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PlugWidget::step()": {
+      "verdict": "accept"
+    },
+    "record:rack::app::AudioBlockSizeChoice": {
+      "verdict": "accept"
+    },
+    "record:rack::app::AudioButton": {
+      "verdict": "accept"
+    },
+    "record:rack::app::AudioDeviceChoice": {
+      "verdict": "accept"
+    },
+    "record:rack::app::AudioDeviceMenuChoice": {
+      "verdict": "accept"
+    },
+    "record:rack::app::AudioDisplay": {
+      "verdict": "accept"
+    },
+    "record:rack::app::AudioDriverChoice": {
+      "verdict": "accept"
+    },
+    "record:rack::app::AudioSampleRateChoice": {
+      "verdict": "accept"
+    },
+    "record:rack::app::CableWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::CircularShadow": {
+      "verdict": "accept"
+    },
+    "record:rack::app::Knob": {
+      "verdict": "accept"
+    },
+    "record:rack::app::PlugWidget": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/widgets-02",
+  "slice": "widgets-02"
+}

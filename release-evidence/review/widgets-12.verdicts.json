@@ -1,0 +1,353 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "field:rack::widget::BaseEvent::context": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventContext::consumed": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventContext::propagating": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventContext::target": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::dragButton": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::dragHoveredWidget": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::draggedWidget": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::heldKeys": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::hoveredWidget": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::lastClickTime": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::lastClickedWidget": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::rootWidget": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::selectedWidget": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::ZoomWidget::zoom": {
+      "verdict": "accept"
+    },
+    "function:rack::widget::getKeyCommandName(int, int)": {
+      "finding": "P2: Rack's default argument is not honoured. The SDK declares getKeyCommandName(int key, int mods = 0) (include/widget/event.hpp:56). The binding at native/bindings/widget/templates.cpp:146-149 registers py::arg(\"mods\") with no default, and the stub src/rackpy/raw/widget.pyi:674 has 'mods: int', so get_key_command_name(65) raises TypeError. This is contrary to docs/coverage.md policy 6 ('Default arguments are recorded and honoured'). Smallest fix: use py::arg(\"mods\") = 0, change the stub to 'mods: int = 0', and add the assertion get_key_command_name(65) == 'A' in check_key_names (tests/widget/in_rack/test_templates.py:17).",
+      "verdict": "finding"
+    },
+    "function:rack::widget::getKeyName(int)": {
+      "verdict": "accept"
+    },
+    "macro:RACK_HELD": {
+      "verdict": "accept"
+    },
+    "macro:RACK_MOD_ALT": {
+      "verdict": "accept"
+    },
+    "macro:RACK_MOD_ALT_NAME": {
+      "verdict": "accept"
+    },
+    "macro:RACK_MOD_CTRL": {
+      "verdict": "accept"
+    },
+    "macro:RACK_MOD_CTRL_NAME": {
+      "verdict": "accept"
+    },
+    "macro:RACK_MOD_MASK": {
+      "verdict": "accept"
+    },
+    "macro:RACK_MOD_SHIFT": {
+      "verdict": "accept"
+    },
+    "macro:RACK_MOD_SHIFT_NAME": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::BaseEvent::consume(rack::widget::Widget *) const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::BaseEvent::getTarget() const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::BaseEvent::isConsumed() const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::BaseEvent::isPropagating() const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::BaseEvent::setTarget(rack::widget::Widget *) const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::BaseEvent::stopPropagating() const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::BaseEvent::unconsume() const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::finalizeWidget(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::getDragHoveredWidget()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::getDraggedWidget()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::getHoveredWidget()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::getRootWidget()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::getSelectedWidget()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleButton(rack::math::Vec, int, int, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleDirty()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleDrop(rack::math::Vec, const std::vector<std::string> &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleHover(rack::math::Vec, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleKey(rack::math::Vec, int, int, int, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleLeave()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleScroll(rack::math::Vec, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleText(rack::math::Vec, uint32_t)": {
+      "finding": "P2: An undocumented and unjustified restriction. native/bindings/ui/event_state.cpp:127-128 raises ValueError for codepoint > 0x10FFFF, but Rack's EventState::handleText(math::Vec, uint32_t) accepts any uint32_t and only forwards it in Hover/SelectText events (Rack src/widget/event.cpp). Neither the manifest notes nor docs/reference/ui.md#ui-input mention the restriction or a crash or undefined behaviour that would justify it. Smallest fix: remove the check, or document it in ui.md with Rack-source evidence that such values are unsafe, and add a test for it.",
+      "verdict": "finding"
+    },
+    "method:rack::widget::EventState::setDragHovered(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setDragHoveredWidget(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setDragged(rack::widget::Widget *, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setDraggedWidget(rack::widget::Widget *, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setHovered(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setHoveredWidget(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setSelected(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setSelectedWidget(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "finding": "P1: No cited test runs ZoomWidget::draw, which applies nvgScale(zoom) and rescales the clip box. tests/widget/in_rack/test_drawing.py draws only through Widget and FramebufferWidget, with no ZoomWidget anywhere in the file. test_variants.py::test_every_variant_subclass_round_trip_and_native_step only steps a ZoomWidget, and test_transparent_opaque_and_zoom_event_base_semantics only sends hover events. Smallest fix: render a FramebufferWidget that contains a ZoomWidget with set_zoom(2) and a Python child whose draw records args.clip_box. Assert the clip box is divided by the zoom, and also call ZoomWidget.draw through super().",
+      "verdict": "finding"
+    },
+    "method:rack::widget::ZoomWidget::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
+      "finding": "P1: No cited test reaches ZoomWidget::drawLayer. test_drawing.py:22-73 calls draw_layer only through Widget.draw_child on a plain Widget parent, and none of the cited test_variants.py tests draws. Smallest fix: in the zoomed-render test proposed for ZoomWidget::draw, call draw_child(zoom_widget, args, 1) or super().draw_layer(args, 1). Assert that the child's draw_layer receives the layer and a zoom-scaled clip_box.",
+      "verdict": "finding"
+    },
+    "method:rack::widget::ZoomWidget::getRelativeOffset(rack::math::Vec, rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::getRelativeZoom(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::getViewport(rack::math::Rect)": {
+      "finding": "P1: No test calls get_viewport on a ZoomWidget or through one. In tests/, get_viewport appears only in tests/widget/in_rack/test_tree.py:309-310, on the detached WidgetNode adapter. The cited tests at test_variants.py:29-91 never call it, so Rack's zoom multiply/divide in ZoomWidget::getViewport is untested. Smallest fix: in test_transparent_opaque_and_zoom_event_base_semantics, assert parent.get_viewport(rect) and child.get_viewport(rect) under set_zoom(2) against Rack's expected scaled rectangle.",
+      "verdict": "finding"
+    },
+    "method:rack::widget::ZoomWidget::getZoom()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::onHoverText(const rack::widget::Widget::HoverTextEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::onPathDrop(const rack::widget::Widget::PathDropEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::setZoom(float)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::widget::Widget::getAncestorOfType<type>()": {
+      "finding": "P1: Unjustified restriction, and the notes are misleading. matcher() at native/bindings/widget/templates.cpp:20-43 uses rttiCast only for the 8 rack::widget classes (lines 24-33). Every other bound SDK widget class goes to the managed-peer isinstance branch (lines 37-43), which returns false for widgets RackPy does not manage. Examples are rackpy.raw.app.ModuleWidget, which is an OpaqueWidget subclass (native/bindings/app/module_widget.cpp:219), RackWidget and ui classes. So get_ancestor_of_type(app.ModuleWidget) returns None for a Rack-owned ModuleWidget, where Rack's dynamic_cast<T*>(parent) (include/widget/Widget.hpp getAncestorOfType) finds it. The manifest notes say 'the bound SDK classes match by dynamic_cast' and the stub returns T | HostWidget (widget.pyi:453), but tests/widget/in_rack/test_templates.py:37-74 only uses rack::widget classes. Policy 10 requires templates over widget types to accept any class. Smallest fix: match every pybind-registered SDK widget class by its C++ type, for example a registry of rttiCast matchers filled in by variant<>. Then add an in-Rack test that finds a Rack-owned app class, such as the RuntimeProbe ModuleWidget.",
+      "verdict": "finding"
+    },
+    "method_template:rack::widget::Widget::getFirstDescendantOfType<type>()": {
+      "finding": "P1: Same matcher restriction as getAncestorOfType. native/bindings/widget/templates.cpp:20-43 and descendantOf at lines 53-61 use dynamic_cast only for the 8 rack::widget classes. A bound app or ui class, such as app.ModuleWidget or ui.MenuItem, never matches a Rack-owned descendant, while Rack's dynamic_cast<T*>(child) would. The notes ('matched as for get_ancestor_of_type') and the stub widget.pyi:454 (T | HostWidget) suggest that it does. Tests use only rack::widget classes (test_templates.py:57-59). Smallest fix: the same type-registry matcher, plus a test that finds a Rack-owned non-widget-namespace descendant.",
+      "verdict": "finding"
+    },
+    "method_template:rack::widget::Widget::recurseEvent<type, type>($0, const $1 &)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::widget::Widget::recursePositionEvent<type, type>($0, const $1 &)": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::BaseEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::EventContext": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::EventState": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::ActionEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::AddEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::ButtonEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::ChangeEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::ContextCreateEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::ContextDestroyEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DeselectEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DirtyEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DoubleClickEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragBaseEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragDropEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragEndEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragEnterEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragHoverEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragLeaveEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragMoveEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragStartEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DrawArgs": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::EnterEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::HideEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::HoverEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::HoverKeyEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::HoverScrollEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::HoverTextEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::KeyBaseEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::LeaveEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::PathDropEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::PositionBaseEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::RemoveEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::RepositionEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::ResizeEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::SelectEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::SelectKeyEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::SelectTextEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::ShowEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::TextBaseEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::ZoomWidget": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/widgets-12",
+  "slice": "widgets-12"
+}

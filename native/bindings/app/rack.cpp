@@ -485,8 +485,15 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 			return views(hostAs<RW>(h).getCompleteCablesOnPort(as<app::PortWidget>(port, "a rackpy.raw.app.PortWidget")));
 		}, py::arg("port"))
 		.def("get_next_cable_color_id", [](const HostRack& h) { return hostAs<RW>(h).getNextCableColorId(); })
-		.def("set_next_cable_color_id", [](const HostRack& h, int id) { hostAs<RW>(h).setNextCableColorId(id); }, py::arg("id"),
-			"Rack's: wraps around its cable colour list.")
+		.def("set_next_cable_color_id", [](const HostRack& h, int id) {
+			// Rack's getNextCableColor resets an id past the end of its colour list but reads a negative one out of
+			// bounds (RackWidget.cpp:1624-1632), so a negative id is refused (RP-42).
+			if (id < 0)
+				throw py::value_error("set_next_cable_color_id: the id is not negative (Rack would read before its colours)");
+			hostAs<RW>(h).setNextCableColorId(id);
+		}, py::arg("id"),
+			"Rack's: the index of the next cable's colour in Rack's colour list; get_next_cable_color starts again at 0 "
+			"past the end. Not negative.")
 		.def("get_next_cable_color", [](const HostRack& h) { return hostAs<RW>(h).getNextCableColor(); });
 	registerHostView([](W* w) { return ::rackpy::rttiCast<RW*>(w) != nullptr; }, [](const ExternalWidget& e) { return py::cast(HostRack{e}); });
 

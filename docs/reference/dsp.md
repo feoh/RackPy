@@ -560,7 +560,8 @@ as in Rack), and `process()` returns the next correction to add. `buf`
   `process(in_, out)` writes `oversample` outputs for one input. Both take a
   `cutoff`, as a ratio of the lower rate's Nyquist frequency (0.9 by default), and keep
   `in_index` within the range Rack's code keeps it in, as it copies or
-  indexes from there. `in_buffer` is Rack's input history (`oversample *
+  indexes from there (a decimator's at a multiple of `oversample`, where Rack
+  leaves it). `in_buffer` is Rack's input history (`oversample *
   quality` inputs for a decimator, `quality` zero-stuffed ones for an
   upsampler) and `kernel` the filter's taps, as live views.
 

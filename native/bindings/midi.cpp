@@ -111,6 +111,31 @@ struct Tracked {
 		return std::find_if(driverSubscriptions.begin(), driverSubscriptions.end(),
 			[&](const DriverSubscription& s) { return s.driverId == driverId && s.deviceId == deviceId; });
 	}
+	/** Rack's subscriber sets ignore a second subscription, so a port must not record one for a device it already
+	holds (its own, or an earlier subscription); and unsubscribing its own device would leave Rack's field pointing at
+	a device the driver may then delete (RP-42: a use-after-free). */
+	void refuseDuplicate(const m::Port& p, const m::Device* device) const {
+		if (device && (p.device == device || holds(device)))
+			throw runtime::Ownership("the port already holds this device (its own or a subscription): Rack would not "
+				"subscribe it twice");
+	}
+	static void refuseOwnDevice(const m::Port& p, const m::Device* device) {
+		if (device && p.device == device)
+			throw runtime::Ownership("this is the port's own device (set_device_id): leave it with set_device_id(-1), or "
+				"Rack's field would point at a device the driver may delete");
+	}
+	/** After a device change: if the port's own device is one it had subscribed to, that subscription was a second
+	entry Rack's subscriber set ignored. Drop it, so the port holds each device once and leaving it is Rack's plain
+	unsubscribe; keeping both let a later unsubscribe or device change leave a pointer to a device the driver had
+	deleted (RP-42). */
+	void foldOwnDevice(const m::Port& p) noexcept {
+		if (m::Device* own = p.device) {
+			deviceSubscriptions.erase(std::remove(deviceSubscriptions.begin(), deviceSubscriptions.end(), own),
+				deviceSubscriptions.end());
+			driverSubscriptions.erase(std::remove_if(driverSubscriptions.begin(), driverSubscriptions.end(),
+				[own](const DriverSubscription& s) { return s.device == own; }), driverSubscriptions.end());
+		}
+	}
 	virtual ~Tracked() = default;
 	virtual void release() noexcept = 0;
 	virtual m::Port& port() = 0;
@@ -170,6 +195,7 @@ struct TrackedPort : Base, Tracked {
 		refuseDuringMidiDelivery("Port.setDeviceId");
 		overrideOrVoid(static_cast<const Base*>(this), "set_device_id", [this, deviceId] { Base::setDeviceId(deviceId); },
 			deviceId);
+		foldOwnDevice(*this);
 	}
 	std::string getDeviceName(int deviceId) override {
 		return overrideOr<std::string>(static_cast<const Base*>(this), "get_device_name",
@@ -916,9 +942,13 @@ void bindMidi(py::module_ mod) {
 		.def("subscribe_input", [](const MidiDriverView& d, int deviceId, py::object input) -> py::object {
 			auto& port = pythonPort<m::Input>(input, "subscribe_input");
 			auto& t = tracked(port);
+			if (t.findDriverSubscription(d.id, deviceId) != t.driverSubscriptions.end() ||
+				(port.device && port.driverId == d.id && port.deviceId == deviceId))
+				t.refuseDuplicate(port, port.device ? port.device : t.findDriverSubscription(d.id, deviceId)->device);
 			auto* device = d.get().subscribeInput(deviceId, &port);
 			if (!device)
 				return py::none();
+			t.refuseDuplicate(port, device);  // reached the same device another way: Rack's set ignored it
 			t.driverSubscriptions.push_back({d.id, deviceId, device});
 			return deviceObject(input, device, true);
 		}, py::arg("device_id"), py::arg("input"),
@@ -930,15 +960,20 @@ void bindMidi(py::module_ mod) {
 			auto it = t.findDriverSubscription(d.id, deviceId);
 			if (it == t.driverSubscriptions.end())
 				throw runtime::Ownership("the port did not subscribe to this device through the driver");
+			Tracked::refuseOwnDevice(port, it->device);
 			d.get().unsubscribeInput(deviceId, &port);
 			t.driverSubscriptions.erase(it);
 		}, py::arg("device_id"), py::arg("input"))
 		.def("subscribe_output", [](const MidiDriverView& d, int deviceId, py::object output) -> py::object {
 			auto& port = pythonPort<m::Output>(output, "subscribe_output");
 			auto& t = tracked(port);
+			if (t.findDriverSubscription(d.id, deviceId) != t.driverSubscriptions.end() ||
+				(port.device && port.driverId == d.id && port.deviceId == deviceId))
+				t.refuseDuplicate(port, port.device ? port.device : t.findDriverSubscription(d.id, deviceId)->device);
 			auto* device = d.get().subscribeOutput(deviceId, &port);
 			if (!device)
 				return py::none();
+			t.refuseDuplicate(port, device);  // reached the same device another way: Rack's set ignored it
 			t.driverSubscriptions.push_back({d.id, deviceId, device});
 			return deviceObject(output, device, false);
 		}, py::arg("device_id"), py::arg("output"))
@@ -948,6 +983,7 @@ void bindMidi(py::module_ mod) {
 			auto it = t.findDriverSubscription(d.id, deviceId);
 			if (it == t.driverSubscriptions.end())
 				throw runtime::Ownership("the port did not subscribe to this device through the driver");
+			Tracked::refuseOwnDevice(port, it->device);
 			d.get().unsubscribeOutput(deviceId, &port);
 			t.driverSubscriptions.erase(it);
 		}, py::arg("device_id"), py::arg("output"))
@@ -975,6 +1011,7 @@ void bindMidi(py::module_ mod) {
 		.def("subscribe", [](const InputDeviceView& v, py::object input) {
 			auto& device = static_cast<m::InputDevice&>(v.get());
 			auto& port = pythonPort<m::Input>(input, "InputDevice.subscribe");
+			tracked(port).refuseDuplicate(port, &device);
 			device.subscribe(&port);
 			tracked(port).deviceSubscriptions.push_back(&device);
 		}, py::arg("input"), "Rack's (not meant for plugins: Driver.subscribe_input is); RackPy undoes it with the port.")
@@ -985,6 +1022,7 @@ void bindMidi(py::module_ mod) {
 			auto it = std::find(subs.begin(), subs.end(), static_cast<m::Device*>(&device));
 			if (it == subs.end())
 				throw runtime::Ownership("the port did not subscribe to this device with InputDevice.subscribe");
+			Tracked::refuseOwnDevice(port, &device);
 			device.unsubscribe(&port);
 			subs.erase(it);
 		}, py::arg("input"))
@@ -1004,6 +1042,7 @@ void bindMidi(py::module_ mod) {
 		.def("subscribe", [](const OutputDeviceView& v, py::object output) {
 			auto& device = static_cast<m::OutputDevice&>(v.get());
 			auto& port = pythonPort<m::Output>(output, "OutputDevice.subscribe");
+			tracked(port).refuseDuplicate(port, &device);
 			device.subscribe(&port);
 			tracked(port).deviceSubscriptions.push_back(&device);
 		}, py::arg("output"), "Rack's (not meant for plugins: Driver.subscribe_output is); RackPy undoes it with the port.")
@@ -1014,6 +1053,7 @@ void bindMidi(py::module_ mod) {
 			auto it = std::find(subs.begin(), subs.end(), static_cast<m::Device*>(&device));
 			if (it == subs.end())
 				throw runtime::Ownership("the port did not subscribe to this device with OutputDevice.subscribe");
+			Tracked::refuseOwnDevice(port, &device);
 			device.unsubscribe(&port);
 			subs.erase(it);
 		}, py::arg("output"))
@@ -1072,9 +1112,11 @@ void bindMidi(py::module_ mod) {
 		.def("set_device_id", [](m::Port& p, int id) {
 			refuseDuringMidiDelivery("Port.set_device_id");
 			laboratory::LaboratoryCall call;
-			return portImplementation(p,
+			portImplementation(p,
 				[id](auto& value) { using T [[maybe_unused]] = std::decay_t<decltype(value)>; return value.T::setDeviceId(id); },
 				[id](m::Port& value) { return value.setDeviceId(id); });
+			if (auto* t = ::rackpy::rttiCast<Tracked*>(&p))
+				t->foldOwnDevice(p);
 		}, py::arg("device_id"),
 			"Rack's: subscribes to the driver's device (-1: none).")
 		.def("get_device_ids", [](m::Port& p) {

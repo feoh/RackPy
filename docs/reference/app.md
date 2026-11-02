@@ -339,7 +339,8 @@ The host-view API:
     next cable colour. `get_incomplete_cable()` warns and returns the last
     incomplete cable, or `None`; use the plural lookup for all of them. `get_next_cable_color()` selects the current palette
     entry, advancing and wrapping its ID when `cable_auto_rotate` is enabled;
-    `get_next_cable_color_id()` and `set_next_cable_color_id()` access that ID;
+    `get_next_cable_color_id()` and `set_next_cable_color_id()` access that ID
+    (not negative: Rack resets an ID past its list but would read before it);
   - `get_touched_param()`, `set_touched_param()` and `touched_param`, the
     param Core's MIDI-Map learns. That param needs a module. The deprecated
     `touched_param` field warns on reads and writes; prefer the methods.

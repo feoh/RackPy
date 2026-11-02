@@ -199,7 +199,7 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 			}
 		});
 		if (!overridden) {
-			try { CallbackGuard guard; Base::step(); }
+			try { CallbackGuard guard; checkNativeStep(*this); Base::step(); }
 			catch (...) { runtime::detail::noteRaised("step", "native Widget step failed"); }
 		}
 	}
@@ -228,7 +228,10 @@ struct Widget : Managed, py::trampoline_self_life_support, Invalidate, Framebuff
 	}
 #define OVERRIDE(E, native, python) \
     void native(const W::E& e) override { \
-        trampolineEvent(static_cast<const Base*>(this), lifetime, #python, #E, e, [this, &e] { Base::native(e); }); \
+        trampolineEvent(static_cast<const Base*>(this), lifetime, #python, #E, e, [this, &e] { \
+            checkNativeEvent<Base, W::E>(*this); \
+            Base::native(e); \
+        }); \
     }
     RACKPY_WIDGET_EVENTS(OVERRIDE)
 #undef OVERRIDE

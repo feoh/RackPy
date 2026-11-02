@@ -75,6 +75,9 @@ Detached models, models attached to isolated plugins, and models staged during
 plugin initialization cannot create modules or widgets (`OwnershipError`): those objects retain a raw model pointer,
 while a detached model can be deleted with its Python handle and a staged model
 can be deleted if registration fails. Wait until registration has committed.
+`Model.append_context_menu(menu, in_browser=False)` (Rack's own items for the
+model) follows the same rule: its items keep the model and read its plugin
+when chosen.
 
 A `Model` has Rack's fields. `slug` can change only before the model is
 added: Rack and patches look models up by it. `plugin` is its plugin, or

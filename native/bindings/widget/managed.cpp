@@ -139,11 +139,26 @@ void transfer(py::object self, py::object child, int placement, py::object sibli
     auto p = state(self);
     transferTo(checked(p), p->token->context, child, placement, argument(sibling));
 }
+/** Rack's Menu keeps its child menu's pointer, and its destructor removes that menu (Menu::~Menu calls setChildMenu(NULL),
+ which reads it), so a child menu leaves only through its menu's set_child_menu (RP-42: removing or deleting it another
+ way crashed Rack when the menu went). */
+void refuseLeavingChildMenu(W& item) {
+	auto* menu = ::rackpy::rttiCast<rack::ui::Menu*>(&item);
+	if (!menu || !item.parent)
+		return;
+	for (W* sibling : item.parent->children) {
+		auto* owner = ::rackpy::rttiCast<rack::ui::Menu*>(sibling);
+		if (owner && owner->childMenu == menu)
+			throw runtime::Ownership("this menu is another menu's child menu: remove it with set_child_menu(None) on that menu");
+	}
+}
+
 void detach(py::object self) {
     checkMutation();
     auto s = state(self);
     auto& item = checked(s);
     if (!item.parent) return;
+    refuseLeavingChildMenu(item);
     {
         CallbackGuard guard;
         item.parent->removeChild(&item);
@@ -158,6 +173,7 @@ void remove(py::object self, py::object child) {
 	auto& item = checked(c);
 	if (item.parent != &parent)
 		throw runtime::Ownership("Widget is not a direct child of this parent");
+	refuseLeavingChildMenu(item);
 	{
 		CallbackGuard guard;
 		parent.removeChild(&item);
@@ -583,7 +599,11 @@ void bindManagedWidgets(py::module_ mod) {
 			s->clearing = false;
 		})
 
-		.def("request_delete", [](py::object self) { checked(state(self)).requestDelete(); })
+		.def("request_delete", [](py::object self) {
+			auto& item = checked(state(self));
+			refuseLeavingChildMenu(item);
+			item.requestDelete();
+		})
 		.def("get_box", [](py::object self) { return checked(state(self)).getBox(); })
         .def("set_box", [](py::object self, rack::math::Rect box) { geometrySetter(self).setBox(box); }, py::arg("box"))
         .def_property("box", [](py::object self) {

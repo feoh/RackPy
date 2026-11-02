@@ -87,6 +87,11 @@ def test_offsets_and_json() -> None:
     port = audio.Port()
     port.input_offset, port.output_offset, port.max_inputs, port.max_outputs = 2, 4, 6, 10
     assert (port.input_offset, port.output_offset, port.max_inputs, port.max_outputs) == (2, 4, 6, 10)
+    with pytest.raises(ValueError, match="not negative"):
+        port.input_offset = -1  # Rack adds the offset to the device's buffer: it would point before it (RP-42)
+    with pytest.raises(ValueError, match="not negative"):
+        port.output_offset = -2
+    assert (port.input_offset, port.output_offset) == (2, 4)
     data = port.to_json()
     assert data["driver"] == port.get_driver_id() and data["inputOffset"] == 2 and data["outputOffset"] == 4
     assert "deviceName" not in data  # no device

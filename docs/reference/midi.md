@@ -43,7 +43,12 @@ A driver lists its input and output devices and their names and defaults.
 `subscribe_input(device_id, port)` and `subscribe_output` make a Python port
 a subscriber of a device, apart from the port's own device. RackPy undoes
 such a subscription when the port dies, and `unsubscribe_*` takes back only
-the subscriptions Python made.
+the subscriptions Python made. A port holds each device once: Rack's
+subscriber sets ignore a second subscription, so subscribing (through the
+driver or the device) to a device the port already holds is refused, and
+when `set_device_id` makes a subscribed device the port's own, that
+subscription becomes the port's device. Unsubscribing the port's own device is
+refused: `set_device_id(-1)` leaves it.
 
 (midi-ports)=
 ## Ports

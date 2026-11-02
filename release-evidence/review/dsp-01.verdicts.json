@@ -1,0 +1,371 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "alias:rack::dsp::SchmittTrigger": {
+      "verdict": "accept"
+    },
+    "alias:rack::dsp::Timer": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::Frame<value, type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::TSchmittTrigger<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::TTimer<type>": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::ComplexFFT::ComplexFFT(size_t)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::Int24::Int24()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::Int24::Int24(int32_t)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::RealFFT::RealFFT(size_t)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::TSchmittTrigger::TSchmittTrigger<T>()": {
+      "verdict": "accept"
+    },
+    "conversion:rack::dsp::Int24::operator int()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::dsp::ComplexFFT::~ComplexFFT()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::dsp::RealFFT::~RealFFT()": {
+      "verdict": "accept"
+    },
+    "enum:rack::dsp::BooleanTrigger::Event": {
+      "verdict": "accept"
+    },
+    "enum:rack::dsp::BooleanTrigger::State": {
+      "verdict": "accept"
+    },
+    "enum:rack::dsp::TSchmittTrigger<float>::Event": {
+      "verdict": "accept"
+    },
+    "enum:rack::dsp::TSchmittTrigger<float>::State": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::BooleanTrigger::Event::NONE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::BooleanTrigger::Event::TRIGGERED": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::BooleanTrigger::Event::UNTRIGGERED": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::BooleanTrigger::State::HIGH": {
+      "finding": "P1: the only cited test, tests/dsp/in_rack_basic/test_digital.py::test_boolean_trigger (lines 151-175), never references BooleanTrigger.State.HIGH and never reads s while it is HIGH; a grep of tests/ finds no use of State.HIGH for BooleanTrigger, so a wrong mapping of this enumerator would not fail the cited test (the binding at native/bindings/dsp/digital.cpp is correct). Smallest fix: add `assert t.s is dsp.BooleanTrigger.State.HIGH` after a true input in test_boolean_trigger, and/or cite test_every_reference_stream_matches_rack, which compares t.s.value with Rack after every step.",
+      "verdict": "finding"
+    },
+    "enumerator:rack::dsp::BooleanTrigger::State::LOW": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::BooleanTrigger::State::UNINITIALIZED": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::TSchmittTrigger<float>::Event::NONE": {
+      "finding": "P1: the only cited test, tests/dsp/in_rack_basic/test_digital.py::test_schmitt_trigger_for_floats (lines 177-195), checks process_event results only against UNTRIGGERED and TRIGGERED; SchmittTrigger.Event.NONE is never referenced in tests/, so a wrong mapping would not fail the cited test (the binding is correct). Smallest fix: add e.g. `assert t.process_event(0.5) is dsp.SchmittTrigger.Event.NONE` to that test, and/or cite test_every_reference_stream_matches_rack (schmitt.process_event stream compares .value with Rack).",
+      "verdict": "finding"
+    },
+    "enumerator:rack::dsp::TSchmittTrigger<float>::Event::TRIGGERED": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::TSchmittTrigger<float>::Event::UNTRIGGERED": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::TSchmittTrigger<float>::State::HIGH": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::TSchmittTrigger<float>::State::LOW": {
+      "finding": "P1: the only cited test, tests/dsp/in_rack_basic/test_digital.py::test_schmitt_trigger_for_floats (lines 177-195), reads s only while UNINITIALIZED or HIGH and never references SchmittTrigger.State.LOW (no use anywhere in tests/), so a wrong mapping of LOW would not fail it (the binding is correct). Smallest fix: add `assert t.s is dsp.SchmittTrigger.State.LOW` after `t.process(0.0)`, and/or cite test_every_reference_stream_matches_rack, which compares t.s.value with Rack after every step.",
+      "verdict": "finding"
+    },
+    "enumerator:rack::dsp::TSchmittTrigger<float>::State::UNINITIALIZED": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::BooleanTrigger::s": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::BooleanTrigger::state": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::ClockDivider::clock": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::ClockDivider::division": {
+      "finding": "P1: the Python property ClockDivider.division (native/bindings/dsp/digital.cpp:181, a custom getter/setter with a uint32_t range check) is never accessed by the cited test tests/dsp/in_rack_basic/test_digital.py::test_clock_divider (lines 250-268), which only uses set_division/get_division and the clock property; no test in tests/ touches `.division`, so a broken getter, setter or OverflowError check would go unnoticed. Smallest fix: add `c.division = 4; assert c.division == 4 == c.get_division()` and `pytest.raises(OverflowError)` for `c.division = -1` / `2**32` to test_clock_divider.",
+      "verdict": "finding"
+    },
+    "field:rack::dsp::ComplexFFT::length": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::ComplexFFT::setup": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::Frame::samples": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::Int24::i": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::PulseGenerator::remaining": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RealFFT::length": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RealFFT::setup": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::TSchmittTrigger::state": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::TSchmittTrigger<float>::s": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::TSchmittTrigger<float>::state": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::TTimer::time": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<float, float>(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<float, int16_t>(int16_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<float, int32_t>(int32_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<float, int64_t>(int64_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<float, int8_t>(int8_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<float, rack::dsp::Int24>(rack::dsp::Int24)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<int16_t, float>(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<int32_t, float>(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<int64_t, float>(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<int8_t, float>(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<rack::dsp::Int24, float>(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::exp2Floor<float>(float, float *)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::exp2Floor<rack::simd::float_4>(rack::simd::float_4, rack::simd::float_4 *)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::sinc(float)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::amplitudeToDb<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::approxExp2Floor<type>($0, $0 *)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::approxExp2_taylor5<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::convert<type, type>($1)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::convert<type, type>(const $1 *, $0 *, size_t)": {
+      "finding": "P1: the buffer form limits len to uint32_t (native/bindings/dsp/basic.cpp:155, values::toInt<uint32_t>(len, ..., \"size_t (at most 2**32 - 1 here)\")) although Rack's convert(const From*, To*, size_t) takes size_t and has no such bound; this restriction is neither justified by Rack UB nor stated in docs/reference/dsp.md#dsp-convert or the manifest notes. Smallest fix: convert len with toInt<size_t> (the buffer-size check already bounds it), or document the 2**32 - 1 bound in the dsp-convert section and the record notes.",
+      "verdict": "finding"
+    },
+    "function_template:rack::dsp::cubic<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::dbToAmplitude<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::exp2Floor<type>($0, $0 *)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::exp2_taylor5<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::exponentialBipolar<type>($0, $0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::polyDirect<type, value>(const $0 (&)[$1], $0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::polyEstrin<type, value>(const $0 (&)[$1], $0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::polyHorner<type, value>(const $0 (&)[$1], $0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::quadraticBipolar<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::quarticBipolar<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::quintic<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::sinc<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::sqrtBipolar<type>($0)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::BooleanTrigger::isHigh()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::BooleanTrigger::process(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::BooleanTrigger::processEvent(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::BooleanTrigger::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::ClockDivider::getClock()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::ClockDivider::getDivision()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::ClockDivider::process()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::ClockDivider::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::ClockDivider::setDivision(uint32_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::ComplexFFT::fft(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::ComplexFFT::fftUnordered(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::ComplexFFT::ifft(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::ComplexFFT::ifftUnordered(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::ComplexFFT::scale(float *)": {
+      "finding": "P1: unjustified, undocumented restriction: the binding raises ValueError when the writable length field is negative (native/bindings/dsp/advanced.cpp:215), but Rack's ComplexFFT::scale (include/dsp/fft.hpp: `float a = 1.f / length; for (int i = 0; i < length; i++) ...`) is then a well-defined no-op, so Rack would not crash, assert or hit UB; docs/reference/dsp.md#dsp-fft and the record notes do not mention the refusal. Smallest fix: for length <= 0 check the buffer against 0 floats and call Rack's scale (a no-op), or document the refusal in dsp-fft and the notes.",
+      "verdict": "finding"
+    },
+    "method:rack::dsp::PulseGenerator::isHigh()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::PulseGenerator::process(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::PulseGenerator::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::PulseGenerator::trigger(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RealFFT::irfft(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RealFFT::irfftUnordered(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RealFFT::rfft(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RealFFT::rfftUnordered(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RealFFT::scale(float *)": {
+      "finding": "P1: unjustified, undocumented restriction: the binding raises ValueError when the writable length field is negative (native/bindings/dsp/advanced.cpp:188), but Rack's RealFFT::scale (include/dsp/fft.hpp: `float a = 1.f / length; for (int i = 0; i < length; i++) x[i] *= a;`) is then a well-defined no-op, so Rack would not crash, assert or hit UB; docs/reference/dsp.md#dsp-fft and the record notes do not mention the refusal. Smallest fix: for length <= 0 check the buffer against 0 floats and call Rack's scale (a no-op), or document the refusal in dsp-fft and the notes.",
+      "verdict": "finding"
+    },
+    "method:rack::dsp::TSchmittTrigger::isHigh()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::TSchmittTrigger::process($c0, $c0, $c0)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::TSchmittTrigger::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::TSchmittTrigger<float>::isHigh()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::TSchmittTrigger<float>::process(float, float, float)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::TSchmittTrigger<float>::processEvent(float, float, float)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::TSchmittTrigger<float>::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::TTimer::getTime()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::TTimer::process($c0)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::TTimer::reset()": {
+      "verdict": "accept"
+    },
+    "record:rack::dsp::BooleanTrigger": {
+      "verdict": "accept"
+    },
+    "record:rack::dsp::ClockDivider": {
+      "verdict": "accept"
+    },
+    "record:rack::dsp::ComplexFFT": {
+      "verdict": "accept"
+    },
+    "record:rack::dsp::Int24": {
+      "verdict": "accept"
+    },
+    "record:rack::dsp::PulseGenerator": {
+      "verdict": "accept"
+    },
+    "record:rack::dsp::RealFFT": {
+      "verdict": "accept"
+    },
+    "specialization:rack::dsp::TSchmittTrigger<float>": {
+      "verdict": "accept"
+    },
+    "variable:rack::dsp::FREQ_A4": {
+      "verdict": "accept"
+    },
+    "variable:rack::dsp::FREQ_C4": {
+      "verdict": "accept"
+    },
+    "variable:rack::dsp::FREQ_SEMITONE": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/dsp-01",
+  "slice": "dsp-01"
+}

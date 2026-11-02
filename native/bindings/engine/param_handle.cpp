@@ -147,6 +147,19 @@ struct ParamHandleRef {
 				std::to_string(paramId) + " any more");
 		return *found;
 	}
+	/** As get, for a caller inside locked(): the GIL is released and the engine lease held already, so this neither
+	 releases the GIL again nor takes a second lease (RP-42: doing both from update_param_handle was fatal). */
+	ParamHandle& getReleased(Engine& engine, bool lockHeld) const {
+		if (slot)
+			return slot->handle;
+		ParamHandle* found = token->alive() && token->context->engine
+			? (lockHeld ? engine.getParamHandle_NoLock(moduleId, paramId) : engine.getParamHandle(moduleId, paramId))
+			: nullptr;
+		if (!found)
+			throw runtime::StaleHandle("no parameter handle is mapped to module " + std::to_string(moduleId) + ", param " +
+				std::to_string(paramId) + " any more");
+		return *found;
+	}
 };
 
 /** The Python object for a handle Rack's lookup returned. */
@@ -188,7 +201,7 @@ ParamHandle& updatable(Engine& engine, ParamHandleRef& ref, bool lockHeld) {
 			throw runtime::Ownership("Rack's engine does not have this parameter handle (add_param_handle first)");
 		return ref.slot->handle;
 	}
-	return ref.get(lockHeld);
+	return ref.getReleased(engine, lockHeld);
 }
 
 void afterUpdate(ParamHandleRef& ref, ParamHandle& handle) {

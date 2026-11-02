@@ -521,14 +521,17 @@ void bind_plugin(py::module_ raw) {
 			"which the widget then owns and deletes with itself) or None (a browser preview). Python owns the widget: a "
 			"Python widget for a RackPy model with a widget factory, else a ForeignModuleWidget.")
 		.def("append_context_menu", [](const ModelHandle& h, py::object menu, bool inBrowser) {
-			RackModel& m = addedModel(h, "append_context_menu");
+			// Rack's items keep this model's pointer and read its plugin when chosen (Model.cpp), so only a model Rack owns
+			// may make them: a detached or staged model can be deleted while the menu is open (RP-42).
+			RackModel& m = committedModel(h, "append_context_menu");
 			auto* target = ::rackpy::rttiCast<rack::ui::Menu*>(widgets::argument(menu));
 			if (!target)
 				throw py::type_error("append_context_menu takes a rackpy.raw.ui.Menu");
 			widgets::checkMutationOf(*target);
 			m.appendContextMenu(target, inBrowser);
 		}, py::arg("menu"), py::arg("in_browser") = false,
-			"Rack's Model::appendContextMenu: Rack's own items for this model (manual, presets folder, favorite...).")
+			"Rack's Model::appendContextMenu: Rack's own items for this model (manual, presets folder, favorite...). Only "
+			"for a committed model: the items keep the model and read its plugin when chosen.")
 		.def("from_json", [](const ModelHandle& h, py::handle data) {
 			checkModelJson(data);
 			RackModel& m = addedModel(h, "from_json");

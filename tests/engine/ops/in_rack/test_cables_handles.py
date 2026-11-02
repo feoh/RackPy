@@ -138,3 +138,25 @@ def test_no_lock_calls_need_the_lock(probe: EngineModule) -> None:
     ):
         with pytest.raises(EngineLockError, match="lock held"):
             call()
+
+
+def test_another_owners_handle_is_updated_through_racks_lookup(probe: EngineModule) -> None:
+    # Core's MIDI-Map owns its handles and maps one from its JSON, so Python only views it (RP-42: updating such a
+    # handle released the GIL a second time inside the engine lock, which pybind11 treats as fatal).
+    e = engine()
+    model = raw.plugin.get_model("Core", "MIDI-Map")
+    assert model is not None
+    midi_map = model.create_module()
+    assert isinstance(midi_map, EngineModule)
+    e.add_module(midi_map)
+    try:
+        maps = {"maps": [{"cc": 1, "moduleId": probe.id, "paramId": 0}]}
+        e.module_from_json(midi_map, {"plugin": "Core", "model": "MIDI-Map", "data": maps})
+        foreign = e.get_param_handle(probe.id, 0)
+        assert isinstance(foreign, ParamHandle) and not foreign.ours  # MIDI-Map's, not Python's
+        # Rack's updateParamHandle looks up the param's old handle, finds this one and unmaps it (Engine.cpp
+        # updateParamHandle_NoLock): the call is Rack's, and it no longer brings Rack down.
+        e.update_param_handle(foreign, probe.id, 0)
+        assert e.get_param_handle(probe.id, 0) is None
+    finally:
+        e.remove_module(midi_map)

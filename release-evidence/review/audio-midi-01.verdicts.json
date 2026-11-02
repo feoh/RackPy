@@ -1,0 +1,238 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "constructor:rack::audio::Port::Port()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::audio::Device::~Device()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::audio::Driver::~Driver()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::audio::Port::~Port()": {
+      "finding": "P1: none of the cited tests checks what happens when a port is destroyed. test_a_port_without_a_device keeps its port in KEPT until Rack quits; test_offsets_and_json drops `other` and asserts nothing afterwards; test_audio_in_live_rack only checks that the in-Rack suite passed. A broken ~PyAudioPort/release() (native/bindings/audio.cpp, PyAudioPort::~PyAudioPort and release) would pass all of them. Smallest fix: cite tests/laboratory/in_rack/test_audio_devices.py::test_audio_teardown_runs_no_python_and_leaves_ports_pointing_nowhere (it asserts `second.subscribed == []` after gc deletes the port) or tests/io/in_rack_virtual/test_virtual.py::test_active_stream_module_deletion_and_hotplug, or add an unsubscribe-on-delete assertion to test_audio.py.",
+      "verdict": "finding"
+    },
+    "field:rack::audio::Device::processMutex": {
+      "finding": "P1: the order in which RackPy takes processMutex and the GIL can deadlock. Rack's Device::processBuffer holds processMutex while it calls each port (Rack src/audio.cpp:37-49). PyAudioPort's overrides then take the GIL inside that lock on the Python-driven path (native/bindings/audio.cpp:134,151,163). Elsewhere RackPy takes processMutex while holding the GIL: subscriberList (audio.cpp:390), and Rack's Device::subscribe/unsubscribe (src/audio.cpp:22,27) reached from Port.set_device_id, Device.subscribe and port deletion with the GIL held. Two ways this hangs: (a) on one thread, a process_* override that reads self.device.subscribed or calls set_device_id locks the non-recursive processMutex its own thread already holds; (b) PythonDevice.process_buffer on a worker thread (the docs allow 'the calling Python thread') while the main thread reads .subscribed. Smallest fix: refuse processMutex-taking calls while the same thread is inside Device::processBuffer (a thread_local flag set in PythonDevice.process_buffer), and release the GIL before locking processMutex from Python-facing bindings.",
+      "verdict": "finding"
+    },
+    "field:rack::audio::Device::subscribed": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Port::context": {
+      "finding": "P1: no test and no documentation. No test anywhere reads `port.context` for an audio port (searched tests/**). docs/reference/audio.md#audio-ports never mentions the `context` property or that it is read-only, although Rack's field is a writable public member (audio.hpp Port::context). Only the docstring at native/bindings/audio.cpp:886-889 explains it. Smallest fix: assert `port.context == raw.context_get()` in test_a_port_without_a_device, and add one line to the Ports doc section saying it is read-only and other contexts' ports are refused.",
+      "verdict": "finding"
+    },
+    "field:rack::audio::Port::device": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Port::deviceId": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Port::driver": {
+      "finding": "P1: no cited test reads `port.driver`. test_a_port_without_a_device and test_offsets_and_json use get_driver(); the only `port.driver` read is in the uncited tests/laboratory/in_rack/test_audio_devices.py:192, where it is None. docs/reference/audio.md#audio-ports lists only 'The properties `driver_id`, `device_id` and `device`' and leaves out `driver`. Also, for a laboratory driver the property returns None while Rack's field is non-null (audio.cpp:884 looks the driver up by driverId, which is -1), and this is not documented. Smallest fix: assert `port.driver == port.get_driver()` in test_a_port_without_a_device, and document `driver` (and its None case for unlisted drivers) in the Ports section.",
+      "verdict": "finding"
+    },
+    "field:rack::audio::Port::driverId": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Port::inputOffset": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Port::maxInputs": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Port::maxOutputs": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Port::outputOffset": {
+      "verdict": "accept"
+    },
+    "function:rack::audio::addDriver(int, rack::audio::Driver *)": {
+      "verdict": "accept"
+    },
+    "function:rack::audio::getDriver(int)": {
+      "verdict": "accept"
+    },
+    "function:rack::audio::getDriverIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::getBlockSize()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::getBlockSizes()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::getName()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::getNumInputs()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::getNumOutputs()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::getSampleRate()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::getSampleRates()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::onStartStream()": {
+      "finding": "P2: the record's fields don't match the code. It says gil_release=false, but PythonDevice.start_stream releases the GIL (native/bindings/audio.cpp:1045), as its own notes say. Its thread is 'main thread; live bound Rack UI context', but start_stream has no main-thread check (only DeviceLease), and docs/reference/audio.md#audio-python-drivers says it runs 'on the calling Python thread'. Smallest fix: set gil_release=true and give a thread value that matches the docs, or add requireMainThread.",
+      "verdict": "finding"
+    },
+    "method:rack::audio::Device::onStopStream()": {
+      "finding": "P2: the record's fields don't match the code. It says gil_release=false, but PythonDevice.stop_stream releases the GIL (native/bindings/audio.cpp:1052). Its thread is 'main thread', but stop_stream has no main-thread check, and docs/reference/audio.md#audio-python-drivers says it runs 'on the calling Python thread'. Smallest fix: correct gil_release and thread, or add requireMainThread.",
+      "verdict": "finding"
+    },
+    "method:rack::audio::Device::processBuffer(const float *, int, float *, int, int)": {
+      "finding": "P1: possible deadlock, and the record's fields are wrong. PythonDevice.process_buffer releases the GIL (audio.cpp:1073) and calls Rack's Device::processBuffer, which holds processMutex while calling ports (Rack src/audio.cpp:37-49). A Python port's override takes the GIL back inside that lock (audio.cpp:134,151,163). An override that calls self.device.subscribed (subscriberList, audio.cpp:390) or set_device_id (Device::unsubscribe/subscribe, src/audio.cpp:22,27) relocks the non-recursive processMutex on the same thread and hangs. Driving from a worker thread, which the docs allow, can also deadlock against a main-thread caller that holds the GIL and waits for processMutex. No test covers either case. The record also says gil_release=false, although the code releases it, and thread 'main thread', although there is no main-thread check. Smallest fix: refuse processMutex-taking bindings while the current thread is inside processBuffer (a thread_local flag), release the GIL before locking processMutex in bindings, and correct gil_release and thread.",
+      "verdict": "finding"
+    },
+    "method:rack::audio::Device::setBlockSize(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::setSampleRate(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::subscribe(rack::audio::Port *)": {
+      "finding": "P1: the raw binding is never called by any test. Searching tests/** finds no call to rackpy.raw.audio.Device.subscribe on a Device view. The laboratory tests only call super().subscribe on rackpy.laboratory.AudioDevice. So RackPy's own logic in this binding is untested: the module-port refusal and the deviceSubscriptions bookkeeping that release() relies on to undo the subscription (native/bindings/audio.cpp:847-854). Smallest fix: add an in-Rack test, mirroring tests/io/in_rack_midi/test_midi.py:159-170, that calls `port.device.subscribe(other_port)`, asserts `other_port in port.device.subscribed`, and checks it is undone when other_port is deleted.",
+      "verdict": "finding"
+    },
+    "method:rack::audio::Device::unsubscribe(rack::audio::Port *)": {
+      "finding": "P1: the raw binding is never called by any test. Searching tests/** finds no call to rackpy.raw.audio.Device.unsubscribe; the laboratory tests only reach the virtual through super() on rackpy.laboratory.AudioDevice. The binding's Ownership error for a port that did not subscribe through Device.subscribe, and its removal of the bookkeeping entry (native/bindings/audio.cpp:855-863), are untested. Smallest fix: extend the Device.subscribe test to unsubscribe, assert the port has left `subscribed`, and assert OwnershipError when unsubscribing again or unsubscribing the port's own device.",
+      "verdict": "finding"
+    },
+    "method:rack::audio::Driver::getDefaultDeviceId()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::getDeviceIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::getDeviceName(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::getDeviceNumInputs(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::getDeviceNumOutputs(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::getName()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::subscribe(int, rack::audio::Port *)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::unsubscribe(int, rack::audio::Port *)": {
+      "finding": "P1: the raw binding is never called by any test. Searching tests/** finds no call to rackpy.raw.audio.Driver.unsubscribe; the laboratory tests only reach the virtual through super() on rackpy.laboratory.AudioDriver. The binding's lookup in driverSubscriptions, its OwnershipError, and the removal of the entry (native/bindings/audio.cpp:782-790) are untested. Smallest fix: in test_virtual.py, call `audio.get_driver(AUDIO_ID).subscribe(0, port)` and then `.unsubscribe(0, port)`, assert the port appears in and then leaves `device.subscribed`, and assert OwnershipError on a second unsubscribe.",
+      "verdict": "finding"
+    },
+    "method:rack::audio::Port::fromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getBlockSize()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getBlockSizes()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDevice()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDeviceDetail(int, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDeviceId()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDeviceIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDeviceName(int)": {
+      "finding": "P1: none of the cited tests calls Port.get_device_name. test_a_port_without_a_device, test_offsets_and_json, and the rest of in_rack_audio run by test_audio_in_live_rack call Driver.get_device_name, never the port's. The only port-level call is in the uncited tests/laboratory/in_rack/test_audio_devices.py::test_racks_audio_port_calls_a_python_driver_and_device (`port.get_device_name(1) == \"OTHER\"`). Smallest fix: cite that test, or assert `port.get_device_name(missing) == \"\"` in test_a_port_without_a_device.",
+      "verdict": "finding"
+    },
+    "method:rack::audio::Port::getDeviceNumInputs(int)": {
+      "finding": "P1: none of the cited tests (test_audio_in_live_rack, test_a_port_without_a_device, test_offsets_and_json) calls Port.get_device_num_inputs. Only Driver.get_device_num_inputs is exercised there. The port-level assertion `(port.get_device_num_inputs(0), ...) == (4, 6)` is in the uncited tests/laboratory/in_rack/test_audio_devices.py::test_racks_audio_port_calls_a_python_driver_and_device. Smallest fix: cite that test or add an assertion to test_a_port_without_a_device.",
+      "verdict": "finding"
+    },
+    "method:rack::audio::Port::getDeviceNumOutputs(int)": {
+      "finding": "P1: none of the cited tests (test_audio_in_live_rack, test_a_port_without_a_device, test_offsets_and_json) calls Port.get_device_num_outputs. Only Driver.get_device_num_outputs is exercised there. The port-level assertion is in the uncited tests/laboratory/in_rack/test_audio_devices.py::test_racks_audio_port_calls_a_python_driver_and_device. Smallest fix: cite that test or add an assertion to test_a_port_without_a_device.",
+      "verdict": "finding"
+    },
+    "method:rack::audio::Port::getDriver()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDriverId()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDriverName()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getNumInputs()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getNumOutputs()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getSampleRate()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getSampleRates()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::onStartStream()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::onStopStream()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::processBuffer(const float *, int, float *, int, int)": {
+      "finding": "P0: out-of-bounds read and write. The input_offset/output_offset setters accept any int (native/bindings/audio.cpp:874,876). Rack passes `input + inputOffset` and `output + outputOffset` (Rack src/audio.cpp:45). For a negative offset, outputSpan computes `size_t(count)*stride - outputOffset` as count*stride + |offset| (audio.cpp:123). The Python-override path then copies with floatArray and writes back with copyBack (audio.cpp:139), touching |offset| floats before the start of the caller's buffer. That corrupts the heap whenever a port overriding process_buffer is driven by PythonDevice.process_buffer. Smallest fix: refuse negative offsets in the setters (Core Audio would also read out of bounds with them), or clamp the spans to the buffer and skip the copy when the offset is outside [0, count*stride); then add a regression test.",
+      "verdict": "finding"
+    },
+    "method:rack::audio::Port::processInput(const float *, int, int)": {
+      "finding": "P0: out-of-bounds read. When input_offset is negative (the setter at native/bindings/audio.cpp:874 accepts it), Rack passes `input + inputOffset` (Rack src/audio.cpp:41). inputSpan (audio.cpp:122) wraps around to count*stride + |offset|. On the Python-override path, floatArray then reads |offset| floats before the caller's input buffer into the array given to process_input, so the override gets data from outside the buffer. Smallest fix: refuse negative offsets in the setter, or clamp inputSpan and skip the copy when the offset is out of range; then add a regression test.",
+      "verdict": "finding"
+    },
+    "method:rack::audio::Port::processOutput(float *, int, int)": {
+      "finding": "P0: out-of-bounds write. When output_offset is negative (the setter at native/bindings/audio.cpp:876 accepts it), Rack passes `output + outputOffset` (Rack src/audio.cpp:49). outputSpan (audio.cpp:123) wraps around to count*stride + |offset|. copyBack (audio.cpp:167) then writes |offset| floats before the caller's output buffer on the Python-override path, which corrupts the heap. Smallest fix: refuse negative offsets in the setter, or clamp outputSpan and skip the copy when the offset is out of range; then add a regression test.",
+      "verdict": "finding"
+    },
+    "method:rack::audio::Port::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::setBlockSize(int)": {
+      "finding": "P1: no cited test asserts anything that would fail if the binding were wrong. test_a_port_without_a_device calls `port.set_block_size(256)` on a port with no device and asserts nothing about the result (tests/io/in_rack_audio/test_audio.py, test_a_port_without_a_device), and test_offsets_and_json doesn't call it. The meaningful assertion, `first.take_requests() == [..., ('block_size', 128.0)]`, is in the uncited tests/laboratory/in_rack/test_audio_devices.py::test_racks_audio_port_calls_a_python_driver_and_device. Smallest fix: cite that test, or call set_block_size on a port holding a PythonDevice and assert get_block_size() and take_requests().",
+      "verdict": "finding"
+    },
+    "method:rack::audio::Port::setDeviceId(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::setDriverId(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::setSampleRate(float)": {
+      "finding": "P1: no cited test asserts anything that would fail if the binding were wrong. test_a_port_without_a_device calls `port.set_sample_rate(48000)` on a port with no device and asserts nothing about the result, and test_offsets_and_json doesn't call it. The meaningful assertion, take_requests() containing ('sample_rate', 44100.0), is in the uncited tests/laboratory/in_rack/test_audio_devices.py::test_racks_audio_port_calls_a_python_driver_and_device. Smallest fix: cite that test, or set the rate on a port holding a PythonDevice and assert get_sample_rate() and take_requests().",
+      "verdict": "finding"
+    },
+    "method:rack::audio::Port::toJson()": {
+      "verdict": "accept"
+    },
+    "record:rack::audio::Device": {
+      "verdict": "accept"
+    },
+    "record:rack::audio::Driver": {
+      "verdict": "accept"
+    },
+    "record:rack::audio::Port": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/audio-midi-01",
+  "slice": "audio-midi-01"
+}

@@ -227,8 +227,11 @@ py::object bindDecimator(py::module_ scope, py::dict& specs) {
 		.def_property_readonly("in_buffer", [](py::object self) { return view(self, self.cast<D&>().inBuffer, OS * Q); })
 		.def_property_readonly("kernel", [](py::object self) { return view(self, self.cast<D&>().kernel, OS * Q); })
 		.def_property("in_index", [](const D& v) { return v.inIndex; }, [](D& v, int i) {
-			if (i < 0 || i > OS * Q - OS)
-				throw py::value_error("in_index must be 0 to " + std::to_string(OS * Q - OS) + "; Rack copies OVERSAMPLE values from it");
+			// Rack only ever leaves inIndex at a multiple of OVERSAMPLE ((inIndex + OVERSAMPLE) % (OVERSAMPLE * QUALITY)):
+			// from any other value a later process would copy past inBuffer (RP-42).
+			if (i < 0 || i > OS * Q - OS || i % OS != 0)
+				throw py::value_error("in_index must be a multiple of OVERSAMPLE (" + std::to_string(OS) + ") from 0 to " +
+					std::to_string(OS * Q - OS) + "; Rack copies OVERSAMPLE values from it each process");
 			v.inIndex = i;
 		})
 		.def("reset", [](D& v) { c::member<&D::reset>(v); })

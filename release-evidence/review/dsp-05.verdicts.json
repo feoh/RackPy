@@ -1,0 +1,286 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "alias:rack::simd::Vector<float, 4>::type": {
+      "verdict": "accept"
+    },
+    "alias:rack::simd::Vector<int32_t, 4>::type": {
+      "verdict": "accept"
+    },
+    "alias:rack::simd::float_4": {
+      "verdict": "accept"
+    },
+    "alias:rack::simd::int32_4": {
+      "verdict": "accept"
+    },
+    "constructor:rack::simd::Vector<float, 4>::Vector()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::simd::Vector<float, 4>::Vector(__m128)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::simd::Vector<float, 4>::Vector(float)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::simd::Vector<float, 4>::Vector(float, float, float, float)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::simd::Vector<float, 4>::Vector(rack::simd::Vector<int32_t, 4>)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::simd::Vector<int32_t, 4>::Vector()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::simd::Vector<int32_t, 4>::Vector(__m128i)": {
+      "finding": "P1: the cited test never exercises this overload. The binding int32_4(v: int32_4) with noconvert (native/bindings/simd/vector.cpp:226-227) is never called with an int32_4 argument. tests/simd/in_rack/test_simd.py::test_construction_lanes_and_views (lines 352-412) calls int32_4() / int32_4(int) / int32_4(4 ints) / int32_4(float_4) / int32_4(2.5) only, and a grep of tests/simd finds no int32_4(<int32_4>) call (the float_4 copy is tested at lines 382-384). Smallest fix: in that test add `j = int32_4(i); j[0] = 99; assert i[0] == 1 and j is not i`.",
+      "verdict": "finding"
+    },
+    "constructor:rack::simd::Vector<int32_t, 4>::Vector(int32_t)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::simd::Vector<int32_t, 4>::Vector(int32_t, int32_t, int32_t, int32_t)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::simd::Vector<int32_t, 4>::Vector(rack::simd::Vector<float, 4>)": {
+      "verdict": "accept"
+    },
+    "field:rack::simd::Vector<float, 4>::s": {
+      "verdict": "accept"
+    },
+    "field:rack::simd::Vector<float, 4>::v": {
+      "verdict": "accept"
+    },
+    "field:rack::simd::Vector<int32_t, 4>::s": {
+      "verdict": "accept"
+    },
+    "field:rack::simd::Vector<int32_t, 4>::v": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator!=(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator!=(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator&(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator&(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator&=(rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator&=(rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator*(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator*=(rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator+(const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator+(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator+(const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator+(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator++(rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator++(rack::simd::Vector<float, 4> &, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator++(rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator++(rack::simd::Vector<int32_t, 4> &, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator+=(rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator+=(rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator-(const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator-(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator-(const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator-(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator--(rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator--(rack::simd::Vector<float, 4> &, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator--(rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator--(rack::simd::Vector<int32_t, 4> &, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator-=(rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator-=(rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator/(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator/=(rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator<(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator<(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator<<(const rack::simd::Vector<int32_t, 4> &, const int &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator<=(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator<=(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator==(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator==(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator>(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator>(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator>=(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator>=(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator>>(const rack::simd::Vector<int32_t, 4> &, const int &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator^(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator^(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator^=(rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator^=(rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator|(const rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator|(const rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator|=(rack::simd::Vector<float, 4> &, const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator|=(rack::simd::Vector<int32_t, 4> &, const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator~(const rack::simd::Vector<float, 4> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::operator~(const rack::simd::Vector<int32_t, 4> &)": {
+      "verdict": "accept"
+    },
+    "macro:DECLARE_VECTOR_OPERATOR_INCREMENT": {
+      "verdict": "accept"
+    },
+    "macro:DECLARE_VECTOR_OPERATOR_INFIX": {
+      "verdict": "accept"
+    },
+    "macro:SIMDE_ENABLE_NATIVE_ALIASES": {
+      "verdict": "accept"
+    },
+    "method:rack::simd::Vector<float, 4>::cast(rack::simd::Vector<int32_t, 4>)": {
+      "verdict": "accept"
+    },
+    "method:rack::simd::Vector<float, 4>::load(const float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::simd::Vector<float, 4>::mask()": {
+      "verdict": "accept"
+    },
+    "method:rack::simd::Vector<float, 4>::operator[](int)": {
+      "verdict": "accept"
+    },
+    "method:rack::simd::Vector<float, 4>::operator[](int) const": {
+      "verdict": "accept"
+    },
+    "method:rack::simd::Vector<float, 4>::store(float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::simd::Vector<float, 4>::zero()": {
+      "verdict": "accept"
+    },
+    "method:rack::simd::Vector<int32_t, 4>::cast(rack::simd::Vector<float, 4>)": {
+      "verdict": "accept"
+    },
+    "method:rack::simd::Vector<int32_t, 4>::load(const int32_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::simd::Vector<int32_t, 4>::mask()": {
+      "verdict": "accept"
+    },
+    "method:rack::simd::Vector<int32_t, 4>::operator[](int)": {
+      "verdict": "accept"
+    },
+    "method:rack::simd::Vector<int32_t, 4>::operator[](int) const": {
+      "verdict": "accept"
+    },
+    "method:rack::simd::Vector<int32_t, 4>::store(int32_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::simd::Vector<int32_t, 4>::zero()": {
+      "verdict": "accept"
+    },
+    "opaque_record:rack::simd::Vector<type, value>": {
+      "verdict": "accept"
+    },
+    "specialization:rack::simd::Vector<float, 4>": {
+      "finding": "P2: the record's notes are wrong. bindings/manifest.json:3141 says 'Vector[float, 4] and Vector[int, 4] give this class', but only Vector[float, 4] gives float_4; Vector[int, 4] gives int32_4 (native/bindings/simd/vector.cpp:276-277, asserted at tests/simd/in_rack/test_simd.py:505). Mapping, test and docs are otherwise correct. Smallest fix: change the note to 'Vector[float, 4] gives this class.'",
+      "verdict": "finding"
+    },
+    "specialization:rack::simd::Vector<int32_t, 4>": {
+      "finding": "P2: the record's notes are wrong. bindings/manifest.json:3142 says 'Vector[float, 4] and Vector[int, 4] give this class', but Vector[float, 4] gives float_4, not int32_4 (native/bindings/simd/vector.cpp:276-277, asserted at tests/simd/in_rack/test_simd.py:505). Mapping, test and docs are otherwise correct. Smallest fix: change the note to 'Vector[int, 4] gives this class.'",
+      "verdict": "finding"
+    },
+    "static_field:rack::simd::Vector<float, 4>::size": {
+      "verdict": "accept"
+    },
+    "static_field:rack::simd::Vector<int32_t, 4>::size": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/dsp-05",
+  "slice": "dsp-05"
+}

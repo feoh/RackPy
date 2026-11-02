@@ -260,6 +260,8 @@ def test_decimator_and_upsampler() -> None:
     d.in_index = 28
     with pytest.raises(ValueError, match="0 to 28"):
         d.in_index = 29  # Rack would copy past in_buffer
+    with pytest.raises(ValueError, match="multiple of OVERSAMPLE"):
+        d.in_index = 1  # Rack keeps it at multiples of 4: from 1, the 8th process would copy past in_buffer (RP-42)
     v = dsp.Decimator[4, 8, float_4]()
     assert isinstance(v.process([float_4(1.0)] * 4), float_4)
     with pytest.raises(ValueError, match="4 vectors"):

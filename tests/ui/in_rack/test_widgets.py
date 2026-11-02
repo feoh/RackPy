@@ -447,6 +447,72 @@ def test_bad_child_menus_are_contained() -> None:
         overlay.request_delete()
 
 
+def test_what_racks_ui_code_asserts_is_refused() -> None:
+    # Rack's code asserts or dereferences these parents (RP-42): each call is refused instead of crashing Rack.
+    class Opening(ui.MenuItem):
+        def create_child_menu(self) -> ui.Menu:
+            return ui.Menu()
+
+    overlay, menu, bar, opening = ui.MenuOverlay(), ui.Menu(), ui.Scrollbar(), Opening()
+    menu.add_child(opening)
+    try:
+        with pytest.raises(OwnershipError, match="parent"):
+            menu.step()  # Menu::step asserts its parent
+        with pytest.raises(OwnershipError, match="parent"):
+            overlay.step()  # MenuOverlay::step reads its parent's box unchecked
+        with pytest.raises(OwnershipError, match="Menu to have a parent"):
+            opening.on_enter(w.EnterEvent())  # setChildMenu asserts the menu's parent
+        with pytest.raises(OwnershipError, match="ScrollWidget"):
+            bar.on_button(w.ButtonEvent(button=glfw.GLFW_MOUSE_BUTTON_LEFT, action=glfw.GLFW_PRESS))
+        with pytest.raises(OwnershipError, match="ScrollWidget"):
+            bar.on_drag_move(w.DragMoveEvent(mouse_delta=Vec(1, 1)))
+        frame = w.FramebufferWidget()
+        frame.box = Rect(Vec(), Vec(40, 40))
+        bar.box = Rect(Vec(), Vec(10, 40))
+        frame.add_child(bar)  # a Scrollbar outside a ScrollWidget: Rack's draw would assert
+        try:
+            frame.render()  # the native draw is refused, reported and skipped: Rack keeps running
+            assert bar.alive and frame.alive
+        finally:
+            frame.remove_child(bar)
+            frame.close()
+        overlay.add_child(menu)  # with a parent, Rack's own step runs
+        menu.step()
+    finally:
+        overlay.close()
+        bar.close()
+
+
+def test_a_deleted_active_entry_or_child_menu_is_not_given() -> None:
+    # Rack never clears Menu.activeEntry when that entry goes (RP-42: wrapping it was a use-after-free).
+    class Parent(ui.MenuItem):
+        def create_child_menu(self) -> ui.Menu:
+            return ui.Menu()
+
+    overlay, menu, parent = ui.MenuOverlay(), ui.Menu(), Parent()
+    menu.add_child(parent)
+    overlay.add_child(menu)
+    overlay.attach_to_scene()
+    try:
+        parent.on_enter(w.EnterEvent())
+        child = menu.child_menu
+        assert menu.active_entry is parent and isinstance(child, ui.Menu)
+        menu.remove_child(parent)
+        parent.close()
+        entry: Any = menu.active_entry
+        assert entry is None  # Rack still holds the deleted pointer
+        # Rack's Menu removes its child menu when it goes (Menu::~Menu): that menu leaves only through set_child_menu.
+        with pytest.raises(OwnershipError, match="set_child_menu"):
+            overlay.remove_child(child)
+        with pytest.raises(OwnershipError, match="set_child_menu"):
+            child.request_delete()
+        menu.set_child_menu(None)  # Rack deletes the child menu
+        gone: Any = menu.child_menu
+        assert gone is None and not child.alive
+    finally:
+        overlay.request_delete()
+
+
 def test_theme_and_thread_rules() -> None:
     ui.set_theme(nanovg.NVGcolor(0.1, 0.1, 0.1), nanovg.NVGcolor(0.9, 0.9, 0.9))
     ui.refresh_theme()

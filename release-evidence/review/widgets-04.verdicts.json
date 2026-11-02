@@ -1,0 +1,417 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "constructor:rack::app::ModuleWidget::ModuleWidget()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::ModuleWidget::ModuleWidget(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::ParamWidget::ParamWidget()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::PortWidget::PortWidget()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::ModuleWidget::~ModuleWidget()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::ParamWidget::~ParamWidget()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::PortWidget::~PortWidget()": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ModuleWidget::model": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ModuleWidget::module": {
+      "verdict": "accept"
+    },
+    "field:rack::app::MultiLightWidget::baseColors": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ParamWidget::module": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ParamWidget::paramId": {
+      "verdict": "accept"
+    },
+    "field:rack::app::PortWidget::module": {
+      "verdict": "accept"
+    },
+    "field:rack::app::PortWidget::portId": {
+      "verdict": "accept"
+    },
+    "field:rack::app::PortWidget::type": {
+      "verdict": "accept"
+    },
+    "field:rack::app::RackScrollWidget::rackWidget": {
+      "verdict": "accept"
+    },
+    "field:rack::app::RackScrollWidget::zoomWidget": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::addInput(rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::addOutput(rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::addParam(rack::app::ParamWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::appendContextMenu(rack::ui::Menu *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::appendDisconnectActions(rack::history::ComplexAction *)": {
+      "finding": "P1: the binding calls Rack's appendDisconnectActions with the GIL held (native/bindings/app/module_widget.cpp:390-394; no unlocked()). Rack deletes each cable widget (src/app/ModuleWidget.cpp:797-798). Each deletion runs ~CableWidget -> setCable(NULL) -> APP->engine->removeCable, which takes the exclusive engine lock (src/app/CableWidget.cpp:154-158,187-189). That breaks ADR 003 decision 2. The sibling disconnect and disconnect_action calls release the GIL (module_widget.cpp:398-412). Manifest gil_release is false. Smallest fix: wrap the call in unlocked([&]{ mw.appendDisconnectActions(&target); }) and set gil_release true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::ModuleWidget::bypassAction(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::clearTemplate()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::clearTemplateDialog()": {
+      "finding": "P2: the manifest says gil_release false, but the binding runs Rack's clearTemplateDialog inside unlocked(), which releases the GIL (native/bindings/app/module_widget.cpp:367-370). Smallest fix: set python.gil_release to true in bindings/manifest.json, or drop unlocked() since Rack's clearTemplateDialog takes no engine lock (src/app/ModuleWidget.cpp:713-718).",
+      "verdict": "finding"
+    },
+    "method:rack::app::ModuleWidget::cloneAction(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::copyClipboard()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::createContextMenu()": {
+      "finding": "P1: the only cited test that calls it, tests/app/entries/rp28b_browser.py:521 (mw.create_context_menu()), asserts nothing about the menu. The other cited tests never call it. A meaningful test exists but is not cited: tests/examples/in_rack_controls/test_controls_in_rack.py:325-327 checks Rack's labels and the Python items. Smallest fix: cite tests/examples/test_controls_state.py::test_the_modules_in_live_rack and tests/examples/in_rack_controls/test_controls_in_rack.py::test_every_switchboard_menu_item_works.",
+      "verdict": "finding"
+    },
+    "method:rack::app::ModuleWidget::disconnect()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::disconnectAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "finding": "P1: no cited test calls ModuleWidget.draw or checks a Python override of it. tests/app/in_rack/test_module_widget.py, tests/app/test_module_browser.py, tests/app/entries/rp28b_browser.py and docs/snippets/module_widget.py contain no draw call or override (a grep for '.draw(' in tests/app finds only lights, the menu bar and host views). Smallest fix: add an in-rack test that renders a Python ModuleWidget in a FramebufferWidget, calls draw(args) from a draw override, and checks a panel pixel or that the override runs.",
+      "verdict": "finding"
+    },
+    "method:rack::app::ModuleWidget::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
+      "finding": "P1: no cited test calls ModuleWidget.draw_layer. The only draw_layer calls in tests/app are on the menu bar host view (tests/app/in_rack/test_rack.py:215). Rack's ModuleWidget::drawLayer(-1) draws the shadow (src/app/ModuleWidget.cpp:290-306), which nothing checks. Smallest fix: add a render test that calls draw_layer(args, -1) and draw_layer(args, 1) on a ModuleWidget and checks the shadow pixel or the layer dispatch.",
+      "verdict": "finding"
+    },
+    "method:rack::app::ModuleWidget::fromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getGridBox()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getGridPosition()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getGridSize()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getInput(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getInputs()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getModel()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getModule()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getOutput(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getOutputs()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getPanel()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getParam(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getParams()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getPorts()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::hasTemplate()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::load(std::string)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::loadAction(std::string)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::loadDialog()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::loadTemplate()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "finding": "P1: no cited test calls ModuleWidget.on_button, and none checks Rack's ModuleWidget::onButton behaviour on a Python module widget: shift-click selection, drag offset, right-click context menu (src/app/ModuleWidget.cpp:374-438). rp28b_browser.py only clicks the browser preview's ModelBox (lines 145-147), and no in_rack test calls it. Smallest fix: add a live-rack test that calls mw.on_button(ButtonEvent(button=LEFT, action=PRESS, mods=SHIFT)) and asserts rack.is_selected(mw).",
+      "verdict": "finding"
+    },
+    "method:rack::app::ModuleWidget::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "finding": "P1: tests/app/entries/rp28b_browser.py:176 calls a.on_drag_end(...) but asserts nothing after it. Rack's onDragEnd pushes the module-move history action (src/app/ModuleWidget.cpp:454-466), and nothing checks it, so a no-op binding would pass. Smallest fix: after the drag, assert that context.history.action_index advanced, or that undo restores before_pos.",
+      "verdict": "finding"
+    },
+    "method:rack::app::ModuleWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)": {
+      "finding": "P1: no cited test calls ModuleWidget.on_drag_hover. A grep for 'on_drag_hover(' in tests/app finds only HostScene and HostRackWidget calls (tests/app/in_rack/test_rack.py:291,333,340). Smallest fix: add a call on a rack-owned Python ModuleWidget in rp28b_browser.py with an observable assertion, for example that the event is consumed or the selection drag updates.",
+      "verdict": "finding"
+    },
+    "method:rack::app::ModuleWidget::onDragMove(const rack::widget::Widget::DragMoveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "finding": "P1: tests/app/entries/rp28b_browser.py:169 calls on_drag_start, but the following assertion (direct_module_drag, lines 170-175) would pass with a no-op. Internal dragEnabled starts true, so on_drag_move moves the module either way. Rack's onDragStart effects, updateModuleOldPositions and the reset of dragRackPos (src/app/ModuleWidget.cpp:441-451), are never checked. Smallest fix: assert that get_module_drag_action() after a moved drag holds a ModuleMove from the start position, which depends on updateModuleOldPositions.",
+      "verdict": "finding"
+    },
+    "method:rack::app::ModuleWidget::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "finding": "P1: no cited test calls ModuleWidget.on_hover. rp28b_browser.py:168,171 calls rw.on_hover on the RackWidget host view, not on the module widget. Rack's ModuleWidget::onHover consumes the event for a selected module (src/app/ModuleWidget.cpp:308-314), and nothing checks that. Smallest fix: select mw, call mw.on_hover(HoverEvent(context=EventContext())) and assert event.is_consumed().",
+      "verdict": "finding"
+    },
+    "method:rack::app::ModuleWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
+      "finding": "P1: no cited test calls ModuleWidget.on_hover_key (the grep finds only scene, scroll and rack host-view calls in tests/app/in_rack/test_rack.py). Rack's handler runs the module shortcuts, including Ctrl+I reset, Ctrl+E bypass and Delete (src/app/ModuleWidget.cpp:316-372), and none is checked. Those shortcuts take the engine lock with the GIL held, and Delete deletes the widget during the call, so this path needs a test. Smallest fix: add a live-rack test sending Ctrl+I or Ctrl+E through mw.on_hover_key and asserting the module's reset or bypass state.",
+      "verdict": "finding"
+    },
+    "method:rack::app::ModuleWidget::pasteClipboardAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::pasteJsonAction(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::randomizeAction()": {
+      "finding": "P1: the only cited call, tests/app/entries/rp28b_browser.py:503 (mw.randomize_action()), records no result. tests/app/test_module_browser.py asserts nothing about it (actions['reset'] is read before the call). A no-op binding would pass. Smallest fix: record module.params[0].value and history.action_index after randomize_action(), and assert that undo restores the previous value.",
+      "verdict": "finding"
+    },
+    "method:rack::app::ModuleWidget::removeAction()": {
+      "finding": "P1: no cited test calls the success path. rp28b_browser.py deletes modules through the _testing.remove_module_widget hook (lines 252, 314), not the Python binding. tests/app/in_rack/test_module_widget.py:111-114 only checks the refusal without a module. A real call with an assertion exists in tests/app/entries/rp28e_cables.py:106-107, asserted at tests/app/test_cables.py:58. Smallest fix: add tests/app/test_cables.py::test_python_cable_widgets_through_racks_rack_engine_and_history to the record's tests.",
+      "verdict": "finding"
+    },
+    "method:rack::app::ModuleWidget::resetAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::save(std::string)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::saveDialog()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::saveTemplate()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::saveTemplateDialog()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::setGridPosition(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::setModel(rack::plugin::Model *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::setModule(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::setPanel(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::setPanel(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::toJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::MultiLightWidget::addBaseColor(NVGcolor)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::MultiLightWidget::getNumColors()": {
+      "finding": "P2: the record's notes say 'a Python subclass may override it (UI thread, contained)'. Rack declares getNumColors as non-virtual (include/app/MultiLightWidget.hpp:16, 'int getNumColors();'), and no trampoline exists for it (LightWidgetT in native/bindings/app/app.cpp:220-232 covers only the draw* virtuals). Rack never calls a Python override. Smallest fix: change the notes to 'Rack's (not virtual)'.",
+      "verdict": "finding"
+    },
+    "method:rack::app::MultiLightWidget::setBrightnesses(const std::vector<float> &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::appendContextMenu(rack::ui::Menu *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::createContextMenu()": {
+      "finding": "P1: the binding calls Rack's createContextMenu with the GIL held (native/bindings/app/app.cpp:323). Rack's ParamWidget::createContextMenu calls APP->engine->getParamHandle(module->id, paramId) (src/app/ParamWidget.cpp:288), which takes the shared engine lock (upstream/engine-locks.json:134-142). That breaks ADR 003 decision 2. Manifest gil_release is false. Smallest fix: release the GIL around native<PW>(self).createContextMenu(); append_context_menu reacquires it through runtime::callPython. Then set gil_release true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::ParamWidget::createTooltip()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::destroyTooltip()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "finding": "P1: no cited test calls ParamWidget.draw or renders a ParamWidget through it. In tests/app/in_rack/test_controls.py the only draw calls are on LightWidget subclasses (line 491), and test_components.py:216 is a plain Widget. Rack's ParamWidget::draw (src/app/ParamWidget.cpp:188-205, the param-map indicator) is never checked. Smallest fix: add a render test of a Python Knob whose draw override calls super().draw(args), asserting the override ran and the SVG or indicator pixel appears.",
+      "verdict": "finding"
+    },
+    "method:rack::app::ParamWidget::getParamQuantity()": {
+      "finding": "P2: the cited test only asserts knob.get_param_quantity() is not None or is None (tests/app/in_rack/test_controls.py:90,101). It would pass if the binding indexed the wrong param (native/bindings/app/app.cpp:315-320 returns param_quantities[param_id]). Smallest fix: assert get_param_quantity() is module.param_quantities[1] (or check its name or index) after param_id = 1.",
+      "verdict": "finding"
+    },
+    "method:rack::app::ParamWidget::initParamQuantity()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::onDoubleClick(const rack::widget::Widget::DoubleClickEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::onEnter(const rack::widget::Widget::EnterEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::onLeave(const rack::widget::Widget::LeaveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::resetAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::step()": {
+      "finding": "P1: the cited test only calls knob.step() after deleting the module, with no assertion about the knob (tests/app/in_rack/test_controls.py:375). Rack's ParamWidget::step sends a ChangeEvent when the quantity's value changes (src/app/ParamWidget.cpp:172-185), and nothing checks that. Smallest fix: with a module set, change the param value, call step() on a ParamWidget subclass whose on_change records calls, and assert one ChangeEvent.",
+      "verdict": "finding"
+    },
+    "method:rack::app::PortWidget::appendContextMenu(rack::ui::Menu *)": {
+      "finding": "P1: no cited test calls PortWidget.append_context_menu or overrides it. A grep for append_context_menu in tests finds only Knob (test_controls.py:665), ModuleWidget and example code, never a PortWidget. So neither the empty default nor Rack calling a Python override from PortWidget::createContextMenu (src/app/PortWidget.cpp:352) is checked. Smallest fix: extend test_rack_asks_python_controls_for_context_menu_items with a PortWidget subclass whose append_context_menu adds an item, and assert the item is in Rack's menu.",
+      "verdict": "finding"
+    },
+    "method:rack::app::PortWidget::createContextMenu()": {
+      "finding": "P1: the only call is tests/app/in_rack/test_controls.py:681 (port.create_context_menu()), with no assertion about the menu, so a no-op binding would pass. Smallest fix: assert the scene menu's labels after the call (as tests/examples/in_rack_controls/test_controls_in_rack.py:327 does with HOOKS.take_scene_menu_labels()), for example the port's name label.",
+      "verdict": "finding"
+    },
+    "method:rack::app::PortWidget::createTooltip()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::deleteTopCableAction()": {
+      "finding": "P1: (a) the binding runs Rack's deleteTopCableAction with the GIL held (native/bindings/app/app.cpp:401-405). Rack deletes the top CableWidget (src/app/PortWidget.cpp:366-367), and ~CableWidget -> setCable(NULL) -> APP->engine->removeCable takes the exclusive engine lock (src/app/CableWidget.cpp:154-158,187-189). That breaks ADR 003 decision 2. (b) None of the cited tests call it. The only call with an assertion is tests/app/entries/rp28b_browser.py:235-246, run by tests/app/test_module_browser.py, which the record does not cite. Smallest fix: release the GIL around the call, set gil_release true, and cite tests/app/test_module_browser.py::test_python_module_widgets_through_racks_browser_cables_history_and_reload.",
+      "verdict": "finding"
+    },
+    "method:rack::app::PortWidget::destroyTooltip()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "finding": "P1: no cited test calls PortWidget.draw. A grep for '.draw(' in tests/app finds no port. Rack's PortWidget::draw, which dims incompatible ports during a cable drag (src/app/PortWidget.cpp:376-386), is never checked. Smallest fix: add a render test of a Python SvgPort whose draw override calls super().draw(args), asserting the override ran and a port pixel is drawn.",
+      "verdict": "finding"
+    },
+    "method:rack::app::PortWidget::getPort()": {
+      "finding": "P2: the cited test only asserts port.get_port() is not None (tests/app/in_rack/test_controls.py:391). Swapping inputs and outputs, or using the wrong index, in native/bindings/app/app.cpp:384-389 would pass. Smallest fix: assert port.get_port() is module.outputs[0], and after type = INPUT that it is module.inputs[0].",
+      "verdict": "finding"
+    },
+    "method:rack::app::PortWidget::getPortInfo()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "finding": "P1: no cited test calls PortWidget.on_button or checks Rack's PortWidget::onButton: right-click opens the context menu, shift-left-click runs deleteTopCableAction (src/app/PortWidget.cpp:389-404). Clicks dispatched by Rack in test_controls.py and rp28a_controls.py check cables and drags, not onButton's effects. Smallest fix: in the module-browser scenario, call inp.on_button(ButtonEvent(button=LEFT, action=PRESS, mods=SHIFT)) on a cabled factory port and assert the cable is removed and undoable.",
+      "verdict": "finding"
+    },
+    "method:rack::app::PortWidget::onDragDrop(const rack::widget::Widget::DragDropEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "finding": "P1: the cited tests check only the RackPy guard: no cable outside the module widget (tests/app/in_rack/test_controls.py:408-433). Rack's own onDragEnd behaviour, removing incomplete cables and pushing the move or add history (src/app/PortWidget.cpp:509-537), is checked only in tests/app/test_module_browser.py, which the record does not cite. Smallest fix: cite tests/app/test_module_browser.py::test_python_module_widgets_through_racks_browser_cables_history_and_reload, ideally with a direct on_drag_end call asserting no incomplete cables remain.",
+      "verdict": "finding"
+    },
+    "method:rack::app::PortWidget::onDragEnter(const rack::widget::Widget::DragEnterEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::onDragLeave(const rack::widget::Widget::DragLeaveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "finding": "P1: the cited tests check only that a Python override runs and that the RackPy guard blocks Rack's cable behaviour outside the module widget (tests/app/in_rack/test_controls.py:408-433). Rack's onDragStart behaviour on a factory port, creating or grabbing a cable (src/app/PortWidget.cpp:418-506), is checked only in tests/app/test_module_browser.py (rp28b_browser.py:186-195,212-218), which the record does not cite. Smallest fix: cite that test.",
+      "verdict": "finding"
+    },
+    "method:rack::app::PortWidget::onEnter(const rack::widget::Widget::EnterEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::onLeave(const rack::widget::Widget::LeaveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::step()": {
+      "finding": "P2: the only call is port.step() in tests/app/in_rack/test_controls.py:376, with no assertion about the port, so a no-op binding would pass. Rack's PortWidget::step is Widget::step, which steps the children (src/app/PortWidget.cpp:371-373). Smallest fix: add a child widget with a step override to a PortWidget, call port.step() and assert the child was stepped.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackScrollWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::getGridOffset()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::getZoom()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::reset()": {
+      "finding": "P1: reset() is called in tests/app/in_rack/test_rack.py:80, 264 and 286, but nothing checks its result. Rack's reset sets offset = RACK_OFFSET*zoom - (30,30) (src/app/RackScrollWidget.cpp:40-42), so a no-op binding would pass. Smallest fix: set a far grid offset, call reset(), and assert get_grid_offset() is close to (-30/zoom)/RACK_GRID_SIZE.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackScrollWidget::setGridOffset(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::setZoom(float)": {
+      "finding": "P2: the binding refuses a non-finite zoom (native/bindings/app/rack.cpp:153-156; the test expects ValueError at tests/app/in_rack/test_rack.py:70-71). Rack handles one safely: setZoom clamps with math::clamp = fmax(fmin(x,4),1/4) (src/app/RackScrollWidget.cpp:64-69; include/math.hpp:106-108), so inf and NaN both become 4. The restriction is not justified as preventing a crash or undefined behaviour. Smallest fix: drop the zoom finiteness check, or document why it stays.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackScrollWidget::setZoom(float, rack::math::Vec)": {
+      "finding": "P2: same zoom restriction as setZoom(float): native/bindings/app/rack.cpp:158-163 refuses a non-finite zoom that Rack's clamp maps to 1/4..4 (src/app/RackScrollWidget.cpp:64-69). The pivot check is justified, since a non-finite pivot makes the offset NaN. Smallest fix: drop the zoom finiteness check (keep the pivot check), or document why it stays.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackScrollWidget::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::zoomToBound(rack::math::Rect)": {
+      "finding": "P1: (a) tests/app/in_rack/test_rack.py:74 calls zoom_to_bound(Rect(Vec(0,0),Vec(300,200))) and asserts nothing, so a no-op would pass. (b) The restriction and its stated reason are wrong. Rack returns quietly for a non-finite pos, and divides by size + 48 after bound.grow(24,24), not by the raw size (src/app/RackScrollWidget.cpp:79-87). Zero-size and non-finite-pos bounds are safe in Rack but raise ValueError here (rack.cpp:165-169; docs/reference/app.md 'Rack divides by it'). Smallest fix: assert get_zoom() and get_grid_offset() after the call, and limit the check to a finite size above -48 (or keep it, with a correct justification in notes and docs).",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackScrollWidget::zoomToModules()": {
+      "finding": "P1: tests/app/in_rack/test_rack.py:75 calls zoom_to_modules() and asserts nothing, so a no-op binding would pass. Rack's zoomToModules zooms to the module container's bounding box (src/app/RackScrollWidget.cpp:72-76). Smallest fix: with the probe module in the rack, assert that zoom and offset change, or match zoom_to_bound on the module container's children bounding box.",
+      "verdict": "finding"
+    },
+    "method_template:rack::app::ModuleWidget::getModule<type>()": {
+      "verdict": "accept"
+    },
+    "record:rack::app::ModuleWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::MultiLightWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::ParamWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::PortWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::RackScrollWidget": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/widgets-04",
+  "slice": "widgets-04"
+}

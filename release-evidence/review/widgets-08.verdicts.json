@@ -1,0 +1,415 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "constructor:rack::componentlibrary::ThemedScrew::ThemedScrew()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TinyLight::TinyLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TinySimpleLight::TinySimpleLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Trimpot::Trimpot()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVBezel::VCVBezel()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVBezelLatch::VCVBezelLatch()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVBezelLight::VCVBezelLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVButton::VCVButton()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVLatch::VCVLatch()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVLightBezel::VCVLightBezel<TLightBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVLightBezelLatch::VCVLightBezelLatch<TLightBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVLightLatch::VCVLightLatch<TLight>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVLightSlider::VCVLightSlider<TLightBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVSlider::VCVSlider()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVSliderLight::VCVSliderLight<TBase>()": {
+      "finding": "P1: neither cited test constructs a VCVSliderLight. test_light_templates_are_specializations only checks class identity (`cl.LEDSliderLight[cl.BlueLight] is cl.VCVSliderLight[cl.BlueLight]`, tests/app/in_rack/test_components.py ~line 183), and test_rectangle_lights_draw_with_racks_code (test_components.py:221-236) never uses it. Nothing checks this constructor's own behaviour: loading VCVSliderLight.svg through set_svg (src/rackpy/raw/_componentlibrary.py VCVSliderLight.__init__) and the box size that follows. manifest.json:442. Smallest fix: cite test_coloured_led_sliders_have_their_own_light (test_components.py:239), which already builds VCVSliderLight[...] lights, and add `assert light.sw.svg is not None and light.box.size == light.sw.box.size`.",
+      "verdict": "finding"
+    },
+    "field:rack::componentlibrary::BefacoBigKnob::bg": {
+      "finding": "P2: the binding (components_knobs.cpp RACKPY_CL_BG -> svgChild(&cl::BefacoBigKnob::bg)) is correct. But the only cited assertion sits behind `if hasattr(knob, \"bg\"):` (tests/app/in_rack/test_components.py:80-81), so a missing or misnamed bg binding passes silently. The docs (componentlibrary.md#cl-components) also don't say the field is read-only, which the notes state. Smallest fix: drop the hasattr guard (every name in KNOBS has bg) and say 'read-only' in the doc bullet.",
+      "verdict": "finding"
+    },
+    "field:rack::componentlibrary::BefacoTinyKnob::bg": {
+      "finding": "P2: the binding (svgChild(&cl::BefacoTinyKnob::bg), components_knobs.cpp) is correct. But the cited bg assertion is guarded by `if hasattr(knob, \"bg\"):` (tests/app/in_rack/test_components.py:80-81), so a missing binding would not fail, and the docs don't mention that it is read-only. Smallest fix: drop the hasattr guard and say 'read-only' in componentlibrary.md#cl-components.",
+      "verdict": "finding"
+    },
+    "field:rack::componentlibrary::Davies1900hKnob::bg": {
+      "finding": "P2: the binding is correct (svgChild(&cl::Davies1900hKnob::bg)). The cited test's check is guarded by `if hasattr(knob, \"bg\")` (tests/app/in_rack/test_components.py:80-81), so a missing binding passes. The unconditional check (`knob.bg.parent is knob.fb`) is in the uncited test_base_knob_constructors_build_racks_layers (test_components.py:117-129). Smallest fix: cite that test (or drop the guard), and note 'read-only' in the docs.",
+      "verdict": "finding"
+    },
+    "field:rack::componentlibrary::LightButton::light": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::LightSlider::light": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::Rogan::bg": {
+      "finding": "P2: the binding is correct (svgChild(&cl::Rogan::bg)). The cited assertion is behind `if hasattr(knob, \"bg\")` (tests/app/in_rack/test_components.py:80-81), so absence would pass. The unconditional check is in the uncited test_base_knob_constructors_build_racks_layers (test_components.py:117-129). Smallest fix: cite that test (or drop the guard), and note 'read-only' in the docs.",
+      "verdict": "finding"
+    },
+    "field:rack::componentlibrary::Rogan::fg": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::RoundKnob::bg": {
+      "finding": "P2: the binding is correct (svgChild(&cl::RoundKnob::bg)). The cited assertion is behind `if hasattr(knob, \"bg\")` (tests/app/in_rack/test_components.py:80-81), so absence would pass. The unconditional check is in the uncited test_base_knob_constructors_build_racks_layers (test_components.py:117-129). Smallest fix: cite that test (or drop the guard), and note 'read-only' in the docs.",
+      "verdict": "finding"
+    },
+    "field:rack::componentlibrary::SegmentDisplay::lightsLen": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::SegmentDisplay::margin": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::SegmentDisplay::vertical": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::SynthTechAlco::bg": {
+      "finding": "P2: the binding is correct (svgChild(&cl::SynthTechAlco::bg)). The only cited assertion is guarded by `if hasattr(knob, \"bg\")` (tests/app/in_rack/test_components.py:80-81), so a missing binding passes silently, and the docs don't say it is read-only. Smallest fix: drop the hasattr guard and add 'read-only' in componentlibrary.md#cl-components.",
+      "verdict": "finding"
+    },
+    "field:rack::componentlibrary::TSvgLight::fb": {
+      "finding": "P2: the mapping is faithful (_componentlibrary.py TSvgLight.__init__ creates a FramebufferWidget child and puts sw inside it, as Rack does). But no cited test reads `.fb` on a light. test_light_templates_are_specializations only checks `lamp.sw.svg` and the box size (test_components.py:153-193), so fb is exercised only indirectly through set_svg. manifest.json:805. Smallest fix: add `assert lamp.fb.parent is lamp and lamp.sw.parent is lamp.fb and lamp.fb.box.size == lamp.sw.box.size`.",
+      "verdict": "finding"
+    },
+    "field:rack::componentlibrary::TSvgLight::sw": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::Trimpot::bg": {
+      "finding": "P2: the binding is correct (svgChild(&cl::Trimpot::bg)). The only cited assertion is guarded by `if hasattr(knob, \"bg\")` (tests/app/in_rack/test_components.py:80-81), so a missing binding passes silently, and the docs don't say it is read-only. Smallest fix: drop the hasattr guard and add 'read-only' in componentlibrary.md#cl-components.",
+      "verdict": "finding"
+    },
+    "field:rack::componentlibrary::VCVLightBezel::light": {
+      "verdict": "accept"
+    },
+    "method:rack::componentlibrary::LightButton::getLight()": {
+      "verdict": "accept"
+    },
+    "method:rack::componentlibrary::LightSlider::getLight()": {
+      "verdict": "accept"
+    },
+    "method:rack::componentlibrary::LightSlider::step()": {
+      "finding": "P2: the implementation and test are fine (_componentlibrary.py LightSlider.step mirrors Rack; test_light_sliders_and_buttons asserts the light's centre x). The record metadata and docs are off. (1) `callback` is null (manifest.json:2028), but this is a Python override that Rack's UI step calls through the widget trampoline, and Widget::step is recorded as callback \"ui\" (manifest.json:2777). (2) The cited docs (componentlibrary.md#cl-templates) never describe step: the light following the handle centre. Smallest fix: set callback to \"ui\" and add one sentence on step to the cl-templates section.",
+      "verdict": "finding"
+    },
+    "method:rack::componentlibrary::RectangleLight::drawBackground(const rack::widget::Widget::DrawArgs &)": {
+      "finding": "P2: the Python body matches Rack's RectangleLight::drawBackground and is dispatched by app.cpp:214. Two problems remain. (1) `callback` is null (manifest.json:2029), though Rack's UI draw calls this Python function; LightWidget::drawBackground is recorded as callback \"ui\" (manifest.json:1719). (2) test_rectangle_lights_draw_with_racks_code samples pixel (5,3) of a 10x6 light (test_components.py:221-228). Rack's default circular LightWidget::drawBackground (radius 3 centred at (3,3), src/app/LightWidget.cpp:30-33) also covers that pixel up to anti-aliasing, so the test only tells rectangle from circle by a 0.05 px AA margin. Smallest fix: set callback \"ui\" and also assert a corner pixel such as (9,0) or (9,5).",
+      "verdict": "finding"
+    },
+    "method:rack::componentlibrary::RectangleLight::drawLight(const rack::widget::Widget::DrawArgs &)": {
+      "finding": "P2: the Python body matches Rack's RectangleLight::drawLight and is dispatched by app.cpp:218. Two problems remain. (1) `callback` is null (manifest.json:2030), though LightWidget::drawLight is recorded as \"ui\" (manifest.json:1722) and this is the same UI-thread Python dispatch. (2) The layer-1 check samples pixel (5,3) (test_components.py:229-236), which also lies within Rack's default circle of radius 3 at (3,3) (src/app/LightWidget.cpp:50-58). The test therefore does not deliberately prove rectangular drawing. Smallest fix: set callback \"ui\" and assert a pixel outside the inscribed circle, such as (9,3).",
+      "verdict": "finding"
+    },
+    "method:rack::componentlibrary::SegmentDisplay::draw(const rack::widget::Widget::DrawArgs &)": {
+      "finding": "P1: the binding is correct (behavior.hpp:51-62 calls cl::SegmentDisplay::draw). But the cited assertion `pixel(image, 0, 0)[:3] == (0, 0, 0)` (tests/app/in_rack/test_components.py ~line 299) cannot fail: Rack's FramebufferWidget clears to transparent black (src/widget/FramebufferWidget.cpp:296, glClearColor(0,0,0,0)), so an undrawn background also gives RGB (0,0,0). The cited docs (componentlibrary.md#cl-components) also don't mention draw or the black background. Smallest fix: assert `pixel(image, 0, 0) == (0, 0, 0, 255)`, and add 'draw() paints Rack's black background, then the segments' to the SegmentDisplay bullet.",
+      "verdict": "finding"
+    },
+    "method:rack::componentlibrary::TSvgLight::setSvg(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::componentlibrary::VCVLightBezel::getLight()": {
+      "verdict": "accept"
+    },
+    "method_template:rack::componentlibrary::SegmentDisplay::setLights<type>(rack::engine::Module *, int, int)": {
+      "finding": "P2: _set_lights (src/rackpy/raw/_componentlibrary.py) is a line-for-line, faithful Python version of Rack's setLights<TLightBase> (componentlibrary.hpp SegmentDisplay::setLights). But test_segment_display (tests/app/in_rack/test_components.py:287-300) checks only the count, type, module and first_light_id. It never checks the reimplemented segment geometry (pos/size from margin and r) or the vertical branch, so a geometry error would not fail any test. Smallest fix: assert lights[i].box.pos.x == pytest.approx(i/3*(30-m)+m) and size.x == pytest.approx((30-m)/3-m), then repeat with display.vertical = True.",
+      "verdict": "finding"
+    },
+    "record:rack::componentlibrary::AudioButton_ADAT": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::AudioButton_USB_B": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::BefacoBigKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::BefacoPush": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::BefacoSlidePot": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::BefacoSwitch": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::BefacoTinyKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::CKD6": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::CKSS": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::CKSSThree": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::CKSSThreeHorizontal": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::CL1362Port": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::DarkPJ301MPort": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Davies1900hBlackKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Davies1900hKnob": {
+      "finding": "P2: the notes (manifest.json:2933) say 'its constructor loads Rack's installed artwork', but Rack's Davies1900hKnob() only sets the angles and adds an empty bg (componentlibrary.hpp). RackPy's own test_base_knob_constructors_build_racks_layers asserts `knob.bg.svg is None` (tests/app/in_rack/test_components.py:117-129), and that test is the one that builds this class directly, yet it is not cited. Smallest fix: correct the note to say it sets Rack's angles and an empty bg layer, and cite test_base_knob_constructors_build_racks_layers.",
+      "verdict": "finding"
+    },
+    "record:rack::componentlibrary::Davies1900hLargeBlackKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Davies1900hLargeRedKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Davies1900hLargeWhiteKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Davies1900hRedKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Davies1900hWhiteKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::LEDSliderBlue": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::LEDSliderGreen": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::LEDSliderRed": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::LEDSliderWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::LEDSliderYellow": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::MidiButton_MIDI_DIN": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::NKK": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::PB61303": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::PJ301MPort": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::PJ3410Port": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan": {
+      "finding": "P2: the notes (manifest.json:2950) say 'its constructor loads Rack's installed artwork', but Rack's Rogan() only sets the angles and adds empty bg/fg layers (componentlibrary.hpp). test_base_knob_constructors_build_racks_layers asserts `bg.svg is None` and `fg.svg is None` (tests/app/in_rack/test_components.py:117-129), and that test, which is the one that builds Rogan directly, is not cited. Smallest fix: correct the note and cite test_base_knob_constructors_build_racks_layers.",
+      "verdict": "finding"
+    },
+    "record:rack::componentlibrary::Rogan1PBlue": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan1PGreen": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan1PRed": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan1PSBlue": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan1PSGreen": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan1PSRed": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan1PSWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan1PWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PBlue": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PGreen": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PRed": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PSBlue": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PSGreen": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PSRed": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PSWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2SGray": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PBlue": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PGreen": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PRed": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PSBlue": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PSGreen": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PSRed": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PSWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan5PSGray": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan6PSWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::RoundBigBlackKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::RoundBlackKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::RoundBlackSnapKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::RoundHugeBlackKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::RoundKnob": {
+      "finding": "P2: the notes (manifest.json:2982) say 'its constructor loads Rack's installed artwork', but Rack's RoundKnob() only sets the angles and adds an empty bg (componentlibrary.hpp). test_base_knob_constructors_build_racks_layers asserts `knob.bg.svg is None` (tests/app/in_rack/test_components.py:117-129), and that test, which is the one that builds RoundKnob directly, is not cited. Smallest fix: correct the note and cite test_base_knob_constructors_build_racks_layers.",
+      "verdict": "finding"
+    },
+    "record:rack::componentlibrary::RoundLargeBlackKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::RoundSmallBlackKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::ScrewBlack": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::ScrewSilver": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::SegmentDisplay": {
+      "finding": "P2: the notes (manifest.json:2987) say 'its constructor loads Rack's installed artwork', but Rack's SegmentDisplay loads no artwork. It is a plain Widget with the fields lightsLen, vertical and margin (componentlibrary.hpp SegmentDisplay), bound as variant<SD> in components_ports.cpp. The binding and test_segment_display are otherwise fine. Smallest fix: change the note to 'Rack's own class, subclassable from Python'.",
+      "verdict": "finding"
+    },
+    "record:rack::componentlibrary::SynthTechAlco": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::TL1105": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::ThemedPJ301MPort": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::ThemedScrew": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Trimpot": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::VCVBezel": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::VCVBezelLatch": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::VCVButton": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::VCVLatch": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::VCVSlider": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_BLACK": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_BLACK_TRANSPARENT": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_BLUE": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_CYAN": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_DARK_GRAY": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_GREEN": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_LIGHT_GRAY": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_ORANGE": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_PURPLE": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_RED": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_WHITE": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_YELLOW": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/widgets-08",
+  "slice": "widgets-08"
+}

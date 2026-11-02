@@ -86,7 +86,18 @@ exists only in Python. Returning something other than a `Menu` is logged and
 gives Rack no menu. `Menu.set_child_menu(menu)` does the same by hand. It
 hands the menu to Rack, which deletes the previous child menu. `child_menu`
 and `active_entry` are read-only. So is `parent_menu`, which Rack 2.6.6 never
-sets. `ColorDotMenuItem` adds a `color`.
+sets. Rack never clears `active_entry` or `child_menu` when those widgets go,
+so each is given only while it is still where Rack keeps it, else `None`; and
+since a menu removes its child menu when it is deleted, a child menu leaves
+only through `set_child_menu`: removing it or `request_delete()` is refused.
+`ColorDotMenuItem` adds a `color`.
+
+Some of Rack's UI code asserts or reads a parent, and RackPy refuses those
+calls (`OwnershipError`) instead of letting Rack stop: `step()` of a `Menu` or
+`MenuOverlay` without a parent, a `MenuItem`'s `on_enter` in a menu without a
+parent (Rack opens the child menu there), and a `Scrollbar`'s `draw`,
+`on_button` and `on_drag_move` outside a `ScrollWidget`. When Rack itself draws
+such a scrollbar, the drawing is skipped and reported.
 
 (ui-menu-helpers)=
 ## Menu helpers

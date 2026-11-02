@@ -121,8 +121,17 @@ struct PyAudioPort : a::Port {
 	}
 
 	// The process callbacks: native counting on Rack's audio thread; a Python override only on a Python-driven device.
-	size_t inputSpan(int stride, int count) const { return count > 0 ? size_t(count) * stride - inputOffset : 0; }
-	size_t outputSpan(int stride, int count) const { return count > 0 ? size_t(count) * stride - outputOffset : 0; }
+	// Rack passes the device's buffer plus the port's offset (audio.cpp:41-49), so a port reads count * stride - offset
+	// floats from there. A negative offset (from JSON: Rack's fromJson takes any) starts before the buffer and one past
+	// its end leaves nothing: Python then gets an empty buffer rather than memory outside it (RP-42).
+	static size_t span(int stride, int count, int offset) {
+		if (count <= 0 || stride <= 0 || offset < 0)
+			return 0;
+		size_t total = size_t(count) * size_t(stride);
+		return size_t(offset) >= total ? 0 : total - size_t(offset);
+	}
+	size_t inputSpan(int stride, int count) const { return span(stride, count, inputOffset); }
+	size_t outputSpan(int stride, int count) const { return span(stride, count, outputOffset); }
 	void processBuffer(const float* input, int inputStride, float* output, int outputStride, int count) override {
 		buffers.fetch_add(1, std::memory_order_relaxed);
 		frames.fetch_add(static_cast<uint64_t>(count), std::memory_order_relaxed);
@@ -874,9 +883,17 @@ void bindAudio(py::module_ mod) {
 			return new PyAudioPort;
 		}))
 		.def_property("input_offset", [](a::Port& p) { return checked(p).inputOffset; },
-			[](a::Port& p, int v) { checked(p).inputOffset = v; }, "Rack's: the device's first input channel for this port.")
+			[](a::Port& p, int v) {
+				if (v < 0)  // Rack adds it to the device's buffer: a negative one points before it (RP-42)
+					throw py::value_error("input_offset is not negative");
+				checked(p).inputOffset = v;
+			}, "Rack's: the device's first input channel for this port; not negative.")
 		.def_property("output_offset", [](a::Port& p) { return checked(p).outputOffset; },
-			[](a::Port& p, int v) { checked(p).outputOffset = v; })
+			[](a::Port& p, int v) {
+				if (v < 0)
+					throw py::value_error("output_offset is not negative");
+				checked(p).outputOffset = v;
+			}, "Rack's: the device's first output channel for this port; not negative.")
 		.def_property("max_inputs", [](a::Port& p) { return checked(p).maxInputs; },
 			[](a::Port& p, int v) { unbridged(p).maxInputs = v; },
 			"Rack's: the most input channels this port processes. Fixed while the port is a module's audio port.")

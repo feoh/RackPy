@@ -36,7 +36,9 @@ void bindBehavior(py::classh<Base, Options...>& cls) {
 		checkTraversal(owner);
 		checkStep(owner);
 		CallbackGuard guard;
-		native<Base>(self).Base::step();
+		auto& w = native<Base>(self);
+		checkNativeStep(w);
+		w.Base::step();
 	})
 	.def("get_children_bounding_box", [](py::object self) { checkTraversal(state(self)); return native<Base>(self).Base::getChildrenBoundingBox(); })
 	.def("get_visible_children_bounding_box", [](py::object self) { checkTraversal(state(self)); return native<Base>(self).Base::getVisibleChildrenBoundingBox(); })
@@ -86,6 +88,7 @@ void bindBehavior(py::classh<Base, Options...>& cls) {
 			if (owner->drawing) throw runtime::Ownership("cannot change a graphics context during drawing"); \
 			++owner->graphicsGeneration; \
 		} \
+		checkNativeEvent<Base, W::E>(w); \
 		CallbackGuard guard; \
 		w.Base::method(e); \
 		captureEventTarget(e.context); \
