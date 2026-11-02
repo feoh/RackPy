@@ -172,7 +172,7 @@ def script() -> Frames:
     # A new graphics context, as when a host recreates its window: fonts load again, the cache renders again.
     before = renders[0]
     _testing.recreate_graphics_context()
-    yield from wait(6)
+    RESULT["recreated_wait_frames"] = yield from until(lambda: renders[0] > before)
     RESULT["recreated"] = {"renders": renders[0] - before, "text_pixels": lit(meter_widget.readout, TEXT)}
 
     # Deleting the Meter while it draws, then undoing: nothing crashes, and it draws again.

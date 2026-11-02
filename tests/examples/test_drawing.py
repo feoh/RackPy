@@ -167,7 +167,8 @@ def test_the_examples_over_racks_real_frames(
     assert result["idle_renders"] == 0
     assert result["range_render_frames"] is not None and result["range_renders"] == 1
     # A new graphics context renders the cache again and reloads the font.
-    assert result["recreated"]["renders"] >= 1 and result["recreated"]["text_pixels"] > 50
+    assert result["recreated"]["renders"] >= 1, result["recreated"]
+    assert result["recreated"]["text_pixels"] > 50, result["recreated"]
     assert result["deleted"] is True and result["undone_text_pixels"] > 50
     assert result["preview"][0] > 0
 
