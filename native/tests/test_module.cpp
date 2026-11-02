@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // The construction state machine, without Python or a fake Rack host.
+#include <cmath>
 #include "../module/module.hpp"
 
 #include <cassert>
@@ -146,7 +147,10 @@ int main() {
 			});
 		});
 		assert(m.getParamQuantity(0) == old && token->alive() && m.params[0].value == 0.f);
-		refuses<std::invalid_argument>([&] { c.configQuantity(0, 1, 1, 1, "", "", 0, 1, 0); });
+		refuses<std::invalid_argument>([&] { c.configQuantity(0, NAN, 1, 0, "", "", 0, 1, 0); });  // RP-42: only NaN
+		refuses<std::invalid_argument>([&] { c.configQuantity(0, 0, INFINITY, 0, "", "", 0, 1, 0, 1); });  // a switch
+		// This difference is below 2^31 in double but rounds to 2^31 in Rack's float subtraction.
+		refuses<std::invalid_argument>([&] { c.configQuantity(0, -64.f, 2147483520.f, 0, "", "", 0, 1, 0, 1); });
 		assert(m.getParamQuantity(0) == old && token->alive());
 		c.configQuantity(0, -1, 1, 0.5f, "Pitch", " V", 0, 2, 3);
 		assert(!token->alive() && m.params[0].value == 0.5f);
@@ -238,7 +242,7 @@ int main() {
 		auto& m = c.get();
 		auto* builtin = m.getParamQuantity(0);
 		auto make = [&] { return std::make_unique<RetiringSwitch>(&log); };
-		refuses<std::invalid_argument>([&] { c.configQuantity(0, 1, 1, 1, "", "", 0, 1, 0, 0, {}, make); });
+		refuses<std::invalid_argument>([&] { c.configQuantity(0, 0, 1, NAN, "", "", 0, 1, 0, 0, {}, make); });
 		refuses<std::runtime_error>([&] {
 			c.configQuantity(0, 0, 1, 0, "", "", 0, 1, 0, 0, {}, []() -> std::unique_ptr<rack::engine::ParamQuantity> {
 				throw std::runtime_error("factory failed");

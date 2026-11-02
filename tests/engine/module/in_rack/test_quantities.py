@@ -213,20 +213,19 @@ def test_quantity_validation_and_replacement_rollback() -> None:
             m.config_param(0, 0, 1, 0)
         m.config(2, 0, 0)
         old = as_view(m.get_param_quantity(0))
-        for bounds in (
-            (1, 1, 1),
-            (2, 1, 1),
-            (0, 1, -1),
-            (0, 1, 2),
-            (math.nan, 1, 0),
-            (0, math.inf, 0),
-            (0, 1, math.nan),
-        ):
-            with pytest.raises(ValueError):
+        # NaN is refused (every comparison with it is false; Rack's switch widgets convert value - min to an int).
+        for bounds in ((math.nan, 1, 0), (0, math.nan, 0), (0, 1, math.nan)):
+            with pytest.raises(ValueError, match="NaN"):
                 m.config_param(0, *bounds)
             assert old.alive and old is m.param_quantities[0] and m.params[0].value == 0
-        for coefficients in ((1, 1, 0), (-1, 1, 0), (0, math.inf, 0), (0, 1, math.nan)):
-            with pytest.raises(ValueError):
+        # A switch's value - min must fit an int, for the same conversions.
+        # The last difference is less than 2**31 in double but rounds to 2**31 in Rack's float arithmetic.
+        for bounds in ((0, math.inf, 0), (0, 3e9, 0), (0, 1, 5e9), (-64, 2147483520, 0)):
+            with pytest.raises(ValueError, match="2\\*\\*31"):
+                m.config_switch(0, *bounds)
+            assert old.alive and old is m.param_quantities[0]
+        for coefficients in ((0, math.nan, 0), (0, 1, math.nan), (math.nan, 1, 0)):
+            with pytest.raises(ValueError, match="NaN"):
                 m.config_param(
                     0,
                     0,
@@ -247,6 +246,18 @@ def test_quantity_validation_and_replacement_rollback() -> None:
         with pytest.raises(TypeError):
             m.config_switch(0, 0, 1, 0, labels=[object()])  # type: ignore[list-item]
         assert old.alive and old is m.param_quantities[0]
+        # Everything else Rack takes, as Rack does (RP-42: these were refused): an unbounded quantity, equal and
+        # inverted bounds, a default outside them, display bases of 1 and -1, and a one-position switch.
+        free = as_view(m.config_param(1, -math.inf, math.inf, 3))
+        assert not free.is_bounded() and m.params[1].value == 3
+        for low, high, default in ((1.0, 1.0, 1.0), (2.0, 1.0, 1.0), (0.0, 1.0, 2.0)):
+            q = as_view(m.config_param(1, low, high, default))
+            assert (q.min_value, q.max_value, q.default_value) == (low, high, default)
+            assert m.params[1].value == default
+        for base in (1, -1):
+            assert as_view(m.config_param(1, 0, 1, 0, display_base=base)).display_base == base
+        only = m.config_switch(1, 0, 0, 0, "Mode", ["Only"])
+        assert isinstance(only, SwitchQuantityView) and only.labels.tolist() == ["Only"]
         # Template/class arguments are not silently accepted and ignored.
         with pytest.raises(TypeError):
             m.config_param(0, 0, 1, 0, quantity_class=object)  # type: ignore[call-overload]
@@ -256,6 +267,8 @@ def test_quantity_validation_and_replacement_rollback() -> None:
         assert m.params[0].value == 0
 
     m = Module.create(build)
+    if _rackpy_host.bound_context_generation() is not None:
+        assert m.param_quantities[1].get_display_value_string() == "Only"
     late_actions: list[Callable[[], Any]] = [
         lambda: m.config_param(0, 0, 1, 0),
         lambda: m.config_switch(0, 0, 1, 0),

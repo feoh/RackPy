@@ -311,10 +311,14 @@ All three helpers are constructor-only. Each writes the native Param's default,
 prepares replacements before retiring old quantities, and invalidates only the
 replaced quantity view, not the Param component itself.
 
-IDs are checked. Helper bounds must be finite and strictly increasing, with a
-finite default inside the range. Display coefficients must be finite; bases
-1 and -1 are rejected because they make the inverse undefined. These checked
-helpers do not cover arbitrary unbounded/raw C++ configuration semantics.
+IDs are checked. Otherwise the helpers take what Rack's take: infinite bounds
+(an unbounded quantity), equal or inverted bounds, a default outside them, and
+any display coefficients (a base of 1 or -1 gives infinite display values, as
+in C++). NaN is refused in the bounds, the default and the coefficients: every
+comparison with it is false, and Rack's switch widgets and param menu convert
+`value - min` to an int, which is undefined for NaN. For the same conversion, a
+switch's (`config_switch`, `config_button`) bounds and default must be finite
+and less than 2**31 apart.
 
 `get_param_quantity(index)` and the fixed-size `param_quantities` collection
 return stable `ParamQuantityView` adapters (or `SwitchQuantityView` for switches

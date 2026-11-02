@@ -234,7 +234,7 @@ def test_class_constructor_and_bounds_errors_leave_slot_unchanged() -> None:
         with pytest.raises(TypeError, match="exactly quantity_type"):
             m.config_param(0, 0, 1, 0, quantity_type=Foreign)
         # Rack's arguments are validated before the class is constructed.
-        for args in ((1, 1, 1), (0, 1, 2), (float("nan"), 1, 0)):
+        for args in ((float("nan"), 1, 0), (0, 1, float("nan"))):
             with pytest.raises(ValueError):
                 m.config_param(0, *args, quantity_type=Counting)
         for i in (-1, 4):

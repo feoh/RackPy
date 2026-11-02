@@ -479,10 +479,22 @@ struct Construction {
 		requireConstruction();
 		Module& m = get();
 		index(id, std::min(m.params.size(), m.paramQuantities.size()));
-		if (!std::isfinite(min) || !std::isfinite(max) || !(min < max) || !std::isfinite(def) || def < min || def > max)
-			throw std::invalid_argument("quantity bounds must be finite and increasing, with default inside the range");
-		if (!std::isfinite(base) || !std::isfinite(multiplier) || !std::isfinite(offset) || base == 1.f || base == -1.f)
-			throw std::invalid_argument("display coefficients must be finite; base cannot be 1 or -1");
+		// Rack's configParam takes any bounds (an unbounded quantity has infinite ones; equal and inverted ones and a
+		// default outside them are its caller's business) and any display coefficients, and only asserts the ID
+		// (RP-42: RackPy refused all of these, which Rack handles). Two things are refused:
+		// - NaN: every comparison with it is false, so Rack's clamps keep it, and its switch widgets and param menu
+		//   convert value - min to an int, which is undefined for NaN;
+		// - for a switch, bounds and a default that are not finite or more than 2^31 apart: SwitchQuantity, SvgSwitch
+		//   and the param menu convert value - min to an int, which is undefined beyond int's range.
+		if (std::isnan(min) || std::isnan(max) || std::isnan(def) || std::isnan(base) || std::isnan(multiplier) ||
+			std::isnan(offset))
+			throw std::invalid_argument("quantity bounds, default and display coefficients must not be NaN");
+		// Rack subtracts floats before converting to int. Check that rounded result, not a double-precision
+		// difference which can be just below 2^31 even when the float subtraction rounds up to 2^31.
+		auto inInt = [](float a, float b) { return std::isfinite(a) && std::isfinite(b) && std::fabs(a - b) < 2147483648.f; };
+		if (kind && !(inInt(min, max) && inInt(def, min) && inInt(def, max)))
+			throw std::invalid_argument("a switch's bounds and default must be finite and less than 2**31 apart: Rack "
+				"converts value - min to an int");
 		auto prepare = [&](rack::engine::ParamQuantity& q) {
 			q.module = &m;
 			q.paramId = id;
