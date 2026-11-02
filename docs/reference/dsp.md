@@ -449,7 +449,12 @@ Rack trusts its inputs here; RackPy refuses what it would get wrong:
   channel, so with fewer than 16 channels a message on a higher channel
   raises `ValueError`;
 - a timing clock message while `clock_division` is 0, which Rack would
-  divide by (`clock_division` itself may be 0);
+  divide by (`clock_division` itself may be 0). Each check follows Rack's own
+  dispatch: `process_cc` reads only the note byte (CC 1 is the mod wheel,
+  stored by MIDI channel in MPE) and `process_system` only the channel nibble
+  (0x8 is the clock), whatever the status byte;
+- a `rotate_index` other than -1 (Rack's value after `panic()`) or a channel
+  below `MAX_CHANNELS`, which Rack indexes its arrays with;
 - in `from_json`, a `channels` above `MAX_CHANNELS`, or a `monoMode` or
   `polyMode` outside its enum, which would make Rack index past its arrays or
   build an invalid enum value. Patch JSON is untrusted.

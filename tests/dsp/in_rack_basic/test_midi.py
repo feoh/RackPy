@@ -374,6 +374,8 @@ def test_midi_parser_refuses_what_rack_would_get_wrong() -> None:
         p.release_note(60, 9, 0)
     with pytest.raises(ValueError, match="MIDI channel 9"):
         p.process_cc(message([0xB9, 0x01, 5]))  # the mod wheel, by MIDI channel
+    with pytest.raises(ValueError, match="MIDI channel 9"):
+        p.process_cc(message([0xA9, 0x01, 5]))  # Rack's processCC reads the note whatever the status (RP-42)
     on2 = midi.Message()
     on2.bytes = [0x92, 60, 100]
     p.process_message(on2)
@@ -386,6 +388,14 @@ def test_midi_parser_refuses_what_rack_would_get_wrong() -> None:
         p.process_message(clock)
     with pytest.raises(ValueError, match="divide"):
         p.process_system(clock)
+    with pytest.raises(ValueError, match="divide"):
+        p.process_system(message([0x98, 60, 100]))  # Rack's processSystem reads the channel nibble alone (RP-42)
+    p.process_cc(clock)  # processCC never divides: a clock is no CC it knows
+    # Rack keeps rotate_index at -1 or a channel, and indexes its arrays with it (RP-42).
+    p.rotate_index = -1
+    for bad in (-2, len(p.gates)):
+        with pytest.raises(ValueError, match="rotate_index"):
+            p.rotate_index = bad
     # Patch JSON is untrusted.
     for invalid in ({"channels": 99}, {"monoMode": 9}, {"polyMode": -1}):
         with pytest.raises(ValueError):

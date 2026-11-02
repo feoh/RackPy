@@ -234,6 +234,17 @@ struct ParserGuards {
 		if (msg.getStatus() == 0xf && msg.getChannel() == 0x8 && p.clockDivision == 0)
 			throw py::value_error(std::string(what) + ": clock_division is 0, and Rack would divide by it");
 	}
+	/** processCC switches on the note alone (whatever the status): CC 1 in polyphonic MPE writes mods[channel] (RP-42). */
+	static void checkCC(const P& p, const Message& msg) {
+		if (p.channels > 1 && p.polyMode == P::MPE_MODE && msg.getNote() == 0x01 && msg.getChannel() >= N)
+			throw py::value_error("process_cc: in MPE mode Rack writes its " + std::to_string(N) +
+				"-channel mod wheels at the message's MIDI channel " + std::to_string(msg.getChannel()));
+	}
+	/** processSystem switches on the channel nibble alone: 0x8, a timing clock, divides by clockDivision (RP-42). */
+	static void checkSystem(const P& p, const Message& msg) {
+		if (msg.getChannel() == 0x8 && p.clockDivision == 0)
+			throw py::value_error("process_system: clock_division is 0, and Rack would divide by it");
+	}
 	static void mpeChannel(const P& p, int channel, const char* what) {
 		if (p.channels > 1 && p.polyMode == P::MPE_MODE && channel >= N)
 			throw py::index_error(std::string(what) + ": in MPE mode the channel must be below " + std::to_string(N));
@@ -313,7 +324,14 @@ py::object bindParser(py::module_ scope, py::object monoModes, py::object polyMo
 				p.heldNotes = std::move(held);
 			}, "A copy, as a list of ints; assigning replaces it.")
 		.def_property("rotate_index", [](const P& p) { return (int) p.rotateIndex; },
-			[](P& p, const py::int_& v) { p.rotateIndex = integer<int8_t>(v, "rotate_index", "int8_t"); })
+			[](P& p, const py::int_& v) {
+				int8_t index = integer<int8_t>(v, "rotate_index", "int8_t");
+				// Rack keeps it at -1 (after panic) or a channel below `channels`, and assignChannel indexes the channel
+				// arrays with it: another value read and wrote outside them (RP-42).
+				if (index < -1 || index >= N)
+					throw py::value_error("rotate_index must be -1 to " + std::to_string(N - 1));
+				p.rotateIndex = index;
+			}, "Rack's rotation position: -1 (after panic) to MAX_CHANNELS - 1.")
 		.def_property_readonly("pws", [](py::object self) { return view(self, self.cast<P&>().pws, N); }, "Pitch wheels, -8192 to 8191.")
 		.def_property_readonly("mods", [](py::object self) { return view(self, self.cast<P&>().mods, N); }, "Mod wheels, 0 to 127.")
 		.def_property_readonly("pw_filters", [](py::object self) { return view(self, self.cast<P&>().pwFilters, N); })
@@ -333,11 +351,11 @@ py::object bindParser(py::module_ scope, py::object monoModes, py::object polyMo
 			c::member<&P::processMessage>(p, msg);
 		}, py::arg("msg"))
 		.def("process_cc", [](P& p, const Message& msg) {
-			Guard::check(p, msg, "process_cc");
+			Guard::checkCC(p, msg);
 			c::member<&P::processCC>(p, msg);
 		}, py::arg("msg"))
 		.def("process_system", [](P& p, const Message& msg) {
-			Guard::check(p, msg, "process_system");
+			Guard::checkSystem(p, msg);
 			c::member<&P::processSystem>(p, msg);
 		}, py::arg("msg"))
 		.def("assign_channel", [](P& p, const py::int_& note) { return c::member<&P::assignChannel>(p, integer<uint8_t>(note, "assign_channel", "uint8_t")); },
