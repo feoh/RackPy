@@ -89,6 +89,26 @@ def test_rack_draws_each_ui_widget_into_pixels() -> None:
             widget.close()
 
 
+def test_menu_and_scroll_widget_draw_their_owned_entries_and_scrollbars() -> None:
+    menu, entry = ui.Menu(), ui.MenuItem()
+    scroll = ui.ScrollWidget()
+    menu.box = Rect(Vec(), Vec(100, 40))
+    entry.box = Rect(Vec(), Vec(80, 20))
+    entry.text = "Menu pixel"
+    menu.add_child(entry)
+    scroll.box = Rect(Vec(), Vec(50, 40))
+    content = w.Widget()
+    content.box = Rect(Vec(), Vec(200, 300))
+    scroll.container.add_child(content)
+    try:
+        assert drawn(rendered(menu, Vec(100, 40)))  # Menu::draw delegates to its Rack-owned entry
+        scroll.step()
+        assert drawn(rendered(scroll, Vec(50, 40)))  # its valid-parent Scrollbar::draw paints the handle
+    finally:
+        menu.close()
+        scroll.close()
+
+
 def test_the_colour_dot_and_the_overlay_background_are_what_racks_draw_calls_paint() -> None:
     dot, overlay = ui.ColorDotMenuItem(), ui.MenuOverlay()
     try:

@@ -51,6 +51,11 @@ change them.
 methods: `get_text()`, `set_text()`, `select_all()`, `get_selected_text()`,
 `insert_text()`, the clipboard methods and the cursor movements. `cursor` and
 `selection` are clamped to the text, because Rack indexes the text with them.
+The raw `text` property directly replaces Rack's string; it does not move or
+clamp `cursor` or `selection`. Shortening the string can therefore leave either
+index past the end, which Rack's later editing and drawing code assumes cannot
+happen. After a raw write that shortens text, set both indices to valid
+positions (or use `set_text()`, which applies Rack's text-change behavior).
 `prev_field` and `next_field`, where Tab moves the focus, take a widget RackPy
 manages, or `None`; if that widget is deleted, the field becomes `None` so
 Rack never follows a dangling pointer. Python may override
@@ -92,7 +97,14 @@ still exists. Rack never clears `active_entry` or `child_menu` when those widget
 so each is given only while it is still where Rack keeps it, else `None`; and
 since a menu removes its child menu when it is deleted, a child menu leaves
 only through `set_child_menu`: removing it or `request_delete()` is refused.
-`ColorDotMenuItem` adds a `color`.
+`MenuItem.text` is its displayed label; `right_text` is the optional right-aligned
+text shown beside it. `disabled` defaults to false. A disabled item does not
+perform its action when activated. `MenuLabel.text` is the displayed label for a
+non-actionable heading. `ColorDotMenuItem` adds a `color`.
+
+`MenuOverlay.bg_color` is the overlay's fill color. Rack draws a filled box over
+the overlay's bounds only when its alpha is greater than zero; the default
+transparent color draws no background.
 
 Some of Rack's UI code asserts or reads a parent, and RackPy refuses those
 calls (`OwnershipError`) instead of letting Rack stop: `step()` of a `Menu` or

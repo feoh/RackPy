@@ -40,8 +40,10 @@ belongs to Python. Each widget has exactly one native owner:
   children present when the loop starts. It has no `append` or `remove`:
   change the list with the methods above, which keep each child's single
   owner. `has_child(child)` checks direct membership, and `get_parent()`
-  returns the current parent or `None`. Once the parent is deleted the view
-  raises `StaleHandleError`; it does not keep the parent alive.
+  returns the current parent or `None`. The `parent` property is read-only;
+  change tree ownership only with the methods above, which preserve Rack's
+  ownership and dispatch semantics. Once the parent is deleted the view raises
+  `StaleHandleError`; it does not keep the parent alive.
 - `close()` deletes a detached widget and its subtree. Closing a widget that
   has a parent raises `OwnershipError`; remove it first.
 - When Rack deletes a widget (its parent is closed or cleared, or a parent's
