@@ -599,10 +599,11 @@ jobs:
           # The tests read Rack's UTF-8 files with Python's default encoding, which on Windows is the ANSI code
           # page unless Python's UTF-8 mode is on (inside Rack, RackPy turns it on itself).
           PYTHONUTF8: "1"
+          PYTHONUNBUFFERED: "1"  # show the current test in the live job log
         run: >
           uv run --frozen pytest -m "(unit or native or host) and not dist and not sanitizer and not stress and not inventory"
           ${WINDOWS_TESTS:+-k "$WINDOWS_TESTS"}
-          -v --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/win-x64.xml
+          -v -s -o faulthandler_timeout=120 --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/win-x64.xml
       - if: always()
         name: Collect Rack logs
         run: |
@@ -652,10 +653,11 @@ jobs:
           # (GLFW 65545). A test-only plugin lets Rack's window use Apple's software OpenGL instead, as Linux CI
           # renders with Mesa (tests/fixtures/macos-software-gl, RP-42). Drawing on a Mac's GPU stays an open gate.
           RACKPY_MACOS_SOFTWARE_GL: "1"
+          PYTHONUNBUFFERED: "1"  # show the current test in the live job log
         run: >
           uv run --frozen pytest -m "(unit or native or host) and not dist and not sanitizer and not stress and not inventory"
           ${MACOS_TESTS:+-k "$MACOS_TESTS"}
-          -v --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/${{ matrix.platform }}.xml
+          -v -s -o faulthandler_timeout=120 --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/${{ matrix.platform }}.xml
       - if: always()
         name: Collect Rack logs
         run: |
