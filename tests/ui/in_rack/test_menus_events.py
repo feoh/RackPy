@@ -72,6 +72,7 @@ class Pad(w.OpaqueWidget):
     def __init__(self) -> None:
         super().__init__()
         self.seen: list[tuple[str, Any]] = []
+        self.select_on_button = False
 
     def on_enter(self, event: Any) -> None:
         self.seen.append(("enter", None))
@@ -95,6 +96,10 @@ class Pad(w.OpaqueWidget):
 
     def on_button(self, event: Any) -> None:
         self.seen.append(("button", (event.button, event.action)))
+        if self.select_on_button:
+            context = raw.context_get()
+            assert context is not None and context.event is not None
+            context.event.set_selected_widget(self)
         super().on_button(event)
 
     def on_select(self, event: Any) -> None:
@@ -161,6 +166,12 @@ def test_rack_dispatches_input_to_python_widgets() -> None:
         assert not state.held_keys and same(state.hovered_widget, pad)
         state.set_hovered_widget(None)
         assert ("leave", None) in pad.seen
+        assert state.handle_hover(inside, Vec(1, 1))
+        pad.select_on_button = True
+        state.handle_button(inside, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0)
+        assert state.selected_widget is pad  # Rack permits setSelectedWidget from inside this Python callback
+        pad.select_on_button = False
+        state.set_selected_widget(None)
     finally:
         pad.remove_from_parent()
         pad.close()

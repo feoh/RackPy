@@ -14,12 +14,14 @@ follows Rack's renamed-plugin table) find any loaded plugin, or return `None`.
 While this plugin initializes, Rack has not finished loading it, so only
 `plugin_instance()` finds it.
 
-A `Plugin` has Rack's fields, read-only, from its `plugin.json`: `slug`,
-`name`, `version`, `license`, `brand`, `description`, `author`,
-`author_email`, `author_url`, `plugin_url`, `manual_url`, `source_url`,
-`donate_url`, `changelog_url`, plus `path` (its directory) and
-`modified_timestamp`. Rack reads them before `init()`, and plugin code has no
-reason to change them. `handle` is the plugin library's handle as an opaque
+A `Plugin` exposes Rack's `plugin.json` metadata fields: `slug`, `name`,
+`version`, `license`, `brand`, `description`, `author`, `author_email`,
+`author_url`, `plugin_url`, `manual_url`, `source_url`, `donate_url` and
+`changelog_url` are writable strings. `slug` can be changed on an isolated
+plugin only before it has models; Rack uses a loaded plugin's slug as its
+registered identity, so that setter raises `OwnershipError`. `path` (its
+directory) and `modified_timestamp` are read-only. `handle` is the plugin
+library's handle as an opaque
 `LibraryHandle`, compared by identity (never an address), or `None` for Core,
 which is part of Rack. `models` is a tuple snapshot; `get_model(slug)` and
 `get_brand()` are Rack's methods. `add_model(model)` is Rack's

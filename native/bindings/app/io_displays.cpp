@@ -55,6 +55,13 @@ void pin(rack::widget::Widget* widget, py::handle port) {
 	});
 }
 
+/** Replaces a widget's property/method port pin; menu pins use pin() because one menu can capture many ports. */
+void replaceWidgetPin(rack::widget::Widget* widget, py::handle port) {
+	pins.erase(std::remove_if(pins.begin(), pins.end(), [widget](const Pin& p) { return p.widget.get() == widget; }), pins.end());
+	if (!port.is_none())
+		pin(widget, port);
+}
+
 // Rack's headers leave these pointers uninitialized (Rack's own code always sets them before use), so the
 // widgets Python makes start with them null.
 template <class Base>
@@ -108,10 +115,11 @@ void audioPortField(Cls& cls) {
 			auto& w = native<T>(self);
 			if (port.is_none()) {
 				w.port = nullptr;
+				replaceWidgetPin(&w, port);
 				return;
 			}
 			w.port = &bindings::pythonAudioPort(port);
-			pin(&w, port);
+			replaceWidgetPin(&w, port);
 		}, "Rack's: the audio port it shows (one Python made), or None. RackPy keeps the port alive while the widget is.");
 }
 
@@ -124,10 +132,11 @@ void midiPortField(Cls& cls) {
 			auto& w = native<T>(self);
 			if (port.is_none()) {
 				w.port = nullptr;
+				replaceWidgetPin(&w, port);
 				return;
 			}
 			w.port = &bindings::pythonMidiPort(port);
-			pin(&w, port);
+			replaceWidgetPin(&w, port);
 		}, "Rack's: the MIDI port it shows (one Python made), or None. RackPy keeps the port alive while the widget is.");
 }
 
@@ -152,8 +161,7 @@ void bindIoDisplays(py::module_ raw, py::module_ mod) {
 			auto& w = native<AD>(self);
 			rack::audio::Port* p = port.is_none() ? nullptr : &bindings::pythonAudioPort(port);
 			w.setAudioPort(p);  // Rack's: rebuilds its children for the port
-			if (p)
-				pin(&w, port);
+			replaceWidgetPin(&w, port);
 		}, py::arg("port"), "Rack's: rebuilds the display's choices (Rack's widgets) for the port, which RackPy keeps alive "
 			"while the display is. Size the display first: its choices take its width.")
 		.def_property_readonly("driver_choice", [](py::object self) { return wrapper(native<AD>(self).driverChoice); })
@@ -172,8 +180,7 @@ void bindIoDisplays(py::module_ raw, py::module_ mod) {
 		auto& w = native<AB>(self);
 		rack::audio::Port* p = port.is_none() ? nullptr : &bindings::pythonAudioPort(port);
 		w.setAudioPort(p);
-		if (p)
-			pin(&w, port);
+		replaceWidgetPin(&w, port);
 	}, py::arg("port"), "Rack's: the port whose menu a click opens; RackPy keeps it alive while the button is.");
 
 	auto midiDriver = variant<app::MidiDriverChoice, LC, PortWidgetInit<app::MidiDriverChoice>>(mod, "MidiDriverChoice");
@@ -190,8 +197,7 @@ void bindIoDisplays(py::module_ raw, py::module_ mod) {
 			auto& w = native<MD>(self);
 			rack::midi::Port* p = port.is_none() ? nullptr : &bindings::pythonMidiPort(port);
 			w.setMidiPort(p);
-			if (p)
-				pin(&w, port);
+			replaceWidgetPin(&w, port);
 		}, py::arg("port"), "Rack's: rebuilds the display's choices for the port, which RackPy keeps alive while the "
 			"display is.")
 		.def_property_readonly("driver_choice", [](py::object self) { return wrapper(native<MD>(self).driverChoice); })
@@ -207,8 +213,7 @@ void bindIoDisplays(py::module_ raw, py::module_ mod) {
 		auto& w = native<MB>(self);
 		rack::midi::Port* p = port.is_none() ? nullptr : &bindings::pythonMidiPort(port);
 		w.setMidiPort(p);
-		if (p)
-			pin(&w, port);
+		replaceWidgetPin(&w, port);
 	}, py::arg("port"), "Rack's: the port whose menu a click opens; RackPy keeps it alive while the button is.");
 
 	mod.def("append_audio_menu", [](py::object menu, py::object port) {

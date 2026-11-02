@@ -254,6 +254,24 @@ def test_sample_rate_converter() -> None:
     with pytest.raises(TypeError, match="Frame\\[2\\]"):
         t.process([dsp.Frame[3]()], 1, outs, 1)
 
+    class ReadOnlyFrame(dsp.Frame[2]):  # type: ignore[type-arg, valid-type]
+        def __buffer__(self, flags: int) -> memoryview:
+            return memoryview(bytes(2 * 4))
+
+    guarded = dsp.SampleRateConverter[2]()
+    guarded.set_rates(44100, 48000)
+    fresh = dsp.SampleRateConverter[2]()
+    fresh.set_rates(44100, 48000)
+    short_frames = frames[:5]
+    with pytest.raises((TypeError, BufferError)):
+        guarded.process(short_frames, len(short_frames), [ReadOnlyFrame()], 1)
+    guarded_out = [dsp.Frame[2]() for _ in range(4)]
+    fresh_out = [dsp.Frame[2]() for _ in range(4)]
+    guarded_result = guarded.process(short_frames, len(short_frames), guarded_out, len(guarded_out))
+    fresh_result = fresh.process(short_frames, len(short_frames), fresh_out, len(fresh_out))
+    assert guarded_result == fresh_result
+    assert [frame.samples.tolist() for frame in guarded_out] == [frame.samples.tolist() for frame in fresh_out]
+
 
 def test_decimator_and_upsampler() -> None:
     d = dsp.Decimator[4, 8]()

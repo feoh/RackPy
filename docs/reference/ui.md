@@ -160,7 +160,9 @@ on threads Python starts (see [the context](window.md#the-context)). Its
   any `uint32`, as Rack does, even one past U+10FFFF.
 - `set_hovered_widget`, `set_dragged_widget`, `set_drag_hovered_widget` and
   `set_selected_widget` change the focus and send Rack's enter, leave,
-  select and drag events. The corresponding `get_hovered_widget`,
+  select and drag events. Unlike general tree-mutating operations,
+  `set_selected_widget` is allowed inside a widget callback, as Rack itself
+  uses it from callbacks. The corresponding `get_hovered_widget`,
   `get_dragged_widget`, `get_drag_hovered_widget`, `get_selected_widget` and
   `get_root_widget` return the current targets. Rack's deprecated shorter
   `set_hovered`, `set_dragged`, `set_drag_hovered` and `set_selected` warn.

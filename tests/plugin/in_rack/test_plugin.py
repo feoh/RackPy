@@ -37,6 +37,34 @@ def test_this_plugin_after_initialization() -> None:
     assert this.get_model("NoSuchModel") is None and rp.get_plugin("NoSuchPlugin") is None
 
 
+def test_plugin_metadata_fields_are_writable() -> None:
+    isolated = rp.Plugin()
+    fields = {
+        "slug": "IsolatedRackPy",
+        "name": "Isolated RackPy",
+        "version": "1.2.3",
+        "license": "GPL-3.0-or-later",
+        "brand": "RackPy test",
+        "description": "isolated metadata",
+        "author": "RackPy contributors",
+        "author_email": "test@example.invalid",
+        "author_url": "https://example.invalid/author",
+        "plugin_url": "https://example.invalid/plugin",
+        "manual_url": "https://example.invalid/manual",
+        "source_url": "https://example.invalid/source",
+        "donate_url": "https://example.invalid/donate",
+        "changelog_url": "https://example.invalid/changelog",
+    }
+    try:
+        for field, value in fields.items():
+            setattr(isolated, field, value)
+            assert getattr(isolated, field) == value
+    finally:
+        isolated.close()
+    with pytest.raises(OwnershipError, match="registered identity"):
+        rp.plugin_instance().slug = "Other"
+
+
 def test_models_are_added_only_while_the_plugin_initializes() -> None:
     model = rp.create_model("Late", lambda m: None)
     assert model.alive and model.plugin is None and model.slug == "Late"

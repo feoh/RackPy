@@ -364,20 +364,37 @@ void bind_plugin(py::module_ raw) {
 			h.owned->close();
 			isolatedPlugins.erase(std::remove(isolatedPlugins.begin(), isolatedPlugins.end(), h.owned), isolatedPlugins.end());
 		}, "Destroy an isolated plugin once; its attached models survive while their handles do.")
-		.def_property_readonly("slug", [](const PluginHandle& h) { return checked(h).slug; })
-		.def_property_readonly("name", [](const PluginHandle& h) { return checked(h).name; })
-		.def_property_readonly("version", [](const PluginHandle& h) { return checked(h).version; })
-		.def_property_readonly("license", [](const PluginHandle& h) { return checked(h).license; })
-		.def_property_readonly("brand", [](const PluginHandle& h) { return checked(h).brand; })
-		.def_property_readonly("description", [](const PluginHandle& h) { return checked(h).description; })
-		.def_property_readonly("author", [](const PluginHandle& h) { return checked(h).author; })
-		.def_property_readonly("author_email", [](const PluginHandle& h) { return checked(h).authorEmail; })
-		.def_property_readonly("author_url", [](const PluginHandle& h) { return checked(h).authorUrl; })
-		.def_property_readonly("plugin_url", [](const PluginHandle& h) { return checked(h).pluginUrl; })
-		.def_property_readonly("manual_url", [](const PluginHandle& h) { return checked(h).manualUrl; })
-		.def_property_readonly("source_url", [](const PluginHandle& h) { return checked(h).sourceUrl; })
-		.def_property_readonly("donate_url", [](const PluginHandle& h) { return checked(h).donateUrl; })
-		.def_property_readonly("changelog_url", [](const PluginHandle& h) { return checked(h).changelogUrl; })
+		.def_property("slug", [](const PluginHandle& h) { return checked(h).slug; }, [](const PluginHandle& h, std::string value) {
+			if (!h.owned || !checked(h).models.empty())
+				throw runtime::Ownership("a loaded plugin's slug is its registered identity and cannot be changed");
+			checked(h).slug = std::move(value);
+		}, "Writable on an isolated plugin before it has models; Rack treats a loaded plugin's slug as its identity.")
+		.def_property("name", [](const PluginHandle& h) { return checked(h).name; },
+			[](const PluginHandle& h, std::string value) { checked(h).name = std::move(value); })
+		.def_property("version", [](const PluginHandle& h) { return checked(h).version; },
+			[](const PluginHandle& h, std::string value) { checked(h).version = std::move(value); })
+		.def_property("license", [](const PluginHandle& h) { return checked(h).license; },
+			[](const PluginHandle& h, std::string value) { checked(h).license = std::move(value); })
+		.def_property("brand", [](const PluginHandle& h) { return checked(h).brand; },
+			[](const PluginHandle& h, std::string value) { checked(h).brand = std::move(value); })
+		.def_property("description", [](const PluginHandle& h) { return checked(h).description; },
+			[](const PluginHandle& h, std::string value) { checked(h).description = std::move(value); })
+		.def_property("author", [](const PluginHandle& h) { return checked(h).author; },
+			[](const PluginHandle& h, std::string value) { checked(h).author = std::move(value); })
+		.def_property("author_email", [](const PluginHandle& h) { return checked(h).authorEmail; },
+			[](const PluginHandle& h, std::string value) { checked(h).authorEmail = std::move(value); })
+		.def_property("author_url", [](const PluginHandle& h) { return checked(h).authorUrl; },
+			[](const PluginHandle& h, std::string value) { checked(h).authorUrl = std::move(value); })
+		.def_property("plugin_url", [](const PluginHandle& h) { return checked(h).pluginUrl; },
+			[](const PluginHandle& h, std::string value) { checked(h).pluginUrl = std::move(value); })
+		.def_property("manual_url", [](const PluginHandle& h) { return checked(h).manualUrl; },
+			[](const PluginHandle& h, std::string value) { checked(h).manualUrl = std::move(value); })
+		.def_property("source_url", [](const PluginHandle& h) { return checked(h).sourceUrl; },
+			[](const PluginHandle& h, std::string value) { checked(h).sourceUrl = std::move(value); })
+		.def_property("donate_url", [](const PluginHandle& h) { return checked(h).donateUrl; },
+			[](const PluginHandle& h, std::string value) { checked(h).donateUrl = std::move(value); })
+		.def_property("changelog_url", [](const PluginHandle& h) { return checked(h).changelogUrl; },
+			[](const PluginHandle& h, std::string value) { checked(h).changelogUrl = std::move(value); })
 		.def_property_readonly("path", [](const PluginHandle& h) { return checked(h).path; })
 		.def_property_readonly("modified_timestamp", [](const PluginHandle& h) { return checked(h).modifiedTimestamp; })
 		.def_property_readonly("handle", [](const PluginHandle& h) -> py::object {

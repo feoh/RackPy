@@ -4,6 +4,7 @@ Rack's live UI (Rack's audio drivers are isolated in tests and list no devices).
 
 import gc
 import math
+import weakref
 from typing import Any
 
 import pytest
@@ -105,6 +106,28 @@ def test_choices_and_buttons_open_their_rack_menus() -> None:
     finally:
         for control, _ in audio_controls + midi_controls:
             control.close()
+
+
+def test_replacing_or_clearing_a_widget_port_releases_old_pins() -> None:
+    widget = app.MidiDeviceChoice()
+    first = midi.InputQueue()
+    first_ref = weakref.ref(first)
+    widget.port = first
+    del first
+    gc.collect()
+    assert first_ref() is widget.port
+
+    second = midi.Output()
+    second_ref = weakref.ref(second)
+    widget.port = second
+    del second
+    gc.collect()
+    assert first_ref() is None and second_ref() is widget.port
+
+    widget.port = None
+    gc.collect()
+    assert second_ref() is None and widget.port is None
+    widget.close()
 
 
 def test_displays_rebuild_for_a_port_and_keep_it_alive() -> None:

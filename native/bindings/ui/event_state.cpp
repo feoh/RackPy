@@ -94,8 +94,15 @@ void bindEventState(py::module_ widget) {
 	};
 	setter("set_hovered_widget", &ES::setHoveredWidget, "set_hovered");
 	setter("set_drag_hovered_widget", &ES::setDragHoveredWidget, "set_drag_hovered");
-	setter("set_selected_widget", &ES::setSelectedWidget, "set_selected");
-	cls.def("set_dragged_widget", [](const EventStateHandle& h, py::object w, int button) {
+	cls.def("set_selected_widget", [](const EventStateHandle& h, py::object w) {
+		h.get().setSelectedWidget(argument(w));
+	}, py::arg("w"), "Rack's: sends Select/Deselect; Rack permits this from a widget callback.")
+		.def("set_selected", [](const EventStateHandle& h, py::object w) {
+			if (PyErr_WarnEx(PyExc_DeprecationWarning, "EventState.set_selected_widget is Rack's current name", 1) < 0)
+				throw py::error_already_set();
+			h.get().setSelectedWidget(argument(w));
+		}, py::arg("w"), "Rack's deprecated spelling.")
+		.def("set_dragged_widget", [](const EventStateHandle& h, py::object w, int button) {
 			dispatching(h, "dragging").setDraggedWidget(argument(w), button);
 		}, py::arg("w"), py::arg("button"))
 		.def("set_dragged", [](const EventStateHandle& h, py::object w, int button) {

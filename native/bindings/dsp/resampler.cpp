@@ -199,17 +199,20 @@ py::object bindConverter(py::module_ scope, py::dict& specs) {
 				runtime::frameBuffer(info, N, "process");
 				std::memcpy(src[(size_t) k].samples, info.ptr, sizeof(float) * N);
 			}
-			for (int k = 0; k < outFrames; k++)
+			std::vector<py::buffer_info> dstBuffers;
+			dstBuffers.reserve((size_t) outFrames);
+			for (int k = 0; k < outFrames; k++) {
 				if (!py::isinstance(out[(size_t) k], frameType))
 					throw py::type_error("process: the frames must be Frame[" + std::to_string(N) + "] objects");
+				auto info = py::buffer(out[(size_t) k]).request(true);
+				runtime::frameBuffer(info, N, "process");
+				dstBuffers.push_back(std::move(info));
+			}
 			int inUsed = inFrames, outUsed = outFrames;
 			c::member<static_cast<void (S::*)(const d::Frame<N>*, int*, d::Frame<N>*, int*)>(&S::process)>(s,
 				(const d::Frame<N>*) src.data(), &inUsed, dst.data(), &outUsed);
-			for (int k = 0; k < outUsed; k++) {
-				py::buffer_info info = py::buffer(out[(size_t) k]).request(true);
-				runtime::frameBuffer(info, N, "process");
-				std::memcpy(info.ptr, dst[(size_t) k].samples, sizeof(float) * N);
-			}
+			for (int k = 0; k < outUsed; k++)
+				std::memcpy(dstBuffers[(size_t) k].ptr, dst[(size_t) k].samples, sizeof(float) * N);
 			return py::make_tuple(inUsed, outUsed);
 		}, py::arg("in_"), py::arg("in_frames"), py::arg("out"), py::arg("out_frames"),
 			"The same for lists of Frame[MAX_CHANNELS] objects (copied into and out of Rack's contiguous frames).");
