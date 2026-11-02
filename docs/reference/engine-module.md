@@ -66,10 +66,11 @@ IDs below 2^53 so they survive JSON, but any 64-bit integer is accepted, as in
 C++). It can be assigned only inside the constructor callback; `get_id()` is
 Rack's getter. `is_bypassed()` is Rack's query, and is `False` until Rack's
 engine owns and bypasses the module ([engine ownership](#engine-ownership);
-nothing public hands a module to the engine before RP-16). Both need the main
-thread. The `model` field and `get_model()` wait for model
-handles (RP-16). Engine ownership, its deletion path and lifecycle events are
-the rest of RP-14C.
+Rack's own model factory, RP-16, is what hands a module to the engine). Both
+need the main thread. The `model` field and `get_model()` return the module's
+`rackpy.raw.plugin.Model`, or `None` before Rack creates the module from one.
+Engine ownership, its deletion path and lifecycle events are the rest of
+RP-14C.
 
 ## Component access
 
@@ -216,8 +217,8 @@ Python call and never an exception into Rack. A UI-safe override that Rack
 calls on the main thread runs through RackPy's contained dispatch: if it
 raises, Rack's own answer is used. Mixed value/range overrides are refused
 when the class is defined, as for every Quantity; RP-22 owns their laboratory
-semantics. RackPy modules are not yet registered with Rack's engine (RP-16),
-so in this release only the test hooks make such calls.
+semantics. Rack's model factory (RP-16) now creates RackPy modules and adds
+them to Rack's engine; the test hooks also make such calls in the host tests.
 
 Retiring an object hands it back to Python and may run its finalizer. An
 override that closes its own module leaves its object stale: the rest of that
@@ -283,7 +284,7 @@ keeping Python work on its teardown path; a quantity does not keep the module
 alive. Python code in an override is ordinary user code, not a sandbox or an audio
 callback. Inherited helper methods and direct base-class calls use the same
 native guards. Deprecated smooth-value methods emit `DeprecationWarning`.
-JSON methods remain RP-15 and are not exposed here.
+`to_json()` and `from_json(data)` are Rack's; see [Module JSON](#module-json).
 
 `SwitchQuantity.labels` uses the mutable `SwitchLabels` vector interface described
 below, including atomic conversion before assignment/extension and copied
@@ -514,7 +515,7 @@ A module Rack's engine owns is deleted by Rack instead; see below.
 In Rack, a module belongs to the engine once Rack adds it: Rack removes it
 from the engine and deletes it when its module widget goes, or at shutdown.
 RackPy implements Rack's side of that (RP-14C2), which RP-16's model factory
-will use; until then only the test hooks hand a module to the engine.
+uses; the test hooks also hand modules to the engine in the host tests.
 
 - Only a sealed module can go to the engine. Its `id` is then the one the
   engine assigned, and every handle and view stays valid, with the same
@@ -683,7 +684,9 @@ Rack's engine does. Details:
 second route to the same output with `ValueError`. An input may feed several
 outputs. Rack's native `processBypass` preserves the routed channel count and
 voltages; the test-hooks build compares it against a standalone C++ reference
-for 0, 1 and 16 channels. It is not yet a public Python callback mapping.
+for 0, 1 and 16 channels. Python reaches `processBypass` only through the
+laboratory's `ModuleClass.process_bypass`, which is never on Rack's audio path
+([laboratory modules](../explanation/callbacks.md#laboratory-modules)).
 
 `Module.BypassRoute()` is an independent value with mutable `input_id` and
 `output_id`, initially -1. `module.bypass_routes` is a checked collection of
@@ -840,9 +843,8 @@ module, which restores parameter values and bypass while the constructor
 rebuilds scales, labels and routes. The lifecycle adapters' object references
 no CPython (`bin/rackpy-dev audio-symbols`).
 
-Not established: Rack model registration and browser previews (a module
-widget's `module` is `None` there; RP-16), Python overrides of the lifecycle
-events (RP-16, RP-22), Python JSON (RP-15), and an audio driver thread actually
-dispatching sample-rate or master events: the tests use no audio device, so
-that path is known from Rack's source and the Python-free object only. macOS
-and Windows have not been run.
+Not established: an audio driver thread actually dispatching sample-rate or
+master events. The tests use no audio device, so that path is known from
+Rack's source and the Python-free object only. As in Rack, a module widget's
+`module` is `None` in the module browser's previews. Per-platform results are
+recorded by CI in `release-evidence/`, not on this page.

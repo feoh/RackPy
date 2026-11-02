@@ -89,7 +89,12 @@ setter.
 
 Names and descriptions shown in Rack's UI. `PortInfo.get_full_name()` appends
 " input" or " output" to `get_name()`. `LightInfo.light_id` identifies the light
-in its module. A Python subclass may override
+in its module. `PortInfo.type` (a `Port.Type`) and `PortInfo.port_id` are
+identity fields: you can assign them while the object is standalone, but once
+a module slot owns it they can change only during that module's construction,
+and a later write raises `OwnershipError` (see
+[Module metadata](engine-module.md#built-in-port-and-light-metadata)).
+A Python subclass may override
 `get_name` and `get_description` (Rack calls them on the UI thread). The
 standalone `module` field is a nullable, mutable **weak** backreference to a
 RackPy `Module`: assigning `info.module = module` preserves identity but neither

@@ -150,7 +150,8 @@ constructor has not returned.
 Rack indexes the module's parameters, ports and lights with a control's IDs
 without checking them, so RackPy checks them. `param_id` must name one of
 the module's parameters whenever a module is set. Set the ID first, then the
-module, as Rack's factories do. A `PortWidget`'s `type` and `port_id`, and a
+module: RackPy's factories do, because setting the module checks the ID. (Rack's
+own factories assign the module first and never check.) A `PortWidget`'s `type` and `port_id`, and a
 light's `first_light_id` and colours, are checked the same way.
 
 When Rack deletes the module, RackPy sets the control's `module` back to
@@ -266,7 +267,8 @@ Like any `HostWidget`, they cannot be moved or deleted from Python.
 
 `helpers.hpp`'s widget templates are `rackpy.raw` functions. The template
 parameter is the first argument, a class (Python subclasses work), and each
-sets Rack's fields in Rack's order:
+sets the same fields as Rack's. Where setting the module checks an ID, RackPy
+assigns the ID first and the module second, the reverse of Rack's factories:
 
 - `create_widget(cls, pos)` and `create_widget_centered(cls, pos)`;
 - `create_panel(svg_path)`, or `create_panel(light_path, dark_path)` for a

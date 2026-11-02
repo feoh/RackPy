@@ -224,8 +224,10 @@ are bound for `T = float_4`, the only vector whose `load` and `store` take a
 
 - `get_voltage_simd(first_channel)`: channels `first_channel` to
   `first_channel + 3`.
-- `get_poly_voltage_simd(first_channel)`: the same if the port is
-  polyphonic, else channel 0's voltage in every lane.
+- `get_poly_voltage_simd(first_channel)`: channel 0's voltage in every lane if
+  the port is monophonic (exactly one channel), else `get_voltage_simd`. A
+  disconnected port has no channels, so it is not monophonic and reads the
+  lanes at `first_channel`.
 - `get_normal_voltage_simd(normal_voltage, first_channel)` and
   `get_normal_poly_voltage_simd(normal_voltage, first_channel)`: the same if
   the port is connected, else `normal_voltage` (a scalar broadcasts).

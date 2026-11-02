@@ -43,8 +43,8 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::plugin::destroy()` | function | excluded: Rack-internal | — | — |
 | `rack::plugin::getModel(const std::string &, const std::string &)` | function | bound | `rackpy.raw.plugin.get_model` | {ref}`plugin#plugin-models <plugin-models>` |
 | `rack::plugin::getModelFallback(const std::string &, const std::string &)` | function | bound | `rackpy.raw.plugin.get_model_fallback` | {ref}`plugin#plugin-models <plugin-models>` |
-| `rack::plugin::getPlugin(const std::string &)` | function | bound | `rackpy.raw.plugin.get_plugin` | {ref}`plugin#plugin-models <plugin-models>` |
-| `rack::plugin::getPluginFallback(const std::string &)` | function | bound | `rackpy.raw.plugin.get_plugin_fallback` | {ref}`plugin#plugin-models <plugin-models>` |
+| `rack::plugin::getPlugin(const std::string &)` | function | bound | `rackpy.raw.plugin.get_plugin` | {ref}`plugin#plugin-models <plugin-models>`, {ref}`plugin#plugin-plugins <plugin-plugins>` |
+| `rack::plugin::getPluginFallback(const std::string &)` | function | bound | `rackpy.raw.plugin.get_plugin_fallback` | {ref}`plugin#plugin-models <plugin-models>`, {ref}`plugin#plugin-plugins <plugin-plugins>` |
 | `rack::plugin::init()` | function | excluded: Rack-internal | — | — |
 | `rack::plugin::isSlugValid(const std::string &)` | function | bound | `rackpy.raw.plugin.is_slug_valid` | {ref}`plugin#plugin-models <plugin-models>` |
 | `rack::plugin::modelFromJson(json_t *)` | function | bound | `rackpy.raw.plugin.model_from_json` | {ref}`plugin#plugin-models <plugin-models>` |

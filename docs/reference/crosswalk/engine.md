@@ -13,7 +13,7 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::engine::LightInfo::~LightInfo()` | destructor | bound | `rackpy.raw.engine.LightInfo` | {ref}`engine-components#components-info <components-info>` |
 | `rack::engine::Module::~Module()` | destructor | bound | `rackpy.raw.engine.Module.close` / `rackpy.engine.Module.close` | [engine-module#engine-ownership](../engine-module.md#engine-ownership), [engine-module#ownership-and-failure](../engine-module.md#ownership-and-failure) |
 | `rack::engine::PortInfo::~PortInfo()` | destructor | bound | `rackpy.raw.engine.PortInfo` | {ref}`engine-components#components-info <components-info>` |
-| `rack::engine::Port::Type` | enum | bound | `rackpy.raw.engine.Port.Type` | {ref}`engine-components#components-info <components-info>` |
+| `rack::engine::Port::Type` | enum | bound | `rackpy.raw.engine.Port.Type` | {ref}`engine-components#components-info <components-info>`, {ref}`engine-components#components-ports <components-ports>` |
 | `rack::engine::Port::Type::INPUT` | enumerator | bound | `rackpy.raw.engine.Port.Type.INPUT` | {ref}`engine-components#components-info <components-info>`, [engine-components#ports](../engine-components.md#ports) |
 | `rack::engine::Port::Type::OUTPUT` | enumerator | bound | `rackpy.raw.engine.Port.Type.OUTPUT` | {ref}`engine-components#components-info <components-info>`, [engine-components#ports](../engine-components.md#ports) |
 | `rack::engine::Cable::id` | field | bound | `rackpy.raw.engine.Cable.id` | {ref}`engine#engine-cables <engine-cables>` |

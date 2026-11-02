@@ -140,12 +140,12 @@ handlers use the same typing. See
 [plugin-wide settings](../how-to/state.md#plugin-wide-settings). The loader
 forwards all four hooks to the host library (host ABI 2). Rack's separate
 `Plugin` destructor clears attached models' plugin pointers without deleting
-the models. RackPy currently exposes borrowed plugin views; a Python mapping
-and behavioral proof of that destructor remain open (RP-31D). The `destroy()`
-hook is not the destructor.
+the models. `Plugin.close()` runs that destructor for an isolated plugin you
+made yourself (see [Plugins](#plugin-plugins)); a plugin Rack loaded cannot be
+closed from Python. The `destroy()` hook is not the destructor.
 
 Everything here is main-thread only (`ThreadError`) except the pure string
 functions `is_slug_valid`, `normalize_slug`, `asset.system` and `asset.user`,
-and the same Rack object always gives the same Python object. `createModule` and
-`createModuleWidget` are Rack's to call; calling them from Python, with a way
-to put the result in the rack, comes with the app widgets (RP-28).
+and the same Rack object always gives the same Python object. `create_module()`
+and `create_module_widget(module)` call Rack's `createModule` and
+`createModuleWidget` on a committed model (see [Models](#plugin-models)).
