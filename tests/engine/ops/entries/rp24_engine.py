@@ -168,7 +168,14 @@ def rp24b(state: dict[str, Any]) -> None:
 
     ON_RESET.append(no_lock)
     e.reset_module(a)
-    state.update(a=a, cable=c, handle=h)
+    # Keep only the two widgetless modules and their cable in the engine's own JSON. This is loaded later in
+    # the disposable test Rack after its scene is cleared; it must never touch a user's live patch.
+    patch = e.to_json()
+    modules = [module for module in patch["modules"] if module["id"] in (a.id, b.id)]
+    cables = [cable for cable in patch["cables"] if cable["id"] == c.id]
+    assert len(modules) == 2 and len(cables) == 1
+    next(module for module in modules if module["id"] == a.id)["params"][0]["value"] = 6
+    state.update(a=a, cable=c, handle=h, payload={"modules": modules, "cables": cables}, ids=[a.id, b.id, c.id])
 
 
 def clear(state: dict[str, Any]) -> None:
@@ -181,7 +188,19 @@ def clear(state: dict[str, Any]) -> None:
     owned_before = owned.alive
     context.scene.rack.clear()  # Rack's module widgets (and their modules and cables) go
     RESULT["rack_cleared"] = [h.in_engine, h.module is None, c.alive, a.alive, owned_before, owned.alive]
-    e.clear()  # the rack is empty now; Rack deletes what Python added, and removes the handles
+    # The rack is empty, so the destructive engine load is safe in this disposable host. It replaces the old
+    # widgetless modules and cable, preserving their IDs and loading the changed parameter from Rack's JSON.
+    e.from_json(state["payload"])
+    module_id, other_id, cable_id = state["ids"]
+    restored = e.get_module(module_id)
+    assert restored is not None
+    RESULT["engine_loaded"] = [
+        sorted(e.get_module_ids()) == sorted([module_id, other_id]),
+        e.get_cable_ids() == [cable_id],
+        e.module_to_json(restored)["model"],
+        e.get_param_value(restored, 0),
+    ]
+    e.clear()  # delete the restored modules/cable with the rack still empty
     RESULT["engine_cleared"] = [h.in_engine, c.alive, a.alive, e.get_num_modules(), e.get_num_cables()]
     RESULT["remove_after_clear"] = refused(lambda: e.remove_param_handle(h))  # Rack would assert
     h.module_id = -1  # Rack's clear leaves the IDs; Rack adds only blank handles

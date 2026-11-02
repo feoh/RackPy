@@ -45,7 +45,9 @@ another plugin's model also returns an `EngineModule`, which Python owns
 ([modules from other plugins](app.md#modules-from-other-plugins)).
 
 `get_num_modules()` returns the count; `has_module(module)` tests whether a
-module is in the engine.
+module is in the engine. RackPy maps both C++ `getModuleIds` overloads to
+`get_module_ids()`; it returns a list rather than writing a caller-provided
+buffer, and has no length-cap argument.
 
 `reset_module`, `randomize_module` and `bypass_module` are Rack's: they send
 the module its event under the lock, without an undo step.
@@ -116,6 +118,9 @@ finds it again by ID at every use: Rack deletes cables without telling
 anyone (a cable widget its own, `Engine.clear` the rest), and the handle
 then goes stale (`alive` false). Such a cable's fields are read-only.
 `get_cable_ids()`, `get_num_cables()` and `has_cable(cable)` are Rack's.
+Both C++ `getCableIds` overloads map to `get_cable_ids()`, which returns a
+list rather than writing a caller-provided buffer; it has no length-cap
+argument.
 
 `add_cable(cable)` gives Rack's engine a cable Python made, and the handle
 then finds it by ID. Rack asserts, as it deletes a module, that no cable in
