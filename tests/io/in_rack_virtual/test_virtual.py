@@ -92,6 +92,13 @@ def test_python_ports_on_a_python_device() -> None:
     assert held is not None and held.get_name() == "Fake 1" and held.get_num_inputs() == 2
     assert port.get_device_id() == device.id == 0 and port.get_driver_id() == AUDIO_ID
     assert port.get_driver_name() == "RackPy Test Audio"
+    assert port.driver is not None and port.driver.get_name() == "RackPy Test Audio" and port.context is not None
+    assert (port.get_device_name(0), port.get_device_num_inputs(0), port.get_device_num_outputs(0)) == ("Fake 1", 2, 2)
+    device.take_requests()  # what Rack's ports asked for so far
+    port.set_sample_rate(44100)  # Rack's setSampleRate asks its device for the rate...
+    port.set_block_size(64)
+    asked = device.take_requests()
+    assert ("sample_rate", 44100.0) in asked and ("block_size", 64.0) in asked  # ...and for the block size
     assert port.log == []  # Rack's setDeviceId called on_start_stream off Python's driving: queued for the UI step
     device.start_stream()  # on Python's driving thread: synchronous
     assert port.log == ["start"]
@@ -162,6 +169,14 @@ def test_active_stream_module_deletion_and_hotplug() -> None:
     assert driver.get_device_ids() == [1] and second.id == 1 and second.name == "Fake 2"
 
 
+def test_a_midi_driver_cannot_take_the_id_racks_ports_use_for_no_driver() -> None:
+    driver = midi.PythonDriver("RackPy -1 MIDI")
+    with pytest.raises(ValueError, match="reserves"):
+        midi.add_driver(-1, driver)
+    assert driver.registered_id == -1  # not registered: it can still be added under another ID
+    assert -1 not in midi.get_driver_ids()
+
+
 def test_a_python_midi_driver() -> None:
     driver = fm.virtual_driver(MIDI_ID, "RackPy Test MIDI", inputs=("Fake In",), outputs=("Fake Out",))
     STATE["midi"] = driver
@@ -192,6 +207,19 @@ def test_a_python_midi_driver() -> None:
     engine().remove_module(cv)
     del cv
     gc.collect()
+
+    # Dropping a Python port on the main thread runs ~Port: it leaves its device's subscribers, as Rack's does.
+    def queues() -> int:
+        return len([p for p in fin.subscribed if isinstance(p, midi.InputQueue)])
+
+    def outputs() -> int:
+        return len([p for p in fout.subscribed if isinstance(p, midi.Output)])
+
+    extras: list[Any] = [fm.open_input(MIDI_ID, "Fake In 2"), fm.open_output(MIDI_ID, "Fake Out 2")]
+    assert (queues(), outputs()) == (2, 2)
+    extras.clear()
+    gc.collect()
+    assert (queues(), outputs()) == (1, 1)
 
     driver.remove_input_device(fin)  # unplugged: Rack no longer lists it; the queue keeps it until it leaves
     assert view.get_input_device_ids() == [0] and fin.removed and alive(fin)

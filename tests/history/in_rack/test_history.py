@@ -72,6 +72,11 @@ def test_actions_python_makes(probe: EngineModule) -> None:
     assert isinstance(h.ModuleRemove(), h.ModuleAdd) and h.ModuleRemove().name == "remove module"
     # Rack's typedefs are the specializations (RP-42): ModuleRemove is InverseAction<ModuleAdd>.
     assert h.InverseAction[h.ModuleAdd] is h.ModuleRemove and h.InverseAction[h.CableAdd] is h.CableRemove
+    # InverseAction<...> is what they are in C++, so isinstance and issubclass agree (RP-42).
+    assert issubclass(h.ModuleRemove, h.InverseAction) and issubclass(h.CableRemove, h.InverseAction)
+    assert isinstance(h.ModuleRemove(), h.InverseAction) and isinstance(h.CableRemove(), h.InverseAction)
+    assert not issubclass(h.ModuleAdd, h.InverseAction) and not isinstance(h.CableAdd(), h.InverseAction)
+    assert not issubclass(h.ParamChange, h.InverseAction) and not issubclass(int, h.InverseAction)
 
     value = e.get_param_value(probe, 0)
     change = h.ParamChange()

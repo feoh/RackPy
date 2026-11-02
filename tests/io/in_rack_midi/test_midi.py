@@ -101,6 +101,35 @@ def test_through_the_loopback(loop: tuple[midi.Output, midi.InputQueue]) -> None
     assert queue.size() == 1
 
 
+def test_midi_port_getters_and_reset_follow_racks_loopback_driver(loop: tuple[midi.Output, midi.InputQueue]) -> None:
+    out, queue = loop
+    # Input and Output ask their driver for the devices (midi.cpp), and answer with its names and defaults.
+    assert queue.get_device_ids() == out.get_device_ids() == list(range(16))
+    assert queue.get_default_device_id() == out.get_default_device_id() == 0
+    assert queue.get_device_name(2) == "Loopback 3" and out.get_device_name(5) == "Loopback 6"
+    assert out.get_channels() == list(range(16))  # an output has no "all channels"; an input has (-1)
+    assert queue.get_channels() == list(range(-1, 16))
+    assert out.get_channel_name(-1) == "All channels" and out.get_channel_name(0) == "Channel 1"
+    assert queue.get_channel_name(15) == "Channel 16"
+    # The properties are the getters.
+    assert out.driver is not None and out.driver.id == LOOPBACK and queue.driver is not None
+    assert out.context is not None
+    # reset() is setDriverId(-1) and the port's default channel (-1 for an input, 0 for an output). -1 is no driver, so
+    # Rack falls back to its first driver and that driver's default device.
+    first = midi.get_driver_ids()[0]
+    fresh_out, fresh_in = midi.Output(), midi.InputQueue()
+    for port in (fresh_out, fresh_in):
+        port.set_driver_id(LOOPBACK)
+        port.set_channel(3)
+        assert port.get_driver_id() == LOOPBACK
+        port.reset()
+        assert port.get_driver_id() == first
+        assert port.get_device_id() == port.get_default_device_id()
+    assert fresh_out.get_channel() == 0 and fresh_in.get_channel() == -1
+    for port in (fresh_out, fresh_in):
+        port.set_device_id(-1)
+
+
 def test_json_and_devices(loop: tuple[midi.Output, midi.InputQueue]) -> None:
     out, queue = loop
     out.set_channel(2)

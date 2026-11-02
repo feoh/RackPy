@@ -48,7 +48,10 @@ cached subclass of `T` whose `undo` runs `T`'s redo and whose `redo` runs
 `T`'s undo, using Rack's code for Rack's types and the Python methods for
 Python's; nested, `InverseAction[InverseAction[T]]` behaves as `T`. Rack's
 typedefs are the specializations themselves: `InverseAction[ModuleAdd]` is
-`ModuleRemove` and `InverseAction[CableAdd]` is `CableRemove`.
+`ModuleRemove` and `InverseAction[CableAdd]` is `CableRemove`. As in C++, both
+are InverseActions: `isinstance(ModuleRemove(), InverseAction)` and
+`issubclass(CableRemove, InverseAction)` are true, although the native classes
+derive from `ModuleAdd` and `CableAdd` themselves.
 
 ### Ownership
 

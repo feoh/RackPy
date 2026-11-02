@@ -1338,6 +1338,8 @@ void bindMidi(py::module_ mod) {
 
 	mod.def("add_driver", [](int id, PythonMidiDriver& d) {
 		runtime::requireMainThread("adding a MIDI driver");
+		if (id == -1)
+			throw std::invalid_argument("Rack reserves driver ID -1 (its ports and patches use it for no driver)");
 		if (m::getDriver(id))
 			throw runtime::Ownership("Rack already has a MIDI driver with this ID (it is stored in patches)");
 		if (!d.owned)

@@ -32,7 +32,25 @@ def _run(action_type: type, name: str, action: object) -> None:
     raise TypeError(f"{action_type.__name__} is not a history action")
 
 
-class InverseAction(Template):
+_ActionMeta: Any = type(_lib.Action)  # the native classes' metaclass: a specialization has both kinds as bases
+
+
+class _InverseMeta(_ActionMeta):  # type: ignore[misc]
+    """Rack's ModuleRemove and CableRemove are ``InverseAction<ModuleAdd>`` and ``InverseAction<CableAdd>``, so they are
+    InverseActions to ``issubclass`` and ``isinstance`` too (RP-42), though they are native classes of ModuleAdd's and
+    CableAdd's own."""
+
+    def __subclasscheck__(cls, subclass: Any) -> bool:
+        if super().__subclasscheck__(subclass):
+            return True
+        removals = (_lib.ModuleRemove, _lib.CableRemove)
+        return cls is InverseAction and isinstance(subclass, type) and issubclass(subclass, removals)
+
+    def __instancecheck__(cls, instance: Any) -> bool:
+        return bool(super().__instancecheck__(instance)) or cls.__subclasscheck__(type(instance))
+
+
+class InverseAction(Template, metaclass=_InverseMeta):
     """Rack's ``InverseAction<TAction>``: ``InverseAction[T]`` swaps ``T``'s undo and redo."""
 
     _params = (None,)
