@@ -375,6 +375,29 @@ def test_midi_override_errors_reach_the_caller() -> None:
 
 
 @needs_ports
+def test_input_queue_and_output_destruction_leave_their_devices() -> None:
+    driver = MidiDriver()
+    input_device = MidiInputDevice("queue")
+    output_device = MidiOutputDevice("output")
+    driver.add_input_device(input_device)
+    driver.add_output_device(output_device)
+
+    queue = midi.InputQueue()
+    driver.connect(queue)
+    assert input_device.subscribed == [queue]
+    del queue
+    gc.collect()
+    assert input_device.subscribed == []
+
+    output = midi.Output()
+    driver.connect(output)
+    assert output_device.connected == 1
+    del output
+    gc.collect()
+    assert output_device.connected == 0
+
+
+@needs_ports
 def test_midi_teardown_runs_no_python_and_leaves_ports_pointing_nowhere() -> None:
     log, driver, first, second, out_device = lab_setup()
     port = midi.Input()

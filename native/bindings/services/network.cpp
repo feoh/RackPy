@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // rack::network -> rackpy.raw.network (RP-30B). Rack's requests block in curl
-// (30 s to connect, no overall limit), so they release the GIL: another
-// Python thread can read a download's progress meanwhile. Python never runs
-// on Rack's audio path.
+// (30 s to connect, no overall limit), so they release the GIL. Rack writes
+// download progress from its worker thread; Python must read it only after the
+// request returns. Python never runs on Rack's audio path.
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -64,8 +64,8 @@ void bindNetwork(py::module_ m) {
 		return n::requestDownload(url, path, target, cookies);
 	}, py::arg("url"), py::arg("filename"), py::arg("progress") = py::none(),
 		py::arg("cookies") = std::map<std::string, std::string>{},
-		"Rack's: downloads to filename; whether it succeeded. A DownloadProgress shows the progress while it runs (from "
-		"another thread). Blocks, with the GIL released.");
+		"Rack's: downloads to filename; whether it succeeded. Read DownloadProgress only after the request returns; "
+		"Rack writes it from the download thread without synchronization. Blocks, with the GIL released.");
 	m.def("encode_url", &n::encodeUrl, py::arg("s"));
 	m.def("url_path", &n::urlPath, py::arg("url"));
 }

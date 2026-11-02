@@ -214,8 +214,6 @@ void bindCables(py::module_ engine, py::class_<EngineHandle>& cls) {
 		.def_property_readonly("alive", [](const CableHandle& h) { return !h.inEngine() || h.find() != nullptr; })
 		.def_property("id", [](const CableHandle& h) { return h.inEngine() ? h.id : h.owned->id; },
 			[](CableHandle& h, int64_t id) {
-				if (id < -1 || id >= (int64_t(1) << 53))
-					throw std::invalid_argument("a cable ID is -1 (unset) or from 0 to 2**53 - 1");
 				h.own("its ID").id = id;
 			}, "Rack's: unique in the engine, -1 until the engine assigns one.")
 		.def_property("input_module", [](const CableHandle& h) {

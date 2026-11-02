@@ -8,6 +8,7 @@ import os
 import platform
 import sys
 import tarfile
+import tempfile
 import threading
 import time
 from collections.abc import Callable, Iterator
@@ -89,7 +90,8 @@ def test_files_and_directories(tmp_path: Path) -> None:
         assert Path(rsys.get_working_directory()) == tmp_path
     finally:
         rsys.set_working_directory(here)
-    assert Path(rsys.get_temp_directory()).is_dir() and files.temp_directory().is_dir()
+    assert Path(rsys.get_temp_directory()) == Path(tempfile.gettempdir())
+    assert files.temp_directory().is_dir()
     assert [p.name for p in files.entries(tmp_path / "d")] == []
 
 
@@ -111,6 +113,10 @@ def test_archives(tmp_path: Path) -> None:
     again.mkdir()
     files.unarchive(archive, again)
     assert (again / "sub" / "data.bin").read_bytes() == BLOB
+    path_extract = tmp_path / "from-path"
+    path_extract.mkdir()
+    rsys.unarchive_to_directory(str(archive), str(path_extract))
+    assert (path_extract / "sub" / "data.bin").read_bytes() == BLOB
 
 
 def test_rack_follows_dotdot_entries_and_the_facade_refuses_them(tmp_path: Path) -> None:
@@ -135,7 +141,12 @@ def test_time_processes_and_flags() -> None:
     rsys.sleep(0.05)
     # A sleep may return a timer tick early (Windows measured 8.4 ms for 10 ms), so only ask for most of it.
     elapsed = rsys.get_time() - t0
-    assert 0.03 <= elapsed < 5 and rsys.get_unix_time() > 1.6e9 and rsys.get_thread_time() >= 0
+    assert 0.03 <= elapsed < 5 and rsys.get_unix_time() > 1.6e9
+    thread_time = rsys.get_thread_time()
+    work = 0
+    for i in range(500_000):
+        work += i
+    assert work > 0 and rsys.get_thread_time() > thread_time
     t1 = rsys.get_time()
     rsys.sleep(-1)  # Rack's sleep_for returns at once for a time of zero or less
     rsys.sleep(0)
@@ -144,8 +155,10 @@ def test_time_processes_and_flags() -> None:
         with pytest.raises(ValueError, match="finite"):
             rsys.sleep(bad)
     os_name = {"linux": "Linux", "darwin": "Mac", "win32": "Windows"}[sys.platform]
-    assert rsys.get_logical_core_count() >= 1 and os_name in rsys.get_operating_system_info()
-    assert isinstance(rsys.get_stack_trace(), str)
+    logical_cores = os.cpu_count()
+    assert rsys.get_logical_core_count() == logical_cores and os_name in rsys.get_operating_system_info()
+    frames = [line for line in rsys.get_stack_trace().splitlines() if line.strip()]
+    assert len(frames) >= 2
     names: list[str] = []
 
     def name_thread() -> None:

@@ -44,8 +44,11 @@ def test_a_cable_python_makes(probe: EngineModule) -> None:
     assert c.output_module is None and c.output_id == -1
     with pytest.raises(ValueError, match="both"):
         c.to_json()  # Rack's toJson reads both modules
-    with pytest.raises(ValueError):
-        c.id = 2**53
+    c.id = -(2**63)
+    assert c.id == -(2**63)
+    c.id = 2**63 - 1
+    assert c.id == 2**63 - 1
+    c.id = -1
     with pytest.raises(TypeError):
         c.input_module = 3  # type: ignore[assignment]
     c.output_module, c.output_id, c.input_module, c.input_id = probe, 0, probe, 0

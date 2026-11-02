@@ -115,9 +115,11 @@ thread ([input](ui.md#context-and-input)). Its `window` is the `Window` below, o
 `NativeHandle`s, because their headers are outside `rack.hpp`. Its engine,
 scene and history come with their own families.
 
-`context_set(context)` is Rack's `contextSet()`. A thread Python starts has
-no context, so `context_get()` returns `None` there. After
-`context_set(context)` it returns the context, as in a C++ plugin thread
+`Context.engine` is read-only and returns Rack's engine in the live context; it
+returns `None` when the context no longer has an engine. `context_set(context)`
+is Rack's `contextSet()`. A thread Python starts has no context, so
+`context_get()` returns `None` there. After `context_set(context)` it returns
+the context, as in a C++ plugin thread
 that calls `contextSet(APP)`. Main-thread-only APIs still refuse to run on
 such a thread. On Rack's main thread, `context_set` accepts only the context
 that is already current. `app_get()` is Rack's deprecated `appGet()`.
@@ -224,9 +226,10 @@ loading again cheap. RackPy holds Rack's cached fonts and images weakly. Every
 graphics context, and using it then raises `StaleHandleError` ("load it
 again"). Before Rack deletes the context, RackPy deletes the textures of the
 images Python owns, so an `Image` Python keeps longer never touches a deleted
-context. Rack Free destroys its graphics context only when it quits. The
-tests also send Rack's destroy and create events through the scene, as a
-host that recreates its window would.
+context. The `Context` handle itself becomes stale when Rack destroys that
+context; using it then raises `StaleHandleError`. Rack Free destroys its graphics
+context only when it quits. The tests also send Rack's destroy and create events
+through the scene, as a host that recreates its window would.
 
 (window-build-macros)=
 ## Build macros

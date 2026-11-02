@@ -35,6 +35,7 @@ NEEDS_RACK = [
     "test_a_laboratory_input_queue_overrides_racks_queue",
     "test_midi_override_errors_reach_the_caller",
     "test_midi_teardown_runs_no_python_and_leaves_ports_pointing_nowhere",
+    "test_input_queue_and_output_destruction_leave_their_devices",
     "test_inconsistent_midi_overrides_leave_no_dangling_ports",
     "test_rack_threads_never_run_laboratory_midi_python",
     "test_a_subscribe_override_that_removes_its_device_leaves_the_port_pointing_nowhere",
