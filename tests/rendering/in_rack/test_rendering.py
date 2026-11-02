@@ -504,7 +504,8 @@ def test_window_queries_and_controls() -> None:
     window_ = window()
     size = window_.get_size()
     assert size.x > 0 and size.y > 0
-    changed = Vec(size.x + 40, size.y + 30)
+    # Shrink inside the available desktop area: window managers may clamp a requested expansion at the display edge.
+    changed = Vec(max(100, size.x - 40), max(100, size.y - 30))
     try:
         window_.set_size(changed)  # asynchronous under X11; read back after Rack's next window-system update
         deadline = time.monotonic() + 2

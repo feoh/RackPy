@@ -32,7 +32,11 @@ def test_borrowed_components_are_the_modules_and_keep_identity(probe: Any) -> No
     assert isinstance(inp, Input) and isinstance(out, Output)
     assert components(probe)[2] is out  # one Python object per component
     param.set_value(0.25)
-    time.sleep(0.05)  # let the engine process a few blocks
+    deadline = time.monotonic() + 2
+    while time.monotonic() < deadline:
+        if out.get_voltage() == pytest.approx(2.5) and light.get_brightness() == pytest.approx(0.25):
+            break  # the engine thread may not get its first block immediately on a loaded runner
+        time.sleep(0.01)
     assert out.get_voltage() == pytest.approx(2.5) and light.get_brightness() == pytest.approx(0.25)
 
 
