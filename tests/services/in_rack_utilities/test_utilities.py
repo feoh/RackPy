@@ -4,10 +4,11 @@
 import itertools
 import sys
 import time
+from pathlib import Path
 
 import pytest
 
-from rackpy.raw import logger, macros, settings
+from rackpy.raw import asset, logger, macros, settings
 from rackpy.raw import random as rr
 from rackpy.raw import string as rs
 
@@ -209,7 +210,14 @@ def test_logging() -> None:
     macros.INFO("rackpy-macro %s", "informed")
     macros.WARN("rackpy-macro %s", "warned")
     macros.FATAL("rackpy-macro %s", "fatal")
-    assert isinstance(logger.get_log_path(), str)
+    original = logger.get_log_path()
+    assert Path(original) == Path(asset.user("log.txt"))
+    try:
+        logger.set_log_path("rackpy-temporary-log-path")
+        assert logger.get_log_path() == "rackpy-temporary-log-path"
+    finally:
+        logger.set_log_path(original)
+    assert logger.get_log_path() == original
     with pytest.raises(TypeError):
         logger.log(logger.Level.INFO_LEVEL, "f", 1, "g", "%d")
 

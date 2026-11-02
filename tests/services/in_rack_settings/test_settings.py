@@ -478,6 +478,34 @@ def test_shared_lock_dropped_while_held(monkeypatch: pytest.MonkeyPatch) -> None
     assert m.calls == ["lock"] and len(unraisable) == 2 and "did not lock it" in unraisable[1]
 
 
+def test_native_shared_lock_cross_thread_drop_reports_and_keeps_mutex_held(monkeypatch: pytest.MonkeyPatch) -> None:
+    unraisable: list[str] = []
+    monkeypatch.setattr("sys.unraisablehook", lambda u: unraisable.append(f"{u.exc_type.__name__}: {u.exc_value}"))
+    mutex = raw.SharedMutex()
+    box = [raw.SharedLock(mutex)]
+    dropper = threading.Thread(target=box.clear)
+    dropper.start()
+    dropper.join()
+    try:
+        assert len(unraisable) == 1 and "did not lock it" in unraisable[0]
+        blocked: list[bool] = []
+
+        def try_write() -> None:
+            acquired = mutex.try_lock()
+            blocked.append(acquired)
+            if acquired:
+                mutex.unlock()
+
+        probe = threading.Thread(target=try_write)
+        probe.start()
+        probe.join()
+        assert blocked == [False]
+    finally:
+        mutex.unlock_shared()  # only the acquiring thread can release the abandoned native lock
+    assert mutex.try_lock()
+    mutex.unlock()
+
+
 def test_shared_lock_on_a_python_subclass_of_shared_mutex() -> None:
     class Counting(raw.SharedMutex):
         def __init__(self) -> None:

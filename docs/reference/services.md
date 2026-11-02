@@ -102,9 +102,9 @@ argument: the same text, without Python's format string ever reaching
 Rack's printf. It is thread-safe and releases the GIL. `Level` has Rack's
 levels, `DEBUG_LEVEL`, `INFO_LEVEL`, `WARN_LEVEL` and `FATAL_LEVEL`, which
 Rack's log labels `debug`, `info`, `warn` and `fatal`; it writes every
-level. `get_log_path()` returns the file Rack logs to, and
-`set_log_path()` sets Rack's variable, though Rack opened its log at
-start-up, so later messages still go there.
+level. `get_log_path()` reads Rack's log path variable, and `set_log_path()`
+sets it; both require Rack's main thread. Rack opened its log at start-up, so
+changing the variable does not redirect later messages.
 
 `rackpy.raw.macros.DEBUG`, `INFO`, `WARN` and `FATAL` are Rack's macros.
 Each logs at its level with the Python caller's file, line and function, as
@@ -304,17 +304,19 @@ methods, not only a `SharedMutex`:
   can try again; a successful `release()` happens once.
 - **Dropped while held,** a lock calls `unlock_shared()`, as C++ would at the
   end of its scope, but only on the thread that made it; an error there is
-  reported through `sys.unraisablehook`. On another thread, or while Python
-  shuts down, it calls no Python: `unlock_shared()` is not called, the drop
-  is reported as unraisable (at shutdown, in Rack's log), and the object
-  stays as it was. Release a lock explicitly to let go of it reliably.
+  reported through `sys.unraisablehook`. On another thread, `unlock_shared()`
+  is not called and the drop is reported as unraisable. During Python shutdown,
+  Python-backed mutexes are not called and failures are reported in Rack's log;
+  a native mutex can still be unlocked on the acquiring thread. Release a lock
+  explicitly to let go of it reliably.
 
 Rack's mutex asserts on every pthread error, which would stop Rack. RackPy
 records which threads hold the mutex and raises `ValueError` before pthread
 sees a misuse:
 
 - a thread locking a mutex it already holds;
-- a thread unlocking a mutex it does not hold.
+- a thread unlocking a mutex it does not hold, including using `unlock()` on a
+  shared hold or `unlock_shared()` on a write hold.
 
 Other risks remain:
 

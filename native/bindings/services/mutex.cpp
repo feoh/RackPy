@@ -10,6 +10,7 @@
 // lock held. Locks are never for Rack's audio path; Python never runs there.
 #include <pybind11/pybind11.h>
 
+#include <exception>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -150,22 +151,34 @@ struct PySharedLock {
 	~PySharedLock() {
 		if (!held)
 			return;
+		if (locker != std::this_thread::get_id()) {
+			if (Py_IsFinalizing()) {
+				WARN("RackPy: a SharedLock was dropped on a different thread during Python's shutdown; "
+					"unlock_shared was not called");
+			}
+			else {
+				PyErr_SetString(PyExc_RuntimeError,
+					"a SharedLock was dropped while held on a thread that did not lock it; unlock_shared was not called");
+				PyErr_WriteUnraisable(owner.ptr());
+			}
+			return;
+		}
 		if (mutex) {
 			try {
 				mutex->unlockShared();
 			}
-			catch (...) {
+			catch (const std::exception& e) {
+				if (Py_IsFinalizing())
+					WARN("RackPy: SharedLock could not release its mutex during shutdown: %s", e.what());
+				else {
+					PyErr_SetString(PyExc_RuntimeError, e.what());
+					PyErr_WriteUnraisable(owner.ptr());
+				}
 			}
 			return;
 		}
 		if (Py_IsFinalizing()) {
 			WARN("RackPy: a SharedLock was dropped while held during Python's shutdown; unlock_shared was not called");
-			return;
-		}
-		if (locker != std::this_thread::get_id()) {
-			PyErr_SetString(PyExc_RuntimeError,
-				"a SharedLock was dropped while held on a thread that did not lock it; unlock_shared was not called");
-			PyErr_WriteUnraisable(owner.ptr());
 			return;
 		}
 		try {
