@@ -70,6 +70,13 @@ def run() -> None:
     RESULT["in_rack"] = [cw.input_plug.parent is not None, cw.is_complete(), engine.get_num_cables()]
     cw.update_cable()
     cable = cw.cable
+    got = cw.get_cable()
+    RESULT["get_cable"] = [got is not None and cable is not None and got.id == cable.id]
+    cw.step()  # Rack's CableWidget::step puts each plug at its end
+    RESULT["stepped"] = [
+        cw.output_plug.get_box().pos == cw.get_output_pos(),
+        cw.input_plug.get_box().pos == cw.get_input_pos(),
+    ]
     RESULT["cabled"] = [cable is not None and cable.in_engine, engine.get_num_cables(), target.inputs[0].is_connected()]
     RESULT["json"] = cw.merge_json({})
     RESULT["listed"] = [rack.get_cable(cable.id) is cw if cable else False, cw in rack.get_cables()]

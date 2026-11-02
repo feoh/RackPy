@@ -7,6 +7,7 @@ input goes through Rack's EventState, as the window would send it.
 
 import gc
 import math
+import time
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
@@ -442,6 +443,22 @@ def test_a_momentary_switch_holds_its_maximum_one_frame_then_returns_to_its_mini
         switch.close()
 
 
+def test_knob_smooth_turns_on_the_quantitys_smoothing_only_when_it_is_set(module: Module) -> None:
+    # Knob::initParamQuantity: smoothing is enabled when smooth is set and the quantity does not snap; never disabled.
+    smooth, plain = app.Knob(), app.Knob()
+    try:
+        smooth.snap = plain.snap = False
+        smooth.smooth, plain.smooth = True, False
+        assert smooth.smooth and not plain.smooth
+        for knob, param in ((smooth, 0), (plain, 1)):
+            knob.param_id, knob.module = param, module
+            knob.init_param_quantity()
+        assert module.param_quantities[0].smooth_enabled and not module.param_quantities[1].smooth_enabled
+    finally:
+        smooth.close()
+        plain.close()
+
+
 def test_rack_turns_a_knob_and_flips_a_switch(module: Module) -> None:
     knob = raw.create_param(app.Knob, Vec(300, 300), module, 0)
     knob.box.size = Vec(30, 30)
@@ -465,7 +482,11 @@ def test_rack_turns_a_knob_and_flips_a_switch(module: Module) -> None:
         events.handle_button(flip, LEFT, RELEASE, 0)
         assert module.params[1].value == 1  # Rack's Switch steps to its next value
         knob.reset_action()
-        assert gain.get_value() == 5  # Rack's reset to the default
+        # Rack's reset to the default: the knob smooths, so the engine thread moves the value there within a few blocks.
+        deadline = time.monotonic() + 5
+        while abs(gain.get_value() - 5) > 0.01 and time.monotonic() < deadline:
+            time.sleep(0.01)
+        assert gain.get_value() == pytest.approx(5, abs=0.01)
     finally:
         knob.remove_from_parent()
         switch.remove_from_parent()

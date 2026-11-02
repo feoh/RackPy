@@ -449,9 +449,10 @@ Rack's audio and MIDI widgets show a port and open its menus:
   accepts no port for the audio menu: with `None` it adds only its labels.
 
 Each choice's `on_action()` opens Rack's corresponding menu; the buttons
-open the combined menus. In Rack 2.6.6 the combined MIDI menu includes driver
-and device choices, but not the channel choice; `MidiChannelChoice` opens its
-own channel menu.
+open the combined menus. In Rack 2.6.6 the combined MIDI menu has the driver
+and device sections as labels with their items, and ends with a "MIDI channel"
+item (with a right arrow) that opens the channel submenu; `MidiChannelChoice`
+opens that channel menu directly.
 
 They take ports Python made ([audio](audio.md), [MIDI](midi.md)). Rack's
 widgets read their port every frame and their menus capture it, so RackPy

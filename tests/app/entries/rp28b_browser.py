@@ -356,9 +356,13 @@ def cable_views(out: app.PortWidget, inp: app.PortWidget) -> Frames:
         "json": "color" in cable.merge_json({}),
     }
     colour = cable.color
-    cable.color = raw.color.from_hex_string("#3060f0")
+    cable.color = raw.color.from_hex_string("#102030")  # another one: from_json must be what changes it
     cable.from_json({"color": "#3060f0"})
     found["color"] = raw.color.to_hex_string(cable.color)
+    cable.from_json({})  # no colour in the JSON: Rack's next cable colour
+    found["color_default"] = raw.color.to_hex_string(cable.color) == raw.color.to_hex_string(
+        rack().get_next_cable_color()
+    )
     cable.color = colour
     RESULT["cable_views"] = found
 

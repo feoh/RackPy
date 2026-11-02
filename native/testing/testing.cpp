@@ -878,6 +878,28 @@ void define(py::module_ m) {
 		delete overlay;
 		return labels;
 	});
+	m.def("take_scene_menu_items", [] {
+		// Like take_scene_menu_labels, for the clickable entries (MenuItem and its subclasses): (text, right text).
+		requireMainThread("take_scene_menu_items");
+		liveContext();
+		rack::ui::MenuOverlay* overlay = nullptr;
+		for (auto* child : APP->scene->children)
+			if (auto* candidate = ::rackpy::rttiCast<rack::ui::MenuOverlay*>(child))
+				overlay = candidate;
+		if (!overlay)
+			throw std::runtime_error("no menu overlay in Rack's scene");
+		std::vector<std::pair<std::string, std::string>> items;
+		for (auto* child : overlay->children) {
+			if (auto* menu = ::rackpy::rttiCast<rack::ui::Menu*>(child)) {
+				for (auto* entry : menu->children)
+					if (auto* item = ::rackpy::rttiCast<rack::ui::MenuItem*>(entry))
+						items.emplace_back(item->text, item->rightText);
+			}
+		}
+		APP->scene->removeChild(overlay);
+		delete overlay;
+		return items;
+	});
 	m.def("scene_tooltip_count", [] {
 		// Count public Tooltip base instances, without inspecting Rack's private widget state.
 		requireMainThread("scene_tooltip_count");

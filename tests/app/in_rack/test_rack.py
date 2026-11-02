@@ -414,6 +414,105 @@ def draw_calls(s: app.HostScene, scroll: app.HostRackScrollWidget, rack: app.Hos
         frame.close()
 
 
+def led_pixels(widget: w.Widget, size: Vec) -> bytes:
+    """What Rack's draw() gives one widget in a framebuffer of its own size."""
+    frame = w.FramebufferWidget()
+    frame.box = Rect(Vec(), size)
+    widget.box = Rect(Vec(), size)
+    frame.add_child(widget)
+    try:
+        frame.render()
+        _, _, pixels = HOOKS.framebuffer_pixels(frame)
+        return bytes(pixels)
+    finally:
+        frame.remove_child(widget)
+        frame.close()
+
+
+def led_pixel(pixels: bytes, x: int, y: int, width: int) -> tuple[int, int, int, int]:
+    at = (y * width + x) * 4
+    return (pixels[at], pixels[at + 1], pixels[at + 2], pixels[at + 3])
+
+
+def test_led_display_defaults_and_what_rack_draws() -> None:
+    display, separator, choice, field = (
+        app.LedDisplay(),
+        app.LedDisplaySeparator(),
+        app.LedDisplayChoice(),
+        app.LedDisplayTextField(),
+    )
+    actions: list[int] = []
+
+    class Picking(app.LedDisplayChoice):
+        def on_action(self, event: Any) -> None:
+            actions.append(1)
+
+    picking = Picking()
+    try:
+        # Constructors (LedDisplay.cpp): a separator has no size, the choice and text field a LED yellow and a font.
+        assert separator.box.size == Vec()
+        yellow = (0xFF / 255, 0xD7 / 255, 0x14 / 255)
+        for widget in (choice, field):
+            assert (widget.color.r, widget.color.g, widget.color.b) == pytest.approx(yellow, abs=1e-6)
+            assert widget.font_path.endswith("ShareTechMono-Regular.ttf")
+        assert choice.text_offset == Vec(10, 18) and field.text_offset == Vec(5, 5)
+        assert choice.bg_color.a == 0
+        assert rgba_of(field.bg_color) == (0.0, 0.0, 0.0, 1.0)
+        assert choice.box.size.y == pytest.approx(app_mm2px_28_over_3())
+        # Fields read back what was set.
+        choice.font_path, choice.color, choice.bg_color = (
+            "res/fonts/DejaVuSans.ttf",
+            nvg.rgb(255, 0, 0),
+            nvg.rgb(0, 0, 255),
+        )
+        field.font_path, field.color, field.bg_color = "res/fonts/DejaVuSans.ttf", nvg.rgb(1, 2, 3), nvg.rgb(4, 5, 6)
+        field.text_offset = Vec(2, 3)
+        assert choice.font_path == field.font_path == "res/fonts/DejaVuSans.ttf"
+        assert rgba_of(choice.color) == (1, 0, 0, 1) and rgba_of(choice.bg_color) == (0, 0, 1, 1)
+        assert rgba_of(field.color) == pytest.approx((1 / 255, 2 / 255, 3 / 255, 1)) and field.text_offset == Vec(2, 3)
+        assert rgba_of(field.bg_color) == pytest.approx((4 / 255, 5 / 255, 6 / 255, 1))
+        # LedDisplay::draw: a dark vertical gradient (0x22 at the top, 0x12 by y = 25) over its box.
+        top = led_pixel(led_pixels(display, Vec(60, 40)), 30, 3, 60)
+        assert top[0] == top[1] == top[2] and 0x12 <= top[0] <= 0x23 and top[3] == 255
+        # LedDisplaySeparator::draw: a diagonal line, 0x33 grey, from the corner to the opposite one.
+        line = led_pixels(separator, Vec(20, 20))
+        assert led_pixel(line, 10, 10, 20)[3] > 0 and led_pixel(line, 17, 2, 20)[3] == 0
+        # LedDisplayChoice::draw fills its box with bg_color unless transparent (layer 0; its text is layer 1).
+        blue = led_pixels(choice, Vec(40, 20))
+        assert led_pixel(blue, 5, 5, 40) == (0, 0, 255, 255)
+        choice.bg_color = nvg.rgba(0, 0, 255, 0)
+        assert not any(led_pixels(choice, Vec(40, 20))[3::4])
+        # LedDisplayChoice::onButton: a left or right press acts and is consumed; OpaqueWidget also takes the left
+        # release (no action), and leaves a middle press alone.
+        for button, action, acts, consumed in (
+            (raw.glfw.GLFW_MOUSE_BUTTON_LEFT, raw.glfw.GLFW_PRESS, True, True),
+            (raw.glfw.GLFW_MOUSE_BUTTON_RIGHT, raw.glfw.GLFW_PRESS, True, True),
+            (raw.glfw.GLFW_MOUSE_BUTTON_LEFT, raw.glfw.GLFW_RELEASE, False, True),
+            (raw.glfw.GLFW_MOUSE_BUTTON_MIDDLE, raw.glfw.GLFW_PRESS, False, False),
+        ):
+            before = len(actions)
+            press = w.ButtonEvent(button=button, action=action, context=w.EventContext())
+            picking.on_button(press)
+            assert (len(actions) - before == 1) is acts
+            assert press.is_consumed() is consumed
+        # LedDisplayTextField::getTextPosition finds the character under the mouse once its font loads.
+        field.font_path = "res/fonts/ShareTechMono-Regular.ttf"
+        field.text = "abc"
+        field.box = Rect(Vec(), Vec(60, 20))
+        assert field.get_text_position(Vec(0, 10)) == 0 and field.get_text_position(Vec(55, 10)) == 3
+    finally:
+        for item in (separator, choice, field, display, picking):
+            item.close()
+
+
+def rgba_of(color: nvg.NVGcolor) -> tuple[float, ...]:
+    return tuple(color.rgba)  # a function: mypy mis-narrows the property after its field was assigned
+
+
+def app_mm2px_28_over_3() -> float:
+    return float(raw.window.mm2px(Vec(0, 28.0 / 3)).y)
+
+
 def test_led_displays() -> None:
     display, separator = app.LedDisplay(), app.LedDisplaySeparator()
     choice = app.LedDisplayChoice()

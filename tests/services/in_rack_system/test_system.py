@@ -132,8 +132,10 @@ def test_rack_follows_dotdot_entries_and_the_facade_refuses_them(tmp_path: Path)
 
 def test_time_processes_and_flags() -> None:
     t0 = rsys.get_time()
-    rsys.sleep(0.01)
-    assert rsys.get_time() - t0 >= 0.009 and rsys.get_unix_time() > 1.6e9 and rsys.get_thread_time() >= 0
+    rsys.sleep(0.05)
+    # A sleep may return a timer tick early (Windows measured 8.4 ms for 10 ms), so only ask for most of it.
+    elapsed = rsys.get_time() - t0
+    assert 0.03 <= elapsed < 5 and rsys.get_unix_time() > 1.6e9 and rsys.get_thread_time() >= 0
     t1 = rsys.get_time()
     rsys.sleep(-1)  # Rack's sleep_for returns at once for a time of zero or less
     rsys.sleep(0)

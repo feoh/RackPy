@@ -47,6 +47,7 @@ def test_python_cable_widgets_through_racks_rack_engine_and_history(
     assert result["detached_update"].startswith("OwnershipError") and "rack" in result["detached_update"]
     assert result["in_rack"] == [True, True, 0]  # the rack has it, incomplete in the engine until update_cable
     assert result["cabled"] == [True, 1, True]
+    assert result["get_cable"] == [True] and result["stepped"] == [True, True]
     assert result["json"] == {"color": "#2878dc"}
     assert result["listed"] == [True, True]
     assert result["undone"] == [False, 0]  # Rack's undo deleted the Python cable widget and its cable

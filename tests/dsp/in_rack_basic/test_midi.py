@@ -349,6 +349,42 @@ def test_midi_generator() -> None:
             def on_message(self, message: midi.Message) -> None: ...
 
 
+def test_midi_generator_state_views_flags_and_reset() -> None:
+    g = dsp.MidiGenerator[4]()
+    assert g.notes.tolist() == [60] * 4 and g.gates.tolist() == [False] * 4 and g.vels.tolist() == [100] * 4
+    assert (g.clk, g.start, g.stop, g.cont) == (False, False, False, False)
+    g.set_velocity(90, 1)
+    g.set_note_gate(64, True, 1)
+    assert g.notes.tolist() == [60, 64, 60, 60] and g.gates.tolist() == [False, True, False, False]
+    assert g.vels[1] == 90
+    for setter, flag in (
+        (g.set_clock, "clk"),
+        (g.set_start, "start"),
+        (g.set_continue, "cont"),
+        (g.set_stop, "stop"),
+    ):
+        setter(True)
+        assert getattr(g, flag) is True
+    assert [m.bytes for m in g.take_messages()][-4:] == [[0xF8], [0xFA], [0xFB], [0xFC]]  # clock, start, cont, stop
+    g.reset()  # Rack's reset(): the notes, gates, velocities and the four flags go back
+    assert g.notes.tolist() == [60] * 4 and g.gates.tolist() == [False] * 4 and g.vels.tolist() == [100] * 4
+    assert (g.clk, g.start, g.stop, g.cont) == (False, False, False, False)
+
+
+def test_midi_parser_panic_clears_the_performance_state_and_reset_the_settings_too() -> None:
+    p = dsp.MidiParser[4]()
+    p.channels, p.pw_range, p.smooth, p.clock_division = 2, 7.0, False, 12
+    p.process_message(message([0x90, 64, 90]))
+    assert p.gates[0] and p.notes[0] == 64 and p.held_notes == [64] and p.rotate_index == 0
+    p.process_message(message([0xB0, 64, 127]))  # sustain pedal down
+    assert p.pedal
+    p.panic()  # Rack's panic(): the performance state only
+    assert not p.gates[0] and p.notes[0] == 60 and p.held_notes == [] and p.rotate_index == -1 and not p.pedal
+    assert (p.channels, p.pw_range, p.smooth, p.clock_division) == (2, 7.0, False, 12)  # the settings stay
+    p.reset()  # Rack's reset(): the settings too
+    assert (p.channels, p.pw_range, p.smooth, p.clock_division) == (1, 2.0, True, 24)
+
+
 def test_midi_parser_refuses_what_rack_would_get_wrong() -> None:
     p = dsp.MidiParser[4]()
     assert p.MAX_CHANNELS == 4 and dsp.MidiParser[4].MonoMode is dsp.MidiParser_16.MonoMode

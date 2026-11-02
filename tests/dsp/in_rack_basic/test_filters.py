@@ -292,6 +292,42 @@ def test_single_pole_filters() -> None:
     assert v.out.tolist() == [0.0, 2.0, 3.0, 4.0]
 
 
+def test_single_pole_filter_fields_and_resets_work_as_racks_do() -> None:
+    # Each reset() sets out to 0 (filter.hpp); the fields are what process() reads and writes.
+    e, p, s, x = dsp.ExponentialFilter(), dsp.PeakFilter(), dsp.SlewLimiter(), dsp.ExponentialSlewLimiter()
+    for each in (e, p, s, x):
+        each.out = 4.0
+        assert each.out == 4.0
+        each.reset()
+        assert each.out == 0.0
+    p.lambda_ = 2.0
+    assert p.lambda_ == 2.0
+    p.set_tau(0.25)
+    assert p.lambda_ == 4.0  # lambda = 1 / tau
+    p.set_lambda(8.0)
+    assert p.lambda_ == 8.0
+    s.rise, s.fall = 7.0, 3.0
+    assert (s.rise, s.fall) == (7.0, 3.0)
+    assert s.process(1.0, 100.0) == 7.0 and s.process(1.0, -100.0) == 4.0  # the fields are the slew rates read
+    # The vector forms are live views of the lanes.
+    peak, slew = dsp.TPeakFilter_float_4(), dsp.TSlewLimiter_float_4()
+    peak.lambda_ = float_4(1, 2, 3, 4)
+    peak.out = float_4(5, 6, 7, 8)
+    assert peak.lambda_.tolist() == [1.0, 2.0, 3.0, 4.0] and peak.out.tolist() == [5.0, 6.0, 7.0, 8.0]
+    peak.reset()
+    assert peak.out.tolist() == [0.0, 0.0, 0.0, 0.0]
+    slew.rise, slew.fall = float_4(1, 2, 3, 4), float_4(4, 3, 2, 1)
+    assert slew.rise.tolist() == [1.0, 2.0, 3.0, 4.0] and slew.fall.tolist() == [4.0, 3.0, 2.0, 1.0]
+    slew.out = float_4(9, 9, 9, 9)
+    slew.reset()
+    assert slew.out.tolist() == [0.0, 0.0, 0.0, 0.0]
+    exp_slew = dsp.TExponentialSlewLimiter_float_4()
+    exp_slew.out = float_4(1, 2, 3, 4)
+    assert exp_slew.out.tolist() == [1.0, 2.0, 3.0, 4.0]
+    exp_slew.reset()
+    assert exp_slew.out.tolist() == [0.0, 0.0, 0.0, 0.0]
+
+
 def test_deprecated_forms_warn() -> None:
     e = dsp.ExponentialFilter()
     e.set_lambda(0.5)

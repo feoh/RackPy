@@ -121,7 +121,7 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
     views = one["cable_views"]  # RP-28D: Rack's cable through its host views
     assert views["views"] == ["HostCableWidget", "HostPlugWidget"] and views["ports"] == [True, True, True]
     assert all(views["plug"]) and all(views["lookups"]) and views["positions"] and views["json"]
-    assert views["color"] == "#3060f0"
+    assert views["color"] == "#3060f0" and views["color_default"]
     first = one["removed_id"]
     assert one["removed"] == {"removes": [f"module-{first}"], "widget": False, "cables": [0, 0, 0]}
     assert one["undone"] == {"rebuilt": True, "cables": [1, 0, 1]}  # the factory rebuilt it; Rack restored the cable

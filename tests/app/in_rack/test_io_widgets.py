@@ -42,8 +42,18 @@ def test_choices_show_their_ports() -> None:
     ):
         other = audio_cls()
         other.port = port
+        assert other.port is port
         other.step()
         assert isinstance(other.text, str)
+        if audio_cls is not app.AudioDeviceMenuChoice:  # a port with no device: Rack dims what it cannot show
+            assert other.color.a == 0.5
+        if audio_cls is app.AudioSampleRateChoice:
+            assert other.text == "--- kHz"  # a box under 100 wide has no prefix; "---" without a rate; " kHz" always
+        if audio_cls is app.AudioBlockSizeChoice:
+            assert other.text == "---"
+        if audio_cls is app.AudioDeviceChoice:
+            assert other.text == "No device"  # Rack's AudioDisplay.noDevice, in its English translation
+        other.close()
     loop = midi.InputQueue()
     loop.set_driver_id(LOOPBACK)
     loop.set_device_id(2)
@@ -55,6 +65,7 @@ def test_choices_show_their_ports() -> None:
         c.step()
         names.append(c.text)
     assert names[0] == "Loopback" and names[1] == "Loopback 3"
+    assert names[2] == loop.get_channel_name(loop.get_channel())  # MidiChannelChoice::step: the port's channel name
     with pytest.raises(TypeError):
         choice.port = loop  # type: ignore[assignment]  # an audio choice takes an audio port
 
@@ -73,7 +84,7 @@ def test_choices_and_buttons_open_their_rack_menus() -> None:
         (app.MidiDriverChoice(), ["MIDI driver"]),
         (app.MidiDeviceChoice(), ["MIDI device"]),
         (app.MidiChannelChoice(), ["MIDI channel"]),
-        (app.MidiButton(), ["MIDI driver", "MIDI device"]),  # Rack's combined menu omits channel
+        (app.MidiButton(), ["MIDI driver", "MIDI device"]),  # its labels; the channel is a submenu item, below
     ]
     try:
         for control, expected in audio_controls:
@@ -83,6 +94,11 @@ def test_choices_and_buttons_open_their_rack_menus() -> None:
         for control, expected in midi_controls:
             control.port = midi_port
             control.on_action(w.ActionEvent())
+            if isinstance(control, app.MidiButton):
+                # appendMidiMenu ends with a "MIDI channel" item that opens the channel menu, which is not a label.
+                items = HOOKS.take_scene_menu_items()
+                assert ("MIDI channel", ui.RIGHT_ARROW) in items
+                control.on_action(w.ActionEvent())  # the labels are gone with the dismissed menu: again, for them
             assert HOOKS.take_scene_menu_labels() == expected
     finally:
         for control, _ in audio_controls + midi_controls:

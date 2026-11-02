@@ -42,8 +42,10 @@ def test_the_engine_and_its_timing() -> None:
     assert rate > 0 and e.get_sample_time() == pytest.approx(1 / rate)
     before, block = e.get_frame(), e.get_block()
     deadline = time.monotonic() + 10
-    while e.get_frame() <= before and time.monotonic() < deadline:
-        time.sleep(0.01)  # Rack's own thread steps the engine (no audio device here); a CI runner may be slow
+    # Rack's own thread steps the engine (no audio device here); a CI runner may be slow. The frame counter moves with
+    # every sample but the block counter only when a block ends, so wait for both (macOS x64 saw one without the other).
+    while (e.get_frame() <= before or e.get_block() <= block) and time.monotonic() < deadline:
+        time.sleep(0.01)
     assert e.get_frame() > before and e.get_block() > block
     assert 0 <= e.get_block_frame() <= e.get_frame() and e.get_block_frames() > 0
     assert math.isfinite(e.get_block_time()) and e.get_block_duration() == pytest.approx(

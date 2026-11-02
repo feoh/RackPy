@@ -47,11 +47,14 @@ template<class Base> void requireScrollParent(Base& w, const char* what) {
 }
 
 /** What Rack's own code would assert or dereference before a widget's step runs (RP-42): a Menu nudges itself inside its
- parent and asserts it (Menu.cpp:52), a MenuOverlay adopts its parent's size without a check (MenuOverlay.cpp:27). */
+ parent and asserts it (Menu.cpp:52), a MenuOverlay adopts its parent's size without a check (MenuOverlay.cpp:27), a
+ Tooltip nudges itself inside its parent and asserts it (Tooltip.cpp:19). */
 template<class Base> void checkNativeStep(Base& w) {
-	if constexpr (std::is_base_of<rack::ui::Menu, Base>::value || std::is_base_of<rack::ui::MenuOverlay, Base>::value) {
+	if constexpr (std::is_base_of<rack::ui::Menu, Base>::value || std::is_base_of<rack::ui::MenuOverlay, Base>::value ||
+		std::is_base_of<rack::ui::Tooltip, Base>::value) {
 		if (!w.parent)
-			throw runtime::Ownership("step needs this menu to have a parent (a MenuOverlay or the scene): Rack's code uses it");
+			throw runtime::Ownership("step needs this widget to have a parent (a MenuOverlay or the scene for a menu, the "
+				"scene's root for a tooltip): Rack's code uses it");
 	}
 }
 
