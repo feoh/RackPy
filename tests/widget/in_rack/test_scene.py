@@ -44,6 +44,7 @@ def test_scene_widget_receives_rack_window_teardown() -> None:
             super().on_context_destroy(event)
 
         def on_context_create(self, event: Any) -> None:
+            assert event.vg is not None and event.vg.alive
             events.append("create")
             super().on_context_create(event)
 

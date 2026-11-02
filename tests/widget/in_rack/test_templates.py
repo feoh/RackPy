@@ -19,6 +19,7 @@ def check_key_names() -> None:
     assert macros.RACK_MOD_ALT == 4 and macros.RACK_MOD_SHIFT_NAME == "Shift"
     assert w.get_key_name(65) == "A"  # GLFW_KEY_A is ASCII
     assert w.get_key_name(10) == ""  # control codes have no name
+    assert w.get_key_command_name(65) == "A"  # Rack's mods parameter defaults to zero
     assert w.get_key_command_name(65, 0) == "A"
     shift = w.get_key_command_name(65, GLFW_MOD_SHIFT)
     # Rack's Ctrl is RACK_MOD_CTRL: GLFW_MOD_CONTROL, but Command (GLFW_MOD_SUPER, named ⌘) on macOS.

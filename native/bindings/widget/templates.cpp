@@ -149,6 +149,6 @@ void bindTemplates(py::module_ mod) {
 	mod.def("get_key_command_name", [](int key, int mods) {
 		runtime::requireMainThread("naming a key command");
 		return rack::widget::getKeyCommandName(key, mods);
-	}, py::arg("key"), py::arg("mods"), "Rack's display name for a key with modifiers, such as Ctrl+S.");
+	}, py::arg("key"), py::arg("mods") = 0, "Rack's display name for a key with modifiers, such as Ctrl+S.");
 }
 } }  // namespace rackpy::widgets

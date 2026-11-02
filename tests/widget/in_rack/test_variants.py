@@ -49,6 +49,19 @@ def test_every_variant_subclass_round_trip_and_native_step(name: str) -> None:
     assert not child.alive
 
 
+def test_zoom_widget_get_viewport_scales_and_clips_against_its_parent() -> None:
+    parent, zoom = w.Widget(), w.ZoomWidget()
+    parent.box = Rect(Vec(), Vec(100, 100))
+    zoom.box = Rect(Vec(10, 10), Vec(50, 50))
+    parent.add_child(zoom)
+    zoom.set_zoom(2)
+    try:
+        # Rack scales to parent coordinates, clips against the parent's viewport, then scales back.
+        assert zoom.get_viewport(Rect(Vec(), Vec(50, 50))) == Rect(Vec(), Vec(25, 25))
+    finally:
+        parent.close()
+
+
 def test_transparent_opaque_and_zoom_event_base_semantics() -> None:
     seen: list[object] = []
 
@@ -178,6 +191,20 @@ def test_transform_rotate_without_an_origin_is_racks_rotation() -> None:
     finally:
         for widget in (by_parts, whole, alone):
             widget.close()
+
+
+def test_parent_property_is_read_only_and_tree_changes_use_ownership_methods() -> None:
+    parent, child = w.Widget(), w.Widget()
+    try:
+        parent.add_child(child)
+        assert child.parent is parent
+        with pytest.raises(AttributeError):
+            child.parent = None  # type: ignore[misc]
+        parent.remove_child(child)
+        assert child.parent is None
+    finally:
+        parent.close()
+        child.close()
 
 
 def test_raw_field_geometry_interoperability_and_eventful_setters() -> None:

@@ -24,6 +24,23 @@ def framed(*children: w.Widget) -> w.FramebufferWidget:
     return frame
 
 
+def test_menu_entry_can_be_constructed_subclassed_and_owned_by_a_menu() -> None:
+    actions: list[str] = []
+
+    class Entry(ui.MenuEntry):
+        def on_action(self, event: Any) -> None:
+            actions.append("activated")
+
+    menu, entry = ui.Menu(), Entry()
+    try:
+        menu.add_child(entry)
+        assert entry.parent is menu and isinstance(entry, ui.MenuEntry)
+        entry.on_action(w.ActionEvent())
+        assert actions == ["activated"]
+    finally:
+        menu.close()
+
+
 def test_classes_follow_racks_hierarchy() -> None:
     assert issubclass(ui.Button, w.OpaqueWidget) and issubclass(ui.OptionButton, ui.RadioButton)
     assert issubclass(ui.RadioButton, ui.Button) and issubclass(ui.ChoiceButton, ui.Button)
@@ -368,6 +385,27 @@ def test_scroll_widget_container_and_offsets() -> None:
     assert not content.alive
 
 
+def test_scroll_widget_consumes_scroll_drag_and_middle_click_and_pages_down() -> None:
+    scroll = ui.ScrollWidget()
+    scroll.box = Rect(Vec(), Vec(50, 40))
+    content = w.Widget()
+    content.box = Rect(Vec(), Vec(200, 300))
+    scroll.container.add_child(content)
+    try:
+        scroll.step()
+        click = w.ButtonEvent(button=glfw.GLFW_MOUSE_BUTTON_MIDDLE, action=glfw.GLFW_PRESS, context=w.EventContext())
+        scroll.on_button(click)
+        assert click.is_consumed()  # Rack handles middle-click when content overflows
+        drag = w.DragStartEvent(button=glfw.GLFW_MOUSE_BUTTON_LEFT, context=w.EventContext())
+        scroll.on_drag_start(drag)
+        assert drag.is_consumed()
+        page = w.HoverKeyEvent(key=glfw.GLFW_KEY_PAGE_DOWN, action=glfw.GLFW_PRESS, context=w.EventContext())
+        scroll.on_hover_key(page)
+        assert page.is_consumed() and scroll.offset.y == pytest.approx(20)
+    finally:
+        scroll.close()
+
+
 def test_scrollbar_drag_uses_its_orientation() -> None:
     scroll, bar = ui.ScrollWidget(), ui.Scrollbar()
     try:
@@ -384,8 +422,22 @@ def test_scrollbar_drag_uses_its_orientation() -> None:
         assert not bar.vertical
         bar.on_drag_move(w.DragMoveEvent(mouse_delta=Vec(10, 7)))
         assert scroll.offset.y == 0 and scroll.offset.x == pytest.approx(20)
+        before = Vec(scroll.offset.x, scroll.offset.y)
+        start = w.DragStartEvent(button=glfw.GLFW_MOUSE_BUTTON_LEFT, context=w.EventContext())
+        bar.on_drag_start(start)
+        assert not start.is_consumed() and scroll.offset == before
+        bar.on_drag_end(w.DragEndEvent(button=glfw.GLFW_MOUSE_BUTTON_LEFT, context=w.EventContext()))
+        assert scroll.offset == before
     finally:
         scroll.close()
+
+
+def test_detached_scrollbar_close_invalidates_its_handle() -> None:
+    bar = ui.Scrollbar()
+    bar.close()
+    assert not bar.alive
+    with pytest.raises(StaleHandleError):
+        _ = bar.vertical
 
 
 def test_menus_child_menus_and_actions() -> None:
