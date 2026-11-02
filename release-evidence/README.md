@@ -25,6 +25,10 @@ the checkout: do not edit or switch its files while collecting or promoting evid
   evidence, and the candidate's introspection: `bin/rackpy-release introspect` runs one example plugin from the
   platform's release candidate, unchanged but for an added entry module, inside Rack Free, and records what its
   RackPy exports. The CI release-candidate jobs also run `bin/check_coverage.py check` against it.
+- **Shared checker tests.** The synthetic coverage-checker mutation suites run once in the Linux unit job rather
+  than on each OS. They are not binding or sample evidence, and a regression test forbids citing them as such.
+  Collection reports a release-bar problem, and promotion refuses to run, if that shared job is missing or fails.
+  All actual record and sample evidence remains specific to its target platform.
 
 `verified` needs a reviewer (RP-42 step 6: a human or an explicitly authorized agent workflow). Until the owner
 chooses one, no record is verified and the release bar stays closed on every platform. That is the expected
@@ -48,5 +52,9 @@ gh workflow run ci.yml -R feoh/rackpy --ref <branch>      # every platform's job
 bin/release-evidence collect <run id>                       # once the run has finished
 ```
 
-CI keeps the underlying reports for 14 days and the release-candidate reports for 30; the JSON here is the
-durable record.
+For faster diagnostic runs, `workflow_dispatch` accepts `macos_tests` and `windows_tests` pytest `-k`
+expressions. Such runs may omit required platform evidence and are not substitutes for a full exact-candidate run
+with both selectors empty. Each target job records its selection in its reports; collection blocks the release bar
+and promotion refuses to proceed when an attestation is missing or nonempty. Runs created before these attestations
+were added must be rerun to use this collector. CI keeps the underlying reports for 14 days and the
+release-candidate reports for 30; the JSON here is the durable record.

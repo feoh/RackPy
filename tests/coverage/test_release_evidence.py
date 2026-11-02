@@ -32,6 +32,31 @@ def candidate(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[Path, di
     return tmp_path, info, check
 
 
+@pytest.mark.parametrize("conclusion", [None, "failure", "cancelled", "skipped"])
+def test_shared_checker_job_must_succeed(conclusion: str | None) -> None:
+    namespace = runpy.run_path(str(REPO / "bin/release-evidence"))
+    check = namespace["shared_check_problems"]
+    job = namespace["SHARED_JOB"]
+    assert check({job: "success"}) == []
+    problems = check({} if conclusion is None else {job: conclusion})
+    assert len(problems) == 1
+    assert problems[0].code == "shared-checks"
+
+
+@pytest.mark.parametrize("platform", ["mac-arm64", "mac-x64", "win-x64"])
+def test_full_suite_selection_is_required(tmp_path: Path, platform: str) -> None:
+    namespace = runpy.run_path(str(REPO / "bin/release-evidence"))
+    check = namespace["selection_problems"]
+    selection = tmp_path / namespace["TESTS"][platform][0] / "selection.txt"
+    assert check(tmp_path, "lin-x64") == []
+    assert check(tmp_path, platform)[0].code == "test-selection"  # absent is not a full run
+    selection.parent.mkdir()
+    selection.write_text("engine", encoding="utf-8")
+    assert check(tmp_path, platform)[0].code == "test-selection"
+    selection.write_text("", encoding="utf-8")
+    assert check(tmp_path, platform) == []
+
+
 def test_run_must_be_finished_and_match_checkout(candidate: tuple[Path, dict[str, Any], Any]) -> None:
     _, info, check = candidate
     assert check(123) == info

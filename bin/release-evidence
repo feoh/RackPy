@@ -64,6 +64,7 @@ CANDIDATES = {
     "win-x64": "windows-win-x64-release-candidate-evidence",
 }
 SHOWN = 40  # problems listed per platform and check; the counts cover all of them
+SHARED_JOB = "Hooks, typing and unit tests"  # synthetic checker mutation tests run here, once on Linux
 
 
 def gh(*args: str) -> str:
@@ -93,6 +94,28 @@ def check_checkout(commit: str) -> None:
         raise SystemExit(
             "tracked files differ from the candidate commit; commit or restore them before judging evidence"
         )
+
+
+def shared_check_problems(jobs: dict[str, str]) -> list[bm.Problem]:
+    """The Linux unit job runs platform-independent coverage-checker mutation tests for the whole release."""
+    conclusion = jobs.get(SHARED_JOB) or "missing"
+    if conclusion == "success":
+        return []
+    return [bm.Problem("shared-checks", SHARED_JOB, f"shared Linux unit job is {conclusion}, not success")]
+
+
+def selection_problems(root: Path, platform: str) -> list[bm.Problem]:
+    """Focused macOS/Windows diagnostic runs are not full-candidate evidence."""
+    if platform == "lin-x64":
+        return []
+    selection = root / TESTS[platform][0] / "selection.txt"
+    try:
+        expression = selection.read_text(encoding="utf-8")
+    except OSError:
+        return [bm.Problem("test-selection", platform, "full-suite selection attestation is missing")]
+    if expression:
+        return [bm.Problem("test-selection", platform, f"diagnostic pytest -k selection was used: {expression!r}")]
+    return []
 
 
 def sha256(path: Path) -> str:
@@ -163,7 +186,9 @@ def collect(run: int, *, dest: Path = DEST) -> None:
                     "objects": len(artifact.get("objects") or {}),
                 }
                 release = bm.release_problems(inputs, manifest, platform, artifact, outcomes)
-                entry["release_problems"] = problems_doc(release)
+                entry["release_problems"] = problems_doc(
+                    release + shared_check_problems(jobs) + selection_problems(root, platform)
+                )
             else:
                 entry["candidate_introspection"] = None  # no candidate: the release bar cannot be judged
             summary[platform] = entry
@@ -252,6 +277,9 @@ def promote(run: int, verdicts: list[Path]) -> None:
     """Mark verified what VERDICTS (release-evidence/review/*.verdicts.json) accept, where run RUN's evidence passes
     on every platform each record is available on. Then run bin/generate_bindings.py generate."""
     info = checked_run(run)
+    jobs = {j["name"]: j["conclusion"] for j in info["jobs"]}
+    if issues := shared_check_problems(jobs):
+        raise SystemExit(issues[0].message)
     docs = []
     for path in verdicts:
         if path.resolve().parent != bm.REVIEWS.resolve() or not path.name.endswith(".verdicts.json"):
@@ -266,6 +294,9 @@ def promote(run: int, verdicts: list[Path]) -> None:
     with tempfile.TemporaryDirectory(prefix="rackpy-promote-") as scratch:
         root = Path(scratch)
         download(run, root)
+        selection_issues = [issue for platform in TESTS for issue in selection_problems(root, platform)]
+        if selection_issues:
+            raise SystemExit("; ".join(issue.message for issue in selection_issues))
         for platform in TESTS:
             try:
                 outcomes = platform_outcomes(root, platform)

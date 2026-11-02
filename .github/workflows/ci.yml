@@ -592,6 +592,8 @@ jobs:
       # drawing on real Windows graphics drivers stays an open gate.
       - name: Mesa's software OpenGL beside the test copy of Rack
         run: uv run --script bin/rack-sdk mesa --into "$(uv run --script bin/rack-sdk host win-x64 | tail -1)"
+      # These two synthetic coverage-checker suites run in the Linux unit job, not as platform binding evidence.
+      # tests/coverage/test_shared_checks.py prevents their accidental use as per-platform manifest/sample evidence.
       - name: Unit, native and Rack host tests
         env:
           WINDOWS_TESTS: ${{ inputs.windows_tests }}  # through the environment, never into the script's text
@@ -600,10 +602,13 @@ jobs:
           # page unless Python's UTF-8 mode is on (inside Rack, RackPy turns it on itself).
           PYTHONUTF8: "1"
           PYTHONUNBUFFERED: "1"  # show the current test in the live job log
-        run: >
-          uv run --frozen pytest -m "(unit or native or host) and not dist and not sanitizer and not stress and not inventory"
-          ${WINDOWS_TESTS:+-k "$WINDOWS_TESTS"}
-          -v -s -o faulthandler_timeout=120 --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/win-x64.xml
+        run: |
+          mkdir -p reports
+          printf '%s' "$WINDOWS_TESTS" > reports/selection.txt
+          uv run --frozen pytest -m "(unit or native or host) and not dist and not sanitizer and not stress and not inventory" \
+            ${WINDOWS_TESTS:+-k "$WINDOWS_TESTS"} \
+            --ignore=tests/coverage/test_mutations.py --ignore=tests/coverage/test_release_mutations.py \
+            -v -s -o faulthandler_timeout=120 --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/win-x64.xml
       - if: always()
         name: Collect Rack logs
         run: |
@@ -646,6 +651,7 @@ jobs:
             ~/.cache/rackpy/build-inputs
           key: rackpy-${{ matrix.platform }}-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json') }}
       - run: uv sync --frozen
+      # The synthetic checker mutation suites run once in the Linux unit job; real Rack tests stay on each target.
       - name: Unit, native and Rack host tests
         env:
           MACOS_TESTS: ${{ inputs.macos_tests }}  # through the environment, never into the script's text
@@ -654,10 +660,13 @@ jobs:
           # renders with Mesa (tests/fixtures/macos-software-gl, RP-42). Drawing on a Mac's GPU stays an open gate.
           RACKPY_MACOS_SOFTWARE_GL: "1"
           PYTHONUNBUFFERED: "1"  # show the current test in the live job log
-        run: >
-          uv run --frozen pytest -m "(unit or native or host) and not dist and not sanitizer and not stress and not inventory"
-          ${MACOS_TESTS:+-k "$MACOS_TESTS"}
-          -v -s -o faulthandler_timeout=120 --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/${{ matrix.platform }}.xml
+        run: |
+          mkdir -p reports
+          printf '%s' "$MACOS_TESTS" > reports/selection.txt
+          uv run --frozen pytest -m "(unit or native or host) and not dist and not sanitizer and not stress and not inventory" \
+            ${MACOS_TESTS:+-k "$MACOS_TESTS"} \
+            --ignore=tests/coverage/test_mutations.py --ignore=tests/coverage/test_release_mutations.py \
+            -v -s -o faulthandler_timeout=120 --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/${{ matrix.platform }}.xml
       - if: always()
         name: Collect Rack logs
         run: |
