@@ -78,7 +78,8 @@ def test_packages_of_one_tree_are_identical_whatever_the_files_dates_and_bytecod
     ]
     assert {(m.uid, m.gid, m.uname, m.gname, m.mtime) for m in members} == {(0, 0, "", "", 1_700_000_000)}
     modes = {m.name: m.mode for m in members}
-    assert modes["X/plugin.so"] == 0o755 and modes["X/plugin.json"] == 0o644
+    # Windows has no execute bits to set: its st_mode marks only executable suffixes (.exe, .bat, ...) so.
+    assert modes["X/plugin.so"] == (0o644 if sys.platform == "win32" else 0o755) and modes["X/plugin.json"] == 0o644
     assert next(m for m in members if m.issym()).linkname == "libpython3.14.so.1.0"
 
 

@@ -132,13 +132,16 @@ def scenario() -> Iterator[None]:
     del added
 
     # 1,000 create/delete cycles: no growth in wrappers, native references, objects or memory.
-    gc.collect()
-    entries0, refs0, objects0, rss0 = (
-        host.identity_entries(),
-        host.native_references(),
-        len(gc.get_objects()),
-        rss_kib(),
-    )
+    # rss_kib first, then collect: its own objects (on Windows its first call imports ctypes.wintypes, and each
+    # defines a ctypes structure) are not counted as Python objects the cycles left (RP-42: 51669 -> 52022 there).
+    rss_kib()
+
+    def sample() -> tuple[int, int, int, int]:
+        rss = rss_kib()
+        gc.collect()
+        return host.identity_entries(), host.native_references(), len(gc.get_objects()), rss
+
+    entries0, refs0, objects0, rss0 = sample()
     stale = 0
     for _ in range(10):
         for _ in range(100):
@@ -150,13 +153,7 @@ def scenario() -> Iterator[None]:
                 stale += 1
         yield
     del m
-    gc.collect()
-    entries1, refs1, objects1, rss1 = (
-        host.identity_entries(),
-        host.native_references(),
-        len(gc.get_objects()),
-        rss_kib(),
-    )
+    entries1, refs1, objects1, rss1 = sample()
     check("1000 cycles: every deleted handle is stale", stale == 1000, stale)
     check("1000 cycles: identity registry does not grow", entries1 <= entries0, f"{entries0} -> {entries1}")
     check("1000 cycles: native references do not grow", refs1 == refs0, f"{refs0} -> {refs1}")
