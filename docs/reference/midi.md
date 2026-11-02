@@ -64,8 +64,9 @@ has Rack's methods:
 - `set_device_id` takes a device, and -1 means none.
 - `get_driver` and `get_driver_id` return the port's driver and its ID;
   `get_device_id` returns its device's ID (-1: none) and `get_device` the
-  device's view, or `None`. The properties `driver_id`, `device_id` and
-  `device` are the same, and an `Input`'s `input_device` and an `Output`'s
+  device's view, or `None`. The properties `driver`, `driver_id`, `device_id`
+  and `device` are the same (`driver` is `None` for a driver that Rack's list
+  does not hold, such as a laboratory driver), and an `Input`'s `input_device` and an `Output`'s
   `output_device` are Rack's typed fields: an `InputDevice` or an
   `OutputDevice` view.
 - `get_device_ids`, `get_device_name`, `get_channels`,

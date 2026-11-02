@@ -149,7 +149,8 @@ runs on Rack's audio path; on the main thread, Rack's window waits.
   `get_thread_time` and `sleep(seconds)`, which returns at once for zero or less
   and refuses NaN, infinity and more than 9e9 seconds (the clock cannot hold it).
 - **System.** `get_logical_core_count`, `get_operating_system_info`,
-  `get_stack_trace` and `set_thread_name` (the calling thread's).
+  `get_stack_trace` and `set_thread_name` (the calling thread's; Rack names it
+  only on Linux, cut to 15 bytes, and macOS and Windows ignore the call).
 - **FPU flags.** `get_fpu_flags`, `set_fpu_flags` and `reset_fpu_flags`
   act on the calling thread's floating-point flags (MXCSR on x64, FPCR on
   arm64); `reset` sets flush-to-zero, and on x64 denormals-are-zero (arm64

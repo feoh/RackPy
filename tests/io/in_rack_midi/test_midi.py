@@ -114,6 +114,9 @@ def test_json_and_devices(loop: tuple[midi.Output, midi.InputQueue]) -> None:
     assert queue in device.subscribed and isinstance(out.output_device, midi.OutputDevice)
     driver = queue.get_driver()
     assert driver is not None and driver.id == LOOPBACK
+    queue_driver, out_driver = queue.driver, out.driver  # the property is the getter
+    assert queue_driver is not None and out_driver is not None
+    assert queue_driver.id == LOOPBACK == out_driver.id
 
     # A second subscription through the driver, then through the device.
     extra = driver.subscribe_input(1, queue)

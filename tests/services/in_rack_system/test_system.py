@@ -148,12 +148,20 @@ def test_time_processes_and_flags() -> None:
 
     def name_thread() -> None:
         rsys.set_thread_name("rackpy-worker")
-        names.append("ok")
+        names.append(_thread_name())
+        rsys.set_thread_name("rackpy-worker-with-a-long-name")
+        names.append(_thread_name())
+
+    def _thread_name() -> str:
+        # Rack names the thread with pthread_setname_np on Linux, cut to 15 bytes; macOS and Windows do nothing.
+        if sys.platform != "linux":
+            return "unobservable"
+        return Path(f"/proc/self/task/{threading.get_native_id()}/comm").read_text().strip()
 
     worker = threading.Thread(target=name_thread)
     worker.start()
     worker.join()
-    assert names == ["ok"]
+    assert names == (["rackpy-worker", "rackpy-worker-w"] if sys.platform == "linux" else ["unobservable"] * 2)
     flags = rsys.get_fpu_flags()
     try:
         rsys.reset_fpu_flags()
