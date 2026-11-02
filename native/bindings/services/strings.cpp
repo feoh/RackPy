@@ -45,6 +45,17 @@ bool hasLocalTime(time_t t) {
 #endif
 }
 
+/** A timestamp Rack's formatTime and formatTimeISO can use (RP-42): finite and inside time_t's range, whose cast is
+undefined outside it, and with a local time. The range is [-2^(n-1), 2^(n-1)): the largest time_t rounds up to 2^(n-1)
+as a double, so comparing against it would let that value through. */
+void requireLocalTime(double timestamp) {
+	const double limit = std::ldexp(1.0, static_cast<int>(sizeof(time_t) * 8 - 1));
+	if (!std::isfinite(timestamp) || timestamp < -limit || timestamp >= limit)
+		throw py::value_error("the timestamp is out of range");
+	if (!hasLocalTime(static_cast<time_t>(timestamp)))
+		throw py::value_error("the timestamp has no local time");  // Rack would pass strftime a null tm
+}
+
 template <class T>
 T integer(py::handle value, const std::string& spec) {
 	if (!py::isinstance<py::int_>(value) || py::isinstance<py::bool_>(value))
@@ -320,20 +331,11 @@ void bindString(py::module_ m) {
 	m.def("split", &s::split, py::arg("s"), py::arg("seperator"), py::arg("max_tokens") = 0,
 		"Rack's: tokens between separators; an empty separator raises Rack's Exception.");
 	m.def("format_time", [](const std::string& format, double timestamp) {
-		if (!std::isfinite(timestamp) || timestamp < static_cast<double>(std::numeric_limits<time_t>::min()) ||
-			timestamp > static_cast<double>(std::numeric_limits<time_t>::max()))
-			throw py::value_error("the timestamp is out of range");
-		time_t t = static_cast<time_t>(timestamp);
-		if (!hasLocalTime(t))
-			throw py::value_error("the timestamp has no local time");  // Rack would pass strftime a null tm
+		requireLocalTime(timestamp);
 		return s::formatTime(format.c_str(), timestamp);
 	}, py::arg("format"), py::arg("timestamp"), "Rack's: strftime of the local time (up to 1023 bytes).");
 	m.def("format_time_iso", [](double timestamp) {
-		if (!std::isfinite(timestamp))
-			throw py::value_error("the timestamp is out of range");
-		time_t t = static_cast<time_t>(timestamp);
-		if (!hasLocalTime(t))
-			throw py::value_error("the timestamp has no local time");
+		requireLocalTime(timestamp);
 		return s::formatTimeISO(timestamp);
 	}, py::arg("timestamp"));
 	m.def("utf32_to_utf8", [](std::vector<uint32_t> codepoints) {

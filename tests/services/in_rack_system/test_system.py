@@ -299,3 +299,31 @@ def test_a_failing_progress_callback_leaves_no_download_running(server: str, tmp
 def test_url_helpers() -> None:
     assert rn.encode_url("a b&c=d") == "a%20b%26c%3Dd"
     assert rn.url_path("https://example.com/foo/index.html") == "/foo/index.html"
+
+
+def test_set_fpu_flags_refuses_flags_that_would_kill_the_process() -> None:
+    # Rack hands any value to the CPU: reserved MXCSR bits fault (SIGSEGV), and an unmasked exception, or on arm64 a
+    # trap-enable bit, makes the thread's own float arithmetic, which Python runs on, die with SIGFPE (RP-42).
+    arm64 = platform.machine().lower() in ("arm64", "aarch64")
+    sticky = 0 if arm64 else 0x3F  # MXCSR's low bits record exceptions, and ordinary arithmetic sets them
+
+    def stable() -> int:
+        return rsys.get_fpu_flags() & ~sticky
+
+    flags = rsys.get_fpu_flags()
+    killers = (
+        [flags | 1 << 8, flags | 1 << 12, flags | 1 << 15]  # FPCR trap enables
+        if arm64
+        else [
+            flags | 1 << 16,
+            flags | 1 << 31,
+            flags & ~(1 << 7),
+            flags & ~0x1F80,
+        ]  # reserved bits, unmasked exceptions
+    )
+    for bad in killers:
+        with pytest.raises(ValueError, match="set_fpu_flags"):
+            rsys.set_fpu_flags(bad)
+        assert stable() == flags & ~sticky  # nothing was written
+    rsys.set_fpu_flags(flags)  # what Rack accepts still goes through
+    assert stable() == flags & ~sticky

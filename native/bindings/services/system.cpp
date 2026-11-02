@@ -62,6 +62,27 @@ void requireShellSafe(const std::string& s, const char* what) {
 #endif
 }
 
+/** Flags Rack's setFpuFlags would hand to the CPU and take the process down with (RP-42). On x64, MXCSR bits 16 to 31 are
+reserved and writing one raises #GP (SIGSEGV on Linux); a cleared exception mask (bits 7 to 12) makes the thread's own
+floating-point arithmetic trap with SIGFPE, and Python runs on this thread. On arm64, FPCR's trap-enable bits (8 to 12
+and 15) do the same where the CPU supports trapping. Anything else Rack accepts is passed through. */
+void requireSurvivableFpuFlags(uint32_t flags) {
+#if defined ARCH_X64
+	if (flags & 0xFFFF0000u)
+		throw py::value_error("set_fpu_flags: MXCSR bits 16 to 31 are reserved: writing one faults the CPU and kills the "
+			"process");
+	if ((flags & 0x1F80u) != 0x1F80u)
+		throw py::value_error("set_fpu_flags: every MXCSR exception mask (bits 7 to 12) must stay set: an unmasked "
+			"floating-point exception kills Python with SIGFPE");
+#elif defined ARCH_ARM64
+	if (flags & 0x9F00u)
+		throw py::value_error("set_fpu_flags: FPCR's trap-enable bits (8 to 12 and 15) must stay clear: a trapped "
+			"floating-point exception kills Python with SIGFPE");
+#else
+	(void) flags;
+#endif
+}
+
 }  // namespace
 
 void bindSystem(py::module_ m) {
@@ -192,8 +213,13 @@ void bindSystem(py::module_ m) {
 #endif
 	}, py::arg("path"), "Rack's: starts the program (with elevated rights), detached. Windows only.");
 	m.def("get_fpu_flags", &sy::getFpuFlags, "Rack's: the calling thread's MXCSR (x64) or FPCR (ARM64).");
-	m.def("set_fpu_flags", &sy::setFpuFlags, py::arg("flags"),
-		"Rack's: sets the calling thread's floating-point flags (Python's own arithmetic on the thread follows them).");
+	m.def("set_fpu_flags", [](uint32_t flags) {
+		requireSurvivableFpuFlags(flags);
+		sy::setFpuFlags(flags);
+	}, py::arg("flags"),
+		"Rack's: sets the calling thread's floating-point flags (Python's own arithmetic on the thread follows them). "
+		"Flags that would kill the process are refused with ValueError: reserved MXCSR bits and unmasked exceptions on x64, "
+		"FPCR trap-enable bits on arm64.");
 	m.def("reset_fpu_flags", &sy::resetFpuFlags,
 		"Rack's: flush-to-zero and denormals-are-zero on the calling thread, as Rack's engine threads run.");
 }
