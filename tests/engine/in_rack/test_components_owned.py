@@ -276,6 +276,8 @@ def test_the_default_port_name_of_the_largest_port_id_does_not_overflow() -> Non
     # so Rack's text is unchanged for every other ID and the true number appears for that one.
     info = PortInfo()
     info.type = Port.Type.INPUT
+    assert info.port_id == -1 and info.get_name() == "#0"  # a new PortInfo's ID is -1
+    info.port_id = 0
     assert info.get_name() == "#1"
     info.port_id = 41
     assert info.get_name() == "#42" and info.get_full_name() == "#42 input"
