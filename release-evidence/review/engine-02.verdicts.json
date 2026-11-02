@@ -1,0 +1,358 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "constructor:rack::engine::Module::Module()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::engine::Module::Module(int, int, int, int)": {
+      "verdict": "accept"
+    },
+    "destructor:rack::engine::Module::~Module()": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::BypassRoute::inputId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::BypassRoute::outputId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::Expander::consumerMessage": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::Expander::messageFlipRequested": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::Expander::module": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::Expander::moduleId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::Expander::producerMessage": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::ExpanderChangeEvent::side": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::PortChangeEvent::connecting": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::PortChangeEvent::portId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::PortChangeEvent::type": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::ProcessArgs::frame": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::ProcessArgs::sampleRate": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::ProcessArgs::sampleTime": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::SampleRateChangeEvent::sampleRate": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::SampleRateChangeEvent::sampleTime": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::bypassRoutes": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::id": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::inputInfos": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::inputs": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::leftExpander": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::lightInfos": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::lights": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::model": {
+      "finding": "P2: the page has a stale paragraph that contradicts this record. docs/reference/engine-module.md:70-71 (Identity and bypass state) still says the `model` field and `get_model()` 'wait for model handles (RP-16)'. That conflicts with the binding (native/bindings/engine/module.cpp:883-885) and with the cited #lifecycle-events text. On the same page, 'Remaining proof gates' (engine-module.md:839-841) still lists Rack model registration, Python overrides of the lifecycle events and Python JSON as not established. Smallest fix: update both paragraphs.",
+      "verdict": "finding"
+    },
+    "field:rack::engine::Module::outputInfos": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::outputs": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::paramQuantities": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::params": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::rightExpander": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Param::value": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamHandle::color": {
+      "finding": "P1: no cited test reads color back. tests/engine/ops/in_rack/test_cables_handles.py:84 assigns h.color and never asserts it, and tests/engine/ops/entries/rp24_engine.py does not touch color. A broken getter or setter (native/bindings/engine/param_handle.cpp, the color property) would still pass. Smallest fix: in test_a_param_handle_python_makes, assert the default colour and the round-trip of raw.nanovg.rgb(255, 128, 0).",
+      "verdict": "finding"
+    },
+    "field:rack::engine::ParamHandle::module": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamHandle::moduleId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamHandle::paramId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamHandle::text": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::Expander::requestMessageFlip()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::config(int, int, int, int)": {
+      "finding": "P1: the only cited test, tests/engine/module/in_rack/test_module.py:70-83 (test_config_once_and_constructor_phase), checks only the once-only and constructor-phase errors. Nothing in it checks that config resized Rack's vectors. A binding that never called Rack's Module::config would still pass, because the seal accepts all-zero sizes. Smallest fix: also cite test_module.py::test_construction_matches_native_reference, which checks get_num_* and component values after config, or assert the counts in the cited test.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Module::configBypass(int, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::createPatchStorageDirectory()": {
+      "finding": "P2: gil_release is false, but the binding releases the GIL around Rack's call (native/bindings/engine/module.cpp:948, py::gil_scoped_release before createPatchStorageDirectory). The record's own notes say so too. Smallest fix: set gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Module::dataFromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::dataToJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::fromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getExpander(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getId()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getInput(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getInputInfo(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getLeftExpander()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getLight(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getLightInfo(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getModel()": {
+      "finding": "P2: the page has a stale paragraph that contradicts this record. docs/reference/engine-module.md:70-71 says `get_model()` 'waits for model handles (RP-16)', but it is bound (native/bindings/engine/module.cpp:885) and the cited #lifecycle-events text describes it correctly. 'Remaining proof gates' (engine-module.md:839-841) still lists model registration as not established. Smallest fix: update both paragraphs.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Module::getNumInputs()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getNumLights()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getNumOutputs()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getNumParams()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getOutput(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getOutputInfo(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getParam(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getParamQuantity(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getPatchStorageDirectory()": {
+      "finding": "P2: gil_release is false, but the binding releases the GIL around Rack's call (native/bindings/engine/module.cpp:948, py::gil_scoped_release before getPatchStorageDirectory). The record's own notes say so too. Smallest fix: set gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Module::getRightExpander()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::isBypassed()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onAdd()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onAdd(const rack::engine::Module::AddEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onBypass(const rack::engine::Module::BypassEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onExpanderChange(const rack::engine::Module::ExpanderChangeEvent &)": {
+      "finding": "P2: the other eleven events have a direct raw call, but onExpanderChange does not. native/bindings/engine/module.cpp:764-776 binds on_add through on_unset_master only, so there is no rackpy.raw.engine.Module.on_expander_change(e). Outside the laboratory, C++'s direct call Module::onExpanderChange(e) on an ordinary module (Rack's empty behaviour plus RackPy's snapshot) has no raw mapping. Smallest fix: bind it through dispatch(), as on_set_master is, or document the omission.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Module::onPortChange(const rack::engine::Module::PortChangeEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onRandomize()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onRandomize(const rack::engine::Module::RandomizeEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onRemove()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onRemove(const rack::engine::Module::RemoveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onReset()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onReset(const rack::engine::Module::ResetEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onSampleRateChange()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onSampleRateChange(const rack::engine::Module::SampleRateChangeEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onSave(const rack::engine::Module::SaveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onSetMaster(const rack::engine::Module::SetMasterEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onUnBypass(const rack::engine::Module::UnBypassEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onUnsetMaster(const rack::engine::Module::UnsetMasterEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::paramsFromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::paramsToJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::process(const rack::engine::Module::ProcessArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::processBypass(const rack::engine::Module::ProcessArgs &)": {
+      "finding": "P2: the cited #bypass-configuration section still says Rack's processBypass 'is not yet a public Python callback mapping' (docs/reference/engine-module.md:682). That contradicts this record's laboratory process_bypass mapping (native/laboratory/module.cpp, Module::processBypass) and the other cited section, #audio-callbacks. Smallest fix: delete or update that sentence.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Module::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::toJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Param::getValue()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Param::setValue(float)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Module::configButton<type>(int, std::string)": {
+      "finding": "P2: config_button accepts only a SwitchQuantity subclass as quantity_type (native/bindings/engine/module.cpp:1017 passes switchOnly=true; native/bindings/engine/standalone_quantity.cpp:215). Rack's configButton<TSwitchQuantity> touches only ParamQuantity members (Module.hpp:164-171), so configButton<SomeParamQuantity> is valid C++. config_switch legitimately needs SwitchQuantity because it sets SwitchQuantity::labels. Smallest fix: let config_button accept any ParamQuantity subclass, or document the narrowing.",
+      "verdict": "finding"
+    },
+    "method_template:rack::engine::Module::configInput<type>(int, std::string)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Module::configLight<type>(int, std::string)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Module::configOutput<type>(int, std::string)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Module::configParam<type>(int, float, float, float, std::string, std::string, float, float, float)": {
+      "finding": "P1: unjustified restriction. config_param rejects non-finite (unbounded) bounds, min >= max, a default outside [min, max] and display_base of 1 or -1 (native/module/module.hpp:482-485). Rack's configParam accepts all of these and only asserts the ID (Module.hpp:124-147). Rack supports unbounded quantities (Quantity::isBounded), and RP-14's own contract (planning/rp-14-slices.md:152) says to preserve raw unbounded and equal bounds. The cited docs admit the helper 'does not cover arbitrary unbounded/raw C++ configuration semantics' (docs/reference/engine-module.md:314-317). No owner approval is recorded, and none of these cases crashes Rack or is undefined behaviour. Smallest fix: accept Rack's full argument range and keep only the ID check, or record an owner-approved contract for the restriction.",
+      "verdict": "finding"
+    },
+    "method_template:rack::engine::Module::configSwitch<type>(int, float, float, float, std::string, std::vector<std::string>)": {
+      "finding": "P1: unjustified restriction. config_switch runs through the same validation (native/bindings/engine/module.cpp:1004-1008, then native/module/module.hpp:482-485), so it rejects equal bounds, non-finite bounds and a default outside the range. Rack's configSwitch accepts these (Module.hpp:152-159). For example, a single-position configSwitch(id, 0, 0, 0, name, {\"Only\"}) is valid in Rack but refused here. No owner approval is recorded. Smallest fix: same as configParam.",
+      "verdict": "finding"
+    },
+    "record:rack::engine::Module": {
+      "finding": "P2: the Python class docstring is stale. It says 'Not yet registerable as a plugin model' (native/bindings/engine/module.cpp:686), but RP-16's model factory now creates these modules for Rack (createForRack, used by native/bindings/plugin.cpp:53). Smallest fix: update the docstring.",
+      "verdict": "finding"
+    },
+    "record:rack::engine::Module::AddEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::BypassEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::BypassRoute": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::Expander": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::ExpanderChangeEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::PortChangeEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::ProcessArgs": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::RandomizeEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::RemoveEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::ResetEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::SampleRateChangeEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::SaveEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::SetMasterEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::UnBypassEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::UnsetMasterEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Param": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::ParamHandle": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/engine-02",
+  "slice": "engine-02"
+}

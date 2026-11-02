@@ -171,6 +171,26 @@ def test_the_generic_contract() -> None:
     assert rackpy.dsp.ringbuffer.RingBuffer is dsp.RingBuffer
 
 
+def test_a_frame_whose_buffer_is_not_its_samples_is_refused() -> None:
+    # A Python subclass can give any buffer (__buffer__): Rack's copy of a Frame would read past a short or strided
+    # one, so it is checked first (RP-42).
+    eight: Any = dsp.Frame[8]
+    two: Any = dsp.Frame[2]
+
+    class Short(eight):  # type: ignore[misc]
+        def __buffer__(self, flags: int, /) -> memoryview:
+            return memoryview(array.array("f", [1.0]))
+
+    class Strided(two):  # type: ignore[misc]
+        def __buffer__(self, flags: int, /) -> memoryview:
+            return memoryview(array.array("f", [1.0, 2.0, 3.0, 4.0]))[::2]
+
+    with pytest.raises(TypeError, match="float32 samples"):
+        dsp.RingBuffer[dsp.Frame[8], 16]().push(Short())
+    with pytest.raises(ValueError, match="contiguous"):
+        dsp.RingBuffer[dsp.Frame[2], 16]().push(Strided())
+
+
 def test_ring_buffer() -> None:
     r = dsp.RingBuffer[float, 16]()
     assert r.empty() and not r.full() and r.size() == 0 and r.capacity() == 16

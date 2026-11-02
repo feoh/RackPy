@@ -37,7 +37,7 @@ The rest are Rack's functions under snake-case names:
   `Exception` for an empty separator.
 - **Positions.** `position_to_location` and `location_to_position` convert
   between a byte position and a `Location` (line and column, from 0).
-- **Base64.** `to_base64` takes bytes. `from_base64` returns bytes and
+- **Base64.** `to_base64` takes bytes (a contiguous byte buffer). `from_base64` returns bytes and
   skips characters that are not Base64; Rack's header says it raises, but
   Rack 2.6.6 never does.
 - **Time.** `format_time(format, timestamp)` is `strftime` of the local
@@ -78,7 +78,7 @@ from 1 to 63: Rack's shift by 64 for `k` 0 is undefined in C++.
 Rack quits. Rack's engine threads and UI use it without a lock, so
 Python's draws race with theirs, as Rack's own do. `init()` reseeds it, and
 `u64`, `u32`, `uniform` (`[0, 1)`), `normal`, `get(type)`, `get_uint32`
-and the other `get_*`, `buffer(out)` (it fills a writable byte buffer) and
+and the other `get_*`, `buffer(out)` (it fills a writable, contiguous byte buffer) and
 `vector(len)` draw from it. For reproducible numbers, make a generator of
 your own.
 

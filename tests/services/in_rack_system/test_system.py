@@ -67,6 +67,8 @@ def test_paths_as_rack_documents_them() -> None:
 def test_files_and_directories(tmp_path: Path) -> None:
     f = tmp_path / "a.bin"
     rsys.write_file(f, b"rack\x00py")
+    with pytest.raises(ValueError, match="contiguous"):
+        rsys.write_file(f, memoryview(b"rack\x00py")[::2])  # copied as len bytes from its start (RP-42)
     assert rsys.read_file(f) == b"rack\x00py" and rsys.get_file_size(f) == 7
     assert rsys.exists(f) and rsys.is_file(f) and not rsys.is_directory(f)
     with pytest.raises(RuntimeError):

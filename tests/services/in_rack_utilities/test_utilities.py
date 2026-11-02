@@ -54,6 +54,9 @@ def test_text() -> None:
     location = rs.position_to_location("ab\ncd", 4)
     assert (location.line, location.column) == (1, 1) and rs.location_to_position("ab\ncd", location) == 4
     assert rs.to_base64(b"RackPy") == "UmFja1B5" and rs.from_base64("UmFja1B5") == b"RackPy"
+    assert rs.to_base64(memoryview(b"xRackPyx")[1:7]) == "UmFja1B5"  # a contiguous slice is fine
+    with pytest.raises(ValueError, match="contiguous"):
+        rs.to_base64(memoryview(b"RackPy")[::-1])  # Rack would read len bytes from its start (RP-42)
     assert rs.from_base64("Um Fj\na1B5!") == b"RackPy"  # Rack 2.6.6 skips non-Base64 characters (it never raises)
     assert rs.strcasecmp("Rack", "rACK") == 0 and rs.strcasecmp("a", "b") < 0
     less = rs.CaseInsensitiveCompare()
@@ -152,6 +155,9 @@ def test_random() -> None:
         rr.get("int")
     out = bytearray(10)
     rr.buffer(out)
+    rr.buffer(memoryview(out)[2:6])  # a contiguous slice is fine
+    with pytest.raises(ValueError, match="contiguous"):
+        rr.buffer(memoryview(out)[::2])  # Rack would write len bytes from its start, past the view (RP-42)
     assert len(rr.vector(7)) == 7
     with pytest.raises((TypeError, BufferError)):
         rr.buffer(b"read-only")  # type: ignore[arg-type]

@@ -1,0 +1,258 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "destructor:rack::engine::LightInfo::~LightInfo()": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Cable::id": {
+      "finding": "P2: the setter refuses IDs below -1 and from 2**53 up (native/bindings/engine/cable.cpp:218). Rack does not need either limit: Engine::addCable_NoLock treats any negative ID as unset and accepts any free int64 ID. docs/reference/engine.md#engine-cables only says '-1 until the engine assigns one', so the limit is undocumented. Fix: accept any int64, or document the range with its reason in #engine-cables.",
+      "verdict": "finding"
+    },
+    "field:rack::engine::Cable::inputId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Cable::inputModule": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Cable::outputId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Cable::outputModule": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Light::value": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::LightInfo::description": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::LightInfo::lightId": {
+      "finding": "P1: the cited test sets light.light_id = 2 and never reads it back (tests/engine/in_rack/test_components_owned.py:270). The read-back is asserted only in tests/engine/module/in_rack/test_raw_vectors.py::test_identity_fields_are_constructor_scoped (line 344), which is not cited. docs/reference/engine-components.md#components-info also never mentions light_id. Fix: cite that test, or add `assert light.light_id == 2`, and mention light_id in #components-info.",
+      "verdict": "finding"
+    },
+    "field:rack::engine::LightInfo::module": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::LightInfo::name": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Cable::fromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Cable::toJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::addCable(rack::engine::Cable *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::addModule(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::addParamHandle(rack::engine::ParamHandle *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::bypassModule(rack::engine::Module *, bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::clear()": {
+      "finding": "P1: the cited tests only check that clear() is refused (tests/engine/ops/in_rack/test_engine.py test_what_the_engine_refuses). A successful Rack clear is exercised and asserted only in tests/engine/ops/entries/rp24_engine.py:174 (result['engine_cleared'], checked by test_python_modules_cables_and_param_handles_in_racks_engine), which this record does not cite. Fix: add tests/engine/ops/test_engine_ops.py::test_python_modules_cables_and_param_handles_in_racks_engine to the record's tests.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::fromJson(json_t *)": {
+      "finding": "P1: no test loads anything through Engine.from_json. The only call is the refused one at tests/engine/ops/in_rack/test_engine.py:123, so Rack's fromJson is never reached. Fix: in rp24_engine.py clear(), after scene.rack.clear(), call e.from_json() with a saved engine JSON and assert the module and cable IDs it restores.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::getBlock()": {
+      "finding": "P1: the only assertion is `e.get_block() >= 0` (tests/engine/ops/in_rack/test_engine.py:46). Almost any integer accessor passes it, so a miswired binding (getFrame, say) would not fail. Fix: in rp24_engine.py rp24a, assert get_block() rises by exactly 2 across the two step_block calls.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::getBlockDuration()": {
+      "finding": "P1: the only assertion is `get_block_duration() >= 0` (tests/engine/ops/in_rack/test_engine.py:47), which does not check Rack's blockFrames * sampleTime. Fix: after step_block(32) in rp24_engine.py, assert get_block_duration() == pytest.approx(32 * get_sample_time()).",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::getBlockFrame()": {
+      "finding": "P1: the only assertion is `get_block_frame() >= 0` (tests/engine/ops/in_rack/test_engine.py:46), which cannot tell it apart from getFrame or getBlock. Fix: in rp24_engine.py, after step_block(64) then step_block(32), assert get_block_frame() == frame + 64.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::getBlockFrames()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getBlockTime()": {
+      "finding": "P1: the only assertion is `math.isfinite(e.get_block_time())` (tests/engine/ops/in_rack/test_engine.py:47), which passes for any finite double accessor. Fix: assert get_block_time() strictly increases across the step_block calls in rp24_engine.py.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::getCable(int64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getCableIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getCableIds(int64_t *, size_t)": {
+      "finding": "P2: the C buffer overload has no Python form of its own; the record notes it is represented by the list get_cable_ids() returns. docs/reference/engine.md#engine-cables only says get_cable_ids() is 'Rack's' and does not say the overload maps to the list (or drop its len cap). Fix: add one sentence to #engine-cables.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::getFrame()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getMasterModule()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getMeterAverage()": {
+      "finding": "P1: the only assertion is `get_meter_average() >= 0` (tests/engine/ops/in_rack/test_engine.py:48), which a swap with getMeterMax or any non-negative accessor passes. Fix: after more than 1 s of stepping (Rack updates the meters once a second), assert it is > 0 and <= get_meter_max().",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::getMeterMax()": {
+      "finding": "P1: the only assertion is `get_meter_max() >= 0` (tests/engine/ops/in_rack/test_engine.py:48). It does not tell max apart from average. Fix: after more than 1 s of stepping, assert get_meter_max() >= get_meter_average() > 0.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::getModule(int64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getModuleIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getModuleIds(int64_t *, size_t)": {
+      "finding": "P2: the C buffer overload has no Python form of its own; the record notes it is represented by the list get_module_ids() returns. docs/reference/engine.md#engine-modules does not say the overload maps to the list (or drop its len cap). Fix: add one sentence to #engine-modules.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::getModule_NoLock(int64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getNumCables()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getNumModules()": {
+      "finding": "P1: the cited assertion is only `e.get_num_modules() >= 1` (tests/engine/ops/in_rack/test_engine.py:66), which get_frame() would pass too. The exact check after clear (rp24_engine.py:175) belongs to a test this record does not cite. Fix: assert get_num_modules() == len(get_module_ids()), as the cable test does, or cite test_python_modules_cables_and_param_handles_in_racks_engine.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::getParamHandle(int64_t, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getParamHandle(rack::engine::Module *, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getParamHandle_NoLock(int64_t, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getParamSmoothValue(rack::engine::Module *, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getParamValue(rack::engine::Module *, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getSampleRate()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getSampleTime()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::hasCable(rack::engine::Cable *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::hasModule(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::moduleFromJson(rack::engine::Module *, json_t *)": {
+      "finding": "P1: the cited test loads unchanged data back and asserts nothing (tests/engine/ops/in_rack/test_engine.py:72), so a no-op binding would pass. Fix: assert an effect, e.g. change a param value in the JSON and check get_param_value afterwards, or cite tests/laboratory/in_rack/test_engine_events.py::test_bench_events_match_racks_engine, which loads expander IDs through e.module_from_json and compares the result with a bench run.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::moduleToJson(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::prepareSave()": {
+      "finding": "P1: e.prepare_save() is called with no assertion (tests/engine/ops/in_rack/test_engine.py:74); nothing checks that a SaveEvent reaches the engine's modules. The other prepare_save calls in tests go through HOOKS or a laboratory Bench, not this binding. Fix: add a RackPy module with an on_save handler to the engine, call e.prepare_save(), and assert the handler ran.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::prepareSaveModule(rack::engine::Module *)": {
+      "finding": "P1: e.prepare_save_module(probe) is called with no assertion (tests/engine/ops/in_rack/test_engine.py:73), so a no-op binding would pass. Fix: call it on a RackPy module in the engine that has an on_save handler, and assert it received exactly one SaveEvent.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::randomizeModule(rack::engine::Module *)": {
+      "finding": "P1: e.randomize_module(probe) is called with no assertion (tests/engine/ops/in_rack/test_engine.py:79); if it were wired to resetModule the test would still pass. Fix: call it on a RackPy module with an on_randomize handler (or a randomizable param) and assert the event or the change.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::removeCable(rack::engine::Cable *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::removeModule(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::removeParamHandle(rack::engine::ParamHandle *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::resetModule(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::setMasterModule(rack::engine::Module *)": {
+      "finding": "P1: the binding refuses a module that is not in the engine (native/bindings/engine/engine.cpp:321, through engineModule, engine_internal.hpp:108-111). Rack's Engine.hpp says 'Module does not need to belong to the Engine'. The limit is defensible (Rack would keep a raw pointer to a module it does not hold), but neither docs/reference/engine.md#engine-master nor the docstring mentions it. Fix: document the requirement and its reason in #engine-master.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::setMasterModule_NoLock(rack::engine::Module *)": {
+      "finding": "P1: like set_master_module, it refuses a module not in the engine (native/bindings/engine/engine.cpp:333-336), which Rack allows. docs/reference/engine.md#engine-threads and #engine-master do not say so. Fix: document the restriction and its reason alongside set_master_module.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::setParamSmoothValue(rack::engine::Module *, int, float)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::setParamValue(rack::engine::Module *, int, float)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::setSuggestedSampleRate(float)": {
+      "finding": "P1: the binding raises ValueError for NaN, negative and infinite rates (native/bindings/engine/engine.cpp:357-358; tested at test_engine.py:61). Only infinity is a real hazard (sampleTime would be 0). Rack's Engine::setSuggestedSampleRate (src/engine/Engine.cpp:663-674) sends anything not > 0, NaN and negatives included, to the 44100 fallback, so refusing those is an unjustified restriction. docs/reference/engine.md#engine-master documents only '0 gives Rack's fallback'. Fix: refuse only +inf (or document the limits and their reason).",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::stepBlock(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::toJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::updateParamHandle(rack::engine::ParamHandle *, int64_t, int, bool)": {
+      "finding": "P0: crash on another owner's handle. For a handle with ours() false, the lambda runs inside locked() (engine_internal.hpp:99-105), which has already released the GIL. It then calls updatable() (native/bindings/engine/param_handle.cpp:331), which calls ref.get(false) (param_handle.cpp:191), which calls findForeign(false). That opens a second py::gil_scoped_release (param_handle.cpp:136) while the GIL is not held. pybind11 3.1 requires the GIL there and PyEval_SaveThread fails fatally; it also takes a second EngineLease shared lock on the same thread. Such handles are reachable: get_param_handle returns views of other owners' handles, and nothing refuses them here. docs/reference/engine.md#engine-param-handles calls those views 'read-only', yet the binding tries to update them. No test covers a foreign handle. Fix: refuse foreign handles in update_param_handle, as the docs imply, or resolve them inside the locked lambda with engine.getParamHandle(ref.moduleId, ref.paramId) and no nested release. Add a test with a foreign handle.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Engine::updateParamHandle_NoLock(rack::engine::ParamHandle *, int64_t, int, bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::yieldWorkers()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Light::getBrightness()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Light::setBrightness(float)": {
+      "finding": "P1: neither cited test calls set_brightness. test_deprecated_members_warn_and_unstable_ones_work writes light.value; test_borrowed_components_are_the_modules_and_keep_identity only reads a light the engine sets. set_brightness is asserted in tests/engine/in_rack/test_components_owned.py:200 (test_plug_lights_are_views_of_the_ports_lights) and in test_every_reference_case_matches_rack, which are not cited. Fix: cite one of those.",
+      "verdict": "finding"
+    },
+    "method:rack::engine::Light::setBrightnessSmooth(float, float, float)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Light::setBrightnessSmooth(float, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Light::setSmoothBrightness(float, float)": {
+      "finding": "P1: every cited test checks only the DeprecationWarning (tests/engine/in_rack/test_components_owned.py:222; tests/coverage/in_rack/test_deprecated_operations.py). None checks the brightness afterwards, and native/tests/components_reference.cpp has no case for this alias. Fix: after set_brightness(1.0), assert set_smooth_brightness(0.0, 0.01) leaves get_brightness() == pytest.approx(0.7), matching set_brightness_smooth(0.0, 0.01).",
+      "verdict": "finding"
+    },
+    "method:rack::engine::LightInfo::getDescription()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::LightInfo::getName()": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Cable": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Engine": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Light": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::LightInfo": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/engine-01",
+  "slice": "engine-01"
+}

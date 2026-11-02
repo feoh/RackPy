@@ -4,6 +4,7 @@
 // rack::Exception. The semantic mappings that are plain Python (Exception,
 // construct, get, DeferWrapper and the other macros) are in
 // src/rackpy/raw/_common.py and src/rackpy/raw/macros.py.
+#include "rackpy/runtime/buffers.hpp"
 #include "rackpy/rtti.hpp"
 #include <algorithm>
 #include <cerrno>
@@ -227,6 +228,7 @@ void bindCommon(py::module_ raw) {
 			py::buffer_info info = data.request();
 			if (info.ndim != 1 || info.itemsize != 1)
 				throw py::type_error("CFile.write takes bytes (a 1-D byte buffer)");
+			runtime::requireContiguous(info, "CFile.write");
 			size_t wrote = std::fwrite(info.ptr, 1, (size_t) info.size, f.open());
 			if (wrote < (size_t) info.size)
 				raiseErrno(errno);

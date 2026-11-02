@@ -24,6 +24,7 @@
 // The callback laboratory's driver and devices (RP-22F, native/laboratory/
 // audio.cpp) are Unlisted ones: Rack never lists them, so only Python's ports
 // reach them, and the ports' teardown here leaves them without running Python.
+#include "rackpy/runtime/buffers.hpp"
 #include "rackpy/rtti.hpp"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -77,6 +78,7 @@ void copyBack(py::handle array, float* data, size_t count) {
 	py::buffer_info info = py::reinterpret_borrow<py::buffer>(array).request();
 	if (info.itemsize != sizeof(float) || info.format != py::format_descriptor<float>::format())
 		throw py::type_error("the output must stay a float32 buffer");
+	runtime::requireContiguous(info, "the output");
 	size_t n = std::min(count, static_cast<size_t>(info.size));
 	std::copy_n(static_cast<const float*>(info.ptr), n, data);
 }
@@ -569,6 +571,7 @@ struct DrivingScope {
 const float* floatBuffer(const py::buffer_info& info, size_t needed, const char* what) {
 	if (info.itemsize != sizeof(float) || info.format != py::format_descriptor<float>::format())
 		throw py::type_error(std::string(what) + " must be a float32 buffer (array('f'), say)");
+	runtime::requireContiguous(info, what);
 	if (static_cast<size_t>(info.size) < needed)
 		throw std::invalid_argument(std::string(what) + " needs at least " + std::to_string(needed) + " floats");
 	return static_cast<const float*>(info.ptr);

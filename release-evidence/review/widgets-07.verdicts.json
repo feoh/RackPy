@@ -1,0 +1,414 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "alias:rack::componentlibrary::BlueLight": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::GrayModuleLightWidget": {
+      "finding": "P2: the record's `implementation` is native/bindings/app/components.cpp, but that file never binds GrayModuleLightWidget (components.cpp:15-39 binds only SCHEMEs, the concrete components and LEDSlider/LEDButton/LEDBezel). The alias is the Python default specialization at src/rackpy/raw/_componentlibrary.py:475 (`_lib.GrayModuleLightWidget = TGrayModuleLightWidget.default()`), and grep of native/ finds it only in registry.cpp comments. The binding and its tests (test_components.py:156-159) are correct. Fix: set the manifest `implementation` (bindings/manifest.json:18) to src/rackpy/raw/_componentlibrary.py.",
+      "verdict": "finding"
+    },
+    "alias:rack::componentlibrary::GreenLight": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::GreenRedLight": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::LEDBezel": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::LEDButton": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::LEDSlider": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::RedGreenBlueLight": {
+      "finding": "P2: the only behaviour check is `len(cl.RedGreenBlueLight().base_colors) == 3` (tests/app/in_rack/test_components.py:161). It would pass with wrong colours or a wrong order, and the order decides which lightId each channel reads (componentlibrary.hpp TRedGreenBlueLight adds RED, GREEN, BLUE). The code is correct (_componentlibrary.py:197). Fix: assert `base_colors == [cl.SCHEME_RED, cl.SCHEME_GREEN, cl.SCHEME_BLUE]`.",
+      "verdict": "finding"
+    },
+    "alias:rack::componentlibrary::RedLight": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::SvgLight": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::WhiteLight": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::YellowLight": {
+      "verdict": "accept"
+    },
+    "alias_template:rack::componentlibrary::LEDBezelLight<type>": {
+      "verdict": "accept"
+    },
+    "alias_template:rack::componentlibrary::LEDLightBezel<type>": {
+      "verdict": "accept"
+    },
+    "alias_template:rack::componentlibrary::LEDLightButton<type>": {
+      "verdict": "accept"
+    },
+    "alias_template:rack::componentlibrary::LEDLightSlider<type>": {
+      "verdict": "accept"
+    },
+    "alias_template:rack::componentlibrary::LEDSliderLight<type>": {
+      "verdict": "accept"
+    },
+    "alias_template:rack::componentlibrary::VCVLightButton<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::LargeLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::LargeSimpleLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::LightButton<type, type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::LightSlider<type, type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::MediumLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::MediumSimpleLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::MomentarySwitch<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::PB61303Light<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::RectangleLight<type>": {
+      "finding": "P1: the cited test cannot tell RectangleLight from Rack's default circular light. test_rectangle_lights_draw_with_racks_code checks only pixel (5,3) of a 10x6 light (tests/app/in_rack/test_components.py:226, and the layer-1 check after it). Rack's default LightWidget::drawBackground/drawLight draw a circle of radius min(10,6)/2=3 centred at (3,3) (Rack src/app/LightWidget.cpp drawBackground/drawLight), which also covers pixel (5,3). So the test would pass if the Python draw_background/draw_light overrides (_componentlibrary.py:237-266) were never dispatched or drew a circle. test_light_templates_are_specializations does not use RectangleLight. Fix: also assert a pixel inside the rectangle but outside the circle, e.g. (9,3) or (8,1), is 0x33 gray in the background render and lit in the layer-1 render.",
+      "verdict": "finding"
+    },
+    "class_template:rack::componentlibrary::SmallLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::SmallSimpleLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TBlueLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TGrayModuleLightWidget<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TGreenLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TGreenRedLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TRedGreenBlueLight<type>": {
+      "finding": "P2: the template's colours are checked only by `len(cl.RedGreenBlueLight().base_colors) == 3` (tests/app/in_rack/test_components.py:161). That would not catch wrong colours or a wrong order (Rack: RED, GREEN, BLUE, which map to firstLightId+0..2). Code at _componentlibrary.py:197 is correct. Fix: assert the exact `[SCHEME_RED, SCHEME_GREEN, SCHEME_BLUE]` list.",
+      "verdict": "finding"
+    },
+    "class_template:rack::componentlibrary::TRedLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TSvgLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TWhiteLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TYellowLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TinyLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TinySimpleLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::VCVBezelLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::VCVLightBezel<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::VCVLightBezelLatch<type>": {
+      "finding": "P2: the inheritance differs from Rack's. C++ declares `struct VCVLightBezelLatch : VCVLightBezel<TLightBase>` (componentlibrary.hpp), but the Python class inherits VCVLightBezel's `_bases` \u2192 `(_lib.VCVBezel,)` (_componentlibrary.py:401, 415). So `issubclass(VCVLightBezelLatch[BlueLight], VCVLightBezel[BlueLight])` is False, while C++'s is_base_of holds. VCVLightLatch already does this correctly by deriving from `LightButton[VCVButton, arg]` (_componentlibrary.py:376-384). Behaviour (light, latch) is otherwise correct and tested. Fix: override `_bases` to return `(VCVLightBezel[args[0]],)`.",
+      "verdict": "finding"
+    },
+    "class_template:rack::componentlibrary::VCVLightLatch<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::VCVLightSlider<type>": {
+      "finding": "P2: the inheritance differs from Rack's. C++ declares `struct VCVLightSlider : LightSlider<VCVSlider, VCVSliderLight<TLightBase>>`, but the Python specialization's bases are the VCVLightSlider template plus `_lib.VCVSlider` (_componentlibrary.py:330-337). So `issubclass(VCVLightSlider[GreenLight], LightSlider[VCVSlider, VCVSliderLight[GreenLight]])` is False (contrast VCVLightLatch at :376-384). Behaviour (the light follows the handle) is correct and tested. Fix: make `_bases` return `(LightSlider[_lib.VCVSlider, VCVSliderLight[args[0]]],)`, or document the deviation.",
+      "verdict": "finding"
+    },
+    "class_template:rack::componentlibrary::VCVSliderLight<type>": {
+      "finding": "P1: neither cited in-Rack test exercises VCVSliderLight's own code. test_light_templates_are_specializations only checks cache identity, `cl.LEDSliderLight[cl.BlueLight] is cl.VCVSliderLight[cl.BlueLight]` (tests/app/in_rack/test_components.py:184), which holds even with an empty class body. test_rectangle_lights_draw_with_racks_code never uses VCVSliderLight. Nothing asserts that it loads Rack's VCVSliderLight.svg (sets sw.svg and a finite box size) or that it is a RectangleLight over TSvgLight (_componentlibrary.py:319-326). Fix: cite test_light_sliders_and_buttons and add, e.g., `assert light.sw.svg is not None and math.isfinite(light.box.size.x) and isinstance(light, cl.RectangleLight)`.",
+      "verdict": "finding"
+    },
+    "constructor:rack::componentlibrary::AudioButton_ADAT::AudioButton_ADAT()": {
+      "finding": "P1: the cited test cannot detect a wrong constructor. test_buttons_and_menus asserts only `b.box.size.x > 0` (tests/app/in_rack/test_io_widgets.py:151-153). Rack's Widget::box defaults to Vec(INFINITY, INFINITY) (include/widget/Widget.hpp:23), and SvgButton sets a size only in addFrame (src/app/SvgButton.cpp:32-43). A plain AudioButton without the ADAT frame would also pass. The binding itself is correct (io_displays.cpp:233). Fix: assert `len(b.frames) == 1`, `b.sw.svg is not None`, a finite box size and `b.shadow.opacity == 0`.",
+      "verdict": "finding"
+    },
+    "constructor:rack::componentlibrary::AudioButton_USB_B::AudioButton_USB_B()": {
+      "finding": "P1: the only check is `b.box.size.x > 0` (tests/app/in_rack/test_io_widgets.py:151-153), which also holds for Widget's default infinite box (Widget.hpp:23; SvgButton sizes itself only in addFrame, SvgButton.cpp:32-43). So the test would not fail if Rack's constructor (USB_B.svg frame, shadow opacity 0) did not run. Binding at io_displays.cpp:234 is correct. Fix: assert frames, sw.svg, a finite size and shadow.opacity == 0.",
+      "verdict": "finding"
+    },
+    "constructor:rack::componentlibrary::BefacoBigKnob::BefacoBigKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::BefacoPush::BefacoPush()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::BefacoSlidePot::BefacoSlidePot()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::BefacoSwitch::BefacoSwitch()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::BefacoTinyKnob::BefacoTinyKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::CKD6::CKD6()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::CKSS::CKSS()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::CKSSThree::CKSSThree()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::CKSSThreeHorizontal::CKSSThreeHorizontal()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::CL1362Port::CL1362Port()": {
+      "finding": "P1: the cited test checks only `isinstance(port, app.SvgPort) and port.box.size.x > 0` (tests/app/in_rack/test_components.py:98). Rack's SvgPort leaves Widget's infinite default box until setSvg (src/app/SvgPort.cpp:8-28; Widget.hpp:23). A plain SvgPort, with Rack's CL1362Port constructor never run, would pass. Binding (components.hpp RACKPY_CL_PORTS, components_ports.cpp) is correct. Fix: assert `port.sw.svg is not None` and `math.isfinite(port.box.size.x)`.",
+      "verdict": "finding"
+    },
+    "constructor:rack::componentlibrary::DarkPJ301MPort::DarkPJ301MPort()": {
+      "finding": "P1: the only per-class check is `port.box.size.x > 0` (tests/app/in_rack/test_components.py:98). It holds for an SvgPort with no SVG, whose box stays infinite (SvgPort.cpp:8-28, Widget.hpp:23), so the test would not fail if Rack's constructor (PJ301M-dark.svg) did not run. Fix: assert that sw.svg is set and the box size is finite.",
+      "verdict": "finding"
+    },
+    "constructor:rack::componentlibrary::Davies1900hBlackKnob::Davies1900hBlackKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Davies1900hKnob::Davies1900hKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Davies1900hLargeBlackKnob::Davies1900hLargeBlackKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Davies1900hLargeRedKnob::Davies1900hLargeRedKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Davies1900hLargeWhiteKnob::Davies1900hLargeWhiteKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Davies1900hRedKnob::Davies1900hRedKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Davies1900hWhiteKnob::Davies1900hWhiteKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::LargeLight::LargeLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::LargeSimpleLight::LargeSimpleLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::LightButton::LightButton<TBase, TLight>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::LightSlider::LightSlider<TBase, TLightBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::MediumLight::MediumLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::MediumSimpleLight::MediumSimpleLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::MidiButton_MIDI_DIN::MidiButton_MIDI_DIN()": {
+      "finding": "P1: test_buttons_and_menus asserts only `b.box.size.x > 0` (tests/app/in_rack/test_io_widgets.py:151-153). MidiButton is an SvgButton, which sizes itself only in addFrame (SvgButton.cpp:32-43), and Widget's box defaults to infinite (Widget.hpp:23). So a plain MidiButton without the MIDI_DIN frame passes. Binding at io_displays.cpp:235 is correct. Fix: assert frames, sw.svg, a finite size and shadow.opacity == 0.",
+      "verdict": "finding"
+    },
+    "constructor:rack::componentlibrary::MomentarySwitch::MomentarySwitch<TSwitch>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::NKK::NKK()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::PB61303::PB61303()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::PB61303Light::PB61303Light<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::PJ301MPort::PJ301MPort()": {
+      "finding": "P1: the cited test's only check is `isinstance(port, app.SvgPort) and port.box.size.x > 0` (tests/app/in_rack/test_components.py:98). That is also true for an SvgPort whose setSvg was never called, because the box stays infinite (SvgPort.cpp:8-28, Widget.hpp:23). So it does not show that Rack's PJ301MPort constructor loaded PJ301M.svg. Fix: assert that sw.svg is set and the box size is finite.",
+      "verdict": "finding"
+    },
+    "constructor:rack::componentlibrary::PJ3410Port::PJ3410Port()": {
+      "finding": "P1: as for the other SvgPort components, `port.box.size.x > 0` (tests/app/in_rack/test_components.py:98) passes for an unconfigured SvgPort's infinite box (SvgPort.cpp:8-28, Widget.hpp:23). So the test would not fail if Rack's PJ3410Port constructor did not run. Fix: assert that sw.svg is set and the box size is finite.",
+      "verdict": "finding"
+    },
+    "constructor:rack::componentlibrary::Rogan1PBlue::Rogan1PBlue()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PGreen::Rogan1PGreen()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PRed::Rogan1PRed()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PSBlue::Rogan1PSBlue()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PSGreen::Rogan1PSGreen()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PSRed::Rogan1PSRed()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PSWhite::Rogan1PSWhite()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PWhite::Rogan1PWhite()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PBlue::Rogan2PBlue()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PGreen::Rogan2PGreen()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PRed::Rogan2PRed()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PSBlue::Rogan2PSBlue()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PSGreen::Rogan2PSGreen()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PSRed::Rogan2PSRed()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PSWhite::Rogan2PSWhite()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PWhite::Rogan2PWhite()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2SGray::Rogan2SGray()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PBlue::Rogan3PBlue()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PGreen::Rogan3PGreen()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PRed::Rogan3PRed()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PSBlue::Rogan3PSBlue()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PSGreen::Rogan3PSGreen()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PSRed::Rogan3PSRed()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PSWhite::Rogan3PSWhite()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PWhite::Rogan3PWhite()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan5PSGray::Rogan5PSGray()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan6PSWhite::Rogan6PSWhite()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan::Rogan()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::RoundBigBlackKnob::RoundBigBlackKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::RoundBlackKnob::RoundBlackKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::RoundBlackSnapKnob::RoundBlackSnapKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::RoundHugeBlackKnob::RoundHugeBlackKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::RoundKnob::RoundKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::RoundLargeBlackKnob::RoundLargeBlackKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::RoundSmallBlackKnob::RoundSmallBlackKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::ScrewBlack::ScrewBlack()": {
+      "finding": "P1: the cited test checks only `isinstance(screw, app.SvgScrew) and screw.box.size.x > 0` (tests/app/in_rack/test_components.py:104). SvgScrew keeps Widget's infinite default box until setSvg (src/app/SvgScrew.cpp:9-24, Widget.hpp:23), so an unconfigured SvgScrew passes. The test does not show that Rack's ScrewBlack constructor loaded ScrewBlack.svg. Fix: assert that sw.svg is set and the box size is finite.",
+      "verdict": "finding"
+    },
+    "constructor:rack::componentlibrary::ScrewSilver::ScrewSilver()": {
+      "finding": "P1: the only check is `screw.box.size.x > 0` (tests/app/in_rack/test_components.py:104). That holds for an SvgScrew's infinite default box (SvgScrew.cpp:9-24, Widget.hpp:23), so the test would not fail if Rack's ScrewSilver constructor did not run. Fix: assert that sw.svg is set and the box size is finite.",
+      "verdict": "finding"
+    },
+    "constructor:rack::componentlibrary::SmallLight::SmallLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::SmallSimpleLight::SmallSimpleLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::SynthTechAlco::SynthTechAlco()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TBlueLight::TBlueLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TGrayModuleLightWidget::TGrayModuleLightWidget<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TGreenLight::TGreenLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TGreenRedLight::TGreenRedLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TL1105::TL1105()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TRedGreenBlueLight::TRedGreenBlueLight<TBase>()": {
+      "finding": "P2: the constructor's effect is checked only by `len(cl.RedGreenBlueLight().base_colors) == 3` (tests/app/in_rack/test_components.py:161). Wrong colours or a wrong order would pass, although Rack adds RED, GREEN, BLUE in that order (componentlibrary.hpp). Code at _componentlibrary.py:197 is correct. Fix: assert the exact colour list.",
+      "verdict": "finding"
+    },
+    "constructor:rack::componentlibrary::TRedLight::TRedLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TSvgLight::TSvgLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TWhiteLight::TWhiteLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TYellowLight::TYellowLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::ThemedPJ301MPort::ThemedPJ301MPort()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/widgets-07",
+  "slice": "widgets-07"
+}

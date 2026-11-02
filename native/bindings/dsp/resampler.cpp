@@ -16,6 +16,7 @@
 // MAX_CHANNELS (Rack only asserts) and makes SampleRateConverter's sizing
 // fields read-only (speex indexes its state by channel without bounds
 // checks). Every Rack call, constructors included, is out of line (calls.hpp).
+#include "rackpy/runtime/buffers.hpp"
 #include "dsp.hpp"
 
 #include <pybind11/stl.h>
@@ -190,6 +191,7 @@ py::object bindConverter(py::module_ scope, py::dict& specs) {
 				if (!py::isinstance(frame, frameType))
 					throw py::type_error("process: the frames must be Frame[" + std::to_string(N) + "] objects");
 				py::buffer_info info = py::buffer(frame).request();
+				runtime::frameBuffer(info, N, "process");
 				std::memcpy(src[(size_t) k].samples, info.ptr, sizeof(float) * N);
 			}
 			for (int k = 0; k < outFrames; k++)
@@ -200,6 +202,7 @@ py::object bindConverter(py::module_ scope, py::dict& specs) {
 				(const d::Frame<N>*) src.data(), &inUsed, dst.data(), &outUsed);
 			for (int k = 0; k < outUsed; k++) {
 				py::buffer_info info = py::buffer(out[(size_t) k]).request(true);
+				runtime::frameBuffer(info, N, "process");
 				std::memcpy(info.ptr, dst[(size_t) k].samples, sizeof(float) * N);
 			}
 			return py::make_tuple(inUsed, outUsed);

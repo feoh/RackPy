@@ -1,0 +1,403 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "alias:rack::app::SVGButton": {
+      "verdict": "accept"
+    },
+    "alias:rack::app::SVGKnob": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::RailWidget::RailWidget()": {
+      "finding": "P1: the only cited exercise is `cls().close()` with no assertion (tests/app/in_rack/test_controls.py:595-596); nothing checks what Rack's constructor does (it adds an internal FramebufferWidget child, Rack src/app/RailWidget.cpp:20-31). Fix: assert the new RailWidget has Rack's child, e.g. len(rail.children) == 1.",
+      "verdict": "finding"
+    },
+    "constructor:rack::app::SliderKnob::SliderKnob()": {
+      "finding": "P1: the only test is `assert isinstance(app.SliderKnob(), app.Knob)` (tests/app/in_rack/test_controls.py:318), a class-hierarchy check that also leaks the widget unclosed. The constructor's one behaviour, forceLinear = true (Rack src/app/SliderKnob.cpp:8-10), is never asserted. Fix: assert app.SliderKnob().force_linear is True and close the widget.",
+      "verdict": "finding"
+    },
+    "constructor:rack::app::SvgButton::SvgButton()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::SvgKnob::SvgKnob()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::RailWidget::~RailWidget()": {
+      "verdict": "accept"
+    },
+    "field:rack::app::RackWidget::touchedParam": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Scene::browser": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Scene::menuBar": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Scene::mousePos": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Scene::rack": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Scene::rackScroll": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgButton::fb": {
+      "finding": "P1: no cited test reads SvgButton.fb. test_switches_buttons_sliders_ports_screws_and_panels checks only button.frames and box (tests/app/in_rack/test_controls.py:557-558), and test_svg_controls_and_their_host_children reads fb only on an SvgKnob (test_controls.py:515-521). Fix: assert isinstance(button.fb, w.HostFramebufferWidget) in the button test.",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgButton::frames": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgButton::shadow": {
+      "finding": "P1: no cited test reads SvgButton.shadow (tests/app/in_rack/test_controls.py:557-558 check only frames and box; the host-children test uses SvgKnob at :515-521). Fix: assert isinstance(button.shadow, w.HostCircularShadow) in the button test.",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgButton::sw": {
+      "finding": "P1: no cited test reads SvgButton.sw (tests/app/in_rack/test_controls.py:557-558 check only frames and box). Fix: after add_frame, assert button.sw.svg is light in the button test.",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgKnob::fb": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgKnob::shadow": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgKnob::sw": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgKnob::tw": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::addCable(rack::app::CableWidget *)": {
+      "finding": "P2: ownership is recorded as \"value\", but add_cable transfers a Python-made CableWidget (and its plugs) to Rack's cable container (native/bindings/app/rack.cpp:446-454, transferWith); compare Engine::addCable's \"Rack's engine takes the Python-made cable\". Fix: set ownership to e.g. \"Rack's rack takes the Python-made cable widget\".",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::addModule(rack::app::ModuleWidget *)": {
+      "finding": "P1: no cited test calls HostRackWidget.add_module successfully. tests/app/in_rack/test_rack.py never calls it; tests/app/entries/rp28b_browser.py:296 (test_module_browser) uses only add_module_at_mouse; the only add_module call in tests is a refusal in uncited tests/engine/ops/in_rack/test_foreign_modules.py:92. Fix: add a positive add_module/get_module/remove_module round-trip (e.g. beside rp28b_browser.py:296) and cite it.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::addModuleAtMouse(rack::app::ModuleWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::appendSelectionContextMenu(rack::ui::Menu *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::bypassSelectionAction(bool)": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :384-389), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::clear()": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :208-212). Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::clearCables()": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :410-414), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::clearCablesAction()": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :415-420), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::clearCablesOnPort(rack::app::PortWidget *)": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :421-426), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::cloneSelectionAction(bool)": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :378-383), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::copyClipboardSelection()": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :358-361), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::deleteSelectionAction()": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :390-395), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::deselectAll()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::disconnectSelectionAction()": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :372-377), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::fromJson(json_t *)": {
+      "finding": "P1: cited tests exercise only RackPy's refusal path (tests/app/in_rack/test_rack.py:130-131 expects OwnershipError from requireNewWidgets); no test ever reaches Rack's RackWidget::fromJson (native/bindings/app/rack.cpp:219-227), so the binding could be wrong without a failure. Also P2: gil_release is false though it uses unlocked(). Fix: add a test that loads JSON for an engine module that has no widget yet and asserts the widget appears (get_module), and set gil_release true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::getCable(int64_t)": {
+      "finding": "P1: none of the cited tests (test_app/in_rack/test_rack.py, test_module_browser via rp28b_browser.py) call get_cable(cable_id); rp28b_browser.py:336 uses only the port overload. The check that exists, rack.get_cable(cable.id) is cw at tests/app/entries/rp28e_cables.py:75 (asserted at tests/app/test_cables.py:51), is not cited. Fix: add tests/app/test_cables.py::test_python_cable_widgets_through_racks_rack_engine_and_history to tests.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::getCable(rack::app::PortWidget *, rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getCableContainer()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getCables()": {
+      "finding": "P1: the cited tests only assert rack.get_cables() == [] on a cable-less rack (tests/app/in_rack/test_rack.py:139), which would also pass if the binding always returned []. The non-empty check, cw in rack.get_cables() at tests/app/entries/rp28e_cables.py:75 (tests/app/test_cables.py:51), is not cited. Fix: cite tests/app/test_cables.py::test_python_cable_widgets_through_racks_rack_engine_and_history.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::getCablesOnPort(rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getCompleteCables()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getCompleteCablesOnPort(rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getIncompleteCable()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getIncompleteCables()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getModule(int64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getModuleContainer()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getModuleDragAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getModules()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getMousePos()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getNextCableColor()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getNextCableColorId()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getPlugContainer()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getSelected()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getTopCable(rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getTopPlug(rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getTouchedParam()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::hasModules()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::hasSelection()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::isSelected(rack::app::ModuleWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::isSelectionBypassed()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::loadSelection(std::string)": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :340-344), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::loadSelectionDialog()": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :345-349). Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::mergeJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::pasteClipboardAction()": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :242-247), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::pasteJsonAction(json_t *)": {
+      "finding": "P1: no test anywhere calls HostRackWidget.paste_json_action. The only paste_json_action call in tests is ModuleWidget's (tests/app/entries/rp28b_browser.py:424, mw.paste_json_action); rp28b_browser.py:496 covers paste_module_json_action only. Also P2: gil_release is false though it uses unlocked() (native/bindings/app/rack.cpp:228-234). Fix: in rp28b_browser.actions, call rack().paste_json_action(rack().selection_to_json()), assert the module count grows by one and that undo restores it, and set gil_release true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::pasteModuleJsonAction(json_t *)": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :235-241), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::randomizeSelectionAction()": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :367-371), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::removeCable(rack::app::CableWidget *)": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:456-475). Ownership is also recorded as \"value\", though the call hands the widget back to Python (s->reclaim()). Fix: set gil_release true and describe the ownership transfer.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::removeModule(rack::app::ModuleWidget *)": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:277-286). Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::requestModulePos(rack::app::ModuleWidget *, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::requestSelectionPos(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::resetSelectionAction()": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :362-366), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::saveSelection(std::string)": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :350-353), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::saveSelectionDialog()": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :354-357). Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::select(rack::app::ModuleWidget *, bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::selectAll()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::selectionToJson(bool)": {
+      "finding": "P2: python.gil_release is false, but the binding releases the GIL through unlocked() (native/bindings/app/rack.cpp:56-59 and :334-339), as the record's own notes say. Fix: set python.gil_release to true.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::setModulePosForce(rack::app::ModuleWidget *, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::setModulePosNearest(rack::app::ModuleWidget *, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::setModulePosSqueeze(rack::app::ModuleWidget *, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::setNextCableColorId(int)": {
+      "finding": "P0: set_next_cable_color_id accepts any int (native/bindings/app/rack.cpp:488), but Rack's getNextCableColor checks only id >= size before reading settings::cableColors[id] (Rack src/app/RackWidget.cpp:1624-1632). So set_next_cable_color_id(-1) followed by get_next_cable_color() reads outside the vector, which is undefined behaviour. The docstring 'wraps around its cable colour list' is also wrong: Rack's setter only stores the id (RackWidget.cpp:1615-1617). Fix: reject negative ids with ValueError, correct the docstring and docs/reference/app.md#app-rack, and add a test.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::setSelectionPosNearest(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::setTouchedParam(rack::app::ParamWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::updateModuleOldPositions()": {
+      "finding": "P1: the cited tests call update_module_old_positions without checking its effect (tests/app/in_rack/test_rack.py:117). Its only observable result, the ModuleMove from get_module_drag_action, is asserted in uncited tests/history/entries/rp24c_history.py:126-133 (tests/history/test_history.py:58). Fix: add tests/history/test_history.py::test_history_through_racks_ui_paths to tests.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RackWidget::updateSelectionFromRect()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RailWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "finding": "P1: no test calls RailWidget.draw. The cited tests only construct and close a RailWidget (tests/app/in_rack/test_controls.py:595-596), and grep finds no other RailWidget use under tests/. Fix: draw a stepped RailWidget into a FramebufferWidget, as test_rack.py's draw_calls does, and assert the drawing ran.",
+      "verdict": "finding"
+    },
+    "method:rack::app::RailWidget::step()": {
+      "finding": "P1: no test calls RailWidget.step. The cited tests only construct and close it (tests/app/in_rack/test_controls.py:595-596). Rack's step loads the theme's rail SVG (Rack src/app/RailWidget.cpp:39-58). Fix: call rail.step() and assert an observable result, e.g. that the child SvgWidget now has an svg, or at least that it runs without error.",
+      "verdict": "finding"
+    },
+    "method:rack::app::Scene::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Scene::getMousePos()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Scene::onDragHover(const rack::widget::Widget::DragHoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Scene::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Scene::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Scene::onPathDrop(const rack::widget::Widget::PathDropEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Scene::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SliderKnob::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "finding": "P1: no test calls SliderKnob.on_button (grep for SliderKnob in tests finds only test_controls.py:318, an isinstance check). Fix: send a ButtonEvent to a SliderKnob bound to a module and assert ParamWidget's behaviour, e.g. that the event is consumed or a right-click opens the context menu.",
+      "verdict": "finding"
+    },
+    "method:rack::app::SliderKnob::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "finding": "P1: no test calls SliderKnob.on_hover (grep for SliderKnob in tests finds only test_controls.py:318). Rack's override bypasses Knob's circular hit-box (Rack src/app/SliderKnob.cpp:12-15), which is easy to check. Fix: hover a corner of a SliderKnob's box (outside the circle) and assert the event is consumed or targeted, unlike for a plain Knob.",
+      "verdict": "finding"
+    },
+    "method:rack::app::SvgButton::addFrame(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgButton::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgButton::onDragDrop(const rack::widget::Widget::DragDropEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgButton::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "finding": "P1: no test calls SvgButton.on_drag_end. test_svg_button_drag_drop_does_not_dispatch_a_second_action (tests/app/in_rack/test_controls.py:254-268) calls only on_button and on_drag_drop, and the cited test_switches... never sends events. Rack's onDragEnd restores frames[0] (Rack src/app/SvgButton.cpp:61-66). Fix: with two frames, call on_drag_start then on_drag_end and assert button.sw.svg is frames[0].",
+      "verdict": "finding"
+    },
+    "method:rack::app::SvgButton::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "finding": "P1: no test calls SvgButton.on_drag_start (tests/app/in_rack/test_controls.py:254-268 cover on_button and on_drag_drop only). Rack's onDragStart shows frames[1] on a left-button drag (Rack src/app/SvgButton.cpp:50-58). Fix: add two frames, call on_drag_start(DragStartEvent(button=LEFT)) and assert button.sw.svg is frames[1].",
+      "verdict": "finding"
+    },
+    "method:rack::app::SvgKnob::onChange(const rack::widget::Widget::ChangeEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgKnob::setSVG(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgKnob::setSvg(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "record:rack::app::RackWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::RailWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::Scene": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SliderKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SvgButton": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SvgKnob": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/widgets-05",
+  "slice": "widgets-05"
+}

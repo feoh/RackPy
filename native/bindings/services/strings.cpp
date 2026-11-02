@@ -22,6 +22,7 @@
 
 #include <rack.hpp>
 
+#include "rackpy/runtime/buffers.hpp"
 #include "rackpy/runtime/threads.hpp"
 #include "services.hpp"
 
@@ -280,6 +281,7 @@ void bindString(py::module_ m) {
 		py::buffer_info info = data.request();
 		if (info.ndim != 1 || info.itemsize != 1)
 			throw py::type_error("to_base64 takes bytes (a 1-D byte buffer)");
+		runtime::requireContiguous(info, "to_base64");
 		return s::toBase64(static_cast<const uint8_t*>(info.ptr), static_cast<size_t>(info.size));
 	}, py::arg("data"), "Rack's toBase64 (both overloads): bytes to Base64 text.");
 	m.def("from_base64", [](const std::string& text) {

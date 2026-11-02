@@ -107,6 +107,11 @@ def test_python_ports_on_a_python_device() -> None:
         device.process_buffer(data, 2, out, 2, frames * 4)  # buffers too short
     with pytest.raises(ValueError, match="stride"):
         device.process_buffer(data, 1, out, 2, 8)
+    # A strided or reversed view is refused: Rack reads frames * stride floats from its start (RP-42).
+    with pytest.raises(ValueError, match="contiguous"):
+        device.process_buffer(memoryview(data)[::-1], 2, out, 2, 4)
+    with pytest.raises(ValueError, match="contiguous"):
+        device.process_buffer(data, 2, memoryview(out)[::2], 2, 4)
     device.stop_stream()  # Rack's Device::onStopStream, as driver code calls it: each port's on_stop_stream
     assert port.log[-1] == "stop"
     device.start_stream()

@@ -11,6 +11,7 @@
 
 #include <rack.hpp>
 
+#include "rackpy/runtime/buffers.hpp"
 #include "services.hpp"
 
 namespace rackpy {
@@ -82,6 +83,7 @@ void bindRandom(py::module_ m) {
 		py::buffer_info info = out.request(true);
 		if (info.readonly || info.itemsize != 1 || info.ndim != 1)
 			throw py::type_error("buffer fills a writable 1-D byte buffer (a bytearray, say)");
+		runtime::requireContiguous(info, "buffer");
 		r::buffer(static_cast<uint8_t*>(info.ptr), static_cast<size_t>(info.size));
 	}, py::arg("out"), "Rack's: fills the buffer with random bytes.");
 	m.def("vector", [](size_t len) {

@@ -20,6 +20,7 @@
 
 #include <rack.hpp>
 
+#include "rackpy/runtime/buffers.hpp"
 #include "services.hpp"
 
 namespace rackpy {
@@ -43,6 +44,7 @@ std::vector<uint8_t> dataOf(py::handle value) {
 	py::buffer_info info = py::reinterpret_borrow<py::buffer>(value).request();
 	if (info.ndim != 1 || info.itemsize != 1)
 		throw py::type_error("expected bytes (a 1-D byte buffer)");
+	runtime::requireContiguous(info, "the data");
 	auto* p = static_cast<const uint8_t*>(info.ptr);
 	return std::vector<uint8_t>(p, p + info.size);
 }

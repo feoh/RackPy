@@ -11,6 +11,7 @@
 // n elements' lanes; Rack's pointers are live views of the inline data, which
 // never moves, read-only for its const T* results.
 #pragma once
+#include "rackpy/runtime/buffers.hpp"
 #include "dsp.hpp"
 
 #include <cstring>
@@ -64,6 +65,7 @@ struct Element<d::Frame<C>> {
 		if (!py::isinstance(h, type()))
 			throw py::type_error("the elements are Frame[" + std::to_string(C) + "] objects");
 		py::buffer_info info = py::reinterpret_borrow<py::buffer>(h).request();
+		runtime::frameBuffer(info, C, "a Frame");
 		d::Frame<C> frame;
 		std::memcpy(frame.samples, info.ptr, sizeof(frame.samples));
 		return frame;
@@ -71,6 +73,7 @@ struct Element<d::Frame<C>> {
 	static py::object to(const d::Frame<C>& x) {
 		py::object out = type()();
 		py::buffer_info info = py::reinterpret_borrow<py::buffer>(out).request(true);
+		runtime::frameBuffer(info, C, "a Frame");
 		std::memcpy(info.ptr, x.samples, sizeof(x.samples));
 		return out;
 	}

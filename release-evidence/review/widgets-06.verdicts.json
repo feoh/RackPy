@@ -1,0 +1,282 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "alias:rack::app::SVGPanel": {
+      "verdict": "accept"
+    },
+    "alias:rack::app::SVGPort": {
+      "verdict": "accept"
+    },
+    "alias:rack::app::SVGScrew": {
+      "verdict": "accept"
+    },
+    "alias:rack::app::SVGSlider": {
+      "verdict": "accept"
+    },
+    "alias:rack::app::SVGSwitch": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::SvgPanel::SvgPanel()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::SvgPort::SvgPort()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::SvgScrew::SvgScrew()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::SvgSlider::SvgSlider()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::SvgSwitch::SvgSwitch()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::Switch::Switch()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::SvgSwitch::~SvgSwitch()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::Switch::~Switch()": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgPanel::fb": {
+      "finding": "P1: no cited test reads SvgPanel.fb (tests/app/in_rack/test_controls.py:546-604 never touches panel.fb; the only exercise is the uncited tests/services/in_rack_settings/test_settings.py:342-345), and the cited anchor app.md#app-svg (app.md:204-237) does not describe fb (it is described under app-host-views, app.md:240-250); cite test_settings.py::test_prefer_dark_panels_rerenders_themed_widgets (or add an isinstance(panel.fb, w.HostFramebufferWidget) assertion) and cite docs/reference/app.md#app-host-views",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgPanel::panelBorder": {
+      "finding": "P2: cited anchor app.md#app-svg (app.md:204-237) does not describe panel_border; it is documented under app.md#app-host-views (app.md:240-250, line 250); add that anchor to the record's docs",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgPanel::svg": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgPanel::sw": {
+      "finding": "P1: no test anywhere reads SvgPanel.sw (grep of tests/ finds no panel.sw; test_controls.py:590-593 asserts only panel.svg/panel_border), and cited anchor app.md#app-svg does not describe sw (app-host-views, app.md:240-250, does); add e.g. assert panel.sw.svg is dark after set_background in test_switches_buttons_sliders_ports_screws_and_panels and cite app.md#app-host-views",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgPort::fb": {
+      "finding": "P1: no test reads SvgPort.fb (cited test_controls.py:546-604 and :514-543 touch only knob.fb and port/themed_port.sw), and cited anchor app.md#app-svg does not describe fb (app-host-views, app.md:240-250, does); add isinstance(port.fb, w.HostFramebufferWidget) and cite app.md#app-host-views",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgPort::shadow": {
+      "finding": "P1: no test reads SvgPort.shadow (grep finds shadow only for knob at test_controls.py:519 and CKSS at test_components.py:92), and cited anchor app.md#app-svg does not describe shadow (app-host-views does, app.md:240-250); after port.set_svg assert isinstance(port.shadow, w.HostCircularShadow) and its box size matches the SVG (Rack sizes it, src/app/SvgPort.cpp:28-29), and cite app.md#app-host-views",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgPort::sw": {
+      "finding": "P2: behaviour is tested (themed_port.sw.svg is light, test_controls.py:585), but the cited anchor app.md#app-svg does not describe sw; it is documented under app.md#app-host-views (app.md:240-250); add that anchor",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgScrew::fb": {
+      "finding": "P1: no test reads SvgScrew.fb (grep of tests/ finds none), and cited anchor app.md#app-svg does not describe fb (app-host-views, app.md:240-250, does); add isinstance(screw.fb, w.HostFramebufferWidget) and screw.fb box size == SVG size after set_svg (src/app/SvgScrew.cpp:23), and cite app.md#app-host-views",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgScrew::sw": {
+      "finding": "P2: behaviour is tested via the subclass (themed_screw.sw.svg is light, test_controls.py:589), but cited anchor app.md#app-svg does not describe sw; it is documented under app.md#app-host-views (app.md:240-250); add that anchor",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgSlider::background": {
+      "finding": "P2: behaviour is tested (test_controls.py:572-579), but cited anchor app.md#app-svg does not describe background; it is documented under app.md#app-host-views (app.md:248); add that anchor",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgSlider::fb": {
+      "finding": "P1: no test reads SvgSlider.fb (grep finds slider.fb nowhere), and cited anchor app.md#app-svg does not describe fb (app-host-views, app.md:240-250, does); add isinstance(slider.fb, w.HostFramebufferWidget) and fb box size == background SVG size after set_background_svg (src/app/SvgSlider.cpp:28), and cite app.md#app-host-views",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgSlider::handle": {
+      "finding": "P2: behaviour is tested (test_controls.py:571-579 and :287-291), but cited anchor app.md#app-svg does not describe handle; it is documented under app.md#app-host-views (app.md:248); add that anchor",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgSlider::maxHandlePos": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgSlider::minHandlePos": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgSwitch::fb": {
+      "finding": "P1: no test reads SvgSwitch.fb (grep of tests/ finds none for a switch), and cited anchor app.md#app-svg does not describe fb (app-host-views, app.md:240-250, does); add isinstance(switch.fb, w.HostFramebufferWidget) and fb box size == first frame size after add_frame (src/app/SvgSwitch.cpp:30), and cite app.md#app-host-views",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgSwitch::frames": {
+      "finding": "P1: unjustified restriction contradicting the docs: the setter rejects None entries (drawableFrames, native/bindings/app/app.cpp:236-243, used at :569) although Rack handles a null frame safely (SvgWidget::setSvg/wrap/draw check svg, src/widget/SvgWidget.cpp:15-35; SvgSwitch::onChange just setSvg(frames[i]), src/app/SvgSwitch.cpp:68-79), and docs/reference/app.md:230-232 say an SVG handed to these widgets 'must be None or loaded'; accept None in drawableFrames (only reject unloaded Svgs) and update the stub frames: list[Svg | None], or document the None restriction with a real justification",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgSwitch::latch": {
+      "finding": "P1: the cited anchor app.md#app-svg (app.md:204-237) never mentions latch or its behaviour (Rack shows frames[1] while pressed and frames[0] on release instead of following the value, SvgSwitch.hpp:24-26), and that behaviour is untested (test_controls.py:556-557 is only a round-trip); document latch in app.md#app-svg and add a drag test (see on_drag_start/on_drag_end)",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgSwitch::shadow": {
+      "finding": "P2: behaviour is exercised in the in-Rack suite (cl.CKSS().shadow.opacity == 0, tests/app/in_rack/test_components.py:92), but the cited anchor app.md#app-svg does not describe shadow; it is documented under app.md#app-host-views (app.md:240-250); add that anchor (and cite test_components.py's test)",
+      "verdict": "finding"
+    },
+    "field:rack::app::SvgSwitch::sw": {
+      "finding": "P2: behaviour is tested (switch.sw.svg is first/second, test_controls.py:292-297, in the suite the cited outer test runs), but the cited anchor app.md#app-svg does not describe sw; it is documented under app.md#app-host-views (app.md:240-250); add that anchor and cite test_svg_controls_apply_change_to_native_children",
+      "verdict": "finding"
+    },
+    "field:rack::app::Switch::momentary": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ThemedSvgPanel::darkSvg": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ThemedSvgPanel::lightSvg": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ThemedSvgPort::darkSvg": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ThemedSvgPort::lightSvg": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ThemedSvgScrew::darkSvg": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ThemedSvgScrew::lightSvg": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PanelBorder::draw(const rack::widget::Widget::DrawArgs &)": {
+      "finding": "P1: no cited test calls PanelBorder.draw; test_controls.py:595-596 only constructs and closes app.PanelBorder(), so nothing would fail if draw were wrong (Rack's PanelBorder::draw strokes a 1px border, src/app/SvgPanel.cpp:9-16); add a framebuffer render of a sized PanelBorder asserting an edge pixel is stroked, as test_light_drawing_overrides_and_layers does",
+      "verdict": "finding"
+    },
+    "method:rack::app::SvgPanel::setBackground(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgPanel::step()": {
+      "finding": "P1: SvgPanel.step is never called in any test (cited test_controls.py:546-604 has no step call; grep finds none for SvgPanel), so Rack's behaviour (sets fb->oversample to 2 or 1 by window pixelRatio, src/app/SvgPanel.cpp:31-41) is unverified; add panel.step() then assert panel.fb.oversample in (1.0, 2.0) matching the window pixel ratio",
+      "verdict": "finding"
+    },
+    "method:rack::app::SvgPort::setSVG(std::shared_ptr<rack::window::Svg>)": {
+      "finding": "P1: the only test of SvgPort.set_svg_legacy (tests/coverage/in_rack/test_deprecated_operations.py:37-44,109-111) asserts just the DeprecationWarning; nothing checks it actually sets the SVG (test_controls.py:546-604 never calls port.set_svg_legacy); add assert port.sw.svg is svg and port.box.size == svg size after the legacy call",
+      "verdict": "finding"
+    },
+    "method:rack::app::SvgPort::setSvg(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgScrew::setSvg(std::shared_ptr<rack::window::Svg>)": {
+      "finding": "P1: test_controls.py:586 calls screw.set_svg(light) with no assertion on screw, so a no-op binding would pass (ThemedSvgScrew.set_svg is a separate binding, app.cpp:620-622); add assert screw.sw.svg is light and screw.box.size == Vec(30, 30)",
+      "verdict": "finding"
+    },
+    "method:rack::app::SvgSlider::onChange(const rack::widget::Widget::ChangeEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgSlider::setBackgroundSVG(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgSlider::setBackgroundSvg(std::shared_ptr<rack::window::Svg>)": {
+      "finding": "P1: test_controls.py:564 calls slider.set_background_svg(dark) without any assertion before the legacy call overwrites the background (line 574-576), so a no-op binding would pass; add assert slider.background.svg is dark and slider.box.size == Vec(12, 24) right after line 564",
+      "verdict": "finding"
+    },
+    "method:rack::app::SvgSlider::setHandlePos(rack::math::Vec, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgSlider::setHandlePosCentered(rack::math::Vec, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgSlider::setHandleSVG(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgSlider::setHandleSvg(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgSlider::setSVGs(std::shared_ptr<rack::window::Svg>, std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgSwitch::addFrame(std::shared_ptr<rack::window::Svg>)": {
+      "finding": "P1: unjustified restriction contradicting the docs: add_frame raises on None (native/bindings/app/app.cpp:573-576) although Rack's addFrame(nullptr) is safe (pushes it and setSvg(nullptr) sizes to zero, src/app/SvgSwitch.cpp:25-36; SvgWidget::draw returns on null, src/widget/SvgWidget.cpp:30-35), and docs/reference/app.md:230-232 say the SVG 'must be None or loaded'; drop the None check (keep drawableSvg's unloaded-Svg check) and type the stub as Svg | None, or document a real justification",
+      "verdict": "finding"
+    },
+    "method:rack::app::SvgSwitch::onChange(const rack::widget::Widget::ChangeEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgSwitch::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "finding": "P1: no test exercises SvgSwitch.on_drag_end; cited test_controls.py:546-604 sets latch=True but never drags (grep finds no SvgSwitch drag), so Rack's latch release (sw->setSvg(frames[0]), src/app/SvgSwitch.cpp:55-65) is unverified; add a latch test: on_drag_start(LEFT) then on_drag_end(LEFT) and assert switch.sw.svg is frames[0]",
+      "verdict": "finding"
+    },
+    "method:rack::app::SvgSwitch::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "finding": "P1: no test exercises SvgSwitch.on_drag_start; cited test_controls.py:546-604 never drags a switch, so Rack's latch press (sw->setSvg(frames[1]), src/app/SvgSwitch.cpp:39-52) is unverified; add a latch test asserting switch.sw.svg is frames[1] after on_drag_start(w.DragStartEvent(button=LEFT))",
+      "verdict": "finding"
+    },
+    "method:rack::app::Switch::initParamQuantity()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Switch::onDoubleClick(const rack::widget::Widget::DoubleClickEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Switch::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "finding": "P1: Switch::onDragEnd only marks a momentary release (src/app/Switch.cpp:116-125); the cited tests use a non-momentary switch (test_controls.py:324-354) or never drag (303-321), so a broken binding would pass; add a momentary test: press (value goes to max), on_drag_end(LEFT), then step() twice and assert the value returns to min",
+      "verdict": "finding"
+    },
+    "method:rack::app::Switch::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Switch::step()": {
+      "finding": "P1: Switch.step is never called in the cited tests (test_controls.py:303-321, 324-354) or elsewhere for a Switch, so Rack's momentary-release-to-min (src/app/Switch.cpp:40-54) is unverified; cover it with the momentary press/release/step test described for on_drag_end",
+      "verdict": "finding"
+    },
+    "method:rack::app::ThemedSvgPanel::setBackground(std::shared_ptr<rack::window::Svg>, std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ThemedSvgPanel::step()": {
+      "finding": "P1: cited tests never call ThemedSvgPanel.step (test_controls.py:593-594 only calls set_background); the behaviour is exercised only by the uncited tests/services/in_rack_settings/test_settings.py:333-346 (test_prefer_dark_panels_rerenders_themed_widgets); add that test node to the record's tests",
+      "verdict": "finding"
+    },
+    "method:rack::app::ThemedSvgPort::setSvg(std::shared_ptr<rack::window::Svg>, std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ThemedSvgPort::step()": {
+      "finding": "P1: ThemedSvgPort.step is never called in any test (grep of tests/ for step() finds no themed port), so Rack's per-frame light/dark switch (SvgPort.hpp ThemedSvgPort::step) is unverified; add a test like test_settings.py:333-346 that toggles prefer_dark_panels, calls themed_port.step() and asserts themed_port.sw.svg switches",
+      "verdict": "finding"
+    },
+    "method:rack::app::ThemedSvgScrew::setSvg(std::shared_ptr<rack::window::Svg>, std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ThemedSvgScrew::step()": {
+      "finding": "P1: ThemedSvgScrew.step is never called in any test (grep of tests/ finds no themed screw step), so Rack's per-frame light/dark switch (SvgScrew.hpp ThemedSvgScrew::step) is unverified; add a prefer_dark_panels toggle plus themed_screw.step() and assert themed_screw.sw.svg switches",
+      "verdict": "finding"
+    },
+    "record:rack::app::PanelBorder": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SvgPanel": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SvgPort": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SvgScrew": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SvgSlider": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SvgSwitch": {
+      "verdict": "accept"
+    },
+    "record:rack::app::Switch": {
+      "verdict": "accept"
+    },
+    "record:rack::app::ThemedSvgPanel": {
+      "verdict": "accept"
+    },
+    "record:rack::app::ThemedSvgPort": {
+      "verdict": "accept"
+    },
+    "record:rack::app::ThemedSvgScrew": {
+      "verdict": "accept"
+    },
+    "variable:rack::app::RACK_GRID_HEIGHT": {
+      "verdict": "accept"
+    },
+    "variable:rack::app::RACK_GRID_SIZE": {
+      "verdict": "accept"
+    },
+    "variable:rack::app::RACK_GRID_WIDTH": {
+      "verdict": "accept"
+    },
+    "variable:rack::app::RACK_OFFSET": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/widgets-06",
+  "slice": "widgets-06"
+}
