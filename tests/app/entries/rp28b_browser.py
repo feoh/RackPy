@@ -326,6 +326,10 @@ def rack() -> Any:
     return context.scene.rack
 
 
+def centre_in_rack(port: app.PortWidget) -> Any:
+    return port.get_relative_offset(port.box.zero_pos().get_center(), rack())
+
+
 def cable_views(out: app.PortWidget, inp: app.PortWidget) -> Frames:
     """RP-28D: the cable Rack made, through its host views."""
     yield from wait(1)
@@ -344,7 +348,11 @@ def cable_views(out: app.PortWidget, inp: app.PortWidget) -> Frames:
             rack().get_top_plug(inp) is plug,
             cable.get_port(Port.Type.OUTPUT) is out,
         ],
-        "positions": cable.get_input_pos().is_finite() and cable.get_output_pos().is_finite(),
+        # Rack's CableWidget::getInputPos/getOutputPos: the port's centre in the rack's coordinates (not the mouse's,
+        # not the other end's).
+        "positions": cable.get_input_pos() == centre_in_rack(inp)
+        and cable.get_output_pos() == centre_in_rack(out)
+        and centre_in_rack(inp) != centre_in_rack(out),
         "json": "color" in cable.merge_json({}),
     }
     colour = cable.color

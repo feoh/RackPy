@@ -309,8 +309,11 @@ The host-view API:
   (Rack clamps the zoom to 1/4 to 4, so NaN and infinity give 4; a pivot must
   be finite), `get_grid_offset()`,
   `set_grid_offset()`, `reset()`, `zoom_to_modules()` and
-  `zoom_to_bound(rect)`. The bound must be finite with a positive size,
-  because Rack divides by it.
+  `zoom_to_bound(rect)`. Rack grows the bound by 24 on each side and divides the
+  view by the result, so a bound whose size is not finite or is -48 or less in
+  either direction is refused (Rack's zoom would be 0, negative or NaN). A bound
+  whose position is not finite does nothing, as in Rack (it is what an empty
+  rack's module bounding box looks like).
 - `HostRackWidget` covers:
   - modules: `get_module(id)`, `get_modules()`, and `request_module_pos`,
     `set_module_pos_nearest`, `set_module_pos_force` and

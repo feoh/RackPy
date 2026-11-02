@@ -24,6 +24,7 @@ from rackpy.raw.math import Rect, Vec
 from rackpy.raw.window import Svg
 
 LEFT, PRESS, RELEASE = raw.glfw.GLFW_MOUSE_BUTTON_LEFT, raw.glfw.GLFW_PRESS, raw.glfw.GLFW_RELEASE
+RIGHT = raw.glfw.GLFW_MOUSE_BUTTON_RIGHT
 # Original test artwork.
 KNOB_SVG = (
     '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30">'
@@ -181,6 +182,19 @@ def test_knob_scroll_leave_records_undo(module: Module) -> None:
         settings.knob_scroll, settings.knob_scroll_sensitivity = old_scroll, old_sensitivity
 
 
+def test_slider_knob_constructor_forces_linear_dragging_as_racks_does(module: Module) -> None:
+    # SliderKnob::SliderKnob sets forceLinear = true (SliderKnob.cpp); a plain Knob's default is false.
+    slider = raw.create_param(app.SliderKnob, Vec(), module, 0)
+    knob = raw.create_param(app.Knob, Vec(), module, 1)
+    try:
+        assert isinstance(slider, app.Knob) and slider.force_linear is True and knob.force_linear is False
+        slider.force_linear = False
+        assert slider.force_linear is False
+    finally:
+        slider.close()
+        knob.close()
+
+
 def test_knob_direct_drag_move_changes_value_only_for_left_button(module: Module) -> None:
     settings = raw.settings.settings
     old_sensitivity = settings.knob_linear_sensitivity
@@ -251,6 +265,90 @@ def test_knob_dispatches_action_for_a_click_but_not_a_drag(module: Module) -> No
         drag.close()
 
 
+def svg_of(widget: Any) -> Svg | None:
+    found: Svg | None = widget.svg  # read again each time: mypy would narrow an attribute it saw asserted
+    return found
+
+
+def shown(button: app.SvgButton) -> Svg | None:
+    return svg_of(button.sw)
+
+
+def dirty_of(framebuffer: Any) -> bool:
+    return bool(framebuffer.dirty)  # a function: mypy would narrow an attribute it saw asserted
+
+
+def test_rail_widget_builds_its_framebuffer_loads_the_rail_and_tiles_it() -> None:
+    # RailWidget.cpp: the constructor adds a FramebufferWidget (oversample 1, no redraw on a subpixel change) holding an
+    # SvgWidget; step() loads the theme's rail SVG into it; draw() puts that framebuffer at each tile it covers
+    # (multiples of the rail's grid-rounded size) and does nothing until an SVG is loaded.
+    rail = app.RailWidget()
+    frame = w.FramebufferWidget()
+    try:
+        kids: Any = rail.children
+        assert len(kids) == 1
+        railed: Any = kids[0]
+        assert isinstance(railed, w.HostFramebufferWidget) and dirty_of(railed)
+        assert railed.oversample == 1.0 and not railed.dirty_on_subpixel_change
+        rail.box = Rect(Vec(), Vec(1500, 120))
+        frame.box = Rect(Vec(), Vec(1500, 120))
+        frame.add_child(rail)
+        frame.render()
+        assert railed.get_box().pos == Vec()  # no SVG yet: draw returned before it placed any tile
+        rail.step()
+        frame.render()
+        tile = railed.get_box().pos  # the last tile drawn: step loaded the rail and draw covered the width
+        assert 0 < tile.x < 1500 and tile.y == 0
+        assert tile.x % app.RACK_GRID_WIDTH == 0
+    finally:
+        frame.close()
+
+
+def test_svg_button_children_and_the_frame_it_shows_while_dragged() -> None:
+    button, single = app.SvgButton(), app.SvgButton()
+    light, dark = svg(), svg(FRAME_SVG)
+    try:
+        assert isinstance(button.fb, w.HostFramebufferWidget) and isinstance(button.shadow, w.HostCircularShadow)
+        assert isinstance(button.sw, w.HostSvgWidget) and shown(button) is None
+        button.add_frame(light)
+        assert shown(button) is light  # the first frame is shown at once
+        button.add_frame(dark)
+        assert shown(button) is light
+        button.on_drag_start(w.DragStartEvent(button=RIGHT, context=w.EventContext()))
+        assert shown(button) is light  # only a left drag shows the pressed frame
+        button.on_drag_start(w.DragStartEvent(button=LEFT, context=w.EventContext()))
+        assert shown(button) is dark
+        button.on_drag_end(w.DragEndEvent(button=RIGHT, context=w.EventContext()))
+        assert shown(button) is light  # Rack's onDragEnd restores the first frame for any button
+        single.add_frame(light)
+        single.on_drag_start(w.DragStartEvent(button=LEFT, context=w.EventContext()))
+        assert shown(single) is light  # with one frame there is no pressed one
+    finally:
+        button.close()
+        single.close()
+
+
+def test_slider_knob_takes_hover_and_buttons_over_its_whole_box_unlike_a_knob(module: Module) -> None:
+    # Knob only answers inside its circle; SliderKnob bypasses that (SliderKnob.cpp), so a corner of its box counts.
+    knob = raw.create_param(app.Knob, Vec(), module, 0)
+    slider = raw.create_param(app.SliderKnob, Vec(), module, 1)
+    corner = Vec(1, 1)
+    try:
+        for widget in (knob, slider):
+            widget.box = Rect(Vec(), Vec(40, 40))
+        for widget, inside in ((knob, False), (slider, True)):
+            hover = w.HoverEvent(pos=corner, context=w.EventContext())
+            widget.on_hover(hover)
+            assert hover.is_consumed() is inside
+            press = w.ButtonEvent(pos=corner, button=LEFT, action=PRESS, context=w.EventContext())
+            widget.on_button(press)
+            assert press.is_consumed() is inside
+        assert HOOKS.touched_param() is slider  # ParamWidget's left press: Rack's MIDI-Map would learn it
+    finally:
+        knob.close()
+        slider.close()
+
+
 def test_svg_button_drag_drop_does_not_dispatch_a_second_action() -> None:
     actions: list[str] = []
 
@@ -315,9 +413,32 @@ def test_knob_switch_and_slider_fields_and_param_quantity_setup(module: Module) 
         switch.init_param_quantity()  # Rack's Switch: snapping, no smoothing, momentary ones never reset
         mode = module.param_quantities[1]
         assert mode.snap_enabled and not mode.smooth_enabled and not mode.reset_enabled
-        assert isinstance(app.SliderKnob(), app.Knob)
     finally:
         knob.close()
+        switch.close()
+
+
+def test_a_momentary_switch_holds_its_maximum_one_frame_then_returns_to_its_minimum(module: Module) -> None:
+    # Switch.cpp: a left press sets the maximum and waits one more frame; a left release sets the minimum at the next
+    # step. Other buttons do nothing.
+    switch = raw.create_param(app.Switch, Vec(), module, 1)
+    switch.momentary = True
+    try:
+        value = module.params[1]
+        assert value.value == 0
+        switch.on_drag_start(w.DragStartEvent(button=RIGHT, context=w.EventContext()))
+        switch.on_drag_end(w.DragEndEvent(button=RIGHT, context=w.EventContext()))
+        switch.step()
+        assert value.value == 0  # not the left button
+        switch.on_drag_start(w.DragStartEvent(button=LEFT, context=w.EventContext()))
+        assert value.value == 1  # the maximum
+        switch.step()
+        assert value.value == 1  # the frame it was pressed in: Rack waits another
+        switch.on_drag_end(w.DragEndEvent(button=LEFT, context=w.EventContext()))
+        assert value.value == 1  # released, but only the next step sets the minimum
+        switch.step()
+        assert value.value == 0
+    finally:
         switch.close()
 
 
@@ -380,6 +501,59 @@ def test_deleting_the_module_clears_controls(module: Module) -> None:
         knob.remove_from_parent()
         for widget in (knob, port, light):
             widget.close()
+
+
+def test_param_widgets_reach_their_own_quantity_and_step_a_change_event(module: Module) -> None:
+    # ParamWidget::step sends a ChangeEvent when the quantity's value differs from the one it last saw (the first step
+    # always does).
+    changes: list[str] = []
+
+    class Knob(app.Knob):
+        def on_change(self, event: Any) -> None:
+            changes.append("change")
+            super().on_change(event)
+
+    knob = raw.create_param(Knob, Vec(), module, 0)
+    other = raw.create_param(app.Knob, Vec(), module, 1)
+    try:
+        own, second = knob.get_param_quantity(), other.get_param_quantity()
+        assert own is not None and second is not None
+        assert (own.name, second.name) == ("Gain", "Mode")  # each reads its own param's quantity
+        knob.step()
+        assert changes == ["change"]
+        knob.step()
+        assert changes == ["change"]  # the value has not moved
+        own.set_value(7)
+        knob.step()
+        assert changes == ["change", "change"]
+    finally:
+        knob.close()
+        other.close()
+
+
+def test_port_widgets_reach_their_own_port_and_step_their_children(module: Module) -> None:
+    steps: list[str] = []
+
+    class Child(w.Widget):
+        def step(self) -> None:
+            steps.append("child")
+            super().step()
+
+    out = raw.create_output(app.PortWidget, Vec(), module, 0)
+    inp = raw.create_input(app.PortWidget, Vec(), module, 0)
+    child = Child()
+    try:
+        module.outputs[0].set_voltage(2.5)
+        module.inputs[0].set_voltage(-1.5)
+        out_port, in_port = out.get_port(), inp.get_port()
+        assert out_port is not None and in_port is not None
+        assert out_port.get_voltage() == 2.5 and in_port.get_voltage() == -1.5  # not swapped, not the other index
+        inp.add_child(child)
+        inp.step()  # PortWidget::step is Widget::step: it steps the children
+        assert steps == ["child"]
+    finally:
+        out.close()
+        inp.close()
 
 
 def test_ports_check_ids_and_reach_the_module(module: Module) -> None:

@@ -5,13 +5,14 @@ import math
 import threading
 import time
 from collections.abc import Callable, Iterator
+from pathlib import Path
 from typing import Any
 
 import pytest
 from _rackpy_host import _testing as HOOKS
 
 from rackpy import raw
-from rackpy.raw import app
+from rackpy.raw import app, asset
 from rackpy.raw import settings as rset
 from rackpy.raw import string as rstring
 from rackpy.raw import widget as w
@@ -376,6 +377,30 @@ def test_either_unlock_releases_either_hold_as_racks_do() -> None:
     assert taken == [True]
     with pytest.raises(ValueError, match="does not hold"):
         m.unlock_shared()  # this thread holds nothing
+
+
+def test_a_shared_mutex_dropped_while_held_is_leaked_with_a_warning() -> None:
+    # Destroying a held pthread rwlock is undefined, so RackPy's destructor leaves it alone (mutex.cpp MutexDelete).
+    warning = "a SharedMutex was dropped while held; it is leaked rather than destroyed"
+    log = Path(asset.user("log.txt"))
+
+    def warnings() -> int:
+        return log.read_text(errors="replace").count(warning)
+
+    before = warnings()
+    free = raw.SharedMutex()
+    free.lock()
+    free.unlock()
+    del free  # not held: destroyed, nothing to report
+    assert warnings() == before
+    held = raw.SharedMutex()
+    held.lock()
+    del held  # still held: leaked, and Rack's log says so
+    assert warnings() == before + 1
+    shared = raw.SharedMutex()
+    shared.lock_shared()
+    del shared
+    assert warnings() == before + 2
 
 
 def test_shared_mutex() -> None:

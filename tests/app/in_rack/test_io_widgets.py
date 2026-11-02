@@ -178,6 +178,8 @@ def test_the_racks_containers_hold_their_own_kind() -> None:
         holder.add_child(cable)
     with pytest.raises(OwnershipError, match="Add event"):
         cable.on_add(w.AddEvent())  # Rack's dispatch alone sends it
+    with pytest.raises(OwnershipError, match="Remove event"):
+        cable.on_remove(w.RemoveEvent())  # the same: Rack's removal of the plugs is its dispatch's
     with pytest.raises(OwnershipError, match="engine"):
         cable.update_cable()  # outside the rack
     holder.close()

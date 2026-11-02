@@ -161,9 +161,11 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 		}, py::arg("zoom"), py::arg("pivot"))
 		.def("zoom_to_modules", [](const HostRackScroll& h) { hostAs<app::RackScrollWidget>(h).zoomToModules(); })
 		.def("zoom_to_bound", [](const HostRackScroll& h, rack::math::Rect bound) {
-			// Rack divides by the bound's size and does not clamp the result.
-			if (!bound.pos.isFinite() || !bound.size.isFinite() || bound.size.x <= 0.f || bound.size.y <= 0.f)
-				throw std::invalid_argument("the bound must be finite, with a positive size");
+			// Rack returns quietly for a bound whose position is not finite (an empty module container's), then grows it by
+			// 24 on each side and divides the view's size by that. It does not clamp the zoom, so a size that is not finite
+			// or not larger than -48 would give it a zoom of 0, a negative one or NaN, and the scroll offsets follow.
+			if (!bound.size.isFinite() || !(bound.size.x > -48.f) || !(bound.size.y > -48.f))
+				throw std::invalid_argument("the bound's size must be finite and larger than -48 in each direction");
 			hostAs<app::RackScrollWidget>(h).zoomToBound(bound);
 		}, py::arg("bound"));
 	registerHostView([](W* w) { return ::rackpy::rttiCast<app::RackScrollWidget*>(w) != nullptr; },

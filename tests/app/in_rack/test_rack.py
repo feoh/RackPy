@@ -75,11 +75,28 @@ def test_the_rack_scroll_widget() -> None:
             assert scroll.get_zoom() == clamped, odd
         with pytest.raises(ValueError, match="finite"):
             scroll.set_zoom(1, Vec(math.nan, 0))  # the pivot goes into the scroll offset unclamped
-        with pytest.raises(ValueError):
-            scroll.zoom_to_bound(Rect(Vec(), Vec(0, 10)))  # Rack divides by the size
-        scroll.zoom_to_bound(Rect(Vec(0, 0), Vec(300, 200)))
-        scroll.zoom_to_modules()
-        scroll.reset()
+        for bad in (Vec(math.inf, 10), Vec(10, math.nan), Vec(-48, 10), Vec(10, -100)):
+            with pytest.raises(ValueError, match="size"):
+                scroll.zoom_to_bound(Rect(Vec(), bad))  # Rack's zoom would be 0, negative or NaN
+        scroll.set_zoom(1)
+        scroll.zoom_to_bound(Rect(Vec(math.inf, 0), Vec(300, 200)))  # a non-finite position: Rack returns quietly
+        assert scroll.get_zoom() == 1
+        scroll.zoom_to_bound(Rect(Vec(0, 0), Vec(0, 0)))  # size 0 is fine: the grown bound is 48 across
+        assert scroll.get_zoom() == pytest.approx(min(scroll.get_box().size.x, scroll.get_box().size.y) / 48)
+        bound = Rect(Vec(100, 50), Vec(300, 200))
+        scroll.zoom_to_bound(bound)
+        grown = (bound.size.x + 48, bound.size.y + 48)
+        size = scroll.get_box().size
+        assert scroll.get_zoom() == pytest.approx(min(size.x / grown[0], size.y / grown[1]))
+        scroll.set_zoom(2)
+        scroll.set_grid_offset(Vec(40, 40))
+        scroll.reset()  # offset = RACK_OFFSET * zoom - (30, 30): the grid offset is -30 / zoom screen pixels
+        reset_offset = scroll.get_grid_offset()
+        assert reset_offset.x == pytest.approx(-30 / 2 / app.RACK_GRID_WIDTH, abs=1e-4)
+        assert reset_offset.y == pytest.approx(-30 / 2 / app.RACK_GRID_HEIGHT, abs=1e-4)
+        scroll.set_zoom(1)
+        scroll.zoom_to_modules()  # to the module container's bounding box, with the probe in the rack
+        assert scroll.get_zoom() != 1
         assert isinstance(scroll.zoom_widget, w.HostWidget)
     finally:
         scroll.set_zoom(zoom)
@@ -117,8 +134,12 @@ def test_modules_selection_and_positions(probe: Any) -> None:
     assert probe in rack.get_selected()
     rack.deselect_all()
     rack.update_module_old_positions()
+    assert rack.get_module_drag_action().is_empty()  # nothing has left the positions just noted
     far = pos.plus(Vec(600, 0))
     assert rack.request_module_pos(probe, far) and probe.get_box().pos == far
+    drag: Any = rack.get_module_drag_action()  # a ModuleMove for each module that left them
+    assert len(drag.actions) == 1 and drag.actions[0].module_id == data["modules"][0]["id"]
+    assert drag.actions[0].type_name == "rack::history::ModuleMove"
     rack.set_module_pos_force(probe, pos)
     assert probe.get_box().pos == pos
     rack.set_module_pos_nearest(probe, pos)
@@ -134,6 +155,23 @@ def test_modules_selection_and_positions(probe: Any) -> None:
     with pytest.raises(OwnershipError, match="already has its widget"):
         rack.from_json({"modules": [{"id": data["modules"][0]["id"]}], "cables": []})
     assert rack.get_module(data["modules"][0]["id"]) is probe
+
+
+def test_pasting_a_selections_json_adds_its_modules_with_one_undo_step(probe: Any) -> None:
+    rack = scene().rack
+    context = raw.context_get()
+    assert context is not None and context.history is not None
+    rack.select(probe)
+    data = rack.selection_to_json()
+    rack.deselect_all()
+    before = len(rack.get_modules())
+    index = context.history.action_index
+    rack.paste_json_action(data)  # Rack's paste: the selection's modules, as new ones
+    try:
+        assert len(rack.get_modules()) == before + 1 and context.history.action_index == index + 1
+    finally:
+        context.history.undo()
+    assert len(rack.get_modules()) == before and context.history.action_index == index
 
 
 def test_containers_cables_colours_and_menus() -> None:
