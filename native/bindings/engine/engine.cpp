@@ -15,7 +15,6 @@
 #include <pybind11/stl.h>
 
 #include <cmath>
-#include <limits>
 #include <vector>
 
 #include "../../module/module.hpp"
@@ -355,15 +354,15 @@ void bindEngine(py::module_ engine) {
 		.def("get_sample_rate", [](const EngineHandle& h) { return h.get().getSampleRate(); })
 		.def("get_sample_time", [](const EngineHandle& h) { return h.get().getSampleTime(); })
 		.def("set_suggested_sample_rate", [](const EngineHandle& h, float rate) {
-			// Rack sends a rate that is not above 0 (NaN and negatives too) to its 44100 fallback. A positive rate whose
-			// period does not fit a float, infinity or below FLT_MIN (1 / it is infinite), would make sampleTime zero or
-			// infinite for every module (RP-42): only those are refused.
-			if (rate > 0.f && (!std::isfinite(rate) || rate < std::numeric_limits<float>::min()))
-				throw std::invalid_argument("a positive sample rate must be finite and at least FLT_MIN (1.18e-38)");
+			// Rack sends a rate that is not above 0 (NaN and negatives too) to its 44100 fallback (RP-42: they were
+			// refused). Infinity is the one value that arrives intact and is harmful: the sample time would be 0 for every
+			// module. A denormal cannot arrive: Rack's main thread flushes denormals to zero, which makes it the fallback.
+			if (std::isinf(rate) && rate > 0.f)
+				throw std::invalid_argument("the sample rate must be finite (0 or less: Rack's fallback)");
 			locked(h, "set_suggested_sample_rate", [rate](Engine& e) { e.setSuggestedSampleRate(rate); });
 		}, py::arg("suggested_sample_rate"),
 			"Rack's: sets the rate unless Rack's settings fix one; a rate that is not above 0 (NaN, negative, 0) gives Rack's "
-			"fallback, 44100. Infinity and rates below FLT_MIN are refused.")
+			"fallback, 44100. Infinity is refused.")
 		.def("yield_workers", [](const EngineHandle& h) { h.get().yieldWorkers(); },
 			"Rack's hint that the engine's worker threads should block rather than spin.")
 		.def("get_frame", [](const EngineHandle& h) { return h.get().getFrame(); })

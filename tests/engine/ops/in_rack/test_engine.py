@@ -68,11 +68,10 @@ def test_the_engine_and_its_timing() -> None:
             e.set_suggested_sample_rate(48000)
             e.set_suggested_sample_rate(fallback)
             assert e.get_sample_rate() == 44100
-        # A positive rate whose period does not fit a float would make every module's sample time zero or infinite.
-        for hazardous in (math.inf, 1e-40):
-            with pytest.raises(ValueError, match="FLT_MIN"):
-                e.set_suggested_sample_rate(hazardous)
-        assert e.get_sample_rate() == 44100  # a refusal changes nothing
+        # Infinity would make every module's sample time zero; a refusal changes nothing.
+        with pytest.raises(ValueError, match="finite"):
+            e.set_suggested_sample_rate(math.inf)
+        assert e.get_sample_rate() == 44100
     finally:
         e.set_suggested_sample_rate(rate)
 
