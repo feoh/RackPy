@@ -1206,7 +1206,7 @@ void upsampler() {
 		outs.push_back(floats(out, OS));
 	}
 	add("upsampler." + std::to_string(OS) + "." + std::to_string(Q), {list(ins)},
-		list({list(outs), i(up->inIndex), floats(up->inBuffer, Q)}));
+		list({list(outs), floats(up->kernel, OS * Q), i(up->inIndex), floats(up->inBuffer, Q)}));
 }
 
 void resamplers() {

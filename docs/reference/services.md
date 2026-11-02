@@ -20,7 +20,11 @@ int or a one-character str), and formats it with Rack's `string::f`. A `*`
 width or precision takes an `int` argument before the value, as in C, and
 Rack's printf applies C's rules to it: a negative width left-justifies, a
 negative precision counts as none. `%n` (it writes through a pointer) and
-`%p` (an address) are refused. Too few or too many arguments, a
+`%p` (an address) are refused. The `t` length modifier is supported for signed
+`%td`/`%ti`, but not for unsigned `%to`/`%tu`/`%tx`/`%tX`; `%lc` and `%ls` are
+also refused because wide-character formatting is not mapped to Python strings.
+These valid C printf forms raise `ValueError` as unsupported conversions. Too
+few or too many arguments, a
 wrong type or a value the C type cannot hold raises. `fv(format, args)` is
 `string::fV`, with a sequence for C's `va_list`.
 
@@ -39,7 +43,9 @@ The rest are Rack's functions under snake-case names:
   between a byte position and a `Location` (line and column, from 0).
   Rack's `positionToLocation` counts the column codepoint by codepoint and
   never advances at a NUL or an invalid UTF-8 byte, so text with one before
-  `pos` on its line raises `ValueError` instead of hanging.
+  `pos` on its line raises `ValueError` instead of hanging. `location_to_position`
+  also refuses text that Rack would not advance through while walking the
+  requested line and columns.
 - **Base64.** `to_base64` takes bytes (a contiguous byte buffer). `from_base64` returns bytes and
   skips characters that are not Base64; Rack's header says it raises, but
   Rack 2.6.6 never does.
@@ -78,10 +84,13 @@ whether those words are nonzero. `result_type` is Python `int`. `rotl(x, k)` nee
 from 1 to 63: Rack's shift by 64 for `k` 0 is undefined in C++.
 
 `local()` is Rack's own generator: one for the whole process, kept until
-Rack quits. Rack's engine threads and UI use it without a lock, so
-Python's draws race with theirs, as Rack's own do. `init()` reseeds it, and
-`u64`, `u32`, `uniform` (`[0, 1)`), `normal`, `get(type)`, `get_uint32`
-and the other `get_*`, `buffer(out)` (it fills a writable, contiguous byte buffer) and
+Rack quits. Seeding or drawing through this reference changes the same state
+Rack uses. `init()` seeds it from the clock and system randomness only if it is
+not already seeded; subsequent calls leave an existing seeded state unchanged.
+Rack's engine threads and UI use it without a lock, so Python's draws race with
+theirs, as Rack's own do. `u64`, `u32`, `uniform` (`[0, 1)`), `normal`,
+`get(type)`, `get_uint32` and the other `get_*`, `buffer(out)` (it fills a
+writable, contiguous byte buffer) and
 `vector(len)` draw from it. For reproducible numbers, make a generator of
 your own.
 
@@ -383,8 +392,10 @@ This is the contract for `WeakPtr<T>`, `WeakBase` and `WeakHandle`
   is a view, and Python cannot construct one.
 
 - **Rack's members.** `WeakPtr()`, `WeakPtr(widget)`, `get()`, `set()`,
-  truth testing, and `__copy__` (Rack's copy). `weak_handle` is the
-  `WeakHandle` the pointers share.
+  truth testing, and `__copy__` (Rack's copy). Assigning one `WeakPtr` to
+  another retargets the destination to the widget returned by the source's
+  `get()`; it does not replace the Python destination object. `weak_handle` is
+  the `WeakHandle` the pointers share.
 - **On widgets.** `Widget` and `HostWidget` have Rack's
   `get_weak_count()` and `weak_handle`.
 - **Handles.** A `WeakHandle` view has `ptr` (the widget, or `None`) and

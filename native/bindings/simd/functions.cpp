@@ -120,15 +120,15 @@ void bindFunctions(py::module_ m) {
 	m.def("pow", [](const float_4& a, const py::int_& b) { return c::powInt(a, exponent(b)); }, py::arg("a"),
 		py::arg("b"), "Rack's pow<T>(T, int) with T = float_4: a**b by squaring; 1 for b <= 0. b must be below 2**30.");
 	m.def("pow", [](float a, const float_4& b) { return c::pow(a, b); }, py::arg("a"), py::arg("b"),
-		"exp(b * log(a)), with std::log for the scalar a; about 2.406e38 where a <= 0.");
+		"exp(b * log(a)), with std::log for scalar a; a == 0 and b > 0 gives 0; negative a or a == 0 with b <= 0 saturates the SIMD exp.");
 	m.def("pow", [](const float_4& a, const float_4& b) { return c::pow(a, b); }, py::arg("a"), py::arg("b"),
-		"exp(b * log(a)): where a <= 0, exp of NaN, about 2.406e38.");
+		"exp(b * log(a)): a == 0 with b > 0 gives 0; negative a or a == 0 with b <= 0 saturates SIMD exp.");
 
 	// --- From math.hpp -------------------------------------------------------------
 	m.def("clamp", [](float x, float a, float b) { return c::clamp(x, a, b); }, py::arg("x"), py::arg("a") = 0.f,
 		py::arg("b") = 1.f, "math::clamp for floats (simd imports it).");
 	m.def("clamp", [](const float_4& x, const float_4& a, const float_4& b) { return c::clamp(x, a, b); }, py::arg("x"),
-		py::arg("a") = float_4(0.f), py::arg("b") = float_4(1.f), "fmin(fmax(x, a), b) per lane: a wins if b < a.");
+		py::arg("a") = float_4(0.f), py::arg("b") = float_4(1.f), "fmin(fmax(x, a), b) per lane: b wins if b < a.");
 	m.def("rescale", [](float x, float x_min, float x_max, float y_min, float y_max) {
 		return c::rescale(x, x_min, x_max, y_min, y_max);
 	}, py::arg("x"), py::arg("x_min"), py::arg("x_max"), py::arg("y_min"), py::arg("y_max"),

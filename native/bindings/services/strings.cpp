@@ -8,7 +8,8 @@
 // that single conversion: Rack's own formatting, one checked argument at a
 // time. A * width or precision takes its int argument first, as printf does,
 // and passes it on to Rack's string::f with the value, so Rack's printf applies
-// C's rules for it (RP-42). %n and %p are refused; a wrong count or type raises.
+// C's rules for it (RP-42). %n and %p, unsupported unsigned t conversions, and
+// wide %lc/%ls are refused; a wrong count or type raises.
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -301,8 +302,24 @@ void bindString(py::module_ m) {
 		return s::positionToLocation(text, pos);
 	}, py::arg("s"), py::arg("pos"), "Rack's: the line and column of byte position pos in the UTF-8 text. Text with a NUL "
 		"or invalid UTF-8 byte before pos on its line is refused: Rack's loop would never end there.");
-	m.def("location_to_position", [](py::handle s8, s::Location location) { return s::locationToPosition(utf8(s8), location); },
-		py::arg("s"), py::arg("location"));
+	m.def("location_to_position", [](py::handle s8, s::Location location) {
+		std::string text = utf8(s8);
+		size_t pos = 0;
+		for (size_t line = 0; line < location.line && pos < text.size(); pos++)
+			if (text[pos] == '\n')
+				line++;
+		for (size_t column = 0; column < location.column && pos < text.size(); column++) {
+			if (text[pos] == '\n')
+				break;
+			size_t next = s::UTF8NextCodepoint(text, pos);
+			if (next == pos)
+				throw py::value_error("Rack's locationToPosition does not advance at a NUL or invalid UTF-8 byte (byte " +
+					std::to_string(pos) + ")");
+			pos = next;
+		}
+		return s::locationToPosition(text, location);
+	}, py::arg("s"), py::arg("location"),
+		"Rack's: byte position of the line and column. Refuses a NUL or invalid UTF-8 byte where Rack's column walk would hang.");
 
 	m.def("to_base64", [](py::buffer data) {
 		py::buffer_info info = data.request();

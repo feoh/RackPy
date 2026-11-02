@@ -52,7 +52,7 @@ void bindRandom(py::module_ m) {
 
 	m.def("local", [] { return &r::local(); }, py::return_value_policy::reference,
 		"Rack's generator: one for the whole process, which lives until Rack quits. Changing it changes Rack's.");
-	m.def("init", &r::init, "Rack's: seeds Rack's generator from the clock and the system's randomness.");
+	m.def("init", &r::init, "Rack's: seeds its generator from the clock and system randomness only if it is not already seeded.");
 	m.def("get", [](const std::string& kind) -> py::object {
 		if (kind == "uint64") return py::int_(r::get<uint64_t>());
 		if (kind == "uint32") return py::int_(r::get<uint32_t>());

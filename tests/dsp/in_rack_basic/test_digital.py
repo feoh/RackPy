@@ -58,6 +58,10 @@ def same(actual: Any, expected: Any) -> bool:
     return type(actual) is type(expected) and bool(actual == expected)
 
 
+def boolean_state(trigger: dsp.BooleanTrigger) -> object:
+    return trigger.s
+
+
 def boolean(event: bool) -> Callable[[list[bool]], list[list[Any]]]:
     def run(inputs: list[bool]) -> list[list[Any]]:
         t = dsp.BooleanTrigger()
@@ -153,6 +157,7 @@ def test_boolean_trigger() -> None:
     assert t.s is dsp.BooleanTrigger.State.UNINITIALIZED and not t.is_high()
     assert not t.process(True)  # from UNINITIALIZED, a first true input does not trigger
     assert t.is_high() and not t.process(True) and not t.process(False) and t.process(True)
+    assert boolean_state(t) is dsp.BooleanTrigger.State.HIGH
     assert t.process_event(False) is dsp.BooleanTrigger.Event.UNTRIGGERED
     assert t.process_event(True) is dsp.BooleanTrigger.Event.TRIGGERED
     assert t.process_event(True) is dsp.BooleanTrigger.Event.NONE
@@ -186,6 +191,7 @@ def test_schmitt_trigger_for_floats() -> None:
     assert not t.process(math.nan) and t.is_high()  # NaN reaches neither threshold
     assert t.process_event(-1.0) is dsp.SchmittTrigger.Event.UNTRIGGERED
     assert t.process_event(2.0, 0.1, 2.0) is dsp.SchmittTrigger.Event.TRIGGERED
+    assert t.process_event(2.0, 0.1, 2.0) is dsp.SchmittTrigger.Event.NONE
     with pytest.warns(DeprecationWarning):
         assert t.state is True
     other = copy.copy(t)
@@ -252,6 +258,8 @@ def test_timers() -> None:
 def test_clock_divider() -> None:
     c = dsp.ClockDivider()
     assert c.get_division() == 1 and all(c.process() for _ in range(3))
+    c.division = 3
+    assert c.division == c.get_division() == 3
     c.set_division(3)
     assert [c.process() for _ in range(6)] == [False, False, True, False, False, True]
     c.set_division(0)

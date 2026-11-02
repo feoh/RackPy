@@ -133,7 +133,7 @@ def upsampler(oversample: int, quality: int) -> Callable[[list[float]], list[Any
             out = floats(oversample)
             u.process(x, out)
             outs.append(out.tolist())
-        return [outs, u.in_index, u.in_buffer.tolist()]
+        return [outs, u.kernel.tolist(), u.in_index, u.in_buffer.tolist()]
 
     return run
 
