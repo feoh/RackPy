@@ -79,6 +79,12 @@ def test_racks_components_load_racks_artwork() -> None:
             assert knob.sw.svg is not None and knob.min_angle < 0 < knob.max_angle, name
             if hasattr(knob, "bg"):
                 assert isinstance(knob.bg, w.HostSvgWidget) and knob.bg.svg is not None, name
+        for name in (
+            "BefacoBigKnob",
+            "SynthTechAlco",
+            "Trimpot",
+        ):  # these have Rack's bg child: the guard above may not hide it
+            assert isinstance(getattr(cl, name)().bg, w.HostSvgWidget), name
         assert cl.RoundBlackSnapKnob().snap and isinstance(cl.Rogan1PRed().fg, w.HostSvgWidget)
         assert cl.RoundBlackKnob().min_angle == pytest.approx(-0.83 * math.pi)
         for name in ("BefacoSlidePot", "VCVSlider"):
@@ -96,6 +102,8 @@ def test_racks_components_load_racks_artwork() -> None:
             port = getattr(cl, name)()
             made.append(port)
             assert isinstance(port, app.SvgPort) and port.box.size.x > 0, name
+            # An SvgPort whose setSvg never ran keeps Widget's infinite box, so the size alone proves nothing.
+            assert port.sw.svg is not None and math.isfinite(port.box.size.x) and math.isfinite(port.box.size.y), name
         themed = cl.ThemedPJ301MPort()
         assert themed.light_svg is not None and themed.dark_svg is not None
         for name in ("ScrewSilver", "ScrewBlack", "ThemedScrew"):
@@ -158,7 +166,11 @@ def test_light_templates_are_specializations() -> None:
         cl.GrayModuleLightWidget, app.ModuleLightWidget
     )
     assert cl.GreenRedLight().base_colors == [cl.SCHEME_GREEN, cl.SCHEME_RED]
-    assert len(cl.RedGreenBlueLight().base_colors) == 3
+    assert cl.RedGreenBlueLight().base_colors == [
+        cl.SCHEME_RED,
+        cl.SCHEME_GREEN,
+        cl.SCHEME_BLUE,
+    ]  # the order sets the light IDs
     medium: type[Any] = cl.MediumLight[cl.RedLight]
     assert medium is cl.MediumLight[cl.RedLight] and medium.__name__ == "MediumLight[RedLight]"
     lamp = medium()
@@ -306,3 +318,24 @@ def test_component_ports_reach_their_module(module: Module) -> None:
         assert port.type == Port.Type.OUTPUT and port.get_port() is not None
     finally:
         port.close()
+
+
+def test_light_templates_derive_from_the_classes_rack_derives_them_from() -> None:
+    # C++: VCVLightBezelLatch<L> : VCVLightBezel<L>, and VCVLightSlider<L> : LightSlider<VCVSlider, VCVSliderLight<L>>.
+    # So is_base_of holds for both, and Python's issubclass and isinstance must agree (RP-42: they did not).
+    templates: Any = cl  # the stubs do not declare the subscript of every template
+    latch_bezel: type[Any] = templates.VCVLightBezelLatch[cl.BlueLight]
+    assert issubclass(latch_bezel, templates.VCVLightBezel[cl.BlueLight]) and issubclass(latch_bezel, cl.VCVBezel)
+    slider: type[Any] = templates.VCVLightSlider[cl.GreenLight]
+    light_slider = templates.LightSlider[cl.VCVSlider, templates.VCVSliderLight[cl.GreenLight]]
+    assert issubclass(slider, light_slider)
+    assert issubclass(slider, cl.VCVSlider) and issubclass(slider, app.SvgSlider)
+    made: list[Any] = [latch_bezel(), slider()]
+    try:
+        assert isinstance(made[0], templates.VCVLightBezel[cl.BlueLight]) and made[0].latch and not made[0].momentary
+        assert isinstance(made[1], light_slider)
+        light = made[1].get_light()
+        assert light is not None and sum(child is light for child in made[1].children) == 1  # made once, not twice
+    finally:
+        for widget in made:
+            widget.close()

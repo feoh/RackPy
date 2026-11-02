@@ -16,7 +16,7 @@ from _rackpy_host import _testing as HOOKS
 
 from rackpy import raw
 from rackpy.errors import OwnershipError, StaleHandleError
-from rackpy.raw import app, ui
+from rackpy.raw import app, settings, ui
 from rackpy.raw import nanovg as nvg
 from rackpy.raw import widget as w
 from rackpy.raw.engine import Module, Port
@@ -587,8 +587,25 @@ def test_switches_buttons_sliders_ports_screws_and_panels() -> None:
         themed_screw.set_svg(light, dark)
         assert themed_screw.light_svg is light and themed_screw.dark_svg is dark
         assert themed_screw.sw.svg is light
+        # Rack has no event for a change of the dark-panels setting: step() re-picks the SVG every frame.
+        preferred = settings.settings.prefer_dark_panels
+        try:
+            settings.settings.prefer_dark_panels = True
+            themed_port.step()
+            themed_screw.step()
+            assert themed_port.sw.svg is dark and themed_screw.sw.svg is dark
+        finally:
+            settings.settings.prefer_dark_panels = preferred
+        themed_port.step()
+        themed_screw.step()
+        assert themed_port.sw.svg is light and themed_screw.sw.svg is light
         panel.set_background(dark)
         assert panel.svg is dark and isinstance(panel.panel_border, w.HostWidget)
+        # SvgPanel::step oversamples the framebuffer twice below a pixel ratio of 2, once at or above it.
+        context = raw.context_get()
+        assert context is not None and context.window is not None
+        panel.step()
+        assert panel.fb.oversample == (2.0 if context.window.pixel_ratio < 2.0 else 1.0)
         assert panel.box.size == Vec(15, 0) or panel.box.size.x > 0  # Rack rounds panels to the rack grid
         themed_panel.set_background(light, dark)
         assert themed_panel.light_svg is light and themed_panel.dark_svg is dark and themed_panel.svg is light

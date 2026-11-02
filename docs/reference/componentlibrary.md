@@ -26,7 +26,7 @@ All are Rack's own classes, subclassable from Python:
   `Davies1900hKnob` and its colours, `Rogan` and its 27 variants,
   `SynthTechAlco`, `Trimpot`, `BefacoBigKnob` and `BefacoTinyKnob`. Their
   `bg` (and Rogan's `fg`) are Rack's own SvgWidget children, as
-  `HostSvgWidget`s.
+  `HostSvgWidget`s, and read-only.
 - **Sliders:** `BefacoSlidePot`, `VCVSlider` (`LEDSlider`).
 - **Switches and buttons:** `NKK`, `CKSS`, `CKSSThree`,
   `CKSSThreeHorizontal`, `CKD6`, `TL1105`, `VCVButton` (`LEDButton`),

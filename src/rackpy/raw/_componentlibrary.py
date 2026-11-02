@@ -338,7 +338,8 @@ class VCVLightSlider(LightSlider):
 
     @classmethod
     def _bases(cls, *args: type) -> tuple[type, ...]:
-        return (_lib.VCVSlider,)
+        # C++ derives it from LightSlider<VCVSlider, VCVSliderLight<TLightBase>>, so it is one (RP-42: it was not).
+        return (LightSlider[_lib.VCVSlider, VCVSliderLight.__class_getitem__(args[0])],)  # type: ignore[misc]
 
     @classmethod
     def _light_class(cls) -> type:
@@ -418,6 +419,11 @@ class VCVLightBezel(Template):
 @_template_class
 class VCVLightBezelLatch(VCVLightBezel):
     _params: ClassVar[_Params] = (_light("WhiteLight"),)
+
+    @classmethod
+    def _bases(cls, *args: type) -> tuple[type, ...]:
+        # C++: VCVLightBezelLatch<TLightBase> derives from VCVLightBezel<TLightBase> (RP-42: it derived from VCVBezel).
+        return (VCVLightBezel.__class_getitem__(args[0]),)
 
     def __init__(self) -> None:
         super().__init__()

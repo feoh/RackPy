@@ -350,11 +350,37 @@ def held(lock: raw.SharedLock) -> bool:
     return lock.held  # a call, so that type checkers do not narrow it across the with block
 
 
+def test_either_unlock_releases_either_hold_as_racks_do() -> None:
+    # Rack's unlock() is pthread_rwlock_unlock, which releases a hold of either mode, and unlock_shared() only calls
+    # it, so neither asserts on the other mode. RackPy once refused it, with no reason in Rack (RP-42).
+    m = raw.SharedMutex()
+    m.lock()
+    m.unlock_shared()  # a write hold, released by the shared unlock
+    assert m.try_lock()
+    m.unlock()
+    m.lock_shared()
+    m.unlock()  # a read hold, released by the write unlock
+    assert m.try_lock_shared()
+    m.unlock_shared()
+    # The thread's hold is gone each time: another thread can take the lock, and a thread holding nothing is refused.
+    taken: list[bool] = []
+
+    def take_and_release() -> None:
+        taken.append(m.try_lock())
+        if taken[-1]:
+            m.unlock()
+
+    probe = threading.Thread(target=take_and_release)
+    probe.start()
+    probe.join()
+    assert taken == [True]
+    with pytest.raises(ValueError, match="does not hold"):
+        m.unlock_shared()  # this thread holds nothing
+
+
 def test_shared_mutex() -> None:
     m = raw.SharedMutex()
     m.lock()
-    with pytest.raises(ValueError, match="shared"):
-        m.unlock_shared()  # RackPy requires the unlock method matching the hold mode
     with pytest.raises(ValueError, match="deadlock"):
         m.lock()  # Rack's rwlock would fail its assertion
     got: list[bool] = []
@@ -373,8 +399,6 @@ def test_shared_mutex() -> None:
         assert flag == [False]  # a writer excludes readers
     readers: list[str] = []
     m.lock_shared()
-    with pytest.raises(ValueError, match="writing"):
-        m.unlock()
 
     def read() -> None:
         m.lock_shared()  # readers share it

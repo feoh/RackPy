@@ -63,15 +63,26 @@ struct TrackedMutex {
 		written = true;
 		return true;
 	}
-	void unlock() {
+	/** Rack's unlock() is pthread_rwlock_unlock, which releases a hold of either mode, and its unlock_shared() only calls
+	it: so both release whichever hold this thread has, and refuse a thread that holds none (Rack would assert). RackPy
+	once refused the other mode, which Rack allows (RP-42). */
+	void releaseHold() {
 		{
 			std::lock_guard<std::mutex> lock(book);
-			if (!written || writer != std::this_thread::get_id())
-				throw py::value_error("this thread does not hold the mutex for writing");
-			written = false;
+			auto me = std::this_thread::get_id();
+			if (written && writer == me) {
+				written = false;
+			}
+			else {
+				auto it = readers.find(me);
+				if (it == readers.end())
+					throw py::value_error("this thread does not hold the mutex, shared or for writing");
+				readers.erase(it);
+			}
 		}
 		mutex.unlock();
 	}
+	void unlock() { releaseHold(); }
 	void lockShared() {
 		if (heldByMe())
 			throw py::value_error("this thread holds the mutex already: Rack's rwlock would deadlock or fail");
@@ -91,16 +102,7 @@ struct TrackedMutex {
 		readers[std::this_thread::get_id()] = 1;
 		return true;
 	}
-	void unlockShared() {
-		{
-			std::lock_guard<std::mutex> lock(book);
-			auto it = readers.find(std::this_thread::get_id());
-			if (it == readers.end())
-				throw py::value_error("this thread does not hold the mutex shared");
-			readers.erase(it);
-		}
-		mutex.unlock_shared();
-	}
+	void unlockShared() { releaseHold(); }
 	bool locked() {
 		std::lock_guard<std::mutex> lock(book);
 		return written || !readers.empty();

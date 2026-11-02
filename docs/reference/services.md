@@ -318,8 +318,11 @@ records which threads hold the mutex and raises `ValueError` before pthread
 sees a misuse:
 
 - a thread locking a mutex it already holds;
-- a thread unlocking a mutex it does not hold, including using `unlock()` on a
-  shared hold or `unlock_shared()` on a write hold.
+- a thread unlocking a mutex it does not hold.
+
+As in Rack, `unlock()` and `unlock_shared()` each release whichever hold the
+thread has, shared or for writing: Rack's `unlock_shared()` just calls
+`unlock()`, which is `pthread_rwlock_unlock`.
 
 Other risks remain:
 
