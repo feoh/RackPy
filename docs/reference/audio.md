@@ -171,6 +171,15 @@ thread:
   Rack's ports run as they would on an audio thread. Core's Audio module
   claims the master module and steps Rack's engine by the device's blocks,
   and a Python port's overrides run synchronously.
+  Rack's `processBuffer` holds the device's `processMutex` while it calls
+  the ports, and each call iterates them, so inside those callbacks the
+  calls that change a port's devices (`set_device_id`, `set_driver_id`,
+  `reset`, `from_json`, `subscribe`, `unsubscribe`, a new `Port`) and that
+  device's `subscribed` or a nested `process_buffer` raise `OwnershipError`
+  rather than hang; Python's ports in the device stay alive until the
+  callbacks end. Elsewhere RackPy waits for a device's `processMutex`
+  without the GIL, so a main-thread call does not hang while another
+  thread drives the device.
 - `remove_device(device)` unplugs it: its stream stops and Rack's lists no
   longer show it. Rack's ports keep it until they choose another device, as
   with RtAudio, and it is deleted when the last one leaves: its `alive` is

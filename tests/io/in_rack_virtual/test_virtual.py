@@ -257,6 +257,84 @@ def test_audio_same_port_native_stream_reentry_and_nonvirtual_super() -> None:
         port.set_device_id(-1)
 
 
+def test_a_devices_callbacks_do_not_change_its_ports() -> None:
+    # Rack holds a device's processMutex in processBuffer and iterates its ports in each callback: an override that
+    # changed them or waited for that mutex hung on it (RP-42), so RackPy refuses those calls there.
+    driver = audio.PythonDriver("Locked audio")
+    device = driver.add_device("Locked", 1, 1)
+    audio.add_driver(4332, driver)
+    data, out = array("f", bytes(4 * 8)), array("f", bytes(4 * 8))
+    refused: list[str] = []
+    others: list[audio.Port] = []
+
+    class Meddler(audio.Port):
+        def process_buffer(self, input: Any, input_stride: int, output: Any, output_stride: int, frames: int) -> None:
+            calls: dict[str, Callable[[], object]] = {
+                "subscribed": lambda: device.subscribed,
+                "port's device": lambda: self.device.subscribed if self.device else None,
+                "set_device_id": lambda: self.set_device_id(-1),
+                "new port": audio.Port,
+                "nested process_buffer": lambda: device.process_buffer(data, 1, out, 1, 8),
+            }
+            for name, call in calls.items():
+                try:
+                    call()
+                except OwnershipError:
+                    refused.append(name)
+            others.clear()  # Python's ports in the device stay alive until its callbacks end
+
+    port = Meddler()
+    port.set_driver_id(4332)
+    port.set_device_id(device.id)
+    other = audio.Port()
+    other.set_driver_id(4332)
+    other.set_device_id(device.id)
+    others.append(other)
+    del other
+    device.process_buffer(data, 1, out, 1, 8)
+    assert refused == ["subscribed", "port's device", "set_device_id", "new port", "nested process_buffer"]
+    gc.collect()
+    assert device.subscribed == [port]  # the dropped port left the device once the callbacks ended
+    port.set_device_id(-1)
+
+
+def test_a_device_driven_from_another_thread() -> None:
+    # A Python-driven processBuffer holds the device's processMutex while a Python port's override waits for the GIL;
+    # the main thread waits for that mutex without the GIL (RP-42: it held the GIL there, and both hung).
+    import threading
+    import time
+
+    driver = audio.PythonDriver("Threaded audio")
+    device = driver.add_device("Threaded", 1, 1)
+    audio.add_driver(4333, driver)
+    started = threading.Event()
+
+    class Slow(audio.Port):
+        def process_buffer(self, input: Any, input_stride: int, output: Any, output_stride: int, frames: int) -> None:
+            started.set()
+            time.sleep(0.3)  # lets the GIL go while Rack holds the device's processMutex
+
+    port = Slow()
+    port.set_driver_id(4333)
+    port.set_device_id(device.id)
+    data, out = array("f", bytes(4 * 8)), array("f", bytes(4 * 8))
+    worker = threading.Thread(target=device.process_buffer, args=(data, 1, out, 1, 8))
+    worker.start()
+    try:
+        assert started.wait(10)
+        assert device.subscribed == [port]
+        started.clear()
+        worker.join(10)
+        worker = threading.Thread(target=device.process_buffer, args=(data, 1, out, 1, 8))
+        worker.start()
+        assert started.wait(10)
+        port.set_device_id(-1)  # Rack's unsubscribe waits for the mutex the same way
+        assert device.subscribed == []
+    finally:
+        worker.join(10)
+    assert not worker.is_alive()
+
+
 def test_facade_signatures_and_callback_annotations() -> None:
     audio_kind = inspect.signature(fa.open_port).parameters["kind"]
     midi_kind = inspect.signature(fm.open_input).parameters["kind"]

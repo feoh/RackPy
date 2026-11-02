@@ -36,6 +36,14 @@ struct ConfiguredDevice : rack::audio::Device {
 	bool removed = false;
 	int driving = 0;  // Python calls running Rack's Device code (under the driver's devicesMutex)
 
+	/** Rack's own (Device::subscribe and unsubscribe), except for how they wait for processMutex: never with the GIL
+	held, since a Python-driven processBuffer holds that mutex while a Python port's override waits for the GIL
+	(RP-42: the review found that deadlock). */
+	void subscribe(rack::audio::Port* port) override;
+	void unsubscribe(rack::audio::Port* port) override;
+	/** subscribed.size(), kept by those two, for its driver to read without processMutex. */
+	std::atomic<size_t> subscribers{0};
+
 	std::string getName() override {
 		std::lock_guard<std::mutex> lock(fieldsMutex);
 		return name;

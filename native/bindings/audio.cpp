@@ -67,6 +67,45 @@ enum class StreamEvent : uint8_t { Start, Stop };
 
 /** Set while a device that Python drives (PythonDevice) runs Rack's Device code on Python's thread. */
 thread_local bool pythonDriving = false;
+/** The devices whose Rack code (processBuffer, the stream callbacks) Python is running on this thread. Rack holds a
+device's processMutex in processBuffer and iterates its ports in each: a Python port's override that changed those
+ports, or waited for that mutex, would deadlock or break Rack's iteration (RP-42). */
+struct Driven {
+	const a::Device* device;
+	bool locked;  // in processBuffer, which holds processMutex (the stream callbacks do not)
+};
+thread_local std::vector<Driven> drivenDevices;
+bool drivenHere(const a::Device& d, bool lockedOnly) {
+	return std::any_of(drivenDevices.begin(), drivenDevices.end(),
+		[&](const Driven& x) { return x.device == &d && (x.locked || !lockedOnly); });
+}
+
+/** Refuses a call that changes which devices a port holds while a device's callbacks run on this thread. */
+void refuseWhileDriving(const char* what) {
+	if (!drivenDevices.empty())
+		throw runtime::Ownership(std::string(what) + " is refused inside an audio device's process or stream "
+			"callbacks: Rack is iterating that device's ports (and holds its processMutex) on this thread");
+}
+
+/** Locks a device's processMutex, never waiting for it with the GIL held (a Python-driven processBuffer on another
+thread holds it while a Python port's override waits for the GIL), nor for the GIL with it held: it returns holding
+the GIL if the caller did. Refused on a thread that already holds it. */
+std::unique_lock<std::mutex> lockProcess(a::Device& d, const char* what) {
+	if (drivenHere(d, true))
+		throw runtime::Ownership(std::string(what) + " is refused inside this device's own process or stream "
+			"callbacks, where Rack holds its processMutex on this thread");
+	bool gil = runtime::interpreterAlive() && PyGILState_Check();
+	for (;;) {
+		std::unique_lock<std::mutex> lock(d.processMutex, std::try_to_lock);
+		if (lock.owns_lock() || !gil) {
+			if (!lock.owns_lock())
+				lock.lock();
+			return lock;
+		}
+		py::gil_scoped_release release;  // wait for the holder without the GIL, then try again with it
+		std::lock_guard<std::mutex> wait(d.processMutex);
+	}
+}
 
 /** Copies `count` floats into a new array('f'). */
 py::object floatArray(const float* data, size_t count) {
@@ -318,8 +357,15 @@ void PyAudioPort::release() noexcept {
 void PyAudioPort::detachBridge() noexcept {
 	{
 		std::unique_lock<std::mutex> lock;
-		if (device)
-			lock = std::unique_lock<std::mutex>(device->processMutex);
+		if (device) {
+			try {
+				lock = lockProcess(*device, "detaching a module's audio port");
+			}
+			catch (const std::exception& e) {
+				// Only on the thread inside the device's callbacks, which holds the mutex: the bridge is not running.
+				WARN("RackPy: %s", e.what());
+			}
+		}
 		bridge.store(nullptr, std::memory_order_release);
 	}
 	if (bridgeModule)
@@ -388,7 +434,7 @@ struct AudioPortView {
 	const a::Port* port;
 	const a::Port& get() const {
 		a::Device& d = device();
-		std::lock_guard<std::mutex> lock(d.processMutex);
+		auto lock = lockProcess(d, "reading a device's port");
 		if (!d.subscribed.count(const_cast<a::Port*>(port)))
 			throw runtime::StaleHandle("the port no longer subscribes to this device");
 		return *port;
@@ -398,10 +444,12 @@ struct AudioPortView {
 /** A device's subscribers: Python's own ports, and PortViews of the others. */
 py::list subscriberList(a::Device& d, std::function<a::Device&()> resolve) {
 	py::list out;
-	std::lock_guard<std::mutex> lock(d.processMutex);  // Rack's: ports do not change while it is held
+	auto lock = lockProcess(d, "listing a device's subscribers");  // Rack's: ports do not change while it is held
 	for (a::Port* port : d.subscribed) {
-		if (::rackpy::rttiCast<PyAudioPort*>(port))
-			out.append(py::cast(port, py::return_value_policy::reference));
+		if (::rackpy::rttiCast<PyAudioPort*>(port)) {
+			if (livePythonAudioPort(port))  // not one being deleted
+				out.append(py::cast(port, py::return_value_policy::reference));
+		}
 		else
 			out.append(py::cast(AudioPortView{resolve, port}));
 	}
@@ -489,22 +537,38 @@ struct ConfiguredDriver : a::Driver {
 		auto* d = find(id);
 		return d ? d->getNumOutputs() : 0;
 	}
+	// devicesMutex is not held while the device waits for its processMutex, which a Python-driven processBuffer
+	// holds while a Python port's override may read the driver's devices (RP-42); `driving` keeps the device.
 	a::Device* subscribe(int id, a::Port* port) override {
-		std::lock_guard<std::mutex> lock(devicesMutex);
-		auto* d = find(id);
-		if (!d)
-			return nullptr;  // Rack's port keeps no device
+		ConfiguredDevice* d;
+		{
+			std::lock_guard<std::mutex> lock(devicesMutex);
+			d = find(id);
+			if (!d)
+				return nullptr;  // Rack's port keeps no device
+			++d->driving;
+		}
 		d->subscribe(port);
+		release(id, d);
 		return d;
 	}
 	void unsubscribe(int id, a::Port* port) override {
-		std::lock_guard<std::mutex> lock(devicesMutex);
-		auto* d = find(id, true);
-		if (!d)
-			return;
+		ConfiguredDevice* d;
+		{
+			std::lock_guard<std::mutex> lock(devicesMutex);
+			d = find(id, true);
+			if (!d)
+				return;
+			++d->driving;
+		}
 		d->unsubscribe(port);
-		if (d->removed && d->subscribed.empty() && d->driving == 0)
-			devices.erase(id);  // a removed device goes once its last port leaves, as RtAudio's do
+		release(id, d);
+	}
+	/** Ends a use of a device; a removed device goes once its last port leaves and no call uses it, as RtAudio's. */
+	void release(int id, ConfiguredDevice* d) {
+		std::lock_guard<std::mutex> lock(devicesMutex);
+		if (--d->driving == 0 && d->removed && d->subscribers.load() == 0)
+			devices.erase(id);
 	}
 };
 
@@ -564,17 +628,37 @@ struct DeviceLease {
 	}
 	~DeviceLease() {
 		std::lock_guard<std::mutex> lock(driver->devicesMutex);
-		if (--device->driving == 0 && device->removed && device->subscribed.empty())
+		if (--device->driving == 0 && device->removed && device->subscribers.load() == 0)
 			driver->devices.erase(id);
 	}
 	DeviceLease(const DeviceLease&) = delete;
 	DeviceLease& operator=(const DeviceLease&) = delete;
 };
 
+/** Python runs a device's Rack code on this thread: Python's ports in it are kept alive meanwhile (an override that
+dropped one would delete a port Rack is iterating), and calls that change a device's ports are refused. Made with
+the GIL held, before it is released. */
 struct DrivingScope {
 	bool previous = pythonDriving;
-	DrivingScope() { pythonDriving = true; }
-	~DrivingScope() { pythonDriving = previous; }
+	std::vector<py::object> kept;
+	DrivingScope(a::Device& device, bool locked) {
+		if (locked && drivenHere(device, true))  // Rack's processBuffer would lock the mutex its caller holds
+			throw runtime::Ownership("a device's process_buffer is refused inside its own process_buffer callbacks");
+		if (!drivenHere(device, false)) {  // a nested scope's ports cannot change: the outer one keeps them
+			auto lock = lockProcess(device, "running a device's callbacks");
+			for (a::Port* port : device.subscribed)
+				if (::rackpy::rttiCast<PyAudioPort*>(port) && livePythonAudioPort(port))
+					kept.push_back(py::cast(port, py::return_value_policy::reference));
+		}
+		pythonDriving = true;
+		drivenDevices.push_back({&device, locked});
+	}
+	~DrivingScope() {
+		drivenDevices.pop_back();
+		pythonDriving = previous;
+	}
+	DrivingScope(const DrivingScope&) = delete;
+	DrivingScope& operator=(const DrivingScope&) = delete;
 };
 
 const float* floatBuffer(const py::buffer_info& info, size_t needed, const char* what) {
@@ -590,6 +674,18 @@ const float* floatBuffer(const py::buffer_info& info, size_t needed, const char*
 
 rack::audio::Port& pythonAudioPort(py::handle value) {
 	return pythonPort(value);
+}
+
+void ConfiguredDevice::subscribe(a::Port* port) {
+	auto lock = lockProcess(*this, "subscribing a port");
+	subscribed.insert(port);
+	subscribers.store(subscribed.size());
+}
+
+void ConfiguredDevice::unsubscribe(a::Port* port) {
+	auto lock = lockProcess(*this, "unsubscribing a port");
+	subscribed.erase(port);
+	subscribers.store(subscribed.size());
 }
 
 UnlistedAudioDevice::UnlistedAudioDevice() {
@@ -644,6 +740,7 @@ py::object audioPortObject(a::Port* port) {
 }
 
 void connectAudioDriver(py::handle port, UnlistedAudioDriver& driver) {
+	refuseWhileDriving("connecting a laboratory driver");
 	PyAudioPort& p = pythonPort(port);
 	if (p.bridgeOwner)
 		throw runtime::Ownership("this audio port is a module's audio port: a laboratory driver cannot drive it");
@@ -687,6 +784,7 @@ void detachModulePort(PyAudioPort* port, module::Module* m) noexcept {
 
 void attachAudioPort(module::Module& m, py::handle value, int inputs, int outputs) {
 	runtime::requireMainThread("setting a module's audio port");
+	refuseWhileDriving("setting a module's audio port");
 	if (m.laboratory)
 		throw runtime::Laboratory("a laboratory module's audio is its Python process(); give an ordinary module the port");
 	if (m.engineOwned.load(std::memory_order_acquire) || m.onBench)
@@ -729,7 +827,7 @@ void attachAudioPort(module::Module& m, py::handle value, int inputs, int output
 	{
 		std::unique_lock<std::mutex> lock;
 		if (p.device)
-			lock = std::unique_lock<std::mutex>(p.device->processMutex);
+			lock = lockProcess(*p.device, "setting a module's audio port");
 		p.bridge.store(bridge.get(), std::memory_order_release);
 	}
 	PyAudioPort* port = &p;
@@ -780,6 +878,7 @@ void bindAudio(py::module_ mod) {
 		.def("get_device_num_outputs", [](const AudioDriverView& d, int id) { return d.get().getDeviceNumOutputs(id); },
 			py::arg("device_id"))
 		.def("subscribe", [](const AudioDriverView& d, int deviceId, py::object port) -> py::object {
+			refuseWhileDriving("Driver.subscribe");
 			auto& p = pythonPort(port);
 			if (p.bridgeOwner)
 				throw runtime::Ownership("a module's audio port has only its own device");
@@ -792,6 +891,7 @@ void bindAudio(py::module_ mod) {
 			"Rack's: makes the port a subscriber of the device (which may open its stream), apart from the port's own "
 			"device; RackPy undoes it when the port dies or the context closes. Port.set_device_id is the usual way.")
 		.def("unsubscribe", [](const AudioDriverView& d, int deviceId, py::object port) {
+			refuseWhileDriving("Driver.unsubscribe");
 			auto& p = pythonPort(port);
 			auto it = std::find_if(p.driverSubscriptions.begin(), p.driverSubscriptions.end(),
 				[&](const PyAudioPort::Direct& s) { return s.driverId == d.id && s.deviceId == deviceId; });
@@ -857,6 +957,7 @@ void bindAudio(py::module_ mod) {
 			return subscriberList(d, [self]() -> a::Device& { return self.cast<const AudioDeviceView&>().get(); });
 		}, "Rack's subscribers: Python's own ports, and PortViews of the others (modules' ports).")
 		.def("subscribe", [](const AudioDeviceView& v, py::object port) {
+			refuseWhileDriving("Device.subscribe");
 			a::Device& d = v.get();
 			auto& p = pythonPort(port);
 			if (p.bridgeOwner)
@@ -865,6 +966,7 @@ void bindAudio(py::module_ mod) {
 			p.deviceSubscriptions.push_back(&d);
 		}, py::arg("port"), "Rack's (its driver's subscribe calls it); RackPy undoes it with the port.")
 		.def("unsubscribe", [](const AudioDeviceView& v, py::object port) {
+			refuseWhileDriving("Device.unsubscribe");
 			a::Device& d = v.get();
 			auto& p = pythonPort(port);
 			auto it = std::find(p.deviceSubscriptions.begin(), p.deviceSubscriptions.end(), &d);
@@ -880,6 +982,7 @@ void bindAudio(py::module_ mod) {
 		"(which may open a real stream).")
 		.def(py::init([] {
 			requireLiveContext("audio.Port()");
+			refuseWhileDriving("audio.Port()");  // Rack's constructor subscribes it to a device
 			return new PyAudioPort;
 		}))
 		.def_property("input_offset", [](a::Port& p) { return checked(p).inputOffset; },
@@ -908,12 +1011,14 @@ void bindAudio(py::module_ mod) {
 			return py::module_::import("rackpy.raw").attr("context_get")();
 		}, "Rack's context the port was made in (the live one: other contexts' ports are refused).")
 		.def("reset", [](a::Port& p) {
+			refuseWhileDriving("Port.reset");
 			laboratory::LaboratoryCall call;
 			checked(p).reset();
 		}, "Rack's: Rack's first driver and its default device.")
 		.def("get_driver", [](a::Port& p) { return checked(p).getDriver() ? driverObject(p.getDriverId()) : py::none(); })
 		.def("get_driver_id", [](a::Port& p) { return checked(p).getDriverId(); })
 		.def("set_driver_id", [](a::Port& p, int id) {
+			refuseWhileDriving("Port.set_driver_id");
 			laboratory::LaboratoryCall call;  // a laboratory driver's overrides may drop it while Rack still uses it
 			checked(p).setDriverId(id);
 		}, py::arg("driver_id"),
@@ -923,6 +1028,7 @@ void bindAudio(py::module_ mod) {
 		.def("get_device_ids", [](a::Port& p) { return checked(p).getDeviceIds(); })
 		.def("get_device_id", [](a::Port& p) { return checked(p).getDeviceId(); })
 		.def("set_device_id", [](a::Port& p, int id) {
+			refuseWhileDriving("Port.set_device_id");
 			laboratory::LaboratoryCall call;
 			checked(p).setDeviceId(id);
 		}, py::arg("device_id"),
@@ -956,6 +1062,7 @@ void bindAudio(py::module_ mod) {
 			return runtime::fromJson(data);
 		})
 		.def("from_json", [](a::Port& p, py::handle data) {
+			refuseWhileDriving("Port.from_json");  // Rack's chooses the driver and device
 			checked(p);
 			std::unique_ptr<json_t, decltype(&json_decref)> json(runtime::toJson(data), json_decref);
 			laboratory::LaboratoryCall call;
@@ -1061,14 +1168,14 @@ void bindAudio(py::module_ mod) {
 			"('block_size', 128.0), ...]. The values are applied already; a real driver would reopen its stream.")
 		.def("start_stream", [](const PythonDevice& d) {
 			DeviceLease lease(d, false);
-			DrivingScope driving;
+			DrivingScope driving(*lease.device, false);
 			py::gil_scoped_release release;
 			lease.device->onStartStream();
 		}, "Rack's Device::onStartStream, as driver code calls it: each subscribed port's on_start_stream (a Python "
 			"port's override runs now, on this thread).")
 		.def("stop_stream", [](const PythonDevice& d) {
 			DeviceLease lease(d, true);
-			DrivingScope driving;
+			DrivingScope driving(*lease.device, false);
 			py::gil_scoped_release release;
 			lease.device->onStopStream();
 		})
@@ -1089,7 +1196,7 @@ void bindAudio(py::module_ mod) {
 			auto token = runtime::binding().current();
 			if (!token || !token->alive())
 				throw runtime::WrongContext("a device streams to Rack's ports only while Rack's context is live");
-			DrivingScope driving;
+			DrivingScope driving(dev, true);
 			py::gil_scoped_release release;  // Rack's ports run (Core Audio steps the engine); Python ports take it back
 			dev.processBuffer(inData, inputStride, outData, outputStride, frames);
 		}, py::arg("input"), py::arg("input_stride"), py::arg("output"), py::arg("output_stride"), py::arg("frames"),
@@ -1138,7 +1245,7 @@ void bindAudio(py::module_ mod) {
 				throw runtime::Ownership("the device belongs to another driver");
 			DeviceLease lease(device, false);
 			{
-				DrivingScope driving;
+				DrivingScope driving(*lease.device, false);
 				py::gil_scoped_release release;
 				lease.device->onStopStream();  // the stream ends; ports keep the device until they leave it
 			}
