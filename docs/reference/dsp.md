@@ -492,8 +492,8 @@ copying the C++ object would free the setup twice.
   `irfft_unordered`/`ifft_unordered` take a spectrum in that order.
 - **Scale.** Nothing is normalized: the inverse of a forward transform is
   `length` times the input. `scale(x)` multiplies `length` floats (`2 *
-  length` complex) by `1 / length`. It reads the writable `length` field;
-  the transforms always use the setup's size.
+  length` complex) by `1 / length`, none if `length` is 0 or less. It reads
+  the writable `length` field; the transforms always use the setup's size.
 
 (dsp-fir)=
 ## FIR helpers and the real-time convolver
@@ -548,7 +548,8 @@ as in Rack), and `process()` returns the next correction to add. `buf`
   to `in_frames` frames and writes up to `out_frames`, with channel `c` of
   frame `i` at `i * stride + c`, and returns `(frames read, frames written)`,
   which C++ returns through two `int` pointers. Buffers are float32 and must
-  hold the frames (`ValueError`); strides must be at least `channels`.
+  hold the frames (`ValueError`); strides are not negative. A stride below
+  `channels` is allowed, as in Rack: channels then share samples.
   `process(frames, in_frames, out_frames_list, out_frames)` takes lists of
   `Frame[MAX_CHANNELS]` objects instead, copied into and out of Rack's
   contiguous frames.

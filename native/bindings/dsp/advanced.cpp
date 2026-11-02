@@ -185,10 +185,10 @@ void bindAdvanced(py::module_ m) {
 			c::member<&d::RealFFT::irfft>(f.base(), in, out);
 		}, py::arg("input"), py::arg("output"), "Inverse of rfft, unscaled.")
 		.def("scale", [](RealFFT& f, const py::buffer& x) {
-			if (f.length < 0)
-				throw py::value_error("scale: length is negative");
-			c::member<&d::RealFFT::scale>(f.base(), floats(x, true, (size_t) f.length, false, "scale"));
-		}, py::arg("x"), "Multiplies the first length floats by 1 / length, in place.");
+			// Rack's loop runs length times: none for a length of 0 or less (RP-42: a negative one was refused).
+			size_t n = f.length > 0 ? (size_t) f.length : 0;
+			c::member<&d::RealFFT::scale>(f.base(), floats(x, true, n, false, "scale"));
+		}, py::arg("x"), "Multiplies the first length floats by 1 / length, in place (none if length <= 0).");
 
 	// --- ComplexFFT ---------------------------------------------------------------
 	py::class_<ComplexFFT> complex(m, "ComplexFFT", "rack::dsp::ComplexFFT: PFFFT's complex FFT of `length` points.");
@@ -212,23 +212,20 @@ void bindAdvanced(py::module_ m) {
 	RACKPY_COMPLEX("ifft", ifft, "Inverse of fft, unscaled.")
 #undef RACKPY_COMPLEX
 	complex.def("scale", [](ComplexFFT& f, const py::buffer& x) {
-		if (f.length < 0)
-			throw py::value_error("scale: length is negative");
-		c::member<&d::ComplexFFT::scale>(f.base(), floats(x, true, 2 * (size_t) f.length, false, "scale"));
-	}, py::arg("x"), "Multiplies the first 2 * length floats by 1 / length, in place.");
+		size_t n = f.length > 0 ? 2 * (size_t) f.length : 0;  // Rack's loop runs length times (RP-42, as RealFFT's)
+		c::member<&d::ComplexFFT::scale>(f.base(), floats(x, true, n, false, "scale"));
+	}, py::arg("x"), "Multiplies the first 2 * length floats by 1 / length, in place (none if length <= 0).");
 
 	// --- fir.hpp ------------------------------------------------------------------
 	m.def("convolve_naive", [](const py::buffer& in, const py::buffer& kernel, int len) {
-		if (len < 0)
-			throw py::value_error("convolve_naive: len is negative");
-		const float* x = floats(in, false, (size_t) len, false, "convolve_naive in_");
-		const float* k = floats(kernel, false, (size_t) len, false, "convolve_naive kernel");
+		size_t n = len > 0 ? (size_t) len : 0;  // Rack's loop does not run for len <= 0: it returns 0 (RP-42)
+		const float* x = floats(in, false, n, false, "convolve_naive in_");
+		const float* k = floats(kernel, false, n, false, "convolve_naive kernel");
 		return c::convolveNaive(x, k, len);
 	}, py::arg("in_"), py::arg("kernel"), py::arg("len"), "sum(in_[len - 1 - i] * kernel[i]): one output of a direct convolution.");
 	m.def("boxcar_lowpass_ir", [](const py::buffer& out, int len, float cutoff) {
-		if (len < 0)
-			throw py::value_error("boxcar_lowpass_ir: len is negative");
-		c::boxcarLowpassIR(floats(out, true, (size_t) len, false, "boxcar_lowpass_ir"), len, cutoff);
+		size_t n = len > 0 ? (size_t) len : 0;  // Rack writes nothing for len <= 0 (RP-42: a negative one was refused)
+		c::boxcarLowpassIR(floats(out, true, n, false, "boxcar_lowpass_ir"), len, cutoff);
 	}, py::arg("out"), py::arg("len"), py::arg("cutoff") = 0.5f,
 		"Writes len taps of a windowless sinc lowpass at cutoff (a ratio of the sample rate).");
 

@@ -227,8 +227,13 @@ def test_sample_rate_converter() -> None:
     with pytest.raises(ValueError, match="rate"):
         s.set_rates(0, 48000)
     out = floats(2 * 20)
-    with pytest.raises(ValueError, match="stride"):
-        s.process(floats(40), 1, 20, out, 2, 20)  # a stride below channels
+    # A stride below channels makes them share samples, as Rack allows (RP-42): 21 floats hold 20 frames of 2 here.
+    ramp = array.array("f", [float(k) for k in range(21)])
+    assert s.process(ramp, 1, 20, out, 2, 20) == (20, 20)  # equal rates: Rack copies
+    assert [out[2 * i + 1] for i in range(20)] == [float(i + 1) for i in range(20)]
+    with pytest.raises(ValueError, match="not negative"):
+        s.process(ramp, -1, 20, out, 2, 20)
+    assert s.process(array.array("f"), 0, 0, array.array("f"), 0, 0) == (0, 0)  # empty buffers: Rack asserts non-null
     with pytest.raises(ValueError, match="at least"):
         s.process(floats(30), 2, 20, out, 2, 20)  # 20 frames of 2 need 40 floats
     # The Frame overload gives the buffer overload's results.

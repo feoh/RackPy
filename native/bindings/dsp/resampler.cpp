@@ -165,14 +165,19 @@ py::object bindConverter(py::module_ scope, py::dict& specs) {
 			py::arg("in_rate"), py::arg("out_rate"))
 		.def("refresh_state", [](S& s) { c::member<&S::refreshState>(s); }, "Rebuilds speexdsp's state from the fields.")
 		.def("process", [](S& s, const py::buffer& in, int inStride, int inFrames, const py::buffer& out, int outStride, int outFrames) {
-			if (inStride < 1 || outStride < 1 || inFrames < 0 || outFrames < 0)
-				throw py::value_error("process: strides must be at least 1 and frame counts not negative");
-			if (inStride < s.channels || outStride < s.channels)
-				throw py::value_error("process: a stride must be at least channels (" + std::to_string(s.channels) + ")");
+			// Any stride of 0 or more stays inside buffers of these sizes; a small one only makes channels share
+			// samples, which Rack and speexdsp allow (RP-42: strides below channels were refused).
+			if (inStride < 0 || outStride < 0 || inFrames < 0 || outFrames < 0)
+				throw py::value_error("process: strides and frame counts are not negative");
 			size_t inNeed = inFrames ? (size_t) inStride * (inFrames - 1) + s.channels : 0;
 			size_t outNeed = outFrames ? (size_t) outStride * (outFrames - 1) + s.channels : 0;
+			static float unused[1];  // Rack asserts non-null pointers, which an empty buffer may not have
 			const float* ip = floats(in, false, inNeed, "process in_");
 			float* op = floats(out, true, outNeed, "process out");
+			if (!ip)
+				ip = unused;
+			if (!op)
+				op = unused;
 			int inUsed = inFrames, outUsed = outFrames;
 			c::member<static_cast<void (S::*)(const float*, int, int*, float*, int, int*)>(&S::process)>(s, ip, inStride, &inUsed, op,
 				outStride, &outUsed);

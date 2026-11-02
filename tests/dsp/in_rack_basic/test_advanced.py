@@ -188,6 +188,16 @@ def test_buffers_are_checked() -> None:
     with pytest.raises(ValueError, match="at least 64"):
         fft.scale(good)
     fft.rfft(good, good)
+    # Rack's loops run length or len times: none at 0 or below, so those are no-ops, not errors (RP-42).
+    kept = array.array("f", [2.0])
+    for length in (0, -3):
+        fft.length = length
+        fft.scale(kept)
+        c = dsp.ComplexFFT(16)
+        c.length = length
+        c.scale(kept)
+        dsp.boxcar_lowpass_ir(kept, length)
+        assert dsp.convolve_naive(kept, kept, length) == 0.0 and kept.tolist() == [2.0]
 
 
 def test_setup_handles_and_ownership() -> None:
