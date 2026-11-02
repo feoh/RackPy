@@ -149,3 +149,27 @@ def test_simulated_graphics_context_recreation() -> None:
         in_scene.remove_from_parent()
         in_scene.close()
         detached.close()
+
+
+def test_framebuffer_widget_base_context_handlers() -> None:
+    # Rack's FramebufferWidget::onContextCreate marks the widget dirty and ::onContextDestroy frees the framebuffer;
+    # called directly, with no RackPy graphics-context hook involved, they show what Rack's own implementations do.
+    frame = w.FramebufferWidget()
+    frame.box = Rect(Vec(), Vec(10, 10))
+    leaf = w.Widget()
+    leaf.box = frame.box.copy()
+    frame.add_child(leaf)
+    frame.attach_to_scene()
+    try:
+        frame.render()
+        frame.set_dirty(False)
+        assert frame.get_framebuffer() is not None and not bool(frame.dirty)
+        frame.on_context_create(w.ContextCreateEvent())
+        assert bool(frame.dirty)
+        frame.render()
+        assert frame.get_framebuffer() is not None
+        frame.on_context_destroy(w.ContextDestroyEvent())
+        assert frame.get_framebuffer() is None
+    finally:
+        frame.remove_from_parent()
+        frame.close()

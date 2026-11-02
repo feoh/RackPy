@@ -247,8 +247,15 @@ void bindUi(py::module_ raw) {
 	using TF = ui::TextField;
 	auto field = variant<TF, OW, TextFieldWidget<TF>>(mod, "TextField");
 	field.def_property("text", [](py::object self) { return native<TF>(self).text; },
-			[](py::object self, std::string v) { native<TF>(self).text = std::move(v); },
-			"The raw field: unlike set_text(), it does not move the cursor or send a change event.")
+			[](py::object self, std::string v) {
+				auto& tf = native<TF>(self);
+				tf.text = std::move(v);
+				// Rack indexes the text with both (and asserts they are in range), so a shorter text pulls them in.
+				tf.cursor = rack::math::clamp(tf.cursor, 0, (int) tf.text.size());
+				tf.selection = rack::math::clamp(tf.selection, 0, (int) tf.text.size());
+			},
+			"The raw field: unlike set_text(), it does not move the cursor to the end or send a change event. A "
+			"cursor or selection past the new text's end is clamped to it, as Rack indexes the text with them.")
 		.def_property("placeholder", [](py::object self) { return native<TF>(self).placeholder; },
 			[](py::object self, std::string v) { native<TF>(self).placeholder = std::move(v); })
 		.def_property("password", [](py::object self) { return native<TF>(self).password; },

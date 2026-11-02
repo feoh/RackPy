@@ -119,6 +119,10 @@ def contexts(window_: win.Window) -> tuple[win.NativeHandle, win.NativeHandle]:
     return vg, fb_vg
 
 
+def vg_of(image: win.Image) -> win.NativeHandle | None:
+    return image.vg  # read again: mypy would narrow the earlier `is None` check
+
+
 def window() -> win.Window:
     context = raw.context_get()
     assert context is not None and context.window is not None
@@ -586,6 +590,7 @@ def test_python_owned_images_free_their_textures(tmp_path: Path) -> None:
     image = win.Image()
     assert image.handle == -1 and image.vg is None
     image.load_file(str(path), contexts(window_)[0])
+    assert vg_of(image) is contexts(window_)[0]  # the context it was loaded in, not the other one
     handle = image.handle
     assert handle > 0 and size_of(handle) == (1, 1)
     del image
@@ -594,6 +599,7 @@ def test_python_owned_images_free_their_textures(tmp_path: Path) -> None:
 
     threaded = win.Image()
     threaded.load_file(str(path), contexts(window_)[1])
+    assert vg_of(threaded) is contexts(window_)[1]
     handle = threaded.handle
     holder = [threaded]
     del threaded

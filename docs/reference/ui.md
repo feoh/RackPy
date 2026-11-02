@@ -51,11 +51,10 @@ change them.
 methods: `get_text()`, `set_text()`, `select_all()`, `get_selected_text()`,
 `insert_text()`, the clipboard methods and the cursor movements. `cursor` and
 `selection` are clamped to the text, because Rack indexes the text with them.
-The raw `text` property directly replaces Rack's string; it does not move or
-clamp `cursor` or `selection`. Shortening the string can therefore leave either
-index past the end, which Rack's later editing and drawing code assumes cannot
-happen. After a raw write that shortens text, set both indices to valid
-positions (or use `set_text()`, which applies Rack's text-change behavior).
+The raw `text` property directly replaces Rack's string; unlike `set_text()`
+it neither moves the cursor to the end nor sends a change event. Because Rack
+indexes the text with `cursor` and `selection`, a raw write that shortens the
+text clamps both to the new end; a longer text leaves them where they were.
 `prev_field` and `next_field`, where Tab moves the focus, take a widget RackPy
 manages, or `None`; if that widget is deleted, the field becomes `None` so
 Rack never follows a dangling pointer. Python may override

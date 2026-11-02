@@ -258,6 +258,11 @@ def test_text_field_editing_and_focus_fields() -> None:
         assert field.get_text() == "λ world"
         field.cursor = 999  # clamped: Rack indexes the text with it
         assert field.cursor == len("λ world".encode())
+        field.text = "ab"  # the raw write: a shorter text pulls the cursor and selection in, Rack indexes with them
+        assert field.cursor == 2 and field.selection == 2 and field.get_selected_text() == ""
+        field.cursor, field.selection = 1, 0
+        field.text = "abc"  # a longer one leaves them alone, and sends no change event
+        assert (field.cursor, field.selection) == (1, 0) and field.get_selected_text() == "a"
         field.placeholder, field.password, field.multiline = "type", True, True
         assert (field.placeholder, field.password, field.multiline) == ("type", True, True)
         field.next_field = other
@@ -428,6 +433,33 @@ def test_scrollbar_drag_uses_its_orientation() -> None:
         assert not start.is_consumed() and scroll.offset == before
         bar.on_drag_end(w.DragEndEvent(button=glfw.GLFW_MOUSE_BUTTON_LEFT, context=w.EventContext()))
         assert scroll.offset == before
+    finally:
+        scroll.close()
+
+
+def test_scrollbar_press_jumps_to_the_clicked_position_unless_it_hits_the_handle() -> None:
+    # Scrollbar::onButton: a left press off the handle moves the ScrollWidget's offset along the bar to that position.
+    scroll, bar = ui.ScrollWidget(), ui.Scrollbar()
+    try:
+        scroll.box = Rect(Vec(), Vec(50, 50))
+        scroll.container_box = Rect(Vec(), Vec(200, 300))
+        bar.box = Rect(Vec(), Vec(10, 100))
+        scroll.add_child(bar)
+        bar.vertical = True
+        press = glfw.GLFW_PRESS
+        left = glfw.GLFW_MOUSE_BUTTON_LEFT
+        bar.on_button(w.ButtonEvent(pos=Vec(5, 2), button=left, action=press))  # on the handle: no move
+        assert scroll.offset == Vec()
+        bar.on_button(w.ButtonEvent(pos=Vec(5, 90), button=left, action=glfw.GLFW_RELEASE))  # only a press moves it
+        bar.on_button(w.ButtonEvent(pos=Vec(5, 90), button=glfw.GLFW_MOUSE_BUTTON_RIGHT, action=press))
+        assert scroll.offset == Vec()
+        event = w.ButtonEvent(context=w.EventContext(), pos=Vec(5, 90), button=left, action=press)
+        bar.on_button(event)
+        handle_size = scroll.get_handle_size().y
+        position = 0.9
+        fraction = (position - handle_size / 2) / (1 - handle_size)
+        assert scroll.offset.x == 0 and scroll.offset.y == pytest.approx(fraction * (300 - 50))
+        assert event.is_consumed()  # OpaqueWidget::onButton consumes the left press
     finally:
         scroll.close()
 
