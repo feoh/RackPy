@@ -31,8 +31,11 @@ hooks = pytest.mark.skipif(_testing is None, reason="needs the test-hooks build 
 def test_app_configuration_strings_are_the_running_racks() -> None:
     assert raw.APP_VERSION == "2.6.6" and raw.APP_VERSION_MAJOR == "2"
     assert raw.APP_NAME == "VCV Rack" and raw.APP_OS == OS and raw.APP_CPU == CPU
-    for name in ("APP_EDITION", "APP_EDITION_NAME", "APP_OS_NAME", "APP_CPU_NAME", "API_URL"):
-        assert isinstance(getattr(raw, name), str) and getattr(raw, name)
+    # Rack Free 2.6.6's src/common.cpp defines these independently for each host platform.
+    assert raw.APP_EDITION == "Free" and raw.APP_EDITION_NAME == "Free"
+    assert {"lin": "Linux", "mac": "macOS", "win": "Windows"}[OS] == raw.APP_OS_NAME
+    assert {"x64": "x64", "arm64": "ARM64"}[CPU] == raw.APP_CPU_NAME
+    assert raw.API_URL == "https://api.vcvrack.com"
 
 
 def test_bit_cast_reinterprets_bits_of_the_same_size() -> None:
