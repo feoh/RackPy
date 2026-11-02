@@ -268,7 +268,7 @@ def test_info_names_and_python_overrides() -> None:
     assert named.get_full_name() == "Gate input" and named.get_description() == "Opens the envelope"
     light = LightInfo()
     light.name, light.light_id = "Level", 2
-    assert light.get_name() == "Level" and light.get_description() == ""
+    assert light.get_name() == "Level" and light.get_description() == "" and light.light_id == 2
 
 
 def test_owned_components_work_from_python_threads() -> None:
