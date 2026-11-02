@@ -21,6 +21,10 @@ callback that runs while Rack already holds the lock exclusively (a
 `ResetEvent`, say), such a method raises `EngineLockError` instead of
 deadlocking.
 
+`rackpy.raw.Context.engine` is a read-only checked handle to Rack's engine,
+or `None` after Rack deletes it. It is available only in Rack's live UI
+context.
+
 Methods that Rack does not lock (`get_frame`, `get_sample_rate`,
 `get_param_value` and the like) read Rack's values directly.
 

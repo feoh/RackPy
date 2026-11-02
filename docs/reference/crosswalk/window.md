@@ -50,11 +50,11 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::window::Font::loadFile(const std::string &, NVGcontext *)` | method | bound | `rackpy.raw.window.Font.load_file` | {ref}`window#window-fonts <window-fonts>` |
 | `rack::window::Image::load(const std::string &)` | method | bound | `rackpy.raw.window.Image.load` | {ref}`window#window-images <window-images>` |
 | `rack::window::Image::loadFile(const std::string &, NVGcontext *)` | method | bound | `rackpy.raw.window.Image.load_file` | {ref}`window#window-images <window-images>` |
-| `rack::window::Svg::draw(NVGcontext *)` | method | bound | `rackpy.raw.window.Svg.draw` | [widgets#typed-bases](../widgets.md#typed-bases) |
+| `rack::window::Svg::draw(NVGcontext *)` | method | bound | `rackpy.raw.window.Svg.draw` | [widgets#typed-bases](../widgets.md#typed-bases), {ref}`window#window-svg <window-svg>` |
 | `rack::window::Svg::getNumPaths()` | method | bound | `rackpy.raw.window.Svg.get_num_paths` | [widgets#typed-bases](../widgets.md#typed-bases), {ref}`window#window-svg <window-svg>` |
 | `rack::window::Svg::getNumPoints()` | method | bound | `rackpy.raw.window.Svg.get_num_points` | [widgets#typed-bases](../widgets.md#typed-bases), {ref}`window#window-svg <window-svg>` |
 | `rack::window::Svg::getNumShapes()` | method | bound | `rackpy.raw.window.Svg.get_num_shapes` | [widgets#typed-bases](../widgets.md#typed-bases), {ref}`window#window-svg <window-svg>` |
-| `rack::window::Svg::getSize()` | method | bound | `rackpy.raw.window.Svg.get_size` | [widgets#typed-bases](../widgets.md#typed-bases) |
+| `rack::window::Svg::getSize()` | method | bound | `rackpy.raw.window.Svg.get_size` | [widgets#typed-bases](../widgets.md#typed-bases), {ref}`window#window-svg <window-svg>` |
 | `rack::window::Svg::load(const std::string &)` | method | bound | `rackpy.raw.window.Svg.load` | [widgets#typed-bases](../widgets.md#typed-bases) |
 | `rack::window::Svg::loadFile(const std::string &)` | method | bound | `rackpy.raw.window.Svg.load_file` | [widgets#typed-bases](../widgets.md#typed-bases) |
 | `rack::window::Svg::loadString(const std::string &)` | method | bound | `rackpy.raw.window.Svg.load_string` | [widgets#typed-bases](../widgets.md#typed-bases) |

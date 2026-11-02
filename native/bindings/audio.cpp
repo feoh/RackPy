@@ -230,6 +230,10 @@ struct PyAudioPort : a::Port {
 			droppedEvents.fetch_add(1, std::memory_order_relaxed);
 		}
 	}
+	void queueInitialStart() noexcept {
+		if (device)
+			queue(StreamEvent::Start);
+	}
 	void stream(StreamEvent event) {
 		if (pythonDriving && runtime::interpreterAlive()) {  // on Python's thread: synchronously
 			py::gil_scoped_acquire gil;
@@ -308,6 +312,10 @@ void deliverEvents() noexcept {
 
 PyAudioPort::PyAudioPort() {
 	ports.push_back(this);
+	// Rack's Port constructor may attach its default device before this Python trampoline exists, so its virtual
+	// onStartStream() call resolves to Rack's no-op. Deliver the initial notification after pybind creates the Python
+	// peer, just as for later stream changes.
+	queueInitialStart();
 	if (hooked)
 		return;
 	hooked = true;
@@ -864,6 +872,15 @@ py::object moduleAudioStats(module::Module& m) {
 	d["frames_to_engine"] = b.toEngineFrames();
 	d["frames_to_device"] = b.toDeviceFrames();
 	return d;
+}
+
+void queueInitialAudioStartForTesting(py::handle value) {
+	auto& port = pythonAudioPort(value);
+	static_cast<PyAudioPort&>(port).queueInitialStart();
+}
+
+void deliverAudioEventsForTesting() noexcept {
+	deliverEvents();
 }
 
 void bindAudio(py::module_ mod) {

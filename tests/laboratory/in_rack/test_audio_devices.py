@@ -247,6 +247,28 @@ def test_racks_audio_port_calls_a_python_driver_and_device() -> None:
 
 
 @needs_ports
+def test_queued_initial_audio_start_reaches_python_override_without_a_physical_device() -> None:
+    log, driver, _, _ = lab_setup()
+    testing_name = "_testing"
+    testing = getattr(_rackpy_host, testing_name)
+
+    class Port(audio.Port):
+        def on_start_stream(self) -> None:
+            log.append(("port", "start"))
+
+    port = Port()
+    driver.connect(port)
+    testing.deliver_audio_events()
+    log.clear()
+
+    # The constructor uses this same path when Rack's base constructor connected its default device before the
+    # Python trampoline existed; exercise it explicitly because CI machines need not have a physical audio device.
+    testing.queue_initial_audio_start(port)
+    testing.deliver_audio_events()
+    assert log == [("port", "start")]
+
+
+@needs_ports
 def test_audio_override_errors_reach_the_port_methods_caller() -> None:
     stranger = AudioDevice("stranger")
 

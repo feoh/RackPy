@@ -204,7 +204,7 @@ def test_buttons_and_menus() -> None:
     assert len(no_port.children) == 7  # Rack 2.6.6's four labels and three separators, and no driver or device items
     no_port.close()
     midi_no_port = ui.Menu()
-    app.append_midi_menu(midi_no_port, None)  # type: ignore[arg-type]  # Rack accepts a null MIDI port
+    app.append_midi_menu(midi_no_port, None)  # Rack accepts a null MIDI port
     assert len(midi_no_port.children) == 5  # Rack's driver/device labels, separators and channel submenu
     midi_no_port.close()
     button.close()

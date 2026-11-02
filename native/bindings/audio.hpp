@@ -20,6 +20,9 @@ namespace bindings {
 
 /** rackpy.raw.audio (RP-29B). */
 void bindAudio(pybind11::module_ audio);
+/** Test hooks: queue and deliver a Port's initial stream notification without requiring a physical default device. */
+void queueInitialAudioStartForTesting(pybind11::handle port);
+void deliverAudioEventsForTesting() noexcept;
 /** A live audio port Python made (rackpy.raw.audio.Port), for Rack's audio widgets and menus. Main thread. */
 rack::audio::Port& pythonAudioPort(pybind11::handle value);
 

@@ -1087,6 +1087,15 @@ void define(py::module_ m) {
 		});
 		worker.join();
 	}, py::arg("generator"), py::arg("message"));
+	// RP-42: exercise the constructor-time stream notification even when CI has no physical default audio device.
+	m.def("queue_initial_audio_start", [](py::handle port) {
+		requireMainThread("queue_initial_audio_start");
+		bindings::queueInitialAudioStartForTesting(port);
+	}, py::arg("port"));
+	m.def("deliver_audio_events", [] {
+		requireMainThread("deliver_audio_events");
+		bindings::deliverAudioEventsForTesting();
+	});
 	// RP-22F: the laboratory's drivers and devices, called as a Rack thread would, were one ever to reach them.
 	m.def("laboratory_audio_on_rack_thread", [](py::handle driver, py::handle device, py::handle port) {
 		auto& d = laboratory::audioDriverForTesting(driver);
