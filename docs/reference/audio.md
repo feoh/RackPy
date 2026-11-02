@@ -127,8 +127,11 @@ leaves). Python reaches it only through the port that holds it, and the view
 goes stale once the port lets go. It has Rack's queries and setters for
 name, channels, sample rate and block size. `subscribed` lists the device's
 subscribers, Python's own ports and read-only `PortView`s of the others,
-under Rack's `processMutex`. `subscribe` and `unsubscribe` are Rack's
-lower-level calls, which RackPy undoes with the port.
+under Rack's `processMutex`. That public mutex field is represented by the
+`Device` view and its operations: RackPy takes it internally where Rack
+requires, but does not expose it as a separate Python lock because holding it
+can block Rack's audio-processing path. `subscribe` and `unsubscribe` are
+Rack's lower-level calls, which RackPy undoes with the port.
 
 (audio-python-drivers)=
 ## Python drivers and devices

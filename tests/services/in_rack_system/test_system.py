@@ -145,10 +145,13 @@ def test_time_processes_and_flags() -> None:
     thread_time = rsys.get_thread_time()
     work = 0
     deadline = time.monotonic() + 2
-    while rsys.get_thread_time() <= thread_time and time.monotonic() < deadline:
+    while True:
         for i in range(500_000):
             work += i
-    assert work > 0 and rsys.get_thread_time() > thread_time
+        current_thread_time = rsys.get_thread_time()
+        if current_thread_time > thread_time or time.monotonic() >= deadline:
+            break
+    assert work > 0 and current_thread_time > thread_time
     t1 = rsys.get_time()
     rsys.sleep(-1)  # Rack's sleep_for returns at once for a time of zero or less
     rsys.sleep(0)
