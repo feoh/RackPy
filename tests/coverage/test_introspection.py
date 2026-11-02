@@ -37,13 +37,14 @@ def test_introspection_comes_from_the_running_package(artifact: Path) -> None:
     data = json.loads(artifact.read_text())
     assert data["rack_version"] == "2.6.6" and data["binding"] == "pybind11 3.1.0"
     objects = data["objects"]
-    # These are compile-time annotations/build switches, not runtime RackPy bindings.
+    # Every macro classified as compile-time-only has no runtime RackPy export.
+    manifest = json.loads((Path(__file__).resolve().parents[2] / "bindings/manifest.json").read_text())
     non_runtime_macros = {
-        "GLEW_NO_GLU",
-        "GLEW_STATIC",
-        "NANOVG_GL2",
-        "PRIVATE",
-        "SIMDE_ENABLE_NATIVE_ALIASES",
+        record["id"].removeprefix("macro:")
+        for record in manifest["entries"]
+        if record["id"].startswith("macro:")
+        and record["python"] is not None
+        and record["python"]["kind"] == "no_runtime_meaning"
     }
     assert not any(name.rsplit(".", 1)[-1] in non_runtime_macros for name in objects)
     assert objects["rackpy.raw"]["kind"] == "module"

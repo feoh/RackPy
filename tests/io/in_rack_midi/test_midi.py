@@ -2,6 +2,7 @@
 """RP-29A: rack::midi in Rack's live UI, with Rack's Loopback MIDI driver (-12): an output on loopback
 device N reaches the inputs on loopback device N."""
 
+import threading
 from collections.abc import Iterator
 
 import pytest
@@ -64,6 +65,38 @@ def test_messages() -> None:
     copy = midi.Message()
     copy.bytes, copy.frame = [0x93], 42
     assert copy == message
+
+
+def test_message_values_are_usable_on_python_worker_threads() -> None:
+    results: list[tuple[list[int], int, int, int, int, int, int, int, str]] = []
+
+    def make_message() -> None:
+        message = midi.Message()
+        message.set_status(0x9)
+        message.set_channel(2)
+        message.set_note(61)
+        message.set_value(99)
+        message.set_frame(123)
+        message.set_size(3)
+        results.append(
+            (
+                message.bytes,
+                message.frame,
+                message.get_channel(),
+                message.get_note(),
+                message.get_value(),
+                message.get_status(),
+                message.get_frame(),
+                message.get_size(),
+                message.to_string(),
+            )
+        )
+
+    worker = threading.Thread(target=make_message)
+    worker.start()
+    worker.join(timeout=2)
+    assert not worker.is_alive()
+    assert results == [([0x92, 61, 99], 123, 2, 61, 99, 9, 123, 3, "92 3d 63")]
 
 
 def test_racks_drivers() -> None:
