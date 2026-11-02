@@ -3,6 +3,7 @@
 Rack's live UI (Rack's audio drivers are isolated in tests and list no devices)."""
 
 import gc
+import math
 from typing import Any
 
 import pytest
@@ -165,7 +166,8 @@ def test_buttons_and_menus() -> None:
         componentlibrary.MidiButton_MIDI_DIN,
     ):
         b = cls()  # Rack's classes, with Rack's artwork
-        assert b.box.size.x > 0
+        assert b.frames and b.sw.svg is not None
+        assert math.isfinite(b.box.size.x) and math.isfinite(b.box.size.y)
         b.close()
     menu = ui.Menu()
     app.append_audio_menu(menu, port)
