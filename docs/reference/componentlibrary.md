@@ -6,9 +6,9 @@ Linux x86_64 inside Rack Free 2.6.6** (see the
 [coverage report](coverage.md)). The audio and MIDI buttons come with Rack's
 displays (RP-28D).
 
-The components draw Rack's own artwork, which Rack installs: their C++
-constructors load it from Rack's folder (`asset::system`), and RackPy copies
-none of it. Use them as Rack's C++ plugins do, with the
+Components whose Rack constructors load SVGs draw Rack's own installed artwork;
+RackPy copies none of it. Some base classes only create empty SVG layers for a
+derived class to populate. Use the components as Rack's C++ plugins do, with the
 [factories](app.md#factories):
 
 ```{rackpy-conceptual}
@@ -78,7 +78,8 @@ The templates:
 - `RectangleLight`, which draws a rectangular background and light.
 - `VCVBezelLight` (`LEDBezelLight`) and `PB61303Light`.
 - `LightSlider[base, light]`, `VCVSliderLight` (`LEDSliderLight`) and
-  `VCVLightSlider` (`LEDLightSlider`). The deprecated `LEDSliderGreen`,
+  `VCVLightSlider` (`LEDLightSlider`). `LightSlider.step()` moves the light to
+  the slider handle's centre. The deprecated `LEDSliderGreen`,
   `LEDSliderRed`, `LEDSliderYellow`, `LEDSliderBlue` and `LEDSliderWhite` are
   classes, as in Rack.
 - `MomentarySwitch`, `LightButton[base, light]`, `VCVLightButton`

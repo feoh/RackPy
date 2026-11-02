@@ -77,7 +77,10 @@ def test_racks_components_load_racks_artwork() -> None:
             made.append(knob)
             assert isinstance(knob, app.SvgKnob) and knob.box.size.x > 0, name
             assert knob.sw.svg is not None and knob.min_angle < 0 < knob.max_angle, name
-            if hasattr(knob, "bg"):
+            if name == "BefacoTinyKnob":
+                assert hasattr(knob, "bg")
+                assert isinstance(knob.bg, w.HostSvgWidget) and knob.bg.parent is knob.fb, name
+            elif hasattr(knob, "bg"):
                 assert isinstance(knob.bg, w.HostSvgWidget) and knob.bg.svg is not None, name
         for name in (
             "BefacoBigKnob",
@@ -109,7 +112,8 @@ def test_racks_components_load_racks_artwork() -> None:
         for name in ("ScrewSilver", "ScrewBlack", "ThemedScrew"):
             screw = getattr(cl, name)()
             made.append(screw)
-            assert isinstance(screw, app.SvgScrew) and screw.box.size.x > 0
+            assert isinstance(screw, app.SvgScrew) and screw.sw.svg is not None
+            assert math.isfinite(screw.box.size.x) and math.isfinite(screw.box.size.y), name
         assert cl.LEDSlider is cl.VCVSlider and cl.LEDButton is cl.VCVButton and cl.LEDBezel is cl.VCVBezel
         assert nvg.rgb(0xED, 0x2C, 0x24) == cl.SCHEME_RED and nvg.rgb(0x17, 0x17, 0x17) == cl.SCHEME_DARK_GRAY
 
@@ -175,6 +179,7 @@ def test_light_templates_are_specializations() -> None:
     assert medium is cl.MediumLight[cl.RedLight] and medium.__name__ == "MediumLight[RedLight]"
     lamp = medium()
     assert lamp.sw.svg is not None and lamp.box.size.x > 0  # Rack's MediumLight.svg
+    assert lamp.fb.parent is lamp and lamp.fb.box.size == lamp.sw.box.size
     assert isinstance(lamp, cl.RedLight)
     assert cl.LargeLight[cl.GreenLight]().box.size.x > lamp.box.size.x > cl.TinyLight[cl.BlueLight]().box.size.x
     assert cl.SmallSimpleLight[cl.YellowLight]().box.size == mm2px(Vec(2, 2))
@@ -236,6 +241,8 @@ def test_rectangle_lights_draw_with_racks_code() -> None:
     light.step()  # no module: Rack lights every colour fully
     background = render(light, Vec(10, 6))  # a framebuffer renders layer 0: the background
     assert pixel(background, 5, 3) == (0x33, 0x33, 0x33, 0xFF)
+    corner_background = pixel(background, 9, 0)
+    assert all(0x30 <= channel <= 0x33 for channel in corner_background[:3]) and corner_background[3] == 255
     holder = Rack()
     holder.box = Rect(Vec(), Vec(10, 6))
     light = cl.RectangleLight[cl.GreenLight]()
@@ -246,6 +253,8 @@ def test_rectangle_lights_draw_with_racks_code() -> None:
     # RectangleLight keeps) brightens it a little.
     r, g, b, a = pixel(holder_image := render(holder, Vec(10, 6)), 5, 3)
     assert g >= 0xC7 - 4 and r >= 0x90 - 4 and b >= 0x3E - 4 and g > r > b and a == 255, pixel(holder_image, 5, 3)
+    corner = pixel(holder_image, 9, 3)
+    assert corner[:3] != (0, 0, 0) and corner[3] == 255
 
 
 def test_coloured_led_sliders_have_their_own_light() -> None:
@@ -261,6 +270,9 @@ def test_coloured_led_sliders_have_their_own_light() -> None:
             light = slider.get_light()
             assert isinstance(light, cl.VCVSliderLight[light_cls])
             assert light.base_colors == [color]
+            if slider_cls is cl.LEDSliderGreen:
+                assert light.sw.svg is not None
+                assert math.isfinite(light.box.size.x) and math.isfinite(light.box.size.y)
         finally:
             slider.close()
 
@@ -306,8 +318,28 @@ def test_segment_display(module: Module) -> None:
         assert len(lights) == 3 and display.lights_len == 3
         assert all(isinstance(light, cl.RectangleLight[cl.RedLight]) and light.module is module for light in lights)
         assert [light.first_light_id for light in lights] == [1, 2, 3]
-        image = render(display, Vec(30, 6))
-        assert pixel(image, 0, 0)[:3] == (0, 0, 0)  # Rack's black background
+        expected_margin = display.margin
+        expected_extent = display.box.size.x - expected_margin
+        assert [light.box.pos.x for light in lights] == pytest.approx(
+            [i / 3 * expected_extent + expected_margin for i in range(3)]
+        )
+        assert all(light.box.size == Vec(expected_extent / 3 - expected_margin, display.box.size.y) for light in lights)
+
+        display.clear_children()
+        display.vertical = True
+        display.box = Rect(Vec(), Vec(6, 30))
+        display.set_lights(module, 0, 3, cl.RedLight)
+        vertical_lights: list[Any] = list(display.children)
+        vertical_extent = display.box.size.y - display.margin
+        assert [light.box.pos.y for light in vertical_lights] == pytest.approx(
+            [i / 3 * vertical_extent + display.margin for i in range(3)]
+        )
+        assert all(
+            light.box.pos.x == 0 and light.box.size == Vec(display.box.size.x, vertical_extent / 3 - display.margin)
+            for light in vertical_lights
+        )
+        image = render(display, Vec(6, 30))
+        assert pixel(image, 0, 0) == (0, 0, 0, 255)  # Rack's opaque black background
     finally:
         display.close()
 
