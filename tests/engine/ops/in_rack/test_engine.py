@@ -40,12 +40,19 @@ def test_the_engine_and_its_timing() -> None:
     assert e is engine() and e.alive
     rate = e.get_sample_rate()
     assert rate > 0 and e.get_sample_time() == pytest.approx(1 / rate)
-    before = e.get_frame()
-    time.sleep(0.05)  # Rack's own thread steps the engine (no audio device here)
-    assert e.get_frame() > before
-    assert e.get_block() >= 0 and e.get_block_frame() >= 0 and e.get_block_frames() >= 0
-    assert math.isfinite(e.get_block_time()) and e.get_block_duration() >= 0
-    assert e.get_meter_average() >= 0 and e.get_meter_max() >= 0
+    before, block = e.get_frame(), e.get_block()
+    deadline = time.monotonic() + 10
+    while e.get_frame() <= before and time.monotonic() < deadline:
+        time.sleep(0.01)  # Rack's own thread steps the engine (no audio device here); a CI runner may be slow
+    assert e.get_frame() > before and e.get_block() > block
+    assert 0 <= e.get_block_frame() <= e.get_frame() and e.get_block_frames() > 0
+    assert math.isfinite(e.get_block_time()) and e.get_block_duration() == pytest.approx(
+        e.get_block_frames() * e.get_sample_time()
+    )
+    # Rack updates its meters once a second, from the blocks' run time over their duration.
+    while e.get_meter_average() <= 0 and time.monotonic() < deadline:
+        time.sleep(0.05)
+    assert e.get_meter_max() >= e.get_meter_average() > 0
     for bad in (0, 1 << 20):
         with pytest.raises(ValueError):
             e.step_block(bad)
@@ -63,7 +70,7 @@ def test_the_engine_and_its_timing() -> None:
 
 def test_modules_in_the_engine(probe: EngineModule) -> None:
     e = engine()
-    assert probe.id in e.get_module_ids() and e.get_num_modules() >= 1
+    assert probe.id in e.get_module_ids() and e.get_num_modules() == len(e.get_module_ids())
     assert e.get_module(probe.id) == probe and hash(e.get_module(probe.id)) == hash(probe)
     assert e.has_module(probe) and probe.alive and probe.get_num_params() == 1
     assert e.get_module(-12345) is None

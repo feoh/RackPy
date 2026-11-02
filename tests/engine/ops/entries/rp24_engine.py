@@ -8,6 +8,7 @@ Rack's cable widget.
 """
 
 import json
+import math
 import traceback
 from collections.abc import Callable
 from pathlib import Path
@@ -92,10 +93,19 @@ def rp24a(state: dict[str, Any]) -> None:
     master = e.get_master_module()
     e.set_master_module(m)  # Rack's own thread stops stepping
     try:
-        frame = e.get_frame()
+        frame, block, time = e.get_frame(), e.get_block(), e.get_block_time()
         e.step_block(64)
+        first = [e.get_block_frame() - frame, e.get_block_time()]
         e.step_block(32)
         RESULT["stepped"] = [e.get_frame() - frame, e.get_block_frames(), e.get_master_module() is m]
+        # Rack's block bookkeeping: the block count, the frame and time each block started, and its length.
+        RESULT["blocks"] = [
+            e.get_block() - block,
+            first[0],
+            e.get_block_frame() - frame,
+            time < first[1] < e.get_block_time(),
+            math.isclose(e.get_block_duration(), 32 * e.get_sample_time()),
+        ]
     finally:
         e.set_master_module(master)
     e.remove_module(m)  # Python owns it again

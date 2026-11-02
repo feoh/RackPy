@@ -60,6 +60,7 @@ def test_python_modules_cables_and_param_handles_in_racks_engine(
     assert "would deadlock" in result["reentry"], result["reentry"]
     assert result["reset"] == 2  # Rack's reset to the default
     assert result["stepped"] == [96, 32, True]  # the master module alone steps the engine
+    assert result["blocks"] == [2, 0, 64, True, True]
     assert result["removed"] == [False, True, True] and result["closed"] is False
     assert "widget owns it" in result["widget_owned"]
     # RP-24B: a cable between modules Python put into the engine
