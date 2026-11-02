@@ -342,7 +342,10 @@ Other risks remain:
 In the `rack.hpp` closure, Rack's `WeakBase` is a base of `Widget`. So a
 `WeakPtr` points at a widget, RackPy's or Rack's own, and `get()` returns
 `None` once Rack deletes it. Weak pointers work on the main thread only,
-because Rack's are not thread-safe.
+because Rack's are not thread-safe. That includes letting go of one: Rack's
+destructor releases a count that is not atomic, so a `WeakPtr` or `WeakHandle`
+that Python drops or collects on another thread leaves Rack's count alone and
+logs a warning. The count, a few bytes, is then never released.
 
 (services-weakptr-contract)=
 ### The widget contract

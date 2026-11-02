@@ -597,6 +597,27 @@ def weak_handle(widget: w.Widget) -> raw.WeakHandle | None:
     return handle
 
 
+def test_a_weak_ptr_dropped_off_the_main_thread_never_touches_racks_count() -> None:
+    # Rack's WeakPtr count is not atomic, and ~WeakPtr releases it: dropping the Python object on another thread would
+    # race the main thread on it. RackPy leaves the count alone there, and releases it on the main thread (RP-42).
+    widget = w.Widget()
+    kept = raw.WeakPtr(widget)
+    assert widget.get_weak_count() == 1
+    box = [raw.WeakPtr(widget)]
+    assert widget.get_weak_count() == 2
+    dropper = threading.Thread(target=box.clear)
+    dropper.start()
+    dropper.join()
+    assert widget.get_weak_count() == 2  # abandoned, not decremented from the other thread
+    extra = raw.WeakPtr(widget)
+    assert widget.get_weak_count() == 3
+    del extra
+    assert widget.get_weak_count() == 2  # the main thread releases its own
+    assert kept.get() is widget
+    widget.close()  # Rack deletes the widget: every WeakPtr that is left reads None
+    assert kept.get() is None
+
+
 def test_weak_handle_is_made_by_weak_ptr() -> None:
     # Rack's WeakPtr<T>::set runs WeakHandle(void*) for an object without a handle (weakptr.hpp:80-83) and deletes
     # the handle with its last WeakPtr (weakptr.hpp:66-77); that is how RackPy reaches the constructor.

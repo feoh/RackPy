@@ -16,13 +16,32 @@ namespace {
 
 using WidgetPtr = rack::WeakPtr<rack::widget::Widget>;
 
+/** ~WeakPtr releases its count in the widget's WeakHandle, which Rack does not make atomic: "Not thread safe". A Python
+object dropped or collected on another thread would race the main thread on that count, and on deleting the handle with
+the last one (RP-42). Off the main thread the count is abandoned instead, which is a few bytes that outlive the widget
+and never a use after free: the destructor then has nothing to release. */
+void abandonOffMainThread(WidgetPtr& ptr) noexcept {
+	if (ptr.weakHandle && !runtime::isMainThread()) {
+		WARN("RackPy: a WeakPtr was dropped off the main thread; its count in Rack's weak handle is abandoned");
+		ptr.weakHandle = nullptr;
+	}
+}
+
 struct WeakPtrRef {
 	WidgetPtr ptr;
+	WeakPtrRef() = default;
+	WeakPtrRef(const WeakPtrRef&) = default;
+	WeakPtrRef& operator=(const WeakPtrRef&) = default;
+	~WeakPtrRef() { abandonOffMainThread(ptr); }
 };
 
 /** The WeakHandle Rack keeps for a widget, through the widget: Rack deletes it with the last WeakPtr. */
 struct WeakHandleView {
 	WidgetPtr keep;  // holds the handle alive while the view lives
+	WeakHandleView() = default;
+	WeakHandleView(const WeakHandleView&) = default;
+	WeakHandleView& operator=(const WeakHandleView&) = default;
+	~WeakHandleView() { abandonOffMainThread(keep); }
 	rack::WeakHandle* get() const {
 		runtime::requireMainThread("using a weak handle");
 		return keep.weakHandle;
