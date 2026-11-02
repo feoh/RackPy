@@ -29,6 +29,10 @@ inline EventRef drawArgs(py::handle object) {
 	return data;
 }
 
+/** For Widget's type templates (get_ancestor_of_type and the like): `cls`, a bound SDK widget class, matches the
+widgets `match` accepts, Rack-made ones included. bindBehavior registers each class it binds. */
+void registerNativeMatch(py::handle cls, std::function<bool(W*)> match);
+
 template<class Base, class... Options>
 void bindBehavior(py::classh<Base, Options...>& cls) {
 	cls.def("step", [](py::object self) {
@@ -99,5 +103,7 @@ void bindBehavior(py::classh<Base, Options...>& cls) {
 	}, py::arg("event"));
 	RACKPY_WIDGET_EVENTS(BIND_EVENT)
 #undef BIND_EVENT
+	// Widget's type templates match a widget of this class by its native type (RP-42: only rack::widget's did).
+	registerNativeMatch(cls, [](W* w) { return ::rackpy::rttiCast<Base*>(w) != nullptr; });
 }
 } }

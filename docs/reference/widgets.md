@@ -129,10 +129,11 @@ Rack's member templates take a class where C++ takes a type argument:
 - `get_ancestor_of_type(cls)` and `get_first_descendant_of_type(cls)` are
   `getAncestorOfType<T>()` and `getFirstDescendantOfType<T>()`: the nearest
   ancestor, or the first descendant depth-first in child order, that is a
-  `cls`, else `None`. `cls` is one of the classes on this page or a Python
-  subclass of one. The classes on this page match Rack's own widgets too (Rack's
-  scene is an `OpaqueWidget`), which come back as `HostWidget`; a Python
-  subclass only matches widgets with that Python class.
+  `cls`, else `None`. `cls` is any bound widget class (this page's, and
+  `rackpy.raw.app`'s, `ui`'s and `componentlibrary`'s) or a Python subclass
+  of one. A bound class matches Rack's own widgets too, by their native type
+  (Rack's scene is an `OpaqueWidget`, and `raw.create_menu()` makes a Rack
+  `ui.Menu`); a Python subclass only matches widgets with that Python class.
 - `recurse_event(method, event)` and `recurse_position_event(method, event)`
   are Rack's `recurseEvent` and `recursePositionEvent`, for a container that
   dispatches an event to its children itself. `method` is the handler, such as

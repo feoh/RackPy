@@ -14,26 +14,23 @@ namespace {
 
 using Match = std::function<bool(W*)>;
 
-template<class T> Match castTo() { return [](W* w) { return ::rackpy::rttiCast<T*>(w) != nullptr; }; }
+/** The bound SDK widget classes (bindBehavior's), by their Python type: module-level types, never freed. */
+std::unordered_map<PyObject*, Match>& nativeMatches() {
+	static std::unordered_map<PyObject*, Match> matches;
+	return matches;
+}
 
-/** ::rackpy::rttiCast<T*> for the bound SDK classes; isinstance for Python subclasses of them. */
+/** ::rackpy::rttiCast<T*> for the bound SDK classes (every one: app's, ui's and componentlibrary's too); isinstance
+for Python subclasses of them. */
 Match matcher(py::module_ mod, py::handle cls) {
 	py::handle widget = mod.attr("Widget");
 	if (!PyType_Check(cls.ptr()) || !PyObject_IsSubclass(cls.ptr(), widget.ptr()))
 		throw py::type_error("expected rackpy.raw.widget.Widget or a subclass of it");
-	const std::pair<const char*, Match> native[] = {
-		{"Widget", castTo<W>()},
-		{"TransparentWidget", castTo<rack::widget::TransparentWidget>()},
-		{"OpaqueWidget", castTo<rack::widget::OpaqueWidget>()},
-		{"ZoomWidget", castTo<rack::widget::ZoomWidget>()},
-		{"TransformWidget", castTo<rack::widget::TransformWidget>()},
-		{"SvgWidget", castTo<rack::widget::SvgWidget>()},
-		{"FramebufferWidget", castTo<rack::widget::FramebufferWidget>()},
-		{"OpenGlWidget", castTo<rack::widget::OpenGlWidget>()},
-	};
-	for (const auto& [name, match] : native)
-		if (cls.is(mod.attr(name)))
-			return match;
+	if (cls.is(widget))
+		return [](W*) { return true; };
+	auto found = nativeMatches().find(cls.ptr());
+	if (found != nativeMatches().end())
+		return found->second;
 	// A Python class can only describe widgets that have its Python peer.
 	auto type = py::reinterpret_borrow<py::object>(cls);
 	return [type](W* w) {
@@ -42,6 +39,14 @@ Match matcher(py::module_ mod, py::handle cls) {
 		return py::isinstance(wrapper(w), type);
 	};
 }
+
+}  // namespace
+
+void registerNativeMatch(py::handle cls, std::function<bool(W*)> match) {
+	nativeMatches()[cls.ptr()] = std::move(match);
+}
+
+namespace {
 
 W* ancestorOf(W& w, const Match& match) {
 	for (W* p = w.parent; p; p = p->parent)

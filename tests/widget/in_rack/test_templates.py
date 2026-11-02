@@ -5,8 +5,9 @@ from typing import Any
 
 import pytest
 
+from rackpy import raw
 from rackpy.errors import OwnershipError
-from rackpy.raw import macros
+from rackpy.raw import app, macros, ui
 from rackpy.raw import widget as w
 from rackpy.raw.math import Rect, Vec
 
@@ -75,6 +76,28 @@ def test_lookups_reach_rack_owned_widgets() -> None:
     finally:
         node.remove_from_parent()
         node.close()
+
+
+def test_lookups_match_every_bound_class() -> None:
+    # app's and ui's classes match Rack-made widgets too, not only rack::widget's (RP-42).
+    menu = raw.create_menu()  # Rack's createMenu: a Rack-made Menu in a Rack-made MenuOverlay, in the scene
+    overlay = menu.parent
+    assert isinstance(overlay, ui.MenuOverlay)
+    item = ui.MenuItem()
+    menu.add_child(item)
+    try:
+        assert item.get_ancestor_of_type(ui.Menu) is menu
+        assert item.get_ancestor_of_type(ui.MenuOverlay) is overlay
+        assert (
+            item.get_ancestor_of_type(ui.ScrollWidget) is None and item.get_ancestor_of_type(app.ModuleWidget) is None
+        )
+        label = ui.MenuLabel()
+        item.add_child(label)
+        assert item.get_first_descendant_of_type(ui.MenuEntry) is label  # Rack's base class of MenuLabel
+        assert item.get_first_descendant_of_type(ui.MenuItem) is None
+    finally:
+        if overlay.alive:
+            overlay.request_delete()
 
 
 def test_recurse_event_and_recurse_position_event_follow_rack() -> None:
