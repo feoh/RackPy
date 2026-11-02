@@ -90,6 +90,8 @@ T fromPython(const py::handle& value, const char* type) {
 		return value.cast<T>();
 	}
 	else if constexpr (std::is_same<T, uint64_t>::value) {
+		if (!PyLong_Check(value.ptr()))
+			throw py::type_error(std::string("bit_cast: an integer type (") + type + ") needs an int");
 		return toU64(py::reinterpret_borrow<py::int_>(value), "bit_cast");
 	}
 	else {

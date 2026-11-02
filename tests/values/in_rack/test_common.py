@@ -55,6 +55,11 @@ def test_bit_cast_refuses_what_rack_would_not_compile() -> None:
         raw.bit_cast(256, "i8", "u8")
     with pytest.raises(TypeError):
         raw.bit_cast(1.5, "f32", "i32")
+    with pytest.raises(TypeError):
+        raw.bit_cast(1.5, "f64", "u64")
+    for value in (-1, 2**64):
+        with pytest.raises(OverflowError):
+            raw.bit_cast(value, "f64", "u64")
 
 
 def test_user_defined_literals_convert_as_cpp_does() -> None:
@@ -76,6 +81,18 @@ def test_exception_carries_its_message() -> None:
     assert isinstance(e, RuntimeError)
     p = raw.Exception.printf("module %lld has %d ports: %s", 42, 3, "ok")
     assert p.msg == "module 42 has 3 ports: ok"
+    for fmt in ("%a", "%A", "%#.3a"):
+        assert raw.Exception.printf(fmt, 1.5).msg == raw.string.f(fmt, 1.5)
+    assert raw.Exception.printf("%a", 1.5).msg == "0x1.8p+0"
+    for fmt in ("%p", "%n"):
+        with pytest.raises(ValueError):
+            raw.Exception.printf(fmt, 1)
+    with pytest.raises(TypeError):
+        raw.Exception.printf("%d", "not an integer")
+    with pytest.raises(TypeError):
+        raw.Exception.printf("%d")
+    with pytest.raises(ValueError):
+        raw.Exception.printf("%s", "bad\0string")
     with pytest.raises(raw.Exception, match="bad patch"):
         raise e
 
@@ -104,8 +121,12 @@ def test_get_reads_mappings_by_key_and_sequences_by_index() -> None:
 
 def test_defer_runs_at_the_end_of_the_block_even_on_error() -> None:
     ran: list[str] = []
-    with raw.defer_wrapper(lambda: ran.append("wrapper")) as d:
-        assert isinstance(d, raw.DeferWrapper) and ran == []
+
+    def callback() -> None:
+        ran.append("wrapper")
+
+    with raw.defer_wrapper(callback) as d:
+        assert isinstance(d, raw.DeferWrapper) and d.f is callback and ran == []
     with pytest.raises(KeyError), macros.DEFER(lambda: ran.append("macro")):
         raise KeyError
     with raw.DeferWrapper(lambda: ran.append("class")):

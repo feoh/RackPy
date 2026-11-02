@@ -182,8 +182,10 @@ reaches you as usual.
 `rackpy.raw.Exception` is `rack::Exception`. Rack's C++ exceptions arrive in
 Python as this type, a `RuntimeError`, with `msg` and `what()` giving the
 message. The printf-style constructor is `Exception.printf(format, *args)`,
-which formats with Python's `%` after removing C length modifiers, so
-`printf("%lld ports", 3)` reads `3 ports`.
+which uses Rack's `string.f` formatter with checked arguments, so
+`printf("%lld ports", 3)` reads `3 ports` and `%a` formats a hexadecimal float.
+Like `string.f`, it refuses `%n` and `%p` and embedded NULs in `%s` arguments;
+the format itself is a C string and ends at its first NUL.
 
 (values-common)=
 ## Configuration strings and helpers
@@ -195,7 +197,7 @@ which formats with Python's `%` after removing C length modifiers, so
 | `42_u8`, `0.5_f32`, … | `rackpy.raw.literals.u8(42)`, `rackpy.raw.literals.f32(0.5)`, … with C++'s conversions (`u8(256)` is 0) |
 | `construct<T>(&T::field, value, …)` | `rackpy.raw.construct(cls, field=value, …)` |
 | `get(map, key, def)`, `get(vector, i, def)` | `rackpy.raw.get(container, key, default=None)`: never inserts; an index outside the sequence gives `default` |
-| `DeferWrapper`, `deferWrapper(f)`, `DEFER({...})` | `with rackpy.raw.defer_wrapper(f):` or `with rackpy.raw.macros.DEFER(f):` runs `f` when the block exits |
+| `DeferWrapper`, `deferWrapper(f)`, `DEFER({...})` | `with rackpy.raw.defer_wrapper(f):` or `with rackpy.raw.macros.DEFER(f):` runs `f` when the block exits; `DeferWrapper.f` is the stored callable |
 
 C++ value-initializes `get`'s default (`0`, `""`); Python cannot know the
 container's element type, so its default is `None`.

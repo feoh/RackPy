@@ -7,15 +7,11 @@ rackpy.raw; import them from there.
 """
 
 import builtins
-import re
 from collections.abc import Callable, Mapping, Sequence
 from types import TracebackType
-from typing import Any
+from typing import Any, cast
 
 __all__ = ["DeferWrapper", "Exception", "construct", "defer_wrapper", "get"]
-
-# printf length modifiers that Python's % operator does not accept.
-_LENGTH_MODIFIERS = re.compile(r"%([-+ #0]*(?:\d+|\*)?(?:\.(?:\d+|\*))?)(?:hh|h|ll|l|L|q|j|z|t)?([diouxXeEfFgGcsa%])")
 
 
 class Exception(builtins.RuntimeError):  # mirrors rack::Exception by name
@@ -35,10 +31,12 @@ class Exception(builtins.RuntimeError):  # mirrors rack::Exception by name
     def printf(cls, format: str, *args: object) -> Exception:
         """The ``Exception(const char* format, ...)`` constructor: printf-style formatting.
 
-        Formats with Python's ``%`` operator after removing C length modifiers
-        (``%lld`` becomes ``%d``), so the common printf conversions behave as in C.
+        Uses Rack's formatter through ``rackpy.raw.string.f``, including its
+        checked argument conversions and its refusal of unsafe ``%n`` and ``%p``.
         """
-        return cls(_LENGTH_MODIFIERS.sub(r"%\1\2", format) % args)
+        from rackpy.raw import string
+
+        return cls(string.f(format, *cast(Any, args)))
 
     def what(self) -> str:
         """The message, as ``std::exception::what()`` returns it."""
