@@ -270,18 +270,26 @@ views, and every method calls Rack's code out of line
   angular cutoff in radians (`c = 2 / r`), `set_cutoff_freq(f)` the cutoff as a
   ratio of the sample rate; `process(x)` steps it, and `lowpass()` and
   `highpass()` read the outputs. `xstate` and `ystate` are Rack's one-element
-  arrays, as live views.
+  arrays, as live views; `reset()` zeroes both.
 - `ExponentialFilter`: exponential smoothing. `set_lambda`, `set_tau`
   (`lambda = 1 / tau`) and `process(delta_time, in_)`, which returns the new
   output and snaps to the input once a step no longer changes the output.
-  Rack's field `lambda` is `lambda_`, as `lambda` is a Python keyword.
+  Python's `lambda_` field maps to Rack's `lambda`, as `lambda` is a Python
+  keyword. Its readable and writable `out` field holds the current output;
+  `reset()` sets it to zero.
 - `PeakFilter`: jumps to higher values at once and decays toward lower ones.
+  Its readable and writable `out` field holds the output and Python's
+  `lambda_` field maps to Rack's `lambda`; `set_lambda` and `set_tau` set
+  that coefficient, with `lambda = 1 / tau`. `reset()` zeroes `out`.
 - `SlewLimiter`: `set_rise_fall(rise, fall)` in units per second;
-  `process(delta_time, in_)` moves toward the input by at most that much.
+  `process(delta_time, in_)` moves toward the input by at most that much. Its
+  readable and writable `rise`, `fall` and `out` fields are Rack's values;
+  `reset()` zeroes `out`.
 - `ExponentialSlewLimiter`: exponential smoothing with separate rise and fall
   rates, `set_rise_fall(rise, fall)` and `set_rise_fall_tau(rise, fall)`
   (`lambda = 1 / tau`). They set Rack's fields `rise_lambda` and
-  `fall_lambda`, which `process` reads and which can also be assigned.
+  `fall_lambda`, which `process` reads and which can also be assigned. Its
+  readable and writable `out` field holds the output; `reset()` zeroes it.
 - **Deprecated.** `process(in_)` with one argument (Rack's `process(1, in)`)
   on the four smoothers, and `PeakFilter.peak()` and `set_rate(r)`
   (`lambda = 1 - r`), emit `DeprecationWarning`.
@@ -439,7 +447,11 @@ Its fields are Rack's, the arrays as live views: the settings
 `velocities`, `aftertouches`, `rotate_index`, the wheels `pws` and `mods`, and
 their smoothing filters `pw_filters` and `mod_filters`, which are
 `ExponentialFilter` objects). `held_notes` is a copy, as a list of ints;
-assigning it replaces Rack's.
+assigning it replaces Rack's. `panic()` clears performance state (notes, gates,
+velocities, wheels and timing state) and the held-note list while preserving
+settings. `reset()` restores the default settings and then clears performance
+state; unlike `panic()`, it resets the configured channel count, modes, pitch
+range, smoothing, clock division and filter rates too.
 
 Rack trusts its inputs here; RackPy refuses what it would get wrong:
 

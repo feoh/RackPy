@@ -2,6 +2,7 @@
 """RP-30A: rack::string, rack::random and rack::logger inside Rack."""
 
 import itertools
+import math
 import sys
 import time
 from pathlib import Path
@@ -29,6 +30,11 @@ def test_printf_through_racks_formatting() -> None:
         rs.f("%d", 2**40)  # an int is 32 bits
     with pytest.raises(ValueError, match="not supported"):
         rs.f("%n", 1)
+    for format, args in (("%tu", (1,)), ("%lc", (65,)), ("%ls", ("text",))):
+        with pytest.raises(ValueError, match="unsupported conversion"):
+            rs.f(format, *args)
+        with pytest.raises(ValueError, match="unsupported conversion"):
+            rs.fv(format, args)
     # A * width or precision takes an int argument first, as printf does (RP-42); Rack's printf applies C's rules:
     # a negative width is the - flag, a negative precision as if none were given.
     assert rs.f("%*d|%-*d|%.*f|%*.*f|%.*s", 4, 7, 3, 7, 2, 3.14159, 8, 3, 2.5, 2, "abc") == "   7|7  |3.14|   2.500|ab"
@@ -54,6 +60,9 @@ def test_text() -> None:
     assert rs.starts_with("rackpy", "rack") and rs.ends_with("rackpy", "py") and not rs.starts_with("a", "ab")
     location = rs.position_to_location("ab\ncd", 4)
     assert (location.line, location.column) == (1, 1) and rs.location_to_position("ab\ncd", location) == 4
+    for text in ("a\x00b", b"a\x80b", b"a\xffb"):
+        with pytest.raises(ValueError, match="does not advance"):
+            rs.location_to_position(text, rs.Location(0, 2))
     # Rack's column loop never advances at a NUL or invalid lead byte, so it would never return (RP-42).
     for text, pos in (("a\x00b", 3), (b"\x80", 1), (b"x\xffy", 3)):
         with pytest.raises(ValueError, match="never returns"):
@@ -141,6 +150,8 @@ def test_versions_and_translations() -> None:
 def test_random() -> None:
     a, b = rr.Xoroshiro128Plus(42, 7), rr.Xoroshiro128Plus(42, 7)
     assert [a() for _ in range(5)] == [b() for _ in range(5)]  # deterministic from a seed
+    seeded = rr.Xoroshiro128Plus(1, 2)
+    assert seeded() == 0x8000300000C003  # Rack's seed(1, 2), then operator() result
     g = rr.Xoroshiro128Plus()
     assert not g.is_seeded() and g() == 0 and g.state == [0, 0]
     g.seed(1)
@@ -154,13 +165,36 @@ def test_random() -> None:
     with pytest.raises(ValueError):
         g.state = [1]
     shared = rr.local()
-    assert shared is rr.local() or shared.state == rr.local().state  # Rack's one generator
+    saved = shared.state
+    try:
+        shared.seed(123, 456)
+        expected_generator = rr.Xoroshiro128Plus(123, 456)
+        assert shared() == expected_generator.state[0] + expected_generator.state[1]
+        state = shared.state
+        rr.init()
+        assert shared.state == state
+        shared.state = [0, 0]
+        rr.init()
+        assert shared.is_seeded()
+    finally:
+        shared.state = saved
     for _ in range(20):
         assert 0.0 <= rr.uniform() < 1.0 and 0 <= rr.get_uint8() <= 255 and 0 <= rr.u32() < 2**32
         assert 0.0 <= rr.get_float() < 1.0 and 0.0 <= rr.get_double() < 1.0
         assert 0 <= rr.get_uint16() < 2**16 and 0 <= rr.get_uint32() < 2**32
         assert isinstance(rr.get_bool(), bool) and 0 <= rr.u64() < 2**64
-    assert isinstance(rr.normal(), float) and isinstance(rr.get("bool"), bool) and 0 <= rr.get() < 2**64
+    generator = rr.local()
+    saved = generator.state
+    try:
+        generator.seed(11, 17)
+        first = rr.get_float()
+        second = rr.get_float()
+        expected_result = math.sqrt(-2.0 * math.log(1.0 - first)) * math.sin(2.0 * math.pi * second)
+        generator.seed(11, 17)
+        assert rr.normal() == pytest.approx(expected_result, abs=1e-7)
+    finally:
+        generator.state = saved
+    assert isinstance(rr.get("bool"), bool) and 0 <= rr.get() < 2**64
     with pytest.raises(ValueError, match="takes"):
         rr.get("int")
     out = bytearray(10)
@@ -171,7 +205,7 @@ def test_random() -> None:
     assert len(rr.vector(7)) == 7
     with pytest.raises((TypeError, BufferError)):
         rr.buffer(b"read-only")  # type: ignore[arg-type]
-    rr.init()  # reseeds Rack's generator
+    rr.init()  # initializes Rack's generator only if it is not already seeded
 
 
 def test_random_get_signed_types() -> None:

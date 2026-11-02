@@ -152,7 +152,10 @@ py::cpp_function convertFunction() {
 		py::arg("x"), "Rack's convert<To, From>(x) for one sample.");
 	return py::cpp_function(
 		[](py::buffer in, py::buffer out, const py::int_& len) {
-			size_t n = values::toInt<uint32_t>(len, "convert", "size_t (at most 2**32 - 1 here)");
+			// This overload takes size_t; values::toInt uses a signed long long and cannot represent its full range.
+			size_t n = PyLong_AsSize_t(len.ptr());
+			if (n == (size_t) -1 && PyErr_Occurred())
+				throw py::error_already_set();
 			const From* src = static_cast<const From*>(samples<From>(in, false, n, "in"));
 			To* dst = static_cast<To*>(samples<To>(out, true, n, "out"));
 			const char* a = reinterpret_cast<const char*>(src);

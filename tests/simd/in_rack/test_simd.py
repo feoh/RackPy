@@ -366,6 +366,8 @@ def test_construction_lanes_and_views() -> None:
         with pytest.raises(IndexError):
             v[bad] = 0.0
     n = int32_4(5)
+    copied = int32_4(n)
+    assert copied.tolist() == n.tolist() and copied is not n
     n[0] = -(2**31)
     assert n[0] == -(2**31)
     with pytest.raises(OverflowError):
