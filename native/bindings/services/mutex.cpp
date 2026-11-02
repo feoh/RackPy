@@ -77,29 +77,40 @@ struct TrackedMutex {
 				auto it = readers.find(me);
 				if (it == readers.end())
 					throw py::value_error("this thread does not hold the mutex, shared or for writing");
-				readers.erase(it);
+				if (it->second > 1)
+					--it->second;
+				else
+					readers.erase(it);
 			}
 		}
 		mutex.unlock();
 	}
 	void unlock() { releaseHold(); }
 	void lockShared() {
-		if (heldByMe())
-			throw py::value_error("this thread holds the mutex already: Rack's rwlock would deadlock or fail");
+		auto me = std::this_thread::get_id();
+		{
+			std::lock_guard<std::mutex> lock(book);
+			if (written && writer == me)
+				throw py::value_error("this thread holds the mutex for writing already");
+		}
 		{
 			py::gil_scoped_release release;
 			mutex.lock_shared();
 		}
 		std::lock_guard<std::mutex> lock(book);
-		readers[std::this_thread::get_id()] = 1;
+		++readers[me];
 	}
 	bool tryLockShared() {
-		if (heldByMe())
-			throw py::value_error("this thread holds the mutex already");
+		auto me = std::this_thread::get_id();
+		{
+			std::lock_guard<std::mutex> lock(book);
+			if (written && writer == me)
+				throw py::value_error("this thread holds the mutex for writing already");
+		}
 		if (!mutex.try_lock_shared())
 			return false;
 		std::lock_guard<std::mutex> lock(book);
-		readers[std::this_thread::get_id()] = 1;
+		++readers[me];
 		return true;
 	}
 	void unlockShared() { releaseHold(); }

@@ -37,8 +37,15 @@ def test_introspection_comes_from_the_running_package(artifact: Path) -> None:
     data = json.loads(artifact.read_text())
     assert data["rack_version"] == "2.6.6" and data["binding"] == "pybind11 3.1.0"
     objects = data["objects"]
-    # PRIVATE is a compile-time marker for internal Rack declarations, not a runtime binding.
-    assert not any(name.rsplit(".", 1)[-1] == "PRIVATE" for name in objects)
+    # These are compile-time annotations/build switches, not runtime RackPy bindings.
+    non_runtime_macros = {
+        "GLEW_NO_GLU",
+        "GLEW_STATIC",
+        "NANOVG_GL2",
+        "PRIVATE",
+        "SIMDE_ENABLE_NATIVE_ALIASES",
+    }
+    assert not any(name.rsplit(".", 1)[-1] in non_runtime_macros for name in objects)
     assert objects["rackpy.raw"]["kind"] == "module"
     assert objects["rackpy.errors.StaleHandleError"]["kind"] == "class"
     assert objects["rackpy.runtime.diagnostics"]["kind"] == "function"

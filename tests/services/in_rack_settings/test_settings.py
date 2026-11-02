@@ -446,6 +446,24 @@ def test_shared_mutex() -> None:
         assert writer == [False]  # a reader excludes writers
     assert not held(lock) and m.try_lock()
     m.unlock()
+    # Rack delegates shared holds to pthread_rwlock_rdlock, which permits recursive reads.
+    m.lock_shared()
+    m.lock_shared()
+    m.unlock_shared()
+    with pytest.raises(ValueError, match="already"):
+        m.try_lock()  # releasing one recursive acquisition keeps the other
+    m.unlock()  # Rack's write-mode unlock also releases one read acquisition
+    assert m.try_lock()  # both recursive acquisitions are now released
+    m.unlock()
+    assert m.try_lock_shared()
+    assert m.try_lock_shared()
+    m.unlock_shared()
+    m.unlock_shared()
+    with raw.SharedLock(m) as outer:
+        with raw.SharedLock(m) as inner:
+            assert held(outer) and held(inner)
+        assert held(outer) and not held(inner)
+    assert not held(outer)
     lock = raw.SharedLock(m)
     assert held(lock)
     lock.release()
@@ -576,8 +594,9 @@ def test_shared_lock_on_a_python_subclass_of_shared_mutex() -> None:
         probe.start()
         probe.join()
         assert c.reads == 1 and held(lock) and writer == [False]  # Rack's rwlock, held for reading
-        with pytest.raises(ValueError, match="holds the mutex already"):
-            raw.SharedLock(c)  # RackPy's misuse refusal still applies
+        with raw.SharedLock(c) as nested:
+            assert c.reads == 2 and held(lock) and held(nested)  # recursive reads follow Rack's pthread rwlock
+        assert held(lock) and not held(nested)
     assert not held(lock) and c.try_lock()
     c.unlock()
 
