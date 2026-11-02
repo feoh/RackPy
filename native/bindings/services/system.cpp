@@ -49,10 +49,17 @@ std::vector<uint8_t> dataOf(py::handle value) {
 	return std::vector<uint8_t>(p, p + info.size);
 }
 
+/** On Linux and macOS Rack runs `xdg-open "..."` or `open "..."` through the shell. Windows' ShellExecuteW runs no
+shell, and its paths have backslashes, so nothing is refused there (RP-42: every Windows path was). */
 void requireShellSafe(const std::string& s, const char* what) {
+#if defined ARCH_WIN
+	(void) s;
+	(void) what;
+#else
 	if (s.find_first_of("\"\\$`") != std::string::npos)
-		throw py::value_error(std::string(what) + " runs `xdg-open \"...\"` through the shell, where \", \\, $ and ` run "
-			"shell code: RackPy refuses them");
+		throw py::value_error(std::string(what) + " runs `xdg-open \"...\"` (macOS: `open`) through the shell, where \", \\, $ "
+			"and ` run shell code: RackPy refuses them");
+#endif
 }
 
 }  // namespace

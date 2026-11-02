@@ -272,8 +272,24 @@ void bindString(py::module_ m) {
 		.def("__repr__", [](const s::Location& l) {
 			return "Location(line=" + std::to_string(l.line) + ", column=" + std::to_string(l.column) + ")";
 		});
-	m.def("position_to_location", [](py::handle s8, size_t pos) { return s::positionToLocation(utf8(s8), pos); },
-		py::arg("s"), py::arg("pos"), "Rack's: the line and column of byte position pos in the UTF-8 text.");
+	m.def("position_to_location", [](py::handle s8, size_t pos) {
+		std::string text = utf8(s8);
+		// Rack's column loop walks codepoints from the line's start to pos and never advances at a NUL or an invalid
+		// lead byte (its codepoint size is 0 there), so it would never return (RP-42). Walk it first.
+		size_t end = std::min(pos, text.size()), line = 0;
+		for (size_t i = 0; i < end; i++)
+			if (text[i] == '\n')
+				line = i + 1;
+		for (size_t i = line; i < end;) {
+			size_t next = s::UTF8NextCodepoint(text, i);
+			if (next == i)
+				throw py::value_error("Rack's positionToLocation never returns at a NUL or invalid UTF-8 byte (byte " +
+					std::to_string(i) + ") before pos on its line");
+			i = next;
+		}
+		return s::positionToLocation(text, pos);
+	}, py::arg("s"), py::arg("pos"), "Rack's: the line and column of byte position pos in the UTF-8 text. Text with a NUL "
+		"or invalid UTF-8 byte before pos on its line is refused: Rack's loop would never end there.");
 	m.def("location_to_position", [](py::handle s8, s::Location location) { return s::locationToPosition(utf8(s8), location); },
 		py::arg("s"), py::arg("location"));
 

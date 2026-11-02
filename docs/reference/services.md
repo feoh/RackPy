@@ -37,6 +37,9 @@ The rest are Rack's functions under snake-case names:
   `Exception` for an empty separator.
 - **Positions.** `position_to_location` and `location_to_position` convert
   between a byte position and a `Location` (line and column, from 0).
+  Rack's `positionToLocation` counts the column codepoint by codepoint and
+  never advances at a NUL or an invalid UTF-8 byte, so text with one before
+  `pos` on its line raises `ValueError` instead of hanging.
 - **Base64.** `to_base64` takes bytes (a contiguous byte buffer). `from_base64` returns bytes and
   skips characters that are not Base64; Rack's header says it raises, but
   Rack 2.6.6 never does.
@@ -153,9 +156,11 @@ runs on Rack's audio path; on the main thread, Rack's window waits.
   engine threads run, and Python's own arithmetic on that thread follows
   them.
 - **Opening things.** `open_browser(url)` and `open_directory(path)` open
-  the desktop's handler without blocking. Rack runs `xdg-open "<string>"`
-  through the shell, so RackPy refuses `"`, `\`, `$` and `` ` ``, which
-  would run shell code. `run_process_detached` is implemented by Rack on
+  the desktop's handler without blocking. On Linux and macOS Rack runs
+  `xdg-open "<string>"` or `open "<string>"` through the shell, so RackPy
+  refuses `"`, `\`, `$` and `` ` ``, which would run shell code. Windows'
+  `ShellExecuteW` runs no shell, so nothing is refused there (its paths have
+  backslashes). `run_process_detached` is implemented by Rack on
   Windows only and asserts elsewhere, so RackPy refuses it on Linux and
   macOS. On Windows it asks for elevation (a UAC prompt) and shows Windows'
   error box if the program is missing; both block Rack's UI thread until

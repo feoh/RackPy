@@ -163,8 +163,14 @@ def test_time_processes_and_flags() -> None:
     assert rsys.get_fpu_flags() == flags
     rsys.open_browser("")  # blank: Rack does nothing
     rsys.open_directory("")
-    with pytest.raises(ValueError, match="shell"):
-        rsys.open_browser('https://example.com/"; touch /tmp/x; "')
+    # Linux and macOS run Rack's command through the shell; Windows' ShellExecuteW does not, and its paths have
+    # backslashes, so nothing is refused there (and nothing is opened here: no handler would answer on CI).
+    if sys.platform != "win32":
+        for argument in ('https://example.com/"; touch /tmp/x; "', "a\\b", "$HOME", "`id`"):
+            with pytest.raises(ValueError, match="shell"):
+                rsys.open_browser(argument)
+            with pytest.raises(ValueError, match="shell"):
+                rsys.open_directory(argument)
 
 
 @pytest.mark.skipif(

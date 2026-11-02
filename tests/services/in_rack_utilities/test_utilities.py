@@ -53,6 +53,12 @@ def test_text() -> None:
     assert rs.starts_with("rackpy", "rack") and rs.ends_with("rackpy", "py") and not rs.starts_with("a", "ab")
     location = rs.position_to_location("ab\ncd", 4)
     assert (location.line, location.column) == (1, 1) and rs.location_to_position("ab\ncd", location) == 4
+    # Rack's column loop never advances at a NUL or invalid lead byte, so it would never return (RP-42).
+    for text, pos in (("a\x00b", 3), (b"\x80", 1), (b"x\xffy", 3)):
+        with pytest.raises(ValueError, match="never returns"):
+            rs.position_to_location(text, pos)
+    nul = rs.position_to_location("a\x00b\ncd", 6)  # on an earlier line: Rack only counts its newline
+    assert (nul.line, nul.column) == (1, 2) and rs.position_to_location("é", 1).column == 1  # pos inside a codepoint
     assert rs.to_base64(b"RackPy") == "UmFja1B5" and rs.from_base64("UmFja1B5") == b"RackPy"
     assert rs.to_base64(memoryview(b"xRackPyx")[1:7]) == "UmFja1B5"  # a contiguous slice is fine
     with pytest.raises(ValueError, match="contiguous"):
