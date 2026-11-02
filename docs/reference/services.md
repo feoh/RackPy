@@ -299,9 +299,12 @@ a running Rack does less, or more, than it seems:
 `SharedMutex` is Rack's read-write lock: many readers, or one writer. It
 has Rack's `lock`, `try_lock`, `unlock`, `lock_shared`, `try_lock_shared`
 and `unlock_shared`, and `with mutex:` holds it for writing. Rack's public
-`rwlock` field is a `pthread_rwlock_t`; RackPy does not expose that field or
-its direct pthread operations. The methods are a checked adapter, not direct
-access to that field.
+`rwlock` field is a `pthread_rwlock_t`, an opaque, platform-specific OS type
+that is the mutex's storage. By owner decision it is represented by the
+`SharedMutex` object and its methods, never as a separate Python value: RackPy
+exposes neither the field nor its direct pthread operations, because a raw
+handle would let Python bypass the holder checks below. The methods are a
+checked adapter, not direct access to that field.
 `SharedLock(m)` is Rack's `SharedLock<TMutex>`: it holds `m` shared from
 construction until `release()`, or until its `with` block ends.
 
