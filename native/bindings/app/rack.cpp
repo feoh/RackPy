@@ -150,14 +150,12 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 			hostAs<app::RackScrollWidget>(h).setGridOffset(v);
 		}, py::arg("grid_offset"))
 		.def("get_zoom", [](const HostRackScroll& h) { return hostAs<app::RackScrollWidget>(h).getZoom(); })
+		// Rack clamps the zoom before it uses it, fmax(fmin(zoom, 4), 1/4): NaN and infinity become 4 and -infinity 1/4
+		// (RP-42: they were refused). The pivot is multiplied into the scroll offset unchecked, so it must be finite.
 		.def("set_zoom", [](const HostRackScroll& h, float zoom) {
-			if (!std::isfinite(zoom))
-				throw std::invalid_argument("zoom must be finite");
 			hostAs<app::RackScrollWidget>(h).setZoom(zoom);
-		}, py::arg("zoom"), "Rack's: clamped to 1/4 to 4, about the view's centre.")
+		}, py::arg("zoom"), "Rack's: clamped to 1/4 to 4 (NaN and infinity give 4), about the view's centre.")
 		.def("set_zoom", [](const HostRackScroll& h, float zoom, rack::math::Vec pivot) {
-			if (!std::isfinite(zoom))
-				throw std::invalid_argument("zoom must be finite");
 			finite(pivot, "pivot");
 			hostAs<app::RackScrollWidget>(h).setZoom(zoom, pivot);
 		}, py::arg("zoom"), py::arg("pivot"))

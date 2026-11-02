@@ -85,8 +85,10 @@ dispatching an event, because nothing else can be iterating a tree that
 exists only in Python. Returning something other than a `Menu` is logged and
 gives Rack no menu. `Menu.set_child_menu(menu)` does the same by hand. It
 hands the menu to Rack, which deletes the previous child menu. `child_menu`
-and `active_entry` are read-only. So is `parent_menu`, which Rack 2.6.6 never
-sets. Rack never clears `active_entry` or `child_menu` when those widgets go,
+and `active_entry` are read-only. So is `parent_menu`: Rack 2.6.6 neither sets
+nor reads it, so a write would store a raw pointer that nothing uses and Rack
+never clears, and a plugin that sets it is given back only while that menu
+still exists. Rack never clears `active_entry` or `child_menu` when those widgets go,
 so each is given only while it is still where Rack keeps it, else `None`; and
 since a menu removes its child menu when it is deleted, a child menu leaves
 only through `set_child_menu`: removing it or `request_delete()` is refused.
@@ -143,7 +145,8 @@ on threads Python starts (see [the context](window.md#the-context)). Its
   `handle_text`, `handle_key`, `handle_drop` and `handle_dirty` do what
   Rack's window does with GLFW's input. They dispatch through the widget
   tree, Python widgets' handlers included. They are refused inside another
-  widget callback, where Rack may be iterating the tree.
+  widget callback, where Rack may be iterating the tree. `handle_text` takes
+  any `uint32`, as Rack does, even one past U+10FFFF.
 - `set_hovered_widget`, `set_dragged_widget`, `set_drag_hovered_widget` and
   `set_selected_widget` change the focus and send Rack's enter, leave,
   select and drag events. The corresponding `get_hovered_widget`,

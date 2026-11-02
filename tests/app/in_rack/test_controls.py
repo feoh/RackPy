@@ -557,10 +557,17 @@ def test_switches_buttons_sliders_ports_screws_and_panels() -> None:
         assert switch.frames == [light, dark] and switch.latch
         with pytest.raises(ValueError):
             switch.frames = [Svg()]
-        with pytest.raises(ValueError):
-            button.add_frame(None)  # type: ignore[arg-type]
+        # Rack's addFrame(nullptr) is safe: it keeps the frame and sizes the widget to nothing (RP-42: it was refused).
+        button.add_frame(None)
+        assert button.frames == [None] and button.box.size == Vec()
+        button.frames = [light, None]
+        assert button.frames == [light, None]
+        button.frames = []
         button.add_frame(light)
         assert button.frames == [light] and button.box.size == Vec(30, 30)
+        switch.add_frame(None)
+        assert switch.frames[-1] is None
+        switch.frames = [light, dark]
         slider.set_background_svg(dark)
         slider.set_handle_svg(light)
         slider.set_handle_pos(Vec(0, 10), Vec(0, 0))

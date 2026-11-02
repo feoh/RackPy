@@ -146,7 +146,8 @@ runs on Rack's audio path; on the main thread, Rack's window waits.
   the directory, so unpack only archives you trust;
   `rackpy.services.system.unarchive` checks the entries first.
 - **Time.** `get_time` (monotonic, for measuring), `get_unix_time`,
-  `get_thread_time` and `sleep(seconds)`.
+  `get_thread_time` and `sleep(seconds)`, which returns at once for zero or less
+  and refuses NaN, infinity and more than 9e9 seconds (the clock cannot hold it).
 - **System.** `get_logical_core_count`, `get_operating_system_info`,
   `get_stack_trace` and `set_thread_name` (the calling thread's).
 - **FPU flags.** `get_fpu_flags`, `set_fpu_flags` and `reset_fpu_flags`

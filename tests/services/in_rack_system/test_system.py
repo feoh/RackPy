@@ -134,8 +134,13 @@ def test_time_processes_and_flags() -> None:
     t0 = rsys.get_time()
     rsys.sleep(0.01)
     assert rsys.get_time() - t0 >= 0.009 and rsys.get_unix_time() > 1.6e9 and rsys.get_thread_time() >= 0
-    with pytest.raises(ValueError):
-        rsys.sleep(-1)
+    t1 = rsys.get_time()
+    rsys.sleep(-1)  # Rack's sleep_for returns at once for a time of zero or less
+    rsys.sleep(0)
+    assert rsys.get_time() - t1 < 0.5
+    for bad in (float("nan"), float("inf"), -float("inf"), 1e300, 9.1e9):  # these overflow the clock's conversion
+        with pytest.raises(ValueError, match="finite"):
+            rsys.sleep(bad)
     os_name = {"linux": "Linux", "darwin": "Mac", "win32": "Windows"}[sys.platform]
     assert rsys.get_logical_core_count() >= 1 and os_name in rsys.get_operating_system_info()
     assert isinstance(rsys.get_stack_trace(), str)

@@ -62,10 +62,19 @@ def test_the_engine_and_its_timing() -> None:
     e.set_suggested_sample_rate(48000)
     try:
         assert e.get_sample_rate() == 48000
+        # Rack sends a rate that is not above 0 to its fallback, NaN and negatives included (RP-42: they were refused).
+        fallbacks: tuple[float, ...] = (0, -1, math.nan)
+        for fallback in fallbacks:
+            e.set_suggested_sample_rate(48000)
+            e.set_suggested_sample_rate(fallback)
+            assert e.get_sample_rate() == 44100
+        # A positive rate whose period does not fit a float would make every module's sample time zero or infinite.
+        for hazardous in (math.inf, 1e-40):
+            with pytest.raises(ValueError, match="FLT_MIN"):
+                e.set_suggested_sample_rate(hazardous)
+        assert e.get_sample_rate() == 44100  # a refusal changes nothing
     finally:
         e.set_suggested_sample_rate(rate)
-    with pytest.raises(ValueError):
-        e.set_suggested_sample_rate(math.nan)
 
 
 def test_modules_in_the_engine(probe: EngineModule) -> None:

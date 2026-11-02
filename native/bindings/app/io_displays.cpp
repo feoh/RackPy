@@ -214,11 +214,14 @@ void bindIoDisplays(py::module_ raw, py::module_ mod) {
 	mod.def("append_audio_menu", [](py::object menu, py::object port) {
 		auto* m = menuArgument(menu);
 		checkMutationOf(*m);
-		auto& p = bindings::pythonAudioPort(port);
-		pin(m, port);  // the menu's items capture the port
-		app::appendAudioMenu(m, &p);
+		// Rack accepts a null port: each of its four sub-menus returns early and the labels and separators are still
+		// added (AudioDisplay.cpp), so None is passed through (RP-42: it was refused).
+		rack::audio::Port* p = port.is_none() ? nullptr : &bindings::pythonAudioPort(port);
+		if (p)
+			pin(m, port);  // the menu's items capture the port
+		app::appendAudioMenu(m, p);
 	}, py::arg("menu"), py::arg("port"), "Rack's: driver, device, sample rate and block size items for the port, which "
-		"RackPy keeps alive while the menu is.");
+		"RackPy keeps alive while the menu is. With None, Rack adds only its labels.");
 	mod.def("append_midi_menu", [](py::object menu, py::object port) {
 		auto* m = menuArgument(menu);
 		checkMutationOf(*m);

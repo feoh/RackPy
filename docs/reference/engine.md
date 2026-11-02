@@ -90,7 +90,9 @@ stepping.
 `get_block_frame`, `get_block_time`, `get_block_frames`,
 `get_block_duration`, `get_meter_average` and `get_meter_max` are Rack's
 timing values. `set_suggested_sample_rate(rate)` sets the rate unless Rack's
-settings fix one; `0` gives Rack's fallback. `yield_workers()` is Rack's hint
+settings fix one; a rate that is not above 0 (0, negative or NaN) gives Rack's
+fallback, 44100. Infinity and rates below `FLT_MIN` are refused, because the
+sample time would be zero or infinite for every module. `yield_workers()` is Rack's hint
 that its worker threads should block rather than spin.
 
 (engine-params)=

@@ -188,8 +188,11 @@ void bindSystem(py::module_ m) {
 	m.def("get_unix_time", &sy::getUnixTime);
 	m.def("get_thread_time", &sy::getThreadTime, "Rack's: the calling thread's CPU time in seconds.");
 	m.def("sleep", [](double time) {
-		if (!std::isfinite(time) || time < 0)
-			throw py::value_error("the time is a finite number of seconds, not negative");
+		// Rack sleeps for std::chrono::duration<double>(time): zero or less returns at once, as it does in C++. NaN,
+		// infinity and a time past the clock's nanosecond range (about 9.2e9 seconds) overflow that conversion, which is
+		// undefined (RP-42).
+		if (!std::isfinite(time) || time > 9.0e9)
+			throw py::value_error("the time is a finite number of seconds, at most 9e9 (zero or less returns at once)");
 		py::gil_scoped_release release;
 		sy::sleep(time);
 	}, py::arg("time"), "Rack's: sleeps the calling thread (on the main thread, Rack's window stops meanwhile).");

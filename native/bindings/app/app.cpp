@@ -233,12 +233,11 @@ void svgChildren(py::classh<T, Options...>& cls) {
 			"The CircularShadow under the control (a HostCircularShadow).");
 }
 
+/** A frame may be None, as Rack's addFrame(nullptr) and every use of a frame (setSvg, wrap, draw) handle a null Svg; only
+an Svg without an image would crash svgDraw (RP-42: None was refused, against the docs). */
 std::vector<SvgPtr> drawableFrames(std::vector<SvgPtr> frames) {
-	for (auto& frame : frames) {
-		if (!frame)
-			throw std::invalid_argument("frames must be loaded Svgs, not None");
+	for (auto& frame : frames)
 		drawableSvg(frame);
-	}
 	return frames;
 }
 
@@ -574,12 +573,10 @@ void bindApp(py::module_ raw) {
 	svgChildren<true>(svgSwitch);
 	svgSwitch.def_property("frames", [](py::object self) { return native<SWI>(self).frames; },
 			[](py::object self, std::vector<SvgPtr> frames) { native<SWI>(self).frames = drawableFrames(std::move(frames)); },
-			"A copy of the loaded SVGs, one per value; assign a list to change it.")
+			"A copy of the SVGs, one per value (an entry may be None); assign a list to change it.")
 		.def_property("latch", [](py::object self) { return native<SWI>(self).latch; },
 			[](py::object self, bool v) { native<SWI>(self).latch = v; })
 		.def("add_frame", [](py::object self, SvgPtr svg) {
-			if (!svg)
-				throw std::invalid_argument("add_frame takes a loaded Svg, not None");
 			native<SWI>(self).addFrame(drawableSvg(std::move(svg)));
 		}, py::arg("svg"));
 
@@ -588,10 +585,8 @@ void bindApp(py::module_ raw) {
 	svgChildren<true>(svgButton);
 	svgButton.def_property("frames", [](py::object self) { return native<SB>(self).frames; },
 			[](py::object self, std::vector<SvgPtr> frames) { native<SB>(self).frames = drawableFrames(std::move(frames)); },
-			"A copy of the loaded SVGs (released, pressed); assign a list to change it.")
+			"A copy of the SVGs (released, pressed; an entry may be None); assign a list to change it.")
 		.def("add_frame", [](py::object self, SvgPtr svg) {
-			if (!svg)
-				throw std::invalid_argument("add_frame takes a loaded Svg, not None");
 			native<SB>(self).addFrame(drawableSvg(std::move(svg)));
 		}, py::arg("svg"));
 

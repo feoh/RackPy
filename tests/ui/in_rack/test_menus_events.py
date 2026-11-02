@@ -143,11 +143,14 @@ def test_rack_dispatches_input_to_python_widgets() -> None:
         state.handle_key(inside, GLFW_KEY_A, 38, GLFW_RELEASE, 0)
         assert GLFW_KEY_A not in state.held_keys
         assert state.handle_text(inside, 0x1F642)
+        # Rack forwards any uint32 and its handlers cope (TextField skips what is past U+10FFFF): nothing is refused.
+        assert state.handle_text(inside, 0x110000) and state.handle_text(inside, 0xFFFFFFFF)
         assert state.handle_scroll(inside, Vec(0, -3))
         state.handle_button(inside, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0)
         state.handle_button(inside, GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE, 0)
         kinds = [kind for kind, _ in pad.seen]
         assert ("key", (GLFW_KEY_A, GLFW_PRESS)) in pad.seen and ("text", 0x1F642) in pad.seen
+        assert ("text", 0x110000) in pad.seen and ("text", 0xFFFFFFFF) in pad.seen  # delivered unchanged
         assert ("scroll", Vec(0, -3)) in pad.seen and ("button", (0, GLFW_PRESS)) in pad.seen and "button" in kinds
         state.set_selected_widget(pad)
         assert same(state.selected_widget, pad) and ("select", None) in pad.seen
