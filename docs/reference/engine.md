@@ -110,12 +110,11 @@ pointer, so smoothing needs a module in the engine.
 
 A `Cable()` that Python makes holds Rack's struct: `id` (-1 until the engine
 assigns one), `output_module` and `output_id`, `input_module` and
-`input_id`. Rack documents a cable ID as between 0 and 2^53 because it is
-serialized as a JSON number, so assigning `id` accepts only -1 (unset) or
-0 to 2^53 - 1, and raises `ValueError` otherwise. Rack's engine would keep
-any other non-negative ID that does not collide, but such a patch would not
-round-trip through JSON readers that use floating point. Its modules are module handles (`Module` or `EngineModule`),
-never Rack's pointers. `to_json()` is Rack's patch JSON for it, and
+`input_id`. `id` accepts any signed 64-bit integer. Rack treats every negative
+cable ID as unset and assigns a non-negative ID when adding the cable to the
+engine; IDs must be unique there. Very large IDs may not round-trip through
+JSON consumers that represent integers as floating-point numbers. Its modules
+are module handles (`Module` or `EngineModule`), never Rack's pointers. `to_json()` is Rack's patch JSON for it, and
 `from_json(data)` sets it from patch JSON, finding the modules in Rack's
 engine by ID (Rack's `Exception` becomes `ValueError`).
 

@@ -211,8 +211,14 @@ def test_deprecated_members_warn_and_unstable_ones_work() -> None:
     with pytest.warns(DeprecationWarning):
         p.value = 3.0
     assert p.get_voltage(0) == 3.0  # value is a union with voltages[0]
+    q = Port()
     with pytest.warns(DeprecationWarning, match="use is_connected"):
-        assert p.active == 0
+        assert q.active == 0
+        q.active = 3
+        assert q.get_channels() == 3
+    with pytest.warns(DeprecationWarning, match="use get_channels"):
+        q.channels = 3
+        assert q.channels == 3
     with pytest.warns(DeprecationWarning, match="use get_normal_voltage"):
         assert p.normalize(2.0) == 2.0
     light = Light()

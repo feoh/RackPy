@@ -10,6 +10,7 @@ import gc
 import math
 import struct
 import threading
+import time
 import zlib
 from collections.abc import Callable
 from pathlib import Path
@@ -458,6 +459,8 @@ def test_svg_handles_and_svg_draw() -> None:
     assert handle.kind == "NSVGimage" and handle.alive
     pixels = paint(lambda vg, args: win.svg_draw(vg, handle))
     assert near(pixels.at(20, 5), (0, 255, 0, 255)) and pixels.at(20, 30)[3] == 0
+    svg_pixels = paint(lambda vg, args: svg.draw(vg))
+    assert near(svg_pixels.at(20, 5), (0, 255, 0, 255)) and svg_pixels.at(20, 30)[3] == 0
     svg.load_string('<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"/>')
     assert not alive(handle)  # load_string replaced the parsed image
     errors: list[type[BaseException]] = []
@@ -497,7 +500,15 @@ def test_window_queries_and_controls() -> None:
     window_ = window()
     size = window_.get_size()
     assert size.x > 0 and size.y > 0
-    window_.set_size(size)  # asynchronous under X11; at least 640 x 480
+    changed = Vec(size.x + 40, size.y + 30)
+    try:
+        window_.set_size(changed)  # asynchronous under X11; read back after Rack's next window-system update
+        deadline = time.monotonic() + 2
+        while window_.get_size() != changed and time.monotonic() < deadline:
+            time.sleep(0.02)
+        assert window_.get_size() == changed
+    finally:
+        window_.set_size(size)
     with pytest.raises(ValueError):
         window_.set_size(Vec(math.inf, 1))
     ratio = window_.pixel_ratio

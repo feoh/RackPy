@@ -177,10 +177,12 @@ runs on Rack's audio path; on the main thread, Rack's window waits.
 ## HTTP: `rackpy.raw.network`
 
 `request_json(method, url, data, cookies)` requests a JSON API.
-`request_download(url, filename, progress, cookies)` downloads a file, and
-another thread can read its progress (0 to 1) from a `DownloadProgress`
-meanwhile. Both block in curl, which allows 30 seconds to connect and sets
-no overall limit, with the GIL released.
+`request_download(url, filename, progress, cookies)` downloads a file and
+writes its 0-to-1 progress to `DownloadProgress`. Do not read `value` while the
+request is running: Rack writes it from the download thread without
+synchronization. Read it only after `request_download` returns. Both requests
+block in curl, which allows 30 seconds to connect and sets no overall limit,
+with the GIL released.
 
 - `Method` has `METHOD_GET`, `METHOD_POST`, `METHOD_PUT` and
   `METHOD_DELETE`. In Rack 2.6.6, `METHOD_PUT` with JSON data actually sends
