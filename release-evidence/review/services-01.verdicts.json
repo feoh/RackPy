@@ -1,0 +1,401 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "alias:rack::network::CookieMap": {
+      "verdict": "accept"
+    },
+    "enum:rack::network::Method": {
+      "verdict": "accept"
+    },
+    "enum:rack::settings::BrowserSort": {
+      "verdict": "accept"
+    },
+    "enum:rack::settings::KnobMode": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::network::Method::METHOD_DELETE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::network::Method::METHOD_GET": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::network::Method::METHOD_POST": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::network::Method::METHOD_PUT": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::BrowserSort::BROWSER_SORT_BRAND": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::BrowserSort::BROWSER_SORT_LAST_USED": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::BrowserSort::BROWSER_SORT_MOST_USED": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::BrowserSort::BROWSER_SORT_NAME": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::BrowserSort::BROWSER_SORT_RANDOM": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::BrowserSort::BROWSER_SORT_UPDATED": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::KnobMode::KNOB_MODE_LINEAR": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::KnobMode::KNOB_MODE_ROTARY_ABSOLUTE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::KnobMode::KNOB_MODE_ROTARY_RELATIVE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::KnobMode::KNOB_MODE_SCALED_LINEAR": {
+      "verdict": "accept"
+    },
+    "field:rack::settings::ModuleInfo::added": {
+      "verdict": "accept"
+    },
+    "field:rack::settings::ModuleInfo::enabled": {
+      "verdict": "accept"
+    },
+    "field:rack::settings::ModuleInfo::favorite": {
+      "verdict": "accept"
+    },
+    "field:rack::settings::ModuleInfo::lastAdded": {
+      "verdict": "accept"
+    },
+    "field:rack::settings::PluginWhitelist::moduleSlugs": {
+      "verdict": "accept"
+    },
+    "field:rack::settings::PluginWhitelist::subscribed": {
+      "verdict": "accept"
+    },
+    "function:rack::network::encodeUrl(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::network::requestDownload(const std::string &, const std::string &, float *, const rack::network::CookieMap &)": {
+      "verdict": "accept"
+    },
+    "function:rack::network::requestJson(rack::network::Method, const std::string &, json_t *, const rack::network::CookieMap &)": {
+      "verdict": "accept"
+    },
+    "function:rack::network::urlPath(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::settings::getModuleInfo(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::settings::isModuleWhitelisted(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::settings::resetCables()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::archiveDirectory(const std::string &, const std::string &, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::archiveDirectory(const std::string &, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::copy(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::createDirectories(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::createDirectory(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::createSymbolicLink(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::exists(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getAbsolute(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getCanonical(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getDirectory(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getEntries(const std::string &, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getExtension(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getFileSize(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getFilename(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getFpuFlags()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getLogicalCoreCount()": {
+      "finding": "P2: the only assertion is a loose bound. tests/services/in_rack_system/test_system.py:138 checks `get_logical_core_count() >= 1`, which any positive-int binding would pass. Rack returns std::thread::hardware_concurrency() (Rack src/system.cpp:652-654). Smallest fix: assert it equals os.cpu_count().",
+      "verdict": "finding"
+    },
+    "function:rack::system::getOperatingSystemInfo()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getStackTrace()": {
+      "finding": "P1: the test only checks the type. tests/services/in_rack_system/test_system.py:139 asserts `isinstance(rsys.get_stack_trace(), str)`, which any str-returning binding passes (for example get_operating_system_info). Smallest fix: assert the text has several newline-separated frames, and on Linux/macOS that it names the RackPy extension or libRack (Rack src/system.cpp:668-710 writes `<library>: <symbol> +0x..` lines).",
+      "verdict": "finding"
+    },
+    "function:rack::system::getStem(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getTempDirectory()": {
+      "finding": "P2: the assertion is weak. tests/services/in_rack_system/test_system.py:90 checks only `Path(get_temp_directory()).is_dir()`, which get_working_directory would also pass. Smallest fix: compare it as a path with tempfile.gettempdir(), or Path(...).resolve() of it.",
+      "verdict": "finding"
+    },
+    "function:rack::system::getThreadTime()": {
+      "finding": "P2: the assertion is weak. tests/services/in_rack_system/test_system.py:134 asserts only `get_thread_time() >= 0`, which get_time or get_unix_time would also pass. Rack returns the calling thread's CPU clock (Rack src/system.cpp:792-818). Smallest fix: compare it with time.thread_time() within a tolerance, or check that it advances during a busy loop but not during rsys.sleep.",
+      "verdict": "finding"
+    },
+    "function:rack::system::getTime()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getUnixTime()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getWorkingDirectory()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::isDirectory(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::isFile(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::join(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::openBrowser(const std::string &)": {
+      "finding": "P1: the shell-character guard is applied on Windows too, where it is unjustified. requireShellSafe (native/bindings/services/system.cpp:50-54, 167-169) refuses \\\", \\\\, $ and ` on every platform. Only Linux (`xdg-open \\\"...\\\"`) and macOS (`open \\\"...\\\"`) go through std::system; Windows calls ShellExecuteW with no shell (Rack src/system.cpp:868-890). docs/reference/services.md:156-158 explains the guard by xdg-open only. Smallest fix: wrap the check in `#if !defined ARCH_WIN`, and document it per platform (xdg-open on Linux, open on macOS, none on Windows).",
+      "verdict": "finding"
+    },
+    "function:rack::system::openDirectory(const std::string &)": {
+      "finding": "P1: open_directory refuses every native Windows path. requireShellSafe rejects '\\\\' (native/bindings/services/system.cpp:50-54, 171-175), and os.fspath of a Windows path contains backslashes, yet Rack's Windows openDirectory uses ShellExecuteW 'explore' with no shell (Rack src/system.cpp:892-914). The test is also weak: test_system.py:163 only calls open_directory(\\\"\\\"), a no-op that passes even if nothing is bound, and the refusal is tested only for open_browser. Smallest fix: skip the guard on ARCH_WIN, document it per platform, and add a refusal test for open_directory (ideally also a PATH-stubbed xdg-open on Linux that records its argument).",
+      "verdict": "finding"
+    },
+    "function:rack::system::readFile(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::readFile(const std::string &, size_t *)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::remove(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::removeRecursively(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::rename(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::resetFpuFlags()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::runProcessDetached(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::setFpuFlags(uint32_t)": {
+      "finding": "P1: invalid flags crash the host, and this is neither guarded nor documented. set_fpu_flags passes any uint32 straight to Rack (native/bindings/services/system.cpp:186), which calls _mm_setcsr on x64 (Rack src/system.cpp:947-953). Setting any reserved MXCSR bit (16-31) raises #GP, which is SIGSEGV on Linux, so `rsys.set_fpu_flags(1 << 16)` kills Rack. Unmasking FP exceptions (bits 7-12) makes the interpreter's own float arithmetic on that thread raise SIGFPE. docs/reference/services.md:149-154 mentions neither. Smallest fix: on x64, refuse flags with bits outside 0xFFFF (ValueError), document that unmasking exceptions crashes Python, and test the refusal.",
+      "verdict": "finding"
+    },
+    "function:rack::system::setThreadName(const std::string &)": {
+      "finding": "P1: no assertion checks the effect. tests/services/in_rack_system/test_system.py:140-148 only checks that the call returns (`names == ['ok']`), so a no-op binding passes. Rack sets the name with pthread_setname_np on Linux, truncated to 15 bytes (Rack src/system.cpp:657-665). Smallest fix: on Linux, read /proc/self/task/<threading.get_native_id()>/comm in the worker and assert 'rackpy-worker'. Add a long name to check the truncation, and document that Rack does nothing on macOS and Windows.",
+      "verdict": "finding"
+    },
+    "function:rack::system::setWorkingDirectory(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::sleep(double)": {
+      "finding": "P1: the negative-time refusal is unjustified and undocumented. native/bindings/services/system.cpp:160-165 raises ValueError for time < 0, and the test asserts that (test_system.py:135-136). But Rack's sleep is std::this_thread::sleep_for(duration<double>(time)) (Rack src/system.cpp:821-823), which returns at once for non-positive durations; only NaN/inf (and huge finite values, which the guard lets through) reach undefined conversion. docs/reference/services.md:145-146 lists `sleep(seconds)` with no restriction. Smallest fix: pass negative values through to Rack, refuse only non-finite or out-of-range values, and document the refusal in services.md#services-system.",
+      "verdict": "finding"
+    },
+    "function:rack::system::unarchiveToDirectory(const std::string &, const std::string &)": {
+      "finding": "P2: the cited test does not exercise the path overload. The record cites only test_rack_follows_dotdot_entries_and_the_facade_refuses_them, which passes bytes (`evil`) to both the facade and rsys.unarchive_to_directory, i.e. the vector overload. The path overload is exercised and checked only in test_archives (tests/services/in_rack_system/test_system.py:107-111, files.unarchive(archive_path, again)). Smallest fix: add tests/services/in_rack_system/test_system.py::test_archives to this record's tests, ideally with a direct rsys.unarchive_to_directory(<path>, ...) call.",
+      "verdict": "finding"
+    },
+    "function:rack::system::unarchiveToDirectory(const std::vector<uint8_t> &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::writeFile(const std::string &, const std::vector<uint8_t> &)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::system::join<type...>(const std::string &, const std::string &, $0...)": {
+      "verdict": "accept"
+    },
+    "record:rack::settings::ModuleInfo": {
+      "verdict": "accept"
+    },
+    "record:rack::settings::PluginWhitelist": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::allowCursorLock": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::autoCheckUpdates": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::autosaveInterval": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::browserSort": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::browserZoom": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::cableAutoRotate": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::cableColors": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::cableLabels": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::cableOpacity": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::cableTension": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::cpuMeter": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::devMode": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::frameRateLimit": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::haloBrightness": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::headless": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::invertZoom": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::isPlugin": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::knobLinearSensitivity": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::knobMode": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::knobScroll": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::knobScrollSensitivity": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::language": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::lastPatchDirectory": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::lastSelectionDirectory": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::lockModules": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::moduleInfos": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::moduleWhitelist": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::mouseWheelZoom": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::pixelRatio": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::pluginSettingsJ": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::preferDarkPanels": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::rackBrightness": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::recentPatchPaths": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::restart": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::safeMode": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::sampleRate": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::settingsPath": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::showTipsOnLaunch": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::skipLoadOnLaunch": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::spotlightBrightness": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::spotlightRadius": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::squeezeModules": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::threadCount": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::tipIndex": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::token": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::tooltips": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::uiTheme": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::verifyHttpsCerts": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::windowMaximized": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::windowPos": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::windowSize": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/services-01",
+  "slice": "services-01"
+}

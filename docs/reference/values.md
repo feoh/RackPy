@@ -217,6 +217,7 @@ Each of Rack's macros has a reviewed disposition (coverage policy 9):
 | `DEPRECATED` | `macros.DEPRECATED`, a decorator whose target emits `DeprecationWarning` |
 | `CONCAT`, `CONCAT_LITERAL`, `TOSTRING`, `TOSTRING_LITERAL` | **no runtime meaning**: they paste and quote tokens for the preprocessor; Python builds strings directly |
 | `BINARY`, `BINARY_START`, `BINARY_END`, `BINARY_SIZE` | **no runtime meaning**: they name data the linker embeds in a C++ plugin; a Python plugin reads its files through asset paths (RP-30) |
+| `PRIVATE` | **no runtime meaning**: an attribute that marks Rack's internal declarations (a deprecation warning under clang, an error otherwise); RackPy never calls them, and the manifest excludes them (`excluded_internal`) |
 
 (values-fopen)=
 ## Files by UTF-8 name: `fopen_u8` (Windows only)

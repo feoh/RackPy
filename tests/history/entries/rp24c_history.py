@@ -111,12 +111,17 @@ def run() -> None:
     add = h.CableAdd()
     add.set_cable(cable_widget)
     RESULT["cable_add"] = [add.cable_id, add.output_module_id, add.input_module_id, add.is_cable(cable_widget)]
+    RESULT["cable_add"] += [add.output_id, add.input_id]
     remove = h.CableRemove()
     remove.set_cable(cable_widget)
     remove.redo()  # Rack's CableAdd undo: the cable widget goes
     RESULT["cable_remove"] = [cables(), rack.get_cable(7) is None]
     remove.undo()  # Rack's CableAdd redo: the cable and its widget come back
     RESULT["cable_remove"] += [cables(), rack.get_cable(7) is not None]
+    add.undo()  # Python's CableAdd.undo, directly (RP-42): Rack's undo removes the cable
+    RESULT["cable_add_direct"] = [cables(), rack.get_cable(7) is None]
+    add.redo()
+    RESULT["cable_add_direct"] += [cables(), rack.get_cable(7) is not None]
     bad = h.CableAdd()
     bad.output_module_id, bad.output_id, bad.input_module_id, bad.input_id = 2, 0, 3, 4  # no input 4
     bad.redo()
@@ -139,6 +144,9 @@ def run() -> None:
     move.module_id, move.old_pos, move.new_pos = 2, Vec(old.x + 300, old.y), old
     move.redo()
     RESULT["move"] = two.box.pos.x == old.x
+    move.undo()  # Rack's undo puts it back at the old position (RP-42)
+    RESULT["move_undo"] = two.box.pos.x == old.x + 300
+    move.redo()
     removal = h.ModuleRemove()
     removal.set_module(three)
     RESULT["removal"] = [removal.model is not None and removal.model.slug == "PyTone", removal.module_id == 3]
@@ -148,6 +156,14 @@ def run() -> None:
     removal.undo()  # Rack's ModuleAdd redo: the module and its Python widget come back
     back = rack.get_module(3)
     RESULT["removal"] += [isinstance(back, ToneWidget), engine.get_module(3) is not None]
+    # Python's ModuleAdd.undo and redo, directly (RP-42): set_module fills it from the widget, as in Rack.
+    adder = h.ModuleAdd()
+    adder.set_module(back)
+    RESULT["module_add"] = [adder.module_id == 3, adder.pos.x == back.box.pos.x]
+    adder.undo()  # Rack's undo: the module and its widget go
+    RESULT["module_add"].append(rack.get_module(3) is None and engine.get_module(3) is None)
+    adder.redo()  # Rack's redo: they come back, through the Python factory
+    RESULT["module_add"].append(isinstance(rack.get_module(3), ToneWidget) and engine.get_module(3) is not None)
 
 
 done = [False]

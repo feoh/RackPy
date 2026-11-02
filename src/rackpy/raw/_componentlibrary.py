@@ -92,7 +92,11 @@ class Template:
             for ancestor in cls.__mro__:
                 if isinstance(ancestor, type) and issubclass(ancestor, Template) and "_params" in vars(ancestor):
                     attrs[f"_args_{ancestor.__name__}"] = key
-            spec = type(name, (cls, *cls._bases(*key)), attrs)
+            bases = cls._bases(*key)
+            # A base that already derives from this template (InverseAction[InverseAction[T]]) carries it: listing
+            # the template first as well would give no consistent MRO (RP-42).
+            parents = bases if any(issubclass(b, cls) for b in bases) else (cls, *bases)
+            spec = type(name, parents, attrs)
             cls._specializations[key] = spec
         return spec
 

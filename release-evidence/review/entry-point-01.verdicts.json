@@ -1,0 +1,11 @@
+{
+  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "records": {
+    "macro:PRIVATE": {
+      "finding": "P1: the cited doc anchor does not describe this record. bindings/manifest.json:1610 cites docs/reference/values.md#values-macros (and docs/reference/crosswalk/entry-point.md:10 links PRIVATE there), but that section's table (docs/reference/values.md:203-219) gives a disposition for ARCH_*, RACK_MOD_CTRL*, fopen, VEC_ARGS/RECT_ARGS, LENGTHOF, ENUMS, DEFER, DEPRECATED, CONCAT/TOSTRING* and BINARY* only. PRIVATE is absent, although ADR 009 item 7 (docs/decisions/009-values-and-raw-conventions.md:60-63) requires a docs anchor for each no_runtime_meaning macro and coverage policy 9 (docs/coverage.md:152-155) lists PRIVATE as reviewed with no runtime meaning. The mapping itself is sound: rack.hpp:15-19 defines PRIVATE as a deprecated/error attribute with nothing to call at run time, and the notes say so accurately. Smallest fix: add a row to the values-macros table, e.g. '`PRIVATE` | **no runtime meaning**: an attribute marking Rack's internal declarations (deprecated warning under clang, compile error otherwise); RackPy never calls them, and they are excluded_internal in the manifest'.",
+      "verdict": "finding"
+    }
+  },
+  "reviewer": "agent-review:rp42-r1/entry-point-01",
+  "slice": "entry-point-01"
+}

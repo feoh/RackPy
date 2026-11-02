@@ -67,7 +67,11 @@ def test_actions_python_makes(probe: EngineModule) -> None:
     add.redo()  # Rack would call model->createModule() on a null model: RackPy does nothing
     add.model = probe.model
     assert add.model is not None and add.model.slug == "RuntimeProbe"
+    add.pos = Vec(45, 380)
+    assert (add.pos.x, add.pos.y) == (45, 380)
     assert isinstance(h.ModuleRemove(), h.ModuleAdd) and h.ModuleRemove().name == "remove module"
+    # Rack's typedefs are the specializations (RP-42): ModuleRemove is InverseAction<ModuleAdd>.
+    assert h.InverseAction[h.ModuleAdd] is h.ModuleRemove and h.InverseAction[h.CableAdd] is h.CableRemove
 
     value = e.get_param_value(probe, 0)
     change = h.ParamChange()
@@ -96,10 +100,25 @@ def test_actions_python_makes(probe: EngineModule) -> None:
     module_change.redo()
     module_change.undo()  # no old JSON: RackPy does nothing (Rack would load null)
     assert module_change.old_module_j is None
+    # Rack's undo and redo load the JSON into the module (RP-42): each one's param value lands.
+    old_j, new_j = e.module_to_json(probe), e.module_to_json(probe)
+    old_j["params"][0]["value"], new_j["params"][0]["value"] = 0.125, 0.75
+    module_change.old_module_j, module_change.new_module_j = old_j, new_j
+    assert module_change.old_module_j == old_j and module_change.new_module_j == new_j
+    try:
+        module_change.redo()
+        assert e.get_param_value(probe, 0) == 0.75
+        module_change.undo()
+        assert e.get_param_value(probe, 0) == 0.125
+    finally:
+        e.set_param_value(probe, 0, value)
 
     cable = h.CableAdd()
-    cable.input_module_id = cable.output_module_id = probe.id
+    cable.cable_id = 11
+    cable.input_module_id, cable.output_module_id = probe.id, probe.id
     cable.input_id, cable.output_id = 0, 3  # the probe has one output
+    assert (cable.cable_id, cable.input_module_id, cable.output_module_id) == (11, probe.id, probe.id)
+    assert (cable.input_id, cable.output_id) == (0, 3)
     before = e.get_num_cables()
     cable.redo()  # Rack would index the output past the module's
     assert e.get_num_cables() == before and not cable.is_cable(None)
@@ -160,6 +179,20 @@ def test_inverse_action(probe: EngineModule) -> None:
     swapped.undo()
     swapped.redo()
     assert log == ["redo", "undo"]
+    # Nested, as in C++, InverseAction<InverseAction<T>> is T again (RP-42): it used to recurse forever.
+    twice: Any = h.InverseAction[h.InverseAction[Mark]]()
+    twice.undo()
+    twice.redo()
+    assert log == ["redo", "undo", "undo", "redo"]
+    native: Any = h.InverseAction[h.InverseAction[h.ParamChange]]()
+    native.module_id, native.param_id, native.old_value, native.new_value = probe.id, 0, 0.25, 0.75
+    try:
+        native.redo()  # ParamChange's redo
+        assert e.get_param_value(probe, 0) == 0.75
+        native.undo()
+        assert e.get_param_value(probe, 0) == 0.25
+    finally:
+        e.set_param_value(probe, 0, value)
 
 
 def test_racks_history() -> None:
@@ -177,6 +210,19 @@ def test_racks_history() -> None:
         history.push(rec)
     history.set_saved()
     assert history.is_saved() and history.saved_index == history.action_index
+    # Writable as in Rack (RP-42): saved_index with any int; action_index within 0..len(actions).
+    history.saved_index = 9999
+    assert history.saved_index == 9999 and not history.is_saved()
+    history.set_saved()
+    done = history.action_index
+    with pytest.raises(ValueError, match="action_index"):
+        history.action_index = len(history.actions) + 1
+    with pytest.raises(ValueError, match="action_index"):
+        history.action_index = -1
+    history.action_index = done - 1
+    assert history.action_index == done - 1 and history.can_redo() and history.get_redo_name() == "python step"
+    history.action_index = done
+    assert history.is_saved() and log == []  # moving the index runs nothing
     history.undo()
     assert log == ["undo"] and history.can_redo() and history.get_redo_name() == "python step"
     assert not history.is_saved()

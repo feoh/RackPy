@@ -587,10 +587,23 @@ void bindHistory(py::module_ m) {
 			h::State& state = handle.get();
 			return actionList(state.actions, handle.token, py::none());
 		}, "Rack's: every action, oldest first: Python's own objects, or ActionViews of those Rack made.")
-		.def_property_readonly("action_index", [](const HistoryHandle& handle) { return handle.get().actionIndex; },
-			"Rack's: how many actions are done (the next undo is the one before it). Read-only: Rack's own.")
-		.def_property_readonly("saved_index", [](const HistoryHandle& handle) { return handle.get().savedIndex; },
-			"Rack's: the action index of the saved patch, or -1. Read-only (set_saved sets it).");
+		.def_property("action_index", [](const HistoryHandle& handle) { return handle.get().actionIndex; },
+			[](const HistoryHandle& handle, int index) {
+				h::State& state = handle.get();
+				refuseInAction("setting action_index");
+				// Rack's undo and redo index actions with it (history.cpp): outside 0..len(actions) they would read
+				// past the vector (RP-42).
+				if (index < 0 || index > (int) state.actions.size())
+					throw py::value_error("action_index must be 0 to len(actions) (" + std::to_string(state.actions.size()) +
+						"), not " + std::to_string(index));
+				state.actionIndex = index;
+			},
+			"Rack's: how many actions are done (the next undo is the one before it). Writable within 0 to len(actions), "
+			"not while an action's undo or redo runs.")
+		.def_property("saved_index", [](const HistoryHandle& handle) { return handle.get().savedIndex; },
+			[](const HistoryHandle& handle, int index) { handle.get().savedIndex = index; },
+			"Rack's: the action index of the saved patch, or -1 (set_saved sets it). Rack only compares it, so any int "
+			"is safe.");
 }
 
 }  // namespace bindings

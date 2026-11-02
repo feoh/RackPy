@@ -19,6 +19,10 @@ _MODULE = "rackpy.raw.history"
 
 def _run(action_type: type, name: str, action: object) -> None:
     for klass in action_type.__mro__:
+        args = vars(klass).get("_args_InverseAction")
+        if args is not None:  # InverseAction[T] (nested, too): T's code with undo and redo swapped, as in C++ (RP-42)
+            _run(args[0], "undo" if name == "redo" else "redo", action)
+            return
         if f"_rack_{name}" in vars(klass):  # a native action type: Rack's own code, never an override
             getattr(klass, f"_rack_{name}")(action)
             return
@@ -49,3 +53,7 @@ class InverseAction(Template):
 
 InverseAction.__module__ = _MODULE
 _lib.InverseAction = InverseAction
+# Rack's typedefs: ModuleRemove is InverseAction<ModuleAdd> and CableRemove InverseAction<CableAdd> (history.hpp), so
+# those specializations are the native classes, as in C++ (RP-42).
+InverseAction._specializations[(_lib.ModuleAdd,)] = _lib.ModuleRemove
+InverseAction._specializations[(_lib.CableAdd,)] = _lib.CableRemove

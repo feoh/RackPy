@@ -52,9 +52,11 @@ def test_history_through_racks_ui_paths(make_hooks_bundle: Callable[[], Path], r
     assert result["disconnect"] == [0, "rack::history::ComplexAction", ["rack::history::CableRemove"], 11]
     assert result["append"] == [1, "rack::history::CableRemove", 0, 11, True]  # Rack removes it; undo restores it
     assert result["cable_color"] == [True] * 5
-    assert result["cable_add"] == [7, 2, 3, True]
+    assert result["cable_add"] == [7, 2, 3, True, 0, 0]
+    assert result["cable_add_direct"] == [0, True, 11, True]
     assert result["cable_remove"] == [0, True, 11, True]
     assert result["bad_cable"] == 11  # Rack would index input 4 and leave an engine cable behind
     assert result["drag"] == [["rack::history::ModuleMove"], True, True, True]
-    assert result["move"] is True
+    assert result["move"] is True and result["move_undo"] is True
     assert result["removal"] == [True, True, True, True, True, True]
+    assert result["module_add"] == [True, True, True, True]

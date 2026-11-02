@@ -16,6 +16,8 @@ collect  download a finished run's reports (gh), then judge each advertised plat
          the summary says which gates are closed and why.
 slices   split the implemented records into review slices (by family, then header) for the record review
          the owner authorized on 2026-11-01 (planning/README.md): release-evidence/review/slices.json.
+verdicts check reviewers' answers (one fenced json block each) against their slices and write them as
+         release-evidence/review/<slice>.verdicts.json.
 promote  mark `verified` the records that reviewers' verdict files accept, where a finished run's evidence
          passes on every platform each record is available on; bin/check_coverage.py check then needs those
          verdict files in release-evidence/review/.
@@ -24,6 +26,7 @@ promote  mark `verified` the records that reviewers' verdict files accept, where
 import contextlib
 import hashlib
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -192,6 +195,32 @@ def slices(*, size: int = 130, dest: Path = bm.REVIEWS) -> None:
     for item in out:
         print(f"{item['slice']}: {len(item['records'])} records, {', '.join(item['headers'])}")
     print(f"{sum(len(i['records']) for i in out)} records in {len(out)} slices: {dest / 'slices.json'}")
+
+
+@app.command
+def verdicts(answers: list[Path], *, dest: Path = bm.REVIEWS) -> None:
+    """Write each reviewer's ANSWER (its final message: one fenced json block) as DEST/<slice>.verdicts.json, after
+    checking the verdict format and that it judges exactly its slice's records (slices.json)."""
+    slices = {s["slice"]: s for s in bm.load_json(dest / "slices.json")["slices"]}
+    for answer in answers:
+        blocks = re.findall(r"```json\s*\n(.*?)\n```", answer.read_text(encoding="utf-8"), re.DOTALL)
+        if len(blocks) != 1:
+            raise SystemExit(f"{answer}: expected one fenced json block, found {len(blocks)}")
+        doc = json.loads(blocks[0])
+        if errors := bm.review_file_problems(doc):
+            raise SystemExit(f"{answer}: {'; '.join(errors)}")
+        item = slices.get(doc.get("slice"))
+        if item is None:
+            raise SystemExit(f"{answer}: no slice {doc.get('slice')!r} in {dest / 'slices.json'}")
+        expected, judged = set(item["records"]), set(doc["records"])
+        if expected != judged:
+            missing, extra = sorted(expected - judged), sorted(judged - expected)
+            raise SystemExit(
+                f"{answer}: {len(missing)} records missing ({missing[:3]}), {len(extra)} extra ({extra[:3]})"
+            )
+        write_json(dest / f"{doc['slice']}.verdicts.json", doc)
+        counts = Counter(v["verdict"] for v in doc["records"].values())
+        print(f"{doc['slice']}: {', '.join(f'{k} {v}' for k, v in sorted(counts.items()))}")
 
 
 @app.command

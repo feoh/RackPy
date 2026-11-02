@@ -40,10 +40,15 @@ or from Rack's cable widget. `is_cable` compares a cable widget's ports.
 
 `ComplexAction` batches actions. `push(action)` appends an action that
 Python owns, which the ComplexAction then owns, and Rack undoes the batch
-backwards. `is_empty()` reports whether the batch has any actions. `InverseAction[T]` is Rack's `InverseAction<T>`: a cached
-subclass of `T` whose `undo` runs `T`'s redo and whose `redo` runs `T`'s
-undo, using Rack's code for Rack's types (`ModuleRemove` is
-`InverseAction<ModuleAdd>` in Rack) and the Python methods for Python's.
+backwards. `is_empty()` reports whether the batch has any actions.
+`actions` lists the batch, oldest first, and is read-only: change the batch
+with `push`, as Rack's own code does, since the ComplexAction owns and
+deletes what it holds. `InverseAction[T]` is Rack's `InverseAction<T>`: a
+cached subclass of `T` whose `undo` runs `T`'s redo and whose `redo` runs
+`T`'s undo, using Rack's code for Rack's types and the Python methods for
+Python's; nested, `InverseAction[InverseAction[T]]` behaves as `T`. Rack's
+typedefs are the specializations themselves: `InverseAction[ModuleAdd]` is
+`ModuleRemove` and `InverseAction[CableAdd]` is `CableRemove`.
 
 ### Ownership
 
@@ -74,9 +79,11 @@ and it raises `StaleHandleError` once Rack deletes the action. A view gives
   released.
 - `can_undo`, `can_redo`, `get_undo_name`, `get_redo_name`, `set_saved` and
   `is_saved` are Rack's.
-- `actions`, `action_index` and `saved_index` are Rack's bookkeeping, and
-  read-only. `actions` holds Python's own action objects and `ActionView`s
-  of Rack's.
+- `actions` is Rack's list, read-only: it holds Python's own action
+  objects and `ActionView`s of Rack's. `action_index` (how many actions are
+  done) is writable within 0 to `len(actions)`, where Rack's undo and redo
+  can index the list, and not while an action's undo or redo runs.
+  `saved_index` is writable with any int, since Rack only compares it.
 
 Rack's `State::push` deletes the actions after the current one, which can
 include the action whose undo is running. So while an action's undo or redo
