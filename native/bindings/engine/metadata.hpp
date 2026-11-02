@@ -8,6 +8,7 @@
 #include <pybind11/trampoline_self_life_support.h>
 
 #include <functional>
+#include <limits>
 #include <memory>
 #include <string>
 
@@ -145,6 +146,19 @@ struct SlotTransfer : module::TransferredMetadata {
 	}
 };
 
+/** Rack's own answer to getName, for an info object whose Python class does not override it. Rack names an unnamed
+port "#" + (portId + 1) as an int, which is undefined for the largest ID: widen it, which is Rack's text for every other
+ID and the true number for that one (RP-42). No exception: Rack's UI calls this through its own frames. */
+template <typename Info>
+std::string defaultInfoName(Info& info) {
+	return info.Info::getName();
+}
+inline std::string defaultInfoName(rack::engine::PortInfo& info) {
+	if (info.name.empty() && info.portId == std::numeric_limits<int>::max())
+		return rack::string::f("#%lld", static_cast<long long>(info.portId) + 1);
+	return info.rack::engine::PortInfo::getName();
+}
+
 /** Python overrides of the info classes' virtual names (callback strategy "ui").
 Standalone, Python owns the object and only `module` is main-thread-only. */
 template <typename Base>
@@ -152,7 +166,9 @@ struct InfoTrampoline : Base, SlotTransfer<Base, InfoTrampoline<Base>>, py::tram
 	using Base::Base;
 	void check() const { SlotTransfer<Base, InfoTrampoline<Base>>::check("using metadata that a module owns"); }
 	std::string getName() override {
-		return overrideOr<std::string>(static_cast<const Base*>(this), "get_name", [this] { return Base::getName(); });
+		return overrideOr<std::string>(static_cast<const Base*>(this), "get_name", [this] {
+			return defaultInfoName(static_cast<Base&>(*this));
+		});
 	}
 	std::string getDescription() override {
 		return overrideOr<std::string>(static_cast<const Base*>(this), "get_description", [this] { return Base::getDescription(); });

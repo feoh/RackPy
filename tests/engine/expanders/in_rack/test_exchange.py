@@ -213,12 +213,22 @@ def test_python_reads_snapshots_while_racks_engine_runs() -> None:
         start = e.get_frame()
         offsets: set[float] = set()
         frames: list[int] = []
+        message_seen = False
         deadline = time.monotonic() + 10
         while len(frames) < 200 and time.monotonic() < deadline:
             snapshot = b.left_expander.snapshot()  # while the engine thread may be writing it
             if snapshot is not None:
                 frame, values = snapshot
-                assert len(values) == 17 and values[0] == 1.0  # one channel: a's counter
+                assert len(values) == 17
+                if not message_seen and not any(values):
+                    # The first frame after the pair is linked: Rack delivers a's message one frame later, so native
+                    # code received silence and that frame's snapshot is all zeros. That is the documented contract,
+                    # not a torn read; a poll that starts mid-block can land on it (it did, on Windows). Once a
+                    # message has been seen, only a's counter is acceptable.
+                    time.sleep(0.001)
+                    continue
+                message_seen = True
+                assert values[0] == 1.0  # one channel: a's counter
                 offsets.add(values[1] - frame)  # its counter of the frame before: a constant offset
                 frames.append(frame)
             time.sleep(0.001)

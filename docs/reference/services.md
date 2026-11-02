@@ -146,15 +146,22 @@ runs on Rack's audio path; on the main thread, Rack's window waits.
   the directory, so unpack only archives you trust;
   `rackpy.services.system.unarchive` checks the entries first.
 - **Time.** `get_time` (monotonic, for measuring), `get_unix_time`,
-  `get_thread_time` and `sleep(seconds)`.
+  `get_thread_time` and `sleep(seconds)`, which returns at once for zero or less
+  and refuses NaN, infinity and more than 9e9 seconds (the clock cannot hold it).
 - **System.** `get_logical_core_count`, `get_operating_system_info`,
-  `get_stack_trace` and `set_thread_name` (the calling thread's).
+  `get_stack_trace` and `set_thread_name` (the calling thread's; Rack names it
+  only on Linux, cut to 15 bytes, and macOS and Windows ignore the call).
 - **FPU flags.** `get_fpu_flags`, `set_fpu_flags` and `reset_fpu_flags`
   act on the calling thread's floating-point flags (MXCSR on x64, FPCR on
   arm64); `reset` sets flush-to-zero, and on x64 denormals-are-zero (arm64
   always treats denormal inputs as zero), with round-to-nearest, as Rack's
   engine threads run, and Python's own arithmetic on that thread follows
-  them.
+  them. `set_fpu_flags` refuses, with `ValueError`, flags that would kill the
+  process: Rack hands any value to the CPU, where a reserved MXCSR bit (16 to
+  31) faults and a cleared exception mask (bits 7 to 12) makes Python's own
+  float arithmetic die with `SIGFPE`, and on arm64 an FPCR trap-enable bit
+  (8 to 12 and 15) does the same where the CPU traps. Everything else Rack
+  accepts goes through.
 - **Opening things.** `open_browser(url)` and `open_directory(path)` open
   the desktop's handler without blocking. On Linux and macOS Rack runs
   `xdg-open "<string>"` or `open "<string>"` through the shell, so RackPy
@@ -341,7 +348,10 @@ Other risks remain:
 In the `rack.hpp` closure, Rack's `WeakBase` is a base of `Widget`. So a
 `WeakPtr` points at a widget, RackPy's or Rack's own, and `get()` returns
 `None` once Rack deletes it. Weak pointers work on the main thread only,
-because Rack's are not thread-safe.
+because Rack's are not thread-safe. That includes letting go of one: Rack's
+destructor releases a count that is not atomic, so a `WeakPtr` or `WeakHandle`
+that Python drops or collects on another thread leaves Rack's count alone and
+logs a warning. The count, a few bytes, is then never released.
 
 (services-weakptr-contract)=
 ### The widget contract

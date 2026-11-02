@@ -134,8 +134,13 @@ def test_time_processes_and_flags() -> None:
     t0 = rsys.get_time()
     rsys.sleep(0.01)
     assert rsys.get_time() - t0 >= 0.009 and rsys.get_unix_time() > 1.6e9 and rsys.get_thread_time() >= 0
-    with pytest.raises(ValueError):
-        rsys.sleep(-1)
+    t1 = rsys.get_time()
+    rsys.sleep(-1)  # Rack's sleep_for returns at once for a time of zero or less
+    rsys.sleep(0)
+    assert rsys.get_time() - t1 < 0.5
+    for bad in (float("nan"), float("inf"), -float("inf"), 1e300, 9.1e9):  # these overflow the clock's conversion
+        with pytest.raises(ValueError, match="finite"):
+            rsys.sleep(bad)
     os_name = {"linux": "Linux", "darwin": "Mac", "win32": "Windows"}[sys.platform]
     assert rsys.get_logical_core_count() >= 1 and os_name in rsys.get_operating_system_info()
     assert isinstance(rsys.get_stack_trace(), str)
@@ -143,12 +148,20 @@ def test_time_processes_and_flags() -> None:
 
     def name_thread() -> None:
         rsys.set_thread_name("rackpy-worker")
-        names.append("ok")
+        names.append(_thread_name())
+        rsys.set_thread_name("rackpy-worker-with-a-long-name")
+        names.append(_thread_name())
+
+    def _thread_name() -> str:
+        # Rack names the thread with pthread_setname_np on Linux, cut to 15 bytes; macOS and Windows do nothing.
+        if sys.platform != "linux":
+            return "unobservable"
+        return Path(f"/proc/self/task/{threading.get_native_id()}/comm").read_text().strip()
 
     worker = threading.Thread(target=name_thread)
     worker.start()
     worker.join()
-    assert names == ["ok"]
+    assert names == (["rackpy-worker", "rackpy-worker-w"] if sys.platform == "linux" else ["unobservable"] * 2)
     flags = rsys.get_fpu_flags()
     try:
         rsys.reset_fpu_flags()
@@ -299,3 +312,31 @@ def test_a_failing_progress_callback_leaves_no_download_running(server: str, tmp
 def test_url_helpers() -> None:
     assert rn.encode_url("a b&c=d") == "a%20b%26c%3Dd"
     assert rn.url_path("https://example.com/foo/index.html") == "/foo/index.html"
+
+
+def test_set_fpu_flags_refuses_flags_that_would_kill_the_process() -> None:
+    # Rack hands any value to the CPU: reserved MXCSR bits fault (SIGSEGV), and an unmasked exception, or on arm64 a
+    # trap-enable bit, makes the thread's own float arithmetic, which Python runs on, die with SIGFPE (RP-42).
+    arm64 = platform.machine().lower() in ("arm64", "aarch64")
+    sticky = 0 if arm64 else 0x3F  # MXCSR's low bits record exceptions, and ordinary arithmetic sets them
+
+    def stable() -> int:
+        return rsys.get_fpu_flags() & ~sticky
+
+    flags = rsys.get_fpu_flags()
+    killers = (
+        [flags | 1 << 8, flags | 1 << 12, flags | 1 << 15]  # FPCR trap enables
+        if arm64
+        else [
+            flags | 1 << 16,
+            flags | 1 << 31,
+            flags & ~(1 << 7),
+            flags & ~0x1F80,
+        ]  # reserved bits, unmasked exceptions
+    )
+    for bad in killers:
+        with pytest.raises(ValueError, match="set_fpu_flags"):
+            rsys.set_fpu_flags(bad)
+        assert stable() == flags & ~sticky  # nothing was written
+    rsys.set_fpu_flags(flags)  # what Rack accepts still goes through
+    assert stable() == flags & ~sticky

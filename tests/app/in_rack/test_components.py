@@ -339,3 +339,25 @@ def test_light_templates_derive_from_the_classes_rack_derives_them_from() -> Non
     finally:
         for widget in made:
             widget.close()
+
+
+def test_centered_factories_put_the_widgets_centre_on_the_position(module: Module) -> None:
+    # Rack's *Centered helpers (helpers.hpp) are the plain factory, then box.pos -= box.size / 2, which is all they add.
+    pos = Vec(40, 30)
+    widgets: list[w.Widget] = [
+        raw.create_input_centered(cl.PJ301MPort, pos, module, 0),
+        raw.create_output_centered(cl.PJ301MPort, pos, module, 0),
+        raw.create_param_centered(cl.RoundBlackKnob, pos, module, 1),
+        raw.create_light_centered(cl.MediumLight[cl.RedLight], pos, module, 0),
+        raw.create_light_param_centered(cl.VCVLightButton[cl.MediumSimpleLight[cl.RedLight]], pos, module, 0, 2),
+        raw.create_widget_centered(cl.PJ301MPort, pos),
+    ]
+    try:
+        for widget in widgets:
+            size = widget.box.size
+            assert size.x > 0 and size.y > 0, widget  # a zero-size widget would be centred trivially
+            assert widget.box.pos.x + size.x / 2 == pytest.approx(pos.x), widget
+            assert widget.box.pos.y + size.y / 2 == pytest.approx(pos.y), widget
+    finally:
+        for widget in widgets:
+            widget.close()

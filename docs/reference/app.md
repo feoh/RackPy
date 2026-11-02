@@ -306,7 +306,8 @@ The host-view API:
   deprecated `mouse_pos` field. Reading or writing it warns; prefer `get_mouse_pos()`.
 - `HostRackScrollWidget` exposes `zoom_widget` and `rack_widget` host views,
   and has `get_zoom()` and `set_zoom(zoom, pivot=)`
-  (Rack clamps the zoom to 1/4 to 4), `get_grid_offset()`,
+  (Rack clamps the zoom to 1/4 to 4, so NaN and infinity give 4; a pivot must
+  be finite), `get_grid_offset()`,
   `set_grid_offset()`, `reset()`, `zoom_to_modules()` and
   `zoom_to_bound(rect)`. The bound must be finite with a positive size,
   because Rack divides by it.
@@ -441,7 +442,8 @@ Rack's audio and MIDI widgets show a port and open its menus:
 - `AudioButton` and `MidiButton`, with the component library's
   `AudioButton_ADAT`, `AudioButton_USB_B` and `MidiButton_MIDI_DIN`, which
   use Rack's artwork.
-- `append_audio_menu(menu, port)` and `append_midi_menu(menu, port)`.
+- `append_audio_menu(menu, port)` and `append_midi_menu(menu, port)`. Rack
+  accepts no port for the audio menu: with `None` it adds only its labels.
 
 Each choice's `on_action()` opens Rack's corresponding menu; the buttons
 open the combined menus. In Rack 2.6.6 the combined MIDI menu includes driver

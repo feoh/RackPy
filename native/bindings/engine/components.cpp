@@ -292,7 +292,8 @@ void bindComponents(py::module_ m) {
 			py::arg("channel") = 0)
 		.def("get_voltage", [](const PortRef& r, int c) { return r.get().getVoltage(channel(c)); }, py::arg("channel") = 0)
 		.def("get_poly_voltage", [](const PortRef& r, int c) { return r.get().getPolyVoltage(channel(c)); }, py::arg("channel"),
-			"The channel's voltage if polyphonic, else channel 0's.")
+			"Channel 0's voltage if the port is monophonic (exactly one channel), else the channel's: a disconnected port "
+			"has no channels, so it reads the channel.")
 		.def("get_normal_voltage", [](const PortRef& r, float n, int c) { return r.get().getNormalVoltage(n, channel(c)); },
 			py::arg("normal_voltage"), py::arg("channel") = 0, "The voltage if connected, else normal_voltage.")
 		.def("get_normal_poly_voltage", [](const PortRef& r, float n, int c) { return r.get().getNormalPolyVoltage(n, channel(c)); },
@@ -301,7 +302,7 @@ void bindComponents(py::module_ m) {
 		.def("get_voltage_simd", [](const PortRef& r, int c) { return r.get().getVoltageSimd<float_4>(simdChannel(c)); },
 			py::arg("first_channel"), "Channels first_channel to first_channel + 3 as a float_4 (getVoltageSimd<float_4>).")
 		.def("get_poly_voltage_simd", [](const PortRef& r, int c) { return r.get().getPolyVoltageSimd<float_4>(simdChannel(c)); },
-			py::arg("first_channel"), "get_voltage_simd if polyphonic, else channel 0's voltage in every lane.")
+			py::arg("first_channel"), "Channel 0's voltage in every lane if the port is monophonic (exactly one channel), else get_voltage_simd.")
 		.def("get_normal_voltage_simd", [](const PortRef& r, const float_4& n, int c) {
 			return r.get().getNormalVoltageSimd<float_4>(n, simdChannel(c));
 		}, py::arg("normal_voltage"), py::arg("first_channel"), "get_voltage_simd if connected, else normal_voltage.")
@@ -402,7 +403,7 @@ void bindComponents(py::module_ m) {
 	identityField(portInfo, "port_id", &PortInfo::portId);
 	infoField(portInfo, "name", &PortInfo::name);
 	infoField(portInfo, "description", &PortInfo::description);
-	infoMethod(portInfo, "get_name", &PortInfo::getName, [](PortInfo& info) { return info.PortInfo::getName(); });
+	infoMethod(portInfo, "get_name", &PortInfo::getName, [](PortInfo& info) { return defaultInfoName(info); });
 	infoMethod(portInfo, "get_full_name", &PortInfo::getFullName, [](PortInfo& info) { return info.PortInfo::getFullName(); }, "get_name() with \" input\" or \" output\" appended.");
 	infoMethod(portInfo, "get_description", &PortInfo::getDescription, [](PortInfo& info) { return info.PortInfo::getDescription(); });
 	auto lightInfo = py::classh<LightInfo, InfoTrampoline<LightInfo>>(m, "LightInfo",

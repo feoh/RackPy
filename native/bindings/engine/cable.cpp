@@ -290,10 +290,10 @@ void bindCables(py::module_ engine, py::class_<EngineHandle>& cls) {
 			const auto& o = b.cast<const CableHandle&>();
 			return a.inEngine() ? o.inEngine() && o.id == a.id : &a == &o;
 		}, py::is_operator())
-		.def("__hash__", [](py::handle self) {
-			const auto& h = self.cast<const CableHandle&>();
-			return h.inEngine() ? py::hash(py::int_(h.id)) : py::hash(py::int_(reinterpret_cast<uintptr_t>(self.ptr())));
-		})
+		// Equality is the object's identity while Python owns the cable and its ID once Rack's engine does, and Engine.add_cable
+		// changes a handle from one to the other. Any hash that followed either basis would change for a cable already in
+		// a set or dict, so it is constant: a == b still implies equal hashes (RP-42). Key large collections by `id`.
+		.def("__hash__", [](py::handle) { return py::ssize_t(0x52504341); })
 		.def("__repr__", [](const CableHandle& h) {
 			return h.inEngine() ? "<Cable " + std::to_string(h.id) + " in Rack's engine>" : std::string("<Cable>");
 		});

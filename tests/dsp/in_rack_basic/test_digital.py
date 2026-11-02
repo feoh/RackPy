@@ -180,6 +180,8 @@ def test_schmitt_trigger_for_floats() -> None:
     assert not t.process(1.0)  # UNINITIALIZED to HIGH without triggering
     assert not t.process(0.5) and t.is_high()  # between the thresholds: no change
     assert not t.process(0.0) and not t.is_high()
+    low: object = t.s  # (typed object: mypy would keep t.s narrowed from the first assert)
+    assert low is dsp.SchmittTrigger.State.LOW
     assert t.process(1.0) and t.is_high()
     assert not t.process(math.nan) and t.is_high()  # NaN reaches neither threshold
     assert t.process_event(-1.0) is dsp.SchmittTrigger.Event.UNTRIGGERED

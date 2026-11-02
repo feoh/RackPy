@@ -69,8 +69,12 @@ def test_the_rack_scroll_widget() -> None:
         assert scroll.get_zoom() == 0.5
         scroll.set_grid_offset(Vec(2, 1))
         assert scroll.get_grid_offset().x == pytest.approx(2, abs=1e-3)
-        with pytest.raises(ValueError):
-            scroll.set_zoom(math.inf)
+        # Rack clamps the zoom, so a non-finite one is not refused: fmax(fmin(zoom, 4), 1/4) (RP-42).
+        for odd, clamped in ((math.inf, 4), (math.nan, 4), (-math.inf, 0.25)):
+            scroll.set_zoom(odd)
+            assert scroll.get_zoom() == clamped, odd
+        with pytest.raises(ValueError, match="finite"):
+            scroll.set_zoom(1, Vec(math.nan, 0))  # the pivot goes into the scroll offset unclamped
         with pytest.raises(ValueError):
             scroll.zoom_to_bound(Rect(Vec(), Vec(0, 10)))  # Rack divides by the size
         scroll.zoom_to_bound(Rect(Vec(0, 0), Vec(300, 200)))

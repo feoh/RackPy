@@ -65,6 +65,7 @@ def test_python_modules_cables_and_param_handles_in_racks_engine(
     assert "widget owns it" in result["widget_owned"]
     # RP-24B: a cable between modules Python put into the engine
     assert result["cable"] == [True, True, True, True, True, True, True, True]
+    assert result["cable_hash"] == [True, True, True, True]  # the hash survives Engine.add_cable
     assert "cables are still connected" in result["cabled_module"]
     assert "cables Python added" in result["cabled_widget"]
     assert "has a module widget" in result["to_widget"]

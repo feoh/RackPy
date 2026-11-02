@@ -271,6 +271,18 @@ def test_info_names_and_python_overrides() -> None:
     assert light.get_name() == "Level" and light.get_description() == "" and light.light_id == 2
 
 
+def test_the_default_port_name_of_the_largest_port_id_does_not_overflow() -> None:
+    # Rack names an unnamed port "#" + (port_id + 1) as an int, which is undefined at INT_MAX (RP-42): RackPy widens it,
+    # so Rack's text is unchanged for every other ID and the true number appears for that one.
+    info = PortInfo()
+    info.type = Port.Type.INPUT
+    assert info.get_name() == "#1"
+    info.port_id = 41
+    assert info.get_name() == "#42" and info.get_full_name() == "#42 input"
+    info.port_id = 2**31 - 1
+    assert info.get_name() == "#2147483648" and info.get_full_name() == "#2147483648 input"
+
+
 def test_owned_components_work_from_python_threads() -> None:
     p = Port()
     errors: list[BaseException] = []

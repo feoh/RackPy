@@ -78,10 +78,13 @@ def test_text() -> None:
 def test_time_and_unicode() -> None:
     assert rs.format_time("%Y", 0).isdigit()
     assert len(rs.format_time_iso(time.time())) >= 19
-    with pytest.raises(ValueError, match="range"):
-        rs.format_time("%Y", float("nan"))
-    with pytest.raises(ValueError):
-        rs.format_time("%Y", 1e300)  # Rack would pass strftime a null time
+    # Outside time_t, converting the timestamp is undefined behaviour: both functions refuse it (RP-42), including
+    # 2**63, which the largest time_t rounds up to as a double.
+    for bad in (float("nan"), float("inf"), 1e300, -1e300, 2.0**63, -(2.0**64)):
+        with pytest.raises(ValueError, match="range"):
+            rs.format_time("%Y", bad)
+        with pytest.raises(ValueError, match="range"):
+            rs.format_time_iso(bad)
     assert rs.utf8_to_utf32("aé€😀") == [0x61, 0xE9, 0x20AC, 0x1F600]
     assert rs.utf32_to_utf8([0x61, 0x1F600, 0x110000]) == "a😀".encode()  # Rack skips codepoints past U+10FFFF
     with pytest.raises(ValueError, match="never returns"):

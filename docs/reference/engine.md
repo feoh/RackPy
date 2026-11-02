@@ -90,7 +90,9 @@ stepping.
 `get_block_frame`, `get_block_time`, `get_block_frames`,
 `get_block_duration`, `get_meter_average` and `get_meter_max` are Rack's
 timing values. `set_suggested_sample_rate(rate)` sets the rate unless Rack's
-settings fix one; `0` gives Rack's fallback. `yield_workers()` is Rack's hint
+settings fix one; a rate that is not above 0 (0, negative or NaN) gives Rack's
+fallback, 44100. Infinity is refused, because the sample time would be zero
+for every module. `yield_workers()` is Rack's hint
 that its worker threads should block rather than spin.
 
 (engine-params)=
@@ -125,6 +127,12 @@ then goes stale (`alive` false). Such a cable's fields are read-only.
 Both C++ `getCableIds` overloads map to `get_cable_ids()`, which returns a
 list rather than writing a caller-provided buffer; it has no length-cap
 argument.
+
+A `Cable` compares by identity while Python owns it and by ID once Rack's
+engine does, and `add_cable` changes a handle from one to the other. So its
+hash is constant: a cable you already keep in a set or dict is still found
+after `add_cable`, and two handles for one engine cable stay equal with equal
+hashes. A constant hash makes big containers slow, so key those by `cable.id`.
 
 `add_cable(cable)` gives Rack's engine a cable Python made, and the handle
 then finds it by ID. Rack asserts, as it deletes a module, that no cable in

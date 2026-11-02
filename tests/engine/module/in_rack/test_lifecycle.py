@@ -114,6 +114,7 @@ def test_direct_dispatch_runs_rack_behaviour_and_records_snapshots() -> None:
         m.on_save(E.SaveEvent())
         m.on_set_master(E.SetMasterEvent())
         m.on_unset_master(E.UnsetMasterEvent())
+        m.on_expander_change(E.ExpanderChangeEvent(1))
         m.on_remove(E.RemoveEvent())
         m.on_randomize(E.RandomizeEvent())
         assert 0 <= m.params[0].value <= 10 and m.params[1].value in (0, 1, 2, 3) and m.params[2].value == 0
@@ -128,13 +129,16 @@ def test_direct_dispatch_runs_rack_behaviour_and_records_snapshots() -> None:
             "SaveEvent",
             "SetMasterEvent",
             "UnsetMasterEvent",
+            "ExpanderChangeEvent",
             "RemoveEvent",
             "RandomizeEvent",
         ]
-        assert [sequence for sequence, _ in events] == list(range(1, 12))
+        assert [sequence for sequence, _ in events] == list(range(1, 13))
         port, rate = as_port(events[2][1]), as_rate(events[3][1])
         assert (port.connecting, port.type, port.port_id) == (True, Port.Type.OUTPUT, 1)
         assert rate.sample_rate == 48000 and rate.sample_time == pytest.approx(1 / 48000)
+        expander = events[9][1]
+        assert isinstance(expander, E.ExpanderChangeEvent) and expander.side == 1  # the side it was called with
         assert m.lifecycle_events() == []  # drained
         # Rack's deprecated no-argument events are empty: nothing to record.
         for name in ("on_add", "on_remove", "on_reset", "on_randomize", "on_sample_rate_change"):

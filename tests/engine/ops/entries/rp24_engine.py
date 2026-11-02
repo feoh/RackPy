@@ -128,7 +128,12 @@ def rp24b(state: dict[str, Any]) -> None:
     e.add_module(b)
     c = Cable()
     c.output_module, c.output_id, c.input_module, c.input_id = a, 0, b, 0
+    seen, hash_before = {c}, hash(c)
     e.add_cable(c)
+    found = e.get_cable(c.id)
+    # A cable already in a set or dict must stay findable when the engine takes it (RP-42): its hash may not change.
+    RESULT["cable_hash"] = [hash(c) == hash_before, c in seen, found is not None and hash(found) == hash(c)]
+    RESULT["cable_hash"].append(found in seen)
     saved = [cable["id"] for cable in e.to_json()["cables"]]
     RESULT["cable"] = [c.in_engine, c.id >= 0, e.has_cable(c), e.get_cable(c.id) == c, c.input_module is b]
     RESULT["cable"] += [c.output_module is a, b.inputs[0].is_connected(), c.id in saved]

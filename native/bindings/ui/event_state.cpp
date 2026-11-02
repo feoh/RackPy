@@ -118,8 +118,9 @@ void bindEventState(py::module_ widget) {
 			return dispatching(h, "dispatching a scroll").handleScroll(pos, delta);
 		}, py::arg("pos"), py::arg("scroll_delta"))
 		.def("handle_text", [](const EventStateHandle& h, rack::math::Vec pos, uint32_t codepoint) {
-			if (codepoint > 0x10FFFF)
-				throw py::value_error("codepoint must be a Unicode code point");
+			// Rack forwards any uint32 to the widgets' onSelectText, and every handler in Rack 2.6.6 is safe with one:
+			// TextField's UTF32toUTF8 skips what is past U+10FFFF, and the Core module widgets range-test before they
+			// index (RP-42: values past U+10FFFF were refused).
 			return dispatching(h, "dispatching text").handleText(pos, codepoint);
 		}, py::arg("pos"), py::arg("codepoint"))
 		.def("handle_key", [](const EventStateHandle& h, rack::math::Vec pos, int key, int scancode, int action, int mods) {
