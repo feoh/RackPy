@@ -49,7 +49,10 @@ change them.
 `TextField` (and `PasswordField`) has Rack's raw fields (`text`,
 `placeholder`, `password`, `multiline`, `cursor`, `selection`) and editing
 methods: `get_text()`, `set_text()`, `select_all()`, `get_selected_text()`,
-`insert_text()`, the clipboard methods and the cursor movements. `cursor` and
+`insert_text()`, the clipboard methods and the cursor movements. Rack's
+`on_button()`, `on_drag_hover()`, `on_select_key()` and `on_select_text()`
+handlers place the cursor, select text and extend selections as Rack does;
+Python subclasses may override them on the UI thread. `cursor` and
 `selection` are clamped to the text, because Rack indexes the text with them.
 The raw `text` property directly replaces Rack's string; unlike `set_text()`
 it neither moves the cursor to the end nor sends a change event. Because Rack
@@ -186,5 +189,4 @@ aliases (`event.Action` is `widget.ActionEvent`, and so on), with a
 `CHECKMARK_STRING` ("✔"), `CHECKMARK(cond)` and `RIGHT_ARROW` ("▸") are
 Rack's macros.
 
-Everything here needs Rack's main thread (`ThreadError` elsewhere) once its
-UI exists, as all widgets do.
+`set_theme()` and `refresh_theme()` need Rack's main thread (`ThreadError` elsewhere), as all UI operations do. The three symbols above are plain strings/a function and can be read or called from any Python thread.

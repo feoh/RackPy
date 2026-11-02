@@ -159,6 +159,31 @@
       "evidence": "createModule/createModuleWidget from RackWidget, Browser, history and clone actions on the main thread; probe: construct on main."
     },
     {
+      "family": "rack::componentlibrary::LightSlider",
+      "methods": [
+        "step"
+      ],
+      "strategy": "ui",
+      "evidence": "Rack steps component-library sliders from the UI widget tree; its override enters the Widget trampoline on the main thread."
+    },
+    {
+      "family": "rack::componentlibrary::RectangleLight",
+      "methods": [
+        "drawBackground",
+        "drawLight"
+      ],
+      "strategy": "ui",
+      "evidence": "Rack draws rectangle-light layers from the UI widget tree; its overrides enter the Widget trampoline on the main thread."
+    },
+    {
+      "family": "rack::history::InverseAction",
+      "methods": [
+        "*"
+      ],
+      "strategy": "ui",
+      "evidence": "Rack invokes InverseAction undo/redo through Action history on the main thread from menus and key commands."
+    },
+    {
       "family": "rack::history::Action",
       "methods": [
         "*"

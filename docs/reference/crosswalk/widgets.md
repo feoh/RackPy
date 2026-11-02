@@ -1051,15 +1051,15 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::ui::TextField::cursorToNextWord()` | method | bound | `rackpy.raw.ui.TextField.cursor_to_next_word` | {ref}`ui#ui-text-fields <ui-text-fields>` |
 | `rack::ui::TextField::cursorToPrevWord()` | method | bound | `rackpy.raw.ui.TextField.cursor_to_prev_word` | {ref}`ui#ui-text-fields <ui-text-fields>` |
 | `rack::ui::TextField::cutClipboard()` | method | bound | `rackpy.raw.ui.TextField.cut_clipboard` | {ref}`ui#ui-text-fields <ui-text-fields>` |
-| `rack::ui::TextField::draw(const rack::widget::Widget::DrawArgs &)` | method | bound | `rackpy.raw.ui.TextField.draw` | {ref}`ui#ui-text-fields <ui-text-fields>` |
+| `rack::ui::TextField::draw(const rack::widget::Widget::DrawArgs &)` | method | bound | `rackpy.raw.ui.TextField.draw` | {ref}`ui#ui-text-fields <ui-text-fields>`, {ref}`ui#ui-widgets <ui-widgets>` |
 | `rack::ui::TextField::getSelectedText()` | method | bound | `rackpy.raw.ui.TextField.get_selected_text` | {ref}`ui#ui-text-fields <ui-text-fields>` |
 | `rack::ui::TextField::getText()` | method | bound | `rackpy.raw.ui.TextField.get_text` | {ref}`ui#ui-text-fields <ui-text-fields>` |
 | `rack::ui::TextField::getTextPosition(rack::math::Vec)` | method | bound | `rackpy.raw.ui.TextField.get_text_position` | {ref}`ui#ui-text-fields <ui-text-fields>` |
 | `rack::ui::TextField::insertText(std::string)` | method | bound | `rackpy.raw.ui.TextField.insert_text` | {ref}`ui#ui-text-fields <ui-text-fields>` |
 | `rack::ui::TextField::onButton(const rack::widget::Widget::ButtonEvent &)` | method | bound | `rackpy.raw.ui.TextField.on_button` | {ref}`ui#ui-text-fields <ui-text-fields>` |
-| `rack::ui::TextField::onDragHover(const rack::widget::Widget::DragHoverEvent &)` | method | bound | `rackpy.raw.ui.TextField.on_drag_hover` | {ref}`ui#ui-text-fields <ui-text-fields>` |
-| `rack::ui::TextField::onSelectKey(const rack::widget::Widget::SelectKeyEvent &)` | method | bound | `rackpy.raw.ui.TextField.on_select_key` | {ref}`ui#ui-text-fields <ui-text-fields>` |
-| `rack::ui::TextField::onSelectText(const rack::widget::Widget::SelectTextEvent &)` | method | bound | `rackpy.raw.ui.TextField.on_select_text` | {ref}`ui#ui-text-fields <ui-text-fields>` |
+| `rack::ui::TextField::onDragHover(const rack::widget::Widget::DragHoverEvent &)` | method | bound | `rackpy.raw.ui.TextField.on_drag_hover` | {ref}`ui#ui-text-fields <ui-text-fields>`, {ref}`ui#ui-widgets <ui-widgets>` |
+| `rack::ui::TextField::onSelectKey(const rack::widget::Widget::SelectKeyEvent &)` | method | bound | `rackpy.raw.ui.TextField.on_select_key` | {ref}`ui#ui-text-fields <ui-text-fields>`, {ref}`ui#ui-widgets <ui-widgets>` |
+| `rack::ui::TextField::onSelectText(const rack::widget::Widget::SelectTextEvent &)` | method | bound | `rackpy.raw.ui.TextField.on_select_text` | {ref}`ui#ui-text-fields <ui-text-fields>`, {ref}`ui#ui-widgets <ui-widgets>` |
 | `rack::ui::TextField::pasteClipboard()` | method | bound | `rackpy.raw.ui.TextField.paste_clipboard` | {ref}`ui#ui-text-fields <ui-text-fields>` |
 | `rack::ui::TextField::selectAll()` | method | bound | `rackpy.raw.ui.TextField.select_all` | {ref}`ui#ui-text-fields <ui-text-fields>` |
 | `rack::ui::TextField::setText(std::string)` | method | bound | `rackpy.raw.ui.TextField.set_text` | {ref}`ui#ui-text-fields <ui-text-fields>` |
@@ -1099,12 +1099,12 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::widget::FramebufferWidget::drawFramebuffer()` | method | bound | `rackpy.raw.widget.FramebufferWidget.draw_framebuffer` | [widgets#drawing](../widgets.md#drawing), [widgets#typed-bases](../widgets.md#typed-bases) |
 | `rack::widget::FramebufferWidget::getFramebuffer()` | method | bound | `rackpy.raw.widget.FramebufferWidget.get_framebuffer` | [widgets#drawing](../widgets.md#drawing), [widgets#typed-bases](../widgets.md#typed-bases) |
 | `rack::widget::FramebufferWidget::getFramebufferSize()` | method | bound | `rackpy.raw.widget.FramebufferWidget.get_framebuffer_size` | [widgets#typed-bases](../widgets.md#typed-bases), [widgets#drawing](../widgets.md#drawing) |
-| `rack::widget::FramebufferWidget::getImageHandle()` | method | bound | `rackpy.raw.widget.FramebufferWidget.get_image_handle` | [widgets#typed-bases](../widgets.md#typed-bases) |
+| `rack::widget::FramebufferWidget::getImageHandle()` | method | bound | `rackpy.raw.widget.FramebufferWidget.get_image_handle` | [widgets#typed-bases](../widgets.md#typed-bases), [widgets#drawing](../widgets.md#drawing) |
 | `rack::widget::FramebufferWidget::onContextCreate(const rack::widget::Widget::ContextCreateEvent &)` | method | bound | `rackpy.raw.widget.FramebufferWidget.on_context_create` | [widgets#overrides-that-rack-calls](../widgets.md#overrides-that-rack-calls), [widgets#events](../widgets.md#events) |
 | `rack::widget::FramebufferWidget::onContextDestroy(const rack::widget::Widget::ContextDestroyEvent &)` | method | bound | `rackpy.raw.widget.FramebufferWidget.on_context_destroy` | [widgets#overrides-that-rack-calls](../widgets.md#overrides-that-rack-calls), [widgets#events](../widgets.md#events) |
 | `rack::widget::FramebufferWidget::onDirty(const rack::widget::Widget::DirtyEvent &)` | method | bound | `rackpy.raw.widget.FramebufferWidget.on_dirty` | [widgets#overrides-that-rack-calls](../widgets.md#overrides-that-rack-calls), [widgets#events](../widgets.md#events) |
 | `rack::widget::FramebufferWidget::render(rack::math::Vec, rack::math::Vec, rack::math::Rect)` | method | bound | `rackpy.raw.widget.FramebufferWidget.render` | [widgets#drawing](../widgets.md#drawing), [widgets#typed-bases](../widgets.md#typed-bases) |
-| `rack::widget::FramebufferWidget::setDirty(bool)` | method | bound | `rackpy.raw.widget.FramebufferWidget.set_dirty` | [widgets#typed-bases](../widgets.md#typed-bases) |
+| `rack::widget::FramebufferWidget::setDirty(bool)` | method | bound | `rackpy.raw.widget.FramebufferWidget.set_dirty` | [widgets#typed-bases](../widgets.md#typed-bases), [widgets#drawing](../widgets.md#drawing) |
 | `rack::widget::FramebufferWidget::step()` | method | bound | `rackpy.raw.widget.FramebufferWidget.step` | [widgets#overrides-that-rack-calls](../widgets.md#overrides-that-rack-calls), [widgets#typed-bases](../widgets.md#typed-bases) |
 | `rack::widget::OpaqueWidget::onButton(const rack::widget::Widget::ButtonEvent &)` | method | bound | `rackpy.raw.widget.OpaqueWidget.on_button` | [widgets#overrides-that-rack-calls](../widgets.md#overrides-that-rack-calls), [widgets#events](../widgets.md#events) |
 | `rack::widget::OpaqueWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)` | method | bound | `rackpy.raw.widget.OpaqueWidget.on_drag_hover` | [widgets#overrides-that-rack-calls](../widgets.md#overrides-that-rack-calls), [widgets#events](../widgets.md#events) |

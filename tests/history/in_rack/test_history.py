@@ -189,6 +189,13 @@ def test_inverse_action(probe: EngineModule) -> None:
     twice.undo()
     twice.redo()
     assert log == ["redo", "undo", "undo", "redo"]
+    # Rack::history invokes the override through the native Action trampoline, not as a direct Python call.
+    recorded_inverse: Any = h.InverseAction[Mark]()
+    history = state()
+    history.push(recorded_inverse)
+    history.undo()
+    history.redo()
+    assert log[-2:] == ["redo", "undo"]
     native: Any = h.InverseAction[h.InverseAction[h.ParamChange]]()
     native.module_id, native.param_id, native.old_value, native.new_value = probe.id, 0, 0.25, 0.75
     try:

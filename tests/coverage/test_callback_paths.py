@@ -14,9 +14,18 @@ def test_every_public_virtual_has_one_generated_execution_row() -> None:
     text = generator.callback_paths(manifest, inputs)
     rows = bm.callback_matrix().classify(inputs.inventory["entries"], bm.load_json(bm.CALLBACK_RULES)["rules"])
     public_virtuals = {
-        e["id"] for e in inputs.inventory["entries"] if e.get("virtual") and e["classification"] == "public"
+        e["id"]
+        for e in inputs.inventory["entries"]
+        if (e.get("virtual") or e.get("override")) and e["classification"] == "public"
     }
-    assert len(rows) == len(public_virtuals) == 434
+    assert len(rows) == len(public_virtuals) == 439
+    assert {
+        "method:rack::history::InverseAction::undo()",
+        "method:rack::history::InverseAction::redo()",
+        "method:rack::componentlibrary::LightSlider::step()",
+        "method:rack::componentlibrary::RectangleLight::drawBackground(const rack::widget::Widget::DrawArgs &)",
+        "method:rack::componentlibrary::RectangleLight::drawLight(const rack::widget::Widget::DrawArgs &)",
+    } <= {row["id"] for row in rows}
     assert {r["id"] for r in rows} == public_virtuals
     for row in rows:
         assert text.count(f"| `{row['id']}` | `{row['strategy']}` |") == 1

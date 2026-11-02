@@ -235,6 +235,48 @@ def test_framebuffer_step_steps_its_children_and_an_opengl_widget_is_dirty_every
         gl.close()
 
 
+def test_opengl_widget_draws_racks_framebuffer_triangle() -> None:
+    gl = w.OpenGlWidget()
+    gl.box = Rect(Vec(), Vec(30, 30))
+    try:
+        gl.render()  # renders OpenGlWidget's own framebuffer; nesting it bypasses that in Rack
+        _, _, pixels = HOOKS.framebuffer_pixels(gl)
+        pixels = bytes(pixels)
+        assert pixel(pixels, 5, 5, 30)[3] == 255  # Rack clears the framebuffer to opaque black
+        assert any(pixels[i : i + 3] != b"\0\0\0" for i in range(0, len(pixels), 4))  # plus its RGB triangle
+    finally:
+        gl.close()
+
+
+def test_transform_widget_draw_layer_transforms_its_child() -> None:
+    transform = w.TransformWidget()
+    transform.translate(Vec(30, 0))
+
+    class Layer(w.Widget):
+        def draw_layer(self, args: Any, layer: int) -> None:
+            assert layer == 1
+            nanovg.begin_path(args.vg)
+            nanovg.rect(args.vg, 0, 0, 8, 8)
+            nanovg.fill_color(args.vg, nanovg.rgb(255, 0, 0))
+            nanovg.fill(args.vg)
+
+    child = Layer()
+    transform.add_child(child)
+
+    class Root(w.Widget):
+        def draw(self, args: Any) -> None:
+            self.draw_child(transform, args, 1)
+
+    root = Root()
+    root.add_child(transform)
+    try:
+        pixels = rendered(root, Vec(60, 20))
+        assert pixel(pixels, 4, 4)[3] == 0  # the untransformed location stays clear
+        assert pixel(pixels, 34, 4) == (255, 0, 0, 255)
+    finally:
+        root.close()
+
+
 def test_rack_draws_an_svg_widget_and_places_a_transform_widgets_child() -> None:
     sw, moved, inside = w.SvgWidget(), w.TransformWidget(), w.SvgWidget()
     try:

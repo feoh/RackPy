@@ -272,6 +272,11 @@ def test_svg_and_framebuffer_fields_lifetimes_and_native_render() -> None:
     frame = w.FramebufferWidget()
     try:
         assert w.SVGWidget is w.SvgWidget
+        unloaded = Svg()
+        with pytest.raises(ValueError, match="loaded"):
+            node.svg = unloaded
+        with pytest.raises(ValueError, match="loaded"):
+            node.set_svg(unloaded)
         with pytest.warns(DeprecationWarning, match="set_svg_legacy"):
             node.set_svg_legacy(svg)
         assert node.svg is svg and node.get_size() == Vec(17, 23)

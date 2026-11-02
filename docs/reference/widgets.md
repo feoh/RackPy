@@ -167,8 +167,9 @@ Rack's integer range. `get_framebuffer()` returns a checked handle that
 becomes stale when the widget re-renders, deletes its framebuffer, or Rack's
 graphics context goes away; `get_image_handle()` is Rack's NanoVG image ID
 (-1 before rendering), not an address. `get_framebuffer_size()` returns the
-current framebuffer dimensions, and `delete_framebuffer()` frees it and
-invalidates existing framebuffer handles.
+current framebuffer dimensions, and `delete_framebuffer()` frees the image
+and invalidates existing framebuffer handles. `set_dirty(dirty=True)` marks it for
+redrawing; pass `False` to mark it clean.
 
 When Rack destroys its graphics context (the window closes), RackPy deletes
 the framebuffers of every widget it manages, even if a Python
@@ -191,9 +192,9 @@ scene, as a host that recreates its window would.
   matrix (`copy()` returns a tuple); `identity()`, `translate()`, `scale()`
   and `rotate(angle, origin)` are Rack's.
 - `SvgWidget.svg` is the raw field: assigning it does not resize the widget,
-  while `set_svg()` and `wrap()` do. `SVGWidget` and `set_svg_legacy()` are
-  Rack's deprecated spellings. `set_svg_legacy()` warns; the `SVGWidget`
-  alias currently does not, a known deprecation-coverage gap. `rackpy.raw.window.Svg` loads SVGs
+  while `set_svg()` and `wrap()` do. It accepts `None` or a loaded `Svg`; an
+  unloaded `Svg` raises `ValueError`. `SVGWidget` and `set_svg_legacy()` are
+  Rack's deprecated spellings; both warn. `rackpy.raw.window.Svg` loads SVGs
   (`load_string`, `load_file`, `Svg.load`; see [SVGs](window.md#svgs)).
 - `FramebufferWidget` has Rack's `dirty`, `bypassed`, `oversample`,
   `dirty_on_subpixel_change` and a checked `viewport_margin` view.

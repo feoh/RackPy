@@ -92,7 +92,7 @@ void bindSystem(py::module_ m) {
 			result = sy::join(result, pathArg(p));
 		return result;
 	}, py::arg("path1"), py::arg("path2") = py::none(), "Rack's join (and its variadic template): path1/path2/...; an empty "
-		"path2 returns path1.");
+		"path2 returns path1 with a trailing separator.");
 	m.def("get_entries", [](py::object dir, int depth) {
 		std::string path = pathArg(dir);
 		py::gil_scoped_release release;

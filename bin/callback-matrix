@@ -72,7 +72,11 @@ def classify(entries: list[dict[str, Any]], rules: list[dict[str, Any]]) -> list
     recs = records(entries)
     rows = []
     for e in entries:
-        if not e.get("virtual") or e["classification"] != "public":
+        # `override` is inherently virtual in C++, even when the declaration
+        # uses `override` without spelling the `virtual` keyword. InverseAction
+        # is a template whose public overrides enter Python through the action
+        # trampoline, so they need the same callback classification.
+        if not (e.get("virtual") or e.get("override")) or e["classification"] != "public":
             continue
         owner = e["name"].rsplit("::", 1)[0]
         chain = ancestors(owner, recs)

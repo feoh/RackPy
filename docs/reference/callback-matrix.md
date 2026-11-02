@@ -4,13 +4,13 @@
 [`upstream/callback-rules.json`](../../upstream/callback-rules.json) and
 [ADR 003](../decisions/003-lifetimes-and-threads.md).
 
-Every public virtual method in the inventory: **434** entries.
+Every public virtual method in the inventory: **439** entries.
 
 ## Strategies
 
 | Strategy | Methods | Meaning |
 | --- | --- | --- |
-| `ui` | 323 | Main (UI) thread with no engine lock held. A Python override may run; the trampoline takes the GIL. |
+| `ui` | 328 | Main (UI) thread with no engine lock held. A Python override may run; the trampoline takes the GIL. |
 | `ui-exclusive` | 19 | Main thread, or whichever thread called the engine method, while Rack holds the engine mutex EXCLUSIVELY and audio processing is stopped. A Python override may run, but must not call any engine method that locks (RackPy refuses it), and its run time stalls audio. |
 | `ui-shared` | 5 | Main thread while Rack holds the engine mutex SHARED, so process() keeps running concurrently. A Python override may run synchronously, but must read module state through atomics or snapshots, never through fields that process() writes. |
 | `engine` | 6 | Engine worker or fallback threads during processing. Production: native code only. Python only in the separately enabled RP-22 laboratory. |
@@ -31,6 +31,8 @@ Every public virtual method in the inventory: **434** entries.
 | `rack::audio::Device` | `driver` | `getBlockSize`, `getBlockSizes`, `getName`, `getNumInputs`, `getNumOutputs`, `getSampleRate`, `getSampleRates`, `setBlockSize`, `setSampleRate`, `subscribe`, `unsubscribe` | 11 |
 | `rack::audio::Driver` | `driver` | `getDefaultDeviceId`, `getDeviceIds`, `getDeviceName`, `getDeviceNumInputs`, `getDeviceNumOutputs`, `getName`, `subscribe`, `unsubscribe` | 8 |
 | `rack::audio::Port` | `driver` | `onStartStream`, `onStopStream`, `processBuffer`, `processInput`, `processOutput` | 5 |
+| `rack::componentlibrary::LightSlider` | `ui` | `step` | 1 |
+| `rack::componentlibrary::RectangleLight` | `ui` | `drawBackground`, `drawLight` | 2 |
 | `rack::dsp::MidiGenerator` | `engine` | `onMessage` | 1 |
 | `rack::engine::LightInfo` | `ui` | `getDescription`, `getName` | 2 |
 | `rack::engine::Module` | `driver` | `onSampleRateChange`, `onSetMaster`, `onUnsetMaster` | 4 |
@@ -43,6 +45,7 @@ Every public virtual method in the inventory: **434** entries.
 | `rack::engine::ParamQuantity` | `ui-shared` | `toJson` | 1 |
 | `rack::engine::PortInfo` | `ui` | `getDescription`, `getName` | 2 |
 | `rack::history::Action` | `ui` | `redo`, `undo` | 18 |
+| `rack::history::InverseAction` | `ui` | `redo`, `undo` | 2 |
 | `rack::midi::Device` | `driver` | `getName` | 1 |
 | `rack::midi::Driver` | `driver` | `getDefaultInputDeviceId`, `getDefaultOutputDeviceId`, `getInputDeviceIds`, `getInputDeviceName`, `getName`, `getOutputDeviceIds`, `getOutputDeviceName`, `subscribeInput`, `subscribeOutput`, `unsubscribeInput`, `unsubscribeOutput` | 11 |
 | `rack::midi::Input` | `driver` | `onMessage` | 2 |

@@ -13,7 +13,7 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::window::Image::~Image()` | destructor | bound | `rackpy.raw.window.Image` | {ref}`window#window-lifetimes <window-lifetimes>` |
 | `rack::window::Svg::~Svg()` | destructor | bound | `rackpy.raw.window.Svg` | {ref}`window#window-svg <window-svg>` |
 | `rack::window::Window::~Window()` | destructor | excluded: Rack-internal | — | — |
-| `rack::Context::engine` | field | bound | `rackpy.raw.Context.engine` | {ref}`engine#engine-threads <engine-threads>` |
+| `rack::Context::engine` | field | bound | `rackpy.raw.Context.engine` | {ref}`engine#engine-threads <engine-threads>`, {ref}`window#window-context <window-context>` |
 | `rack::Context::event` | field | bound | `rackpy.raw.Context.event` | {ref}`ui#ui-input <ui-input>` |
 | `rack::Context::history` | field | bound | `rackpy.raw.Context.history` | {ref}`history#history-state <history-state>` |
 | `rack::Context::midiLoopbackContext` | field | bound | `rackpy.raw.Context.midi_loopback_context` | {ref}`window#window-context <window-context>` |
