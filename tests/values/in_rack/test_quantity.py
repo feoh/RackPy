@@ -7,6 +7,7 @@ import _rackpy_host
 import pytest
 
 from rackpy.raw import Quantity
+from rackpy.raw import random as rr
 from rackpy.raw.engine import ParamQuantity
 from rackpy.runtime import diagnostics
 from rackpy.types import ValueQuantity
@@ -196,6 +197,35 @@ def test_reset_and_randomize_may_be_overridden() -> None:
     assert calls == ["reset"] and q.get_value() == 0.25
     q.randomize()
     assert 0.0 <= q.get_value() <= 1.0
+
+
+def test_quantity_randomize_uses_racks_seeded_uniform_draw() -> None:
+    generator = rr.local()
+    saved = generator.state
+    try:
+        generator.seed(5, 9)
+        expected = rr.uniform()
+        generator.seed(5, 9)
+        quantity = ValueQuantity(0, 1, 0)
+        quantity.randomize()
+        assert quantity.get_value() == expected
+    finally:
+        generator.state = saved
+
+
+@hooks
+def test_quantity_randomize_virtual_dispatches_to_python_override() -> None:
+    assert _testing is not None
+    calls: list[str] = []
+
+    class Tracked(ValueQuantity):
+        def randomize(self) -> None:
+            calls.append("randomize")
+            self.set_value(0.375)
+
+    quantity = Tracked(0, 1, 0)
+    _testing.call_virtual(quantity, "randomize")
+    assert calls == ["randomize"] and quantity.get_value() == 0.375
 
 
 def test_same_quantity_reentry_through_racks_get_string_and_super() -> None:

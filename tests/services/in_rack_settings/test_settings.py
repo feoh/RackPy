@@ -353,6 +353,8 @@ def held(lock: raw.SharedLock) -> bool:
 def test_shared_mutex() -> None:
     m = raw.SharedMutex()
     m.lock()
+    with pytest.raises(ValueError, match="shared"):
+        m.unlock_shared()  # RackPy requires the unlock method matching the hold mode
     with pytest.raises(ValueError, match="deadlock"):
         m.lock()  # Rack's rwlock would fail its assertion
     got: list[bool] = []
@@ -371,6 +373,8 @@ def test_shared_mutex() -> None:
         assert flag == [False]  # a writer excludes readers
     readers: list[str] = []
     m.lock_shared()
+    with pytest.raises(ValueError, match="writing"):
+        m.unlock()
 
     def read() -> None:
         m.lock_shared()  # readers share it

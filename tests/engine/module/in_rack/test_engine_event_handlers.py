@@ -11,6 +11,7 @@ import _rackpy_host
 import pytest
 from _rackpy_host import _testing as HOOKS
 
+from rackpy import raw
 from rackpy.errors import EngineLockError, OwnershipError
 from rackpy.plugin import ModuleClass
 from rackpy.raw import plugin as rp
@@ -79,6 +80,26 @@ def test_rack_dispatches_events_to_python_after_its_own_behaviour() -> None:
     assert isinstance(connect, Module.PortChangeEvent) and connect.connecting and connect.port_id == 0
     assert not disconnect.connecting
     assert values == [3.0]  # Rack had already reset the parameter when on_reset ran
+
+
+def test_raw_engine_prepare_save_dispatches_module_events() -> None:
+    seen: list[object] = []
+
+    def configure(module: Module) -> None:
+        module.config(0, 0, 0, 0)
+        module.set_event_handlers(on_save=seen.append)
+
+    module = Module.create(configure)
+    HOOKS.engine_adopt(module)
+    try:
+        context = raw.context_get()
+        assert context is not None and context.engine is not None
+        context.engine.prepare_save_module(module)
+        assert len(seen) == 1 and isinstance(seen[0], Module.SaveEvent)
+        context.engine.prepare_save()
+        assert len(seen) == 2 and isinstance(seen[1], Module.SaveEvent)
+    finally:
+        HOOKS.engine_delete(module, None)
 
 
 def test_handler_errors_are_contained_and_slow_ones_are_diagnosed() -> None:
