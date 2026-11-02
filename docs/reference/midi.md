@@ -74,6 +74,11 @@ has Rack's methods:
   device by name.
 - `channel` is an input's channel filter, or the channel an output sets on
   each message (-1: all, or leave it).
+- `reset()` is Rack's: `set_driver_id(-1)`, which (as -1 is no driver) falls
+  back to Rack's first driver and that driver's default device, then the
+  port's default channel: -1 (all) for an input and 0 for an output.
+- The read-only `context` property is the Rack context the port was made in, as
+  Rack's `Port::context` field.
 
 `get_device_ids`, `get_default_device_id`, `set_device_id`,
 `get_device_name` and `get_channels` are Rack's virtuals. A Python `Input`
