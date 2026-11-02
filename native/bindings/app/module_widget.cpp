@@ -391,7 +391,7 @@ void bindModuleWidget(py::module_ app) {
 			checkMutation();
 			auto& mw = inRack(self, "append_disconnect_actions");
 			auto& target = bindings::ownedComplexAction(complexAction);
-			mw.appendDisconnectActions(&target);
+			unlocked([&] { mw.appendDisconnectActions(&target); });  // each cable's removal takes the engine lock
 		}, py::arg("complex_action"),
 			"Rack's: for each of this widget's cables, adds a CableRemove to the ComplexAction (one Python owns) and "
 			"removes the cable, as Rack's disconnect_action does before pushing it. Push it to Context.history.")

@@ -320,7 +320,12 @@ void bindApp(py::module_ raw) {
 		}, "The module's ParamQuantity for param_id, or None without a module.")
 		.def("create_tooltip", [](py::object self) { checkMutation(); native<PW>(self).createTooltip(); })
 		.def("destroy_tooltip", [](py::object self) { checkMutation(); native<PW>(self).destroyTooltip(); })
-		.def("create_context_menu", [](py::object self) { checkMutation(); native<PW>(self).createContextMenu(); },
+		.def("create_context_menu", [](py::object self) {
+			checkMutation();
+			auto& w = native<PW>(self);
+			py::gil_scoped_release release;  // Rack reads the param's handle under the engine lock (ADR 003, decision 2)
+			w.createContextMenu();
+		},
 			"Rack's param context menu (value entry, reset, append_context_menu's items), opened in Rack's scene.")
 		.def("reset_action", [](py::object self) {
 			bindings::refuseInAction("reset_action");
@@ -401,7 +406,9 @@ void bindApp(py::module_ raw) {
 		.def("delete_top_cable_action", [](py::object self) {
 			bindings::refuseInAction("delete_top_cable_action");
 			checkMutation();
-			native<P>(self).deleteTopCableAction();
+			auto& w = native<P>(self);
+			py::gil_scoped_release release;  // the cable's removal takes the engine lock (ADR 003, decision 2)
+			w.deleteTopCableAction();
 		},
 			"Rack's: deletes the top cable on this port, with an undo history action.");
 

@@ -84,7 +84,9 @@ The methods of the RackPy classes themselves, which is what `super()`
 reaches, run **Rack's** implementation for that class. That is also how to
 deliver an event yourself: on a plain `FramebufferWidget`,
 `frame.on_button(event)` dispatches the click to its children by position,
-as Rack would.
+as Rack would. Rack's handler runs without the GIL, since it may take the
+engine lock (a port's shift-click removes its top cable); overrides it
+reaches take the GIL back.
 
 Exceptions never reach Rack. RackPy logs them, and then:
 

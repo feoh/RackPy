@@ -90,7 +90,11 @@ void bindBehavior(py::classh<Base, Options...>& cls) {
 		} \
 		checkNativeEvent<Base, W::E>(w); \
 		CallbackGuard guard; \
-		w.Base::method(e); \
+		{ \
+			/* Rack's handler may take the engine lock (a port's shift-click removes a cable): ADR 003, decision 2. */ \
+			py::gil_scoped_release release; \
+			w.Base::method(e); \
+		} \
 		captureEventTarget(e.context); \
 	}, py::arg("event"));
 	RACKPY_WIDGET_EVENTS(BIND_EVENT)

@@ -117,6 +117,7 @@ def test_python_module_widgets_through_racks_browser_cables_history_and_reload(
         [0, 0, 0],
         True,
     ]  # undoable actions vs. direct per-port clearing
+    assert one["shift_click"] == [[0, 0, 0], [1, 0, 1]]  # PortWidget.on_button: shift-click deletes it, undoably
     views = one["cable_views"]  # RP-28D: Rack's cable through its host views
     assert views["views"] == ["HostCableWidget", "HostPlugWidget"] and views["ports"] == [True, True, True]
     assert all(views["plug"]) and all(views["lookups"]) and views["positions"] and views["json"]

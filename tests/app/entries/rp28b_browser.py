@@ -31,6 +31,7 @@ from rackpy.raw.window import Svg
 CONFIG: dict[str, Any] = json.loads((Path(__file__).resolve().parent / "rp28b_config.json").read_text())
 RESULT: dict[str, Any] = {"factory": [], "removes": []}
 LEFT, PRESS, RELEASE = 0, 1, 0
+SHIFT = 1  # GLFW_MOD_SHIFT
 VOICES: dict[int, VoiceWidget] = {}
 PREVIEWS: list[VoiceWidget] = []
 Frames = Generator[None]
@@ -236,6 +237,10 @@ def phase1() -> Frames:
     deleted = list(_testing.rack_cables())
     _testing.history_undo()
     restored_delete = list(_testing.rack_cables())
+    inp.on_button(w.ButtonEvent(button=LEFT, action=PRESS, mods=SHIFT))  # Rack's shift-click: deleteTopCableAction
+    clicked = list(_testing.rack_cables())
+    _testing.history_undo()
+    RESULT["shift_click"] = [clicked, list(_testing.rack_cables())]
     rack().clear_cables_action()
     cleared = list(_testing.rack_cables())
     _testing.history_undo()
