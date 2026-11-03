@@ -303,30 +303,24 @@ def test_json_requests(server: str) -> None:
 def test_downloads(server: str, tmp_path: Path) -> None:
     target = tmp_path / "blob.bin"
     seen: list[float] = []
-    assert net.download(server + "/blob", target, seen.append, interval=0.001)
-    assert target.read_bytes() == BLOB and seen[-1] == 1.0 and all(0.0 <= v <= 1.0 for v in seen)
+    assert net.download(server + "/blob", target, seen.append)
+    assert target.read_bytes() == BLOB and seen == [1.0]
     assert not rn.request_download(server + "/missing", tmp_path / "m.bin")  # an HTTP error fails
     progress = rn.DownloadProgress()
     assert rn.request_download(server + "/blob", tmp_path / "b2.bin", progress) and progress.value == 1.0
 
 
-def test_a_failing_progress_callback_leaves_no_download_running(server: str, tmp_path: Path) -> None:
-    """RP-38: on_progress raises mid-download; download() lets Rack's download finish, then raises."""
-    target, calls = tmp_path / "slow.bin", [0]
+def test_a_failing_progress_callback_runs_after_download_finishes(server: str, tmp_path: Path) -> None:
+    """Rack's unsynchronized progress pointer is read only after the request returns."""
+    target = tmp_path / "slow.bin"
 
-    def fail_on_second(fraction: float) -> None:
-        calls[0] += 1
-        if calls[0] == 2:
-            raise RuntimeError("progress failed")
+    def fail_after_download(fraction: float) -> None:
+        assert fraction == 1.0 and target.read_bytes() == BLOB
+        raise RuntimeError("progress failed")
 
-    def workers() -> set[threading.Thread]:  # the test server's request threads are daemons; the download's is not
-        return {t for t in threading.enumerate() if not t.daemon}
-
-    threads = workers()
     with pytest.raises(RuntimeError, match="progress failed"):
-        net.download(server + "/slow", target, fail_on_second, interval=0.01)
-    assert workers() == threads  # no worker left writing the file
-    assert calls[0] == 2 and target.read_bytes() == BLOB  # not called again; the file is complete, not growing
+        net.download(server + "/slow", target, fail_after_download)
+    assert target.read_bytes() == BLOB
 
 
 def test_url_helpers() -> None:

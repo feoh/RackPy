@@ -21,7 +21,7 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::midi::InputQueue::~InputQueue()` | destructor | bound | `rackpy.raw.midi.InputQueue` | {ref}`midi#midi-ports <midi-ports>` |
 | `rack::midi::Output::~Output()` | destructor | bound | `rackpy.raw.midi.Output` | {ref}`midi#midi-ports <midi-ports>` |
 | `rack::midi::Port::~Port()` | destructor | bound | `rackpy.raw.midi.Port` | {ref}`midi#midi-ports <midi-ports>` |
-| `rack::audio::Device::processMutex` | field | bound | `rackpy.raw.audio.Device` | {ref}`audio#audio-devices <audio-devices>` |
+| `rack::audio::Device::processMutex` | field | bound | `rackpy.raw.audio.Device.process_mutex` | {ref}`audio#audio-devices <audio-devices>` |
 | `rack::audio::Device::subscribed` | field | bound | `rackpy.raw.audio.Device.subscribed` | {ref}`audio#audio-devices <audio-devices>` |
 | `rack::audio::Port::context` | field | bound | `rackpy.raw.audio.Port.context` | {ref}`audio#audio-ports <audio-ports>` |
 | `rack::audio::Port::device` | field | bound | `rackpy.raw.audio.Port.device` | {ref}`audio#audio-ports <audio-ports>` |

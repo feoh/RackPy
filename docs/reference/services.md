@@ -417,8 +417,9 @@ This is the contract for `WeakPtr<T>`, `WeakBase` and `WeakHandle`
   directory, before Rack writes anything.
 - **`rackpy.services.network`.** `get_json(url, params)`, `post_json`,
   `put_json` and `delete_json`, plus `download(url, filename, on_progress)`,
-  which runs Rack's download on a worker thread and calls `on_progress`
-  with the fraction on the calling thread. JSON helpers return `rackpy.types.JSON`;
+  which calls `on_progress` once with the final fraction after Rack's request
+  completes. Rack's progress pointer is unsynchronized, so live progress is unavailable.
+  JSON helpers return `rackpy.types.JSON`;
   `None` may be either a JSON null or a failure. Narrow the result before
   treating it as an object or an array. Input bodies are typed as `object`
   and validated by the JSON converter at runtime; see [values](values.md) for

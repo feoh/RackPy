@@ -929,7 +929,7 @@
  },
  "rackpy.services.network": {
   "delete_json": "def delete_json(url: str, *, cookies: dict[str, str] | None=None) -> JSON",
-  "download": "def download(url: str, filename: str | os.PathLike[str], on_progress: Callable[[float], object] | None=None, *, interval: float=0.1, cookies: dict[str, str] | None=None) -> bool",
+  "download": "def download(url: str, filename: str | os.PathLike[str], on_progress: Callable[[float], object] | None=None, *, cookies: dict[str, str] | None=None) -> bool",
   "encode_url": "encode_url = _network.encode_url",
   "get_json": "def get_json(url: str, params: dict[str, str] | None=None, *, cookies: dict[str, str] | None=None) -> JSON",
   "post_json": "def post_json(url: str, data: object=None, *, cookies: dict[str, str] | None=None) -> JSON",

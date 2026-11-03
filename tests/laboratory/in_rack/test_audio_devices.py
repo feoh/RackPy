@@ -168,6 +168,28 @@ def test_audio_super_is_the_configured_answer() -> None:
         driver.remove_device(device)
 
 
+@needs_ports
+def test_device_process_mutex_has_a_lifetime_checked_ui_guard() -> None:
+    _, driver, _, _ = lab_setup()
+    port = audio.Port()
+    driver.connect(port)
+    device = port.device
+    assert device is not None
+    mutex = device.process_mutex
+    with mutex.acquire() as guard:
+        assert guard.owns_lock
+        with pytest.raises(OwnershipError, match="acquired twice"):
+            mutex.try_acquire()
+    assert not guard.owns_lock
+    try_guard = mutex.try_acquire()
+    assert try_guard is not None
+    try_guard.release()
+    assert not try_guard.owns_lock
+    port.set_device_id(-1)
+    with pytest.raises(StaleHandleError):
+        mutex.acquire()
+
+
 def test_an_audio_driver_and_its_devices_are_collected() -> None:
     class Cyclic(AudioDevice):
         driver: AudioDriver

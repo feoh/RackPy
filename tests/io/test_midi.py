@@ -42,6 +42,7 @@ def test_python_inputs_receive_queued_messages_on_the_ui_thread(
     assert result["before_step"] == []  # never on the sending thread
     assert result["after_step"] == [0, 1, 2, 3, 4]
     assert result["overflow"] == [1024, 976]  # the bounded queue drops the rest, and counts them
+    assert result["byte_limit"] == [[64 * 1024], 977]  # 64 KiB is accepted; the next byte is dropped
     assert result["threads"] == [True]  # the UI (main) thread only
     # RP-29C: an audio port's stream events from Rack's setDeviceId, delivered at RackPy's UI step
     assert result["stream_before"] == []

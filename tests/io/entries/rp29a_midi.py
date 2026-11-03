@@ -29,6 +29,7 @@ class Recorder(midi.Input):
         import threading
 
         RESULT["delivered"].append(message.get_note())
+        RESULT.setdefault("sizes", []).append(message.get_size())
         RESULT["threads"].add(threading.current_thread() is threading.main_thread())
 
 
@@ -70,6 +71,15 @@ def scenario() -> Generator[None]:
     yield
     yield
     RESULT["overflow"] = [len(RESULT["delivered"]), rec.dropped]
+    RESULT["sizes"].clear()
+    at_limit = midi.Message()
+    at_limit.bytes = [0] * (64 * 1024)
+    oversized = midi.Message()
+    oversized.bytes = [0] * (64 * 1024 + 1)
+    out.send_message(oversized)
+    out.send_message(at_limit)
+    yield
+    RESULT["byte_limit"] = [RESULT["sizes"], rec.dropped]
     # An audio port's stream events from Rack (its setDeviceId), queued for the UI thread.
     driver = audio.PythonDriver("RackPy Windowed Audio")
     driver.add_device("Fake 1")

@@ -38,6 +38,7 @@
 #include <mutex>
 #include <optional>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <rack.hpp>
@@ -75,9 +76,18 @@ struct Driven {
 	bool locked;  // in processBuffer, which holds processMutex (the stream callbacks do not)
 };
 thread_local std::vector<Driven> drivenDevices;
+thread_local std::vector<const a::Device*> processMutexGuards;
 bool drivenHere(const a::Device& d, bool lockedOnly) {
 	return std::any_of(drivenDevices.begin(), drivenDevices.end(),
 		[&](const Driven& x) { return x.device == &d && (x.locked || !lockedOnly); });
+}
+bool processMutexGuardedHere(const a::Device& d) {
+	return std::find(processMutexGuards.begin(), processMutexGuards.end(), &d) != processMutexGuards.end();
+}
+void forgetProcessMutexGuard(const a::Device* device) {
+	auto it = std::find(processMutexGuards.begin(), processMutexGuards.end(), device);
+	if (it != processMutexGuards.end())
+		processMutexGuards.erase(it);
 }
 
 /** Refuses a call that changes which devices a port holds while a device's callbacks run on this thread. */
@@ -91,6 +101,8 @@ void refuseWhileDriving(const char* what) {
 thread holds it while a Python port's override waits for the GIL), nor for the GIL with it held: it returns holding
 the GIL if the caller did. Refused on a thread that already holds it. */
 std::unique_lock<std::mutex> lockProcess(a::Device& d, const char* what) {
+	if (processMutexGuardedHere(d))
+		throw runtime::Ownership(std::string(what) + " is refused while this thread holds the device's process_mutex guard");
 	if (drivenHere(d, true))
 		throw runtime::Ownership(std::string(what) + " is refused inside this device's own process or stream "
 			"callbacks, where Rack holds its processMutex on this thread");
@@ -429,6 +441,56 @@ struct AudioDeviceView {
 		if (!device || !port.holds(device))
 			throw runtime::StaleHandle("the port no longer holds this audio device");
 		return *device;
+	}
+};
+
+struct AudioProcessMutexView {
+	AudioDeviceView device;
+};
+
+struct AudioProcessMutexGuard {
+	AudioDeviceView device;
+	std::unique_lock<std::mutex> lock;
+	a::Device* lockedDevice = nullptr;
+	std::thread::id thread = std::this_thread::get_id();
+
+	AudioProcessMutexGuard(AudioDeviceView view, bool wait) : device(std::move(view)) {
+		runtime::requireMainThread("audio Device.process_mutex.acquire");
+		a::Device& d = device.get();
+		if (wait)
+			lock = lockProcess(d, "acquiring a device's processMutex");
+		else {
+			if (processMutexGuardedHere(d))
+				throw runtime::Ownership("a device's processMutex cannot be acquired twice on the same thread");
+			if (drivenHere(d, true))
+				throw runtime::Ownership("acquiring a device's processMutex is refused inside its own process callbacks");
+			lock = std::unique_lock<std::mutex>(d.processMutex, std::try_to_lock);
+		}
+		if (lock.owns_lock()) {
+			lockedDevice = &d;
+			processMutexGuards.push_back(&d);
+		}
+	}
+	~AudioProcessMutexGuard() {
+		if (lock.owns_lock() && thread == std::this_thread::get_id())
+			forgetProcessMutexGuard(lockedDevice);
+	}
+	AudioProcessMutexGuard(const AudioProcessMutexGuard&) = delete;
+	AudioProcessMutexGuard& operator=(const AudioProcessMutexGuard&) = delete;
+	AudioProcessMutexGuard(AudioProcessMutexGuard&&) = default;
+	AudioProcessMutexGuard& operator=(AudioProcessMutexGuard&&) = delete;
+	bool ownsLock() const { return lock.owns_lock(); }
+	void checkThread() const {
+		if (thread != std::this_thread::get_id())
+			throw runtime::Ownership("a process-mutex guard must be used on the UI thread that acquired it");
+	}
+	void release() {
+		checkThread();
+		if (lock.owns_lock()) {
+			forgetProcessMutexGuard(lockedDevice);
+			lockedDevice = nullptr;
+			lock.unlock();
+		}
 	}
 };
 
@@ -939,6 +1001,33 @@ void bindAudio(py::module_ mod) {
 		.def_property_readonly("max_inputs", [](const AudioPortView& v) { return v.get().maxInputs; })
 		.def_property_readonly("max_outputs", [](const AudioPortView& v) { return v.get().maxOutputs; });
 
+	py::class_<AudioProcessMutexGuard>(mod, "ProcessMutexGuard", py::is_final(),
+		"RAII guard that releases a device's process mutex on the UI thread that acquired it.")
+		.def("release", &AudioProcessMutexGuard::release, "Release the mutex; safe to call more than once.")
+		.def_property_readonly("owns_lock", &AudioProcessMutexGuard::ownsLock)
+		.def("__enter__", [](AudioProcessMutexGuard& guard) -> AudioProcessMutexGuard& {
+			guard.checkThread();
+			if (!guard.ownsLock())
+				throw runtime::Ownership("this process-mutex guard does not own the lock");
+			return guard;
+		}, py::return_value_policy::reference_internal)
+		.def("__exit__", [](AudioProcessMutexGuard& guard, py::object, py::object, py::object) {
+			guard.release();
+			return false;
+		}, py::arg("exc_type"), py::arg("exc_value"), py::arg("traceback"));
+
+	py::class_<AudioProcessMutexView>(mod, "ProcessMutex", py::is_final(),
+		"A lifetime-checked view of an audio device's process mutex.")
+		.def("acquire", [](const AudioProcessMutexView& view) {
+			return AudioProcessMutexGuard(view.device, true);
+		}, "Acquire the mutex, releasing the GIL while waiting; use the returned guard as a context manager.")
+		.def("try_acquire", [](const AudioProcessMutexView& view) -> py::object {
+			AudioProcessMutexGuard guard(view.device, false);
+			if (!guard.ownsLock())
+				return py::none();
+			return py::cast(std::move(guard));
+		}, "Try to acquire the mutex; return a context-manager guard or None without waiting.");
+
 	py::class_<AudioDeviceView>(mod, "Device", py::is_final(),
 		"An audio device of a driver, through the Python port that holds it. Rack's device methods may raise Rack's "
 		"Exception from the driver.")
@@ -969,6 +1058,10 @@ void bindAudio(py::module_ mod) {
 			ReleaseForDriver release(&d);
 			d.setBlockSize(size);
 		}, py::arg("block_size"))
+		.def_property_readonly("process_mutex", [](const AudioDeviceView& v) {
+			v.get();
+			return AudioProcessMutexView{v};
+		}, "Rack's processMutex as a guarded lock view; use only briefly on the UI thread.")
 		.def_property_readonly("subscribed", [](py::object self) {
 			a::Device& d = self.cast<const AudioDeviceView&>().get();
 			return subscriberList(d, [self]() -> a::Device& { return self.cast<const AudioDeviceView&>().get(); });

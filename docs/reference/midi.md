@@ -87,10 +87,12 @@ or `Output` subclass may override them, and Rack's menus and its
 
 - **`Input`.** Rack delivers messages on the MIDI driver's thread, or, for
   the Loopback driver, on whichever thread sends, often an engine thread.
-  Python never runs there. The native port copies each message into a queue
-  of 1024, and RackPy calls the subclass's `on_message(message)` on the UI
-  thread at its next step. The queue never blocks the sending thread: a
-  message that finds it full or busy is dropped and counted in `dropped`.
+  Python never runs there. The native port copies each message into a
+  preallocated queue of up to 1024 messages and 64 KiB of total message bytes;
+  a single message may use at most 64 KiB. RackPy calls the subclass's
+  `on_message(message)` on the UI thread at its next step. The queue never
+  blocks or allocates on the sending thread: a message that finds it busy,
+  full, or over either byte limit is dropped and counted in `dropped`.
   An unset frame is set from Rack's engine timing, as Rack does.
 - **`InputQueue`** is Rack's queue port. It keeps up to 8192 messages in
   frame order, and `try_pop(max_frame)` returns the next one due, or `None`.

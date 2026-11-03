@@ -7,7 +7,6 @@ not JSON) returns ``None``, as Rack does. Never call them from code that must no
 """
 
 import os
-import threading
 from collections.abc import Callable
 from typing import cast
 
@@ -45,30 +44,17 @@ def download(
     filename: str | os.PathLike[str],
     on_progress: Callable[[float], object] | None = None,
     *,
-    interval: float = 0.1,
     cookies: dict[str, str] | None = None,
 ) -> bool:
-    """Downloads to ``filename``; whether it succeeded.
+    """Download to ``filename`` and return whether it succeeded.
 
-    With ``on_progress``, Rack's download runs on a worker thread and ``on_progress(fraction)`` is
-    called on this thread every ``interval`` seconds while it runs, and once more at the end.
-    Rack's download cannot be cancelled: if ``on_progress`` raises, it is not called again, the
-    download runs to its end, as it would without ``on_progress``, and then the error propagates.
-    No thread is left writing ``filename`` after this returns or raises.
+    Rack writes its progress pointer without synchronization. RackPy therefore reads it only after the request
+    returns and calls ``on_progress`` once with the final fraction; live progress is unavailable. If the callback
+    raises, the download has already finished and the error propagates.
     """
     if on_progress is None:
         return _network.request_download(url, filename, None, cookies or {})
     progress = _network.DownloadProgress()
-    result: list[bool] = []
-    worker = threading.Thread(
-        target=lambda: result.append(_network.request_download(url, filename, progress, cookies or {}))
-    )
-    worker.start()
-    try:
-        while worker.is_alive():
-            on_progress(progress.value)
-            worker.join(interval)
-        on_progress(progress.value)
-    finally:
-        worker.join()  # RP-38: never abandon it, still writing the file and holding up the interpreter's exit
-    return bool(result and result[0])
+    result = _network.request_download(url, filename, progress, cookies or {})
+    on_progress(progress.value)
+    return result

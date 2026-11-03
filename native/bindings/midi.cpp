@@ -61,31 +61,51 @@ namespace {
 /** Bounded message queue a driver or engine thread fills without blocking. */
 struct MessageQueue {
 	static constexpr size_t capacity = 1024;
-	std::array<m::Message, capacity> slots;
-	size_t head = 0, count = 0;
+	static constexpr size_t byteCapacity = 64 * 1024;
+	struct Slot {
+		size_t size = 0;
+		decltype(m::Message{}.frame) frame = -1;
+	};
+	std::array<Slot, capacity> slots;
+	std::array<uint8_t, byteCapacity> bytes{};
+	size_t head = 0, count = 0, byteHead = 0, bytesUsed = 0;
 	std::mutex mutex;
 	std::atomic<uint64_t> dropped{0};
 
 	void push(const m::Message& message) noexcept {
 		std::unique_lock<std::mutex> lock(mutex, std::try_to_lock);
-		if (!lock.owns_lock() || count == capacity) {
+		const size_t size = message.bytes.size();
+		if (!lock.owns_lock() || count == capacity || size > byteCapacity - bytesUsed) {
 			dropped.fetch_add(1, std::memory_order_relaxed);
 			return;
 		}
-		try {
-			slots[(head + count) % capacity] = message;  // reuses the slot's byte storage when it can
-			++count;
-		}
-		catch (...) {
-			dropped.fetch_add(1, std::memory_order_relaxed);
-		}
+		const size_t tail = (byteHead + bytesUsed) % byteCapacity;
+		const size_t first = std::min(size, byteCapacity - tail);
+		std::copy_n(message.bytes.begin(), first, bytes.begin() + static_cast<std::ptrdiff_t>(tail));
+		std::copy_n(message.bytes.begin() + static_cast<std::ptrdiff_t>(first), size - first, bytes.begin());
+		slots[(head + count) % capacity] = {size, message.frame};
+		bytesUsed += size;
+		++count;
 	}
 	std::vector<m::Message> take() {
 		std::lock_guard<std::mutex> lock(mutex);
 		std::vector<m::Message> out;
 		out.reserve(count);
-		for (; count > 0; --count, head = (head + 1) % capacity)
-			out.push_back(slots[head]);
+		while (count > 0) {
+			const Slot slot = slots[head];
+			m::Message message;
+			message.frame = slot.frame;
+			message.bytes.resize(slot.size);  // allocation is on the UI consumer thread, not Rack's sending thread
+			const size_t first = std::min(slot.size, byteCapacity - byteHead);
+			std::copy_n(bytes.begin() + static_cast<std::ptrdiff_t>(byteHead), first, message.bytes.begin());
+			std::copy_n(bytes.begin(), slot.size - first,
+				message.bytes.begin() + static_cast<std::ptrdiff_t>(first));
+			out.push_back(std::move(message));
+			byteHead = (byteHead + slot.size) % byteCapacity;
+			bytesUsed -= slot.size;
+			head = (head + 1) % capacity;
+			--count;
+		}
 		return out;
 	}
 };
@@ -1159,7 +1179,7 @@ void bindMidi(py::module_ mod) {
 
 	py::class_<m::Input, m::Port, PyInput, std::unique_ptr<m::Input, MainThreadDelete<m::Input>>>(mod, "Input",
 		"Rack's MIDI input port. Subclass it and override on_message: RackPy calls it on the UI thread with each "
-		"message the driver delivered (queued; up to 1024 wait, more are dropped and counted).")
+		"message the driver delivered (queued; up to 1024 messages and 64 KiB of bytes wait; more are dropped and counted).")
 		.def(py::init([] {
 			requireLiveContext("midi.Input()");
 			refuseDuringMidiDelivery("midi.Input()");  // Rack's constructor subscribes it
@@ -1182,7 +1202,7 @@ void bindMidi(py::module_ mod) {
 			checked(p);
 			auto* py = ::rackpy::rttiCast<PyInput*>(&p);
 			return py ? py->queue.dropped.load() : 0;
-		}, "Messages that found the queue full or busy, and were dropped.");
+		}, "Messages dropped because the queue was busy, full, or the message/queued bytes exceeded 64 KiB.");
 
 	py::class_<m::InputQueue, m::Input, std::unique_ptr<m::InputQueue, MainThreadDelete<m::InputQueue>>>(mod, "InputQueue",
 		py::is_final(),

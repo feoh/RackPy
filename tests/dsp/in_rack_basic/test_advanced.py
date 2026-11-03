@@ -213,7 +213,7 @@ def test_setup_handles_and_ownership() -> None:
 
 
 def test_real_time_convolver() -> None:
-    for bad in (8, 24, 33, 2 * 32768):
+    for bad in (8, 24, 33, 2 * 32768, 2**63 - 1):
         with pytest.raises(ValueError, match="block_size"):
             dsp.RealTimeConvolver(bad)
     conv = dsp.RealTimeConvolver(32)

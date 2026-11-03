@@ -130,7 +130,7 @@ struct ConvolverArray {
 
 size_t blockSize(const py::int_& value) {
 	long long n = values::toInt<long long>(value, "RealTimeConvolver", "size_t");
-	if (n < 16 || !pffftLength(2 * n, 32) || n > MAX_CONVOLVER_BLOCK)
+	if (n < 16 || n > MAX_CONVOLVER_BLOCK || !pffftLength(2 * n, 32))
 		throw py::value_error("RealTimeConvolver: block_size must make 2 * block_size a PFFFT real length (block_size "
 			"16, 32, 48, 64, ...; Rack recommends a power of 2 from 32) of at most " + std::to_string(MAX_CONVOLVER_BLOCK) +
 			", not " + std::to_string(n));
