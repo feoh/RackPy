@@ -504,33 +504,33 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::app::Scene::mousePos` | field | bound | `rackpy.raw.app.HostScene.mouse_pos` | {ref}`app#app-rack <app-rack>`, [app#the-scene-and-the-rack](../app.md#the-scene-and-the-rack) |
 | `rack::app::Scene::rack` | field | bound | `rackpy.raw.app.HostScene.rack` | {ref}`app#app-rack <app-rack>` |
 | `rack::app::Scene::rackScroll` | field | bound | `rackpy.raw.app.HostScene.rack_scroll` | {ref}`app#app-rack <app-rack>` |
-| `rack::app::SvgButton::fb` | field | bound | `rackpy.raw.app.SvgButton.fb` | {ref}`app#app-svg <app-svg>` |
+| `rack::app::SvgButton::fb` | field | bound | `rackpy.raw.app.SvgButton.fb` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::SvgButton::frames` | field | bound | `rackpy.raw.app.SvgButton.frames` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgButton::shadow` | field | bound | `rackpy.raw.app.SvgButton.shadow` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgButton::sw` | field | bound | `rackpy.raw.app.SvgButton.sw` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgKnob::fb` | field | bound | `rackpy.raw.app.SvgKnob.fb` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgKnob::shadow` | field | bound | `rackpy.raw.app.SvgKnob.shadow` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgKnob::sw` | field | bound | `rackpy.raw.app.SvgKnob.sw` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgKnob::tw` | field | bound | `rackpy.raw.app.SvgKnob.tw` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgPanel::fb` | field | bound | `rackpy.raw.app.SvgPanel.fb` | {ref}`app#app-svg <app-svg>` |
+| `rack::app::SvgButton::shadow` | field | bound | `rackpy.raw.app.SvgButton.shadow` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
+| `rack::app::SvgButton::sw` | field | bound | `rackpy.raw.app.SvgButton.sw` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
+| `rack::app::SvgKnob::fb` | field | bound | `rackpy.raw.app.SvgKnob.fb` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
+| `rack::app::SvgKnob::shadow` | field | bound | `rackpy.raw.app.SvgKnob.shadow` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
+| `rack::app::SvgKnob::sw` | field | bound | `rackpy.raw.app.SvgKnob.sw` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
+| `rack::app::SvgKnob::tw` | field | bound | `rackpy.raw.app.SvgKnob.tw` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
+| `rack::app::SvgPanel::fb` | field | bound | `rackpy.raw.app.SvgPanel.fb` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::SvgPanel::panelBorder` | field | bound | `rackpy.raw.app.SvgPanel.panel_border` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::SvgPanel::svg` | field | bound | `rackpy.raw.app.SvgPanel.svg` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgPanel::sw` | field | bound | `rackpy.raw.app.SvgPanel.sw` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgPort::fb` | field | bound | `rackpy.raw.app.SvgPort.fb` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgPort::shadow` | field | bound | `rackpy.raw.app.SvgPort.shadow` | {ref}`app#app-svg <app-svg>` |
+| `rack::app::SvgPanel::sw` | field | bound | `rackpy.raw.app.SvgPanel.sw` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
+| `rack::app::SvgPort::fb` | field | bound | `rackpy.raw.app.SvgPort.fb` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
+| `rack::app::SvgPort::shadow` | field | bound | `rackpy.raw.app.SvgPort.shadow` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::SvgPort::sw` | field | bound | `rackpy.raw.app.SvgPort.sw` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
-| `rack::app::SvgScrew::fb` | field | bound | `rackpy.raw.app.SvgScrew.fb` | {ref}`app#app-svg <app-svg>` |
+| `rack::app::SvgScrew::fb` | field | bound | `rackpy.raw.app.SvgScrew.fb` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::SvgScrew::sw` | field | bound | `rackpy.raw.app.SvgScrew.sw` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::SvgSlider::background` | field | bound | `rackpy.raw.app.SvgSlider.background` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
-| `rack::app::SvgSlider::fb` | field | bound | `rackpy.raw.app.SvgSlider.fb` | {ref}`app#app-svg <app-svg>` |
+| `rack::app::SvgSlider::fb` | field | bound | `rackpy.raw.app.SvgSlider.fb` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::SvgSlider::handle` | field | bound | `rackpy.raw.app.SvgSlider.handle` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::SvgSlider::maxHandlePos` | field | bound | `rackpy.raw.app.SvgSlider.max_handle_pos` | {ref}`app#app-svg <app-svg>`, [app#svg-controls-screws-and-panels](../app.md#svg-controls-screws-and-panels) |
 | `rack::app::SvgSlider::minHandlePos` | field | bound | `rackpy.raw.app.SvgSlider.min_handle_pos` | {ref}`app#app-svg <app-svg>`, [app#svg-controls-screws-and-panels](../app.md#svg-controls-screws-and-panels) |
-| `rack::app::SvgSwitch::fb` | field | bound | `rackpy.raw.app.SvgSwitch.fb` | {ref}`app#app-svg <app-svg>` |
+| `rack::app::SvgSwitch::fb` | field | bound | `rackpy.raw.app.SvgSwitch.fb` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::SvgSwitch::frames` | field | bound | `rackpy.raw.app.SvgSwitch.frames` | {ref}`app#app-svg <app-svg>` |
 | `rack::app::SvgSwitch::internal` | field | excluded: Rack-internal | — | — |
 | `rack::app::SvgSwitch::latch` | field | bound | `rackpy.raw.app.SvgSwitch.latch` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgSwitch::shadow` | field | bound | `rackpy.raw.app.SvgSwitch.shadow` | {ref}`app#app-svg <app-svg>` |
+| `rack::app::SvgSwitch::shadow` | field | bound | `rackpy.raw.app.SvgSwitch.shadow` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::SvgSwitch::sw` | field | bound | `rackpy.raw.app.SvgSwitch.sw` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::Switch::internal` | field | excluded: Rack-internal | — | — |
 | `rack::app::Switch::momentary` | field | bound | `rackpy.raw.app.Switch.momentary` | [app#app-controls](../app.md#app-controls) |
@@ -802,7 +802,7 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::app::MultiLightWidget::addBaseColor(NVGcolor)` | method | bound | `rackpy.raw.app.MultiLightWidget.add_base_color` | {ref}`app#app-lights <app-lights>` |
 | `rack::app::MultiLightWidget::getNumColors()` | method | bound | `rackpy.raw.app.MultiLightWidget.get_num_colors` | {ref}`app#app-lights <app-lights>` |
 | `rack::app::MultiLightWidget::setBrightnesses(const std::vector<float> &)` | method | bound | `rackpy.raw.app.MultiLightWidget.set_brightnesses` | {ref}`app#app-lights <app-lights>` |
-| `rack::app::PanelBorder::draw(const rack::widget::Widget::DrawArgs &)` | method | bound | `rackpy.raw.app.PanelBorder.draw` | {ref}`app#app-svg <app-svg>` |
+| `rack::app::PanelBorder::draw(const rack::widget::Widget::DrawArgs &)` | method | bound | `rackpy.raw.app.PanelBorder.draw` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::ParamWidget::appendContextMenu(rack::ui::Menu *)` | method | bound | `rackpy.raw.app.ParamWidget.append_context_menu` | [app#app-controls](../app.md#app-controls) |
 | `rack::app::ParamWidget::createContextMenu()` | method | bound | `rackpy.raw.app.ParamWidget.create_context_menu` | [app#app-controls](../app.md#app-controls) |
 | `rack::app::ParamWidget::createTooltip()` | method | bound | `rackpy.raw.app.ParamWidget.create_tooltip` | [app#app-controls](../app.md#app-controls) |
