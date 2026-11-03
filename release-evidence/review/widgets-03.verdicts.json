@@ -1,12 +1,11 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "c7566a2a721bd7c15176ea01039bd8ed14a689e8",
   "records": {
     "constructor:rack::app::LedDisplayChoice::LedDisplayChoice()": {
       "verdict": "accept"
     },
     "constructor:rack::app::LedDisplaySeparator::LedDisplaySeparator()": {
-      "finding": "P1: no cited test asserts anything about a constructed LedDisplaySeparator; tests/app/in_rack/test_rack.py:374-397 only constructs it, overwrites its box and renders it with no assertion, so Rack's constructor (box.size = Vec(), src/app/LedDisplay.cpp) and the Python peer are unverified. Smallest fix: assert app.LedDisplaySeparator().box.size == Vec() and isinstance(..., w.Widget).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "constructor:rack::app::LedDisplayTextField::LedDisplayTextField()": {
       "verdict": "accept"
@@ -15,20 +14,16 @@
       "verdict": "accept"
     },
     "destructor:rack::app::ModuleLightWidget::~ModuleLightWidget()": {
-      "finding": "P1: no cited test checks what happens when a ModuleLightWidget is deleted. Rack's destructor removes an open tooltip (src/app/ModuleLightWidget.cpp ~ModuleLightWidget), and the notes say RackPy invalidates the peer and detaches its module link. Yet the tests only call light.close() in finally blocks, with no later assertion (tests/app/in_rack/test_controls.py:140-143, :380-383, :468-469). Smallest fix: create a tooltip, close the light, then assert HOOKS.scene_tooltip_count() fell, not light.alive, and that deleting the module afterwards is safe.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::app::LedDisplayChoice::bgColor": {
-      "finding": "P1: bg_color is written (tests/app/in_rack/test_rack.py:379) but never read back or checked through drawing anywhere in the suite, so a broken getter/setter (native/bindings/app/rack.cpp LedDisplayChoice bg_color property) would pass. Smallest fix: assert choice.bg_color == nvg.rgb(0, 0, 0) after the assignment, or assert Rack's default rgba(0,0,0,0).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::app::LedDisplayChoice::color": {
-      "finding": "P1: color is written (tests/app/in_rack/test_rack.py:379) but never read back or checked through drawing anywhere in the suite. Smallest fix: assert choice.color == nvg.rgb(255, 0, 0), or assert Rack's constructor default rgb(0xff,0xd7,0x14) before assigning.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::app::LedDisplayChoice::fontPath": {
-      "finding": "P1: font_path is written (tests/app/in_rack/test_rack.py:378) but never read back; the round-trip at :380 covers only text and text_offset. Smallest fix: add choice.font_path to the tuple asserted at test_rack.py:380, or assert that the default ends with ShareTechMono-Regular.ttf.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::app::LedDisplayChoice::text": {
       "verdict": "accept"
@@ -37,27 +32,22 @@
       "verdict": "accept"
     },
     "field:rack::app::LedDisplayTextField::bgColor": {
-      "finding": "P1: field.bg_color is written (tests/app/in_rack/test_rack.py:382) but never read back or checked through drawing anywhere in the suite. Smallest fix: assert field.bg_color == nvg.rgb(4, 5, 6).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::app::LedDisplayTextField::color": {
-      "finding": "P1: field.color is written (tests/app/in_rack/test_rack.py:382) but never read back anywhere in the suite. Smallest fix: assert field.color == nvg.rgb(1, 2, 3).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::app::LedDisplayTextField::fontPath": {
-      "finding": "P1: field.font_path is written (tests/app/in_rack/test_rack.py:383) but never read back anywhere in the suite. Smallest fix: assert field.font_path == 'res/fonts/ShareTechMono-Regular.ttf'.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::app::LedDisplayTextField::textOffset": {
-      "finding": "P1: field.text_offset is written (tests/app/in_rack/test_rack.py:382) but never read back. Its only indirect effect, get_text_position at :385, is asserted only within 0..3, which every valid result satisfies. Smallest fix: assert field.text_offset == Vec(1, 1).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::app::LightWidget::bgColor": {
       "verdict": "accept"
     },
     "field:rack::app::LightWidget::borderColor": {
-      "finding": "P1: border_color is only written (tests/app/in_rack/test_controls.py:498) and never read back or checked in pixels anywhere in the suite; grep finds no other border_color use. Smallest fix: assert lamp.border_color == nvg.rgb(9, 9, 9) after the assignment.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::app::LightWidget::color": {
       "verdict": "accept"
@@ -66,8 +56,7 @@
       "verdict": "accept"
     },
     "field:rack::app::MidiChannelChoice::port": {
-      "finding": "P1: MidiChannelChoice.port is set, but neither its getter nor its effect is asserted. In tests/app/in_rack/test_io_widgets.py:51-57 the channel choice's text (names[2]) is never checked, and on_action's 'MIDI channel' label (:75) is added even when the port is null (src/app/MidiDisplay.cpp MidiChannelChoice::onAction). Smallest fix: assert c.port is loop and names[2] == loop.get_channel_name(loop.get_channel()).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::app::MidiDeviceChoice::port": {
       "verdict": "accept"
@@ -97,44 +86,34 @@
       "verdict": "accept"
     },
     "function:rack::app::appendMidiMenu(rack::ui::Menu *, rack::midi::Port *)": {
-      "finding": "P1: the cited doc docs/reference/app.md:443-446 says Rack 2.6.6's combined MIDI menu has no channel choice. In fact appendMidiMenu adds a 'MIDI channel' submenu item (src/app/MidiDisplay.cpp appendMidiMenu: createMenuItem<MidiChannelItem>(\"MidiDisplay.channel\", RIGHT_ARROW)). The test comment at tests/app/in_rack/test_io_widgets.py:76 repeats the error, because take_scene_menu_labels collects only MenuLabels. The test at :152-155 only checks that the child count grew. Also P2: append_midi_menu rejects port=None (pythonMidiPort, native/bindings/midi.cpp:656-659), which Rack handles by appending labels only; this restriction is not documented. Smallest fix: correct the doc to say channel is a submenu item, and assert the menu's last item text is 'MIDI channel'.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::app::LedDisplay::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: the only cited exercise is frame.render() at tests/app/in_rack/test_rack.py:393, with no assertion. Neither Rack's LedDisplay::draw output (dark gradient background) nor rackpy.raw.app.LedDisplay.draw is checked, so a wrong mapping would pass. Smallest fix: read HOOKS.framebuffer_pixels(frame) after render and assert a dark background pixel, as test_controls.py:505-506 does for lights.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::app::LedDisplay::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
-      "finding": "P1: no assertion exercises LedDisplay.draw_layer. tests/app/in_rack/test_rack.py:393 renders a framebuffer with no assertion, and nothing calls or overrides draw_layer on a LedDisplay. Smallest fix: draw layer 1 through a Python container (as test_controls.py:487-491 does) and assert that a child override is reached, or check a pixel.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::app::LedDisplayChoice::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: only frame.render() at tests/app/in_rack/test_rack.py:393 with no assertion. Rack's bg_color fill (src/app/LedDisplay.cpp LedDisplayChoice::draw) is never checked. Smallest fix: give the choice an opaque bg_color, render, and assert the pixel colour.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::app::LedDisplayChoice::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
-      "finding": "P1: no assertion exercises LedDisplayChoice.draw_layer. Rack draws text only on layer 1, and the cited test (tests/app/in_rack/test_rack.py:393) renders layer 0 in a framebuffer without asserting anything. Smallest fix: draw layer 1 explicitly (draw_child(child, args, 1)) and assert pixels in the text colour.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::app::LedDisplayChoice::onButton(const rack::widget::Widget::ButtonEvent &)": {
-      "finding": "P1: no test anywhere calls LedDisplayChoice.on_button. Rack's override dispatches onAction on a left or right press and consumes the event (src/app/LedDisplay.cpp LedDisplayChoice::onButton), which is untested; grep finds no on_button use on an LED choice. Smallest fix: subclass LedDisplayChoice with an on_action recorder, call on_button with a ButtonEvent (PRESS, LEFT), and assert on_action ran.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::app::LedDisplaySeparator::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: only frame.render() at tests/app/in_rack/test_rack.py:393 with no assertion; the separator's line is never checked. Smallest fix: render a separator with a diagonal box and assert a pixel on the line has Rack's #333333 stroke.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::app::LedDisplayTextField::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: only frame.render() at tests/app/in_rack/test_rack.py:393 with no assertion on the text field's drawing. Smallest fix: assert that a pixel or a child-draw override is reached after render.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::app::LedDisplayTextField::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
-      "finding": "P1: Rack draws the field's text and caret on layer 1, but the cited test renders a framebuffer (layer 0) with no assertion (tests/app/in_rack/test_rack.py:393). Smallest fix: draw layer 1 explicitly and assert text-coloured pixels.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::app::LedDisplayTextField::getTextPosition(rack::math::Vec)": {
-      "finding": "P1: the only assertion, 0 <= field.get_text_position(Vec(30, 10)) <= 3 at tests/app/in_rack/test_rack.py:385, accepts every valid result for the 3-character text, including Rack's no-font fallback 0. A mapping to ui::TextField::getTextPosition or a constant would pass. Smallest fix: assert distinct positions, e.g. get_text_position(Vec(0, 10)) == 0 and get_text_position(Vec(59, 10)) == 3.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::app::LightWidget::draw(const rack::widget::Widget::DrawArgs &)": {
       "verdict": "accept"
@@ -152,8 +131,7 @@
       "verdict": "accept"
     },
     "method:rack::app::MidiButton::onAction(const rack::widget::Widget::ActionEvent &)": {
-      "finding": "P1: the cited doc docs/reference/app.md:443-446 says the button's combined MIDI menu has no channel choice. Rack's MidiButton::onAction calls appendMidiMenu, which adds a 'MIDI channel' submenu item (src/app/MidiDisplay.cpp). The test passes only because take_scene_menu_labels collects MenuLabels (native/testing/testing.cpp:870-874), and its comment 'Rack's combined menu omits channel' (tests/app/in_rack/test_io_widgets.py:76) is wrong. Smallest fix: correct the doc and the comment to say the channel is a submenu item.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::app::MidiButton::setMidiPort(rack::midi::Port *)": {
       "verdict": "accept"
@@ -162,8 +140,7 @@
       "verdict": "accept"
     },
     "method:rack::app::MidiChannelChoice::step()": {
-      "finding": "P1: MidiChannelChoice.step() runs in tests/app/in_rack/test_io_widgets.py:51-57, but its text (names[2]) is never asserted, and no other test checks it. Rack's step sets the text to port->getChannelName(port->getChannel()), or to the 'channel 1' string without a port. Smallest fix: assert names[2] == loop.get_channel_name(loop.get_channel()), and assert the no-port text.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::app::MidiDeviceChoice::onAction(const rack::widget::Widget::ActionEvent &)": {
       "verdict": "accept"
@@ -196,8 +173,7 @@
       "verdict": "accept"
     },
     "method:rack::app::ModuleLightWidget::onHover(const rack::widget::Widget::HoverEvent &)": {
-      "finding": "P1: no test anywhere calls on_hover on a ModuleLightWidget. The cited tests (tests/app/in_rack/test_controls.py:356-384 and :436-469) never send a HoverEvent. Rack's override consumes the event only when the light has a LightInfo (src/app/ModuleLightWidget.cpp onHover), and that is untested. Smallest fix: call light.on_hover(w.HoverEvent(...)) with and without a configured LightInfo, and assert whether the event was consumed.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::app::ModuleLightWidget::onLeave(const rack::widget::Widget::LeaveEvent &)": {
       "verdict": "accept"
@@ -206,15 +182,13 @@
       "verdict": "accept"
     },
     "record:rack::app::LedDisplay": {
-      "finding": "P1: no test asserts anything about rackpy.raw.app.LedDisplay itself. tests/app/in_rack/test_rack.py:374-397 constructs it, adds children and renders without an assertion, and the notes' claim that it can be subclassed is never exercised. Smallest fix: subclass LedDisplay with a draw override that calls super(), render, and assert the override ran and Rack's background was drawn.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "record:rack::app::LedDisplayChoice": {
       "verdict": "accept"
     },
     "record:rack::app::LedDisplaySeparator": {
-      "finding": "P1: no test asserts anything about rackpy.raw.app.LedDisplaySeparator. In tests/app/in_rack/test_rack.py:374-397 it is only constructed, given a box and rendered. MidiDisplay's driver_separator is Rack's own instance seen as a host view, not this class. Smallest fix: assert isinstance(separator, w.Widget) and Rack's default box size, and render a subclass override.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "record:rack::app::LedDisplayTextField": {
       "verdict": "accept"
@@ -241,6 +215,6 @@
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/widgets-03",
+  "reviewer": "agent-review:bcc462d8-939d-45a6-b615-36f6c0f6d074",
   "slice": "widgets-03"
 }

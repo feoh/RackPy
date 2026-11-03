@@ -1,5 +1,5 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "d199bc8f94c0a9b603cddcc7d867ebed70c3634e",
   "records": {
     "alias:rack::random::Xoroshiro128Plus::result_type": {
       "verdict": "accept"
@@ -23,8 +23,7 @@
       "verdict": "accept"
     },
     "constructor:rack::random::Xoroshiro128Plus::Xoroshiro128Plus(uint64_t, uint64_t)": {
-      "finding": "P1: the cited test cannot detect a wrong binding. tests/services/in_rack_utilities/test_utilities.py:129-130 only checks that two generators built with (42, 7) agree, and a constructor that ignored its arguments (both return 0) would pass. Nothing checks the seeded state, the one-draw shift, or the default s1=0. Smallest fix: assert Xoroshiro128Plus(1, 2).state equals the state after seed(1, 2) on an unseeded generator, and Xoroshiro128Plus(5) == Xoroshiro128Plus(5, 0). Or cite test_random_get_signed_types / the values reference replay, which compare against Rack's own draws.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "constructor:rack::string::Version::Version()": {
       "verdict": "accept"
@@ -48,8 +47,7 @@
       "verdict": "accept"
     },
     "destructor:rack::WeakPtr::~WeakPtr<T>()": {
-      "finding": "P1: the record's thread is 'main thread', and the docs (services.md:331) say weak pointers work on the main thread only, but the destructor is not confined to it. WeakPtrRef/WeakHandleView hold a plain rack::WeakPtr (native/bindings/widget/weakptr.cpp:19-25) whose ~WeakPtr runs Rack's set(nullptr) (weakptr.hpp:64-78) on whichever Python thread drops or garbage-collects the object. That set(nullptr) decrements count, writes widget->weakHandle and deletes the handle, racing Rack's non-thread-safe main-thread use. The SharedLock records handle off-thread drops; this one does not. Also, the cited test_weak_pointers asserts nothing about release on drop (only test_weak_handle_is_made_by_weak_ptr's `del handle` does, and it is not cited). Smallest fix: on a non-main-thread drop, defer the release to the main thread (or leak and report it); cite or add a test that `del p` lowers get_weak_count().",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::WeakBase::weakHandle": {
       "verdict": "accept"
@@ -76,8 +74,7 @@
       "verdict": "accept"
     },
     "function:rack::random::buffer(uint8_t *, size_t)": {
-      "finding": "P0: out-of-bounds write for non-contiguous buffers. native/bindings/services/random.cpp:81-85 calls out.request(true); pybind11's buffer::request asks for PyBUF_STRIDES (pybind11/pytypes.h:2369-2370). Only readonly, itemsize and ndim are checked, and r::buffer(info.ptr, info.size) then writes contiguously. memoryview(bytearray(10))[::-1] has ptr at the last byte, so Rack writes 9 bytes past the allocation; [::2] fills the wrong bytes. The stub (random.pyi:36) explicitly accepts memoryview. The test (test_utilities.py:153-154) calls rr.buffer(out) but asserts nothing about the contents. Smallest fix: require a C-contiguous buffer (request with PyBUF_C_CONTIGUOUS, or check strides[0] == 1), and assert the bytes change (or match a seeded Rack draw).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::random::get<bool>()": {
       "verdict": "accept"
@@ -98,16 +95,13 @@
       "verdict": "accept"
     },
     "function:rack::random::init()": {
-      "finding": "P1: the docs and docstring misdescribe the behaviour, and the test asserts nothing. Rack's init() returns early when the generator is already seeded and otherwise seeds from the clock only (Rack/src/random.cpp:13-29). The docstring says it seeds 'from the clock and the system's randomness' (native/bindings/services/random.cpp:54). docs/reference/services.md:79 says '`init()` reseeds it', but inside Rack the generator is already seeded, so the call does nothing. test_utilities.py:158 calls rr.init() with no assertion. Smallest fix: document 'seeds Rack's generator from the clock if it is unseeded, else does nothing', and test both paths (state unchanged when seeded; seeded after setting local().state = [0, 0]).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::random::local()": {
-      "finding": "P1: the cited test would pass a wrong binding. test_utilities.py:143-144 asserts `shared is rr.local() or shared.state == rr.local().state`, which a binding returning a copy (or a fresh unseeded generator, [0,0] == [0,0]) also satisfies. Nothing shows that changing local() changes Rack's draws. Smallest fix: cite tests/services/in_rack_utilities/test_utilities.py::test_random_get_signed_types, which seeds local() and checks get() follows it, or add that assertion to test_random.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::random::normal()": {
-      "finding": "P1: no meaningful test. The only assertion is isinstance(rr.normal(), float) (test_utilities.py:150), which a binding to uniform() or any float function would pass. normal is not in the values reference replay (native/tests/values_reference.cpp:180-205 covers only get<T>). Smallest fix: seed local() and compare normal() with Rack's Box-Muller result from two get<float>() draws, or add normal to the compiled reference.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::random::u32()": {
       "verdict": "accept"
@@ -161,19 +155,16 @@
       "verdict": "accept"
     },
     "function:rack::string::f(const char *, ...)": {
-      "finding": "P1: standard printf conversions are refused without being documented. In native/bindings/services/strings.cpp, %c and %s take only the empty length (lines 140-156), so ISO C %lc and %ls are refused. The unsigned case (lines 114-124) has no 't' branch, so %tu, %to and %tx are refused. POSIX %n$ positional arguments also fail as 'unsupported conversion' (line 159). docs/reference/services.md:15-25 names only %n and %p as refused. Also: a one-character non-ASCII str for %c passes only its first UTF-8 byte (line 144), and any non-UTF-8 output (%c with an int >= 128, %s with non-UTF-8 bytes) raises UnicodeDecodeError when the std::string result is converted to str. Smallest fix: support %lc/%ls (via wchar_t) and %t with unsigned conversions, or document every refused form; reject non-ASCII %c strs and document the str return.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::string::fV(const char *, va_list)": {
-      "finding": "P1: fv shares formatPrintf with f (native/bindings/services/strings.cpp:253), so it has the same undocumented refusals: %lc and %ls (lines 140-156), %tu, %to and %tx (lines 114-124), and %n$ positional arguments (line 159). It also has the same UnicodeDecodeError on non-UTF-8 output. docs/reference/services.md:15-25 lists only %n and %p. Smallest fix: as for f, support these forms or document them.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::string::formatTime(const char *, double)": {
       "verdict": "accept"
     },
     "function:rack::string::formatTimeISO(double)": {
-      "finding": "P2: format_time_iso checks only isfinite (native/bindings/services/strings.cpp:313-316) before static_cast<time_t>(timestamp). For a finite value outside time_t's range (e.g. 1e300) that cast is undefined behaviour in C++. format_time has an explicit range check, and docs/reference/services.md (Time) says an out-of-range timestamp raises ValueError for both functions. Smallest fix: apply format_time's range check here.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::string::fromBase64(const std::string &)": {
       "verdict": "accept"
@@ -185,15 +176,13 @@
       "verdict": "accept"
     },
     "function:rack::string::locationToPosition(const std::string &, rack::string::Location)": {
-      "finding": "P2: an undocumented near-endless loop. In Rack's locationToPosition (Rack/src/string.cpp column loop), UTF8NextCodepoint does not advance at a NUL or invalid lead byte, so the loop runs location.column times. location_to_position('\\0', Location(0, 2**63)) therefore effectively hangs, holding the GIL (native/bindings/services/strings.cpp:276 forwards any text and column). Smallest fix: document this, or reject text with NUL/invalid UTF-8 as utf8_to_utf32 does.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::string::lowercase(const std::string &)": {
       "verdict": "accept"
     },
     "function:rack::string::positionToLocation(const std::string &, size_t)": {
-      "finding": "P1: the call never returns on valid Python input, and this is not documented. Rack's positionToLocation column loop `for (i = linePos; i < pos;) i = UTF8NextCodepoint(s, i);` (Rack/src/string.cpp) never advances at a NUL or invalid lead byte, because UTF8CodepointSize returns 0. So position_to_location('a\\x00b', 3) or position_to_location(b'\\x80', 1) loops forever, holding the GIL; on the main thread this freezes Rack. native/bindings/services/strings.cpp:274 forwards any str or bytes, unlike utf8_to_utf32, which guards the same class of hang (lines 324-334). The docs (services.md 'Positions') are silent. Smallest fix: refuse text containing NUL or invalid UTF-8 before pos with ValueError, document it, and test it.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::string::split(const std::string &, const std::string &, size_t)": {
       "verdict": "accept"
@@ -205,12 +194,10 @@
       "verdict": "accept"
     },
     "function:rack::string::toBase64(const std::vector<uint8_t> &)": {
-      "finding": "P0: out-of-bounds read and wrong results for non-contiguous buffers. native/bindings/services/strings.cpp:279-283 calls data.request(), which asks for PyBUF_STRIDES (pybind11/pytypes.h:2369-2370), checks only ndim and itemsize, then passes (info.ptr, info.size) to Rack as if contiguous. memoryview(b'abc')[::-1] starts at the last byte, so Rack reads 2 bytes past the object; memoryview(b'abcdef')[::2] encodes 'abc' instead of 'ace'. The stub (string.pyi:27) accepts memoryview. Smallest fix: require a C-contiguous buffer (PyBUF_C_CONTIGUOUS / strides[0] == 1) and add a strided-memoryview test.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::string::toBase64(const uint8_t *, size_t)": {
-      "finding": "P0: the same binding as the vector overload (native/bindings/services/strings.cpp:279-283). data.request() accepts strided views (PyBUF_STRIDES, pybind11/pytypes.h:2370), and Rack reads info.size contiguous bytes from info.ptr: an out-of-bounds read for a reversed memoryview, wrong output for a stepped one. Smallest fix: require C-contiguous input and test a strided memoryview.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::string::translate(const std::string &)": {
       "verdict": "accept"
@@ -237,8 +224,7 @@
       "verdict": "accept"
     },
     "function_template:rack::string::f<type...>($0...)": {
-      "finding": "P1: this template maps to the same rackpy.raw.string.f, so it has the same undocumented refusals. In native/bindings/services/strings.cpp, %lc and %ls are refused (lines 140-156), %tu, %to and %tx are refused (lines 114-124), and %n$ positional arguments fail (line 159). Non-UTF-8 output (%c >= 128, a non-ASCII one-character str, non-UTF-8 bytes for %s) raises UnicodeDecodeError. docs/reference/services.md:15-25 lists only %n and %p as refused. Smallest fix: as for string::f, support these forms or document them.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function_template:rack::string::join<type>(const $0 &, std::string)": {
       "verdict": "accept"
@@ -256,8 +242,7 @@
       "verdict": "accept"
     },
     "method:rack::WeakPtr::operator=(const rack::WeakPtr<$c0> &)": {
-      "finding": "P2: the docs don't describe this mapping. The record maps Rack's operator= (which retargets an existing pointer: set(other.get()), weakptr.hpp:57-60) to __copy__, which makes a new pointer. Only the manifest notes say to use target.set(source.get()). docs/reference/services.md:357-359 presents __copy__ only as 'Rack's copy' and never mentions operator=. Smallest fix: add a sentence to the services-weakptr section saying operator= is target.set(source.get()).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::WeakPtr::set($c0 *)": {
       "verdict": "accept"
@@ -314,6 +299,6 @@
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/common-03",
+  "reviewer": "agent-review:d8aef3ee-733c-4976-81e6-e0e09c114642+4f4e3575-7334-4856-b97d-2646b1b8da91",
   "slice": "common-03"
 }

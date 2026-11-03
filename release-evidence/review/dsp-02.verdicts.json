@@ -1,5 +1,5 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "c7566a2a721bd7c15176ea01039bd8ed14a689e8",
   "records": {
     "alias:rack::dsp::BiquadFilter": {
       "verdict": "accept"
@@ -20,8 +20,7 @@
       "verdict": "accept"
     },
     "class_template:rack::dsp::IIRFilter<value, value, type>": {
-      "finding": "P2: the cited anchor docs/reference/dsp.md#dsp-iir (lines 289-307) does not state the owner-approved bound (orders 2 to 8; other arguments raise TypeError). The bound is stated only under #dsp-templates (dsp.md:51-53, 74-77), and the record does not cite that anchor. Smallest fix: add docs/reference/dsp.md#dsp-templates to the record's docs, or add one sentence on the 2-8 bound and the TypeError to the IIR filters section.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "class_template:rack::dsp::TBiquadFilter<type>": {
       "verdict": "accept"
@@ -129,26 +128,22 @@
       "verdict": "accept"
     },
     "field:rack::dsp::TExponentialFilter::out": {
-      "finding": "P2: the binding (filter.cpp def_readwrite(\"out\")) and the test (test_filters.py:256, e.out == 0.5) are fine, but the cited section docs/reference/dsp.md#dsp-filters (lines 259-287) never names the out field. It only says process 'returns the new output'. Smallest fix: one sentence in #dsp-filters listing the smoothers' fields (out, lambda_, rise, fall, ...) as Rack's readable and writable fields.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::TExponentialSlewLimiter::fallLambda": {
       "verdict": "accept"
     },
     "field:rack::dsp::TExponentialSlewLimiter::out": {
-      "finding": "P1: no cited test reads or writes ExponentialSlewLimiter.out (or the float_4 out). test_single_pole_filters (test_filters.py:252-293) only calls process/set_rise_fall*/reset on x and reads rise_lambda/fall_lambda, and the reference replay (smoothers) returns only rise_lambda/fall_lambda. #dsp-filters (dsp.md:259-287) does not name the field either. Smallest fix: assert x.out after a process call (and after an assignment that process then reads), and name out in #dsp-filters.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::TExponentialSlewLimiter::riseLambda": {
       "verdict": "accept"
     },
     "field:rack::dsp::TPeakFilter::lambda": {
-      "finding": "P1: neither cited test touches PeakFilter.lambda_. test_single_pole_filters (test_filters.py:259-261) uses only set_lambda/process, and the reference 'smoothers' replay never reads p.lambda_. The only assertion is test_deprecated_forms_warn (test_filters.py:303, p.lambda_ == 0.75), which is not cited. The lambda_ naming is documented only in the ExponentialFilter bullet of #dsp-filters (dsp.md:276-279). Smallest fix: add tests/dsp/in_rack_basic/test_filters.py::test_deprecated_forms_warn to the record, and mention PeakFilter's lambda_ field in #dsp-filters.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::TPeakFilter::out": {
-      "finding": "P1: no test in tests/dsp/in_rack_basic/test_filters.py reads or writes PeakFilter.out or TPeakFilter_float_4.out. peak() is a separate deprecated method, and the reference replays use process() return values only. #dsp-filters (dsp.md:259-287) does not name the field. Smallest fix: assert p.out after p.process(...) in test_single_pole_filters (and an assignment that process then reads), and document out in #dsp-filters.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::TRCFilter::c": {
       "verdict": "accept"
@@ -160,24 +155,19 @@
       "verdict": "accept"
     },
     "field:rack::dsp::TSlewLimiter::fall": {
-      "finding": "P1: no cited test reads or writes SlewLimiter.fall or TSlewLimiter_float_4.fall. test_single_pole_filters (test_filters.py:262-264, 288-292) and the reference 'smoothers' replay only call set_rise_fall and process. #dsp-filters (dsp.md:280-281) names the set_rise_fall parameters, not the field. Smallest fix: assert s.fall after set_rise_fall, and that assigning s.fall changes process(); name the rise/fall fields in #dsp-filters.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::TSlewLimiter::out": {
-      "finding": "P2: tested through the float_4 instantiation (test_filters.py:291-292, the v.out live view), but the cited section docs/reference/dsp.md#dsp-filters (lines 259-287) never names the out field. Smallest fix: name the smoothers' out field in #dsp-filters, in the same sentence as for the other filters.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::TSlewLimiter::rise": {
-      "finding": "P1: no cited test reads or writes SlewLimiter.rise or TSlewLimiter_float_4.rise. Only set_rise_fall/process are exercised (test_filters.py:262-264, 288-290; reference 'smoothers'). #dsp-filters (dsp.md:280-281) does not document the field. Smallest fix: assert s.rise after set_rise_fall plus an assignment that process() reads; name the field in #dsp-filters.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::dsp::boxcarLowpassIR(float *, int, float)": {
-      "finding": "P1: unjustified, undocumented restriction. native/bindings/dsp/advanced.cpp:229-230 raises ValueError for len < 0, but Rack's boxcarLowpassIR (fir.hpp, 'for (int i = 0; i < len; i++)') is well defined for len <= 0 and writes nothing. docs/reference/dsp.md:495-499 does not mention the refusal. Smallest fix: treat len < 0 like 0 (check the buffer for max(len, 0) items and call Rack), or document and justify the ValueError.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::dsp::convolveNaive(const float *, const float *, int)": {
-      "finding": "P1: unjustified, undocumented restriction. native/bindings/dsp/advanced.cpp:222-223 raises ValueError for len < 0, but Rack's convolveNaive (fir.hpp) returns 0.f for len <= 0 (the loop does not run). docs/reference/dsp.md:495-499 does not mention the refusal. Smallest fix: check the buffers for max(len, 0) items and call Rack (it returns 0), or document and justify the ValueError.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::dsp::IIRFilter::getFrequencyPhase($c2)": {
       "verdict": "accept"
@@ -213,8 +203,7 @@
       "verdict": "accept"
     },
     "method:rack::dsp::TExponentialFilter::reset()": {
-      "finding": "P1: neither cited test calls ExponentialFilter.reset(). test_single_pole_filters (test_filters.py:252-258) never resets e, and the reference 'smoothers' replay (native/tests/dsp_reference.cpp:513-540) has no reset. #dsp-filters (dsp.md:259-287) does not mention reset for the smoothers. Smallest fix: in test_single_pole_filters, process to a nonzero out, call e.reset(), and assert e.out == 0.0; mention reset() (out = 0) in #dsp-filters.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::dsp::TExponentialFilter::setLambda($c0)": {
       "verdict": "accept"
@@ -229,8 +218,7 @@
       "verdict": "accept"
     },
     "method:rack::dsp::TExponentialSlewLimiter::reset()": {
-      "finding": "P1: the only call (test_filters.py:272, x.reset()) cannot detect a broken reset. out is already 0.0 at that point (test_filters.py:268 asserts x.process(1.0, 0.0) == 0.0), so the following process(0.5, 1.0) == 0.5 holds even if reset did nothing. #dsp-filters (dsp.md:259-287) does not mention reset. Smallest fix: call reset when out is nonzero (e.g. right after x.process(0.25, 1.0)) and assert x.out == 0.0; document reset() in #dsp-filters.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::dsp::TExponentialSlewLimiter::setRiseFall($c0, $c0)": {
       "verdict": "accept"
@@ -248,19 +236,16 @@
       "verdict": "accept"
     },
     "method:rack::dsp::TPeakFilter::reset()": {
-      "finding": "P1: no cited test calls PeakFilter.reset() or TPeakFilter_float_4.reset(). It is absent from test_single_pole_filters (test_filters.py:259-261) and from the reference replays (dsp_reference.cpp:513-566). #dsp-filters (dsp.md:259-287) does not mention it. Smallest fix: after p.process(0.5, 4.0), call p.reset() and assert the next process(0.5, 0.0) starts from 0; document reset() in #dsp-filters.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::dsp::TPeakFilter::setLambda($c0)": {
-      "finding": "P2: binding and test are fine (test_filters.py:260-261), but the cited section's PeakFilter bullet (docs/reference/dsp.md:280) only says it 'jumps to higher values at once and decays toward lower ones'. set_lambda appears only under ExponentialFilter (dsp.md:276-279). Smallest fix: say in the PeakFilter bullet that it has ExponentialFilter's set_lambda/set_tau/lambda_.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::dsp::TPeakFilter::setRate($c0)": {
       "verdict": "accept"
     },
     "method:rack::dsp::TPeakFilter::setTau($c0)": {
-      "finding": "P2: binding and test (reference 'smoothers' replay) are fine, but the PeakFilter bullet of docs/reference/dsp.md#dsp-filters (dsp.md:280) does not mention set_tau (lambda = 1 / tau). It is described only for ExponentialFilter (dsp.md:276-277). Smallest fix: state in the PeakFilter bullet that set_lambda/set_tau behave as for ExponentialFilter.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::dsp::TRCFilter::highpass()": {
       "verdict": "accept"
@@ -272,8 +257,7 @@
       "verdict": "accept"
     },
     "method:rack::dsp::TRCFilter::reset()": {
-      "finding": "P2: the binding is fine and is tested (test_filters.py:284-286: other.reset() zeroes xstate), but the RCFilter bullet of docs/reference/dsp.md#dsp-filters (dsp.md:270-275) lists set_cutoff, set_cutoff_freq, process, lowpass, highpass, xstate and ystate, not reset(). Smallest fix: add 'reset() zeroes xstate and ystate' to the RCFilter bullet.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::dsp::TRCFilter::setCutoff($c0)": {
       "verdict": "accept"
@@ -288,8 +272,7 @@
       "verdict": "accept"
     },
     "method:rack::dsp::TSlewLimiter::reset()": {
-      "finding": "P1: no cited test calls SlewLimiter.reset() or TSlewLimiter_float_4.reset(). It is absent from test_single_pole_filters (test_filters.py:262-264, 288-292) and from the reference replays (dsp_reference.cpp:513-566). #dsp-filters (dsp.md:259-287) does not mention it. Smallest fix: after s.process(0.1, 5.0), call s.reset() and assert s.out == 0.0; document reset() in #dsp-filters.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::dsp::TSlewLimiter::setRiseFall($c0, $c0)": {
       "verdict": "accept"
@@ -298,6 +281,6 @@
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/dsp-02",
+  "reviewer": "agent-review:bcc462d8-939d-45a6-b615-36f6c0f6d074",
   "slice": "dsp-02"
 }

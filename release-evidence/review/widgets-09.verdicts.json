@@ -1,5 +1,5 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "d199bc8f94c0a9b603cddcc7d867ebed70c3634e",
   "records": {
     "alias:rack::ui::ScrollBar": {
       "verdict": "accept"
@@ -14,8 +14,7 @@
       "verdict": "accept"
     },
     "constructor:rack::ui::MenuEntry::MenuEntry()": {
-      "finding": "P1: the cited test test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35) only checks issubclass(ui.MenuItem, ui.MenuEntry). ui.MenuEntry() is never constructed in any cited test. Smallest fix: construct a MenuEntry (or a Python subclass), assert Rack's default size (box.size == Vec(0, BND_WIDGET_HEIGHT)) and add it to a Menu.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "constructor:rack::ui::MenuOverlay::MenuOverlay()": {
       "verdict": "accept"
@@ -30,8 +29,7 @@
       "verdict": "accept"
     },
     "constructor:rack::ui::Scrollbar::Scrollbar()": {
-      "finding": "P1: the only cited behaviour test, test_scroll_widget_container_and_offsets (tests/ui/in_rack/test_widgets.py:337-369), never calls ui.Scrollbar(); its scrollbars are Rack-made HostWidgets. test_scrollbar_drag_uses_its_orientation (test_widgets.py:371-389) does construct one but is not cited. Smallest fix: cite that test.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "destructor:rack::ui::Menu::~Menu()": {
       "verdict": "accept"
@@ -40,8 +38,7 @@
       "verdict": "accept"
     },
     "destructor:rack::ui::Scrollbar::~Scrollbar()": {
-      "finding": "P1: no cited test closes or deletes a Python ui.Scrollbar and asserts it is invalidated. test_scroll_widget_container_and_offsets (tests/ui/in_rack/test_widgets.py:337-369) only deletes Rack-made scrollbars implicitly. Smallest fix: close a detached Scrollbar, and delete one owned by a ScrollWidget, then assert .alive is False.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "enum:rack::ui::Label::Alignment": {
       "verdict": "accept"
@@ -89,12 +86,10 @@
       "verdict": "accept"
     },
     "field:rack::ui::Button::text": {
-      "finding": "P1: no cited test reads Button.text back. test_rack_draws_the_widgets only assigns it (tests/ui/in_rack/test_widgets.py:212) and has no assertion; the other cited tests never touch text. Smallest fix: add a text round-trip assertion (e.g. in test_fields_round_trip) and cite it.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::ui::ColorDotMenuItem::color": {
-      "finding": "P1: the only cited behaviour test is test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35). ColorDotMenuItem.color is never set or read in a test. Smallest fix: add a color round-trip (as for Label.color in test_fields_round_trip) and cite it.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::ui::Label::alignment": {
       "verdict": "accept"
@@ -112,8 +107,7 @@
       "verdict": "accept"
     },
     "field:rack::ui::Menu::activeEntry": {
-      "finding": "P0: Menu.active_entry returns wrapper(native.activeEntry) (native/bindings/ui/ui.cpp:298). Rack never clears activeEntry when that entry is removed or deleted; it only compares the pointer (Rack src/ui/MenuItem.cpp:21,68,73). After the active item is detached and closed, or request_delete()d and the menu stepped, reading active_entry hands a dangling pointer to wrapper(), which falls through to the external path and calls Rack's WeakPtr::set(native) (native/bindings/widget/managed.cpp:325-332), which dereferences ptr->weakHandle: a use-after-free that RackPy introduces. Smallest fix: track the entry like TextField prev/next_field (clear activeEntry from the entry's onDestroyed, ui.cpp focusField) or only return it if it is still a child of the menu; add a test that deletes the active entry and reads active_entry.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::ui::Menu::childMenu": {
       "verdict": "accept"
@@ -122,28 +116,22 @@
       "verdict": "accept"
     },
     "field:rack::ui::Menu::parentMenu": {
-      "finding": "P1: Rack's Menu::parentMenu is a public writable field (SDK include/ui/Menu.hpp:12), but RackPy makes it read-only (native/bindings/ui/ui.cpp:295). The notes and docs (docs/reference/ui.md ui-menus: 'So is parent_menu, which Rack 2.6.6 never sets') give no crash or ownership reason for refusing writes. Because Python can never set it, reading it always returns None and the field has no usable meaning. Smallest fix: allow writes with lifetime tracking, as focusField does for TextField prev/next_field (clear on the target's deletion), or document a real safety justification for the restriction.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::ui::MenuItem::disabled": {
-      "finding": "P1: the cited doc anchor docs/reference/ui.md#ui-menus never mentions MenuItem.disabled or what it does in Rack (no action on drop; drawn as a label). The tests are fine. Smallest fix: list MenuItem's text, right_text and disabled fields in the ui-menus section.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::ui::MenuItem::rightText": {
-      "finding": "P1: the cited doc anchor docs/reference/ui.md#ui-menus never mentions MenuItem.right_text; it appears only as a helper parameter in the uncited ui-menu-helpers section. Smallest fix: document text, right_text and disabled under ui-menus.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::ui::MenuItem::text": {
-      "finding": "P1: the cited doc anchor docs/reference/ui.md#ui-menus never mentions the MenuItem.text field. Smallest fix: document text, right_text and disabled under ui-menus.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::ui::MenuLabel::text": {
-      "finding": "P1: test_rack_draws_the_widgets only assigns menu_label.text (tests/ui/in_rack/test_widgets.py:212) and never reads it back. The cited doc anchor docs/reference/ui.md#ui-menus names MenuLabel but not its text field. Smallest fix: add a round-trip assertion and document MenuLabel.text in ui-menus.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::ui::MenuOverlay::bgColor": {
-      "finding": "P1: test_menus_child_menus_and_actions only assigns overlay.bg_color (tests/ui/in_rack/test_widgets.py:408) and never reads it back. The cited anchor docs/reference/ui.md#ui-menus does not mention bg_color. Smallest fix: assert the round trip (and Rack's transparent default) and document MenuOverlay.bg_color in ui-menus.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::ui::ProgressBar::quantity": {
       "verdict": "accept"
@@ -170,8 +158,7 @@
       "verdict": "accept"
     },
     "field:rack::ui::SequentialLayout::alignment": {
-      "finding": "P1: test_fields_round_trip assigns layout.alignment = MIDDLE_ALIGNMENT (tests/ui/in_rack/test_widgets.py:52) but never reads it back, and test_sequential_layout_positions_its_children never sets alignment. Neither the getter nor the effect on layout is asserted. Smallest fix: assert layout.alignment == ui.SequentialLayout.Alignment.CENTER_ALIGNMENT after the assignment, or assert centred child positions after step().",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::ui::SequentialLayout::margin": {
       "verdict": "accept"
@@ -186,8 +173,7 @@
       "verdict": "accept"
     },
     "method:rack::ui::Button::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: no cited test exercises rackpy.raw.ui.Button.draw. test_rack_draws_the_widgets (tests/ui/in_rack/test_widgets.py:208-225) only calls frame.render() through Rack's virtual draw, never calls the Python draw method and asserts nothing; the other cited tests do not draw. Smallest fix: add an in-Rack test where a draw override calls super().draw(args) and asserts something observable (e.g. the override ran and returned without error inside a render, or a pixel/state check), and cite it.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::Button::onDragDrop(const rack::widget::Widget::DragDropEvent &)": {
       "verdict": "accept"
@@ -199,39 +185,31 @@
       "verdict": "accept"
     },
     "method:rack::ui::ChoiceButton::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: the only cited behaviour test is test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35), which runs issubclass checks only. No ChoiceButton is ever constructed or drawn. Smallest fix: add an in-Rack test that draws a ChoiceButton (a draw override calling super().draw(args)) and cite it.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::ColorDotMenuItem::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: the only cited test is test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35), an issubclass check. No ColorDotMenuItem is constructed or drawn. Smallest fix: an in-Rack test that renders a ColorDotMenuItem through a draw override calling super().draw(args), cited here.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::ColorDotMenuItem::step()": {
-      "finding": "P1: the only cited test is test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35). ColorDotMenuItem.step is never called, so Rack's behaviour (MenuItem::step plus 20 px width, src/ui/MenuItem.cpp ColorDotMenuItem::step) is unverified. Smallest fix: step a ColorDotMenuItem and a MenuItem with the same text and assert the 20 px width difference.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::Label::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: no cited test exercises rackpy.raw.ui.Label.draw. test_rack_draws_the_widgets (tests/ui/in_rack/test_widgets.py:208-225) renders through Rack's virtual draw with no assertion and never calls the Python method; test_fields_round_trip does not draw. Smallest fix: an in-Rack draw-override test that calls super().draw(args) with an assertion, cited here.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::List::step()": {
-      "finding": "P1: the record cites only test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35), which never calls List.step. test_list_positions_children_vertically (test_widgets.py:83-94) does assert Rack's List::step layout but is cited only on record:rack::ui::List. Smallest fix: add tests/ui/in_rack/test_widgets.py::test_list_positions_children_vertically to this record's tests.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::Menu::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: no cited test draws a Menu or calls rackpy.raw.ui.Menu.draw. test_menus_child_menus_and_actions and test_bad_child_menus_are_contained (tests/ui/in_rack/test_widgets.py:391-447) never render. Smallest fix: an in-Rack test that renders a Menu with a draw override calling super().draw(args) and asserts on it, cited here.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::Menu::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)": {
-      "finding": "P1: no cited test calls Menu.on_hover_scroll. The cited tests (tests/ui/in_rack/test_widgets.py:391-447) never send a HoverScrollEvent to a Menu. Rack's behaviour (src/ui/Menu.cpp: box.pos.y += scrollDelta.y when the menu is not inside its parent's box) is therefore unverified. Smallest fix: place a Menu taller than its overlay, call on_hover_scroll and assert box.pos.y moves.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::Menu::setChildMenu(rack::ui::Menu *)": {
       "verdict": "accept"
     },
     "method:rack::ui::Menu::step()": {
-      "finding": "P0: Rack's Menu::step ends with assert(parent); box = box.nudge(parent->box.zeroPos()) (Rack src/ui/Menu.cpp:52-53). Asserts are on, since Rack's makefiles do not define NDEBUG. The Python step binding (native/bindings/widget/behavior.hpp:34-40) has no parent check, so ui.Menu().step() on a detached menu aborts or crashes Rack. The cited tests never call Menu.step. Smallest fix: refuse step on a Menu with no parent (OwnershipError, as set_child_menu does at ui.cpp:305), document it, and test both the refusal and an attached step.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::MenuItem::createChildMenu()": {
       "verdict": "accept"
@@ -240,8 +218,7 @@
       "verdict": "accept"
     },
     "method:rack::ui::MenuItem::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: no cited test exercises rackpy.raw.ui.MenuItem.draw. test_rack_draws_the_widgets (tests/ui/in_rack/test_widgets.py:208-225) renders via Rack's virtual draw without assertions and never calls the Python method; the menu tests never render. Smallest fix: an in-Rack draw-override test calling super().draw(args) with an assertion, cited here.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::MenuItem::onAction(const rack::widget::Widget::ActionEvent &)": {
       "verdict": "accept"
@@ -250,75 +227,58 @@
       "verdict": "accept"
     },
     "method:rack::ui::MenuItem::onEnter(const rack::widget::Widget::EnterEvent &)": {
-      "finding": "P0: on_enter calls Rack's MenuItem::onEnter (native/bindings/widget/behavior.hpp BIND_EVENT). That calls createChildMenu(), which for a Python create_child_menu override returns a handed-over Menu (ui.cpp MenuItemWidget/handOver), and then parentMenu->setChildMenu(childMenu) (Rack src/ui/MenuItem.cpp:76), which does assert(parent) (src/ui/Menu.cpp:24). For an item in a Menu that has no parent (ui.Menu() with no MenuOverlay), item.on_enter(EnterEvent()) aborts Rack. set_child_menu guards exactly this case (ui.cpp:305), but this path does not. Smallest fix: in MenuItemWidget::createChildMenu or the on_enter binding, refuse or return no menu when the parent Menu has no parent; add a test.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::MenuItem::step()": {
-      "finding": "P1: no cited test asserts MenuItem.step behaviour. test_rack_draws_the_widgets (tests/ui/in_rack/test_widgets.py:208-225) steps the layout with no assertion; the menu tests do not step items. Rack's behaviour (box.size.x from the label widths, src/ui/MenuItem.cpp MenuItem::step) is unverified. Smallest fix: step an item and assert its width grows with text and right_text.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::MenuLabel::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: the only cited test, test_rack_draws_the_widgets (tests/ui/in_rack/test_widgets.py:208-225), renders through Rack's virtual draw with no assertion and never calls the Python MenuLabel.draw. Smallest fix: an in-Rack draw-override test calling super().draw(args) with an assertion, cited here.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::MenuLabel::step()": {
-      "finding": "P1: the only cited test, test_rack_draws_the_widgets (tests/ui/in_rack/test_widgets.py:208-225), steps the layout without asserting anything. Rack's MenuLabel::step width (label width + 10, src/ui/MenuLabel.cpp) is unverified. Smallest fix: call step and assert box.size.x > 10 and that it grows with text.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::MenuOverlay::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: the only cited behaviour test, test_menus_child_menus_and_actions (tests/ui/in_rack/test_widgets.py:391-431), never renders the overlay or calls MenuOverlay.draw. Smallest fix: an in-Rack draw-override test calling super().draw(args) with an assertion, cited here.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::MenuOverlay::onAction(const rack::widget::Widget::ActionEvent &)": {
-      "finding": "P1: the cited test never calls MenuOverlay.on_action. first.do_action() (tests/ui/in_rack/test_widgets.py:421) reaches overlay->requestDelete() directly from MenuItem::doAction (Rack src/ui/MenuItem.cpp), not through MenuOverlay::onAction. Smallest fix: call overlay.on_action(ActionEvent()) and assert overlay.requested_delete.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::MenuOverlay::onButton(const rack::widget::Widget::ButtonEvent &)": {
-      "finding": "P1: no cited test sends a ButtonEvent to a MenuOverlay. test_text_field_context_menu_intercepts_clicks covers outside-click interception but is not cited here. Smallest fix: cite that test, or add a direct on_button test asserting the event is consumed and the overlay requests deletion on press.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::MenuOverlay::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
-      "finding": "P1: no cited test calls MenuOverlay.on_hover_key. Rack's behaviour (Escape closes the menu and every key is consumed, src/ui/MenuOverlay.cpp) is unverified. Smallest fix: send an Escape HoverKeyEvent and assert requested_delete and consumption.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::MenuOverlay::step()": {
-      "finding": "P0: Rack's MenuOverlay::step does box = parent->box.zeroPos() with no null check (Rack src/ui/MenuOverlay.cpp:26). The Python step binding (native/bindings/widget/behavior.hpp:34-40) has no parent guard, so ui.MenuOverlay().step() on a detached overlay dereferences null and crashes Rack. No cited test calls it. Smallest fix: refuse step on a parentless MenuOverlay (OwnershipError), document it, and test both the refusal and an attached step.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::MenuSeparator::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: the only cited test, test_rack_draws_the_widgets (tests/ui/in_rack/test_widgets.py:208-225), renders through Rack's virtual draw without assertions and never calls the Python MenuSeparator.draw. Smallest fix: an in-Rack draw-override test calling super().draw(args) with an assertion, cited here.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::OptionButton::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: the only cited test is test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35), an issubclass check. No OptionButton is constructed or drawn. Smallest fix: an in-Rack test drawing an OptionButton through super().draw(args), cited here.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::ProgressBar::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: no cited test exercises rackpy.raw.ui.ProgressBar.draw. test_rack_draws_the_widgets (tests/ui/in_rack/test_widgets.py:208-225) renders via Rack's virtual draw with no assertion and never calls the Python method; test_quantity_fields_keep_their_quantity_alive does not draw. Smallest fix: an in-Rack draw-override test calling super().draw(args) with an assertion, cited here.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::RadioButton::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: the only cited behaviour test is test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35), an issubclass check. No RadioButton is drawn. Smallest fix: an in-Rack test drawing a RadioButton through super().draw(args), cited here.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::RadioButton::onDragDrop(const rack::widget::Widget::DragDropEvent &)": {
       "verdict": "accept"
     },
     "method:rack::ui::RadioButton::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
-      "finding": "P1: the only cited test is test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35). RadioButton.on_drag_end is never called. Rack's override deliberately does not set the quantity to its minimum, unlike Button (src/ui/RadioButton.cpp), and that is unverified. Smallest fix: call on_drag_end on a RadioButton whose quantity is at its maximum and assert the value is unchanged.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::RadioButton::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
-      "finding": "P1: the only cited test is test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35). RadioButton.on_drag_start is never called. Rack's override deliberately skips Button's setMax (src/ui/RadioButton.cpp), and that is unverified. Smallest fix: call on_drag_start(DragStartEvent(button=0)) and assert the quantity is not set to its maximum.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::ScrollWidget::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: the only cited behaviour test, test_scroll_widget_container_and_offsets (tests/ui/in_rack/test_widgets.py:337-369), never renders the ScrollWidget or calls ScrollWidget.draw. Smallest fix: an in-Rack draw-override test calling super().draw(args) with an assertion, cited here.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::ScrollWidget::getContainerOffsetBound()": {
-      "finding": "P1: the only assertion is isinstance(scroll.get_container_offset_bound(), Rect) (tests/ui/in_rack/test_widgets.py:351), which would pass for any wrong Rect. Smallest fix: assert it equals Rect(container_box.pos, container_box.size.minus(scroll.box.size)), which is Rack's definition (src/ui/ScrollWidget.cpp getContainerOffsetBound).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::ScrollWidget::getHandleOffset()": {
       "verdict": "accept"
@@ -333,22 +293,19 @@
       "verdict": "accept"
     },
     "method:rack::ui::ScrollWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
-      "finding": "P1: no cited test calls ScrollWidget.on_button. Rack's behaviour (a middle or Alt-left click on a scrollable widget is consumed before its children, src/ui/ScrollWidget.cpp onButton) is unverified. Smallest fix: send a middle-button ButtonEvent to a scrollable ScrollWidget and assert it is consumed.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::ScrollWidget::onDragMove(const rack::widget::Widget::DragMoveEvent &)": {
       "verdict": "accept"
     },
     "method:rack::ui::ScrollWidget::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
-      "finding": "P1: no cited test calls ScrollWidget.on_drag_start (tests/ui/in_rack/test_widgets.py:337-369 has none), so Rack's consume (src/ui/ScrollWidget.cpp onDragStart) is unverified. Smallest fix: call on_drag_start with an EventContext and assert the event is consumed.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::ScrollWidget::onHover(const rack::widget::Widget::HoverEvent &)": {
       "verdict": "accept"
     },
     "method:rack::ui::ScrollWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
-      "finding": "P1: no cited test calls ScrollWidget.on_hover_key, so Rack's PageUp/PageDown/Home/End scrolling (src/ui/ScrollWidget.cpp onHoverKey) is unverified. Smallest fix: send a PAGE_DOWN press HoverKeyEvent to a scrollable widget and assert offset.y grows by box.size.y/2 and the event is consumed.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::ScrollWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)": {
       "verdict": "accept"
@@ -360,24 +317,19 @@
       "verdict": "accept"
     },
     "method:rack::ui::Scrollbar::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P0: Rack's Scrollbar::draw does assert(dynamic_cast<ScrollWidget*>(parent)) (Rack src/ui/Scrollbar.cpp:24-25), and Rack's asserts are on. RackPy lets a ui.Scrollbar be added to any parent and drawn, both through the Python draw binding and through the trampoline fallback (native/bindings/widget/trampoline.hpp:135-141). validateNativeDraw (native/bindings/widget/drawing.hpp:43-55) guards Svg and Framebuffer crashes but not this one, so a Scrollbar inside a FramebufferWidget aborts Rack on render. No cited test draws a Scrollbar. Smallest fix: refuse or skip native Scrollbar draw unless its parent is a ScrollWidget (add it to validateNativeDraw), document it, and test it.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::Scrollbar::onButton(const rack::widget::Widget::ButtonEvent &)": {
-      "finding": "P0: Rack's Scrollbar::onButton does assert(dynamic_cast<ScrollWidget*>(parent)) on a left press (Rack src/ui/Scrollbar.cpp:41-43). The on_button binding (native/bindings/widget/behavior.hpp BIND_EVENT) has no parent check, so ui.Scrollbar().on_button(ButtonEvent(button=0, action=PRESS)) aborts Rack. No cited test calls it. Smallest fix: refuse when the parent is not a ScrollWidget (OwnershipError), document it, and test both the jump-to-position behaviour and the refusal.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::Scrollbar::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
-      "finding": "P1: no cited test calls Scrollbar.on_drag_end (tests/ui/in_rack/test_widgets.py:337-369 has none). Rack's override is an intentional no-op (src/ui/Scrollbar.cpp), so even a call-and-no-change assertion is missing. Smallest fix: call it and assert the ScrollWidget's offset is unchanged.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::Scrollbar::onDragMove(const rack::widget::Widget::DragMoveEvent &)": {
-      "finding": "P0: Rack's Scrollbar::onDragMove does assert(dynamic_cast<ScrollWidget*>(parent)) (Rack src/ui/Scrollbar.cpp:71-72). The on_drag_move binding (native/bindings/widget/behavior.hpp BIND_EVENT) has no guard, so ui.Scrollbar().on_drag_move(DragMoveEvent(...)) on a detached bar, or one under any other parent, aborts Rack. The cited test only covers the attached case (tests/ui/in_rack/test_widgets.py:371-389). Smallest fix: refuse when the parent is not a ScrollWidget, document it, and test the refusal.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::Scrollbar::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
-      "finding": "P1: no cited test calls Scrollbar.on_drag_start. Rack's override is an intentional no-op that does not consume (src/ui/Scrollbar.cpp), and that is unverified. Smallest fix: call it with an EventContext and assert the event is not consumed and the offset is unchanged.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::SequentialLayout::step()": {
       "verdict": "accept"
@@ -386,12 +338,10 @@
       "verdict": "accept"
     },
     "record:rack::ui::ChoiceButton": {
-      "finding": "P1: the only cited test is test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35), an issubclass check. ui.ChoiceButton() is never constructed, subclassed or used in any cited test. Smallest fix: construct, configure and draw or dispatch to a ChoiceButton in an in-Rack test and cite it.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "record:rack::ui::ColorDotMenuItem": {
-      "finding": "P1: the only cited test is test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35), an issubclass check. ui.ColorDotMenuItem is never constructed or used in a cited test. Smallest fix: construct one in a Menu, set color, step and draw it, and cite that test.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "record:rack::ui::Label": {
       "verdict": "accept"
@@ -403,8 +353,7 @@
       "verdict": "accept"
     },
     "record:rack::ui::MenuEntry": {
-      "finding": "P1: the only cited test is test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35), an issubclass check. MenuEntry is never constructed or subclassed directly in a cited test, although the docs promise it is directly subclassable (docs/reference/ui.md ui-menus). Smallest fix: an in-Rack test that subclasses MenuEntry, adds it to a Menu and steps or draws it.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "record:rack::ui::MenuItem": {
       "verdict": "accept"
@@ -419,27 +368,24 @@
       "verdict": "accept"
     },
     "record:rack::ui::OptionButton": {
-      "finding": "P1: the only cited test is test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35), an issubclass check. ui.OptionButton() is never constructed or used. Smallest fix: construct one with a quantity, exercise its inherited RadioButton toggle and draw, and cite the test.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "record:rack::ui::ProgressBar": {
       "verdict": "accept"
     },
     "record:rack::ui::RadioButton": {
-      "finding": "P1: the record cites only test_classes_follow_racks_hierarchy (tests/ui/in_rack/test_widgets.py:27-35), an issubclass check. test_button_radio_and_menu_drop_actions (test_widgets.py:123-155) does subclass and use RadioButton but is not cited on the record. Smallest fix: add that test to this record's tests.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "record:rack::ui::ScrollWidget": {
       "verdict": "accept"
     },
     "record:rack::ui::Scrollbar": {
-      "finding": "P1: the only cited behaviour test, test_scroll_widget_container_and_offsets (tests/ui/in_rack/test_widgets.py:337-369), never constructs or subclasses the Python ui.Scrollbar class; the scrollbars it touches are Rack-made HostWidgets. Smallest fix: cite test_scrollbar_drag_uses_its_orientation (test_widgets.py:371-389).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "record:rack::ui::SequentialLayout": {
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/widgets-09",
+  "reviewer": "agent-review:2481d69c-7995-4800-a310-3636c7ee5a0e",
   "slice": "widgets-09"
 }

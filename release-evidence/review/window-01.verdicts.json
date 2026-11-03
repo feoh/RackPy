@@ -1,12 +1,11 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "c7566a2a721bd7c15176ea01039bd8ed14a689e8",
   "records": {
     "alias:rack::window::SVG": {
       "verdict": "accept"
     },
     "destructor:rack::Context::~Context()": {
-      "finding": "P2: the cited doc anchor does not describe this record's behaviour. docs/reference/window.md:219-229 (window-lifetimes) covers only Font, Image and NativeHandle staleness and the graphics context. It never says that Rack deletes its Context when it quits, or that rackpy.raw.Context then reports alive False and raises StaleHandleError. The binding (native/bindings/window.cpp:31-36) and the test (tests/rendering/in_rack/test_rendering.py:656-675, asserting `not context.alive`) do both. Smallest fix: add one sentence on Context lifetime and staleness to window-lifetimes or window-context, and cite it.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "destructor:rack::window::Font::~Font()": {
       "verdict": "accept"
@@ -18,8 +17,7 @@
       "verdict": "accept"
     },
     "field:rack::Context::engine": {
-      "finding": "P2: the cited anchor docs/reference/engine.md#engine-threads (engine.md:13-25) covers threading for Engine methods. It never names Context.engine or its read-only, None-once-deleted behaviour from the notes; only the page intro above the anchor (engine.md:3-4) mentions Context.engine. Binding (window.cpp:63-67) and test (tests/engine/ops/in_rack/test_engine.py:21-40) are fine. Smallest fix: name Context.engine (read-only, main thread, None once Rack deletes the engine) in that section, or cite an anchor that does.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::Context::event": {
       "verdict": "accept"
@@ -49,8 +47,7 @@
       "verdict": "accept"
     },
     "field:rack::window::Image::vg": {
-      "finding": "P1: no cited test checks Image.vg on a loaded image (binding at native/bindings/drawing/resources.cpp:289-293). The only assertion is `image.vg is None` for an unloaded Image (tests/rendering/in_rack/test_rendering.py:576). The `own.vg is window_.vg` check at line 557 is on a Font. A binding that always returned None would pass every cited test. Smallest fix: after image.load_file(path, vg) and on a window.load_image() result, assert that `image.vg is window_.vg` (or `fb_vg` for the threaded image loaded into contexts(window_)[1]).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::window::Svg::handle": {
       "verdict": "accept"
@@ -122,8 +119,7 @@
       "verdict": "accept"
     },
     "method:rack::window::Svg::draw(NVGcontext *)": {
-      "finding": "P1: no cited test calls Svg.draw (binding at native/bindings/widget/variants_svg.cpp:31). The only cited test, tests/widget/in_rack/test_variants.py:237-284, renders through SvgWidget, and Rack's SvgWidget::draw calls window::svgDraw(args.vg, svg->handle) directly (Rack src/widget/SvgWidget.cpp:34), never Svg::draw. A search of tests/ finds no `.draw(` call on an Svg. The cited anchor widgets.md#typed-bases (widgets.md:176-195) also does not mention draw; it is described only in widgets.md 'Drawing' (line 153) and window.md#window-svg. Smallest fix: add an in-Rack test that calls svg.draw(vg) inside a draw callback and checks the rendered pixels (as test_svg_handles_and_svg_draw does for svg_draw), and cite docs/reference/window.md#window-svg.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::window::Svg::getNumPaths()": {
       "verdict": "accept"
@@ -135,8 +131,7 @@
       "verdict": "accept"
     },
     "method:rack::window::Svg::getSize()": {
-      "finding": "P2: the only cited doc anchor, docs/reference/widgets.md#typed-bases (widgets.md:176-195), names load_string, load_file and Svg.load but not get_size. get_size() is described only in docs/reference/window.md#window-svg, which this record does not cite. Binding (variants_svg.cpp:27) and test (test_variants.py:283, `svg.get_size() == Vec(17, 23)`) are fine. Smallest fix: add docs/reference/window.md#window-svg to the record's docs.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::window::Svg::load(const std::string &)": {
       "verdict": "accept"
@@ -196,8 +191,7 @@
       "verdict": "accept"
     },
     "method:rack::window::Window::setSize(rack::math::Vec)": {
-      "finding": "P1: no cited test checks that set_size reaches Rack's Window::setSize. tests/rendering/in_rack/test_rendering.py:500-503 only calls window_.set_size(size) with the current size and checks RackPy's own ValueError for an infinite size. Nothing checks the requested size or Rack's 640 x 480 clamp (Rack src/window/Window.cpp:410-413), so a no-op binding (resources.cpp:337-340) would pass. Smallest fix: request a size below the minimum (e.g. Vec(100, 100)), wait a UI frame or two, assert get_size() == Vec(640, 480), then restore the original size.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "opaque_record:rack::midiloopback::Context": {
       "verdict": "accept"
@@ -215,8 +209,7 @@
       "verdict": "accept"
     },
     "record:rack::window::Svg": {
-      "finding": "P2: the record's notes are misleading. They call the record 'partial: CPU SVG values that SvgWidget needs; the window family (fonts, images, NanoVG) is RP-27', but RP-27A has since bound every Svg member (variants_svg.cpp:12-46; window.cpp:116-127 for the SVG alias) and the status is implemented. The record also cites only widgets.md#typed-bases, not docs/reference/window.md#window-svg, which documents the class. Smallest fix: update the notes to say all of Svg is bound, and add window.md#window-svg and test_rendering.py::test_svg_handles_and_svg_draw to the record.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "record:rack::window::Window": {
       "verdict": "accept"
@@ -228,6 +221,6 @@
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/window-01",
+  "reviewer": "agent-review:bcc462d8-939d-45a6-b615-36f6c0f6d074",
   "slice": "window-01"
 }

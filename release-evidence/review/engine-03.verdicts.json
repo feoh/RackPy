@@ -1,13 +1,11 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "c7566a2a721bd7c15176ea01039bd8ed14a689e8",
   "records": {
     "destructor:rack::engine::PortInfo::~PortInfo()": {
-      "finding": "P1: the only cited test, test_components_owned.py::test_info_names_and_python_overrides (:253-271), creates PortInfo objects but never observes their destruction. Nothing checks the alias/SlotTransfer teardown (metadata.hpp:41-44 detaches the module link), or Rack deleting a slot-owned PortInfo through the virtual destructor. Smallest fix: cite tests/engine/module/in_rack/test_standalone_metadata.py::test_standalone_module_rollback_gc_and_churn (deletes linked PortInfo objects and checks backreference cleanup) and a slot-retirement test from test_transferred_metadata.py.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "enum:rack::engine::Port::Type": {
-      "finding": "P2: the only cited doc, docs/reference/engine-components.md#components-info (lines 87-114), never names Port.Type or its members. The enum is described under #components-ports (engine-components.md:36-38). Smallest fix: add docs/reference/engine-components.md#components-ports to the record's docs.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "enumerator:rack::engine::Port::Type::INPUT": {
       "verdict": "accept"
@@ -64,12 +62,10 @@
       "verdict": "accept"
     },
     "field:rack::engine::Port::active": {
-      "finding": "P1: no cited test checks what the field does. test_components_owned.py:215 only asserts that a fresh port's active == 0, which a constant 0 would also satisfy. The deprecated-operation tests (test_deprecated_operations.py:100) only check the warning. The setter (components.cpp:364-370: union with channels, channelCount range check) is never exercised by any test. Smallest fix: in test_deprecated_members_warn_and_unstable_ones_work, set p.active = 3, assert p.get_channels() == 3 (the union), and assert that p.active = 17 raises ValueError.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::engine::Port::channels": {
-      "finding": "P1: the cited tests only check the warning (test_deprecated_operations.py:101) and that writing 200 raises ValueError (test_components_owned.py:135-144). None asserts that the getter returns the raw count or that the setter writes it (components.cpp:357-363). That behaviour is asserted only in uncited tests (tests/simd/in_rack/test_simd.py:613-619; the connected() helper used by test_every_reference_case_matches_rack). Smallest fix: cite tests/engine/in_rack/test_components_owned.py::test_every_reference_case_matches_rack and add a round-trip check such as p.channels = 3; assert p.channels == 3 == p.get_channels().",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::engine::Port::plugLights": {
       "verdict": "accept"
@@ -90,12 +86,10 @@
       "verdict": "accept"
     },
     "field:rack::engine::PortInfo::portId": {
-      "finding": "P1: the only cited test, test_raw_vectors.py::test_identity_fields_are_constructor_scoped (:303-350), exercises PortInfoView.port_id, a separate class (engine.pyi:116), not the record's rackpy.raw.engine.PortInfo.port_id (components.cpp:402). The cited doc, engine-components.md#components-info, never names port_id or its rule that identity fields freeze once a sealed slot owns the object (requireIdentityEdit, components.cpp:139-146). Smallest fix: cite tests/engine/module/in_rack/test_standalone_metadata.py::test_standalone_module_identity_null_and_reassignment (with an empty name, port_id = 0 yields Rack's \"#1\" through get_name), and mention port_id/type and the freeze rule under #components-info, or cite engine-module.md#metadata-class-factories.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::engine::PortInfo::type": {
-      "finding": "P2: the test is adequate, but the cited doc docs/reference/engine-components.md#components-info (lines 87-114) never names the type field or its rule that identity fields freeze once a sealed slot owns the object (identityField/requireIdentityEdit, components.cpp:139-146, 401). Smallest fix: one sentence under #components-info naming type (a Port.Type) and port_id as identity fields, with a link to the freeze rule in engine-module.md.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::engine::SwitchQuantity::labels": {
       "verdict": "accept"
@@ -104,8 +98,7 @@
       "verdict": "accept"
     },
     "method:rack::engine::ParamQuantity::getDefaultValue()": {
-      "finding": "P2: the record's ownership says \"borrowed; per-slot generation and weak module backreference\", but rackpy.raw.engine.ParamQuantity.get_default_value runs on Python-created objects that Python owns (StandaloneQuantity, standalone_quantity.cpp:224 py::init_alias, binding at :260). The other records of this class correctly say \"owned by Python, attached by a weak module link, or owned by a module slot\". The implementation field also points at support/quantity.hpp (the trampoline) rather than the Python binding at standalone_quantity.cpp:260. Smallest fix: use the class's ownership string and cite standalone_quantity.cpp (keep quantity.hpp as the trampoline).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::engine::ParamQuantity::getDescription()": {
       "verdict": "accept"
@@ -126,26 +119,22 @@
       "verdict": "accept"
     },
     "method:rack::engine::ParamQuantity::getMaxValue()": {
-      "finding": "P2: the record's ownership says \"borrowed; per-slot generation and weak module backreference\", but get_max_value on rackpy.raw.engine.ParamQuantity runs on Python-owned, weakly attached or slot-owned objects (standalone_quantity.cpp:224, :259). This contradicts the class's other records, and the implementation field names support/quantity.hpp instead of the binding at standalone_quantity.cpp:259. Smallest fix: correct the ownership and implementation fields.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::engine::ParamQuantity::getMinValue()": {
-      "finding": "P2: the record's ownership says \"borrowed; per-slot generation and weak module backreference\", but get_min_value on rackpy.raw.engine.ParamQuantity runs on Python-owned, weakly attached or slot-owned objects (standalone_quantity.cpp:224, :258). This contradicts the class's other records, and the implementation field names support/quantity.hpp instead of the binding at standalone_quantity.cpp:258. Smallest fix: correct the ownership and implementation fields.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::engine::ParamQuantity::getParam()": {
       "verdict": "accept"
     },
     "method:rack::engine::ParamQuantity::getSmoothValue()": {
-      "finding": "P2: the binding reimplements the method instead of calling Rack's ParamQuantity::getSmoothValue. standalone_quantity.cpp:280-284 calls the qualified, non-virtual q.Q::getValue() whenever quantityTrampoline() is true, which holds for every Python-created quantity (support/quantity.hpp:44-51). Rack's definition (src/engine/ParamQuantity.cpp, getSmoothValue) calls virtual getValue(). So for a rackpy.laboratory.ParamQuantity subclass that overrides get_value, C++ getSmoothValue reaches the override (support/quantity.hpp:58-62, dispatchValue with laboratoryOverrides) but get_smooth_value() bypasses it. Smallest fix: call q.getSmoothValue() through RACKPY_CALL_DEPRECATED, as Port.normalize does (components.cpp:340-345), after the warning and checkAccess.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::engine::ParamQuantity::getUnit()": {
       "verdict": "accept"
     },
     "method:rack::engine::ParamQuantity::getValue()": {
-      "finding": "P2: the record's ownership says \"borrowed; per-slot generation and weak module backreference\", but get_value on rackpy.raw.engine.ParamQuantity runs on Python-owned, weakly attached or slot-owned objects (standalone_quantity.cpp:224, :256). This contradicts the class's other records, and the implementation field names support/quantity.hpp instead of the binding at standalone_quantity.cpp:256. Smallest fix: correct the ownership and implementation fields.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::engine::ParamQuantity::randomize()": {
       "verdict": "accept"
@@ -163,12 +152,10 @@
       "verdict": "accept"
     },
     "method:rack::engine::ParamQuantity::setSmoothValue(float)": {
-      "finding": "P2: the binding reimplements the method instead of calling Rack's ParamQuantity::setSmoothValue. standalone_quantity.cpp:275-279 calls the qualified, non-virtual q.Q::setValue(value) for every Python-created quantity (quantityTrampoline is true, support/quantity.hpp:44-51). Rack's setSmoothValue calls virtual setValue(). So a rackpy.laboratory.ParamQuantity set_value override, which C++ setSmoothValue would reach (support/quantity.hpp:63-67), is bypassed by set_smooth_value(). Smallest fix: keep the warning and checkValueWrite, then call q.setSmoothValue(value) through RACKPY_CALL_DEPRECATED, as Port.normalize does (components.cpp:340-345).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::engine::ParamQuantity::setValue(float)": {
-      "finding": "P2: the record's ownership says \"borrowed; per-slot generation and weak module backreference\", but set_value on rackpy.raw.engine.ParamQuantity runs on Python-owned, weakly attached or slot-owned objects (standalone_quantity.cpp:224, :257). This contradicts the class's other records, and the implementation field names support/quantity.hpp instead of the binding at standalone_quantity.cpp:257. Smallest fix: correct the ownership and implementation fields.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::engine::ParamQuantity::toJson()": {
       "verdict": "accept"
@@ -186,8 +173,7 @@
       "verdict": "accept"
     },
     "method:rack::engine::Port::getPolyVoltage(uint8_t)": {
-      "finding": "P2: the binding's docstring (components.cpp:294-295) says \"The channel's voltage if polyphonic, else channel 0's.\" Rack (Port.hpp getPolyVoltage) returns channel 0 only when isMonophonic(), so a disconnected port (0 channels) returns the requested channel's voltage, not channel 0's. The cited reference doc (engine-components.md:42, \"channel 0's voltage on a monophonic port\") is correct. Smallest fix: change the docstring to \"channel 0's voltage if monophonic, else the channel's\".",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::engine::Port::getVoltage(uint8_t)": {
       "verdict": "accept"
@@ -220,23 +206,19 @@
       "verdict": "accept"
     },
     "method:rack::engine::Port::setVoltage(float, uint8_t)": {
-      "finding": "P1: no cited test asserts that set_voltage writes a voltage. test_every_reference_case_matches_rack never calls it (its connected() helper writes p.voltages[c] directly, test_components_owned.py:56-61). test_channel_indices_are_checked_before_rack_sees_them only checks the IndexError for bad channels (:128-129). test_borrowed_components_are_the_modules_and_keep_identity only reads get_voltage. A set_voltage that checked the channel and then wrote nothing would pass every cited test. Smallest fix: cite tests/engine/in_rack/test_components_owned.py::test_owned_ports_share_memory_with_memoryview_and_snapshots_copy (set_voltage(5.0, 2) then view[2] == 5.0) or tests/simd/in_rack/test_simd.py::test_port_simd_methods, or add assert p.get_voltage(c) == v after set_voltage.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::engine::Port::writeVoltages(const float *)": {
       "verdict": "accept"
     },
     "method:rack::engine::PortInfo::getDescription()": {
-      "finding": "P1: the only cited test, test_components_owned.py::test_info_names_and_python_overrides, calls get_description() only on a subclass that overrides it in Python (:260-268). Python's method lookup finds the override, so the native binding (components.cpp:407) and Rack's PortInfo::getDescription are never reached. A wrong binding would still pass. Smallest fix: cite tests/engine/module/in_rack/test_standalone_metadata.py::test_standalone_module_identity_null_and_reassignment (asserts info.get_description() == \"Still valid\" and the native-reference values), or add assert PortInfo().get_description() == \"\" after setting description.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::engine::PortInfo::getFullName()": {
-      "finding": "P2: no overflow guard. Rack's getFullName calls getName(), whose fallback computes portId + 1 (src/engine/PortInfo.cpp, getName). With name == \"\" and port_id = 2**31 - 1 (settable through identityField, components.cpp:402) that is signed int overflow, which is undefined behaviour. The binding (components.cpp:406) does not guard it. The ParamQuantity binding refuses the identical case with ValueError (standalone_quantity.cpp:84-87, 243-244; documented at engine-module.md:263-265). Smallest fix: in the get_name/get_full_name base lambdas, raise ValueError(\"port ID overflows Rack's default label\") when info.name.empty() && info.portId == INT_MAX, and document it under #components-info.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::engine::PortInfo::getName()": {
-      "finding": "P1: the only cited test, test_components_owned.py::test_info_names_and_python_overrides, never calls the native rackpy.raw.engine.PortInfo.get_name binding (components.cpp:405). It reaches getName only indirectly through get_full_name, and the subclass's get_name is the Python override. Rack's numbered default (\"#N\") is also untested in the citation. Separately (P2), the binding has no portId + 1 overflow guard for name == \"\" and port_id == 2**31 - 1, unlike ParamQuantity.get_label (standalone_quantity.cpp:84-87, 243-244). Smallest fix: cite tests/engine/module/in_rack/test_standalone_metadata.py::test_standalone_module_identity_null_and_reassignment (asserts get_name() against the native reference, including \"#1\"), and add the same ValueError guard as ParamQuantity.get_label.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::engine::SwitchQuantity::getDisplayValueString()": {
       "verdict": "accept"
@@ -251,8 +233,7 @@
       "verdict": "accept"
     },
     "method_template:rack::engine::Port::getPolyVoltageSimd<type>(uint8_t)": {
-      "finding": "P2: the cited doc docs/reference/simd.md#simd-ports (simd.md:227-228) and the binding docstring (components.cpp:303-304) say \"the same if the port is polyphonic, else channel 0's voltage in every lane\". Rack's getPolyVoltageSimd broadcasts channel 0 only when isMonophonic(). A disconnected port (0 channels) returns getVoltageSimd(first_channel). The binding calls Rack correctly, so only the text is wrong. Smallest fix: \"channel 0's voltage in every lane if monophonic, else get_voltage_simd\".",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method_template:rack::engine::Port::getVoltageSimd<type>(uint8_t)": {
       "verdict": "accept"
@@ -267,8 +248,7 @@
       "verdict": "accept"
     },
     "record:rack::engine::ParamQuantity": {
-      "finding": "P2: the cited doc anchor docs/reference/engine-module.md#standalone-quantities is out of date. It says \"JSON methods remain RP-15 and are not exposed here.\" (engine-module.md:286), but the class exposes to_json/from_json (standalone_quantity.cpp:261-273; src/rackpy/raw/engine.pyi ParamQuantity.to_json/from_json), as the same file's Module JSON section says. Smallest fix: replace the sentence with a link to #module-json.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "record:rack::engine::Port": {
       "verdict": "accept"
@@ -283,6 +263,6 @@
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/engine-03",
+  "reviewer": "agent-review:bcc462d8-939d-45a6-b615-36f6c0f6d074",
   "slice": "engine-03"
 }

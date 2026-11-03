@@ -1,6 +1,5 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
-  "edited": "the parent removed null entries for non-record keys from the reviewer's answer: field:rack::dsp::MidiGenerator::channelPressure_placeholder_removed",
+  "commit": "c7566a2a721bd7c15176ea01039bd8ed14a689e8",
   "records": {
     "class_template:rack::dsp::MidiGenerator<value>": {
       "verdict": "accept"
@@ -66,37 +65,31 @@
       "verdict": "accept"
     },
     "field:rack::dsp::MidiGenerator::clk": {
-      "finding": "P1: no cited test reads or writes the clk property. native/bindings/dsp/midi.cpp:152 binds it, but tests/dsp/in_rack_basic/test_midi.py::generator() records only messages, key_pressures and channel_pressure, and test_midi_generator never touches clk, so binding the wrong member would go unnoticed. Smallest fix: in test_midi_generator, assert g.clk is False, call g.set_clock(True), then assert g.clk is True (or assign it and check that the next set_clock call sends nothing).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::MidiGenerator::cont": {
-      "finding": "P1: no cited test reads or writes the cont property (native/bindings/dsp/midi.cpp:155). generator() in tests/dsp/in_rack_basic/test_midi.py records only messages, key_pressures and channel_pressure, and test_midi_generator never touches cont. Smallest fix: add a round-trip, for example set_continue(True) then assert g.cont is True.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::MidiGenerator::frame": {
       "verdict": "accept"
     },
     "field:rack::dsp::MidiGenerator::gates": {
-      "finding": "P1: no cited test reads or writes the gates view of MidiGenerator (native/bindings/dsp/midi.cpp:146). test_midi_generator and generator() in tests/dsp/in_rack_basic/test_midi.py never touch g.gates; the gates assertions in that file are for MidiParser. Smallest fix: after g.set_note_gate(60, True, 3), assert g.gates[3] is True, and check that assigning g.gates[3] = False changes what the next set_note_gate sends.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::MidiGenerator::keyPressures": {
       "verdict": "accept"
     },
     "field:rack::dsp::MidiGenerator::notes": {
-      "finding": "P1: no cited test reads or writes the notes view of MidiGenerator (native/bindings/dsp/midi.cpp:145). test_midi_generator and generator() in tests/dsp/in_rack_basic/test_midi.py never touch g.notes; the notes assertions in that file are for MidiParser. Smallest fix: after g.set_note_gate(60, True, 3), assert g.notes[3] == 60.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::MidiGenerator::pw": {
       "verdict": "accept"
     },
     "field:rack::dsp::MidiGenerator::start": {
-      "finding": "P1: no cited test reads or writes the start property (native/bindings/dsp/midi.cpp:153). generator() in tests/dsp/in_rack_basic/test_midi.py records only messages, key_pressures and channel_pressure, and test_midi_generator never touches start. Smallest fix: add a round-trip, for example set_start(True) then assert g.start is True.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::MidiGenerator::stop": {
-      "finding": "P1: no cited test reads or writes the stop property (native/bindings/dsp/midi.cpp:154). generator() in tests/dsp/in_rack_basic/test_midi.py records only messages, key_pressures and channel_pressure, and test_midi_generator never touches stop. Smallest fix: add a round-trip, for example set_stop(True) then assert g.stop is True.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::MidiGenerator::vels": {
       "verdict": "accept"
@@ -165,8 +158,7 @@
       "verdict": "accept"
     },
     "field:rack::dsp::MidiParser::rotateIndex": {
-      "finding": "P0: the rotate_index setter accepts any int8_t (native/bindings/dsp/midi.cpp:315-316), and Rack's assignChannel trusts the value. In REUSE or ROTATE mode with channels > 1, a value of -2 or below, or 127 (which ++ wraps to -128), makes assignChannel read gates[rotateIndex] at a negative index (Rack-SDK include/dsp/midi.hpp:527-534). It can then return that index as a uint8_t such as 252, and pressNote writes notes, gates, velocities and retriggerPulses at that index (midi.hpp:589). So assign_channel, press_note or process_message after `p.rotate_index = -100` reads and writes outside the parser's arrays. This contradicts the file's stated policy of refusing input that would make Rack index past its arrays. Smallest fix: allow only -1 to MAX_CHANNELS - 1 in the setter (ValueError otherwise; Rack's own invariant: panic sets -1 at midi.hpp:362, and assignChannel keeps it in [0, channels)), document the range in docs/reference/dsp.md#dsp-midi-parser, and add a refusal test.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::MidiParser::smooth": {
       "verdict": "accept"
@@ -283,8 +275,7 @@
       "verdict": "accept"
     },
     "method:rack::dsp::MidiParser::panic()": {
-      "finding": "P1: no cited test calls the parser's panic() binding (native/bindings/dsp/midi.cpp:328). In tests/dsp/in_rack_basic/test_midi.py, Rack's panic runs only inside processCC (the 0x7b message), and the only direct .panic() calls are on MidiGenerator (lines 113 and 343). docs/reference/dsp.md#dsp-midi-parser does not name panic() either. Smallest fix: add a 'panic' op to the parserMethods reference script and its Python replay, or assert that p.panic() clears gates and held_notes but keeps the settings; then mention panic() in the parser section.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::dsp::MidiParser::pressNote(uint8_t, uint8_t, uint8_t)": {
       "verdict": "accept"
@@ -293,8 +284,7 @@
       "verdict": "accept"
     },
     "method:rack::dsp::MidiParser::processCC(const rack::midi::Message &)": {
-      "finding": "P0: process_cc's guard (Guard::check, native/bindings/dsp/midi.cpp:218-229) checks the MPE channel only when the message's status is 0x8, 0x9, 0xd, 0xe, or 0xb with note 1. Rack's processCC ignores the status: it switches on getNote(), and for note 0x01 in polyphonic MPE mode it writes mods[msg.getChannel()] (Rack-SDK include/dsp/midi.hpp:462). On MidiParser[2] with channels 2 and MPE_MODE, p.process_cc(message([0xA5, 0x01, 100])) passes the guard and writes mods[5], past the 2-element array. The guard also wrongly refuses a 0xF8 message when clock_division is 0, although processCC never divides (P2). Smallest fix: give process_cc its own check that tests getNote() == 0x01 and the MPE channel against MAX_CHANNELS whatever the status, and drop the clock check for this path; add a test.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::dsp::MidiParser::processFilters(float)": {
       "verdict": "accept"
@@ -306,8 +296,7 @@
       "verdict": "accept"
     },
     "method:rack::dsp::MidiParser::processSystem(const rack::midi::Message &)": {
-      "finding": "P0: process_system refuses the clock_division == 0 case only when the status is 0xf (native/bindings/dsp/midi.cpp:234). Rack's processSystem ignores the status: it switches on msg.getChannel() alone and evaluates clock % clockDivision for channel 0x8 (Rack-SDK include/dsp/midi.hpp:482, 491). So with p.clock_division = 0, p.process_system(message([0x98, 60, 100])) passes the guard and divides by zero (SIGFPE). The guard also wrongly refuses MPE note messages on channels at or above MAX_CHANNELS, although processSystem never indexes by channel (P2). Smallest fix: give process_system its own check, getChannel() == 0x8 && clockDivision == 0, whatever the status, with no MPE check; add a test with a non-0xF status byte.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::dsp::MidiParser::refreshHeld()": {
       "verdict": "accept"
@@ -319,8 +308,7 @@
       "verdict": "accept"
     },
     "method:rack::dsp::MidiParser::reset()": {
-      "finding": "P1: no cited test calls the parser's reset() binding (native/bindings/dsp/midi.cpp:327). Rack's reset runs only inside the constructor; the test file's 'reset' ops (lines 113-114) are MidiGenerator's. docs/reference/dsp.md#dsp-midi-parser does not name reset() either. Smallest fix: change some settings (channels, poly mode, pw_range, clock_division), call p.reset(), assert they are back to Rack's defaults (or add a 'reset' op to the parserMethods reference script), and document reset() and panic() in the parser section.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::dsp::MidiParser::setChannels(uint8_t)": {
       "verdict": "accept"
@@ -344,6 +332,6 @@
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/dsp-03",
+  "reviewer": "agent-review:bcc462d8-939d-45a6-b615-36f6c0f6d074+3f3c4218-63bd-4975-88f5-eb3a1cba905e",
   "slice": "dsp-03"
 }

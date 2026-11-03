@@ -1,5 +1,5 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "c7566a2a721bd7c15176ea01039bd8ed14a689e8",
   "records": {
     "alias:rack::simd::Vector<float, 4>::type": {
       "verdict": "accept"
@@ -32,8 +32,7 @@
       "verdict": "accept"
     },
     "constructor:rack::simd::Vector<int32_t, 4>::Vector(__m128i)": {
-      "finding": "P1: the cited test never exercises this overload. The binding int32_4(v: int32_4) with noconvert (native/bindings/simd/vector.cpp:226-227) is never called with an int32_4 argument. tests/simd/in_rack/test_simd.py::test_construction_lanes_and_views (lines 352-412) calls int32_4() / int32_4(int) / int32_4(4 ints) / int32_4(float_4) / int32_4(2.5) only, and a grep of tests/simd finds no int32_4(<int32_4>) call (the float_4 copy is tested at lines 382-384). Smallest fix: in that test add `j = int32_4(i); j[0] = 99; assert i[0] == 1 and j is not i`.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "constructor:rack::simd::Vector<int32_t, 4>::Vector(int32_t)": {
       "verdict": "accept"
@@ -267,12 +266,10 @@
       "verdict": "accept"
     },
     "specialization:rack::simd::Vector<float, 4>": {
-      "finding": "P2: the record's notes are wrong. bindings/manifest.json:3141 says 'Vector[float, 4] and Vector[int, 4] give this class', but only Vector[float, 4] gives float_4; Vector[int, 4] gives int32_4 (native/bindings/simd/vector.cpp:276-277, asserted at tests/simd/in_rack/test_simd.py:505). Mapping, test and docs are otherwise correct. Smallest fix: change the note to 'Vector[float, 4] gives this class.'",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "specialization:rack::simd::Vector<int32_t, 4>": {
-      "finding": "P2: the record's notes are wrong. bindings/manifest.json:3142 says 'Vector[float, 4] and Vector[int, 4] give this class', but Vector[float, 4] gives float_4, not int32_4 (native/bindings/simd/vector.cpp:276-277, asserted at tests/simd/in_rack/test_simd.py:505). Mapping, test and docs are otherwise correct. Smallest fix: change the note to 'Vector[int, 4] gives this class.'",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "static_field:rack::simd::Vector<float, 4>::size": {
       "verdict": "accept"
@@ -281,6 +278,6 @@
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/dsp-05",
+  "reviewer": "agent-review:bcc462d8-939d-45a6-b615-36f6c0f6d074",
   "slice": "dsp-05"
 }

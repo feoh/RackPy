@@ -1,5 +1,5 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "d199bc8f94c0a9b603cddcc7d867ebed70c3634e",
   "records": {
     "alias:rack::event::Action": {
       "verdict": "accept"
@@ -104,8 +104,7 @@
       "verdict": "accept"
     },
     "alias:rack::widget::Widget::BaseEvent": {
-      "finding": "P1: no cited test checks rackpy.raw.widget.Widget.BaseEvent. The cited tests use w.BaseEvent, and only Widget.HoverEvent's identity is asserted (tests/widget/in_rack/test_events.py, test_all_event_handlers_and_prototype_hierarchy: `assert w.Widget.HoverEvent is w.HoverEvent`); the alias itself is set generically by the register() loop (src/rackpy/_widget_events.py, register). Smallest fix: add `assert w.Widget.BaseEvent is w.BaseEvent` to that test.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "constructor:rack::widget::Widget::PathDropEvent::PathDropEvent(const std::vector<std::string> &)": {
       "verdict": "accept"
@@ -114,23 +113,19 @@
       "verdict": "accept"
     },
     "field:rack::widget::Widget::ButtonEvent::action": {
-      "finding": "P1: none of the 4 cited test_events.py tests reads or asserts ButtonEvent.action; ButtonEvent only appears in the uncited parametrized dispatch test. It is exercised at tests/ui/in_rack/test_menus_events.py:96 and asserted at :150 (run by tests/ui/test_ui.py::test_ui_in_live_rack), which this record does not cite (the sibling ::button record does). Smallest fix: cite tests/ui/test_ui.py::test_ui_in_live_rack.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::widget::Widget::ButtonEvent::button": {
       "verdict": "accept"
     },
     "field:rack::widget::Widget::ButtonEvent::mods": {
-      "finding": "P1: no cited test (and no test in the repository) sets and reads back ButtonEvent.mods. A grep for `.mods`/`mods=` under tests/ finds only KeyBaseEvent and MIDI uses. Smallest fix: add a round-trip such as `w.ButtonEvent(mods=3).mods == 3` to test_owned_records_path_lifetimes_nullable_targets_and_fields, or assert event.mods in the Pad.on_button dispatch test.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::widget::Widget::ContextCreateEvent::vg": {
-      "finding": "P1: the cited test_events.py tests only construct ContextCreateEvent(context=...) (test_events.py, the names list in test_all_event_handlers) and never read .vg. The only read is the uncited tests/rendering/in_rack/test_rendering.py on_create (`nvg.begin_path(event.vg)` near line 268). Smallest fix: assert event.vg is a live GraphicsContext in a cited context-create test (e.g. test_scene.py::test_simulated_graphics_context_recreation) and cite it.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::widget::Widget::ContextDestroyEvent::vg": {
-      "finding": "P1: the cited test_events.py tests never read ContextDestroyEvent.vg. The meaningful assertion is in the uncited tests/widget/in_rack/test_scene.py:42 (`assert event.vg is not None and event.vg.alive`, in test_scene_widget_receives_rack_window_teardown). Smallest fix: cite that test (or tests/widget/test_tree.py::test_widget_live_ui, which runs it).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::widget::Widget::DragBaseEvent::button": {
       "verdict": "accept"
@@ -142,8 +137,7 @@
       "verdict": "accept"
     },
     "field:rack::widget::Widget::DragHoverEvent::mouseDelta": {
-      "finding": "P1: no cited test sets or reads DragHoverEvent.mouse_delta. The cited test_events.py tests never use it, and no test anywhere constructs DragHoverEvent(mouse_delta=...). Smallest fix: add a round-trip `w.DragHoverEvent(mouse_delta=Vec(1, 2)).mouse_delta == Vec(1, 2)` to test_owned_records_path_lifetimes_nullable_targets_and_fields.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::widget::Widget::DragHoverEvent::origin": {
       "verdict": "accept"
@@ -152,8 +146,7 @@
       "verdict": "accept"
     },
     "field:rack::widget::Widget::DragMoveEvent::mouseDelta": {
-      "finding": "P1: the cited test_events.py tests never use DragMoveEvent.mouse_delta. It is meaningfully exercised only by uncited tests: tests/app/in_rack/test_controls.py:193 (test_knob_direct_drag_move_changes_value_only_for_left_button, via tests/app/test_app.py::test_app_widgets_in_live_rack) and tests/ui/in_rack/test_widgets.py:165/199 (via tests/ui/test_ui.py::test_ui_in_live_rack). Smallest fix: cite one of those, or add a round-trip assertion.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::widget::Widget::DrawArgs::clipBox": {
       "verdict": "accept"
@@ -165,8 +158,7 @@
       "verdict": "accept"
     },
     "field:rack::widget::Widget::HoverEvent::mouseDelta": {
-      "finding": "P1: tests/widget/in_rack/test_events.py:31 sets HoverEvent(mouse_delta=Vec(2, 3)) but no cited test reads it back or checks Rack observing it, so a broken read or write would still pass. Smallest fix: add `assert event.mouse_delta == Vec(2, 3)` in test_position_recursion_consumption_and_expiring_views (and/or read it in Child.on_hover).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::widget::Widget::HoverScrollEvent::scrollDelta": {
       "verdict": "accept"
@@ -178,12 +170,10 @@
       "verdict": "accept"
     },
     "field:rack::widget::Widget::KeyBaseEvent::keyName": {
-      "finding": "P1: tests/widget/in_rack/test_events.py:119 sets key_name='a' but never reads it, and is_key_command(65)/(66) gives the same result with an empty keyName (Rack's isKeyCommand falls back to key==key, src/widget/event.cpp:85-96). The meaningful use is the uncited tests/app/in_rack/test_rack.py:294 (Ctrl+0 via key_name='0', in test_racks_own_scene_rack_and_plugs_are_not_subclassable). Smallest fix: assert key.key_name == 'a' plus a case where key_name differs from key (e.g. key=81, key_name='a' -> is_key_command(65) is True), or cite tests/app/test_app.py::test_app_widgets_in_live_rack.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::widget::Widget::KeyBaseEvent::mods": {
-      "finding": "P1: tests/widget/in_rack/test_events.py:119 sets mods=0, which equals the default, and never reads it, so a broken write would still pass. The meaningful use (mods=RACK_MOD_CTRL triggering Rack's Ctrl+0) is the uncited tests/app/in_rack/test_rack.py:294. Smallest fix: assert a nonzero round-trip and is_key_command(65, RACK_MOD_CTRL), or cite tests/app/test_app.py::test_app_widgets_in_live_rack.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::widget::Widget::KeyBaseEvent::scancode": {
       "verdict": "accept"
@@ -204,12 +194,10 @@
       "verdict": "accept"
     },
     "field:rack::widget::Widget::parent": {
-      "finding": "P2: Rack's public `Widget* parent` is writable, but the binding is read-only (native/bindings/widget/managed.cpp:573, def_property_readonly). The record notes nevertheless say 'the raw field: writes bypass Rack's setters and their events', and docs/reference/widgets.md#creating-and-owning-widgets does not state the read-only restriction (justified, since writing it would break single ownership). Smallest fix: correct the notes and add one sentence to widgets.md that `parent` is read-only and changes go through add_child/remove_child.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::widget::Widget::requestedDelete": {
-      "finding": "P1: every cited test that touches requested_delete is a WidgetNode test (tests/widget/in_rack/test_tree.py:117-153, test_native_step_deletes_requested_children_and_invalidates_views; WidgetNode is the separate binding at native/bindings/widget/tree.cpp:178, which the notes say does not count). No raw rackpy.raw.widget.Widget test reads or writes requested_delete; the only raw read is the uncited tests/ui/in_rack/test_widgets.py:422 (MenuOverlay). Smallest fix: add a raw Widget test: request_delete() sets it, assigning False cancels and parent.step() keeps the child, and True makes step() delete it.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::widget::Widget::visible": {
       "verdict": "accept"
@@ -221,12 +209,10 @@
       "verdict": "accept"
     },
     "method:rack::widget::Widget::addChildAbove(rack::widget::Widget *, rack::widget::Widget *)": {
-      "finding": "P1: the only test of add_child_above is tests/widget/in_rack/test_tree.py:61-77 (test_checked_sibling_insertion_order_and_errors), which runs on WidgetNode (separate binding, native/bindings/widget/tree.cpp:178; notes say it does not count). The native CTest also covers that adapter. No test calls rackpy.raw.widget.Widget.add_child_above (grep under tests/ finds only test_tree.py). Smallest fix: add a raw Widget test for its order and errors (sibling not a direct child -> OwnershipError, managed.cpp transferTo).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::Widget::addChildBelow(rack::widget::Widget *, rack::widget::Widget *)": {
-      "finding": "P1: as with addChildAbove, add_child_below is tested only on WidgetNode (tests/widget/in_rack/test_tree.py:62-83; adapter in native/bindings/widget/tree.cpp:178, excluded from coverage by the record notes). No test calls rackpy.raw.widget.Widget.add_child_below. Smallest fix: add a raw Widget order and error test.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::Widget::addChildBottom(rack::widget::Widget *)": {
       "verdict": "accept"
@@ -247,8 +233,7 @@
       "verdict": "accept"
     },
     "method:rack::widget::Widget::getAbsoluteOffset(rack::math::Vec)": {
-      "finding": "P1: the only value assertion is tests/widget/in_rack/test_tree.py:305 (test_geometry_visibility_and_coordinate_queries), which runs on WidgetNode (excluded adapter, native/bindings/widget/tree.cpp). No test calls rackpy.raw.widget.Widget.get_absolute_offset (managed.cpp:609). Smallest fix: add a raw Widget nested-offset assertion, e.g. in test_variants.py's raw geometry test.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::Widget::getAbsoluteZoom()": {
       "verdict": "accept"
@@ -257,8 +242,7 @@
       "verdict": "accept"
     },
     "method:rack::widget::Widget::getChildrenBoundingBox()": {
-      "finding": "P1: the only raw Widget use is tests/widget/in_rack/test_managed.py:96, which only checks the OwnershipError refusal during clearing. The value test (tests/widget/in_rack/test_tree.py:184) is on WidgetNode (excluded adapter). No cited test checks Rack's result or a Python override of get_children_bounding_box. Smallest fix: add a raw Widget assertion such as `root.get_children_bounding_box() == Rect(-1, -2, 8, 10)` with two boxed children, plus an override case.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::Widget::getParent()": {
       "verdict": "accept"
@@ -270,23 +254,19 @@
       "verdict": "accept"
     },
     "method:rack::widget::Widget::getRelativeZoom(rack::widget::Widget *)": {
-      "finding": "P1: the cited value assertions (tests/widget/in_rack/test_tree.py:307-328) run on WidgetNode (excluded adapter). test_variants' get_absolute_zoom() goes through C++ getAbsoluteZoom, not the Python get_relative_zoom binding (behavior.hpp, get_relative_zoom). A raw assertion exists only in the uncited tests/hardening/in_rack_fuzz/test_lifetime.py:43. Smallest fix: cite that test, or add `child.get_relative_zoom(zoom_parent) == 2` to test_transparent_opaque_and_zoom_event_base_semantics.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::Widget::getSize()": {
       "verdict": "accept"
     },
     "method:rack::widget::Widget::getViewport(rack::math::Rect)": {
-      "finding": "P1: get_viewport is tested only on WidgetNode (tests/widget/in_rack/test_tree.py:309-311; excluded adapter, native/bindings/widget/tree.cpp). No test calls rackpy.raw.widget.Widget.get_viewport (behavior.hpp, get_viewport with its default Rect.inf()). Smallest fix: add a raw Widget test of the default argument and of clipping by ancestor boxes.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::Widget::getVisibleChildrenBoundingBox()": {
-      "finding": "P1: the cited value test tests/widget/in_rack/test_tree.py:187 (test_snapshot_box_copy_and_layout) runs on WidgetNode (excluded adapter). No test calls rackpy.raw.widget.Widget.get_visible_children_bounding_box. Smallest fix: add a raw Widget assertion with one hidden child.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::Widget::hasChild(rack::widget::Widget *)": {
-      "finding": "P1: has_child is tested only on WidgetNode (tests/widget/in_rack/test_tree.py:45, test_tree_identity_transfer_and_order; excluded adapter). No test calls rackpy.raw.widget.Widget.has_child (managed.cpp:607). Smallest fix: add `root.has_child(child) and not root.has_child(grandchild)` to test_managed_subclass_native_step_and_transfer.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::Widget::hide()": {
       "verdict": "accept"
@@ -295,8 +275,7 @@
       "verdict": "accept"
     },
     "method:rack::widget::Widget::isVisible()": {
-      "finding": "P1: is_visible is tested only on WidgetNode (tests/widget/in_rack/test_tree.py:186, 313-321; excluded adapter). No test calls rackpy.raw.widget.Widget.is_visible (managed.cpp:603). Smallest fix: assert is_visible() after hide()/show() in test_raw_field_geometry_interoperability_and_eventful_setters.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::Widget::onAction(const rack::widget::Widget::ActionEvent &)": {
       "verdict": "accept"
@@ -401,20 +380,18 @@
       "verdict": "accept"
     },
     "method:rack::widget::Widget::setPosition(rack::math::Vec)": {
-      "finding": "P1: set_position is tested only on WidgetNode (tests/widget/in_rack/test_tree.py:292-322; excluded adapter, native/bindings/widget/tree.cpp). No test calls rackpy.raw.widget.Widget.set_position (managed.cpp:600) or checks that it fires RepositionEvent. Smallest fix: add a raw Widget test with an on_reposition override, firing once on a change and not on an identical position.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::Widget::setSize(rack::math::Vec)": {
       "verdict": "accept"
     },
     "method:rack::widget::Widget::setVisible(bool)": {
-      "finding": "P1: set_visible is tested only on WidgetNode (tests/widget/in_rack/test_tree.py:185, 320; excluded adapter). No test calls rackpy.raw.widget.Widget.set_visible (managed.cpp:604) or checks its Show/Hide events. Smallest fix: add set_visible(False/True) with on_show/on_hide assertions to test_raw_field_geometry_interoperability_and_eventful_setters.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::Widget::show()": {
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/widgets-11",
+  "reviewer": "agent-review:2d8d2083-8da5-46b6-bc3c-22a3ddbf8f23+2e256cc3-26c6-406f-a6c2-75c06a50139b",
   "slice": "widgets-11"
 }

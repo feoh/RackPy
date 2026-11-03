@@ -1,5 +1,5 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "c7566a2a721bd7c15176ea01039bd8ed14a689e8",
   "records": {
     "class_template:rack::SharedLock<type>": {
       "verdict": "accept"
@@ -29,19 +29,16 @@
       "verdict": "accept"
     },
     "destructor:rack::SharedLock::~SharedLock<TMutex>()": {
-      "finding": "P2: the docs are wrong about a native SharedMutex lock dropped on another thread. docs/reference/services.md#services-shared-lock ('Dropped while held ... On another thread ... the drop is reported as unraisable') does not match native/bindings/services/mutex.cpp ~PySharedLock: for a native SharedMutex it calls mutex->unlockShared(), which throws because the dropping thread is not a recorded reader, and `catch (...) {}` discards that silently. Nothing is reported, and the mutex stays read-held. tests/services/in_rack_settings/test_settings.py::test_shared_lock_dropped_while_held covers only a Python TMutex (ReadLock). Smallest fix: report the failure as unraisable in the native branch (as the Python branch does), or say in the docs that the native case is silent. Then add a cross-thread drop case with a native SharedMutex.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "destructor:rack::SharedMutex::~SharedMutex()": {
-      "finding": "P1: no test checks this destructor's behaviour. RackPy replaces Rack's destructor with MutexDelete (native/bindings/services/mutex.cpp: a mutex still held when dropped is leaked with a WARN instead of pthread_rwlock_destroy), and the manifest notes and docs/reference/services.md ('A mutex dropped while held is leaked') describe this. Neither cited test asserts it: tests/services/in_rack_settings/test_settings.py::test_shared_mutex and ::test_waiting_releases_the_gil always unlock before the mutex goes, and no test in tests/services drops a held SharedMutex. Smallest fix: add an in-Rack test that drops a held SharedMutex (e.g. `m = raw.SharedMutex(); m.lock(); del m; gc.collect()`) and asserts that Rack survives and logs the leak warning (or another observable sign of the leak path), and that dropping an unheld mutex logs nothing.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::SharedLock::m": {
       "verdict": "accept"
     },
     "field:rack::SharedMutex::rwlock": {
-      "finding": "P2: the cited doc never mentions the rwlock field. The record maps it to the class rackpy.raw.SharedMutex, and the manifest notes justify this ('the pthread rwlock inside SharedMutex; Python uses its methods'). But docs/reference/services.md#services-mutex (lines 273-325) does not mention the `rwlock` field or explain why it has no Python attribute (an opaque pthread_rwlock_t that Python can use only through Rack's methods). A reader cannot learn the field's disposition from the docs. Smallest fix: add one sentence to #services-mutex saying Rack's `rwlock` field is the opaque pthread lock, not exposed as an attribute, and reached only through lock/unlock/lock_shared/unlock_shared/try_*.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::math::Rect::pos": {
       "verdict": "accept"
@@ -89,8 +86,7 @@
       "verdict": "accept"
     },
     "function:rack::math::interpolateLinear(const float *, float)": {
-      "finding": "P1: unjustified restriction. native/bindings/values/math.cpp (interpolate_linear lambda, the check `!(x >= 0.f)`) raises IndexError for every x < 0. For x in (-1, 0), Rack's interpolateLinear (Rack-SDK include/math.hpp: `int xi = x;` truncates toward zero to 0, then reads p[0] and p[1]) is well defined and stays in bounds whenever len(p) >= 2, which RackPy already requires. It returns an extrapolated value that RackPy cannot reach. docs/reference/values.md#values-scalars justifies the IndexError with 'breaking it in C++ would crash or hang Rack', which is false for this range, and tests/values/in_rack/test_math.py::test_preconditions_rack_only_documents_are_checked asserts IndexError for x = -0.5. Smallest fix: change the lower bound to `x > -1.f` (still refusing NaN and x <= -1, where xi would be negative), update the doc table row and change the -0.5 assertion to compare with Rack's result (or add a reference case). Alternatively, record an owner-approved contract for the restriction.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::math::isNear(float, float, float)": {
       "verdict": "accept"
@@ -192,12 +188,10 @@
       "verdict": "accept"
     },
     "method:rack::SharedMutex::unlock()": {
-      "finding": "P2: a restriction that is not documented accurately. In Rack, SharedMutex::unlock() is pthread_rwlock_unlock, and unlock_shared() just calls unlock() (Rack-SDK include/mutex.hpp). So in Rack, unlock() releases a lock the thread holds for reading, and no assert fires. RackPy's TrackedMutex::unlock (native/bindings/services/mutex.cpp, `if (!written || writer != me) throw ... 'does not hold the mutex for writing'`) refuses that case. docs/reference/services.md#services-mutex lists only 'a thread unlocking a mutex it does not hold' and justifies refusals as 'Rack's mutex asserts', but here the thread does hold the mutex and Rack would not assert. The pairing rule is defensible (std::shared_mutex's contract, which Rack's header cites), but it should be documented. Smallest fix: document that unlock() requires the thread to hold the mutex for writing and unlock_shared() for reading, although Rack's pthread implementation would accept either. Optionally add a test asserting the ValueError for unlock() after lock_shared().",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::SharedMutex::unlock_shared()": {
-      "finding": "P2: a restriction that is not documented accurately. Rack's unlock_shared() is literally `unlock();` (Rack-SDK include/mutex.hpp), so in Rack it also releases a lock the thread holds for writing. RackPy's TrackedMutex::unlockShared (native/bindings/services/mutex.cpp, readers.find(me) == end, which throws 'does not hold the mutex shared') refuses it for a writer. docs/reference/services.md#services-mutex describes refusals only as 'unlocking a mutex it does not hold' that Rack would assert on. Neither is true here: the thread holds the mutex, and pthread_rwlock_unlock succeeds. Smallest fix: document the read/write pairing rule (as for unlock()) and note how it differs from Rack's implementation. Optionally add a test asserting the ValueError for unlock_shared() after lock().",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::math::Rect::clamp(rack::math::Rect) const": {
       "verdict": "accept"
@@ -386,6 +380,6 @@
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/common-02",
+  "reviewer": "agent-review:bcc462d8-939d-45a6-b615-36f6c0f6d074",
   "slice": "common-02"
 }

@@ -1,13 +1,11 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "c7566a2a721bd7c15176ea01039bd8ed14a689e8",
   "records": {
     "alias:rack::widget::SVGWidget": {
-      "finding": "P2: the cited anchor docs/reference/widgets.md#typed-bases (189-191) says 'the SVGWidget alias currently does not [warn], a known deprecation-coverage gap'. That is stale: src/rackpy/raw/__init__.py:121 makes access warn, widgets.md:20 says it warns, and tests/coverage/in_rack/test_deprecated_aliases.py:38-42 asserts the warning. Smallest fix: delete the stale sentence.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "constructor:rack::ui::PasswordField::PasswordField()": {
-      "finding": "P1: PasswordField() only sets password = true (include/ui/TextField.hpp, PasswordField ctor), but the cited test asserts only isinstance(ui.PasswordField(), ui.TextField) (tests/ui/in_rack/test_widgets.py:254). A binding that built a plain TextField would pass. Smallest fix: assert ui.PasswordField().password is True.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "constructor:rack::ui::Slider::Slider()": {
       "verdict": "accept"
@@ -52,8 +50,7 @@
       "verdict": "accept"
     },
     "field:rack::ui::TextField::text": {
-      "finding": "P2: cursor and selection are clamped because 'Rack indexes the text with them' (native/bindings/ui/ui.cpp:258-267; docs/reference/ui.md text-fields). The raw text setter (ui.cpp:249-251) does not re-clamp them, though. Assigning a shorter text leaves cursor/selection past the end, which Rack's TextField::onSelectKey asserts against (src/ui/TextField.cpp: assert(cursor <= (int) text.size())), and which makes insert_text/get_selected_text raise. Smallest fix: clamp cursor/selection after a text write, or document that a raw text write can leave them out of range.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::ui::Tooltip::text": {
       "verdict": "accept"
@@ -74,53 +71,43 @@
       "verdict": "accept"
     },
     "field:rack::widget::SvgWidget::svg": {
-      "finding": "P2: the setter refuses an Svg with no parsed image (ValueError via drawableSvg, native/bindings/widget/managed.hpp:157-161, used at variants_svg.cpp:53). The restriction is justified (Rack's svgDraw dereferences svg->handle unchecked), but the cited anchor docs/reference/widgets.md#typed-bases (187-191) does not document it. Smallest fix: add 'None or a loaded Svg; an unloaded Svg raises ValueError' to typed-bases.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::widget::TransformWidget::transform": {
       "verdict": "accept"
     },
     "function:rack::ui::refreshTheme()": {
-      "finding": "P1: tests/ui/in_rack/test_widgets.py:450-470 calls ui.refresh_theme() and only checks RackPy's off-main-thread ThreadError. Nothing observes that Rack's theme was restored, so a no-op binding would pass. Smallest fix: set_theme to distinctive colours, render a widget, call refresh_theme, re-render, and assert the pixels change back (framebuffer read-back as in tests/rendering).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::ui::setTheme(NVGcolor, NVGcolor)": {
-      "finding": "P1: tests/ui/in_rack/test_widgets.py:451 calls ui.set_theme(...) with no assertion, so a no-op binding would pass. Smallest fix: render a Button/TextField in a FramebufferWidget before and after set_theme(bg, fg) and assert the read-back colour changes.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "macro:CHECKMARK": {
-      "finding": "P2: the cited anchor docs/reference/ui.md#ui-theme (162-163) says 'Everything here needs Rack's main thread (ThreadError elsewhere)'. CHECKMARK has no thread check (native/bindings/ui/ui.cpp:380-381), and the record's thread is 'any'. Smallest fix: exempt the macros in that sentence.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "macro:CHECKMARK_STRING": {
-      "finding": "P2: docs/reference/ui.md#ui-theme (162-163) says everything there needs Rack's main thread, but CHECKMARK_STRING is a plain module str (native/bindings/ui/ui.cpp:378) with record thread 'any'. Smallest fix: exempt the macros in that sentence.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "macro:RIGHT_ARROW": {
-      "finding": "P2: docs/reference/ui.md#ui-theme (162-163) says everything there needs Rack's main thread, but RIGHT_ARROW is a plain module str (native/bindings/ui/ui.cpp:379) with record thread 'any'. Smallest fix: exempt the macros in that sentence.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::Slider::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: no cited test checks Slider::draw. The only drawing test, tests/ui/in_rack/test_widgets.py:208-229 (test_rack_draws_the_widgets), calls frame.render() twice and asserts nothing. Python Slider.draw(args) is never called, so a wrong or no-op binding would still pass. Smallest fix: render a Slider with a quantity into a FramebufferWidget, read back its pixels (as tests/rendering/in_rack/test_rendering.py does), or assert a Python draw override calling super().draw(args) produces bndSlider output.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::Slider::onDoubleClick(const rack::widget::Widget::DoubleClickEvent &)": {
       "verdict": "accept"
     },
     "method:rack::ui::Slider::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
-      "finding": "P1: no cited test calls Slider.on_drag_end. tests/ui/in_rack/test_widgets.py:96-120 calls on_drag_start/on_drag_end on the Button only, and test_slider_double_click_resets_quantity (157-168) covers only on_double_click and on_drag_move. Rack's Slider::onDragEnd (src/ui/Slider.cpp, cursorUnlock) is never run. Smallest fix: call slider.on_drag_start / on_drag_end with button=0 and assert Rack's cursor-lock state, or at least that the quantity is unchanged and no error is logged.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::Slider::onDragMove(const rack::widget::Widget::DragMoveEvent &)": {
       "verdict": "accept"
     },
     "method:rack::ui::Slider::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
-      "finding": "P1: no cited test calls Slider.on_drag_start. tests/ui/in_rack/test_widgets.py:108 calls it on a ui.Button, not the Slider, so Rack's Slider::onDragStart (src/ui/Slider.cpp: button check, then cursorLock) is never run. Smallest fix: add slider.on_drag_start(w.DragStartEvent(button=0)) with an assertion (cursor-lock state, or that a non-left button is ignored).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::TextField::copyClipboard()": {
-      "finding": "P1: the cited test cannot tell whether copy_clipboard works. tests/ui/in_rack/test_widgets.py:268-272 calls copy_clipboard() and then cut_clipboard(), which copies again (Rack's cutClipboard calls copyClipboard), before paste_clipboard() is asserted. A no-op copy_clipboard would still pass. Smallest fix: select, copy_clipboard(), move the cursor to the end, paste_clipboard() without cutting, and assert the text is duplicated.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::TextField::createContextMenu()": {
       "verdict": "accept"
@@ -141,8 +128,7 @@
       "verdict": "accept"
     },
     "method:rack::ui::TextField::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: the only drawing test, tests/ui/in_rack/test_widgets.py:208-229, renders a TextField and asserts nothing, and Python TextField.draw(args) is never called. Also, the cited anchor docs/reference/ui.md text-fields (46-58) does not mention draw. Smallest fix: add an assertion on rendered output, or on a Python override that calls super().draw(args), and cite ui.md#ui-widgets, which documents drawing overrides.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::TextField::getSelectedText()": {
       "verdict": "accept"
@@ -157,20 +143,16 @@
       "verdict": "accept"
     },
     "method:rack::ui::TextField::onButton(const rack::widget::Widget::ButtonEvent &)": {
-      "finding": "P1: no cited test calls TextField.on_button. The cited tests (test_widgets.py:232-255, 208-229) never send a ButtonEvent to a TextField, so Rack's behaviour (left press sets cursor = selection = getTextPosition; right press opens the context menu) is unchecked. The cited anchor ui.md#ui-text-fields also does not mention on_button. Smallest fix: subclass with get_text_position returning 2, send ButtonEvent(button=LEFT, action=PRESS), assert cursor == selection == 2, and cite ui.md#ui-widgets.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::TextField::onDragHover(const rack::widget::Widget::DragHoverEvent &)": {
-      "finding": "P2: the behaviour is tested (test_widgets.py:286-303), but the only cited anchor, docs/reference/ui.md#ui-text-fields (46-58), does not mention on_drag_hover or event handlers. Smallest fix: also cite ui.md#ui-widgets (which says calling on_*(event) runs Rack's implementation), or mention the handlers in the text-fields section.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::TextField::onSelectKey(const rack::widget::Widget::SelectKeyEvent &)": {
-      "finding": "P2: the behaviour is tested (test_widgets.py:280-282), but the only cited anchor, docs/reference/ui.md#ui-text-fields (46-58), does not mention on_select_key. Smallest fix: also cite ui.md#ui-widgets, or mention the event handlers in the text-fields section.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::TextField::onSelectText(const rack::widget::Widget::SelectTextEvent &)": {
-      "finding": "P2: the behaviour is tested (test_widgets.py:278-279), but the only cited anchor, docs/reference/ui.md#ui-text-fields (46-58), does not mention on_select_text. Smallest fix: also cite ui.md#ui-widgets, or mention the event handlers in the text-fields section.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::TextField::pasteClipboard()": {
       "verdict": "accept"
@@ -182,19 +164,16 @@
       "verdict": "accept"
     },
     "method:rack::ui::Tooltip::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: the only cited in-Rack test, tests/ui/in_rack/test_widgets.py:38-65 (test_fields_round_trip), only round-trips tooltip.text. No test anywhere draws a Tooltip (Tooltip appears only at test_widgets.py:39), so Rack's Tooltip::draw is never run. Smallest fix: render a Tooltip with text in a FramebufferWidget and assert on the output, or on a Python override that calls super().draw(args).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::ui::Tooltip::step()": {
-      "finding": "P1: no test calls Tooltip.step() or steps a Tooltip. The cited test_fields_round_trip (test_widgets.py:38-65) only sets and reads text. Rack's Tooltip::step, which positions and sizes the box from the mouse and the text, is never run. Smallest fix: set text, call tooltip.step(), and assert that box.size grew to fit the text (and pos follows scene.mouse_pos).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::FramebufferWidget::deleteFramebuffer()": {
       "verdict": "accept"
     },
     "method:rack::widget::FramebufferWidget::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: no cited test runs FramebufferWidget::draw. The cited tests use frame.render() (render -> drawFramebuffer -> children), e.g. tests/widget/in_rack/test_drawing.py:66,91,114 and test_variants.py:265, and never call frame.draw(args) or let Rack draw the frame itself. tests/rendering/test_frames.py does run it (clean/dirty re-render counts and the composited framebuffer pixel) but is not cited for this record. Smallest fix: cite tests/rendering/test_frames.py::test_framebuffers_and_the_self_lit_layer_in_real_frames.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::FramebufferWidget::drawFramebuffer()": {
       "verdict": "accept"
@@ -206,16 +185,13 @@
       "verdict": "accept"
     },
     "method:rack::widget::FramebufferWidget::getImageHandle()": {
-      "finding": "P2: the behaviour is tested (test_variants.py:263-266), but the only cited anchor, docs/reference/widgets.md#typed-bases (193-195), does not mention get_image_handle. It is described under #drawing (widgets.md:163-164), which this record does not cite. Smallest fix: add docs/reference/widgets.md#drawing to docs.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::FramebufferWidget::onContextCreate(const rack::widget::Widget::ContextCreateEvent &)": {
-      "finding": "P1: the test cannot tell whether on_context_create runs Rack's implementation. In test_scene.py:110-151 the override calls super().on_context_create(), and the test asserts bool(frame.dirty). But RackPy's own graphics-context-create hook marks every managed framebuffer dirty anyway (native/bindings/widget/managed.cpp:185-190), and the detached frame passes the same assertion. The test_events cases cover only Widget.on_context_create. Smallest fix: on a rendered detached frame with set_dirty(False), call frame.on_context_create(w.ContextCreateEvent(...)) directly and assert dirty becomes True and a child override receives the event.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::FramebufferWidget::onContextDestroy(const rack::widget::Widget::ContextDestroyEvent &)": {
-      "finding": "P1: Rack's FramebufferWidget::onContextDestroy is never run by a cited test. The test_scene.py:113-116 override deliberately skips super(), and RackPy's hook frees the framebuffer instead (managed.cpp:174-183). The test_events cases call only Widget.on_context_destroy. Smallest fix: render a detached frame, call frame.on_context_destroy(w.ContextDestroyEvent(...)), and assert get_framebuffer() is None, get_image_handle() == -1 and dirty is True.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::FramebufferWidget::onDirty(const rack::widget::Widget::DirtyEvent &)": {
       "verdict": "accept"
@@ -224,12 +200,10 @@
       "verdict": "accept"
     },
     "method:rack::widget::FramebufferWidget::setDirty(bool)": {
-      "finding": "P2: the behaviour is tested (test_variants.py:259-260), but the only cited anchor, docs/reference/widgets.md#typed-bases (193-195), lists the dirty field and not set_dirty(), or its default of True. Smallest fix: mention set_dirty(dirty=True) in typed-bases, or cite an anchor that describes it.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::FramebufferWidget::step()": {
-      "finding": "P1: the only test calling FramebufferWidget.step is tests/widget/in_rack/test_variants.py:29-49. It checks that Rack calls the Python override (calls == [1]) on a frame with no children. Nothing checks what base.step(self) does (Rack's FramebufferWidget::step is Widget::step, which steps the children), so a no-op binding would pass. Smallest fix: give the frame a child whose step override records the call, then call FramebufferWidget.step(frame) and assert the child stepped.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::OpaqueWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
       "verdict": "accept"
@@ -253,34 +227,28 @@
       "verdict": "accept"
     },
     "method:rack::widget::OpenGlWidget::drawFramebuffer()": {
-      "finding": "P1: no cited test runs OpenGlWidget::drawFramebuffer. test_drawing.py:99-121 subclasses w.FramebufferWidget, not OpenGlWidget, and test_variants.py:29-49 only steps an OpenGlWidget child. Rack's OpenGlWidget::drawFramebuffer (src/widget/OpenGlWidget.cpp:16-35: clear plus RGB triangle) is never run. Smallest fix: render() an OpenGlWidget, or call its draw_framebuffer from an override, and assert e.g. a red corner pixel in the framebuffer read-back.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::OpenGlWidget::step()": {
-      "finding": "P1: Rack's OpenGlWidget::step sets dirty = true every frame (src/widget/OpenGlWidget.cpp:9-13). The only cited test, test_variants.py:29-49, asserts just that the Python override was called. Smallest fix: set_dirty(False), call OpenGlWidget.step(gl), and assert gl.dirty is True.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::SvgWidget::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: no cited test checks what SvgWidget::draw draws. test_variants.py:237-283 renders a frame containing the SvgWidget but asserts only framebuffer size and handle, which depend on the widget box, not on svgDraw. Python SvgWidget.draw(args) is never called, so a wrong binding would pass. Smallest fix: read back a framebuffer pixel and assert the SVG's #124578 fill (as tests/rendering does), or assert through an override that calls super().draw(args).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::SvgWidget::setSVG(std::shared_ptr<rack::window::Svg>)": {
       "verdict": "accept"
     },
     "method:rack::widget::SvgWidget::setSvg(std::shared_ptr<rack::window::Svg>)": {
-      "finding": "P2: set_svg raises ValueError for an Svg with no parsed image (drawableSvg, native/bindings/widget/managed.hpp:157-161; variants_svg.cpp:56). The restriction is justified (Rack would crash in svgDraw), but the cited anchor docs/reference/widgets.md#typed-bases (187-191) does not document it. Smallest fix: document the ValueError for unloaded Svgs in typed-bases.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::SvgWidget::wrap()": {
       "verdict": "accept"
     },
     "method:rack::widget::TransformWidget::draw(const rack::widget::Widget::DrawArgs &)": {
-      "finding": "P1: no cited test draws a TransformWidget. TransformWidget appears only in test_variants.py:29-49 (step round trip) and 123-180 (matrix math). The cited test_drawing.py tests use plain Widgets. Rack's TransformWidget::draw (nvgTransform, then Widget::draw) is never run. Smallest fix: put a child in a translated/scaled TransformWidget inside a FramebufferWidget, render, and assert the child's draw override sees the transformed nvg current transform or pixel position.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::TransformWidget::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
-      "finding": "P1: no cited test runs TransformWidget::drawLayer. TransformWidget is used only in test_variants.py:29-49 and 123-180, and test_drawing.py's draw_layer test uses plain Widgets. Smallest fix: call draw_child(transform_widget, args, 1) from a parent draw override, or call transform_widget.draw_layer(args, 1), and assert a child's draw_layer override runs under the applied transform.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::widget::TransformWidget::identity()": {
       "verdict": "accept"
@@ -352,6 +320,6 @@
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/widgets-10",
+  "reviewer": "agent-review:bcc462d8-939d-45a6-b615-36f6c0f6d074",
   "slice": "widgets-10"
 }

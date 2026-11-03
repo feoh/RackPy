@@ -1,9 +1,8 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "c7566a2a721bd7c15176ea01039bd8ed14a689e8",
   "records": {
     "class_template:rack::history::InverseAction<type>": {
-      "finding": "P2: InverseAction[InverseAction[X]] recurses forever where C++ InverseAction<InverseAction<X>> behaves as X: the outer specialization's _args_InverseAction overrides the inner one (src/rackpy/raw/_componentlibrary.py:91-94), so _run(InverseAction[X], ...) finds InverseAction.undo/redo in the MRO, which call _run again with self._args_InverseAction (still the outer argument), ending in RecursionError (src/rackpy/raw/_history.py:21-29, 43-47). The record's ownership 'value' is also wrong: an InverseAction[T] instance is an action that transfers to Rack on push, like the other action records ('Python's until pushed ...'). Smallest fix: in _run, when klass is an InverseAction specialization, recurse on vars(klass)['_args_InverseAction'][0] with the name swapped; add a nested-specialization test; correct ownership.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "constructor:rack::history::CableAdd::CableAdd()": {
       "verdict": "accept"
@@ -48,27 +47,22 @@
       "verdict": "accept"
     },
     "field:rack::history::CableAdd::cableId": {
-      "finding": "P1: no cited test exercises CableAdd.cable_id. test_actions_python_makes never sets or reads it (tests/history/in_rack/test_history.py:100-107). It is only read back in test_history_through_racks_ui_paths (tests/history/entries/rp24c_history.py:113), which this record does not cite. Smallest fix: add a round-trip assertion and cite tests/history/test_history.py::test_history_through_racks_ui_paths.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::history::CableAdd::color": {
       "verdict": "accept"
     },
     "field:rack::history::CableAdd::inputId": {
-      "finding": "P1: no test asserts CableAdd.input_id. test_actions_python_makes only writes it (tests/history/in_rack/test_history.py:102), and its assertion that no cable is added (:104-105) would still pass if the setter were a no-op, because an output ID of 3 alone makes RackPy skip the redo. No test reads it back (rp24c_history.py:113 reads only cable_id, output_module_id and input_module_id). Smallest fix: assert a round-trip, e.g. (cable.input_id, cable.output_id) == (0, 3), and assert input_id after set_cable.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::history::CableAdd::inputModuleId": {
-      "finding": "P1: the cited tests do not meaningfully exercise CableAdd.input_module_id. test_actions_python_makes writes it (tests/history/in_rack/test_history.py:101), but the assertion at :105 also holds if the write is lost, because module -1 makes Rack do nothing. It is only read back in uncited test_history_through_racks_ui_paths (tests/history/entries/rp24c_history.py:113). Smallest fix: add a round-trip assertion and cite test_history_through_racks_ui_paths.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::history::CableAdd::outputId": {
-      "finding": "P1: no test asserts CableAdd.output_id. It is written at tests/history/in_rack/test_history.py:102, and the assertion at :105 still holds if the write is lost (-1 is also out of range). No test reads it back (rp24c_history.py:113 does not). Smallest fix: add a round-trip assertion and assert output_id after set_cable.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::history::CableAdd::outputModuleId": {
-      "finding": "P1: the cited tests do not meaningfully exercise CableAdd.output_module_id. It is written at tests/history/in_rack/test_history.py:101, and the assertion at :105 also holds if the write is lost. It is only read back in uncited test_history_through_racks_ui_paths (tests/history/entries/rp24c_history.py:113). Smallest fix: add a round-trip assertion and cite test_history_through_racks_ui_paths.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::history::CableColorChange::cableId": {
       "verdict": "accept"
@@ -80,8 +74,7 @@
       "verdict": "accept"
     },
     "field:rack::history::ComplexAction::actions": {
-      "finding": "P1: the cited doc docs/reference/history.md#history-actions never describes ComplexAction.actions or says it is read-only. Only State's actions and an ActionView's actions are described, yet Rack's field is a mutable std::vector and the binding is def_property_readonly (native/bindings/history/history.cpp:448). The cited inner test test_actions_python_makes does not touch it; test_complex_actions does (tests/history/in_rack/test_history.py:119-123). Smallest fix: add a sentence on the read-only children list (Python's objects or ActionViews; push adds children) and cite test_complex_actions.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::history::ModuleAction::moduleId": {
       "verdict": "accept"
@@ -93,19 +86,16 @@
       "verdict": "accept"
     },
     "field:rack::history::ModuleAdd::pos": {
-      "finding": "P1: no test reads or writes ModuleAdd.pos (bound at native/bindings/history/history.cpp:492). test_actions_python_makes never touches it (tests/history/in_rack/test_history.py:62-71), and the UI test's set_module/undo never asserts it (tests/history/entries/rp24c_history.py:142-149). Smallest fix: add a Vec round-trip assertion and assert that set_module copies the widget's box.pos.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::history::ModuleBypass::bypassed": {
       "verdict": "accept"
     },
     "field:rack::history::ModuleChange::newModuleJ": {
-      "finding": "P1: no assertion would fail if ModuleChange.new_module_j were wrong. test_actions_python_makes sets it to the module's current JSON, calls redo() (no observable change) and never reads it back (tests/history/in_rack/test_history.py:93-98). If the setter were a no-op, the RackPy guard would just skip the redo and the test would still pass. Smallest fix: assert a JSON round-trip, and assert that redo applies a different param value carried in new_module_j.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::history::ModuleChange::oldModuleJ": {
-      "finding": "P1: the only assertion is that the default is None (tests/history/in_rack/test_history.py:98), which a getter that always returns None also passes. The setter is never exercised. Smallest fix: assert a JSON round-trip, and assert that undo applies a param value carried in old_module_j.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::history::ModuleMove::newPos": {
       "verdict": "accept"
@@ -123,50 +113,40 @@
       "verdict": "accept"
     },
     "field:rack::history::State::actionIndex": {
-      "finding": "P1: unjustified restriction. Rack's State::actionIndex is a public writable int, but State.action_index is read-only (native/bindings/history/history.cpp:590), and the only reason given is 'Rack's own bookkeeping'. Rack misbehaves only for values outside [0, actions.size()], because State::undo/redo/getUndoName index actions[actionIndex] (Rack src/history.cpp). A range-checked setter would keep the public semantics (AGENTS.md: an adapter does not count if public semantics remain inaccessible). Smallest fix: add a setter that checks 0 <= value <= len(actions) and is refused while an action runs; test and document it, or cite an owner-approved contract.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::history::State::actions": {
       "verdict": "accept"
     },
     "field:rack::history::State::savedIndex": {
-      "finding": "P1: unjustified restriction. Rack's State::savedIndex is a public writable int, and any value is safe in Rack: it is only compared in isSaved and adjusted in push (Rack src/history.cpp). Yet saved_index is read-only (native/bindings/history/history.cpp:592), with no crash, ADR or owner justification. Smallest fix: add a plain setter, test a round-trip together with is_saved(), and document it.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::Action::redo()": {
-      "finding": "P2: python.gil_release is false, but Action.redo goes through pythonRun -> rackRun, which calls Rack's redo under py::gil_scoped_release (native/bindings/history/history.cpp:268-286). Smallest fix: set python.gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::Action::undo()": {
-      "finding": "P2: python.gil_release is false, but Action.undo goes through pythonRun -> rackRun, which calls Rack's undo under py::gil_scoped_release (native/bindings/history/history.cpp:268-286). Smallest fix: set python.gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::CableAdd::isCable(rack::app::CableWidget *) const": {
-      "finding": "P1: the cited tests assert only is_cable(None) is False (tests/history/in_rack/test_history.py:105), which Rack's own null check returns without any port comparison. The positive comparison is asserted only in uncited test_history_through_racks_ui_paths (tests/history/entries/rp24c_history.py:113; tests/history/test_history.py asserts cable_add == [7, 2, 3, True]). Smallest fix: cite test_history_through_racks_ui_paths.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::CableAdd::redo()": {
-      "finding": "P2: python.gil_release is false, but CableAdd.redo runs Rack's CableAdd::redo via rackRun under py::gil_scoped_release (native/bindings/history/history.cpp:268-286). Smallest fix: set python.gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::CableAdd::setCable(rack::app::CableWidget *)": {
-      "finding": "P1: the cited test test_actions_python_makes never calls set_cable. It is only exercised and asserted in test_history_through_racks_ui_paths (tests/history/entries/rp24c_history.py:111-113), which this record does not cite. Smallest fix: cite tests/history/test_history.py::test_history_through_racks_ui_paths.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::CableAdd::undo()": {
-      "finding": "P1: no test calls CableAdd.undo. Rack's CableAdd::undo runs only through CableRemove.redo, a different binding, in the uncited UI test (tests/history/entries/rp24c_history.py:116). Also P2: python.gil_release is false although rackRun releases the GIL (native/bindings/history/history.cpp:278-286). Smallest fix: add a direct CableAdd.undo assertion (the cable widget goes) to the UI test, cite it, and set gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::CableColorChange::redo()": {
-      "finding": "P2: python.gil_release is false, but CableColorChange.redo runs Rack's code via rackRun under py::gil_scoped_release (native/bindings/history/history.cpp:268-286). Smallest fix: set python.gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::CableColorChange::setCable(rack::app::CableWidget *)": {
       "verdict": "accept"
     },
     "method:rack::history::CableColorChange::undo()": {
-      "finding": "P2: python.gil_release is false, but CableColorChange.undo runs Rack's code via rackRun under py::gil_scoped_release (native/bindings/history/history.cpp:268-286). Smallest fix: set python.gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::ComplexAction::isEmpty()": {
       "verdict": "accept"
@@ -175,64 +155,49 @@
       "verdict": "accept"
     },
     "method:rack::history::ComplexAction::redo()": {
-      "finding": "P2: python.gil_release is false, but ComplexAction.redo runs Rack's ComplexAction::redo via rackRun under py::gil_scoped_release; Python children re-acquire the GIL through the trampoline (native/bindings/history/history.cpp:268-286). Smallest fix: set python.gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::ComplexAction::undo()": {
-      "finding": "P2: python.gil_release is false, but ComplexAction.undo runs Rack's ComplexAction::undo via rackRun under py::gil_scoped_release (native/bindings/history/history.cpp:268-286). Smallest fix: set python.gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::InverseAction::redo()": {
-      "finding": "P2: for a nested InverseAction[InverseAction[X]], redo recurses forever (src/rackpy/raw/_history.py:21-29, 46-47 with src/rackpy/raw/_componentlibrary.py:91-94: the outer _args_InverseAction shadows the inner one). For a native T it reaches T._rack_undo -> rackRun, which releases the GIL (native/bindings/history/history.cpp:278-286), yet python.gil_release is false. Callback is null even though Rack calls this Python method through the ActionT trampoline once the action is pushed (history.cpp ActionT::run -> pythonOverride). Smallest fix: resolve the inner specialization's argument in _run, set gil_release to true, and give the record the same 'ui' callback as the other undo/redo records.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::InverseAction::undo()": {
-      "finding": "P2: for a nested InverseAction[InverseAction[X]], undo recurses forever (src/rackpy/raw/_history.py:21-29, 43-44 with src/rackpy/raw/_componentlibrary.py:91-94). For a native T it reaches T._rack_redo -> rackRun, which releases the GIL (native/bindings/history/history.cpp:278-286), yet python.gil_release is false. Callback is null even though Rack invokes this Python override via the ActionT trampoline from its history. Smallest fix: resolve the inner specialization's argument in _run, set gil_release to true, and set callback to 'ui'.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::ModuleAdd::redo()": {
-      "finding": "P2: python.gil_release is false, but ModuleAdd.redo runs Rack's ModuleAdd::redo, which takes the engine lock in Engine::addModule, under py::gil_scoped_release in rackRun (native/bindings/history/history.cpp:278-286). Smallest fix: set python.gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::ModuleAdd::setModule(rack::app::ModuleWidget *)": {
-      "finding": "P1: the cited test test_actions_python_makes never calls set_module. It is only exercised and asserted in test_history_through_racks_ui_paths (tests/history/entries/rp24c_history.py:142-145; tests/history/test_history.py asserts removal == [True]*6), which this record does not cite. Smallest fix: cite tests/history/test_history.py::test_history_through_racks_ui_paths.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::ModuleAdd::undo()": {
-      "finding": "P1: no test calls ModuleAdd.undo. test_actions_python_makes only calls add.redo() with a null model (tests/history/in_rack/test_history.py:68), and Rack's ModuleAdd::undo runs only via ModuleRemove.redo in the uncited UI test (tests/history/entries/rp24c_history.py:148). Also P2: python.gil_release is false although rackRun releases the GIL (native/bindings/history/history.cpp:278-286). Smallest fix: add a direct ModuleAdd.undo test (the module widget is removed), cite it, and set gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::ModuleBypass::redo()": {
-      "finding": "P2: python.gil_release is false, but ModuleBypass.redo runs Rack's code, which takes the exclusive engine lock in Engine::bypassModule, under py::gil_scoped_release in rackRun (native/bindings/history/history.cpp:278-286). Smallest fix: set python.gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::ModuleBypass::undo()": {
-      "finding": "P2: python.gil_release is false, but ModuleBypass.undo runs Rack's code, which takes the engine lock in Engine::bypassModule, under py::gil_scoped_release in rackRun (native/bindings/history/history.cpp:278-286). Smallest fix: set python.gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::ModuleChange::redo()": {
-      "finding": "P1: no assertion checks ModuleChange.redo. test_actions_python_makes calls it with the module's own current JSON and asserts nothing about the effect (tests/history/in_rack/test_history.py:95-96), so a no-op binding would pass. Also P2: python.gil_release is false although rackRun releases the GIL (native/bindings/history/history.cpp:278-286). Smallest fix: give new_module_j a different param value, assert redo applies it, and set gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::ModuleChange::undo()": {
-      "finding": "P1: the only undo call checks the missing-JSON guard and asserts just that old_module_j is still None (tests/history/in_rack/test_history.py:97-98); Rack's undo with real JSON is never asserted. Also P2: python.gil_release is false although rackRun releases the GIL (native/bindings/history/history.cpp:278-286). Smallest fix: set old_module_j, assert undo restores its param value, and set gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::ModuleMove::redo()": {
-      "finding": "P1: the cited tests never call ModuleMove.redo (tests/history/in_rack/test_history.py:57-59 only sets fields). It is only asserted in uncited test_history_through_racks_ui_paths (tests/history/entries/rp24c_history.py:138-141). Also P2: python.gil_release is false although rackRun releases the GIL (native/bindings/history/history.cpp:278-286). Smallest fix: cite test_history_through_racks_ui_paths and set gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::ModuleMove::undo()": {
-      "finding": "P1: no test calls Python's ModuleMove.undo: the in-Rack suite only sets fields (tests/history/in_rack/test_history.py:57-59), and the UI test only calls redo (tests/history/entries/rp24c_history.py:140). Also P2: python.gil_release is false although rackRun releases the GIL (native/bindings/history/history.cpp:278-286). Smallest fix: call move.undo() in the UI test, assert the widget returns to old_pos, cite the test, and set gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::ParamChange::redo()": {
-      "finding": "P2: python.gil_release is false, but ParamChange.redo runs Rack's code under py::gil_scoped_release in rackRun (native/bindings/history/history.cpp:278-286). Smallest fix: set python.gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::ParamChange::undo()": {
-      "finding": "P2: python.gil_release is false, but ParamChange.undo runs Rack's code under py::gil_scoped_release in rackRun (native/bindings/history/history.cpp:278-286). Smallest fix: set python.gil_release to true.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::history::State::canRedo()": {
       "verdict": "accept"
@@ -271,8 +236,7 @@
       "verdict": "accept"
     },
     "record:rack::history::CableRemove": {
-      "finding": "P2: Rack's CableRemove is InverseAction<CableAdd> (history.hpp), but Python's CableRemove derives only from CableAdd (native/bindings/history/history.cpp:546; src/rackpy/raw/history.pyi). So isinstance(CableRemove(), InverseAction) is False, and InverseAction[CableAdd] is a different class. The docs present ModuleRemove as InverseAction<ModuleAdd> without noting this divergence. Smallest fix: document the divergence, or register CableRemove as a virtual subclass of InverseAction.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "record:rack::history::ComplexAction": {
       "verdict": "accept"
@@ -293,8 +257,7 @@
       "verdict": "accept"
     },
     "record:rack::history::ModuleRemove": {
-      "finding": "P2: Rack's ModuleRemove is InverseAction<ModuleAdd> (history.hpp), and docs/reference/history.md#history-actions says so, but Python's ModuleRemove derives only from ModuleAdd (native/bindings/history/history.cpp:495; src/rackpy/raw/history.pyi:55). So isinstance(ModuleRemove(), InverseAction) is False, and InverseAction[ModuleAdd] is a different class. Smallest fix: document the divergence, or register ModuleRemove as a virtual subclass of InverseAction.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "record:rack::history::ParamChange": {
       "verdict": "accept"
@@ -303,6 +266,6 @@
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/history-01",
+  "reviewer": "agent-review:bcc462d8-939d-45a6-b615-36f6c0f6d074",
   "slice": "history-01"
 }

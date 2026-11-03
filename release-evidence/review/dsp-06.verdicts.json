@@ -1,5 +1,5 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "d199bc8f94c0a9b603cddcc7d867ebed70c3634e",
   "records": {
     "function:rack::simd::abs(rack::simd::float_4)": {
       "verdict": "accept"
@@ -23,8 +23,7 @@
       "verdict": "accept"
     },
     "function:rack::simd::clamp(rack::simd::float_4, rack::simd::float_4, rack::simd::float_4)": {
-      "finding": "P2: the float_4 overload's docstring says 'fmin(fmax(x, a), b) per lane: a wins if b < a' (native/bindings/simd/functions.cpp:129-130), but Rack's float_4 clamp is fmin(fmax(x, a), b) (Rack-SDK include/simd/functions.hpp, 'inline float_4 clamp'), so when b < a the result is b: fmax(x, a) >= a > b, then fmin(..., b) = b. Only the scalar math::clamp returns a (math.hpp:104-107, std::fmax(std::fmin(x, b), a)). The binding calls Rack correctly and the reference cases match; only the help text is wrong. Smallest fix: change the docstring to 'b wins if b < a (unlike the scalar math::clamp, where a wins)' and optionally note this difference in docs/reference/simd.md#simd-functions.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::simd::cos(rack::simd::float_4)": {
       "verdict": "accept"
@@ -81,8 +80,7 @@
       "verdict": "accept"
     },
     "function:rack::simd::pow(float, rack::simd::float_4)": {
-      "finding": "P2: the docstring of the (float a, float_4 b) overload says 'exp(b * log(a)), with std::log for the scalar a; about 2.406e38 where a <= 0' (native/bindings/simd/functions.cpp:122-123). This is wrong for a == 0: std::log(0.f) is -inf, not NaN as with sse_mathfun_log_ps. So for lanes with b > 0, b * -inf = -inf, and sse_mathfun_exp_ps clamps that to -88.38 (sse_mathfun.h exp_ps, _mm_max_ps), giving about 0, not about 2.406e38. Only b <= 0 lanes, or a < 0, saturate. The binding calls Rack correctly and the reference cases (pow_s with s = 0, native/tests/simd_reference.cpp:398-400) match; only the help text is wrong. Smallest fix: say the result saturates at about 2.406e38 where a < 0, or where a == 0 and b <= 0, and is about 0 where a == 0 and b > 0.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::simd::pow(rack::simd::float_4, rack::simd::float_4)": {
       "verdict": "accept"
@@ -157,6 +155,6 @@
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/dsp-06",
+  "reviewer": "agent-review:051f5b02-2fad-432f-82da-8b9b127cc83c",
   "slice": "dsp-06"
 }

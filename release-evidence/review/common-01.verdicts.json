@@ -1,5 +1,5 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "c7566a2a721bd7c15176ea01039bd8ed14a689e8",
   "records": {
     "class_template:rack::DeferWrapper<type>": {
       "verdict": "accept"
@@ -8,8 +8,7 @@
       "verdict": "accept"
     },
     "constructor:rack::Exception::Exception(const char *, ...)": {
-      "finding": "P2: Exception.printf passes C's `%a` conversion through to Python's `%`, where it means something else. The regex at src/rackpy/raw/_common.py:18 lists `a` among the accepted conversions, and line 41 applies Python `%`. In C, `%a` prints a hexadecimal float (1.5 -> `0x1.8p+0`); in Python it prints ascii() (`1.5`). Rack's constructor uses printf semantics. Smallest fix: drop `a` from the conversion class so it raises like the other unsupported conversions, or translate it with float.hex(). Document the choice in values.md#values-exception.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "constructor:rack::Exception::Exception(const std::string &)": {
       "verdict": "accept"
@@ -36,8 +35,7 @@
       "verdict": "accept"
     },
     "field:rack::DeferWrapper::f": {
-      "finding": "P2: the cited test never reads or assigns the public attribute `DeferWrapper.f`. tests/values/in_rack/test_common.py:105-114 uses only with-blocks, so it would still pass if the field were renamed or stored privately: __exit__ (src/rackpy/raw/_common.py:101) and the constructor (line 93) use the same name. The values.md#values-common row also does not mention `f`. Smallest fix: assert `raw.DeferWrapper(fn).f is fn` in the test, and name `f` in the doc row.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::Exception::msg": {
       "verdict": "accept"
@@ -118,8 +116,7 @@
       "verdict": "accept"
     },
     "function_template:rack::bitCast<type, type>($1)": {
-      "finding": "P2: when the source type is u64, a non-int value raises a different error than for the other integer types. fromPython<uint64_t> (native/bindings/values/common.cpp:91-92) skips the PyLong_Check used for the other integer types (line 96). toU64 (lines 77-81) then turns CPython's TypeError into OverflowError. So `bit_cast(1.5, \"f64\", \"u64\")` raises OverflowError, while `bit_cast(1.5, \"f32\", \"i32\")` raises TypeError, which the test asserts. Smallest fix: add the same PyLong_Check/type_error before toU64 in the uint64_t branch, and add a u64 case to test_bit_cast_refuses_what_rack_would_not_compile.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function_template:rack::construct<type, type, type, type...>($1, $2, $3...)": {
       "verdict": "accept"
@@ -260,8 +257,7 @@
       "verdict": "accept"
     },
     "method:rack::Quantity::randomize()": {
-      "finding": "P1: no cited test would fail if randomize were a no-op or never reached a Python override. tests/values/in_rack/test_quantity.py:185-198 overrides only reset, and its randomize check (line 197, `0.0 <= q.get_value() <= 1.0`) already holds for the value 0.25 that reset left behind. test_the_base_quantity_has_racks_defaults never calls randomize, and the reference replay has no randomize case. The binding itself (native/bindings/values/quantity.cpp, QuantityTrampoline::randomize in native/bindings/support/quantity.hpp) looks correct. Smallest fix: seed rackpy.raw.random.local(), then assert that randomize gives Rack's uniform draw rescaled to the bounds (or at least changes the value). Also add a Python randomize override and assert that it is called.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::Quantity::reset()": {
       "verdict": "accept"
@@ -297,23 +293,19 @@
       "verdict": "accept"
     },
     "variable:rack::API_URL": {
-      "finding": "P2: the cited test checks only that the value is a non-empty str (tests/values/in_rack/test_common.py:34-35). It would pass if the binding at native/bindings/values/common.cpp bound another APP_* string. Rack defines it as \"https://api.vcvrack.com\" (Rack src/common.cpp:40). Smallest fix: assert that exact value.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "variable:rack::APP_CPU": {
       "verdict": "accept"
     },
     "variable:rack::APP_CPU_NAME": {
-      "finding": "P2: the cited test checks only that the value is a non-empty str (tests/values/in_rack/test_common.py:34-35), so a swapped binding would pass. Rack defines it as \"x64\" or \"ARM64\" (Rack src/common.cpp:35,38). Smallest fix: assert the per-CPU value, as the test already does for APP_CPU.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "variable:rack::APP_EDITION": {
-      "finding": "P2: the cited test checks only that the value is a non-empty str (tests/values/in_rack/test_common.py:34-35), so a swapped binding would pass. Rack defines it as \"Free\" (Rack src/common.cpp:19). Smallest fix: assert `raw.APP_EDITION == \"Free\"`.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "variable:rack::APP_EDITION_NAME": {
-      "finding": "P2: the cited test checks only that the value is a non-empty str (tests/values/in_rack/test_common.py:34-35), so a swapped binding would pass. Rack defines it as \"Free\" (Rack src/common.cpp:20). Smallest fix: assert the exact value.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "variable:rack::APP_NAME": {
       "verdict": "accept"
@@ -322,8 +314,7 @@
       "verdict": "accept"
     },
     "variable:rack::APP_OS_NAME": {
-      "finding": "P2: the cited test checks only that the value is a non-empty str (tests/values/in_rack/test_common.py:34-35), so a swapped binding would pass. Rack defines it as \"Linux\", \"macOS\" or \"Windows\" (Rack src/common.cpp:25,28,31). Smallest fix: assert the per-OS value.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "variable:rack::APP_VERSION": {
       "verdict": "accept"
@@ -362,10 +353,9 @@
       "verdict": "accept"
     },
     "variable:rack::logger::logPath": {
-      "finding": "P1: the test is too weak and the doc leaves out a restriction. The only assertion is `isinstance(logger.get_log_path(), str)` (tests/services/in_rack_utilities/test_utilities.py:200), which a binding that always returns \"\" would pass. set_log_path, the write half of this writable variable, is never exercised. Both get_log_path and set_log_path require the main thread (native/bindings/services/logger.cpp, runtime::requireMainThread in each), as the manifest's `thread` says. docs/reference/services.md:102-104 does not mention that. Smallest fix: have the outer test (tests/services/test_utilities.py) assert that the path ends with the log.txt it reads, and add a set/get round-trip that restores the old value. In services.md, state that both functions are main-thread only.",
-      "verdict": "finding"
+      "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/common-01",
+  "reviewer": "agent-review:bcc462d8-939d-45a6-b615-36f6c0f6d074",
   "slice": "common-01"
 }

@@ -1,5 +1,5 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "c7566a2a721bd7c15176ea01039bd8ed14a689e8",
   "records": {
     "alias:rack::dsp::VUMeter": {
       "verdict": "accept"
@@ -56,8 +56,7 @@
       "verdict": "accept"
     },
     "field:rack::dsp::Decimator::inIndex": {
-      "finding": "P0: the in_index setter accepts any value from 0 to OVERSAMPLE*(QUALITY-1) (native/bindings/dsp/resampler.cpp:225-229). That range only checks the next copy. Rack's Decimator::process (Rack-SDK include/dsp/resampler.hpp:125-129) does memcpy(&inBuffer[inIndex], in, OVERSAMPLE) and then inIndex = (inIndex + OVERSAMPLE) % (OVERSAMPLE*QUALITY), so Rack only ever leaves inIndex at multiples of OVERSAMPLE. With a value that is not a multiple, a later call writes past inBuffer. Example: Decimator[4, 8], in_index = 1. After 7 process() calls inIndex is 29, and the 8th call copies into elements 29..32 of a 32-element array. Element 32 is kernel[0] (kernel[0..3] for float_4), so Python can silently corrupt memory, which is undefined behaviour. This also makes docs/reference/dsp.md:563-565 ('keep in_index within the range Rack's code keeps it in') and the manifest note wrong. tests/dsp/in_rack_basic/test_resampling.py:261-263 only checks 28 and 29. Smallest fix: in the setter, also require in_index % OVERSAMPLE == 0 (ValueError); add a test that in_index = 1 raises; update the doc and the note.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::Decimator::kernel": {
       "verdict": "accept"
@@ -102,8 +101,7 @@
       "verdict": "accept"
     },
     "field:rack::dsp::Upsampler::kernel": {
-      "finding": "P1: none of the cited tests checks Upsampler.kernel. In tests/dsp/in_rack_basic/test_resampling.py:124-134 the reference runner returns only [outs, in_index, in_buffer], unlike the decimator runner (line 120), which includes d.kernel.tolist(). test_decimator_and_upsampler (lines 270-277) never reads u.kernel. The uncited test_decimator_and_upsampler_reset (line 296) only compares one RackPy kernel with another, so a view of the wrong array or the wrong length (native/bindings/dsp/resampler.cpp:254) would still pass. Smallest fix: add u.kernel.tolist() to the upsampler reference result in native/tests/dsp_reference.cpp and in the Python runner, as the decimator does, or at least assert len(u.kernel) == OVERSAMPLE*QUALITY plus a value against Rack.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::dsp::VuMeter2::lambda": {
       "verdict": "accept"
@@ -244,8 +242,7 @@
       "verdict": "accept"
     },
     "method:rack::dsp::SampleRateConverter::process(const float *, int, int *, float *, int, int *)": {
-      "finding": "P1: the binding refuses in_stride or out_stride below channels, and strides below 1 (native/bindings/dsp/resampler.cpp:179-182; documented at docs/reference/dsp.md:546 and in the manifest note), but nothing justifies this. Rack's process (Rack-SDK include/dsp/resampler.hpp:68-99) passes any stride to speex_resampler_set_input/output_stride, or uses it in the copy loop, without asserting. The binding's own size check (inNeed/outNeed = stride*(frames-1) + channels, resampler.cpp:183-184) already keeps every access inside the buffers for any stride of 0 or more, so smaller strides would not crash or be undefined. They are only unusual: overlapping reads, or channels overwriting each other's output. Smallest fix: drop the stride >= channels check (keep only stride >= 0 and the size check), or record a real justification in the doc and the note.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::dsp::SampleRateConverter::process(const rack::dsp::Frame<$c0> *, int *, rack::dsp::Frame<$c0> *, int *)": {
       "verdict": "accept"
@@ -290,6 +287,6 @@
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/dsp-04",
+  "reviewer": "agent-review:bcc462d8-939d-45a6-b615-36f6c0f6d074",
   "slice": "dsp-04"
 }

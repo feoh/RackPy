@@ -1,12 +1,11 @@
 {
-  "commit": "ed863f541d6665fa4356945689848e378d411356",
+  "commit": "c7566a2a721bd7c15176ea01039bd8ed14a689e8",
   "records": {
     "destructor:rack::plugin::Model::~Model()": {
       "verdict": "accept"
     },
     "destructor:rack::plugin::Plugin::~Plugin()": {
-      "finding": "P2: The mapping (Plugin.close), its tests and #plugin-plugins are accurate. But docs/reference/plugin.md:139-141 (plugin-hooks) still says 'RackPy currently exposes borrowed plugin views; a Python mapping and behavioral proof of that destructor remain open (RP-31D)'. That contradicts the Plugin.close binding and test_isolated_plugin_destruction_clears_model_backpointers. Smallest fix: replace that sentence with a pointer to Plugin.close in #plugin-plugins.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::plugin::Model::description": {
       "verdict": "accept"
@@ -15,8 +14,7 @@
       "verdict": "accept"
     },
     "field:rack::plugin::Model::manualUrl": {
-      "finding": "P1: No cited test reads or writes Model.manual_url. tests/plugin/in_rack/test_plugin.py:36 compares get_manual_url() with the plugin's manual_url, and test_model_fields_are_this_plugins_to_change round-trips only name, tag_ids and hidden (lines 69-75). A grep of tests/ finds no other use of Model.manual_url. Smallest fix: add manual_url to the own-model write round trip and to the foreign read-only loop in test_model_fields_are_this_plugins_to_change.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::plugin::Model::modularGridUrl": {
       "verdict": "accept"
@@ -49,8 +47,7 @@
       "verdict": "accept"
     },
     "field:rack::plugin::Plugin::description": {
-      "finding": "P1: The only cited test, tests/plugin/in_rack/test_plugin.py::test_this_plugin_after_initialization (lines 17-37), never reads Plugin.description, so a wrong binding would pass. The value is checked in tests/plugin/entries/rp16_loader.py:28 through tests/plugin/test_plugin.py::test_rack_loader_methods_while_the_plugin_initializes, which the record does not cite. Smallest fix: cite that test, or assert this.description against plugin.json in the cited test.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::plugin::Plugin::donateUrl": {
       "verdict": "accept"
@@ -71,8 +68,7 @@
       "verdict": "accept"
     },
     "field:rack::plugin::Plugin::name": {
-      "finding": "P1: The only cited test, tests/plugin/in_rack/test_plugin.py::test_this_plugin_after_initialization (lines 17-37), never reads Plugin.name. Its brand == get_brand() check uses the brand field, not name. The value is checked in tests/plugin/entries/rp16_loader.py:28 through tests/plugin/test_plugin.py::test_rack_loader_methods_while_the_plugin_initializes, which the record does not cite. Smallest fix: cite that test, or assert this.name in the cited test.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "field:rack::plugin::Plugin::path": {
       "verdict": "accept"
@@ -111,12 +107,10 @@
       "verdict": "accept"
     },
     "function:rack::plugin::getPlugin(const std::string &)": {
-      "finding": "P2: The cited doc anchor docs/reference/plugin.md#plugin-models does not mention get_plugin. It is documented under #plugin-plugins (plugin.md, first paragraph of 'Plugins'). Smallest fix: cite docs/reference/plugin.md#plugin-plugins.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::plugin::getPluginFallback(const std::string &)": {
-      "finding": "P2: The cited doc anchor docs/reference/plugin.md#plugin-models does not mention get_plugin_fallback. It is documented under #plugin-plugins. Smallest fix: cite docs/reference/plugin.md#plugin-plugins.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function:rack::plugin::isSlugValid(const std::string &)": {
       "verdict": "accept"
@@ -149,31 +143,25 @@
       "verdict": "accept"
     },
     "function_template:rack::createInput<type>(rack::math::Vec, rack::engine::Module *, int)": {
-      "finding": "P2: The record notes and docs/reference/app.md#app-factories (lines 266-268: 'each sets Rack's fields in Rack's order') are wrong. Rack's helpers.hpp createInput sets module, then type, then portId. src/rackpy/raw/_widget_helpers.py _port sets type, then port_id, then module. app.md's 'Controls and their module' section also says 'Set the ID first, then the module, as Rack's factories do', which contradicts helpers.hpp. Smallest fix: say that RackPy sets the ID before the module because its fields are checked, as the createLightParam notes already do.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function_template:rack::createInputCentered<type>(rack::math::Vec, rack::engine::Module *, int)": {
-      "finding": "P1: No cited test checks the centering, which is the only thing this function adds to create_input. tests/app/in_rack/test_controls.py:399-401 (test_ports_check_ids_and_reach_the_module) asserts only input_port.type == INPUT, and no cited test reads box.pos after the call. The doc also has the field-order error described for createInput (app.md:266-268). Smallest fix: give the port a size and assert box.pos == pos - size/2.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function_template:rack::createLight<type>(rack::math::Vec, rack::engine::Module *, int)": {
-      "finding": "P2: The record notes and docs/reference/app.md#app-factories (lines 266-268) say Rack's field order is kept. Rack's createLight sets module, then firstLightId. src/rackpy/raw/_widget_helpers.py create_light sets first_light_id, then module. Smallest fix: correct the notes and the doc to say RackPy sets the ID first.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function_template:rack::createLightCentered<type>(rack::math::Vec, rack::engine::Module *, int)": {
-      "finding": "P1: The centering is never asserted. tests/app/in_rack/test_controls.py:437 (test_module_lights_follow_the_engine) calls create_light_centered(..., Vec(10, 10), None, 0) and then tests only the light's colors and IDs, never box.pos. The doc also has the field-order error described for createLight. Smallest fix: assert box.pos == pos - box.size/2 for a light with a size.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function_template:rack::createLightParam<type>(rack::math::Vec, rack::engine::Module *, int, int)": {
       "verdict": "accept"
     },
     "function_template:rack::createLightParamCentered<type>(rack::math::Vec, rack::engine::Module *, int, int)": {
-      "finding": "P1: tests/app/in_rack/test_components.py:269-273 checks the light's module and first_light_id, and that the light is centred inside the button. That centring is the button's own layout. The button's box.pos is never compared with Vec(20, 20) - size/2, so this function's centering is untested. Smallest fix: add assert button.box.pos == Vec(20, 20).minus(button.box.size.div(2)).",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function_template:rack::createMenu<type>()": {
-      "finding": "P2: The record's ownership says 'the new widget belongs to Python until added to a menu'. native/bindings/ui/ui.cpp:362-363 hands the menu to a MenuOverlay straight away and the overlay to Rack's scene, so Rack's scene owns it from the start, as docs/reference/ui.md#ui-menu-helpers says. Smallest fix: change the ownership to 'Rack's scene owns the overlay and the menu as soon as it is created'.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function_template:rack::createMenuItem<type>(std::string, std::string)": {
       "verdict": "accept"
@@ -188,12 +176,10 @@
       "verdict": "accept"
     },
     "function_template:rack::createOutput<type>(rack::math::Vec, rack::engine::Module *, int)": {
-      "finding": "P2: The record notes and docs/reference/app.md#app-factories (lines 266-268) say Rack's field order is kept. Rack's createOutput sets module, then type, then portId. src/rackpy/raw/_widget_helpers.py _port sets type, then port_id, then module. Smallest fix: correct the notes and the doc to say RackPy sets the ID first.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function_template:rack::createOutputCentered<type>(rack::math::Vec, rack::engine::Module *, int)": {
-      "finding": "P1: None of the cited tests calls create_output_centered. test_widget_factories, test_rack_turns_a_knob_and_flips_a_switch, test_ports_check_ids_and_reach_the_module and test_module_lights_follow_the_engine in tests/app/in_rack/test_controls.py do not use it. Its only in-suite use, tests/app/in_rack/test_components.py:304 (test_component_ports_reach_their_module), is not cited and does not check the position. Smallest fix: cite a test that asserts type == OUTPUT and box.pos == pos - size/2, for example a PJ301MPort, which has a size.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function_template:rack::createPanel<type>(std::string)": {
       "verdict": "accept"
@@ -202,12 +188,10 @@
       "verdict": "accept"
     },
     "function_template:rack::createParam<type>(rack::math::Vec, rack::engine::Module *, int)": {
-      "finding": "P2: The record notes ('Rack's fields are set in Rack's order') and docs/reference/app.md#app-factories (lines 266-268) are inaccurate. Rack's helpers.hpp createParam sets module, then paramId, then calls initParamQuantity. src/rackpy/raw/_widget_helpers.py create_param sets param_id, then module. app.md's 'as Rack's factories do' sentence (Controls and their module) contradicts helpers.hpp. Smallest fix: say that RackPy sets the ID first because its fields are checked.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function_template:rack::createParamCentered<type>(rack::math::Vec, rack::engine::Module *, int)": {
-      "finding": "P1: The centering is not tested. tests/app/in_rack/test_controls.py:327-328 calls create_param_centered(app.Switch, Vec(400, 315), ...) and the next line overwrites switch.box, so no assertion would fail if the widget were not centred. The doc also has the field-order error described for createParam. Smallest fix: assert box.pos == pos - box.size/2 before overwriting the box, using a sized widget.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "function_template:rack::createSubmenuItem<type>(std::string, std::string, std::function<void (ui::Menu *)>, bool)": {
       "verdict": "accept"
@@ -216,20 +200,16 @@
       "verdict": "accept"
     },
     "function_template:rack::createWidgetCentered<type>(rack::math::Vec)": {
-      "finding": "P1: tests/app/in_rack/test_controls.py:622 (test_widget_factories) creates the `centred` widget but never asserts anything about it, and no other cited test calls create_widget_centered. Smallest fix: create a widget with a known box.size and assert box.pos == pos - size/2.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::plugin::Model::appendContextMenu(rack::ui::Menu *, bool)": {
-      "finding": "P0 (found by reading the source, not run): append_context_menu can leave menu items that crash Rack. native/bindings/plugin.cpp:524 checks the model only with addedModel (plugin.cpp:214, which needs only m.plugin != NULL). It does not use committedModel (plugin.cpp:206), so a model attached to an isolated rp.Plugin() is accepted. Rack's Model::appendContextMenu (src/plugin/Model.cpp) adds items whose lambdas use `this` and read `plugin->...` when the item is chosen: the library item uses plugin->slug, and the favorite item calls isFavorite(), which uses plugin->slug. Plugin.close() (plugin.cpp:73) runs ~Plugin, which sets model->plugin = NULL (src/plugin/Plugin.cpp:14-18), and dropping the model afterwards deletes it. Rack's MenuItem::doAction (src/ui/MenuItem.cpp:86-93) does not check `disabled`. So these steps dereference NULL or freed memory: append_context_menu(menu), then plugin.close() (and optionally del model), then choose an item by clicking or with do_action. This is the dangling-raw-Model* hazard that RP-31M closed for create_module and create_module_widget. Separately (P2), the cited anchor docs/reference/plugin.md#plugin-models does not mention append_context_menu or in_browser; it is described in docs/reference/ui.md:119. Smallest fix: use committedModel(h, \"Model.append_context_menu\") and add a test that a detached or isolated model is refused. Cite ui.md#ui-menu-helpers, or document the method and in_browser under #plugin-models.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::plugin::Model::createModule()": {
-      "finding": "P2: The record says gil_release: false, but native/bindings/plugin.cpp:464 releases the GIL (py::gil_scoped_release) around model.createModule() for another plugin's model, and the record's own notes say 'GIL released'. docs/reference/plugin.md:146-148 also still says calling createModule from Python 'comes with the app widgets (RP-28)', which contradicts the #plugin-models text and the binding. Smallest fix: set gil_release to true, or document it as conditional, and delete the stale sentence in the plugin-hooks section.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::plugin::Model::createModuleWidget(rack::engine::Module *)": {
-      "finding": "P2: The record says gil_release: false, but native/bindings/plugin.cpp:513 releases the GIL around model.createModuleWidget(target) for a model's own C++ widget. docs/reference/plugin.md:146-148 also still says calling createModuleWidget from Python 'comes with the app widgets (RP-28)'. Smallest fix: correct gil_release and delete the stale sentence.",
-      "verdict": "finding"
+      "verdict": "accept"
     },
     "method:rack::plugin::Model::fromJson(json_t *)": {
       "verdict": "accept"
@@ -292,6 +272,6 @@
       "verdict": "accept"
     }
   },
-  "reviewer": "agent-review:rp42-r1/plugin-01",
+  "reviewer": "agent-review:bcc462d8-939d-45a6-b615-36f6c0f6d074",
   "slice": "plugin-01"
 }
