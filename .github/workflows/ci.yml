@@ -13,13 +13,18 @@ on:
   workflow_dispatch:
     inputs:
       macos_tests:
-        description: "Optional pytest -k expression for the macOS host-test jobs (empty: all of them)"
+        description: "Optional pytest -k expression for the macOS test jobs (empty: all of them)"
         required: false
         default: ""
       windows_tests:
-        description: "Optional pytest -k expression for the Windows host-test job (empty: all of them)"
+        description: "Optional pytest -k expression for the Windows test jobs (empty: all of them)"
         required: false
         default: ""
+      platform_tests_only:
+        description: "Run only Windows/macOS native, unit and Rack-host tests; skip release/evidence jobs (not an acceptance run)"
+        type: boolean
+        required: false
+        default: false
   schedule:
     - cron: "17 6 * * 1"  # weekly: external links, and a fresh look at the pinned downloads
 
@@ -46,6 +51,7 @@ env:
 
 jobs:
   planning:
+    if: ${{ !inputs.platform_tests_only }}
     name: Planning data
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -58,6 +64,7 @@ jobs:
       - run: bin/callback-matrix check
 
   python:
+    if: ${{ !inputs.platform_tests_only }}
     name: Hooks, typing and unit tests
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -81,6 +88,7 @@ jobs:
           if-no-files-found: ignore
 
   docs:
+    if: ${{ !inputs.platform_tests_only }}
     name: Documentation site
     runs-on: ubuntu-24.04
     timeout-minutes: 30  # nine deliberately broken site builds, ~90 s each
@@ -112,7 +120,7 @@ jobs:
   docs-links:
     name: Documentation external links
     # External sites must not block pull requests; this runs weekly and on demand.
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && !inputs.platform_tests_only
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -131,6 +139,7 @@ jobs:
           if-no-files-found: ignore
 
   native:
+    if: ${{ !inputs.platform_tests_only }}
     name: SDK pins, native build and audio-path guard
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -167,6 +176,7 @@ jobs:
           if-no-files-found: ignore
 
   inventory:
+    if: ${{ !inputs.platform_tests_only }}
     name: SDK inventory
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -209,7 +219,7 @@ jobs:
     # RP-42. The committed inventory's macOS and Windows variants are extracted on Linux with each target's own
     # library headers. This extracts each one again on the platform itself, with that machine's compiler headers
     # (Xcode's SDK; MSYS2's MinGW) and that platform's SDK archive, and fails on any difference.
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && !inputs.platform_tests_only
     strategy:
       fail-fast: false
       matrix:
@@ -265,6 +275,7 @@ jobs:
         run: uv run --script bin/inventory_sdk.py platform-check "$PLATFORM" --clangxx "$CLANGXX" --libclang "$LIBCLANG"
 
   host:
+    if: ${{ !inputs.platform_tests_only }}
     name: Rack host smoke tests (headless and Xvfb, no audio device)
     runs-on: ubuntu-24.04
     # The in-Rack suites grow with each binding family (27.7 minutes at RP-19A); builds are memory-capped too.
@@ -307,7 +318,7 @@ jobs:
     name: Distributable build with the official Rack toolchain
     # Building the toolchain takes about an hour on a cache miss, so this runs
     # on main and on demand, not on every pull request.
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && !inputs.platform_tests_only
     runs-on: ubuntu-24.04
     timeout-minutes: 300
     steps:
@@ -354,7 +365,7 @@ jobs:
     # then installs and runs them in clean Ubuntu 20.04 and 16.04 containers with no Python and no network
     # (bin/rackpy-release verify). Keeps the manifest, checksums, logs and screenshots, not the artifacts:
     # nothing is distributed without owner approval.
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && !inputs.platform_tests_only
     needs: dist  # shares its toolchain cache
     runs-on: ubuntu-24.04
     timeout-minutes: 120
@@ -424,7 +435,7 @@ jobs:
     # checked), then installs and runs them in Rack Free 2.6.6 with an empty environment, including the
     # wrong-architecture, unsigned and quarantine cases (bin/rackpy-release verify). A runner is not a clean
     # Mac: the logs record every library Rack mapped. Keeps evidence, not the artifacts.
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && !inputs.platform_tests_only
     strategy:
       fail-fast: false
       matrix:
@@ -474,12 +485,24 @@ jobs:
             tar -tvf "$f" > "reports/listings/$(basename "$f").txt" || true
           done
       - if: always()
+        id: upload-evidence
+        continue-on-error: true
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: macos-${{ matrix.platform }}-release-candidate-evidence
           path: reports/
           retention-days: 30
           if-no-files-found: ignore
+      # Artifact storage has intermittently failed DNS resolution after the release checks completed.
+      - if: always() && steps.upload-evidence.outcome == 'failure'
+        name: Retry evidence upload once
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: macos-${{ matrix.platform }}-release-candidate-evidence
+          path: reports/
+          retention-days: 30
+          if-no-files-found: ignore
+          overwrite: true
 
   windows-release-candidate:
     name: Windows x64 release candidate, installed and run in fresh Rack user folders
@@ -489,7 +512,7 @@ jobs:
     # including the missing-DLL, damaged-runtime, decoy-DLL, permission, Unicode and long-path cases
     # (bin/rackpy-release verify). A runner is not a clean PC: the logs record every DLL Rack loaded.
     # Keeps evidence, not the artifacts.
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && !inputs.platform_tests_only
     runs-on: windows-2025
     timeout-minutes: 150
     defaults:
@@ -540,12 +563,24 @@ jobs:
             cp "$d/licenses/FILES.json" "reports/files/$(basename "$d").json" || true
           done
       - if: always()
+        id: upload-evidence
+        continue-on-error: true
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: windows-win-x64-release-candidate-evidence
           path: reports/
           retention-days: 30
           if-no-files-found: ignore
+      # Artifact storage has intermittently failed DNS resolution after the release checks completed.
+      - if: always() && steps.upload-evidence.outcome == 'failure'
+        name: Retry evidence upload once
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-win-x64-release-candidate-evidence
+          path: reports/
+          retention-days: 30
+          if-no-files-found: ignore
+          overwrite: true
 
   windows:
     name: Windows x64, native build, CTest, unit and Rack host tests
@@ -615,12 +650,23 @@ jobs:
           mkdir -p reports/rack-logs
           cd "$RUNNER_TEMP/pytest" 2>/dev/null && find . -name log.txt -exec cp --parents {} "$GITHUB_WORKSPACE/reports/rack-logs/" \; || true
       - if: always()
+        id: upload-evidence
+        continue-on-error: true
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: windows-win-x64-reports
           path: reports/
           retention-days: 14
           if-no-files-found: ignore
+      - if: always() && steps.upload-evidence.outcome == 'failure'
+        name: Retry test report upload once
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-win-x64-reports
+          path: reports/
+          retention-days: 14
+          if-no-files-found: ignore
+          overwrite: true
 
   macos:
     name: macOS ${{ matrix.platform }}, native build, CTest, unit and Rack host tests
@@ -673,9 +719,20 @@ jobs:
           mkdir -p reports/rack-logs
           cd "$RUNNER_TEMP/pytest" 2>/dev/null && find . -name log.txt -exec rsync -R {} "$GITHUB_WORKSPACE/reports/rack-logs/" \; || true
       - if: always()
+        id: upload-evidence
+        continue-on-error: true
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: macos-${{ matrix.platform }}-reports
           path: reports/
           retention-days: 14
           if-no-files-found: ignore
+      - if: always() && steps.upload-evidence.outcome == 'failure'
+        name: Retry test report upload once
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: macos-${{ matrix.platform }}-reports
+          path: reports/
+          retention-days: 14
+          if-no-files-found: ignore
+          overwrite: true
