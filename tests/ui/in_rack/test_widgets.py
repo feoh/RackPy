@@ -53,7 +53,7 @@ def test_classes_follow_racks_hierarchy() -> None:
 
 
 def test_fields_round_trip() -> None:
-    label, layout, tooltip = ui.Label(), ui.SequentialLayout(), ui.Tooltip()
+    label, layout, tooltip, dot = ui.Label(), ui.SequentialLayout(), ui.Tooltip(), ui.ColorDotMenuItem()
     try:
         label.text, label.font_size, label.line_height = "λ Level", 14.0, 1.5
         label.color = nanovg.NVGcolor(10 / 255, 20 / 255, 30 / 255)
@@ -67,6 +67,7 @@ def test_fields_round_trip() -> None:
         layout.orientation = ui.SequentialLayout.VERTICAL_ORIENTATION
         assert layout.orientation == ui.SequentialLayout.Orientation.VERTICAL_ORIENTATION
         layout.alignment = ui.SequentialLayout.MIDDLE_ALIGNMENT
+        assert layout.alignment == ui.SequentialLayout.Alignment.MIDDLE_ALIGNMENT
         layout.wrap, layout.margin, layout.spacing = False, Vec(2, 3), Vec(4, 5)
         assert ui.SequentialLayout.MIDDLE_ALIGNMENT == ui.SequentialLayout.CENTER_ALIGNMENT  # Rack's aliases
         assert ui.SequentialLayout.TOP_ALIGNMENT == ui.SequentialLayout.LEFT_ALIGNMENT
@@ -77,8 +78,10 @@ def test_fields_round_trip() -> None:
         assert (layout.wrap, layout.margin, layout.spacing) == (False, Vec(2, 3), Vec(4, 5))
         tooltip.text = "tip"
         assert tooltip.text == "tip"
+        dot.color = nanovg.NVGcolor(0.15, 0.25, 0.35, 0.45)
+        assert (dot.color.r, dot.color.g, dot.color.b, dot.color.a) == pytest.approx((0.15, 0.25, 0.35, 0.45))
     finally:
-        for widget in (label, layout, tooltip):
+        for widget in (label, layout, tooltip, dot):
             widget.close()
 
 
@@ -227,6 +230,7 @@ def test_rack_draws_the_widgets() -> None:
     label, button, slider, bar = ui.Label(), ui.Button(), ui.Slider(), ui.ProgressBar()
     field, item, separator, menu_label = ui.TextField(), ui.MenuItem(), ui.MenuSeparator(), ui.MenuLabel()
     label.text, button.text, field.text, item.text, menu_label.text = "Label", "Push", "typed", "Item", "Header"
+    assert button.text == "Push" and menu_label.text == "Header"
     slider.quantity = bar.quantity = q
     layout = ui.SequentialLayout()
     layout.box = Rect(Vec(), Vec(200, 120))
@@ -489,7 +493,10 @@ def test_menus_child_menus_and_actions() -> None:
             return child
 
     overlay, menu = ui.MenuOverlay(), ui.Menu()
-    overlay.bg_color = nanovg.NVGcolor(0, 0, 0, 0.5)
+    overlay.bg_color = nanovg.NVGcolor(0.1, 0.2, 0.3, 0.5)
+    assert (overlay.bg_color.r, overlay.bg_color.g, overlay.bg_color.b, overlay.bg_color.a) == pytest.approx(
+        (0.1, 0.2, 0.3, 0.5)
+    )
     first, parent = Item(), Parent()
     first.text, first.right_text, parent.text = "First", "Ctrl+F", "More"
     menu.add_child(first)
@@ -513,6 +520,30 @@ def test_menus_child_menus_and_actions() -> None:
             ui.Menu().set_child_menu(None)
     finally:
         overlay.request_delete()
+
+
+def test_menu_parent_menu_writes_are_limited_to_live_siblings() -> None:
+    overlay, foreign_overlay = ui.MenuOverlay(), ui.MenuOverlay()
+    first, second, foreign = ui.Menu(), ui.Menu(), ui.Menu()
+    overlay.add_child(first)
+    overlay.add_child(second)
+    foreign_overlay.add_child(foreign)
+    try:
+        second.parent_menu = first
+        assert second.parent_menu is first
+        second.parent_menu = None
+        assert second.parent_menu is None
+        with pytest.raises(ValueError, match="same parent"):
+            second.parent_menu = foreign
+        with pytest.raises(ValueError, match="different Menu"):
+            second.parent_menu = second
+        second.parent_menu = first
+        overlay.remove_child(first)
+        first.close()
+        assert second.parent_menu is None
+    finally:
+        overlay.close()
+        foreign_overlay.close()
 
 
 def test_bad_child_menus_are_contained() -> None:

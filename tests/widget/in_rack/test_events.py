@@ -38,6 +38,7 @@ def test_position_recursion_consumption_and_expiring_views() -> None:
             with pytest.raises(StaleHandleError):
                 _ = ref.context if isinstance(ref, w.BaseEvent) else ref.target
         assert event.pos == Vec(13, 25)  # caller-owned data remains valid
+        assert event.mouse_delta == Vec(2, 3)
         event.unconsume()
         assert not event.is_consumed() and not event.is_propagating()
         context.propagating = True
@@ -101,6 +102,7 @@ def test_all_event_handlers_and_prototype_hierarchy() -> None:
         assert isinstance(w.HoverKeyEvent(), w.PositionBaseEvent)
         assert isinstance(w.DragHoverEvent(), w.DragBaseEvent)
         assert w.Widget.HoverEvent is w.HoverEvent
+        assert w.Widget.BaseEvent is w.BaseEvent
         assert w.BaseEvent().get_target() is None
         with pytest.raises(StaleHandleError):
             saved[0].is_consumed()
@@ -116,10 +118,12 @@ def test_owned_records_path_lifetimes_nullable_targets_and_fields() -> None:
     assert len(event.paths) == 2
     event.paths = ["replacement"]
     assert event.paths == ["replacement"]
-    key = w.HoverKeyEvent(key=65, scancode=12, key_name="a", action=1, mods=0)
-    assert key.is_key_command(65)
-    assert not key.is_key_command(66)
-    assert key.key == 65 and key.scancode == 12 and key.action == 1
+    key = w.HoverKeyEvent(key=65, scancode=12, key_name="a", action=1, mods=2)
+    assert (key.key, key.scancode, key.key_name, key.action, key.mods) == (65, 12, "a", 1, 2)
+    button = w.ButtonEvent(mods=3)
+    assert button.mods == 3
+    drag_hover = w.DragHoverEvent(mouse_delta=Vec(4, 5))
+    assert drag_hover.mouse_delta == Vec(4, 5)
     text_event = w.HoverTextEvent(codepoint=0x1F642)
     assert isinstance(text_event, w.TextBaseEvent) and text_event.codepoint == 0x1F642
     context = w.EventContext()

@@ -1018,7 +1018,7 @@ void bindModule(py::module_ engine) {
 				r.state->configQuantity(i, 0.f, 1.f, 0.f, std::move(name), "", 0.f, 1.f, 0.f, 2);
 			else
 				r.state->configQuantity(i, 0.f, 1.f, 0.f, std::move(name), "", 0.f, 1.f, 0.f, 2, {},
-					[&] { return makeTransferredQuantity(r, type, true, i); });
+					[&] { return makeTransferredQuantity(r, type, false, i); });
 			return component(r, Kind::ParamQuantity, i);
 		}, py::arg("param_id"), py::arg("name") = "", py::arg("quantity_type") = py::none())
 		.def("config_input", [](const ModuleRef& r, int i, std::string name, py::object type) {

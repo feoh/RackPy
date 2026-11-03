@@ -184,9 +184,9 @@ have their own class factories, described next.
 
 Rack's `configParam<TParamQuantity>`, `configSwitch<TSwitchQuantity>` and
 `configButton<TSwitchQuantity>` work the same way: pass the class as
-`quantity_type`. `config_param` takes `ParamQuantity` or any subclass,
-including `SwitchQuantity`; `config_switch` and `config_button` need
-`SwitchQuantity` or a subclass. RackPy checks Rack's arguments (IDs, bounds,
+`quantity_type`. `config_param` and `config_button` take `ParamQuantity` or any
+subclass, including `SwitchQuantity`; `config_switch` needs `SwitchQuantity`
+or a subclass. RackPy checks Rack's arguments (IDs, bounds,
 display coefficients) **before** it calls `quantity_type()`, then sets exactly
 the fields Rack's template sets: `module`, `param_id`, the bounds and default,
 `name`, `unit` and the display coefficients; `config_switch` also enables

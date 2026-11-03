@@ -110,14 +110,14 @@ def test_factories_match_native_reference(reference: dict[str, Any]) -> None:
     def configure(m: Module) -> None:
         made.append(m.config_param(0, -1, 1, 0.5, "Gain", " dB", 0, 2, 3, quantity_type=CustomQuantity))
         made.append(m.config_switch(1, 0, 2, 1, "Mode", ["X", "Y", "Z"], quantity_type=CustomSwitch))
-        made.append(m.config_button(2, "Push", quantity_type=CustomSwitch))
+        made.append(m.config_button(2, "Push", quantity_type=CustomQuantity))
         made.append(m.config_param(3, 0, 4, 2, "Steps", quantity_type=CustomSwitch))
 
     baseline = _rackpy_host.transferred_objects()
     m = build(configure)
     try:
         assert [record(m, q, i) for i, q in enumerate(made)] == reference["quantity_factories"]
-        assert [type(q) for q in made] == [CustomQuantity, CustomSwitch, CustomSwitch, CustomSwitch]
+        assert [type(q) for q in made] == [CustomQuantity, CustomSwitch, CustomQuantity, CustomSwitch]
         for i, q in enumerate(made):
             assert q is m.get_param_quantity(i) is m.param_quantities[i] and q.alive
         assert list(m.param_quantities) == made
@@ -227,8 +227,11 @@ def test_class_constructor_and_bounds_errors_leave_slot_unchanged() -> None:
         for wrong in (ParamQuantity, CustomQuantity, SwitchQuantityView):
             with pytest.raises(TypeError, match="quantity_type must be SwitchQuantity"):
                 m.config_switch(0, 0, 1, 0, quantity_type=wrong)  # type: ignore[type-var]
-            with pytest.raises(TypeError, match="quantity_type must be SwitchQuantity"):
+        for wrong in (object, PortInfo, Quantity):
+            with pytest.raises(TypeError, match="quantity_type must be ParamQuantity"):
                 m.config_button(0, quantity_type=wrong)  # type: ignore[type-var]
+        with pytest.raises(TypeError, match="quantity_type must be ParamQuantity"):
+            m.config_button(0, quantity_type="ParamQuantity")  # type: ignore[call-overload]
         with pytest.raises(RuntimeError, match="constructor failed"):
             m.config_param(0, 0, 1, 0, quantity_type=Failing)
         with pytest.raises(TypeError, match="exactly quantity_type"):

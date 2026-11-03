@@ -20,6 +20,10 @@ def test_printf_through_racks_formatting() -> None:
     assert rs.f("%lld %llu %hhd %hu", -(2**62), 2**64 - 1, -128, 65535) == f"{-(2**62)} {2**64 - 1} -128 65535"
     assert rs.f("%e %g %a", 1500.0, 0.0001, 1.0) == "1.500000e+03 0.0001 0x1p+0"
     assert rs.fv("%s-%s", ["a", "b"]) == "a-b" and rs.f("no conversions") == "no conversions"
+    with pytest.raises(ValueError, match="exactly one byte"):
+        rs.f("%c", "é")  # %c writes one C byte, not a UTF-8 sequence
+    with pytest.raises(ValueError, match="exactly one byte"):
+        rs.fv("%c", ["é"])
     with pytest.raises(TypeError, match="more arguments"):
         rs.f("%d %d", 1)
     with pytest.raises(TypeError, match="takes 1"):

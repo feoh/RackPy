@@ -129,8 +129,7 @@ class MenuOverlay(OpaqueWidget):
     bg_color: NVGcolor
 
 class Menu(OpaqueWidget):
-    @property
-    def parent_menu(self) -> Menu | None: ...  # Rack 2.6.6 never sets it
+    parent_menu: Menu | None  # Writable for a different sibling Menu, or None.
     @property
     def child_menu(self) -> Menu | None: ...
     @property

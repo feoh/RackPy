@@ -153,8 +153,12 @@ std::string convert(const std::string& spec, const std::string& length, char con
 		}
 		case 'c':
 			if (length == "") {
-				if (py::isinstance<py::str>(value) && py::len(value) == 1)
-					return call(f, stars, static_cast<int>(value.cast<std::string>()[0] & 0xff));
+				if (py::isinstance<py::str>(value)) {
+					const std::string character = value.cast<std::string>();
+					if (character.size() != 1)
+						throw py::value_error("%c string must encode to exactly one byte (ASCII)");
+					return call(f, stars, static_cast<int>(static_cast<unsigned char>(character[0])));
+				}
 				return call(f, stars, static_cast<int>(integer<unsigned char>(value, spec)));
 			}
 			break;

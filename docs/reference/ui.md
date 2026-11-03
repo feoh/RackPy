@@ -92,10 +92,11 @@ dispatching an event, because nothing else can be iterating a tree that
 exists only in Python. Returning something other than a `Menu` is logged and
 gives Rack no menu. `Menu.set_child_menu(menu)` does the same by hand. It
 hands the menu to Rack, which deletes the previous child menu. `child_menu`
-and `active_entry` are read-only. So is `parent_menu`: Rack 2.6.6 neither sets
-nor reads it, so a write would store a raw pointer that nothing uses and Rack
-never clears, and a plugin that sets it is given back only while that menu
-still exists. Rack never clears `active_entry` or `child_menu` when those widgets go,
+and `active_entry` are read-only. `parent_menu` is writable for plugin code,
+but is limited to a different `Menu` in the same parent widget (or `None`),
+so a write cannot introduce a pointer to an unowned menu. Its getter returns
+`None` once the referenced menu is detached. Rack 2.6.6 itself neither sets
+nor reads this field. Rack never clears `active_entry` or `child_menu` when those widgets go,
 so each is given only while it is still where Rack keeps it, else `None`; and
 since a menu removes its child menu when it is deleted, a child menu leaves
 only through `set_child_menu`: removing it or `request_delete()` is refused.

@@ -299,17 +299,31 @@ void bindUi(py::module_ raw) {
 		.def_property("bg_color", [](py::object self) { return native<ui::MenuOverlay>(self).bgColor; },
 			[](py::object self, NVGcolor c) { native<ui::MenuOverlay>(self).bgColor = c; });
 	auto menu = variant<ui::Menu, OW>(mod, "Menu");
-	// parentMenu is a raw pointer that Rack 2.6.6 neither sets nor reads (its parentMenu variables are locals), so nothing
-	// would use a Python write, and Rack never clears it when that menu goes: it is read-only, and given like child_menu,
-	// only while it is still among its overlay's children (a plugin may set it, RP-42: wrapping a deleted menu was a
-	// use-after-free).
-	menu.def_property_readonly("parent_menu", [](py::object self) -> py::object {
+	// Rack 2.6.6 neither sets nor reads parentMenu, but plugins can. It is a raw pointer, so writes are limited to a
+	// sibling Menu in the same parent; reads compare against the live child list before wrapping it (RP-42).
+	menu.def_property("parent_menu", [](py::object self) -> py::object {
 			auto& m = native<ui::Menu>(self);
 			if (!m.parentMenu || !m.parent) return py::none();
 			for (W* sibling : m.parent->children)
 				if (sibling == m.parentMenu) return wrapper(sibling);
 			return py::none();
-		}, "Rack's field, or None: Rack 2.6.6 itself never sets it, and it is given only while that menu still exists.")
+		}, [](py::object self, py::object value) {
+			checkMutation();
+			auto& m = native<ui::Menu>(self);
+			if (value.is_none()) {
+				m.parentMenu = nullptr;
+				return;
+			}
+			auto& candidate = native<ui::Menu>(value);
+			if (!m.parent || candidate.parent != m.parent || &candidate == &m)
+				throw py::value_error("parent_menu must be a different Menu in the same parent widget, or None");
+			for (W* sibling : m.parent->children)
+				if (sibling == &candidate) {
+					m.parentMenu = &candidate;
+					return;
+				}
+			throw py::value_error("parent_menu must still be attached to the same parent widget");
+		}, "Rack's field: assign a different sibling Menu or None; reads return None once it is detached.")
 		// Rack never clears activeEntry when that entry goes, nor childMenu when the overlay deletes it: each is given only
 		// while it is still in the tree where Rack keeps it (the menu's children, its parent's), compared by address and
 		// never dereferenced, or None (RP-42: wrapping a deleted widget was a use-after-free).

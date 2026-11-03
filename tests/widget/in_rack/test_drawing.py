@@ -73,6 +73,36 @@ def test_rack_rendering_calls_python_draw_layer_and_legacy_draw_with_scoped_args
     assert not leaf.alive
 
 
+def test_zoom_widget_scales_children_for_draw_and_draw_layer() -> None:
+    seen: list[tuple[str, int | None, Any]] = []
+
+    class Child(w.Widget):
+        def draw(self, args: Any) -> None:
+            seen.append(("draw", None, args.clip_box))
+
+        def draw_layer(self, args: Any, layer: int) -> None:
+            seen.append(("layer", layer, args.clip_box))
+
+    class Zoom(w.ZoomWidget):
+        def draw(self, args: Any) -> None:
+            super().draw(args)
+            w.ZoomWidget.draw_layer(self, args, 1)
+
+    zoom, child = Zoom(), Child()
+    zoom.box = Rect(Vec(4, 4), Vec(20, 20))
+    zoom.set_zoom(2.0)
+    child.box = Rect(Vec(2, 3), Vec(10, 10))
+    zoom.add_child(child)
+    frame = framed(zoom)
+    try:
+        frame.render()
+        assert [kind for kind, _, _ in seen] == ["draw", "layer"]
+        assert seen[1][1] == 1
+        assert seen[0][2] == seen[1][2] == Rect(Vec(), Vec(8, 7))
+    finally:
+        frame.close()
+
+
 def test_draw_errors_are_contained_and_siblings_still_draw() -> None:
     drawn: list[int] = []
 

@@ -16,7 +16,7 @@ format decides. `f(format, *args)` reads the format, checks each conversion
 against its Python argument, converts the argument to the C type the
 conversion and its length modifier name (`%d` an `int`, `%lld` a
 `long long`, `%u` an `unsigned`, `%f` a `double`, `%s` a str or bytes, `%c` an
-int or a one-character str), and formats it with Rack's `string::f`. A `*`
+int or a single-byte ASCII str), and formats it with Rack's `string::f`. A `*`
 width or precision takes an `int` argument before the value, as in C, and
 Rack's printf applies C's rules to it: a negative width left-justifies, a
 negative precision counts as none. `%n` (it writes through a pointer) and

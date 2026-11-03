@@ -191,8 +191,10 @@ scalar mixed with a vector broadcasts.
   - `fmax`/`fmin` return the second argument's lane where either lane is NaN.
   - `atan2(x, y)` is `std::atan2(x, y)`, the angle of the point `(y, x)`:
     Rack names the numerator `x`.
-  - `pow(a, b)` for vectors is `exp(b * log(a))`, so where `a <= 0` it is
-    `exp` of NaN, about `2.406e38`: `pow(float_4(0.0), 1/3)` is not 0.
+  - For a **vector base**, `pow(a, b)` is `exp(b * log(a))`, so where a lane
+    of `a <= 0` it is `exp` of NaN, about `2.406e38`: `pow(float_4(0.0), 1/3)`
+    is not 0. The separate scalar-base/vector-exponent overload uses
+    `std::log(a)`: for `a == 0` and positive `b`, it returns 0.
 - **`pow` with an `int` exponent** is Rack's template `pow<T>(T, int)` for
   `T = float` and `float_4`: `a**b` by repeated squaring. As in Rack, an
   exponent of 0 or less gives 1. Rack's loop doubles a C `int` past the

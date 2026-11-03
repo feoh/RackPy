@@ -513,17 +513,17 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::app::SvgKnob::sw` | field | bound | `rackpy.raw.app.SvgKnob.sw` | {ref}`app#app-svg <app-svg>` |
 | `rack::app::SvgKnob::tw` | field | bound | `rackpy.raw.app.SvgKnob.tw` | {ref}`app#app-svg <app-svg>` |
 | `rack::app::SvgPanel::fb` | field | bound | `rackpy.raw.app.SvgPanel.fb` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgPanel::panelBorder` | field | bound | `rackpy.raw.app.SvgPanel.panel_border` | {ref}`app#app-svg <app-svg>` |
+| `rack::app::SvgPanel::panelBorder` | field | bound | `rackpy.raw.app.SvgPanel.panel_border` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::SvgPanel::svg` | field | bound | `rackpy.raw.app.SvgPanel.svg` | {ref}`app#app-svg <app-svg>` |
 | `rack::app::SvgPanel::sw` | field | bound | `rackpy.raw.app.SvgPanel.sw` | {ref}`app#app-svg <app-svg>` |
 | `rack::app::SvgPort::fb` | field | bound | `rackpy.raw.app.SvgPort.fb` | {ref}`app#app-svg <app-svg>` |
 | `rack::app::SvgPort::shadow` | field | bound | `rackpy.raw.app.SvgPort.shadow` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgPort::sw` | field | bound | `rackpy.raw.app.SvgPort.sw` | {ref}`app#app-svg <app-svg>` |
+| `rack::app::SvgPort::sw` | field | bound | `rackpy.raw.app.SvgPort.sw` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::SvgScrew::fb` | field | bound | `rackpy.raw.app.SvgScrew.fb` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgScrew::sw` | field | bound | `rackpy.raw.app.SvgScrew.sw` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgSlider::background` | field | bound | `rackpy.raw.app.SvgSlider.background` | {ref}`app#app-svg <app-svg>` |
+| `rack::app::SvgScrew::sw` | field | bound | `rackpy.raw.app.SvgScrew.sw` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
+| `rack::app::SvgSlider::background` | field | bound | `rackpy.raw.app.SvgSlider.background` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::SvgSlider::fb` | field | bound | `rackpy.raw.app.SvgSlider.fb` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgSlider::handle` | field | bound | `rackpy.raw.app.SvgSlider.handle` | {ref}`app#app-svg <app-svg>` |
+| `rack::app::SvgSlider::handle` | field | bound | `rackpy.raw.app.SvgSlider.handle` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::SvgSlider::maxHandlePos` | field | bound | `rackpy.raw.app.SvgSlider.max_handle_pos` | {ref}`app#app-svg <app-svg>`, [app#svg-controls-screws-and-panels](../app.md#svg-controls-screws-and-panels) |
 | `rack::app::SvgSlider::minHandlePos` | field | bound | `rackpy.raw.app.SvgSlider.min_handle_pos` | {ref}`app#app-svg <app-svg>`, [app#svg-controls-screws-and-panels](../app.md#svg-controls-screws-and-panels) |
 | `rack::app::SvgSwitch::fb` | field | bound | `rackpy.raw.app.SvgSwitch.fb` | {ref}`app#app-svg <app-svg>` |
@@ -531,7 +531,7 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::app::SvgSwitch::internal` | field | excluded: Rack-internal | — | — |
 | `rack::app::SvgSwitch::latch` | field | bound | `rackpy.raw.app.SvgSwitch.latch` | {ref}`app#app-svg <app-svg>` |
 | `rack::app::SvgSwitch::shadow` | field | bound | `rackpy.raw.app.SvgSwitch.shadow` | {ref}`app#app-svg <app-svg>` |
-| `rack::app::SvgSwitch::sw` | field | bound | `rackpy.raw.app.SvgSwitch.sw` | {ref}`app#app-svg <app-svg>` |
+| `rack::app::SvgSwitch::sw` | field | bound | `rackpy.raw.app.SvgSwitch.sw` | {ref}`app#app-svg <app-svg>`, {ref}`app#app-host-views <app-host-views>` |
 | `rack::app::Switch::internal` | field | excluded: Rack-internal | — | — |
 | `rack::app::Switch::momentary` | field | bound | `rackpy.raw.app.Switch.momentary` | [app#app-controls](../app.md#app-controls) |
 | `rack::app::ThemedSvgPanel::darkSvg` | field | bound | `rackpy.raw.app.ThemedSvgPanel.dark_svg` | {ref}`app#app-svg <app-svg>`, [app#svg-controls-screws-and-panels](../app.md#svg-controls-screws-and-panels) |

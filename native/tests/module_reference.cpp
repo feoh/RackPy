@@ -162,7 +162,7 @@ int main() {
 		m.config(4, 0, 0, 0);
 		m.configParam<CustomQuantity<ParamQuantity>>(0, -1.f, 1.f, 0.5f, "Gain", " dB", 0.f, 2.f, 3.f);
 		m.configSwitch<CustomQuantity<SwitchQuantity>>(1, 0.f, 2.f, 1.f, "Mode", {"X", "Y", "Z"});
-		m.configButton<CustomQuantity<SwitchQuantity>>(2, "Push");
+		m.configButton<CustomQuantity<ParamQuantity>>(2, "Push");
 		// configParam with a switch class: no switch fields are touched.
 		m.configParam<CustomQuantity<SwitchQuantity>>(3, 0.f, 4.f, 2.f, "Steps");
 		json_t* quantities = json_array();
