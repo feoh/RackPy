@@ -35,15 +35,16 @@ clean checkout of the exact preview commit (replace `<preview-commit>` with the
 ```bash
 git clone https://github.com/feoh/RackPy.git RackPy-preview
 cd RackPy-preview
+git fetch origin rp42
 git checkout <preview-commit>
 uv sync --frozen
-bin/rack-toolchain build
+bin/rack-toolchain build  # one-time toolchain build; may take about an hour
 PREVIEW_DIR=/tmp/rackpy-preview
 bin/rackpy-release build --dest "$PREVIEW_DIR"
-sha256sum -c "$PREVIEW_DIR/artifacts/SHA256SUMS"
-RACK_SDK="$(bin/rack-sdk path lin-x64)"
+(cd "$PREVIEW_DIR/artifacts" && sha256sum -c SHA256SUMS)
+RACK_FREE=/path/to/unzipped/Rack2Free
 bin/rackpy-release verify "$PREVIEW_DIR/artifacts" \\
-  --rack "$RACK_SDK" --logs "$PREVIEW_DIR/verify-ubuntu-20.04"
+  --rack "$RACK_FREE" --logs "$PREVIEW_DIR/verify-ubuntu-20.04"
 ```
 
 `build` empties the destination first, so choose a disposable directory outside
@@ -54,7 +55,7 @@ logs and screenshots in the `--logs` directory. Do not use `--allow-dirty` for
 this preview. A successful container test does not prove physical audio-device
 deadlines or audio-interface behavior; the optional host install below is for
 manual Rack use. The exact commit and results for the candidate built for this
-preview are recorded in [`candidate-audit.md`](../../release-evidence/candidate-audit.md).
+preview are recorded in the [candidate audit](https://github.com/feoh/RackPy/blob/rp42/release-evidence/candidate-audit.md).
 
 ## What the files are
 
