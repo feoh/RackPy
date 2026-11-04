@@ -174,7 +174,36 @@ jobs:
         run: bin/rack-sdk closure
       - name: rack.hpp-only probe builds with the SDK's plugin.mk
         run: bin/rack-sdk probe
+      - name: Install compiler cache for fast native feedback
+        if: github.event_name == 'pull_request' || inputs.fast == true
+        run: sudo apt-get $APT_OPTS install -y --no-install-recommends ccache
+      - name: Restore compiler cache (fast native only)
+        if: github.event_name == 'pull_request' || inputs.fast == true
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rackpy-native-ccache
+          key: rackpy-ccache-fast-native-lin-x64-v1-${{ github.sha }}
+          restore-keys: rackpy-ccache-fast-native-lin-x64-v1-
+      - name: Native build and audio-path guard (fast cache, not release evidence)
+        if: github.event_name == 'pull_request' || inputs.fast == true
+        env:
+          RACKPY_TEST_EVIDENCE: ""
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-native-ccache
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_COMPILERCHECK: content
+          CCACHE_MAXSIZE: 800M
+        run: >
+          uv run --frozen pytest -m "native and not host and not sanitizer and not stress" -v
+          --basetemp="$RUNNER_TEMP/native-pytest" --junitxml=reports/native.xml
+      - name: Native compiler cache statistics
+        if: always() && (github.event_name == 'pull_request' || inputs.fast == true)
+        env:
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-native-ccache
+          CCACHE_MAXSIZE: 800M
+        run: ccache --show-stats
       - name: Native build (warnings as errors), CTest, inspection, setup errors, audio-path guard
+        if: github.event_name != 'pull_request' && inputs.fast != true
         run: uv run --frozen pytest -m "native and not host and not sanitizer and not stress" -v --junitxml=reports/native.xml
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

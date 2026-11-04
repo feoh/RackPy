@@ -139,9 +139,11 @@ For cross-platform early feedback, dispatch CI with `fast=true`: Linux,
 macOS arm64/x64 and Windows run the same production-host smoke; platform
 inventory and all release-candidate jobs are omitted. The fast host steps do
 not write per-test coverage evidence and cannot establish full coverage, parity
-or release readiness. Fast host builds use separate per-platform ccache stores;
-compiler contents and build flags remain part of the cache key, and each job
-prints cache statistics. A cold cache still needs a full build. Full and
+or release readiness. Fast host builds use separate per-platform ccache stores,
+and the complete native test selection uses its own cache on pull requests and
+fast dispatches. Compiler contents and build flags remain part of the cache key,
+and each job prints cache statistics. Cached native results are not release
+evidence. A cold cache still needs a full build. Full dispatch, main and
 release-candidate jobs do not use these caches. `macos_tests` and
 `windows_tests` apply only to a full dispatch; do not combine them with
 `fast=true`. Runtime depends on runner and build cache state; no 15–20 minute
