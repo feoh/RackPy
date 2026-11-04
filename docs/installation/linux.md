@@ -15,8 +15,8 @@ or broad platform-support claim is made.
 - **Linux x86_64** with glibc 2.23 (Ubuntu 16.04's) or newer. The candidate
   is built with VCV's own Rack plugin toolchain, the one Rack's own plugins use,
   and its binaries are checked against the glibc 2.23 floor. This exact preview
-  was install/run-verified in Ubuntu 20.04; it was not separately tested on
-  Ubuntu 16.04.
+  was install/run-verified in Ubuntu 20.04 and Ubuntu 16.04 containers; see the
+  [candidate audit](../../release-evidence/candidate-audit.md) for limitations.
 - **VCV Rack Free {{rack_version}}**. Other Rack 2 versions are untested.
 - **Nothing else at run time.** Each plugin brings its own CPython {{python_version}},
   and never uses a Python installed on the computer or the network.

@@ -37,8 +37,14 @@ checks passed: checksums, all ten plugin loads, module creation and patch
 reopen, windowed module-browser smokes, interpreter finalization, refusal and
 error cases, upgrade, and uninstall. The full output is in
 `/tmp/rackpy-preview-52526e8/verify-ubuntu-20.04/summary.txt` on this machine.
-Ubuntu 16.04 was not run for this exact candidate. The owner subsequently
-reported manually installing the oscillator in Rack Pro 2.6.6 and hearing its
+On 2026-11-04, the same candidate also passed `bin/rackpy-release verify`
+with `--image ubuntu-16.04` in Ubuntu 16.04.7 (glibc 2.23), again with no
+system Python or network. Checksums, all ten examples, patch reopen, windowed
+smokes, error cases, upgrade and uninstall passed. The logs are at
+`/tmp/rackpy-preview-52526e8/verify-ubuntu-16.04/` on this machine.
+
+The owner subsequently reported manually installing the oscillator in Rack Pro
+2.6.6 and hearing its
 tone through headphones; that is one owner-reported smoke, not broad Rack Pro
 support or a deadline measurement. The container test does not exercise
 physical audio/MIDI devices, audio deadlines, or hardware GPU drivers.

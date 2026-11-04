@@ -16,8 +16,10 @@ package version.
 - Verified all 13 artifact checksums and installed/ran all ten example plugins
   in a clean Ubuntu 20.04 container with no system Python or network access.
   Patch reopen, windowed smokes, upgrade/uninstall, and error-case checks passed.
-  Ubuntu 16.04 and a manual desktop Rack install were not run for this exact
-  candidate; see [`candidate audit`](release-evidence/candidate-audit.md).
+  The same checks subsequently passed in Ubuntu 16.04. The owner also reported
+  hearing the oscillator in a manual Rack Pro 2.6.6 smoke; this is not a broad
+  compatibility or performance claim. See the
+  [`candidate audit`](release-evidence/candidate-audit.md).
 - Documented Linux production audio-path/lifecycle safety evidence and its
   limitations in [`docs/performance-results.md`](docs/performance-results.md).
 - Coverage remains incomplete and explicitly partial. Controlled performance
