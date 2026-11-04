@@ -24,6 +24,7 @@ LINKED = (
     "spikes",
     "benchmarks",
     "planning",
+    "release-evidence",
     "native",
     "cmake",
     "LICENSE",

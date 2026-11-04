@@ -1,11 +1,14 @@
 # Quickstart: your first RackPy plugin
 
-:::{admonition} Pre-release: from source, Linux only
+:::{admonition} Pre-release: build from source
 :class: important
 
-RackPy has no release. These steps build it from a checkout of the repository
-and make a plugin that only the computer that built it can load. Do not
-distribute what they make. macOS and Windows are not supported yet.
+RackPy has no public release. These steps build a development bundle from the
+repository on Linux x86_64 or macOS; they are not a substitute for a versioned
+release artifact. Candidate install/run checks have also passed in CI on Linux,
+macOS x86_64/arm64, and Windows x86_64, but those artifacts are not distributed.
+See the [candidate audit](../release-evidence/candidate-audit.md) for exact
+commits, platforms and remaining release gates.
 :::
 
 By the end you will have a plugin of your own in Rack, with one module whose

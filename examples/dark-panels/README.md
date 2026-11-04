@@ -58,7 +58,10 @@ with Mesa's software OpenGL:
 
 ## Restrictions
 
-Linux x86_64, Rack Free 2.6.6 and Mesa's software renderer only, so far: other
-GPUs, drivers and platforms are not tested. Only one RackPy plugin can run in
-a Rack process. The plugin's Python is trusted code, not a sandbox. Do not
-distribute development builds. See [the template](../template/README.md#restrictions).
+The reviewed screenshot references and pixel comparisons are from Linux
+x86_64, Rack Free 2.6.6 and Mesa's software renderer. Candidate install/window
+smokes also run in CI on macOS x86_64/arm64 and Windows x86_64, but that is not
+hardware-GPU or cross-platform pixel-parity evidence. Only one RackPy plugin
+can run in a Rack process. The plugin's Python is trusted code, not a sandbox.
+Do not distribute development builds. See
+[the template](../template/README.md#restrictions).

@@ -1,55 +1,64 @@
-# Release-candidate audit (not a release)
+# Release evidence
 
-No RackPy release has been published or approved. The binaries from this audit
-were staged outside the repository and are not included here. The manifest and
-checksums below preserve the identity of the Linux candidate; they do not make
-the artifacts publicly available.
+What RackPy's full-surface claim rests on, platform by platform (RP-42). Everything here except this README and
+`coverage/scope-review.md` is written by `bin/release-evidence collect RUN` from one finished CI run, and names
+that run and its commit: the evidence is tied to an immutable ref, not to a working tree. `collect` and `promote`
+require a completed run for the current commit and reject tracked working-tree changes. These checks do not lock
+the checkout: do not edit or switch its files while collecting or promoting evidence.
 
-## Candidate built from this source
+The owner-approved practical partial-candidate audit is recorded separately in
+[`candidate-audit.md`](candidate-audit.md). It does **not** satisfy or change the
+full-surface release bar described below.
 
-- Source commit: `6a62604a0dc81bd32dd0e16ce564813852847072` (clean detached worktree).
-- Candidate platform built locally: Linux x86_64.
-- Candidate metadata: [`candidate-linux-x64/manifest.json`](candidate-linux-x64/manifest.json)
-  and [`candidate-linux-x64/SHA256SUMS`](candidate-linux-x64/SHA256SUMS).
-- Rebuild command from a clean checkout: `bin/rackpy-release build --dest <outside-repo-directory>`.
-- The 13 staged artifacts (runtime, 10 example plugins, developer wheel, source
-  archive) matched `SHA256SUMS`. Rack's manifest records each archive's size,
-  content digest and artifact SHA-256. The staged candidate occupied 510 MB.
-- `bin/rackpy-release verify` installed the candidate in a clean Ubuntu 20.04
-  container with no system Python and `--network none`. All ten example plugins
-  loaded, patches reopened, plugin upgrade/uninstall behavior passed, the
-  windowed Rack smoke cases passed, and no Python/module errors were reported.
-  The candidate manifest and every checksum were validated by the verifier.
+| File | What it records |
+| --- | --- |
+| `run.json` | The CI run, its URL, its commit, every job's conclusion, and the SHA-256 of the inventory, manifest and sample list the checks used |
+| `SUMMARY.md` | One table: each platform's test outcomes, record evidence, sample parity and release bar |
+| `coverage/<platform>.json` | That platform's record evidence (`bin/check_coverage.py evidence`), sample parity (`samples`), and the full-coverage release bar (`release`) against what its release candidate exports inside Rack, each with problem counts and the first 40 problems |
+| `samples/<platform>.json` | Each official sample's outcome on that platform: its disposition's tests and how each ended |
+| `coverage/scope-review.md` | The implementer's review of templates, macros, deprecated declarations, virtual overrides, platform branches and adapters for scope cheating (step 3), with what it found and fixed |
 
-The GitHub Actions run
-[41763149030](https://github.com/feoh/RackPy/actions/runs/41763149030) validated
-install/run and in-candidate manifest checks on Linux x86_64, macOS x86_64/arm64,
-and Windows x86_64 for source commit `16ecf405932b857197406673bec1d16ff09115c5`.
-The current source commit adds documentation/evidence after that commit. Thus
-cross-platform evidence exists for that earlier candidate; the exact 6a62604
-artifact set was locally built and validated only on Linux. The run's optional
-external-linkcheck failed on GitHub HTTP 429; required documentation build and
-all platform candidate/native/host jobs passed.
+## What the checks mean
 
-## Claims and decisions still open
+- **Record evidence.** Every bound record available on a platform cites a test that passed on that platform,
+  and none that failed there. Test outcomes come from the CI test jobs (`RACKPY_TEST_EVIDENCE`), including each
+  in-Rack test by name. A skipped test is not a pass.
+- **Sample parity.** Every official tutorial, guide and template sample (`upstream/examples.json`) has a
+  disposition whose tests all passed on that platform, or is out of scope with a reason (building Rack itself).
+- **Release bar.** Every available declaration `verified` or `excluded_internal`, a real inventory, record
+  evidence, and the candidate's introspection: `bin/rackpy-release introspect` runs one example plugin from the
+  platform's release candidate, unchanged but for an added entry module, inside Rack Free, and records what its
+  RackPy exports. The CI release-candidate jobs also run `bin/check_coverage.py check` against it.
+- **Shared checker tests.** The synthetic coverage-checker mutation suites run once in the Linux unit job rather
+  than on each OS. They are not binding or sample evidence, and a regression test forbids citing them as such.
+  Collection reports a release-bar problem, and promotion refuses to run, if that shared job is missing or fails.
+  All actual record and sample evidence remains specific to its target platform.
 
-- This is a **partial, unreleased development candidate**, not a complete
-  supported-public-API implementation. The coverage report remains the source
-  of truth; no full-surface claim is made.
-- The Linux candidate smoke tests do not prove a physical audio-device deadline
-  budget or a controlled performance result; see
-  [`../docs/performance-results.md`](../docs/performance-results.md).
-- Exact-current-commit macOS/Windows artifacts and tests have not been produced.
-- No PyPI name reservation has been verified. Do not upload an empty or
-  nonfunctional package.
-- The proposed facade stability policy remains unapproved. Do not present it as
-  a compatibility promise.
-- Package publication, tagging, uploading artifacts, and contacting VCV remain
-  gated on explicit owner approval. No signing credentials or public upload
-  actions were used.
+`verified` needs a reviewer (RP-42 step 6: a human or an explicitly authorized agent workflow). Until the owner
+chooses one, no record is verified and the release bar stays closed on every platform. That is the expected
+state, not a failure to hide.
 
-Before any public release, the owner must choose a preview version and approve
-its scope, artifact set, release notes, publication destinations, and any
-signing/submission steps. Rebuild from the approved immutable commit, rerun the
-checks against those exact bytes on each target claimed, and re-check coverage
-and safety statements.
+## Open gates
+
+Reported, not waived:
+
+- No real GPU: CI draws Rack's window with software OpenGL (Mesa llvmpipe on Linux and Windows, Apple's software
+  renderer on macOS).
+- The audio-path guard (`LD_PRELOAD`) exists on Linux only; on macOS and Windows its tests are skipped, so the
+  samples that cite them do not pass there (RP-43).
+- `rack::system::runProcessDetached` on Windows asks UAC to elevate; it has no unattended test there.
+- No physical audio or MIDI devices; signing and notarization; clean-machine and Gatekeeper checks beyond CI.
+
+## Reproduce
+
+```console
+gh workflow run ci.yml -R feoh/rackpy --ref <branch>      # every platform's jobs, including the candidates
+bin/release-evidence collect <run id>                       # once the run has finished
+```
+
+For faster diagnostic runs, `workflow_dispatch` accepts `macos_tests` and `windows_tests` pytest `-k`
+expressions. Such runs may omit required platform evidence and are not substitutes for a full exact-candidate run
+with both selectors empty. Each target job records its selection in its reports; collection blocks the release bar
+and promotion refuses to proceed when an attestation is missing or nonempty. Runs created before these attestations
+were added must be rerun to use this collector. CI keeps the underlying reports for 14 days and the
+release-candidate reports for 30; the JSON here is the durable record.

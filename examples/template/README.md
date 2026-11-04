@@ -19,9 +19,12 @@ res/Starter.svg                     the panel, with its components layer
 
 ## Requirements
 
-Linux x86_64 with uv, CMake, Ninja and GCC, and Rack Free 2.6.6. RackPy is not
-released: build it from this repository ([CONTRIBUTING.md](../../CONTRIBUTING.md)).
-macOS and Windows are not supported yet (RP-40, RP-41).
+Build from source on Linux x86_64 with uv, CMake, Ninja and GCC, or on macOS
+with Xcode's command-line tools; use Rack Free 2.6.6. RackPy is not released:
+build it from this repository ([CONTRIBUTING.md](../../CONTRIBUTING.md)). CI
+has built and run candidate bundles including this template on macOS x86_64/arm64
+and Windows x86_64, but no platform artifacts are distributed and this is not a
+public support promise (RP-40, RP-41).
 
 ## Make your own plugin
 

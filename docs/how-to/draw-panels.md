@@ -10,7 +10,9 @@ section covers one feature of the Plugin API Guide's
 sections. The pictures are screenshots of Rack's own window, read back from
 the frames Rack drew under Xvfb with Mesa's software OpenGL. The tests take
 them again on every run and compare them with these, so they show what the
-code does. Other GPUs and platforms are not tested yet.
+code does. CI has run candidate smoke checks with software rendering on Linux,
+macOS and Windows; these screenshots are not hardware-GPU evidence, and other
+GPU drivers are not tested here.
 
 The drawing reference is [Drawing and the window](../reference/window.md);
 widgets are in [subclassable widgets](../reference/widgets.md).

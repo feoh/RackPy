@@ -98,7 +98,10 @@ throughout.
 | ThreadSanitizer | The native tests, including RackPy's lock-free queues and expander exchange | Rack's process: neither Rack nor CPython is built with it, so it cannot run there |
 | 1,000 create/delete and save/reload cycles | RackPy's live references, transferred objects, deferred releases and identity entries return exactly; resident memory does not grow | Leaks inside Rack or CPython that RackPy's counters cannot see |
 
-Linux x86_64 only: macOS and Windows have not been built or tested.
+Dynamic audio-path interposition is implemented only on Linux x86_64. CI has
+built and run install candidates on Linux x86_64, macOS x86_64/arm64, and
+Windows x86_64; platform-specific dynamic audio-path instrumentation remains a
+gap. No public release is available.
 
 ## Distributing a plugin that bundles Python
 
@@ -112,7 +115,9 @@ plugins, and it changes what a distributor must check.
 - **Signing.** On macOS, Rack's own signature allows unsigned libraries, but
   Gatekeeper's quarantine applies to downloaded archives, and each bundled
   library needs a consistent signature (RP-40). On Windows, unsigned DLLs
-  may be blocked or flagged (RP-41). Neither platform is built yet.
+  may be blocked or flagged (RP-41). Candidate install/run checks cover both platforms in CI, but no
+signed/notarized public artifacts are available; treat release signing and
+Gatekeeper behavior as open gates.
 - **Updates.** The bundled runtime receives CPython's security fixes only when
   the plugin is rebuilt and reinstalled. Rebuild when the pinned CPython
   publishes a security release.

@@ -84,8 +84,10 @@ first, and remove `plugins-lin-x64/RackPyPolyphony` before building again.
 
 ## Restrictions
 
-Linux x86_64 and Rack Free 2.6.6 only, so far. A kernel library is native
-code built for one platform; macOS and Windows builds are not made or tested.
-Only one RackPy plugin can run in a Rack process. The plugin's Python and C++
-are trusted code, not a sandbox. Do not distribute development builds. See
+This example has been built and run in RackPy candidate CI on Linux x86_64,
+macOS x86_64/arm64, and Windows x86_64 with Rack Free 2.6.6. These are
+pre-release candidate checks, not a public support promise or distributed
+artifact. Only one RackPy plugin can run in a Rack process. The plugin's Python
+and C++ are trusted code, not a sandbox. Do not distribute development builds.
+See
 [the template](../template/README.md#restrictions).

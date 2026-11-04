@@ -3,11 +3,12 @@
 :::{admonition} Bound, not yet verified
 :class: warning
 
-On Linux x86_64, RackPy binds every public declaration of Rack's SDK that
-exists there, except Rack-internal ones, and each is tested; none is marked `verified`
-yet, and macOS and Windows are not built. The [coverage report](coverage.md)
-has the totals, and each declaration's status comes from the binding manifest
-that CI checks.
+The binding manifest catalogs Rack's public SDK declarations, except
+Rack-internal ones; coverage and test status vary, and none is marked `verified`
+yet. CI has built and run install candidates on Linux x86_64, macOS x86_64/arm64,
+and Windows x86_64, but this is not a completeness claim or a published release.
+The [coverage report](coverage.md) has the totals, and each declaration's status
+comes from the binding manifest that CI checks.
 :::
 
 ```{toctree}

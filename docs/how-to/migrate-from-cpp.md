@@ -80,7 +80,7 @@ modules, draws, and handles menus and events, and on threads you start
 
 | Rack's C++ workflow | RackPy |
 | --- | --- |
-| Install MSYS2 (Windows), Homebrew packages (macOS) or a distribution's build packages (Linux) | Linux x86_64 only, so far: uv, CMake, Ninja, GCC and git; RackPy downloads the SDK and Python itself ([quickstart](../quickstart.md#what-you-need)) |
+| Install MSYS2 (Windows), Homebrew packages (macOS) or a distribution's build packages (Linux) | Development from source is documented for Linux x86_64 and macOS; use uv, CMake, Ninja and the platform's compiler. RackPy downloads the SDK and Python itself ([quickstart](../quickstart.md#what-you-need)); Windows has candidate CI coverage but no published toolchain/support promise. |
 | Download the SDK and set `RACK_DIR` | `bin/rackpy-dev build` uses the pinned, checksummed SDK |
 | `helper.py createplugin` and `createmodule` | `bin/rackpy-plugin create` and `add-module` ([template](../../examples/template/README.md)) |
 | Clone a plugin, `make dep`, `make`, `make install` | `bin/rackpy-plugin build` combines your project with RackPy's bundle; there is no Makefile |

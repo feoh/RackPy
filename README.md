@@ -6,14 +6,15 @@ RackPy lets you build Rack plugins with idiomatic Python while keeping access to
 the complete supported public C++ plugin API. It runs **inside Rack**, not as an
 external remote-control service.
 
-> **Early development, no release.** On Linux x86_64, RackPy builds from source,
-> loads into Rack Free 2.6.6 and binds every public declaration of Rack's SDK
-> that exists there, except Rack-internal ones; each is tested, none is yet
-> marked `verified` ([coverage report](docs/reference/coverage.md)). Plugins
-> written in Python add modules with panels, controls, menus, drawing, state,
-> expanders and audio processed natively, and the [examples](examples/README.md)
-> run in Rack under test. macOS and Windows are not built, and development builds
-> run only on the computer that built them: there is nothing to distribute yet.
+> **Early development, no release.** RackPy builds from source on Linux x86_64
+> and macOS, and loads into Rack Free 2.6.6. It has bindings across Rack's
+> public SDK, but coverage and test status vary; none is yet marked `verified`
+> ([coverage report](docs/reference/coverage.md)). Plugins written in Python add
+> modules with panels, controls, menus, drawing, state, expanders and native
+> audio processing, and the [examples](examples/README.md) run in Rack under
+> test. CI has built and run install candidates on Linux x86_64, macOS x86_64 and
+> arm64, and Windows x86_64, but no artifacts are published. Coverage and
+> performance are partial; see the [candidate audit](release-evidence/candidate-audit.md).
 > The [quickstart](docs/quickstart.md) builds RackPy and a first plugin.
 
 ## What we are building

@@ -66,7 +66,10 @@ lists the bundle's own files, so `build` leaves it out of your plugin.
   RackPy's download cache, so that bundling takes seconds. `--runtime copy`
   copies it instead, and strips its binaries; the result is still a
   development build.
-- **Platform.** Linux x86_64 only, for Rack Free {{rack_version}}.
+- **Platform.** This development-bundle workflow targets Linux x86_64 and
+  Rack Free {{rack_version}}. Separate release-candidate jobs have built and
+  run on macOS x86_64/arm64 and Windows x86_64; those candidates are not
+  distributed and do not constitute a public support promise.
 
 ## Before anyone else runs it
 
