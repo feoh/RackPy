@@ -12,6 +12,11 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      fast:
+        description: "Fast feedback only: representative production-host checks, no release candidates"
+        required: false
+        type: boolean
+        default: false
       macos_tests:
         description: "Optional pytest -k expression for the macOS host-test jobs (empty: all of them)"
         required: false
@@ -209,7 +214,7 @@ jobs:
     # RP-42. The committed inventory's macOS and Windows variants are extracted on Linux with each target's own
     # library headers. This extracts each one again on the platform itself, with that machine's compiler headers
     # (Xcode's SDK; MSYS2's MinGW) and that platform's SDK archive, and fails on any difference.
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.fast != true)
     strategy:
       fail-fast: false
       matrix:
@@ -286,7 +291,17 @@ jobs:
             ~/.cache/rackpy/spike-inputs
           key: rackpy-host-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json', 'spikes/embedding/inputs.json') }}
       - run: uv sync --frozen
-      - name: Skeleton, docs snippets, RP-04 embedding spike and RP-06 lifecycle probe in Rack Free 2.6.6
+      - name: Fast production-host smoke (not release evidence)
+        if: github.event_name == 'pull_request' || inputs.fast == true
+        env:
+          RACKPY_TEST_EVIDENCE: ""
+        run: >
+          uv run --frozen pytest -m "host and not dist and not sanitizer and not stress" -v --basetemp="$RUNNER_TEMP/pytest"
+          tests/hardening/test_security.py
+          tests/examples/test_oscillator.py::test_the_plugin_loads_under_its_own_slug_and_keeps_its_patch
+          --junitxml=reports/host.xml
+      - name: Full Rack-host suite
+        if: github.event_name != 'pull_request' && inputs.fast != true
         run: >
           uv run --frozen pytest -m "host and not dist and not sanitizer and not stress" -v --basetemp="$RUNNER_TEMP/pytest"
           --junitxml=reports/host.xml
@@ -307,7 +322,7 @@ jobs:
     name: Distributable build with the official Rack toolchain
     # Building the toolchain takes about an hour on a cache miss, so this runs
     # on main and on demand, not on every pull request.
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.fast != true)
     runs-on: ubuntu-24.04
     timeout-minutes: 300
     steps:
@@ -354,7 +369,7 @@ jobs:
     # then installs and runs them in clean Ubuntu 20.04 and 16.04 containers with no Python and no network
     # (bin/rackpy-release verify). Keeps the manifest, checksums, logs and screenshots, not the artifacts:
     # nothing is distributed without owner approval.
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.fast != true)
     needs: dist  # shares its toolchain cache
     runs-on: ubuntu-24.04
     timeout-minutes: 120
@@ -424,7 +439,7 @@ jobs:
     # checked), then installs and runs them in Rack Free 2.6.6 with an empty environment, including the
     # wrong-architecture, unsigned and quarantine cases (bin/rackpy-release verify). A runner is not a clean
     # Mac: the logs record every library Rack mapped. Keeps evidence, not the artifacts.
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.fast != true)
     strategy:
       fail-fast: false
       matrix:
@@ -489,7 +504,7 @@ jobs:
     # including the missing-DLL, damaged-runtime, decoy-DLL, permission, Unicode and long-path cases
     # (bin/rackpy-release verify). A runner is not a clean PC: the logs record every DLL Rack loaded.
     # Keeps evidence, not the artifacts.
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.fast != true)
     runs-on: windows-2025
     timeout-minutes: 150
     defaults:
@@ -594,7 +609,20 @@ jobs:
         run: uv run --script bin/rack-sdk mesa --into "$(uv run --script bin/rack-sdk host win-x64 | tail -1)"
       # These two synthetic coverage-checker suites run in the Linux unit job, not as platform binding evidence.
       # tests/coverage/test_shared_checks.py prevents their accidental use as per-platform manifest/sample evidence.
+      - name: Fast production-host smoke (not release evidence)
+        if: inputs.fast == true
+        env:
+          RACKPY_TEST_EVIDENCE: ""
+          GALLIUM_DRIVER: llvmpipe
+          PYTHONUTF8: "1"
+          PYTHONUNBUFFERED: "1"
+        run: >
+          uv run --frozen pytest -m "host and not dist and not sanitizer and not stress" -v -s
+          --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/win-x64.xml
+          tests/hardening/test_security.py
+          tests/examples/test_oscillator.py::test_the_plugin_loads_under_its_own_slug_and_keeps_its_patch
       - name: Unit, native and Rack host tests
+        if: inputs.fast != true
         env:
           WINDOWS_TESTS: ${{ inputs.windows_tests }}  # through the environment, never into the script's text
           GALLIUM_DRIVER: llvmpipe  # Mesa's CPU renderer, not its Direct3D 12 driver
@@ -652,7 +680,19 @@ jobs:
           key: rackpy-${{ matrix.platform }}-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json') }}
       - run: uv sync --frozen
       # The synthetic checker mutation suites run once in the Linux unit job; real Rack tests stay on each target.
+      - name: Fast production-host smoke (not release evidence)
+        if: inputs.fast == true
+        env:
+          RACKPY_TEST_EVIDENCE: ""
+          RACKPY_MACOS_SOFTWARE_GL: "1"
+          PYTHONUNBUFFERED: "1"
+        run: >
+          uv run --frozen pytest -m "host and not dist and not sanitizer and not stress" -v -s
+          --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/${{ matrix.platform }}.xml
+          tests/hardening/test_security.py
+          tests/examples/test_oscillator.py::test_the_plugin_loads_under_its_own_slug_and_keeps_its_patch
       - name: Unit, native and Rack host tests
+        if: inputs.fast != true
         env:
           MACOS_TESTS: ${{ inputs.macos_tests }}  # through the environment, never into the script's text
           # GitHub-hosted macOS runners have no GPU, and Rack's GLFW asks only for accelerated pixel formats

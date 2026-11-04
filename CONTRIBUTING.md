@@ -128,6 +128,21 @@ Neither proves anything about loading in Rack; `tests/integration` does that.
 
 ## CI
 
+Pull requests use a **fast Linux host smoke**, not the full Rack-host suite. It
+builds the production host (not the separate test-hooks build), runs the
+security suite and the oscillator plugin's real-Rack load/patch-reopen test.
+Native and audio-path checks still run in their own job. This is early feedback,
+not release evidence. Pushes to `main` and an ordinary workflow dispatch retain
+the full host, native-platform and candidate suites below.
+
+For cross-platform early feedback, dispatch CI with `fast=true`: Linux,
+macOS arm64/x64 and Windows run the same production-host smoke; platform
+inventory and all release-candidate jobs are omitted. The fast host steps do
+not write per-test coverage evidence and cannot establish full coverage, parity
+or release readiness. `macos_tests` and `windows_tests` apply only to a full
+dispatch; do not combine them with `fast=true`. Runtime depends on runner and
+build cache state; no 15–20 minute completion time is promised.
+
 [.github/workflows/ci.yml](.github/workflows/ci.yml) runs on pushes to `main`
 and on pull requests, on `ubuntu-24.04`:
 
@@ -139,7 +154,7 @@ and on pull requests, on `ubuntu-24.04`:
 | SDK inventory | `pytest -m inventory` with LLVM 21 from apt.llvm.org; see below |
 | Documentation site | `sphinx-build -W` and `pytest -m "docs and not host"`; keeps the HTML |
 | Documentation external links (weekly and on demand) | `sphinx-build -b linkcheck` |
-| Rack host smoke tests | `pytest -m "host and not dist"`: the skeleton, the docs snippets that run in Rack, the RP-04 spike and the RP-06 probe in Rack Free 2.6.6 |
+| Rack host smoke tests | Pull requests and fast dispatch: production-host security and oscillator load/patch smoke. Full dispatch/main: `pytest -m "host and not dist"`, including docs snippets, the RP-04 spike and the RP-06 probe |
 | Distributable build (pushes to `main` and on demand) | builds or restores the official toolchain, then `pytest -m dist` |
 | SDK inventory on mac-arm64, mac-x64 and win-x64 (pushes to `main` and on demand) | `bin/inventory_sdk.py platform-check`: each platform's SDK extracted natively and compared with the committed inventory |
 | macOS arm64 and x86_64 (pushes to `main` and on demand) | `macos-15` and `macos-15-intel`: the native build, CTest and `pytest -m "(unit or native or host) and not dist ..."`. The runners have no GPU, so a test-only plugin (`tests/fixtures/macos-software-gl`) gives Rack's window Apple's software OpenGL. `macos_tests` (a dispatch input) narrows the selection |
@@ -149,7 +164,7 @@ and on pull requests, on `ubuntu-24.04`:
 | Linux release candidate (pushes to `main` and on demand) | `bin/rackpy-release build`, then `bin/rackpy-release verify` installs it on clean Ubuntu 20.04 and 16.04 containers with no Python and no network; then `introspect` and `check_coverage.py check --introspection` against the candidate; keeps the manifest, checksums, introspection, logs and screenshots |
 
 Each job keeps its JUnit report, the host jobs keep every Rack `log.txt`, and
-the docs job keeps the built site, for 14 days. The test jobs also keep each
+the docs job keeps the built site, for 14 days. The full test jobs also keep each
 test's outcome (`RACKPY_TEST_EVIDENCE`), from which `bin/check_coverage.py
 evidence` and `samples` judge each platform ([release evidence](release-evidence/README.md)). CI keeps no binaries:
 distributing a build needs owner approval (RP-44).
