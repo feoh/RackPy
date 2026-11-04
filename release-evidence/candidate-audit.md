@@ -1,9 +1,10 @@
-# Release-candidate audit (not a release)
+# Release-candidate audit (local preview, not a public release)
 
-No RackPy release has been published or approved. The binaries from this audit
-were staged outside the repository and are not included here. The manifest and
-checksums below preserve the identity of the Linux candidate; they do not make
-the artifacts publicly available.
+The owner approved an unpublished, local-only Linux preview at RackPy version
+`0.1.0.dev1` on 2026-11-04. Public publication, tagging, uploading and VCV
+submission remain unauthorized. The preview artifacts are staged outside the
+repository; this audit records their exact source, manifest and checksums but
+does not make them publicly available.
 
 ## Candidate built from this source
 
@@ -43,14 +44,17 @@ all platform candidate/native/host jobs passed.
 - Exact-current-commit macOS/Windows artifacts and tests have not been produced.
 - No PyPI name reservation has been verified. Do not upload an empty or
   nonfunctional package.
-- The proposed facade stability policy remains unapproved. Do not present it as
-  a compatibility promise.
+- The owner approved the proposed facade stability policy in
+  [`docs/reference/api-stability.md`](../docs/reference/api-stability.md) on
+  2026-11-04; it applies from the first release.
 - Package publication, tagging, uploading artifacts, and contacting VCV remain
   gated on explicit owner approval. No signing credentials or public upload
   actions were used.
 
-Before any public release, the owner must choose a preview version and approve
-its scope, artifact set, release notes, publication destinations, and any
-signing/submission steps. Rebuild from the approved immutable commit, rerun the
-checks against those exact bytes on each target claimed, and re-check coverage
-and safety statements.
+For this local preview, rebuild from the selected immutable commit, run the
+checks in [the Linux preview instructions](../docs/installation/linux.md), and
+install only on the owner's Linux machine. Before any public release, obtain
+separate owner approval for its scope, artifact set, release notes, publication
+destinations and signing/submission steps. Rebuild from the approved immutable
+commit, rerun checks against those exact bytes on each target claimed, and
+re-check coverage and safety statements.

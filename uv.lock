@@ -703,7 +703,7 @@ wheels = [
 
 [[package]]
 name = "rackpy"
-version = "0.0.0.dev0"
+version = "0.1.0.dev1"
 source = { editable = "." }
 
 [package.dev-dependencies]

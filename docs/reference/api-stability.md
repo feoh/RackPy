@@ -1,6 +1,6 @@
 # Facade contract and versioning
 
-RackPy is unreleased. The package version is `0.0.0.dev0`, it is marked
+RackPy has no public release. The local preview package version is `0.1.0.dev1`, and it is marked
 `Private :: Do Not Upload`, and no compatibility promise exists between
 development versions. This page defines what the Pythonic facade is, the
 conventions it follows, and how changes to it are controlled.

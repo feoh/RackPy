@@ -1,13 +1,13 @@
 # Install on Linux
 
-:::{admonition} Release candidates only: nothing is published
+:::{admonition} Owner-approved local preview: not published
 :class: warning
 
-RackPy has no release. The files this page describes are release candidates
-that `bin/rackpy-release build` makes from a commit, and the CI release-candidate
-job makes from `main`. They are not on GitHub Releases, PyPI or the VCV Library,
-and must not be redistributed until the owner approves a release (RP-44). Do
-not install a file that claims to be a RackPy release from anywhere else.
+RackPy has no public release. The owner approved an unpublished Linux x86_64
+preview for local testing only. The files below are built from a pinned commit
+by `bin/rackpy-release build`; they are not on GitHub Releases, PyPI or the VCV
+Library and must not be shared or redistributed. No full-coverage, performance,
+or broad platform-support claim is made.
 :::
 
 ## What you need
@@ -17,8 +17,44 @@ not install a file that claims to be a RackPy release from anywhere else.
   plugins are built with, and need no newer glibc than they do. They are
   tested on Ubuntu 16.04 (glibc 2.23) and Ubuntu 20.04.
 - **VCV Rack Free {{rack_version}}**. Other Rack 2 versions are untested.
-- **Nothing else.** Each plugin brings its own CPython {{python_version}}, and
-  never uses a Python installed on the computer, or the network.
+- **Nothing else at run time.** Each plugin brings its own CPython {{python_version}},
+  and never uses a Python installed on the computer or the network.
+- **To build and verify:** Git, uv, Docker, network access for the pinned inputs,
+  and VCV Rack Free 2.6.6. Docker is used to build VCV's pinned Linux toolchain
+  and run clean-machine verification; it is not required to install the finished
+  plugin in Rack.
+
+## Build and verify the local preview
+
+The selected Python package version is `0.1.0.dev1`. The release builder adds
+`+g<commit>` to identify the source commit; the example `.vcvplugin` names and
+Rack log continue to use `2.0.0`, Rack's plugin version field. Build from a
+clean checkout of the exact preview commit (replace `<preview-commit>` with the
+40-character hash listed in the candidate audit):
+
+```bash
+git clone https://github.com/feoh/RackPy.git RackPy-preview
+cd RackPy-preview
+git checkout <preview-commit>
+uv sync --frozen
+bin/rack-toolchain build
+PREVIEW_DIR=/tmp/rackpy-preview
+bin/rackpy-release build --dest "$PREVIEW_DIR"
+sha256sum -c "$PREVIEW_DIR/artifacts/SHA256SUMS"
+RACK_SDK="$(bin/rack-sdk path lin-x64)"
+bin/rackpy-release verify "$PREVIEW_DIR/artifacts" \\
+  --rack "$RACK_SDK" --logs "$PREVIEW_DIR/verify-ubuntu-20.04"
+```
+
+`build` empties the destination first, so choose a disposable directory outside
+the checkout. It writes the candidate under `artifacts/`, plus its manifest and
+checksums. `verify` runs the packages in a clean Ubuntu 20.04 container with no
+system Python and no network, exercises all ten example plugins, and saves its
+logs and screenshots in the `--logs` directory. Do not use `--allow-dirty` for
+this preview. A successful container test does not prove physical audio-device
+deadlines or audio-interface behavior; the optional host install below is for
+manual Rack use. The exact commit and results for the candidate built for this
+preview are recorded in [`candidate-audit.md`](../../release-evidence/candidate-audit.md).
 
 ## What the files are
 
