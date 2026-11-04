@@ -6,6 +6,7 @@ The owner amendments below take precedence over historical delivery gates.
 ## Durable records
 
 - [Practical path to a first public release](practical-release.md)
+- [Sample-led Python API gap audit](sample-api-audit.md)
 - [Detailed human-readable task contracts](TASKS.md)
 - [Machine-readable task contracts and dependency DAG](tasks.json)
 - [Witan slugs and project-recovery state](witan.json)

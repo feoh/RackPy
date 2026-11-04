@@ -49,7 +49,8 @@ change the coverage denominator or call incomplete mappings complete.
 
 ## Official samples as a gap-finding baseline
 
-A fresh inventory check is a better starting point than creating duplicate ports:
+A fresh inventory check is a better starting point than creating duplicate
+ports; see the detailed [sample API audit](sample-api-audit.md):
 
 - Live Witan shows RP-33 through RP-36 closed. `upstream/examples.json` has 77
   entries; all tutorial, API-guide and helper/template samples have tested
