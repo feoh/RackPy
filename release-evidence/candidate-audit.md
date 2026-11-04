@@ -37,9 +37,24 @@ checks passed: checksums, all ten plugin loads, module creation and patch
 reopen, windowed module-browser smokes, interpreter finalization, refusal and
 error cases, upgrade, and uninstall. The full output is in
 `/tmp/rackpy-preview-52526e8/verify-ubuntu-20.04/summary.txt` on this machine.
-Ubuntu 16.04 and a manual install into the desktop's Rack user folder were not
-run for this exact candidate. The container test does not exercise physical
-audio/MIDI devices, audio deadlines, or hardware GPU drivers.
+Ubuntu 16.04 was not run for this exact candidate. The owner subsequently
+reported manually installing the oscillator in Rack Pro 2.6.6 and hearing its
+tone through headphones; that is one owner-reported smoke, not broad Rack Pro
+support or a deadline measurement. The container test does not exercise
+physical audio/MIDI devices, audio deadlines, or hardware GPU drivers.
+
+## First plugin and packaging smoke (2026-11-04)
+
+On Linux x86_64, using the runtime bundle from this candidate and the tools at
+commit `e3b9327`, the documented `rackpy-plugin create`, `add-module`, `build`
+and `pack` workflow created a new `MyPlugin` with a module from the oscillator
+panel. Rack Free 2.6.6 extracted the resulting package in an isolated temporary
+user folder, loaded `MyPlugin 2.0.0`, and retained a patch containing
+`MyModule` on a second headless launch; the extracted plugin was then removed.
+The temporary test files were deleted. This checks that this particular
+candidate/runtime and tool version work together; it does not validate newer
+candidate binaries, interactive rendering, generated audio, upgrade behavior,
+or another operating system.
 
 ## Earlier cross-platform CI evidence
 
