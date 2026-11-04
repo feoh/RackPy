@@ -40,6 +40,11 @@
   ],
   "virtual_driver": "def virtual_driver(driver_id: int, name: str, *, devices: tuple[str, ...]=('Virtual 1',)) -> PythonDriver"
  },
+ "rackpy.dialog": {
+  "choose_directory": "def choose_directory(*, directory: str | os.PathLike[str] | None=None) -> Path | None",
+  "open_file": "def open_file(*, directory: str | os.PathLike[str] | None=None, filters: str | None=None) -> Path | None",
+  "save_file": "def save_file(*, directory: str | os.PathLike[str] | None=None, filename: str | None=None, filters: str | None=None) -> Path | None"
+ },
  "rackpy.drawing": {
   "Color": "Color = NVGcolor | str | tuple[float, float, float] | tuple[float, float, float, float]",
   "DEFAULT_FONT": "DEFAULT_FONT: str",

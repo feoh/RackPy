@@ -21,6 +21,8 @@ void bindMutex(pybind11::module_ raw);
 void bindSettings(pybind11::module_ settings);
 /** rackpy.raw.system (RP-30B). */
 void bindSystem(pybind11::module_ system);
+/** Internal support for rackpy.dialog via Rack SDK osdialog, outside the rack.hpp inventory. */
+void bindDialog(pybind11::module_ dialog);
 /** rackpy.raw.network (RP-30B). */
 void bindNetwork(pybind11::module_ network);
 /** A path argument: str or os.PathLike, as a UTF-8 string. Needs the GIL. */

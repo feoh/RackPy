@@ -26,10 +26,21 @@ int osdialog_message(osdialog_message_level level, osdialog_message_buttons butt
 }
 
 char* osdialog_file(osdialog_file_action action, const char* path, const char* filename, osdialog_filters* filters) {
-    (void) path;
-    (void) filename;
-    (void) filters;
     record("file", action);
+    const char* details_path = getenv("RACKPY_DIALOG_DETAILS");
+    if (details_path) {
+        FILE* details = fopen(details_path, "a");
+        if (details) {
+            fprintf(details, "action=%d path=%s filename=%s", action, path ? path : "", filename ? filename : "");
+            for (osdialog_filters* filter = filters; filter; filter = filter->next) {
+                fprintf(details, " filter=%s", filter->name ? filter->name : "");
+                for (osdialog_filter_patterns* pattern = filter->patterns; pattern; pattern = pattern->next)
+                    fprintf(details, ":%s", pattern->pattern ? pattern->pattern : "");
+            }
+            fputc('\n', details);
+            fclose(details);
+        }
+    }
     const char* result = getenv("RACKPY_DIALOG_FILE");
     return result && *result ? strdup(result) : NULL;
 }

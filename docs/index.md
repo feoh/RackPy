@@ -36,7 +36,8 @@ plugin API, proved symbol by symbol; see the [coverage contract](coverage.md).
   log messages.
 - **Doing a specific job?** The how-to guides cover
   [plugins and models](how-to/plugins.md), [state](how-to/state.md),
-  [processing audio](how-to/dsp.md), [graphs](how-to/graphs.md) and
+  [processing audio](how-to/dsp.md), [graphs](how-to/graphs.md),
+  [choosing files](how-to/choose-files.md), and
   [drawing panels](how-to/draw-panels.md). The [examples](examples.md) are
   complete plugins, tested in Rack, for the features of Rack's tutorial and API
   guide.
@@ -82,6 +83,7 @@ how-to/dsp
 how-to/graphs
 how-to/polyphony
 how-to/menus
+how-to/choose-files
 how-to/draw-panels
 how-to/expanders
 how-to/audio-midi
