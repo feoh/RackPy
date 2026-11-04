@@ -12,10 +12,11 @@ or broad platform-support claim is made.
 
 ## What you need
 
-- **Linux x86_64** with glibc 2.23 (Ubuntu 16.04's) or newer. The release
-  candidates are built with VCV's own Rack plugin toolchain, the one Rack's own
-  plugins are built with, and need no newer glibc than they do. They are
-  tested on Ubuntu 16.04 (glibc 2.23) and Ubuntu 20.04.
+- **Linux x86_64** with glibc 2.23 (Ubuntu 16.04's) or newer. The candidate
+  is built with VCV's own Rack plugin toolchain, the one Rack's own plugins use,
+  and its binaries are checked against the glibc 2.23 floor. This exact preview
+  was install/run-verified in Ubuntu 20.04; it was not separately tested on
+  Ubuntu 16.04.
 - **VCV Rack Free {{rack_version}}**. Other Rack 2 versions are untested.
 - **Nothing else at run time.** Each plugin brings its own CPython {{python_version}},
   and never uses a Python installed on the computer or the network.
@@ -43,7 +44,7 @@ PREVIEW_DIR=/tmp/rackpy-preview
 bin/rackpy-release build --dest "$PREVIEW_DIR"
 (cd "$PREVIEW_DIR/artifacts" && sha256sum -c SHA256SUMS)
 RACK_FREE=/path/to/unzipped/Rack2Free
-bin/rackpy-release verify "$PREVIEW_DIR/artifacts" \\
+bin/rackpy-release verify "$PREVIEW_DIR/artifacts" \
   --rack "$RACK_FREE" --logs "$PREVIEW_DIR/verify-ubuntu-20.04"
 ```
 

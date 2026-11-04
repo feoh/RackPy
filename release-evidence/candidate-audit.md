@@ -1,60 +1,71 @@
-# Release-candidate audit (local preview, not a public release)
+# RackPy 0.1.0.dev1 — local Linux preview audit (not a public release)
 
-The owner approved an unpublished, local-only Linux preview at RackPy version
-`0.1.0.dev1` on 2026-11-04. Public publication, tagging, uploading and VCV
-submission remain unauthorized. The preview artifacts are staged outside the
-repository; this audit records their exact source, manifest and checksums but
-does not make them publicly available.
+The owner approved this Linux x86_64 preview for local testing only on
+2026-11-04. Nothing is published, tagged or approved for redistribution. The
+candidate binaries live outside git at
+`/tmp/rackpy-preview-52526e8/artifacts/`; this repository retains only their
+manifest and checksums.
 
-## Candidate built from this source
+## Exact candidate
 
-- Source commit: `6a62604a0dc81bd32dd0e16ce564813852847072` (clean detached worktree).
-- Candidate platform built locally: Linux x86_64.
-- Candidate metadata: [`manifest.json`](manifest.json),
-  [`candidate-linux-x64/manifest.json`](candidate-linux-x64/manifest.json), and
-  [`candidate-linux-x64/SHA256SUMS`](candidate-linux-x64/SHA256SUMS).
-- Rebuild command from a clean checkout: `bin/rackpy-release build --dest <outside-repo-directory>`.
-- The 13 staged artifacts (runtime, 10 example plugins, developer wheel, source
-  archive) matched `SHA256SUMS`. Rack's manifest records each archive's size,
-  content digest and artifact SHA-256. The staged candidate occupied 510 MB.
-- `bin/rackpy-release verify` installed the candidate in a clean Ubuntu 20.04
-  container with no system Python and `--network none`. All ten example plugins
-  loaded, patches reopened, plugin upgrade/uninstall behavior passed, the
-  windowed Rack smoke cases passed, and no Python/module errors were reported.
-  The candidate manifest and every checksum were validated by the verifier.
+- RackPy package version: `0.1.0.dev1`; the runtime and source artifact version
+  adds `+g52526e83c` to identify the source. The `.vcvplugin` files say `2.0.0`,
+  which is Rack's plugin version field, not RackPy's package version.
+- Source commit: `52526e83c0c0bfc74d223e46ea78319450336766` (clean checkout,
+  `dirty: false` in the manifest).
+- Platform: Linux x86_64 (`lin-x64`), Rack Free 2.6.6, glibc floor 2.23.
+- Artifact manifest: [`manifest.json`](manifest.json), also retained as
+  [`candidate-linux-x64/manifest.json`](candidate-linux-x64/manifest.json).
+- SHA-256 list: [`candidate-linux-x64/SHA256SUMS`](candidate-linux-x64/SHA256SUMS).
+  All 13 artifacts and the manifest matched it after the build.
+- Artifact folder: 510 MB, outside the repository; no binaries are committed.
+  It contains the runtime bundle, ten example `.vcvplugin` packages, developer
+  wheel, source archive, manifest and checksums.
 
-The GitHub Actions run
-[41763149030](https://github.com/feoh/RackPy/actions/runs/41763149030) validated
-install/run and in-candidate manifest checks on Linux x86_64, macOS x86_64/arm64,
-and Windows x86_64 for source commit `16ecf405932b857197406673bec1d16ff09115c5`.
-The current source commit adds documentation/evidence after that commit. Thus
-cross-platform evidence exists for that earlier candidate; the exact 6a62604
-artifact set was locally built and validated only on Linux. The run's optional
-external-linkcheck failed on GitHub HTTP 429; required documentation build and
-all platform candidate/native/host jobs passed.
+Rebuild the exact commit and repeat the clean-container install/run suite using
+the [Linux preview instructions](../docs/installation/linux.md). On the build
+machine, this candidate was verified with:
 
-## Claims and decisions still open
+```console
+bin/rackpy-release verify /tmp/rackpy-preview-52526e8/artifacts \
+  --rack /home/feoh/.cache/rackpy/host/x/lin-x64/Rack2Free \
+  --logs /tmp/rackpy-preview-52526e8/verify-ubuntu-20.04 --image ubuntu-20.04
+```
 
-- This is a **partial, unreleased development candidate**, not a complete
-  supported-public-API implementation. The coverage report remains the source
-  of truth; no full-surface claim is made.
-- The Linux candidate smoke tests do not prove a physical audio-device deadline
-  budget or a controlled performance result; see
-  [`../docs/performance-results.md`](../docs/performance-results.md).
-- Exact-current-commit macOS/Windows artifacts and tests have not been produced.
-- No PyPI name reservation has been verified. Do not upload an empty or
-  nonfunctional package.
-- The owner approved the proposed facade stability policy in
-  [`docs/reference/api-stability.md`](../docs/reference/api-stability.md) on
-  2026-11-04; it applies from the first release.
-- Package publication, tagging, uploading artifacts, and contacting VCV remain
-  gated on explicit owner approval. No signing credentials or public upload
-  actions were used.
+The clean Ubuntu 20.04.6 container had no system Python and no network. All
+checks passed: checksums, all ten plugin loads, module creation and patch
+reopen, windowed module-browser smokes, interpreter finalization, refusal and
+error cases, upgrade, and uninstall. The full output is in
+`/tmp/rackpy-preview-52526e8/verify-ubuntu-20.04/summary.txt` on this machine.
+Ubuntu 16.04 and a manual install into the desktop's Rack user folder were not
+run for this exact candidate. The container test does not exercise physical
+audio/MIDI devices, audio deadlines, or hardware GPU drivers.
 
-For this local preview, rebuild from the selected immutable commit, run the
-checks in [the Linux preview instructions](../docs/installation/linux.md), and
-install only on the owner's Linux machine. Before any public release, obtain
-separate owner approval for its scope, artifact set, release notes, publication
-destinations and signing/submission steps. Rebuild from the approved immutable
-commit, rerun checks against those exact bytes on each target claimed, and
-re-check coverage and safety statements.
+## Earlier cross-platform CI evidence
+
+GitHub Actions run
+[41763149030](https://github.com/feoh/RackPy/actions/runs/41763149030) ran
+candidate install/run checks on Linux x86_64, macOS x86_64/arm64 and Windows
+x86_64 for earlier source commit
+`16ecf405932b857197406673bec1d16ff09115c5`. That is useful prior evidence, not
+validation of this exact commit or its artifacts. The run's optional external
+link checker failed on GitHub HTTP 429; required documentation and candidate,
+native and host jobs passed.
+
+## Scope and remaining gates
+
+- This is a **local partial preview**, not a complete supported-public-API
+  implementation and not a public platform-support statement. The coverage
+  report remains authoritative; no full-surface claim is made.
+- No controlled performance result or physical audio deadline test is claimed.
+  Linux audio-path safety evidence and its limits are in
+  [`docs/performance-results.md`](../docs/performance-results.md).
+- The owner approved the proposed facade policy in
+  [`docs/reference/api-stability.md`](../docs/reference/api-stability.md); it
+  applies from the first public release.
+- Exact-current-commit macOS/Windows packages are not part of this Linux-only
+  preview. No PyPI name reservation is verified; do not upload a placeholder
+  or this private developer wheel.
+- Public publication, tagging, PyPI/GitHub upload, VCV submission, signing and
+  notarization still require separate explicit owner approval. Local testing
+  approval does not grant any of those permissions.

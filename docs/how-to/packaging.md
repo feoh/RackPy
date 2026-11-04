@@ -3,11 +3,11 @@
 :::{admonition} Pre-release: nothing here is for distribution yet
 :class: warning
 
-RackPy has no release. On Linux, `bin/rackpy-release build` makes release
-candidates (RP-39) that install on other computers, and `bin/rackpy-plugin pack`
-makes a `.vcvplugin` of your own plugin from one. macOS and Windows are RP-40
-and RP-41. Until the owner approves a release (RP-44), do not distribute any of
-them.
+RackPy has no public release. On Linux, `bin/rackpy-release build` makes
+release candidates (RP-39) that install on other computers, and
+`bin/rackpy-plugin pack` makes a `.vcvplugin` of your own plugin from one. macOS
+and Windows are RP-40 and RP-41. Until the owner separately approves a public
+release (RP-44), do not distribute any of them.
 :::
 
 ## What a RackPy plugin contains

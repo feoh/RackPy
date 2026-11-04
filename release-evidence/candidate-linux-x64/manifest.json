@@ -1,14 +1,14 @@
 {
   "artifacts": [
     {
-      "content_sha256": "f789f8e5dae32406fc1a3cbcffe8e49a88e8722db2b44e5ab286a3dbc1668013",
-      "file": "rackpy-runtime-0.0.0.dev0+g6a62604a0-lin-x64.tar.zst",
+      "content_sha256": "461c07fde9bb1f540421567b456c1ef3de2e9e77e052e43f1371f2412775716f",
+      "file": "rackpy-runtime-0.1.0.dev1+g52526e83c-lin-x64.tar.zst",
       "role": "runtime bundle: input to bin/rackpy-plugin build; not itself a plugin to install",
-      "sha256": "692601038b9aedc92b8c071c7c820e701a78a0c539640873aa4c001e6e0c9e55",
-      "size": 48307308
+      "sha256": "0be728bee38fa2e68907fa80191dc18c10dc48a967236532dc9d438b475e1529",
+      "size": 48307405
     },
     {
-      "content_sha256": "9d0d834b8ce87cb44bf4c01aba7d879c2795fe69c7a8bdc2baf455fea56e6a99",
+      "content_sha256": "75db0c02fed38a25762aa1dd26bf640200fec102dac26b86dfd7e1c95e1faa40",
       "example": "configuration",
       "file": "RackPyConfiguration-2.0.0-lin-x64.vcvplugin",
       "models": [
@@ -16,48 +16,48 @@
         "Splitter"
       ],
       "role": "example plugin: copy into Rack's plugins folder",
-      "sha256": "2166f36b0b4a8e8adc82fbb22f71258f52246e2ff369811858a17e812e9fe446",
-      "size": 48310968,
+      "sha256": "061fd913166241beb55ba6fd526eb7cd37be856ef96c7ba8f20f619d72d6b6be",
+      "size": 48311252,
       "slug": "RackPyConfiguration"
     },
     {
-      "content_sha256": "260bd02b852d06450dfbb9cbd59fba9226daa878582f03c3d12d176be66d7500",
+      "content_sha256": "7bb6ac485e54954759a0bad649bfa12e1824fd22c88c24033e731314b8a5d187",
       "example": "dark-panels",
       "file": "RackPyDarkPanels-2.0.0-lin-x64.vcvplugin",
       "models": [
         "Lantern"
       ],
       "role": "example plugin: copy into Rack's plugins folder",
-      "sha256": "489eae3d9de0ae61dcd554206663a30bd53cd5598e7534205cd731158e39a4b2",
-      "size": 48306088,
+      "sha256": "0d34bcbca6e2f84009383e58a5e49ce4ec400017256b9cccb0d880c13b61763c",
+      "size": 48305582,
       "slug": "RackPyDarkPanels"
     },
     {
-      "content_sha256": "91163a779ca323339a5c399af6935ff91e8d98c449b7ea5232c93e1a54817ffe",
+      "content_sha256": "052d6911e645a310ea8e3adc86aff74e63e8d0960d6ff8345a81bd34e627b32e",
       "example": "drawing",
       "file": "RackPyDrawing-2.0.0-lin-x64.vcvplugin",
       "models": [
         "Meter"
       ],
       "role": "example plugin: copy into Rack's plugins folder",
-      "sha256": "88bb94087bdff0132a70c34734cac5851b551eb84fd1860ef59350724be15cf5",
-      "size": 48305589,
+      "sha256": "a200a3a49be2031fe23394134ebff7159f540bf7c272814cacc7e3cc12d2a58b",
+      "size": 48305403,
       "slug": "RackPyDrawing"
     },
     {
-      "content_sha256": "0ba064662394753ae69465aac58b7d6adbbfda23ec406b86d5374a1a68148c0b",
+      "content_sha256": "e1edd4204b2e018f675925c041814916db29eea2023933eb1e862c1f0cdf4a4b",
       "example": "dsp",
       "file": "RackPyDsp-2.0.0-lin-x64.vcvplugin",
       "models": [
         "Filter"
       ],
       "role": "example plugin: copy into Rack's plugins folder",
-      "sha256": "d3d64effd99fd48960851698ce96535038e584d0021782896bb56ea2ce3cf28c",
-      "size": 48333572,
+      "sha256": "7859fff5e447079673a7092d404e05c4694a6f7eadf38d7b73a806e50d192779",
+      "size": 48333804,
       "slug": "RackPyDsp"
     },
     {
-      "content_sha256": "3d73984b86853a228606a67d5361e72ca9b98b767ece1dc63338ab8967496f4e",
+      "content_sha256": "f6246585edf417a459154c5e1016e3798738fe8a37c78f9f4eb105e921d79f38",
       "example": "expanders",
       "file": "RackPyExpanders-2.0.0-lin-x64.vcvplugin",
       "models": [
@@ -66,36 +66,36 @@
         "Peeker"
       ],
       "role": "example plugin: copy into Rack's plugins folder",
-      "sha256": "a92bb857f4bb8529ea548331cf43c5f57bfa05cf3fdb3d94a51968fd6896ff44",
-      "size": 48332701,
+      "sha256": "424a51be3900c76ac93e5f2723e1ba980ff2612118f312915ca94a817be6a78f",
+      "size": 48333118,
       "slug": "RackPyExpanders"
     },
     {
-      "content_sha256": "afb71ba313342b0181a2629a39cff2d03322d993e0acc89a2c431dc82bfe66cf",
+      "content_sha256": "d1476b136f5be5c66dd398a2754061d682091042f2441a9bffedc0d355c2fd27",
       "example": "menus",
       "file": "RackPyMenus-2.0.0-lin-x64.vcvplugin",
       "models": [
         "Switchboard"
       ],
       "role": "example plugin: copy into Rack's plugins folder",
-      "sha256": "0e830fe71576979b103a571944867f6c99d136708fcb8a9d2ae0afc01de518d9",
-      "size": 48307423,
+      "sha256": "238c0f5ec3de41bcd458471b14e078ecff25e7139bec7b386046d54134b99a2a",
+      "size": 48307032,
       "slug": "RackPyMenus"
     },
     {
-      "content_sha256": "e827236cc1b34aa34a523cb62efdc892df08a783003e03d9a1bfdcfbdbc71034",
+      "content_sha256": "ddeead0aa82d071add40cfe5984d894955d24331dd282bc9167d3568b8fbdd7c",
       "example": "oscillator",
       "file": "RackPyOscillator-2.0.0-lin-x64.vcvplugin",
       "models": [
         "Oscillator"
       ],
       "role": "example plugin: copy into Rack's plugins folder",
-      "sha256": "e747b31685ad41b6a78e725f12e256c57f06dd6dd74b5ad02d9343166144c91a",
-      "size": 48306781,
+      "sha256": "e01c234296d09bf22992699129d3de7ba1c32265b1e421573ab060ccf55bd698",
+      "size": 48306650,
       "slug": "RackPyOscillator"
     },
     {
-      "content_sha256": "04da5e3ac25c7de756f62cc721b172b668a34a902a431844a72152bf502ffdcb",
+      "content_sha256": "ac2187a769199d9f29a2d9ab5e79a8b02d8250fddf16f43d0c621b1e892fdd7d",
       "example": "polyphony",
       "file": "RackPyPolyphony-2.0.0-lin-x64.vcvplugin",
       "models": [
@@ -103,50 +103,50 @@
         "PolySineScalar"
       ],
       "role": "example plugin: copy into Rack's plugins folder",
-      "sha256": "7189115e713ce8ccf8de18b2ee9238bc4db95582ce70ce2d2499edd31c2030fa",
-      "size": 48326242,
+      "sha256": "3dca413ce639f24e04bb29799d5a295c82440da8d25db9393edac220cc31c7f4",
+      "size": 48326569,
       "slug": "RackPyPolyphony"
     },
     {
-      "content_sha256": "ab112c47469f74edd98bc2336a38a6477bb22a3c8589b27530991e1adfd018e7",
+      "content_sha256": "d2d18120d866de23669d8b251f0adec922e01c7d9178a4c714fe30a43fe17504",
       "example": "state-and-events",
       "file": "RackPyStateEvents-2.0.0-lin-x64.vcvplugin",
       "models": [
         "Sequencer"
       ],
       "role": "example plugin: copy into Rack's plugins folder",
-      "sha256": "c54245fb7a4dd3c38152dd43ea918030c917267ed8cf0d8bd175c6dcc922199f",
-      "size": 48306760,
+      "sha256": "4eb58fc761acd22b3e0200146c157ae4fa96a657a7d6af341035df3c6d67474d",
+      "size": 48307136,
       "slug": "RackPyStateEvents"
     },
     {
-      "content_sha256": "86da9cb1399f826a29d27a447e78f433224af318c271a4be0fe91bad37f66159",
+      "content_sha256": "9e4692549c35e56614342362b12e60fef49a6827dcbd6bf6a5e9be0a5ce36e18",
       "example": "template",
       "file": "RackPyTemplate-2.0.0-lin-x64.vcvplugin",
       "models": [
         "Starter"
       ],
       "role": "example plugin: copy into Rack's plugins folder",
-      "sha256": "88aff949267d59ba5c7c77f3ac5c5222b5cd32a34bc3cf90a15d675a26db2f68",
-      "size": 48308700,
+      "sha256": "9491bb66f14a8fa18209ae29883f24d247bc4f89e89ed9460d1c9b668e468d4d",
+      "size": 48308565,
       "slug": "RackPyTemplate"
     },
     {
-      "content_sha256": "d63baa46129d9387f21181f9c91977d12487750d4afe44809105322382ee74e0",
-      "file": "rackpy-0.0.0.dev0-py3-none-any.whl",
+      "content_sha256": "dac0ee62287e4ecd11d17ffcb816b5af9025bbfae9630a6e3c083a4ac7ffddc6",
+      "file": "rackpy-0.1.0.dev1-py3-none-any.whl",
       "role": "developer package: pip/uv-installable rackpy for editors, type checkers and offline graph tests; runs nothing in Rack",
-      "sha256": "b2057fbc2d54f385271c91ed9819fd652ccac2628dee3e4f83a82e64a3808bd5",
-      "size": 146740
+      "sha256": "96e60cdc921ffe92a1354afb848fc7ac714975442d48141ae79543c9b6ed2685",
+      "size": 146772
     },
     {
-      "content_sha256": "70d61e455996088bc99c84205c242e645e6a375868353802cefceeb25ddd7390",
-      "file": "rackpy-0.0.0.dev0+g6a62604a0-source.tar.gz",
+      "content_sha256": "bb4ff0e2dc9f721d38c3e66573d65fe6cfa070bb557eb9a1a15afb9f5648257b",
+      "file": "rackpy-0.1.0.dev1+g52526e83c-source.tar.gz",
       "role": "corresponding source (GPL-3.0-or-later)",
-      "sha256": "75b5f3f4804398cb96126a7c8cbd3357e75d4e4cfa72de8f32eea121ed91ffb6",
-      "size": 2426270
+      "sha256": "162910bfd90d332da20998abd69d4893c1ded4adf1ab217ba14174294287928b",
+      "size": 2434480
     }
   ],
-  "commit": "6a62604a0dc81bd32dd0e16ce564813852847072",
+  "commit": "52526e83c0c0bfc74d223e46ea78319450336766",
   "dirty": false,
   "elf": {
     "RackPy/plugin.so": {
@@ -275,7 +275,7 @@
       "zlib": "1.3.1",
       "zstd": "1.5.7"
     },
-    "commit": "6a62604a0dc81bd32dd0e16ce564813852847072",
+    "commit": "52526e83c0c0bfc74d223e46ea78319450336766",
     "dirty": false,
     "glibc_floor": "2.23",
     "python_runtime": {
@@ -300,19 +300,19 @@
       "size": 9325383,
       "url": "https://vcvrack.com/downloads/Rack-SDK-2.6.6-lin-x64.zip"
     },
-    "rackpy_version": "0.0.0.dev0+g6a62604a0",
+    "rackpy_version": "0.1.0.dev1+g52526e83c",
     "toolchain": {
       "build": "4fd131870162",
       "recipe_sha256": "ff003cd7c7c44b15704f2702931c4ae1daa2ce2661eeecdc956953c3f1eafa0a",
       "target": "x86_64-ubuntu16.04-linux-gnu"
     },
-    "uv_lock_sha256": "4c51b879f283f10e68732e9cbe0dd1fc8f88ae056db724dacb9122c691d05403"
+    "uv_lock_sha256": "0b39e006a997291126bdef991c3797eb0f9a8c7912c00fc6a054907718715058"
   },
   "note": "RackPy release candidate. Not published: nothing here may be distributed without owner approval.",
   "platform": "lin-x64",
-  "rackpy_version": "0.0.0.dev0+g6a62604a0",
+  "rackpy_version": "0.1.0.dev1+g52526e83c",
   "schema_version": 1,
-  "source_date_epoch": 1793783959,
+  "source_date_epoch": 1793805762,
   "third_party": [
     {
       "component": "CPython 3.14.9",
