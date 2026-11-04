@@ -173,8 +173,10 @@ on threads Python starts (see [the context](window.md#the-context)). Its
 - `finalize_widget` makes Rack forget a widget.
 - The raw fields (`hovered_widget`, `selected_widget`, and the rest) can be
   written with `None` or a live widget without sending events.
-  `root_widget`, the scene, is read-only. Rack clears the fields when a
-  widget leaves its tree or is deleted. `held_keys` is a copy of Rack's set.
+  `root_widget` is the raw scene pointer: assigning `None` or a live widget
+  changes the root from which Rack dispatches input, without synthesizing
+  events. Rack normally owns this pointer. Rack clears the other widget fields
+  when a widget leaves its tree or is deleted. `held_keys` is a copy of Rack's set.
 
 `rackpy.raw.macros` has `RACK_MOD_CTRL`, `RACK_MOD_SHIFT`, `RACK_MOD_ALT`
 (Ctrl is Command on macOS), their `*_NAME`s, `RACK_MOD_MASK` and

@@ -59,8 +59,8 @@ void bindEventState(py::module_ widget) {
 	auto cls = py::class_<EventStateHandle>(widget, "EventState", py::is_final(),
 		"Rack's input dispatcher (rack::widget::EventState), from rackpy.raw.context_get().event. Main thread; "
 		"stale once Rack's context closes.");
-	cls.def_property_readonly("root_widget", [](const EventStateHandle& h) { return wrapper(h.get().rootWidget); },
-		"Rack's scene. Read-only: Rack dispatches every event from it.");
+	widgetField<&ES::rootWidget>(cls, "root_widget",
+		"The raw field: replacing it changes the scene from which Rack dispatches input.");
 	widgetField<&ES::hoveredWidget>(cls, "hovered_widget",
 		"The raw field: writing it skips Rack's Enter/Leave events (set_hovered_widget sends them).");
 	widgetField<&ES::draggedWidget>(cls, "dragged_widget", "The raw field (set_dragged_widget sends drag events).");

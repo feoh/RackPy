@@ -730,8 +730,7 @@ class WidgetNode:
 
 @final
 class EventState:
-    @property
-    def root_widget(self) -> Widget | HostWidget | None: ...
+    root_widget: Widget | HostWidget | None
     hovered_widget: Widget | HostWidget | None
     dragged_widget: Widget | HostWidget | None
     drag_hovered_widget: Widget | HostWidget | None

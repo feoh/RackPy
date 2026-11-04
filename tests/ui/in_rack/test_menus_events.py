@@ -194,8 +194,12 @@ def test_raw_fields_and_finalization() -> None:
         assert same(state.selected_widget, None)
         with pytest.warns(DeprecationWarning, match="set_hovered_widget"):
             state.set_hovered(None)
-        with pytest.raises(AttributeError):
-            state.root_widget = pad  # type: ignore[misc,unused-ignore]
+        root = state.root_widget
+        assert root is not None
+        state.root_widget = pad
+        assert state.root_widget is pad
+        state.root_widget = root
+        assert state.root_widget is root
     finally:
         if pad.parent is not None:
             pad.remove_from_parent()

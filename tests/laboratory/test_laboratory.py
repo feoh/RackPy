@@ -26,6 +26,7 @@ NEEDS_RACK = [
     "test_racks_output_reaches_a_python_output_device",
     "test_laboratory_midi_device_native_reentry_super_and_recursion_limit",
     "test_racks_audio_port_calls_a_python_driver_and_device",
+    "test_device_process_mutex_has_a_lifetime_checked_ui_guard",
     "test_queued_initial_audio_start_reaches_python_override_without_a_physical_device",
     "test_audio_override_errors_reach_the_port_methods_caller",
     "test_audio_teardown_runs_no_python_and_leaves_ports_pointing_nowhere",
