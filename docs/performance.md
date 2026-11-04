@@ -2,7 +2,9 @@
 
 “Reasonably performant” needs an honest baseline and measurement conditions.
 The following are **proposed release budgets**, not results. RP-07 must measure
-feasibility and freeze justified budgets before implementation fans out.
+feasibility and freeze justified budgets before implementation fans out. See
+[the latest performance and safety results](performance-results.md) for the
+current evidence and explicit gaps.
 
 ## Architectural invariants
 

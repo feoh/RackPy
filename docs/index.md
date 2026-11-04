@@ -9,8 +9,10 @@ RackPy is in **early development**, and there is **no release** to install.
 On Linux x86_64 it builds from source, loads into Rack Free, and binds the
 public Rack API ([coverage report](reference/coverage.md)): plugins written in
 Python add modules with controls, panels, menus, drawing, state and native
-audio processing, and the [examples](examples.md) run in Rack under test. No
-declaration is marked `verified` yet, and macOS and Windows are not built.
+audio processing, and the [examples](examples.md) run in Rack under test. CI
+has built and run install candidates on Linux x86_64, macOS x86_64/arm64, and
+Windows x86_64, but no release artifacts are published. No declaration is
+marked `verified` yet.
 :::
 
 RackPy lets you write Rack plugins in idiomatic Python, running inside Rack,
@@ -25,7 +27,7 @@ plugin API, proved symbol by symbol; see the [coverage contract](coverage.md).
 | Rack SDK | {{rack_version}}, commit {{rack_commit}} |
 | Bundled Python | CPython {{python_version}} ({{python_build}}) |
 | Binding library | pybind11 {{pybind11_version}} |
-| Platforms | Linux x86_64 only, from source; macOS and Windows not built yet |
+| Platforms | Linux x86_64 from source; install candidates verified in CI on Linux x86_64, macOS x86_64/arm64, Windows x86_64; no published artifacts |
 
 ## Where to go
 
@@ -102,6 +104,7 @@ architecture
 compatibility
 coverage
 performance
+performance-results
 licensing
 documentation
 decisions/index
