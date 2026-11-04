@@ -47,6 +47,37 @@ change the coverage denominator or call incomplete mappings complete.
    preview approval does not authorize a tag, upload, redistribution or VCV
    contact. Complete RP-44 only when its actual approved delivery is verified.
 
+## Official samples as a gap-finding baseline
+
+A fresh inventory check is a better starting point than creating duplicate ports:
+
+- Live Witan shows RP-33 through RP-36 closed. `upstream/examples.json` has 77
+  entries; all tutorial, API-guide and helper/template samples have tested
+  dispositions. `bin/manual-sources check` on 2026-11-04 confirmed all 69
+  captured code blocks still match the live manual. Four Rack-building samples
+  (`building-06`–`building-09`) are explicitly out of scope because they build
+  Rack itself, not a plugin.
+- In CI run
+  [41763149030](https://github.com/feoh/RackPy/actions/runs/41763149030), the
+  sample evidence from commit `16ecf405932b857197406673bec1d16ff09115c5`
+  reports 73 disposition tests passed on Linux. macOS arm64, macOS x64 and
+  Windows each report 69 passed and four skipped: the same Linux-specific
+  audio-path guard tests (`guide-07`, `guide-13`, `guide-25`, `guide-30`).
+  These are platform-evidence gaps for that guard, not unported sample features;
+  the functional sample tests passed. This older run is not evidence for later
+  candidate bytes.
+- The newer local preview's ten plugins also passed its Ubuntu 20.04 clean
+  install/run checks, and the owner manually heard the oscillator in Rack Pro.
+  Neither establishes full API coverage.
+
+No official plugin-facing sample remains to port from this captured manual
+revision. For sample-led API work, first map a concrete user workflow in an
+example to its binding-manifest records and passing tests; prioritize only a
+real missing or unusable operation. Do not reopen RP-33–RP-36 to repeat their
+completed deliverables. The cross-platform audio-guard skips may be addressed
+separately if that platform claim becomes useful, but they are not the first
+API feature to implement.
+
 ## Test effort: pay for information, not repetitions
 
 - On ordinary changes, use hooks and focused tests for the changed area. Run a
