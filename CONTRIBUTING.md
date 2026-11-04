@@ -156,7 +156,7 @@ and on pull requests, on `ubuntu-24.04`:
 | Hooks, typing and unit tests | `uv sync --frozen`, `prek run --all-files`, `pytest -m unit` |
 | SDK pins, native build and audio-path guard | `bin/rack-sdk verify`, `closure`, `probe`; `pytest -m "native and not host"` |
 | SDK inventory | `pytest -m inventory` with LLVM 21 from apt.llvm.org; see below |
-| Documentation site | `sphinx-build -W` and `pytest -m "docs and not host"`; keeps the HTML |
+| Documentation site | `sphinx-build -W` and `pytest -m "docs and not host"`, split across three jobs; keeps the HTML and per-shard reports |
 | Documentation external links (weekly and on demand) | `sphinx-build -b linkcheck` |
 | Rack host smoke tests | Pull requests and fast dispatch: production-host security and oscillator load/patch smoke. Full dispatch/main: `pytest -m "host and not dist"`, including docs snippets, the RP-04 spike and the RP-06 probe |
 | Distributable build (pushes to `main` and on demand) | builds or restores the official toolchain, then `pytest -m dist` |
