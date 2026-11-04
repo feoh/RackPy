@@ -79,6 +79,74 @@ completed deliverables. The cross-platform audio-guard skips may be addressed
 separately if that platform claim becomes useful, but they are not the first
 API feature to implement.
 
+## Proposed lean path to cross-platform support and eventual parity
+
+These are **planning recommendations**, not a replacement for the existing
+[full-surface release bar](../docs/coverage.md#release-bar), an assertion that
+any platform has passed it, or authorization to publish. Apply the same
+principle as the first-release plan: pay for evidence of a particular claim,
+not repeated work that provides no new information. Keep these claims separate:
+
+| Claim | Evidence needed | What it does not establish |
+| --- | --- | --- |
+| A platform is usable for an early release | On that native OS and architecture, verify the identified final candidate bytes: integrity and dependencies, real Rack load, a representative create/package/install/use/save/reopen/uninstall journey, relevant crash/lifetime/audio-path checks and actionable failure handling. Document environment, skips, limitations and security/signing behavior. | Full SDK coverage, equal platform features, all OS versions, or real-time performance. |
+| Cross-platform release | Meet that platform bar independently for every advertised OS/architecture and say exactly which versions and features were exercised. Ship only the candidates that meet it; do not infer a platform pass from cross-compilation, another platform, or earlier bytes. | Feature parity or complete coverage. One platform's delay need not hold back another partial release. |
+| Parity for a named feature set | Define the feature set and version, then compare its meaningful behavior, error handling and documented differences on each claimed target using native host tests where necessary. Record intentional platform differences and unresolved skips; do not equate matching package names with matching behavior. | Parity outside that feature set or full Rack SDK coverage. |
+| Full supported public API coverage | Meet RP-42 and the existing coverage contract for **every** advertised platform, including the full inventory, semantic Python mappings, evidence for platform availability, callbacks/macros/templates and exclusions, tests/docs, and independent review. Native-only or inaccessible mappings, unknowns and skipped required evidence are not passes. | Universal platform support, physical-device deadlines or benchmark claims. |
+
+### Reduce work without reducing evidence
+
+1. **One platform matrix, not three unrelated checklists.** Identify Linux
+   x86_64, macOS x86_64/arm64 and Windows x86_64 as candidate targets, not
+   blanket support claims. For each release, record source commit, artifact
+   hashes, native OS version, host version, checks and explicit pass/fail/skip.
+   A single candidate-verification run can satisfy multiple gates when its
+   evidence actually covers each one. Reuse preserved evidence for identical
+   bytes and conditions; rerun affected checks for changes and always verify
+   the final bytes. No cross-platform substitution for platform-specific tests.
+2. **Test the real user journey once per candidate and target.** Combine
+   template-to-package, actual Rack installation, representative UI and native
+   audio operation, patch round-trip, upgrade and uninstall with the existing
+   candidate suite where practical. Retain focused platform-specific tests for
+   loader isolation, runtime collisions, paths and distribution/security behavior.
+   Host smoke is not a substitute for an audio-device deadline measurement.
+3. **Treat missing evidence as a scoped gap, not an automatic project-wide
+   veto.** Prior Mac validation records windowed-render skips on CI and SIP-on
+   behavior not established; Windows records Linux-only dynamic audio guards
+   and sanitizer gaps. For a platform claim, investigate whether the real user
+   journey and a meaningful safety check can be run on a suitable native host,
+   or whether a different check actually tests the same risk. Record its scope
+   and residual risk; if it does not, keep the gap open and narrow the claim.
+   Do not mark a skip as a pass or weaken a required full-coverage gate.
+4. **Use sample parity as a feature map, not duplicate implementation work.**
+   Reuse the 77-entry inventory and existing feature dispositions. For a named
+   parity claim, run the relevant actual-candidate behavior on each target;
+   identify out-of-scope source blocks and skipped tests. The prior Linux-only
+   audio-guard skips remain gaps in guard evidence, not proof that a sample's
+   feature is absent. Full sample parity remains subject to RP-42's existing
+   stricter evidence requirements.
+5. **Make full coverage incremental.** Preserve all counted public entries and
+   their semantic requirements. Prioritize gaps that block real plugin workflows;
+   group independent review and tests by family and reuse reviewed results only
+   where the reviewed source, mapping, tests and platform evidence still apply.
+   Automate change-impact and evidence collection where reliable, but retain the
+   owner-approved independent review and spot checks. Re-review changed or
+   invalidated evidence; do not replace review with introspection alone. Until
+   RP-42 passes, label coverage partial regardless of progress percentages.
+6. **Run expensive measurement for the claim it supports.** The controlled A/B
+   and physical-device deadline work supports performance claims, not a general
+   cross-platform availability claim. Preserve meaningful audio-path and
+   lifecycle safety checks on every advertised target; document where an
+   equivalent platform mechanism has not been demonstrated. Never claim audio
+   deadlines, lock-free host behavior or a passing benchmark without evidence.
+
+The earlier multi-platform CI candidate used source commit
+`16ecf405932b857197406673bec1d16ff09115c5` ([run 41763149030](https://github.com/feoh/RackPy/actions/runs/41763149030));
+its platform jobs and known skips are useful starting evidence, **not** a
+pass for a newer candidate. The current local preview audit covers only its
+identified Linux bytes. No CI gates, coverage denominator, task acceptance
+criteria or owner approvals are changed by these recommendations.
+
 ## Test effort: pay for information, not repetitions
 
 - On ordinary changes, use hooks and focused tests for the changed area. Run a
