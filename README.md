@@ -2,9 +2,10 @@
 
 **A Python API for VCV Rack plugins: expressive at the surface, native where timing matters.**
 
-RackPy lets you build Rack plugins with idiomatic Python while keeping access to
-the complete supported public C++ plugin API. It runs **inside Rack**, not as an
-external remote-control service.
+RackPy lets you build Rack plugins with idiomatic Python and access to parts of
+Rack's public C++ plugin API. Complete public API coverage is a long-term goal,
+not a current claim. RackPy runs **inside Rack**, not as an external
+remote-control service.
 
 > **Early development, no release.** RackPy builds from source on Linux x86_64
 > and macOS, and loads into Rack Free 2.6.6. It has bindings across Rack's
@@ -62,8 +63,10 @@ it and pinned the SDK archives by SHA-256
 ([compatibility baseline](docs/compatibility.md)). RP-04 chose a bundled
 CPython 3.14 and pybind11 3.1.0 ([ADR 002](docs/decisions/002-embedding-and-bindings.md));
 RP-07 set the working performance budgets ([ADR 004](docs/decisions/004-performance-budgets.md)).
-The RP-08 skeleton loads into Rack Free 2.6.6 on Linux x86_64. macOS and
-Windows have not been built or run.
+The RP-08 skeleton loads into Rack Free 2.6.6 on Linux x86_64. Later candidate
+builds have also been exercised on macOS and Windows; see the
+[candidate audit](release-evidence/candidate-audit.md) for the tested commits and
+limitations.
 
 ## Tracking
 
