@@ -28,11 +28,12 @@ external remote-control service.
   API guide and plugin template demonstrate.
 - Reproducible Linux, macOS, and Windows packages, subject to feasibility gates.
 
-**“Complete” is a release criterion, not the current state.** It means the pinned
-public SDK surface has no unreviewed or unimplemented Python mappings. Private
-Rack internals are not part of the supported plugin API. Templates, macros,
-platform-specific APIs, and third-party types need explicit semantic mappings;
-they must not disappear from the coverage denominator.
+**“Complete” is a future coverage claim, not a requirement for a useful early
+release.** It means the pinned public SDK surface has no unreviewed or
+unimplemented Python mappings. Until that is established, releases and builds
+must describe their limitations honestly. Private Rack internals are not part of
+the supported plugin API. Templates, macros, platform-specific APIs, and
+third-party types must not disappear from the coverage denominator.
 
 ## Start here
 

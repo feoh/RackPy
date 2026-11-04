@@ -1,6 +1,7 @@
 # RackPy execution plan
 
-This is a specification and task graph, not a completed implementation.
+This is the original specification and task graph, alongside an evolving implementation.
+The owner amendments below take precedence over historical delivery gates.
 
 ## Durable records
 
@@ -86,6 +87,19 @@ sandboxing, Rack Pro/DAW embedding support without explicit testing, and
 redistributing the Rack SDK or restricted graphics.
 
 ## Owner amendments
+
+**Practical delivery, November 2026.** The owner wants a useful way to write
+VCV Rack plugins in Python, not a mission-critical certification process.
+Prioritize an installable, documented build and representative plugin workflows
+in real Rack; fix material crashes and audio-path problems, and iterate on gaps
+as they are encountered. Broad API coverage remains desirable, but exhaustive
+per-declaration review, every official sample, all-platform parity and the RP-42
+proof machinery are not prerequisites for an honestly labeled early/partial
+release or personal use. Do not mark RP-42's original full-coverage proof complete
+without meeting it, or describe unverified coverage as complete. Validate each
+advertised platform and state any limitations; publication still needs owner
+approval. Historical task contracts and phase-exit gates below describe the
+ambitious full-coverage objective, not a blocker to practical partial delivery.
 
 **2026-10-21: examples, not manual ports.** In RP-33 to RP-36 and RP-42, "port"
 now means an *original* RackPy example that demonstrates the same feature as

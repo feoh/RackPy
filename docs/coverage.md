@@ -1,5 +1,12 @@
 # API coverage contract
 
+This document defines the evidence needed to claim **complete** coverage, not a
+prerequisite for an honestly labeled early or partial release. The owner has
+prioritized practical plugin development and incremental improvements over
+exhaustive proof; see the [planning amendment](../planning/README.md#owner-amendments).
+The inventory and existing checks remain useful for identifying gaps and must not
+be altered to imply completeness that has not been verified.
+
 ## Establish a denominator before writing bindings
 
 The denominator is the SDK inventory,
