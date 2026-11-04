@@ -291,15 +291,35 @@ jobs:
             ~/.cache/rackpy/spike-inputs
           key: rackpy-host-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json', 'spikes/embedding/inputs.json') }}
       - run: uv sync --frozen
+      - name: Install compiler cache for fast feedback
+        if: github.event_name == 'pull_request' || inputs.fast == true
+        run: sudo apt-get $APT_OPTS install -y --no-install-recommends ccache
+      - name: Restore compiler cache (fast Linux host only)
+        if: github.event_name == 'pull_request' || inputs.fast == true
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rackpy-ccache
+          key: rackpy-ccache-fast-lin-x64-v1-${{ github.sha }}
+          restore-keys: rackpy-ccache-fast-lin-x64-v1-
       - name: Fast production-host smoke (not release evidence)
         if: github.event_name == 'pull_request' || inputs.fast == true
         env:
           RACKPY_TEST_EVIDENCE: ""
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_COMPILERCHECK: content
+          CCACHE_MAXSIZE: 800M
         run: >
           uv run --frozen pytest -m "host and not dist and not sanitizer and not stress" -v --basetemp="$RUNNER_TEMP/pytest"
           tests/hardening/test_security.py
           tests/examples/test_oscillator.py::test_the_plugin_loads_under_its_own_slug_and_keeps_its_patch
           --junitxml=reports/host.xml
+      - name: Compiler cache statistics
+        if: always() && (github.event_name == 'pull_request' || inputs.fast == true)
+        env:
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
+        run: ccache --show-stats
       - name: Full Rack-host suite
         if: github.event_name != 'pull_request' && inputs.fast != true
         run: >
@@ -584,7 +604,7 @@ jobs:
         with:
           msystem: MINGW64
           update: false
-          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-binutils
+          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-binutils mingw-w64-x86_64-ccache
       - name: MINGW64 tools on PATH
         env:
           MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
@@ -609,10 +629,22 @@ jobs:
         run: uv run --script bin/rack-sdk mesa --into "$(uv run --script bin/rack-sdk host win-x64 | tail -1)"
       # These two synthetic coverage-checker suites run in the Linux unit job, not as platform binding evidence.
       # tests/coverage/test_shared_checks.py prevents their accidental use as per-platform manifest/sample evidence.
+      - name: Restore compiler cache (fast Windows host only)
+        if: inputs.fast == true
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rackpy-ccache
+          key: rackpy-ccache-fast-win-x64-v1-${{ github.sha }}
+          restore-keys: rackpy-ccache-fast-win-x64-v1-
       - name: Fast production-host smoke (not release evidence)
         if: inputs.fast == true
         env:
           RACKPY_TEST_EVIDENCE: ""
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_COMPILERCHECK: content
+          CCACHE_MAXSIZE: 800M
           GALLIUM_DRIVER: llvmpipe
           PYTHONUTF8: "1"
           PYTHONUNBUFFERED: "1"
@@ -621,6 +653,11 @@ jobs:
           --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/win-x64.xml
           tests/hardening/test_security.py
           tests/examples/test_oscillator.py::test_the_plugin_loads_under_its_own_slug_and_keeps_its_patch
+      - name: Compiler cache statistics
+        if: always() && inputs.fast == true
+        env:
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
+        run: ccache --show-stats
       - name: Unit, native and Rack host tests
         if: inputs.fast != true
         env:
@@ -672,6 +709,9 @@ jobs:
         with:
           version: ${{ env.UV_VERSION }}
       - run: brew install ninja jq
+      - name: Install compiler cache for fast feedback
+        if: inputs.fast == true
+        run: brew install ccache
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
@@ -680,10 +720,22 @@ jobs:
           key: rackpy-${{ matrix.platform }}-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json') }}
       - run: uv sync --frozen
       # The synthetic checker mutation suites run once in the Linux unit job; real Rack tests stay on each target.
+      - name: Restore compiler cache (fast macOS host only)
+        if: inputs.fast == true
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rackpy-ccache
+          key: rackpy-ccache-fast-${{ matrix.platform }}-v1-${{ github.sha }}
+          restore-keys: rackpy-ccache-fast-${{ matrix.platform }}-v1-
       - name: Fast production-host smoke (not release evidence)
         if: inputs.fast == true
         env:
           RACKPY_TEST_EVIDENCE: ""
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_COMPILERCHECK: content
+          CCACHE_MAXSIZE: 800M
           RACKPY_MACOS_SOFTWARE_GL: "1"
           PYTHONUNBUFFERED: "1"
         run: >
@@ -691,6 +743,11 @@ jobs:
           --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/${{ matrix.platform }}.xml
           tests/hardening/test_security.py
           tests/examples/test_oscillator.py::test_the_plugin_loads_under_its_own_slug_and_keeps_its_patch
+      - name: Compiler cache statistics
+        if: always() && inputs.fast == true
+        env:
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
+        run: ccache --show-stats
       - name: Unit, native and Rack host tests
         if: inputs.fast != true
         env:

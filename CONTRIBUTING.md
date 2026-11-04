@@ -139,9 +139,13 @@ For cross-platform early feedback, dispatch CI with `fast=true`: Linux,
 macOS arm64/x64 and Windows run the same production-host smoke; platform
 inventory and all release-candidate jobs are omitted. The fast host steps do
 not write per-test coverage evidence and cannot establish full coverage, parity
-or release readiness. `macos_tests` and `windows_tests` apply only to a full
-dispatch; do not combine them with `fast=true`. Runtime depends on runner and
-build cache state; no 15–20 minute completion time is promised.
+or release readiness. Fast host builds use separate per-platform ccache stores;
+compiler contents and build flags remain part of the cache key, and each job
+prints cache statistics. A cold cache still needs a full build. Full and
+release-candidate jobs do not use these caches. `macos_tests` and
+`windows_tests` apply only to a full dispatch; do not combine them with
+`fast=true`. Runtime depends on runner and build cache state; no 15–20 minute
+completion time is promised.
 
 [.github/workflows/ci.yml](.github/workflows/ci.yml) runs on pushes to `main`
 and on pull requests, on `ubuntu-24.04`:
