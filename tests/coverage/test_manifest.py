@@ -468,12 +468,18 @@ def test_promotion_needs_an_accepting_verdict_and_passing_evidence(mini: Mini) -
             a: {"verdict": "accept"},
             b: {"verdict": "finding", "finding": "no test of the edge"},
             c: {"verdict": "accept"},
+            d: {"verdict": "accept"},
             "nope": {"verdict": "accept"},
         }
     )
-    promoted, skipped = bm.promote_records(manifest, [doc], {c: ["win-x64"]})
+    promoted, skipped = bm.promote_records(manifest, [doc], {c: ["win-x64"]}, eligible={a, b, c})
     assert promoted == [a]
-    assert skipped == {b: "finding: no test of the edge", c: "evidence fails on win-x64", "nope": "not in the manifest"}
+    assert skipped == {
+        b: "finding: no test of the edge",
+        c: "evidence fails on win-x64",
+        d: "not available on selected target platforms",
+        "nope": "not in the manifest",
+    }
     statuses = {r["id"]: (r["status"], r.get("reviewer")) for r in manifest["entries"]}
     assert statuses[a] == ("verified", "agent-review:r1") and statuses[d][0] == "implemented"
     assert any(p.id == a and p.code == "reviewer" for p in bm.validate(mini.inputs(), manifest, None))

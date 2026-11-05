@@ -885,11 +885,18 @@ def sample_problems(
 
 
 def promote_records(
-    manifest: dict[str, Any], verdicts: list[dict[str, Any]], blocked: dict[str, list[str]]
+    manifest: dict[str, Any],
+    verdicts: list[dict[str, Any]],
+    blocked: dict[str, list[str]],
+    *,
+    eligible: set[str] | None = None,
 ) -> tuple[list[str], dict[str, str]]:
-    """Mark `verified` each implemented record a verdict accepts, naming its reviewer, unless BLOCKED lists
-    platforms where its evidence fails (RP-42 step 6). Returns the promoted IDs and, for every other record a
-    verdict names, why it was not promoted. Nothing else changes."""
+    """Mark accepted implemented records `verified`, naming the reviewer.
+
+    BLOCKED lists selected platforms where evidence fails. ELIGIBLE, when supplied,
+    contains records available on the release's explicitly selected target platforms.
+    Returns promoted IDs and why every other named record was not promoted.
+    """
     records = {r["id"]: r for r in manifest["entries"]}
     promoted: list[str] = []
     skipped: dict[str, str] = {}
@@ -902,6 +909,8 @@ def promote_records(
                 skipped[ident] = "finding: " + verdict["finding"]
             elif record["status"] not in BOUND:
                 skipped[ident] = f"status is {record['status']}"
+            elif eligible is not None and ident not in eligible:
+                skipped[ident] = "not available on selected target platforms"
             elif ident in blocked:
                 skipped[ident] = "evidence fails on " + ", ".join(sorted(blocked[ident]))
             elif record["status"] != "verified":

@@ -31,6 +31,12 @@ full-surface release bar described below.
   evidence, and the candidate's introspection: `bin/rackpy-release introspect` runs one example plugin from the
   platform's release candidate, unchanged but for an added entry module, inside Rack Free, and records what its
   RackPy exports. The CI release-candidate jobs also run `bin/check_coverage.py check` against it.
+- **Targeted promotion.** `bin/release-evidence promote` verifies all four CI platforms by default. Pass
+  `--platforms lin-x64` (or an explicit list) only when the release advertises that narrower target set. A
+  declaration is promoted only if it is available on at least one selected target and its cited tests pass on
+  every selected target where it is available. Other platform evidence remains in the collected reports but
+  does not silently become a support claim; `check_coverage.py release` must still pass for every advertised
+  target.
 - **Shared checker tests.** The synthetic coverage-checker mutation suites run once in the Linux unit job rather
   than on each OS. They are not binding or sample evidence, and a regression test forbids citing them as such.
   Collection reports a release-bar problem, and promotion refuses to run, if that shared job is missing or fails.

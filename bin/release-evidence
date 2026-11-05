@@ -18,9 +18,9 @@ slices   split the implemented records into review slices (by family, then heade
          the owner authorized on 2026-11-01 (planning/README.md): release-evidence/review/slices.json.
 verdicts check reviewers' answers (one fenced json block each) against their slices and write them as
          release-evidence/review/<slice>.verdicts.json.
-promote  mark `verified` the records that reviewers' verdict files accept, where a finished run's evidence
-         passes on every platform each record is available on; bin/check_coverage.py check then needs those
-         verdict files in release-evidence/review/.
+promote  mark `verified` the reviewed records available on the selected target platforms, where a finished
+         run's evidence passes on each selected platform; defaults to every CI platform. Choose only platforms
+         the release actually advertises. `bin/check_coverage.py check` then needs the verdict files in review/.
 """
 
 import contextlib
@@ -273,9 +273,8 @@ def verdicts(answers: list[Path], *, dest: Path = bm.REVIEWS) -> None:
 
 
 @app.command
-def promote(run: int, verdicts: list[Path]) -> None:
-    """Mark verified what VERDICTS (release-evidence/review/*.verdicts.json) accept, where run RUN's evidence passes
-    on every platform each record is available on. Then run bin/generate_bindings.py generate."""
+def promote(run: int, verdicts: list[Path], *, platforms: list[str] | None = None) -> None:
+    """Mark accepted records verified against the selected target platforms (defaults to every CI platform)."""
     info = checked_run(run)
     jobs = {j["name"]: j["conclusion"] for j in info["jobs"]}
     if issues := shared_check_problems(jobs):
@@ -288,16 +287,27 @@ def promote(run: int, verdicts: list[Path]) -> None:
         if errors := bm.review_file_problems(doc):
             raise SystemExit(f"{path}: {'; '.join(errors)}")
         docs.append(doc)
+    selected_platforms = list(TESTS) if platforms is None else platforms
+    if not selected_platforms or len(selected_platforms) != len(set(selected_platforms)):
+        raise SystemExit("--platforms must name one or more distinct CI platforms")
+    unknown_platforms = sorted(set(selected_platforms) - set(TESTS))
+    if unknown_platforms:
+        raise SystemExit(f"unknown --platforms: {', '.join(unknown_platforms)}; choose from {', '.join(TESTS)}")
     inputs = bm.load_inputs()
     manifest: dict[str, Any] = bm.load_json(bm.MANIFEST)
+    eligible = {
+        ident
+        for ident, entry in inputs.index.items()
+        if bm.counted(entry) and any(bm.availability(inputs.inventory, entry)[p] == "yes" for p in selected_platforms)
+    }
     blocked: dict[str, list[str]] = {}
     with tempfile.TemporaryDirectory(prefix="rackpy-promote-") as scratch:
         root = Path(scratch)
         download(run, root)
-        selection_issues = [issue for platform in TESTS for issue in selection_problems(root, platform)]
+        selection_issues = [issue for platform in selected_platforms for issue in selection_problems(root, platform)]
         if selection_issues:
             raise SystemExit("; ".join(issue.message for issue in selection_issues))
-        for platform in TESTS:
+        for platform in selected_platforms:
             try:
                 outcomes = platform_outcomes(root, platform)
             except bm.ManifestError as e:
@@ -305,7 +315,7 @@ def promote(run: int, verdicts: list[Path]) -> None:
             for problem in bm.evidence_problems(inputs, manifest, platform, outcomes)[0]:
                 blocked.setdefault(problem.id, []).append(platform)
     check_checkout(info["headSha"])
-    promoted, skipped = bm.promote_records(manifest, docs, blocked)
+    promoted, skipped = bm.promote_records(manifest, docs, blocked, eligible=eligible)
     bm.MANIFEST.write_text(bm.dumps(manifest), encoding="utf-8", newline="\n")
     for ident, why in sorted(skipped.items()):
         print(f"not promoted: {ident}: {why}")
