@@ -296,8 +296,11 @@ void maintainBridges() noexcept {
 	}
 }
 
+void releaseRequestedProcessMutexGuards() noexcept;
+
 /** Runs Python ports' on_start_stream and on_stop_stream for their queued events. Main thread, UI step. */
 void deliverEvents() noexcept {
+	releaseRequestedProcessMutexGuards();
 	maintainBridges();
 	auto all = ports;
 	for (auto* p : all) {
@@ -448,49 +451,122 @@ struct AudioProcessMutexView {
 	AudioDeviceView device;
 };
 
-struct AudioProcessMutexGuard {
+struct AudioProcessMutexGuardState {
 	AudioDeviceView device;
 	std::unique_lock<std::mutex> lock;
 	a::Device* lockedDevice = nullptr;
 	std::thread::id thread = std::this_thread::get_id();
+	std::atomic<bool> releaseRequested{false};
+};
+thread_local std::vector<std::shared_ptr<AudioProcessMutexGuardState>> processMutexGuardStates;
+bool processMutexGuardCleanupHooked = false;
 
-	AudioProcessMutexGuard(AudioDeviceView view, bool wait) : device(std::move(view)) {
+void releaseProcessMutexGuard(const std::shared_ptr<AudioProcessMutexGuardState>& state) {
+	if (state->thread != std::this_thread::get_id())
+		throw runtime::Ownership("a process-mutex guard must be released on the UI thread that acquired it");
+	if (state->lock.owns_lock()) {
+		forgetProcessMutexGuard(state->lockedDevice);
+		state->lock.unlock();
+		state->lockedDevice = nullptr;
+	}
+	auto it = std::find(processMutexGuardStates.begin(), processMutexGuardStates.end(), state);
+	if (it != processMutexGuardStates.end())
+		processMutexGuardStates.erase(it);
+}
+
+void releaseRequestedProcessMutexGuards() noexcept {
+	py::gil_scoped_acquire gil;
+	for (size_t i = 0; i < processMutexGuardStates.size();) {
+		auto state = processMutexGuardStates[i];
+		if (state->releaseRequested.load(std::memory_order_acquire)) {
+			if (state->lock.owns_lock()) {
+				forgetProcessMutexGuard(state->lockedDevice);
+				state->lock.unlock();
+				state->lockedDevice = nullptr;
+			}
+			processMutexGuardStates.erase(processMutexGuardStates.begin() + static_cast<std::ptrdiff_t>(i));
+		} else {
+			i++;
+		}
+	}
+}
+
+void releaseAllProcessMutexGuards() noexcept {
+	py::gil_scoped_acquire gil;
+	for (const auto& state : processMutexGuardStates) {
+		if (state->thread == std::this_thread::get_id() && state->lock.owns_lock()) {
+			forgetProcessMutexGuard(state->lockedDevice);
+			state->lock.unlock();
+			state->lockedDevice = nullptr;
+		}
+	}
+	processMutexGuardStates.clear();
+}
+
+void ensureProcessMutexGuardCleanup() {
+	if (processMutexGuardCleanupHooked)
+		return;
+	processMutexGuardCleanupHooked = true;
+	runtime::onUiStep([] { releaseRequestedProcessMutexGuards(); });
+	runtime::onContextClosing([] {
+		releaseAllProcessMutexGuards();
+		processMutexGuardCleanupHooked = false;
+	});
+}
+
+struct AudioProcessMutexGuard {
+	std::shared_ptr<AudioProcessMutexGuardState> state;
+
+	AudioProcessMutexGuard(AudioDeviceView view, bool wait) {
 		runtime::requireMainThread("audio Device.process_mutex.acquire");
-		a::Device& d = device.get();
+		ensureProcessMutexGuardCleanup();
+		state = std::make_shared<AudioProcessMutexGuardState>();
+		state->device = std::move(view);
+		a::Device& d = state->device.get();
 		if (wait)
-			lock = lockProcess(d, "acquiring a device's processMutex");
+			state->lock = lockProcess(d, "acquiring a device's processMutex");
 		else {
 			if (processMutexGuardedHere(d))
 				throw runtime::Ownership("a device's processMutex cannot be acquired twice on the same thread");
 			if (drivenHere(d, true))
 				throw runtime::Ownership("acquiring a device's processMutex is refused inside its own process callbacks");
-			lock = std::unique_lock<std::mutex>(d.processMutex, std::try_to_lock);
+			state->lock = std::unique_lock<std::mutex>(d.processMutex, std::try_to_lock);
 		}
-		if (lock.owns_lock()) {
-			lockedDevice = &d;
-			processMutexGuards.push_back(&d);
+		if (state->lock.owns_lock()) {
+			state->lockedDevice = &d;
+			processMutexGuardStates.push_back(state);
+			try {
+				processMutexGuards.push_back(&d);
+			} catch (...) {
+				processMutexGuardStates.pop_back();
+				throw;
+			}
 		}
 	}
 	~AudioProcessMutexGuard() {
-		if (lock.owns_lock() && thread == std::this_thread::get_id())
-			forgetProcessMutexGuard(lockedDevice);
+		if (!state || !state->lock.owns_lock())
+			return;
+		if (state->thread == std::this_thread::get_id())
+			releaseProcessMutexGuard(state);
+		else
+			state->releaseRequested.store(true, std::memory_order_release);
 	}
 	AudioProcessMutexGuard(const AudioProcessMutexGuard&) = delete;
 	AudioProcessMutexGuard& operator=(const AudioProcessMutexGuard&) = delete;
 	AudioProcessMutexGuard(AudioProcessMutexGuard&&) = default;
 	AudioProcessMutexGuard& operator=(AudioProcessMutexGuard&&) = delete;
-	bool ownsLock() const { return lock.owns_lock(); }
+	bool ownsLock() const {
+		checkThread();
+		return state && state->lock.owns_lock();
+	}
 	void checkThread() const {
-		if (thread != std::this_thread::get_id())
+		if (state && state->thread != std::this_thread::get_id())
 			throw runtime::Ownership("a process-mutex guard must be used on the UI thread that acquired it");
 	}
 	void release() {
 		checkThread();
-		if (lock.owns_lock()) {
-			forgetProcessMutexGuard(lockedDevice);
-			lockedDevice = nullptr;
-			lock.unlock();
-		}
+		if (state)
+			releaseProcessMutexGuard(state);
 	}
 };
 

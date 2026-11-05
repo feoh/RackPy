@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // rack::settings -> rackpy.raw.settings (RP-30C). Rack's settings are plain
-// globals that its UI reads and writes on the main thread (and its engine
-// reads some, such as threadCount, unlocked, as Rack's own menus leave them):
-// so RackPy reads and writes them on the main thread only, one property per
-// setting of the `settings` object. Rack saves them when it quits.
+// globals that its UI reads and writes on the main thread; its engine also
+// reads threadCount at each block. RackPy changes threadCount while holding
+// Rack's exclusive engine lock and releases the GIL while waiting. Other
+// properties are read and written on the main thread, one per setting of the
+// `settings` object. Rack saves them when it quits.
 //
 // Two are read-only: Rack sets `headless` and `isPlugin` at start-up and its
 // code assumes them afterwards (a window exists exactly when not headless).
@@ -20,6 +21,7 @@
 
 #include <rack.hpp>
 
+#include "../engine/engine_internal.hpp"
 #include "rackpy/runtime/errors.hpp"
 #include "rackpy/runtime/json.hpp"
 #include "rackpy/runtime/threads.hpp"
@@ -178,8 +180,14 @@ void bindSettings(py::module_ m) {
 		requireMain("changing Rack's settings");
 		if (n < 1)
 			throw py::value_error("Rack's engine needs at least one thread");
-		st::threadCount = n;  // Rack's engine relaunches its workers at its next block
-	}, "Rack's engine threads: its engine reads it at each block.");
+		auto token = runtime::binding().current();
+		if (!token || !token->context->engine)
+			throw runtime::WrongContext("changing Rack's thread count needs its live engine");
+		runtime::refuseEngineReentry("changing Rack's thread count");
+		py::gil_scoped_release release;
+		runtime::EngineLease lease(*token);
+		underEngineLock(*token->context->engine, true, [n] { st::threadCount = n; });
+	}, "Rack's engine threads; changing the count waits for the current block under the engine's exclusive lock.");
 	cls.def_property("plugin_settings", [](const Settings&) -> py::object {
 		requireMain("reading Rack's settings");
 		return st::pluginSettingsJ ? runtime::fromJson(st::pluginSettingsJ) : py::none();

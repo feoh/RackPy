@@ -131,7 +131,7 @@ under Rack's `processMutex`. The `process_mutex` property returns a
 lifetime-checked `ProcessMutex` view: `acquire()` returns an RAII guard, and
 `try_acquire()` returns a guard or `None`. Use the guard as a context manager
 briefly on the UI thread; waiting releases the GIL, and the guard must be used
-and released on that same thread. Do not call Rack operations that need this
+and released on that same thread. If its last Python reference is destroyed on another thread, RackPy defers the unlock to the next UI step; until then the mutex remains held. Keep the guard on its acquiring thread. Do not call Rack operations that need this
 mutex, or run engine/audio callbacks, while holding it: it can block Rack's
 audio-processing path. `subscribe` and `unsubscribe` are Rack's lower-level
 calls, which RackPy undoes with the port.

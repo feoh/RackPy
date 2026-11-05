@@ -2,6 +2,7 @@
 """RP-22F: the laboratory audio driver and device, called by Rack's own audio::Port methods, inside Rack."""
 
 import gc
+import threading
 import weakref
 from typing import Any
 
@@ -185,6 +186,22 @@ def test_device_process_mutex_has_a_lifetime_checked_ui_guard() -> None:
     assert try_guard is not None
     try_guard.release()
     assert not try_guard.owns_lock
+
+    guard = mutex.acquire()
+    held = [guard]
+    del guard
+
+    def drop_guard() -> None:
+        owned = held.pop()
+        del owned
+
+    worker = threading.Thread(target=drop_guard)
+    worker.start()
+    worker.join()
+    _rackpy_host._testing.deliver_audio_events()  # deferred unlock runs on the acquiring UI thread
+    deferred = mutex.try_acquire()
+    assert deferred is not None and deferred.owns_lock
+    deferred.release()
     port.set_device_id(-1)
     with pytest.raises(StaleHandleError):
         mutex.acquire()
