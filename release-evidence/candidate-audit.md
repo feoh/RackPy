@@ -101,12 +101,12 @@ commit does not change these candidate bytes; any eventual publication
 candidate must be rebuilt from its final approved source commit.
 
 The full CI workflow [run 41954139410](https://github.com/feoh/RackPy/actions/runs/41954139410)
-completed successfully on this same source commit. All jobs passed, including
-Linux, macOS arm64/x64 and Windows x64 native/host checks and their candidate
-install/run jobs. This is useful same-commit platform evidence, not a claim of
-platform parity or a reason to advertise macOS/Windows in the proposed Linux
-release; it also does not turn implemented API mappings into independently
-verified coverage.
+completed successfully on earlier source commit
+`7ed3627014c4cc312bff2840d63ce30ef2b10fcb`. All jobs passed, including Linux,
+macOS arm64/x64 and Windows x64 native/host checks and candidate install/run
+jobs. It is useful prior evidence, not validation of the chooser changes or the
+final candidate, not platform parity, and not a reason to advertise macOS or
+Windows in this Linux release.
 
 ## Local Linux candidate with file chooser (2026-11-05; pre-release-doc update)
 
@@ -132,6 +132,29 @@ full API coverage, or macOS/Windows support. The follow-up documentation commit
 records this candidate but does not change its bytes; any public candidate must
 be rebuilt from its final approved source commit.
 
+## GitHub release candidate (2026-11-05)
+
+A fresh build from clean source commit
+`c5269274f08191e453fe478fcdfb067b0fba7180` produced 13 build artifacts (runtime,
+ten plugins, wheel and source) plus `manifest.json` and `SHA256SUMS` (15 files,
+510 MB total) in `/tmp/rackpy-release-c526927/artifacts/`. The manifest records
+`dirty: false`, `lin-x64`, Rack Free 2.6.6 and glibc floor 2.23. The preserved
+[`candidate-linux-x64-c526927/manifest.json`](candidate-linux-x64-c526927/manifest.json)
+and [`SHA256SUMS`](candidate-linux-x64-c526927/SHA256SUMS) identify the 13
+build artifacts and the manifest; the checksum file itself is the 15th upload.
+The binaries remain outside git until attached to the authorized GitHub release.
+
+`bin/rackpy-release verify` passed on Ubuntu 20.04.6 and 16.04.7 in isolated
+containers without system Python and with networking disabled. It verified all
+13 build artifacts plus the manifest against `SHA256SUMS`, all ten plugins,
+patch reopen, windowed Rack rendering,
+interpreter finalization, refusal/error cases, upgrade and uninstall. Logs are
+under `/tmp/rackpy-release-c526927/verify-ubuntu-{20.04,16.04}/`. On this exact
+source, `prek run --all-files`, warning-free Sphinx HTML build, and the release
+and docs integration tests (21 passed) also passed. GitHub's full multi-platform
+workflow is tracked separately below; no cross-platform support is implied by
+this Linux release candidate.
+
 ## Earlier cross-platform CI evidence
 
 GitHub Actions run
@@ -145,18 +168,20 @@ native and host jobs passed.
 
 ## Scope and remaining gates
 
-- This is a **local partial preview**, not a complete supported-public-API
-  implementation and not a public platform-support statement. The coverage
-  report remains authoritative; no full-surface claim is made.
+- This is an **early partial preview**, not complete supported-public-API
+  coverage. The coverage report remains authoritative; no full-surface claim is
+  made. GitHub-only publication is authorized; no PyPI or VCV activity is in
+  scope.
+- The supported preview target is Linux x86_64 with Rack Free 2.6.6. CI evidence
+  for other platforms does not establish platform parity or extend this release's
+  support statement.
 - No controlled performance result or physical audio deadline test is claimed.
   Linux audio-path safety evidence and its limits are in
   [`docs/performance-results.md`](../docs/performance-results.md).
 - The owner approved the proposed facade policy in
   [`docs/reference/api-stability.md`](../docs/reference/api-stability.md); it
   applies from the first public release.
-- Exact-current-commit macOS/Windows packages are not part of this Linux-only
-  preview. No PyPI name reservation is verified; do not upload a placeholder
-  or this private developer wheel.
-- Public publication, tagging, PyPI/GitHub upload, VCV submission, signing and
-  notarization still require separate explicit owner approval. Local testing
-  approval does not grant any of those permissions.
+- Artifacts are unsigned. No signing/notarization, external legal review,
+  physical audio/MIDI hardware test, or published documentation site is claimed.
+- After upload, verify all public bytes against this candidate's hashes and
+  install a downloaded example from the release before closing the release task.
