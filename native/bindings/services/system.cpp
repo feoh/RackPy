@@ -98,10 +98,26 @@ void bindSystem(py::module_ m) {
 		py::gil_scoped_release release;
 		return sy::getEntries(path, depth);
 	}, py::arg("dir_path"), py::arg("depth") = 0, "Rack's: the entries' paths (depth -1 recurses all the way).");
-	m.def("exists", [](py::object p) { return sy::exists(pathArg(p)); }, py::arg("path"));
-	m.def("is_file", [](py::object p) { return sy::isFile(pathArg(p)); }, py::arg("path"));
-	m.def("is_directory", [](py::object p) { return sy::isDirectory(pathArg(p)); }, py::arg("path"));
-	m.def("get_file_size", [](py::object p) { return sy::getFileSize(pathArg(p)); }, py::arg("path"));
+	m.def("exists", [](py::object p) {
+		std::string path = pathArg(p);
+		py::gil_scoped_release release;
+		return sy::exists(path);
+	}, py::arg("path"));
+	m.def("is_file", [](py::object p) {
+		std::string path = pathArg(p);
+		py::gil_scoped_release release;
+		return sy::isFile(path);
+	}, py::arg("path"));
+	m.def("is_directory", [](py::object p) {
+		std::string path = pathArg(p);
+		py::gil_scoped_release release;
+		return sy::isDirectory(path);
+	}, py::arg("path"));
+	m.def("get_file_size", [](py::object p) {
+		std::string path = pathArg(p);
+		py::gil_scoped_release release;
+		return sy::getFileSize(path);
+	}, py::arg("path"));
 	m.def("rename", [](py::object a, py::object b) {
 		std::string src = pathArg(a), dst = pathArg(b);
 		py::gil_scoped_release release;
@@ -112,12 +128,26 @@ void bindSystem(py::module_ m) {
 		py::gil_scoped_release release;
 		return sy::copy(src, dst);
 	}, py::arg("src_path"), py::arg("dest_path"), "Rack's: whether it copied (recursively), overwriting.");
-	m.def("create_directory", [](py::object p) { return sy::createDirectory(pathArg(p)); }, py::arg("path"));
-	m.def("create_directories", [](py::object p) { return sy::createDirectories(pathArg(p)); }, py::arg("path"));
+	m.def("create_directory", [](py::object p) {
+		std::string path = pathArg(p);
+		py::gil_scoped_release release;
+		return sy::createDirectory(path);
+	}, py::arg("path"));
+	m.def("create_directories", [](py::object p) {
+		std::string path = pathArg(p);
+		py::gil_scoped_release release;
+		return sy::createDirectories(path);
+	}, py::arg("path"));
 	m.def("create_symbolic_link", [](py::object target, py::object link) {
-		return sy::createSymbolicLink(pathArg(target), pathArg(link));
+		std::string targetPath = pathArg(target), linkPath = pathArg(link);
+		py::gil_scoped_release release;
+		return sy::createSymbolicLink(targetPath, linkPath);
 	}, py::arg("target"), py::arg("link"));
-	m.def("remove", [](py::object p) { return sy::remove(pathArg(p)); }, py::arg("path"),
+	m.def("remove", [](py::object p) {
+		std::string path = pathArg(p);
+		py::gil_scoped_release release;
+		return sy::remove(path);
+	}, py::arg("path"),
 		"Rack's: removes a file or an empty directory; whether it did.");
 	m.def("remove_recursively", [](py::object p) {
 		std::string path = pathArg(p);
@@ -125,7 +155,11 @@ void bindSystem(py::module_ m) {
 		return sy::removeRecursively(path);
 	}, py::arg("path"), "Rack's: how many files and directories it removed.");
 	m.def("get_working_directory", &sy::getWorkingDirectory);
-	m.def("set_working_directory", [](py::object p) { sy::setWorkingDirectory(pathArg(p)); }, py::arg("path"),
+	m.def("set_working_directory", [](py::object p) {
+		std::string path = pathArg(p);
+		py::gil_scoped_release release;
+		sy::setWorkingDirectory(path);
+	}, py::arg("path"),
 		"Rack's: the process's working directory (Rack's and every plugin's).");
 	m.def("get_temp_directory", &sy::getTempDirectory);
 	m.def("get_absolute", [](py::object p) { return sy::getAbsolute(pathArg(p)); }, py::arg("path"));

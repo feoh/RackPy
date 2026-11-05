@@ -2,13 +2,15 @@
 
 The widget tree, layout and framebuffers, UI controls and menus, Rack's app widgets, SVG resources, the component library and input events.
 
-:::{admonition} Not bound yet
+:::{admonition} Partial bindings; full-coverage obligation remains
 :class: warning
 
-This is the coverage obligation for family 4, not available API. Each row is
-a declaration in the pinned Rack {{rack_version}} SDK that a full-coverage
-release must map to Python ([coverage contract](../../coverage.md)). Totals are in
-the [coverage report](../coverage.md).
+RackPy exposes part of this family's API, but the mapping is not yet complete
+or independently verified for every declaration below. This table is the
+coverage obligation for family 4: each row is a declaration in the pinned Rack
+{{rack_version}} SDK that a full-coverage release must map to Python
+([coverage contract](../../coverage.md)). Totals and current mapping states are
+in the [coverage report](../coverage.md).
 :::
 
 ```{rackpy-surface} 4 widgets/ui/app/componentlibrary
