@@ -32,6 +32,7 @@ MODULES = (
     "rackpy.plugin",
     "rackpy.assets",
     "rackpy.audio",
+    "rackpy.dialog",
     "rackpy.midi",
     "rackpy.services",
     "rackpy.services.network",
