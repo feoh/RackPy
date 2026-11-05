@@ -20,6 +20,10 @@ package version.
   hearing the oscillator in a manual Rack Pro 2.6.6 smoke; this is not a broad
   compatibility or performance claim. See the
   [`candidate audit`](release-evidence/candidate-audit.md).
+- Added `rackpy.dialog` for selecting files and directories through Rack's native
+  UI chooser, with cancellation, filters and save-name support. It is UI-thread
+  only and returns a path; it never reads, executes or deserializes the selection.
+  See [`docs/how-to/choose-files.md`](docs/how-to/choose-files.md).
 - Documented Linux production audio-path/lifecycle safety evidence and its
   limitations in [`docs/performance-results.md`](docs/performance-results.md).
 - Coverage remains incomplete and explicitly partial. Controlled performance
