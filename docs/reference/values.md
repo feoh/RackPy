@@ -74,7 +74,7 @@ it in C++ would crash or hang Rack:
 | --- | --- | --- |
 | `euc_mod`, `euc_div`, `euc_div_mod` (int) | `b` must be positive | `ValueError` |
 | `log2` | (a negative `n` loops forever) | `ValueError` for `n < 0` |
-| `interpolate_linear(p, x)` | `p` must have `floor(x) + 2` values | `IndexError`, also for NaN `x` or `x <= -1` (Rack truncates `x` toward 0, so `x` in (-1, 0) extrapolates from `p[0]` and `p[1]`) |
+| `interpolate_linear(p, x)` | `p` must have `trunc(x) + 2` values | `IndexError`, also for NaN `x` or `x <= -1` (Rack truncates `x` toward 0, so `x` in (-1, 0) needs two values and extrapolates from `p[0]` and `p[1]`) |
 
 Out-parameters become return values: `euc_div_mod(-7, 3)` is `(-3, 2)` and
 `complex_mult(ar, ai, br, bi)` returns `(cr, ci)`. `interpolate_linear` copies

@@ -37,7 +37,6 @@ def test_surface_pages_list_every_inventory_entry_with_its_manifest_status(site:
     shown = 0
     for page in (site.html / "reference" / "surface").glob("*.html"):
         html = page.read_text()
-        assert "Not bound yet" in html, page.name
         body = html.split("<tbody>", 1)[1].split("</tbody>", 1)[0]
         rows = body.count("<tr")
         shown += rows

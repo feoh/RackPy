@@ -90,6 +90,12 @@ RackPy module as the master: it then advances the engine by that many frames
 (1 to 65536), and Rack's own thread waits. Rack serializes it with any other
 stepping.
 
+`set_master_module(module)` accepts only a checked module handle that is
+already in this engine (or `None`), including in the `_no_lock` form. Rack's
+C++ method accepts a raw `Module*`; RackPy narrows that contract so it cannot
+store a detached or foreign module pointer as the engine's master. `None`
+restores Rack's own thread as the master.
+
 `get_sample_rate`, `get_sample_time`, `get_frame`, `get_block`,
 `get_block_frame`, `get_block_time`, `get_block_frames`,
 `get_block_duration`, `get_meter_average` and `get_meter_max` are Rack's

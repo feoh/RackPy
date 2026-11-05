@@ -87,7 +87,7 @@ def test_raw_engine_prepare_save_dispatches_module_events() -> None:
 
     def configure(module: Module) -> None:
         module.config(0, 0, 0, 0)
-        module.set_event_handlers(on_save=seen.append)
+        module.set_event_handlers(on_save=seen.append, on_randomize=seen.append)
 
     module = Module.create(configure)
     HOOKS.engine_adopt(module)
@@ -98,6 +98,8 @@ def test_raw_engine_prepare_save_dispatches_module_events() -> None:
         assert len(seen) == 1 and isinstance(seen[0], Module.SaveEvent)
         context.engine.prepare_save()
         assert len(seen) == 2 and isinstance(seen[1], Module.SaveEvent)
+        context.engine.randomize_module(module)
+        assert len(seen) == 3 and isinstance(seen[2], Module.RandomizeEvent)
     finally:
         HOOKS.engine_delete(module, None)
 

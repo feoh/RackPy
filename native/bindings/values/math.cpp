@@ -146,7 +146,7 @@ void bindMath(py::module_ raw) {
 		// (which is undefined for large x), so a bad index cannot read past the array. Rack truncates x toward 0, so
 		// x in (-1, 0) reads p[0] and p[1] and extrapolates (RP-42: it was refused); x <= -1 would read p[-1].
 		if (p.size() < 2 || !(x > -1.f) || !(x < (float) (p.size() - 1)))
-			throw py::index_error("interpolate_linear: p must have at least floor(x) + 2 values, and x must be > -1");
+			throw py::index_error("interpolate_linear: p must have at least trunc(x) + 2 values, and x must be > -1");
 		return rack::math::interpolateLinear(p.data(), x);
 	}, py::arg("p"), py::arg("x"), "Linearly interpolates the sequence p at index x. p is copied; it is not modified.");
 	m.def("complex_mult", [](float ar, float ai, float br, float bi) {

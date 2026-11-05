@@ -67,7 +67,7 @@ def test_preconditions_rack_only_documents_are_checked() -> None:
         m.log2(-1)
     assert m.log2(0) == 0 and m.log2(1) == 0 and m.log2(1024) == 10
     with pytest.raises(IndexError):
-        m.interpolate_linear([1.0, 2.0], 1.0)  # needs floor(x) + 2 values
+        m.interpolate_linear([1.0, 2.0], 1.0)  # needs trunc(x) + 2 values
     # Rack truncates x toward 0: in (-1, 0) it reads p[0] and p[1] and extrapolates (RP-42); at -1 it would read p[-1].
     assert m.interpolate_linear([1.0, 3.0], -0.5) == 0.0
     with pytest.raises(IndexError):
