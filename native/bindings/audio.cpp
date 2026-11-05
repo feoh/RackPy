@@ -544,12 +544,15 @@ struct AudioProcessMutexGuard {
 		}
 	}
 	~AudioProcessMutexGuard() {
-		if (!state || !state->lock.owns_lock())
+		if (!state)
 			return;
-		if (state->thread == std::this_thread::get_id())
-			releaseProcessMutexGuard(state);
-		else
+		if (state->thread != std::this_thread::get_id()) {
+			// The acquiring UI thread alone may inspect or mutate the unique_lock.
 			state->releaseRequested.store(true, std::memory_order_release);
+			return;
+		}
+		if (state->lock.owns_lock())
+			releaseProcessMutexGuard(state);
 	}
 	AudioProcessMutexGuard(const AudioProcessMutexGuard&) = delete;
 	AudioProcessMutexGuard& operator=(const AudioProcessMutexGuard&) = delete;
