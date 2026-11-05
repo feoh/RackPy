@@ -185,6 +185,36 @@ pull-request gate. Measure repeated timings and failures before optimizing
 particular jobs; a hypothetical 15-hour suite or flaky test is not an observed
 fact here.
 
+### Fast-lane measurements (2026-11-05)
+
+The fast lane (`fast=true` dispatch, and pull requests for Linux) was changed three
+ways: compiler caches for fast host and native builds, one parse of each cited test
+file in the manifest check, and the documentation checks split across runners. All
+runs below are `workflow_dispatch` with `fast=true` on branch `rp42`; wall time is
+from the run's creation to its last job.
+
+| Run | Commit | Cache | Wall time | Longest job |
+| --- | --- | --- | --- | --- |
+| [41919903920](https://github.com/feoh/RackPy/actions/runs/41919903920) | `e099c09` | none | 39 min 43 s | Windows host, 33 min 55 s |
+| [41937530408](https://github.com/feoh/RackPy/actions/runs/41937530408) | `1bc1093` | host caches warm, native cache cold | 24 min 43 s (the run failed only on the external link check, rate limited with HTTP 429, since removed from fast dispatch) | native build, 24 min 38 s |
+| [41946080091](https://github.com/feoh/RackPy/actions/runs/41946080091) | `4a120a0` | warm | 10 min 36 s | hooks and unit tests, 10 min 31 s |
+| [41947778257](https://github.com/feoh/RackPy/actions/runs/41947778257) | `71eee0f` | warm | 7 min 47 s | docs shard, 7 min 42 s |
+| [41949649812](https://github.com/feoh/RackPy/actions/runs/41949649812) | `d3c45ea` | warm | 3 min 34 s | Windows host, 3 min 29 s |
+
+What the numbers do and do not show:
+
+- A **cold** cache still pays for the full build (heavy binding sources compile at
+  most two at a time on a 16 GB runner; cold fast runs took 22 to 35 minutes per
+  platform). The warm figures apply only when the compiler cache restores; ccache hit
+  rates in the warm host jobs were 65 to 66 percent of cacheable calls.
+- The 12 s per-test cost in `tests/coverage/` was 9.5 s of repeated `ast.parse`; the
+  unit suite went from 331 s to 30 s locally, with the same 265 tests passing.
+- The fast lane omits per-test coverage evidence, release candidates, platform
+  inventory and the external link check. It is not release evidence and does not
+  replace the full dispatch or `main` runs.
+- Runner queue time varies (one earlier macOS arm64 job waited 16 minutes) and is
+  outside these numbers. Each row is one run, not a distribution.
+
 The exact local preview's checksums, container checks and caveats are in the
 [candidate audit](../release-evidence/candidate-audit.md). The owner-reported
 headphone smoke is recorded on RP-44 in live Witan. Neither replaces testing the
