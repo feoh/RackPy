@@ -194,11 +194,11 @@ jobs:
         run: bin/rack-sdk closure
       - name: rack.hpp-only probe builds with the SDK's plugin.mk
         run: bin/rack-sdk probe
-      - name: Install compiler cache for fast native feedback
-        if: github.event_name == 'pull_request' || inputs.fast == true
+      # The compiler cache covers only these test builds (the dev and sanitizer builds, never a release
+      # candidate): ccache replays compiler output keyed on the compiler's contents, flags and sources.
+      - name: Install compiler cache
         run: sudo apt-get $APT_OPTS install -y --no-install-recommends ccache
-      - name: Restore compiler cache (fast native only)
-        if: github.event_name == 'pull_request' || inputs.fast == true
+      - name: Restore compiler cache (native test builds)
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/rackpy-native-ccache
@@ -216,15 +216,21 @@ jobs:
         run: >
           uv run --frozen pytest -m "native and not host and not sanitizer and not stress" -v
           --basetemp="$RUNNER_TEMP/native-pytest" --junitxml=reports/native.xml
+      - name: Native build (warnings as errors), CTest, inspection, setup errors, audio-path guard
+        if: github.event_name != 'pull_request' && inputs.fast != true
+        env:
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-native-ccache
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_COMPILERCHECK: content
+          CCACHE_MAXSIZE: 800M
+        run: uv run --frozen pytest -m "native and not host and not sanitizer and not stress" -v --junitxml=reports/native.xml
       - name: Native compiler cache statistics
-        if: always() && (github.event_name == 'pull_request' || inputs.fast == true)
+        if: always()
         env:
           CCACHE_DIR: ${{ runner.temp }}/rackpy-native-ccache
           CCACHE_MAXSIZE: 800M
         run: ccache --show-stats
-      - name: Native build (warnings as errors), CTest, inspection, setup errors, audio-path guard
-        if: github.event_name != 'pull_request' && inputs.fast != true
-        run: uv run --frozen pytest -m "native and not host and not sanitizer and not stress" -v --junitxml=reports/native.xml
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -353,11 +359,11 @@ jobs:
             ~/.cache/rackpy/spike-inputs
           key: rackpy-host-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json', 'spikes/embedding/inputs.json') }}
       - run: uv sync --frozen
-      - name: Install compiler cache for fast feedback
-        if: github.event_name == 'pull_request' || inputs.fast == true
+      # The compiler cache covers only the host tests' own builds (production and test-hooks), never a release
+      # candidate. The fast and full suites build the same trees, so they share one cache.
+      - name: Install compiler cache
         run: sudo apt-get $APT_OPTS install -y --no-install-recommends ccache
-      - name: Restore compiler cache (fast Linux host only)
-        if: github.event_name == 'pull_request' || inputs.fast == true
+      - name: Restore compiler cache (Linux host test builds)
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/rackpy-ccache
@@ -377,16 +383,22 @@ jobs:
           tests/hardening/test_security.py
           tests/examples/test_oscillator.py::test_the_plugin_loads_under_its_own_slug_and_keeps_its_patch
           --junitxml=reports/host.xml
-      - name: Compiler cache statistics
-        if: always() && (github.event_name == 'pull_request' || inputs.fast == true)
-        env:
-          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
-        run: ccache --show-stats
       - name: Full Rack-host suite
         if: github.event_name != 'pull_request' && inputs.fast != true
+        env:
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_COMPILERCHECK: content
+          CCACHE_MAXSIZE: 800M
         run: >
           uv run --frozen pytest -m "host and not dist and not sanitizer and not stress" -v --basetemp="$RUNNER_TEMP/pytest"
           --junitxml=reports/host.xml
+      - name: Compiler cache statistics
+        if: always()
+        env:
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
+        run: ccache --show-stats
       - if: always()
         name: Collect Rack logs
         run: |
@@ -691,8 +703,8 @@ jobs:
         run: uv run --script bin/rack-sdk mesa --into "$(uv run --script bin/rack-sdk host win-x64 | tail -1)"
       # These two synthetic coverage-checker suites run in the Linux unit job, not as platform binding evidence.
       # tests/coverage/test_shared_checks.py prevents their accidental use as per-platform manifest/sample evidence.
-      - name: Restore compiler cache (fast Windows host only)
-        if: inputs.fast == true
+      # The compiler cache covers only the tests' own builds, never a release candidate; fast and full runs share it.
+      - name: Restore compiler cache (Windows host test builds)
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/rackpy-ccache
@@ -715,15 +727,15 @@ jobs:
           --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/win-x64.xml
           tests/hardening/test_security.py
           tests/examples/test_oscillator.py::test_the_plugin_loads_under_its_own_slug_and_keeps_its_patch
-      - name: Compiler cache statistics
-        if: always() && inputs.fast == true
-        env:
-          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
-        run: ccache --show-stats
       - name: Unit, native and Rack host tests
         if: inputs.fast != true
         env:
           WINDOWS_TESTS: ${{ inputs.windows_tests }}  # through the environment, never into the script's text
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_COMPILERCHECK: content
+          CCACHE_MAXSIZE: 800M
           GALLIUM_DRIVER: llvmpipe  # Mesa's CPU renderer, not its Direct3D 12 driver
           # The tests read Rack's UTF-8 files with Python's default encoding, which on Windows is the ANSI code
           # page unless Python's UTF-8 mode is on (inside Rack, RackPy turns it on itself).
@@ -736,6 +748,11 @@ jobs:
             ${WINDOWS_TESTS:+-k "$WINDOWS_TESTS"} \
             --ignore=tests/coverage/test_mutations.py --ignore=tests/coverage/test_release_mutations.py \
             -v -s -o faulthandler_timeout=120 --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/win-x64.xml
+      - name: Compiler cache statistics
+        if: always()
+        env:
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
+        run: ccache --show-stats
       - if: always()
         name: Collect Rack logs
         run: |
@@ -771,8 +788,7 @@ jobs:
         with:
           version: ${{ env.UV_VERSION }}
       - run: brew install ninja jq
-      - name: Install compiler cache for fast feedback
-        if: inputs.fast == true
+      - name: Install compiler cache
         run: brew install ccache
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -782,8 +798,8 @@ jobs:
           key: rackpy-${{ matrix.platform }}-inputs-${{ hashFiles('upstream/versions.json', 'packaging/inputs.json') }}
       - run: uv sync --frozen
       # The synthetic checker mutation suites run once in the Linux unit job; real Rack tests stay on each target.
-      - name: Restore compiler cache (fast macOS host only)
-        if: inputs.fast == true
+      # The compiler cache covers only the tests' own builds, never a release candidate; fast and full runs share it.
+      - name: Restore compiler cache (macOS host test builds)
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/rackpy-ccache
@@ -805,15 +821,15 @@ jobs:
           --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/${{ matrix.platform }}.xml
           tests/hardening/test_security.py
           tests/examples/test_oscillator.py::test_the_plugin_loads_under_its_own_slug_and_keeps_its_patch
-      - name: Compiler cache statistics
-        if: always() && inputs.fast == true
-        env:
-          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
-        run: ccache --show-stats
       - name: Unit, native and Rack host tests
         if: inputs.fast != true
         env:
           MACOS_TESTS: ${{ inputs.macos_tests }}  # through the environment, never into the script's text
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_COMPILERCHECK: content
+          CCACHE_MAXSIZE: 800M
           # GitHub-hosted macOS runners have no GPU, and Rack's GLFW asks only for accelerated pixel formats
           # (GLFW 65545). A test-only plugin lets Rack's window use Apple's software OpenGL instead, as Linux CI
           # renders with Mesa (tests/fixtures/macos-software-gl, RP-42). Drawing on a Mac's GPU stays an open gate.
@@ -826,6 +842,11 @@ jobs:
             ${MACOS_TESTS:+-k "$MACOS_TESTS"} \
             --ignore=tests/coverage/test_mutations.py --ignore=tests/coverage/test_release_mutations.py \
             -v -s -o faulthandler_timeout=120 --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/${{ matrix.platform }}.xml
+      - name: Compiler cache statistics
+        if: always()
+        env:
+          CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
+        run: ccache --show-stats
       - if: always()
         name: Collect Rack logs
         run: |
