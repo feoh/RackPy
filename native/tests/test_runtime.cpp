@@ -7,8 +7,10 @@
 
 #include <atomic>
 #include <chrono>
+#include <condition_variable>
 #include <cstdio>
 #include <functional>
+#include <mutex>
 #include <set>
 #include <string>
 #include <thread>
@@ -125,20 +127,50 @@ void testBinding() {
 	CHECK(binding.refusedContexts() == 2);
 	CHECK(binding.current() == token);
 
-	// A Python thread holds an engine lease; close() waits for it before marking the context dead.
-	std::atomic<bool> holding{false};
+	// A Python thread holds an engine lease; close() must wait for its explicit release.
+	std::mutex gateMutex;
+	std::condition_variable gate;
+	bool holding = false;
+	bool release = false;
+	bool closeStarted = false;
+	bool closeFinished = false;
 	std::thread holder([&] {
 		EngineLease lease(*token);
-		holding.store(true);
-		std::this_thread::sleep_for(std::chrono::milliseconds(60));
+		{
+			std::lock_guard<std::mutex> lock(gateMutex);
+			holding = true;
+		}
+		gate.notify_all();
+		std::unique_lock<std::mutex> lock(gateMutex);
+		gate.wait(lock, [&] { return release; });
 	});
-	while (!holding.load())
-		std::this_thread::yield();
-	auto t0 = std::chrono::steady_clock::now();
-	binding.close();
-	double waited = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+	{
+		std::unique_lock<std::mutex> lock(gateMutex);
+		gate.wait(lock, [&] { return holding; });
+	}
+	std::thread closer([&] {
+		{
+			std::lock_guard<std::mutex> lock(gateMutex);
+			closeStarted = true;
+		}
+		gate.notify_all();
+		binding.close();
+		{
+			std::lock_guard<std::mutex> lock(gateMutex);
+			closeFinished = true;
+		}
+		gate.notify_all();
+	});
+	{
+		std::unique_lock<std::mutex> lock(gateMutex);
+		gate.wait(lock, [&] { return closeStarted; });
+		CHECK(!gate.wait_for(lock, std::chrono::milliseconds(20), [&] { return closeFinished; }));
+		release = true;
+	}
+	gate.notify_all();
 	holder.join();
-	CHECK(waited >= 40);
+	closer.join();
+	CHECK(closeFinished);
 	CHECK(!token->alive());
 	CHECK(!binding.current());
 	binding.close();  // idempotent
