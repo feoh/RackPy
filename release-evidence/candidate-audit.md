@@ -108,6 +108,30 @@ platform parity or a reason to advertise macOS/Windows in the proposed Linux
 release; it also does not turn implemented API mappings into independently
 verified coverage.
 
+## Current local Linux candidate (2026-11-05)
+
+A clean local build from commit
+`78c42531af9bbfe92e0104045770ffed5c4fd946` produced 13 artifacts as
+`0.1.0.dev1+g78c42531a`, in
+`/tmp/rackpy-preview-78c4253/artifacts/`. The committed
+[`candidate-linux-x64-78c4253/manifest.json`](candidate-linux-x64-78c4253/manifest.json)
+and [`SHA256SUMS`](candidate-linux-x64-78c4253/SHA256SUMS) identify the
+artifacts; binaries remain outside git. The manifest records `dirty: false`,
+`lin-x64`, and glibc floor 2.23.
+
+`bin/rackpy-release verify` passed on Ubuntu 16.04.7 (glibc 2.23) and Ubuntu
+20.04.6 (glibc 2.31), in offline containers without system Python. Both runs
+checked hashes, all ten plugins, patch reopen, windowed Rack rendering,
+interpreter finalization, refusal/error cases, upgrade and uninstall. Logs are
+under `/tmp/rackpy-preview-78c4253/verify-ubuntu-{16.04,20.04}/`. The new
+`rackpy.dialog` chooser itself passed its focused in-Rack interposer test on
+this source branch: open/save/directory actions, filters, default save name,
+selection and cancellation. This candidate is still local-only evidence; it
+does not approve publication or establish physical-device behavior, performance,
+full API coverage, or macOS/Windows support. The follow-up documentation commit
+records this candidate but does not change its bytes; any public candidate must
+be rebuilt from its final approved source commit.
+
 ## Earlier cross-platform CI evidence
 
 GitHub Actions run
