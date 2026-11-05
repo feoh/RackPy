@@ -115,16 +115,18 @@ def test_shutdown_runs_in_the_documented_order(windowed: RackRun) -> None:
         "deliberate failure in a closing hook",
         "WORKER polite joined after",
         "RackPy context closed; handles to it are now stale",
-        "WORKER careless saw StaleHandleError",
         "Deleting engine",
         "RackPy interpreter finalized: Py_FinalizeEx returned 0",
     ]
     positions = [log.find(marker) for marker in order]
     assert all(p >= 0 for p in positions), dict(zip(order, positions, strict=True))
-    # The careless worker may notice the closed context before or after Rack deletes the engine,
-    # but always after the context closed; every other step is strictly ordered.
-    strict = [p for i, p in enumerate(positions) if order[i] != "WORKER careless saw StaleHandleError"]
-    assert strict == sorted(strict), dict(zip(order, positions, strict=True))
+    # The careless worker is an unjoined daemon, so Rack may finalize Python before it runs again.
+    # If it logs its stale-handle observation, it must be after the context closed; no log is
+    # required if teardown wins the scheduling race. Every other step is strictly ordered.
+    careless = log.find("WORKER careless saw StaleHandleError")
+    if careless >= 0:
+        assert careless > positions[4]
+    assert positions == sorted(positions)
     assert positions[4] > positions[3]
 
 
