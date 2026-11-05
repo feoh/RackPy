@@ -24,6 +24,7 @@ The owner amendments below take precedence over historical delivery gates.
 - [RP-26 bounded implementation slices](rp-26-slices.md) (supplements the original graph)
 - [RP-27 bounded implementation slices](rp-27-slices.md) (supplements the original graph)
 - [RP-28 bounded implementation slices](rp-28-slices.md) (supplements the original graph)
+- [Permissively licensed Rack plugins for future RackPy examples](permissive-plugin-examples.md) (research shortlist; no implementation or redistribution approval)
 
 Witan is authoritative for live task status, ownership, comments and blockers.
 Git holds a durable copy of task scope; status is deliberately not frozen into
