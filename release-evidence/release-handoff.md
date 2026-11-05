@@ -44,11 +44,11 @@ Verified, with the command or log:
   `pack`) produced a module that Rack Free 2.6.6 loaded and whose patch reopened
   ([candidate audit](candidate-audit.md)). That ran against the earlier `52526e83`
   runtime, not these bytes.
-- The 265 unit tests passed on an earlier `rp42` commit (`pytest -m unit`,
-  5 min 30 s); on the candidate source, the sample-disposition tests passed
-  (76) and the template unit tests passed (7). These focused local tests are
-  not a replacement for the full unit/native/host CI on this commit, which is
-  still running.
+- On the candidate source, the sample-disposition tests passed (76) and the
+  template unit tests passed (7). Full CI run
+  [41954139410](https://github.com/feoh/RackPy/actions/runs/41954139410)
+  completed successfully on the exact candidate source commit, including the
+  Linux unit/native/host checks and all platform candidate workflows.
 - Licence texts and third-party notices ship inside each package; the manifest lists
   17 third-party components.
 - You heard the earlier oscillator candidate through headphones in Rack Pro 2.6.6.
@@ -56,8 +56,10 @@ Verified, with the command or log:
 
 Not verified:
 
-- Any macOS or Windows candidate of this commit (earlier-commit CI evidence exists and
-  is described in the audit). The release would not advertise them.
+- The local Linux artifact checksums do not describe separately built macOS or
+  Windows bytes. Full CI did build and exercise candidates on macOS arm64/x64
+  and Windows x64 at source commit `7ed3627`, but those platforms are not part of
+  this proposed Linux-only release.
 - Coverage: 3,098 declarations are **implemented** on Linux; **none are marked
   verified**. The release must say bindings exist for the inventoried surface, with
   independent verification outstanding. It must not say "full coverage".

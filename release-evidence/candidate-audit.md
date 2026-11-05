@@ -100,6 +100,14 @@ behavior or performance, or claim full API coverage. The later audit-document
 commit does not change these candidate bytes; any eventual publication
 candidate must be rebuilt from its final approved source commit.
 
+The full CI workflow [run 41954139410](https://github.com/feoh/RackPy/actions/runs/41954139410)
+completed successfully on this same source commit. All jobs passed, including
+Linux, macOS arm64/x64 and Windows x64 native/host checks and their candidate
+install/run jobs. This is useful same-commit platform evidence, not a claim of
+platform parity or a reason to advertise macOS/Windows in the proposed Linux
+release; it also does not turn implemented API mappings into independently
+verified coverage.
+
 ## Earlier cross-platform CI evidence
 
 GitHub Actions run
