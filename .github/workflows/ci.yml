@@ -129,8 +129,8 @@ jobs:
 
   docs-links:
     name: Documentation external links
-    # External sites must not block pull requests; this runs weekly and on demand.
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    # External sites must not block fast feedback; run weekly and on ordinary dispatch.
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.fast != true)
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:

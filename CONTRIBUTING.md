@@ -159,7 +159,7 @@ and on pull requests, on `ubuntu-24.04`:
 | SDK pins, native build and audio-path guard | `bin/rack-sdk verify`, `closure`, `probe`; `pytest -m "native and not host"` |
 | SDK inventory | `pytest -m inventory` with LLVM 21 from apt.llvm.org; see below |
 | Documentation site | `sphinx-build -W` and `pytest -m "docs and not host"`, split across three jobs; keeps the HTML and per-shard reports |
-| Documentation external links (weekly and on demand) | `sphinx-build -b linkcheck` |
+| Documentation external links (weekly and ordinary dispatch, not fast dispatch) | `sphinx-build -b linkcheck` |
 | Rack host smoke tests | Pull requests and fast dispatch: production-host security and oscillator load/patch smoke. Full dispatch/main: `pytest -m "host and not dist"`, including docs snippets, the RP-04 spike and the RP-06 probe |
 | Distributable build (pushes to `main` and on demand) | builds or restores the official toolchain, then `pytest -m dist` |
 | SDK inventory on mac-arm64, mac-x64 and win-x64 (pushes to `main` and on demand) | `bin/inventory_sdk.py platform-check`: each platform's SDK extracted natively and compared with the committed inventory |

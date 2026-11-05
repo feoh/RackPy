@@ -62,6 +62,20 @@ candidate/runtime and tool version work together; it does not validate newer
 candidate binaries, interactive rendering, generated audio, upgrade behavior,
 or another operating system.
 
+## Later local Linux candidate (2026-11-05)
+
+A second local-only build from clean commit
+`1bc1093d24c28ba3169bd5eaa325252e433fe8c7` produced 13 artifacts as
+`0.1.0.dev1+g1bc1093d2`, with its own manifest and `SHA256SUMS`, in
+`/tmp/rackpy-preview-1bc1093/artifacts/`. It does not replace the exact
+candidate or checksums above. Using Rack Free 2.6.6, the Ubuntu 16.04.7
+container verification passed artifact checksums, all ten examples, patch
+reopen, windowed smokes, error/refusal cases, upgrade and uninstall, with no
+system Python or network. Logs are in
+`/tmp/rackpy-preview-1bc1093/verify-ubuntu-16.04/`. This is local Linux
+container evidence, not a physical-device test, public release approval, or
+validation of a subsequent source commit.
+
 ## Earlier cross-platform CI evidence
 
 GitHub Actions run
