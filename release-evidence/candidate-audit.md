@@ -3,8 +3,8 @@
 The first candidate was approved for local testing on 2026-11-04. On
 2026-11-05 the owner separately authorized a GitHub-only pre-release with all
 ten example plugins. No PyPI upload, VCV submission or docs-site publication is
-in scope. This audit records successive local candidates; the final tagged
-source and public bytes must be called out below after publication.
+in scope. The GitHub pre-release and its downloaded public bytes are recorded
+below; the local candidates remain as history.
 
 ## Initial local candidate (historical)
 
@@ -132,28 +132,35 @@ full API coverage, or macOS/Windows support. The follow-up documentation commit
 records this candidate but does not change its bytes; any public candidate must
 be rebuilt from its final approved source commit.
 
-## GitHub release candidate (2026-11-05)
+## Published GitHub pre-release (2026-11-05)
 
 A fresh build from clean source commit
 `c5269274f08191e453fe478fcdfb067b0fba7180` produced 13 build artifacts (runtime,
 ten plugins, wheel and source) plus `manifest.json` and `SHA256SUMS` (15 files,
-510 MB total) in `/tmp/rackpy-release-c526927/artifacts/`. The manifest records
-`dirty: false`, `lin-x64`, Rack Free 2.6.6 and glibc floor 2.23. The preserved
+510 MB total). The manifest records `dirty: false`, `lin-x64`, Rack Free 2.6.6
+and glibc floor 2.23. The preserved
 [`candidate-linux-x64-c526927/manifest.json`](candidate-linux-x64-c526927/manifest.json)
-and [`SHA256SUMS`](candidate-linux-x64-c526927/SHA256SUMS) identify the 13
-build artifacts and the manifest; the checksum file itself is the 15th upload.
-The binaries remain outside git until attached to the authorized GitHub release.
+and [`SHA256SUMS`](candidate-linux-x64-c526927/SHA256SUMS) identify the build
+artifacts and manifest; the checksum file is the final attached file. All 15
+files are published as the pre-release [`v0.1.0.dev1`](https://github.com/feoh/RackPy/releases/tag/v0.1.0.dev1),
+targeting this exact source commit. Binaries are not committed to git.
 
-`bin/rackpy-release verify` passed on Ubuntu 20.04.6 and 16.04.7 in isolated
-containers without system Python and with networking disabled. It verified all
-13 build artifacts plus the manifest against `SHA256SUMS`, all ten plugins,
-patch reopen, windowed Rack rendering,
-interpreter finalization, refusal/error cases, upgrade and uninstall. Logs are
-under `/tmp/rackpy-release-c526927/verify-ubuntu-{20.04,16.04}/`. On this exact
-source, `prek run --all-files`, warning-free Sphinx HTML build, and the release
-and docs integration tests (21 passed) also passed. GitHub's full multi-platform
-workflow is tracked separately below; no cross-platform support is implied by
-this Linux release candidate.
+After download from GitHub, `sha256sum -c SHA256SUMS` verified every listed
+build artifact and manifest. `bin/rackpy-release verify` passed against the
+downloaded public assets on Ubuntu 20.04.6 in an isolated container without
+system Python and with networking disabled. It checked all ten plugins, patch
+reopen, windowed Rack rendering, interpreter finalization, refusal/error cases,
+upgrade and uninstall. The public-download run is logged at
+`/tmp/rackpy-release-c526927/verify-public-ubuntu-20.04/`; the pre-upload checks
+also passed on Ubuntu 16.04.7 (glibc 2.23). On source commit `c526927`,
+`prek run --all-files`, warning-free Sphinx HTML build, and release/docs
+integration tests (21 passed) passed.
+
+Full GitHub Actions run
+[42022956074](https://github.com/feoh/RackPy/actions/runs/42022956074) completed
+successfully on chooser-bearing source commit `78c42531af9bbfe92e0104045770ffed5c4fd946`.
+The tagged source `c526927` adds release-facing documentation and was validated
+locally; no cross-platform support is implied by this Linux release.
 
 ## Earlier cross-platform CI evidence
 
@@ -183,5 +190,6 @@ native and host jobs passed.
   applies from the first public release.
 - Artifacts are unsigned. No signing/notarization, external legal review,
   physical audio/MIDI hardware test, or published documentation site is claimed.
-- After upload, verify all public bytes against this candidate's hashes and
-  install a downloaded example from the release before closing the release task.
+- Post-upload verification is complete: all 15 public files were downloaded,
+  all listed checksums matched, and the ten example plugins passed the release
+  verification suite from the downloaded public assets on Ubuntu 20.04.6.
