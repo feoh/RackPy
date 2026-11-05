@@ -92,13 +92,32 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Every shard that builds a site takes about two minutes, so each one gets its own runner. The site-build
+        # shard only builds and keeps the HTML; an empty selection skips pytest. The selections partition the
+        # docs tests: each runs in exactly one shard (checked when this list changes).
         include:
-          - shard: site
-            selection: "not test_mistakes_fail_the_build"
-          - shard: broken-links
-            selection: "test_mistakes_fail_the_build and (page or anchor or repository-file or unlabelled-python)"
-          - shard: broken-content
-            selection: "test_mistakes_fail_the_build and not (page or anchor or repository-file or unlabelled-python)"
+          - shard: site-build
+            selection: ""
+          - shard: site-tests
+            selection: "not test_mistakes_fail_the_build and not test_conceptual_code_is_labelled_and_accepted"
+          - shard: conceptual-code
+            selection: "test_conceptual_code_is_labelled_and_accepted"
+          - shard: broken-page
+            selection: "test_mistakes_fail_the_build and page"
+          - shard: broken-anchor
+            selection: "test_mistakes_fail_the_build and anchor"
+          - shard: broken-repository-file
+            selection: "test_mistakes_fail_the_build and repository-file"
+          - shard: broken-unlabelled-python
+            selection: "test_mistakes_fail_the_build and unlabelled-python"
+          - shard: broken-missing-snippet
+            selection: "test_mistakes_fail_the_build and missing-snippet"
+          - shard: broken-image-alt
+            selection: "test_mistakes_fail_the_build and image-alt"
+          - shard: broken-missing-example
+            selection: "test_mistakes_fail_the_build and missing-example"
+          - shard: broken-missing-object
+            selection: "test_mistakes_fail_the_build and missing-object"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
@@ -106,13 +125,14 @@ jobs:
           version: ${{ env.UV_VERSION }}
       - run: uv sync --frozen
       - name: Build with warnings as errors (pages, anchors, repository links, labelled code, alt text)
-        if: matrix.shard == 'site'
+        if: matrix.shard == 'site-build'
         run: uv run --frozen sphinx-build -W --keep-going -n -b html docs build/docs/html
       - name: Docs checks and runs-in=python snippets (runs-in=rack snippets run in the host job)
+        if: matrix.selection != ''
         env:
           DOCS_SELECTION: ${{ matrix.selection }}
         run: uv run --frozen pytest -m "docs and not host and not sanitizer and not stress" -k "$DOCS_SELECTION" -v --junitxml=reports/docs.xml
-      - if: always() && matrix.shard == 'site'
+      - if: always() && matrix.shard == 'site-build'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: docs-html
