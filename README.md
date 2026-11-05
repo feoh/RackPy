@@ -7,15 +7,15 @@ Rack's public C++ plugin API. Complete public API coverage is a long-term goal,
 not a current claim. RackPy runs **inside Rack**, not as an external
 remote-control service.
 
-> **Early development, no release.** RackPy builds from source on Linux x86_64
-> and macOS, and loads into Rack Free 2.6.6. It has bindings across Rack's
-> public SDK, but coverage and test status vary; none is yet marked `verified`
-> ([coverage report](docs/reference/coverage.md)). Plugins written in Python add
-> modules with panels, controls, menus, drawing, state, expanders and native
-> audio processing, and the [examples](examples/README.md) run in Rack under
-> test. CI has built and run install candidates on Linux x86_64, macOS x86_64 and
-> arm64, and Windows x86_64, but no artifacts are published. Coverage and
-> performance are partial; see the [candidate audit](release-evidence/candidate-audit.md).
+> **Early preview release: Linux x86_64, Rack Free 2.6.6.** RackPy has bindings
+> across Rack's public SDK, but coverage and test status vary; none is yet marked
+> `verified` ([coverage report](docs/reference/coverage.md)). Plugins written in
+> Python add modules with panels, controls, menus, drawing, state, expanders and
+> native audio processing, and the [examples](examples/README.md) run in Rack
+> under test. GitHub Releases provides Linux preview artifacts; CI has also built
+> and exercised candidate workflows on macOS x86_64/arm64 and Windows x86_64,
+> which are not advertised as supported platforms here. Coverage and performance
+> are partial; see the [candidate audit](release-evidence/candidate-audit.md).
 > The [quickstart](docs/quickstart.md) builds RackPy and a first plugin.
 
 ## What we are building

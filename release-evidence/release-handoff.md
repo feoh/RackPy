@@ -1,9 +1,11 @@
 # RackPy early Linux release: handoff for the owner's decision
 
-**Status: a proposal. Nothing is published, tagged, uploaded or sent to VCV, and
-nothing here is approval to do so.** It is step 4 of
-[the practical release plan](../planning/practical-release.md). Step 5, publication,
-needs your explicit answers to the decisions below.
+**Status: GitHub publication authorized, but not yet tagged or uploaded.** On
+2026-11-05 the owner authorized a GitHub pre-release only; the remaining work is
+to finish the exact-ref checks, rebuild and verify the final candidate, then
+publish and verify its public bytes. No PyPI upload, VCV contact/submission or
+documentation-site publication is authorized. This handoff is step 4 of
+[the practical release plan](../planning/practical-release.md).
 
 ## What is proposed
 
@@ -76,28 +78,26 @@ Not verified:
 - Coverage is partial in the sense above; the long-term full-surface goal stays open.
 - Linux x86_64 and Rack 2.6.6 only.
 
-## Decisions I need from you
+## Confirmed publication scope
 
-1. **Go or no go** for a first public pre-release at all, or keep it local for now.
-2. **Version.** Keep `0.1.0.dev1` (the runtime and source artifacts add
-   `+g<commit>`; the wheel is plain `0.1.0.dev1`), or use `0.1.0a1`, my earlier
-   recommendation.
-3. **GitHub.** Create a pre-release on `feoh/RackPy` with a tag you name (suggested
-   `v0.1.0.dev1`), attaching the artifacts and `SHA256SUMS`?
-4. **Which artifacts.** All ten 47 MB examples, or only the runtime, `Oscillator` and
-   `Template` examples plus the wheel and source?
-5. **PyPI.** The wheel is a developer package (typing, offline graph tests) that runs
-   nothing in Rack. PyPI's policy treats empty or non-functional packages as name
-   squatting. Publish it, or hold the `rackpy` name until a functional distribution?
-6. **VCV.** Do not contact VCV or submit to the VCV Library at this stage. Confirm.
-7. **Signing.** Linux packages are unsigned and need no notarization. Confirm that is
-   acceptable.
-8. **Docs.** Publish the documentation site, or leave it in the repository?
+- **Destination:** GitHub Releases on `feoh/RackPy` only; create a pre-release
+  tagged `v0.1.0.dev1`.
+- **Version:** `0.1.0.dev1`; runtime and source names include `+g<commit>`, and
+  the developer wheel uses the plain PEP 440 version.
+- **Assets:** all ten Linux x86_64 example `.vcvplugin` packages, runtime bundle,
+  developer wheel, source archive, `manifest.json` and `SHA256SUMS` (about 510 MiB).
+- **Not in scope:** no PyPI upload, VCV contact/Library submission or published
+  documentation site. The Linux artifacts are unsigned; the release notes will
+  disclose that. No legal review, physical-device audio deadline or performance
+  certification is claimed.
 
-## What happens after approval
+## Publication sequence
 
-Rebuild from the final clean commit, run `verify` on 16.04 and 20.04, update
-`manifest.json`, `candidate-linux-x64/` and the audit, publish only the approved
-items, download the public bytes, compare checksums, install one example from them in
-a clean container, and record the result. RP-44 closes only when that delivered
-outcome is verified.
+After the full workflow on the chooser-bearing source commit completes, build a
+fresh candidate from the final clean release-document commit. Run `verify` on
+Ubuntu 16.04 and 20.04 and retain that exact manifest and checksums. Create the
+GitHub pre-release with only the authorized assets, download every public asset,
+compare its checksum with the approved manifest, install a published example
+from those bytes in a clean container, and record the result. No PyPI, VCV or
+documentation-site publication is part of this release. RP-44 remains open until
+the public bytes are verified.

@@ -1,12 +1,12 @@
-# RackPy 0.1.0.dev1 — local Linux preview audit (not a public release)
+# RackPy 0.1.0.dev1 — Linux x86_64 preview release evidence
 
-The owner approved this Linux x86_64 preview for local testing only on
-2026-11-04. Nothing is published, tagged or approved for redistribution. The
-candidate binaries live outside git at
-`/tmp/rackpy-preview-52526e8/artifacts/`; this repository retains only their
-manifest and checksums.
+The first candidate was approved for local testing on 2026-11-04. On
+2026-11-05 the owner separately authorized a GitHub-only pre-release with all
+ten example plugins. No PyPI upload, VCV submission or docs-site publication is
+in scope. This audit records successive local candidates; the final tagged
+source and public bytes must be called out below after publication.
 
-## Exact candidate
+## Initial local candidate (historical)
 
 - RackPy package version: `0.1.0.dev1`; the runtime and source artifact version
   adds `+g52526e83c` to identify the source. The `.vcvplugin` files say `2.0.0`,
@@ -62,7 +62,7 @@ candidate/runtime and tool version work together; it does not validate newer
 candidate binaries, interactive rendering, generated audio, upgrade behavior,
 or another operating system.
 
-## Later local Linux candidate (2026-11-05)
+## Later local Linux candidate (2026-11-05; superseded)
 
 A second local-only build from clean commit
 `1bc1093d24c28ba3169bd5eaa325252e433fe8c7` produced 13 artifacts as
@@ -108,7 +108,7 @@ platform parity or a reason to advertise macOS/Windows in the proposed Linux
 release; it also does not turn implemented API mappings into independently
 verified coverage.
 
-## Current local Linux candidate (2026-11-05)
+## Local Linux candidate with file chooser (2026-11-05; pre-release-doc update)
 
 A clean local build from commit
 `78c42531af9bbfe92e0104045770ffed5c4fd946` produced 13 artifacts as

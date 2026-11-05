@@ -1,13 +1,14 @@
 # Install on Linux
 
-:::{admonition} Owner-approved local preview: not published
+:::{admonition} Early preview release: Linux x86_64 only
 :class: warning
 
-RackPy has no public release. The owner approved an unpublished Linux x86_64
-preview for local testing only. The files below are built from a pinned commit
-by `bin/rackpy-release build`; they are not on GitHub Releases, PyPI or the VCV
-Library and must not be shared or redistributed. No full-coverage, performance,
-or broad platform-support claim is made.
+RackPy `0.1.0.dev1` is a GitHub-only pre-release for VCV Rack Free 2.6.6 on
+Linux x86_64. Download its runtime, example plugins, wheel, source, manifest
+and checksums from [GitHub Releases](https://github.com/feoh/RackPy/releases).
+It is not a complete API-coverage, performance, or broad platform-support
+claim. No PyPI upload, VCV Library submission or documentation-site publication
+is part of this release.
 :::
 
 ## What you need
@@ -25,7 +26,7 @@ or broad platform-support claim is made.
   and run clean-machine verification; it is not required to install the finished
   plugin in Rack.
 
-## Build and verify the local preview
+## Build and verify from source
 
 The selected Python package version is `0.1.0.dev1`. The release builder adds
 `+g<commit>` to identify the source commit; the example `.vcvplugin` names and
