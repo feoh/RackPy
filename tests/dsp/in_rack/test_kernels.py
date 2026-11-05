@@ -188,12 +188,18 @@ def test_reset_rate_bypass_and_failure_are_native() -> None:
         assert kernel is not None
         sequence = _rackpy_host.diagnostics_recorded()
         kernel.set("fail_after", frames.get_voltage() + 10)
-        assert until(lambda: m.kernel_failed)
+
+        def failure_diagnostic_recorded() -> bool:
+            return any(
+                code == "kernel_failed" and "rackpy_test.Probe" in message
+                for _, _, code, _, message in _rackpy_host.diagnostics(sequence)
+            )
+
+        # The diagnostic ring is bounded and audio can advance quickly on CI;
+        # observe the record while the failure happens, before later records can
+        # overwrite it.
+        assert until(lambda: m.kernel_failed and failure_diagnostic_recorded())
         assert until(lambda: all(o.get_voltage() == 0.0 for o in (frames, rate, resets)))  # silenced
-        assert any(
-            code == "kernel_failed" and "rackpy_test.Probe" in message
-            for _, _, code, _, message in _rackpy_host.diagnostics(sequence)
-        )
         kernel.set("fail_after", 0)  # controls still reach a failed kernel
         HOOKS.engine_reset(m)  # Initialize clears the failure
         assert until(lambda: not m.kernel_failed and frames.get_voltage() > 0)
