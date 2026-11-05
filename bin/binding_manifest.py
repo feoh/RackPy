@@ -443,6 +443,22 @@ def dumps(manifest: dict[str, Any]) -> str:
 # --- validation ------------------------------------------------------------------
 
 
+_PARSED: dict[tuple[Path, int, int], ast.Module | None] = {}
+
+
+def parsed_module(file: Path) -> ast.Module | None:
+    """The file's syntax tree, or None if it does not parse. Parsed once per file version (path, mtime, size):
+    a manifest cites each test file thousands of times, and parsing dominated the check's run time."""
+    stat = file.stat()
+    key = (file, stat.st_mtime_ns, stat.st_size)
+    if key not in _PARSED:
+        try:
+            _PARSED[key] = ast.parse(file.read_text(encoding="utf-8"))
+        except SyntaxError:
+            _PARSED[key] = None
+    return _PARSED[key]
+
+
 def test_exists(repo: Path, node: str) -> bool:
     """`tests/x/test_y.py::test_name` (optionally `::Class::test_name` or with `[param]`) names a real test."""
     path, _, rest = node.partition("::")
@@ -450,9 +466,8 @@ def test_exists(repo: Path, node: str) -> bool:
     if not rest or not file.is_file() or not path.startswith("tests/"):
         return False
     names = [part.split("[", 1)[0] for part in rest.split("::")]
-    try:
-        tree = ast.parse(file.read_text(encoding="utf-8"))
-    except SyntaxError:
+    tree = parsed_module(file)
+    if tree is None:
         return False
     scope: list[ast.stmt] = tree.body
     for name in names:
