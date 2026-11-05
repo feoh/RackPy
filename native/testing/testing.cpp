@@ -944,6 +944,10 @@ void define(py::module_ m) {
 		ContextScope scope(foreignContext());
 		return f();
 	});
+	m.def("with_no_context", [](py::function f) {
+		ContextScope scope(nullptr);
+		return f();
+	});
 	m.def("close_window", [] {
 		requireMainThread("close_window");
 		APP->window->close();

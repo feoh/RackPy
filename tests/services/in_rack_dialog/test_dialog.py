@@ -4,7 +4,11 @@
 import os
 from pathlib import Path
 
+import pytest
+from _rackpy_host import _testing
+
 from rackpy.dialog import choose_directory, open_file, save_file
+from rackpy.errors import ContextError
 
 
 def test_native_file_dialog_actions_and_cancellation(tmp_path: Path) -> None:
@@ -15,6 +19,9 @@ def test_native_file_dialog_actions_and_cancellation(tmp_path: Path) -> None:
     assert save_file(directory=start, filename="take.wav", filters="Audio:wav") == selected
     assert choose_directory(directory=start) == selected
 
+    with pytest.raises(ContextError, match="bound Rack UI context"):
+        _testing.with_no_context(open_file)
+
     os.environ["RACKPY_DIALOG_FILE"] = ""
     assert open_file() is None
     assert save_file() is None
@@ -22,7 +29,5 @@ def test_native_file_dialog_actions_and_cancellation(tmp_path: Path) -> None:
 
 
 def test_file_dialog_checks_filter_types() -> None:
-    import pytest
-
     with pytest.raises(TypeError):
         open_file(filters=1)  # type: ignore[arg-type]

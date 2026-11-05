@@ -30,6 +30,8 @@ std::optional<std::string> chooseFile(const std::string& action, py::object dire
 	auto token = runtime::binding().current();
 	if (!token)
 		throw runtime::WrongContext("a Rack file dialog needs Rack's live bound UI context");
+	if (rack::contextGet() != token->context)
+		throw runtime::WrongContext("a Rack file dialog needs the bound Rack UI context active on this thread");
 	runtime::checkContext(*token);
 
 	osdialog_file_action nativeAction;
