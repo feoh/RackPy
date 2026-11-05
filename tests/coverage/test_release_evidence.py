@@ -57,6 +57,15 @@ def test_full_suite_selection_is_required(tmp_path: Path, platform: str) -> None
     assert check(tmp_path, platform) == []
 
 
+def test_review_verdict_must_match_exact_ci_candidate(candidate: tuple[Path, dict[str, Any], Any]) -> None:
+    _, info, check = candidate
+    require = check.__globals__["require_verdict_commit"]
+    path = Path("widgets-01.verdicts.json")
+    require(path, {"commit": info["headSha"]}, info["headSha"])
+    with pytest.raises(SystemExit, match="not CI candidate"):
+        require(path, {"commit": "0" * 40}, info["headSha"])
+
+
 def test_run_must_be_finished_and_match_checkout(candidate: tuple[Path, dict[str, Any], Any]) -> None:
     _, info, check = candidate
     assert check(123) == info

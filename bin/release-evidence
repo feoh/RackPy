@@ -82,6 +82,12 @@ def checked_run(run: int) -> dict[str, Any]:
     return info
 
 
+def require_verdict_commit(path: Path, doc: dict[str, Any], candidate: str) -> None:
+    """A review is tied to the exact candidate source, not just to stable record IDs."""
+    if doc.get("commit") != candidate:
+        raise SystemExit(f"{path}: verdict reviewed {doc.get('commit')}, not CI candidate {candidate}")
+
+
 def check_checkout(commit: str) -> None:
     """Check again around long operations; callers must also prevent concurrent checkout edits."""
     head = subprocess.run(
@@ -286,6 +292,7 @@ def promote(run: int, verdicts: list[Path], *, platforms: list[str] | None = Non
         doc = bm.load_json(path)
         if errors := bm.review_file_problems(doc):
             raise SystemExit(f"{path}: {'; '.join(errors)}")
+        require_verdict_commit(path, doc, info["headSha"])
         docs.append(doc)
     selected_platforms = list(TESTS) if platforms is None else platforms
     if not selected_platforms or len(selected_platforms) != len(set(selected_platforms)):
