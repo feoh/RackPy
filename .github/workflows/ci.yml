@@ -224,7 +224,11 @@ jobs:
           CCACHE_BASEDIR: ${{ github.workspace }}
           CCACHE_COMPILERCHECK: content
           CCACHE_MAXSIZE: 800M
-        run: uv run --frozen pytest -m "native and not host and not sanitizer and not stress" -v --junitxml=reports/native.xml
+        # The same --basetemp as the fast step: the build tree's path is part of every compile command, so
+        # a different one would never hit the other lane's cache.
+        run: >
+          uv run --frozen pytest -m "native and not host and not sanitizer and not stress" -v
+          --basetemp="$RUNNER_TEMP/native-pytest" --junitxml=reports/native.xml
       - name: Native compiler cache statistics
         if: always()
         env:
