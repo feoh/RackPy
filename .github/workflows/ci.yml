@@ -661,14 +661,35 @@ jobs:
           if-no-files-found: ignore
 
   windows:
-    name: Windows x64, native build, CTest, unit and Rack host tests
+    name: Windows x64 ${{ matrix.suite.name }} suite, native build, CTest, unit and Rack host tests
     # RP-41. A native build with MSYS2's MINGW64 GCC (mingw-w64, msvcrt: the compiler family and C runtime
     # Rack for Windows is built with), the native tests (CTest, through the dev_build fixture) and the host
     # tests in Rack Free 2.6.6, unpacked from its installer by 7-Zip. The test harness runs on uv's
     # Windows CPython; the plugin embeds the pinned MSVC-built CPython. Linux-only tests skip by platform.
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    # Disjoint directory slices run concurrently; app and coverage are isolated because they dominated the prior
+    # Windows x64 suite's observed runtime. The report collector merges their evidence by platform.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite:
+              name: app
+              paths: tests/app tests/widget tests/ui tests/rendering
+          - suite:
+              name: coverage
+              paths: tests/coverage
+          - suite:
+              name: dsp
+              paths: tests/dsp tests/simd tests/values tests/engine tests/io tests/laboratory
+          - suite:
+              name: examples
+              paths: tests/examples
+          - suite:
+              name: services
+              paths: tests/docs tests/facade tests/hardening tests/history tests/integration tests/native tests/plugin tests/runtime tests/services tests/state tests/trampolines tests/unit
     runs-on: windows-2025
-    timeout-minutes: 180
+    timeout-minutes: 90
     defaults:
       run:
         shell: bash
@@ -715,7 +736,7 @@ jobs:
           key: rackpy-ccache-fast-win-x64-v1-${{ github.sha }}
           restore-keys: rackpy-ccache-fast-win-x64-v1-
       - name: Fast production-host smoke (not release evidence)
-        if: inputs.fast == true
+        if: inputs.fast == true && matrix.suite.name == 'app'
         env:
           RACKPY_TEST_EVIDENCE: ""
           CMAKE_CXX_COMPILER_LAUNCHER: ccache
@@ -751,7 +772,8 @@ jobs:
           uv run --frozen pytest -m "(unit or native or host) and not dist and not sanitizer and not stress and not inventory" \
             ${WINDOWS_TESTS:+-k "$WINDOWS_TESTS"} \
             --ignore=tests/coverage/test_mutations.py --ignore=tests/coverage/test_release_mutations.py \
-            -v -s -o faulthandler_timeout=120 --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/win-x64.xml
+            -v -s -o faulthandler_timeout=120 --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/win-x64.xml \
+            ${{ matrix.suite.paths }}
       - name: Compiler cache statistics
         if: always()
         env:
@@ -765,13 +787,13 @@ jobs:
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: windows-win-x64-reports
+          name: windows-win-x64-${{ matrix.suite.name }}-reports
           path: reports/
           retention-days: 14
           if-no-files-found: ignore
 
   macos:
-    name: macOS ${{ matrix.platform }}, native build, CTest, unit and Rack host tests
+    name: macOS ${{ matrix.platform }} ${{ matrix.suite.name }} suite, native build, CTest, unit and Rack host tests
     # RP-40. Native builds with the runner's AppleClang (one architecture each), the native tests
     # (CTest, through the dev_build fixture) and the host tests in Rack Free 2.6.6, headless and
     # windowed. Linux-only tests (ELF tools, LD_PRELOAD guards, the Linux toolchain) skip by platform.
@@ -782,10 +804,36 @@ jobs:
         include:
           - runner: macos-15
             platform: mac-arm64
+            suite: { name: app, paths: "tests/app tests/widget tests/ui tests/rendering" }
+          - runner: macos-15
+            platform: mac-arm64
+            suite: { name: coverage, paths: "tests/coverage" }
+          - runner: macos-15
+            platform: mac-arm64
+            suite: { name: dsp, paths: "tests/dsp tests/simd tests/values tests/engine tests/io tests/laboratory" }
+          - runner: macos-15
+            platform: mac-arm64
+            suite: { name: examples, paths: "tests/examples" }
+          - runner: macos-15
+            platform: mac-arm64
+            suite: { name: services, paths: "tests/docs tests/facade tests/hardening tests/history tests/integration tests/native tests/plugin tests/runtime tests/services tests/state tests/trampolines tests/unit" }
           - runner: macos-15-intel
             platform: mac-x64
+            suite: { name: app, paths: "tests/app tests/widget tests/ui tests/rendering" }
+          - runner: macos-15-intel
+            platform: mac-x64
+            suite: { name: coverage, paths: "tests/coverage" }
+          - runner: macos-15-intel
+            platform: mac-x64
+            suite: { name: dsp, paths: "tests/dsp tests/simd tests/values tests/engine tests/io tests/laboratory" }
+          - runner: macos-15-intel
+            platform: mac-x64
+            suite: { name: examples, paths: "tests/examples" }
+          - runner: macos-15-intel
+            platform: mac-x64
+            suite: { name: services, paths: "tests/docs tests/facade tests/hardening tests/history tests/integration tests/native tests/plugin tests/runtime tests/services tests/state tests/trampolines tests/unit" }
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 180
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
@@ -810,7 +858,7 @@ jobs:
           key: rackpy-ccache-fast-${{ matrix.platform }}-v1-${{ github.sha }}
           restore-keys: rackpy-ccache-fast-${{ matrix.platform }}-v1-
       - name: Fast production-host smoke (not release evidence)
-        if: inputs.fast == true
+        if: inputs.fast == true && matrix.suite.name == 'app'
         env:
           RACKPY_TEST_EVIDENCE: ""
           CMAKE_CXX_COMPILER_LAUNCHER: ccache
@@ -845,7 +893,8 @@ jobs:
           uv run --frozen pytest -m "(unit or native or host) and not dist and not sanitizer and not stress and not inventory" \
             ${MACOS_TESTS:+-k "$MACOS_TESTS"} \
             --ignore=tests/coverage/test_mutations.py --ignore=tests/coverage/test_release_mutations.py \
-            -v -s -o faulthandler_timeout=120 --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/${{ matrix.platform }}.xml
+            -v -s -o faulthandler_timeout=120 --basetemp="$RUNNER_TEMP/pytest" --junitxml=reports/${{ matrix.platform }}.xml \
+            ${{ matrix.suite.paths }}
       - name: Compiler cache statistics
         if: always()
         env:
@@ -859,7 +908,7 @@ jobs:
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: macos-${{ matrix.platform }}-reports
+          name: macos-${{ matrix.platform }}-${{ matrix.suite.name }}-reports
           path: reports/
           retention-days: 14
           if-no-files-found: ignore

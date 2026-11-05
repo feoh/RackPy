@@ -53,9 +53,27 @@ TESTS = {
         "dist-reports",
         "inventory-reports",
     ],
-    "mac-arm64": ["macos-mac-arm64-reports"],
-    "mac-x64": ["macos-mac-x64-reports"],
-    "win-x64": ["windows-win-x64-reports"],
+    "mac-arm64": [
+        "macos-mac-arm64-app-reports",
+        "macos-mac-arm64-coverage-reports",
+        "macos-mac-arm64-dsp-reports",
+        "macos-mac-arm64-examples-reports",
+        "macos-mac-arm64-services-reports",
+    ],
+    "mac-x64": [
+        "macos-mac-x64-app-reports",
+        "macos-mac-x64-coverage-reports",
+        "macos-mac-x64-dsp-reports",
+        "macos-mac-x64-examples-reports",
+        "macos-mac-x64-services-reports",
+    ],
+    "win-x64": [
+        "windows-win-x64-app-reports",
+        "windows-win-x64-coverage-reports",
+        "windows-win-x64-dsp-reports",
+        "windows-win-x64-examples-reports",
+        "windows-win-x64-services-reports",
+    ],
 }
 CANDIDATES = {
     "lin-x64": "release-candidate-evidence",
@@ -114,14 +132,19 @@ def selection_problems(root: Path, platform: str) -> list[bm.Problem]:
     """Focused macOS/Windows diagnostic runs are not full-candidate evidence."""
     if platform == "lin-x64":
         return []
-    selection = root / TESTS[platform][0] / "selection.txt"
-    try:
-        expression = selection.read_text(encoding="utf-8")
-    except OSError:
-        return [bm.Problem("test-selection", platform, "full-suite selection attestation is missing")]
-    if expression:
-        return [bm.Problem("test-selection", platform, f"diagnostic pytest -k selection was used: {expression!r}")]
-    return []
+    problems: list[bm.Problem] = []
+    for artifact in TESTS[platform]:
+        selection = root / artifact / "selection.txt"
+        try:
+            expression = selection.read_text(encoding="utf-8")
+        except OSError:
+            problems.append(bm.Problem("test-selection", artifact, "full-suite selection attestation is missing"))
+            continue
+        if expression:
+            problems.append(
+                bm.Problem("test-selection", artifact, f"diagnostic pytest -k selection was used: {expression!r}")
+            )
+    return problems
 
 
 def sha256(path: Path) -> str:

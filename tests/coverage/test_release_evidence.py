@@ -47,14 +47,15 @@ def test_shared_checker_job_must_succeed(conclusion: str | None) -> None:
 def test_full_suite_selection_is_required(tmp_path: Path, platform: str) -> None:
     namespace = runpy.run_path(str(REPO / "bin/release-evidence"))
     check = namespace["selection_problems"]
-    selection = tmp_path / namespace["TESTS"][platform][0] / "selection.txt"
+    selections = [tmp_path / artifact / "selection.txt" for artifact in namespace["TESTS"][platform]]
     assert check(tmp_path, "lin-x64") == []
-    assert check(tmp_path, platform)[0].code == "test-selection"  # absent is not a full run
-    selection.parent.mkdir()
-    selection.write_text("engine", encoding="utf-8")
-    assert check(tmp_path, platform)[0].code == "test-selection"
-    selection.write_text("", encoding="utf-8")
+    assert check(tmp_path, platform)[0].code == "test-selection"  # absent shard reports are not a full run
+    for selection in selections:
+        selection.parent.mkdir(parents=True)
+        selection.write_text("", encoding="utf-8")
     assert check(tmp_path, platform) == []
+    selections[0].write_text("engine", encoding="utf-8")
+    assert check(tmp_path, platform)[0].code == "test-selection"
 
 
 def test_review_verdict_must_match_exact_ci_candidate(candidate: tuple[Path, dict[str, Any], Any]) -> None:
