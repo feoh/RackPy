@@ -1,4 +1,4 @@
-# RackPy early Linux release: handoff for the owner's decision
+# RackPy early Linux release: publication record
 
 **Status: published and post-upload verified.** On 2026-11-05 the owner
 authorized a GitHub-only pre-release. [`v0.1.0.dev1`](https://github.com/feoh/RackPy/releases/tag/v0.1.0.dev1)
@@ -62,10 +62,11 @@ Not verified:
 - The local Linux artifact checksums do not describe separately built macOS or
   Windows bytes. Full CI did build and exercise candidates on macOS arm64/x64
   and Windows x64 at source commit `7ed3627`, but those platforms are not part of
-  this proposed Linux-only release.
+  this published Linux-only release.
 - Coverage: 3,098 declarations are **implemented** on Linux; **none are marked
-  verified**. The release must say bindings exist for the inventoried surface, with
-  independent verification outstanding. It must not say "full coverage".
+  verified**. The release notes state that bindings exist for the inventoried
+  surface, with independent verification outstanding; they do not claim full
+  coverage.
 - Performance and physical-device audio deadlines. No controlled benchmark exists.
 - Physical audio or MIDI hardware and hardware GPU drivers.
 - A legal review of the licence mix (the plugin bundles CPython and RackPy under
