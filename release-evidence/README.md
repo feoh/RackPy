@@ -7,7 +7,9 @@ require a completed run for the current commit and reject tracked working-tree c
 the checkout: do not edit or switch its files while collecting or promoting evidence.
 
 The owner-approved practical partial-candidate audit is recorded separately in
-[`candidate-audit.md`](candidate-audit.md). It does **not** satisfy or change the
+[`candidate-audit.md`](candidate-audit.md). Its local-candidate manifests and
+checksum lists are retained under `candidate-linux-x64-<commit>/`; the large
+binary artifacts remain outside git. This does **not** satisfy or change the
 full-surface release bar described below.
 
 | File | What it records |

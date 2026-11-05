@@ -17,32 +17,38 @@ performance.
 
 | Item | Value |
 | --- | --- |
-| Source commit | `1bc1093d24c28ba3169bd5eaa325252e433fe8c7`, clean checkout (`dirty: false`) |
-| Version string | `0.1.0.dev1+g1bc1093d2` (you chose `0.1.0.dev1` for the local preview) |
+| Source commit | `7ed3627014c4cc312bff2840d63ce30ef2b10fcb`, clean checkout (`dirty: false`) |
+| Version string | `0.1.0.dev1+g7ed362701` (the owner-selected `0.1.0.dev1` local-preview version) |
 | Platform | `lin-x64`, glibc floor 2.23, Rack Free 2.6.6 |
-| Location | `/tmp/rackpy-preview-1bc1093/artifacts/`, outside git |
-| Artifacts | 13: runtime bundle (47 MB), ten example `.vcvplugin` packages (about 47 MB each), developer wheel (144 KB), source archive (2.4 MB), plus `manifest.json` and `SHA256SUMS` |
+| Location | `/tmp/rackpy-preview-7ed3627/artifacts/`, outside git |
+| Artifacts | 13: runtime bundle (about 47 MB), ten example `.vcvplugin` packages (about 47 MB each), developer wheel (147 KB), source archive (2.4 MB), plus `manifest.json` and `SHA256SUMS` |
 
-**This is not the release candidate for publication.** Documentation and CI commits
-have landed on `rp42` since this build, and the source archive contains the whole
-commit. A published candidate must be rebuilt from the final clean commit and verified
-again (`bin/rackpy-release build`, then `verify`). The checksums of this local build
-are in its own `SHA256SUMS`; a rebuilt candidate will have different ones, and only
-those may be published.
+**This is not a release candidate for publication.** The artifacts were verified
+on Ubuntu 16.04 and 20.04 and are tied to commit `7ed3627`; this handoff and audit
+were updated afterward. Any candidate proposed for publication must be rebuilt
+from the final approved clean source commit and verified again. The checksums of
+this local build are in its own `SHA256SUMS`; a rebuilt candidate will have
+different ones, and only those may be considered for publication.
 
 ## Evidence, labelled
 
 Verified, with the command or log:
 
-- Artifact checksums, all ten examples loading, patch reopen, windowed module browser,
-  refusal and error cases, upgrade and uninstall pass in clean **Ubuntu 16.04.7** and
-  **Ubuntu 20.04.6** containers with no system Python and no network
-  (`bin/rackpy-release verify`; logs under `/tmp/rackpy-preview-1bc1093/verify-*`).
+- On the exact candidate above, `bin/rackpy-release verify` passed in clean
+  **Ubuntu 16.04.7** and **Ubuntu 20.04.6** containers, with no system Python
+  and Docker networking disabled: checksums, all ten example plugins, patch
+  reopen, windowed module-browser smokes, refusal/error cases, upgrade and
+  uninstall. Logs are under `/tmp/rackpy-preview-7ed3627/verify-*`; committed
+  candidate metadata is in [`candidate-linux-x64-7ed3627/`](candidate-linux-x64-7ed3627/).
 - Documented first-plugin workflow (`rackpy-plugin create`, `add-module`, `build`,
   `pack`) produced a module that Rack Free 2.6.6 loaded and whose patch reopened
   ([candidate audit](candidate-audit.md)). That ran against the earlier `52526e83`
   runtime, not these bytes.
-- The 265 unit tests pass locally on `rp42` (`pytest -m unit`, 5 min 30 s).
+- The 265 unit tests passed on an earlier `rp42` commit (`pytest -m unit`,
+  5 min 30 s); on the candidate source, the sample-disposition tests passed
+  (76) and the template unit tests passed (7). These focused local tests are
+  not a replacement for the full unit/native/host CI on this commit, which is
+  still running.
 - Licence texts and third-party notices ship inside each package; the manifest lists
   17 third-party components.
 - You heard the earlier oscillator candidate through headphones in Rack Pro 2.6.6.

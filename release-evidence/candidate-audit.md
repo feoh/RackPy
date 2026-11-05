@@ -77,6 +77,29 @@ uninstall, with no system Python or network. Logs are in
 container evidence, not a physical-device test, public release approval, or
 validation of a subsequent source commit.
 
+## Current local Linux candidate (2026-11-05)
+
+A fresh, clean local build from commit
+`7ed3627014c4cc312bff2840d63ce30ef2b10fcb` produced 13 artifacts as
+`0.1.0.dev1+g7ed362701`, in
+`/tmp/rackpy-preview-7ed3627/artifacts/`. The committed
+[`candidate-linux-x64-7ed3627/manifest.json`](candidate-linux-x64-7ed3627/manifest.json)
+and [`SHA256SUMS`](candidate-linux-x64-7ed3627/SHA256SUMS) identify the
+artifacts; binaries remain outside git. The manifest records `dirty: false`,
+`lin-x64`, and glibc floor 2.23.
+
+`bin/rackpy-release verify` passed on Ubuntu 16.04.7 (glibc 2.23) and Ubuntu
+20.04.6 (glibc 2.31), each in an offline container without system Python. Both
+runs checked all artifact hashes, all ten plugin loads, module creation and
+patch reopen, windowed Rack rendering, interpreter finalization, refusal/error
+cases, upgrade and uninstall. Logs are under
+`/tmp/rackpy-preview-7ed3627/verify-ubuntu-16.04/` and
+`/tmp/rackpy-preview-7ed3627/verify-ubuntu-20.04/`. This remains local-only
+preview evidence: it does not approve publication, establish physical-device
+behavior or performance, or claim full API coverage. The later audit-document
+commit does not change these candidate bytes; any eventual publication
+candidate must be rebuilt from its final approved source commit.
+
 ## Earlier cross-platform CI evidence
 
 GitHub Actions run
