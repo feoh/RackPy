@@ -61,6 +61,21 @@ header reachable from `rack.hpp` against
 [tests/fixtures/sdk-provenance.json](tests/fixtures/sdk-provenance.json), so a
 missing or different SDK is a configure error, not a warning.
 
+The unit tests take about 30 seconds. For a fast real-Rack check, install
+[ccache](https://ccache.dev/) and run the same subset as CI's fast lane; the first
+run compiles everything, later runs reuse the compiler cache:
+
+```bash
+CCACHE_DIR=~/.cache/rackpy-ccache CCACHE_BASEDIR="$PWD" CCACHE_COMPILERCHECK=content \
+CMAKE_CXX_COMPILER_LAUNCHER=ccache RACKPY_TEST_EVIDENCE= \
+uv run pytest -m "host and not dist and not sanitizer and not stress" \
+  tests/hardening/test_security.py \
+  tests/examples/test_oscillator.py::test_the_plugin_loads_under_its_own_slug_and_keeps_its_patch
+```
+
+On one Linux machine (32 cores) this took 233 seconds with a cold cache and 51
+seconds warm. It is a smoke test, not release evidence.
+
 ## Commands
 
 | Command | What it does |
