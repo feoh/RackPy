@@ -592,6 +592,8 @@ void bindManagedWidgets(py::module_ mod) {
 			auto s = state(self);
 			checkTraversal(s);
 			auto& w = checked(s);
+			for (W* child : w.children)
+				refuseLeavingChildMenu(*child);
 			CallbackGuard guard;
 			s->clearing = true;
 			try { w.clearChildren(); }

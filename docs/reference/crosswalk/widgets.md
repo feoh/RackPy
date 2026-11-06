@@ -645,8 +645,8 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::widget::Widget::PositionBaseEvent::pos` | field | bound | `rackpy.raw.widget.Widget.PositionBaseEvent.pos` | [widgets#events](../widgets.md#events) |
 | `rack::widget::Widget::TextBaseEvent::codepoint` | field | bound | `rackpy.raw.widget.Widget.TextBaseEvent.codepoint` | [widgets#events](../widgets.md#events) |
 | `rack::widget::Widget::box` | field | bound | `rackpy.raw.widget.Widget.box` | [widgets#creating-and-owning-widgets](../widgets.md#creating-and-owning-widgets), [widget-trees](../widget-trees.md), [detached_tree](../../snippets/detached_tree.py) |
-| `rack::widget::Widget::children` | field | bound | `rackpy.raw.widget.Widget.children` | [widgets#creating-and-owning-widgets](../widgets.md#creating-and-owning-widgets), [widget-trees](../widget-trees.md) |
-| `rack::widget::Widget::parent` | field | bound | `rackpy.raw.widget.Widget.parent` | [widgets#creating-and-owning-widgets](../widgets.md#creating-and-owning-widgets), [widget-trees](../widget-trees.md) |
+| `rack::widget::Widget::children` | field | unrepresentable | `rackpy.raw.widget.Widget.children` | [widgets#creating-and-owning-widgets](../widgets.md#creating-and-owning-widgets), [widget-trees](../widget-trees.md) |
+| `rack::widget::Widget::parent` | field | unrepresentable | `rackpy.raw.widget.Widget.parent` | [widgets#creating-and-owning-widgets](../widgets.md#creating-and-owning-widgets), [widget-trees](../widget-trees.md) |
 | `rack::widget::Widget::requestedDelete` | field | bound | `rackpy.raw.widget.Widget.requested_delete` | [widgets#creating-and-owning-widgets](../widgets.md#creating-and-owning-widgets), [widget-trees](../widget-trees.md) |
 | `rack::widget::Widget::visible` | field | bound | `rackpy.raw.widget.Widget.visible` | [widgets#creating-and-owning-widgets](../widgets.md#creating-and-owning-widgets), [widget-trees](../widget-trees.md) |
 | `rack::widget::ZoomWidget::zoom` | field | bound | `rackpy.raw.widget.ZoomWidget.zoom` | [widgets#typed-bases](../widgets.md#typed-bases) |

@@ -13,15 +13,15 @@ platform's own extraction parsed: the semantic entry it names is counted instead
 
 | Platform | unreviewed | planned | implemented | verified | unrepresentable | excluded_internal | unknown | absent | superseded | not inventoried |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lin-x64 | 0 | 5 | 3086 | 0 | 7 | 111 | 0 | 22 | 4 | 0 |
-| mac-arm64 | 0 | 5 | 3088 | 0 | 7 | 111 | 0 | 18 | 6 | 0 |
-| mac-x64 | 0 | 5 | 3086 | 0 | 7 | 111 | 0 | 22 | 4 | 0 |
-| win-x64 | 0 | 5 | 3090 | 0 | 7 | 111 | 0 | 14 | 8 | 0 |
+| lin-x64 | 0 | 5 | 3084 | 0 | 9 | 111 | 0 | 22 | 4 | 0 |
+| mac-arm64 | 0 | 5 | 3086 | 0 | 9 | 111 | 0 | 18 | 6 | 0 |
+| mac-x64 | 0 | 5 | 3084 | 0 | 9 | 111 | 0 | 22 | 4 | 0 |
+| win-x64 | 0 | 5 | 3088 | 0 | 9 | 111 | 0 | 14 | 8 | 0 |
 
 ## Needs attention
 
 - **Unknown** (in the inventory, not in the manifest): 0
-- **Unrepresentable** (awaiting an owner decision): 7
+- **Unrepresentable** (awaiting an owner decision): 9
 - **Unresolved callback strategy** (ADR 003): 0
 - **Open owner review items** (each blocks a release until the owner decides): 7
 
@@ -30,6 +30,8 @@ platform's own extraction parsed: the semantic entry it names is counted instead
 - `class_template:rack::DeferWrapper<type>`
 - `constructor:rack::DeferWrapper::DeferWrapper<F>($c0)`
 - `destructor:rack::DeferWrapper::~DeferWrapper<F>()`
+- `field:rack::widget::Widget::children`
+- `field:rack::widget::Widget::parent`
 - `function_template:rack::deferWrapper<type>($0)`
 - `macro:BINARY_END`
 - `macro:BINARY_SIZE`
@@ -53,7 +55,7 @@ platform's own extraction parsed: the semantic entry it names is counted instead
 | 1 common/value | 0 | 0 | 329 | 0 | 7 | 3 | 0 | 15 | 2 | 0 |
 | 2 engine | 0 | 0 | 276 | 0 | 0 | 22 | 0 | 0 | 0 | 0 |
 | 3 plugin/model/assets/helpers | 0 | 0 | 90 | 0 | 0 | 4 | 0 | 0 | 0 | 0 |
-| 4 widgets/ui/app/componentlibrary | 0 | 1 | 1378 | 0 | 0 | 50 | 0 | 2 | 2 | 0 |
+| 4 widgets/ui/app/componentlibrary | 0 | 1 | 1376 | 0 | 2 | 50 | 0 | 2 | 2 | 0 |
 | 5 window/rendering/context | 0 | 1 | 72 | 0 | 0 | 12 | 0 | 0 | 0 | 0 |
 | 6 dsp/simd | 0 | 0 | 558 | 0 | 0 | 0 | 0 | 4 | 0 | 0 |
 | 7 audio/midi | 0 | 3 | 166 | 0 | 0 | 6 | 0 | 0 | 0 | 0 |

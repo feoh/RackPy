@@ -618,6 +618,9 @@ def test_a_deleted_active_entry_or_child_menu_is_not_given() -> None:
         assert entry is None  # Rack still holds the deleted pointer
         # Rack's Menu removes its child menu when it goes (Menu::~Menu): that menu leaves only through set_child_menu.
         with pytest.raises(OwnershipError, match="set_child_menu"):
+            overlay.clear_children()
+        assert menu.alive and child.alive
+        with pytest.raises(OwnershipError, match="set_child_menu"):
             overlay.remove_child(child)
         with pytest.raises(OwnershipError, match="set_child_menu"):
             child.request_delete()
