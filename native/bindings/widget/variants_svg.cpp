@@ -47,18 +47,14 @@ void bindSvgVariant(py::module_ raw, py::module_ mod) {
 		.def_static("load", [](const std::string& filename) { runtime::requireMainThread("loading an SVG"); return S::load(filename); }, py::arg("filename"))
 		.def("load_file", [](std::shared_ptr<S> svg, const std::string& filename) {
 			runtime::requireMainThread("loading an SVG");
-			S next;
-			next.loadFile(filename);  // failed loads leave the existing image intact
-			std::swap(svg->handle, next.handle);
+			svg->loadFile(filename);
 			++svgGeneration(svg)->value;
-		}, py::arg("filename"), "Transactional: on failure the previous image stays (Rack's leaves none).")
+		}, py::arg("filename"), "Rack's loadFile: on failure the previous image is cleared.")
 		.def("load_string", [](std::shared_ptr<S> svg, const std::string& data) {
 			runtime::requireMainThread("parsing an SVG");
-			S next;
-			next.loadString(data);
-			std::swap(svg->handle, next.handle);
+			svg->loadString(data);
 			++svgGeneration(svg)->value;
-		}, py::arg("data"), "Transactional: on failure the previous image stays (Rack's leaves none).")
+		}, py::arg("data"), "Rack's loadString: on failure the previous image is cleared.")
 		.def("get_size", [](S& svg) { runtime::requireMainThread("reading an SVG"); return svg.getSize(); })
 		.def("get_num_shapes", [](S& svg) { runtime::requireMainThread("reading an SVG"); return svg.getNumShapes(); })
 		.def("get_num_paths", [](S& svg) { runtime::requireMainThread("reading an SVG"); return svg.getNumPaths(); })
