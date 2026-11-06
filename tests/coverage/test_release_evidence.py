@@ -20,6 +20,7 @@ def git(repo: Path, *args: str) -> str:
 @pytest.fixture
 def candidate(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[Path, dict[str, Any], Any]:
     git(tmp_path, "init", "-q")
+    git(tmp_path, "config", "commit.gpgsign", "false")  # isolated fixture: no machine/user signing hooks
     (tmp_path / "input").write_text("candidate\n", encoding="utf-8")
     git(tmp_path, "add", "input")
     git(tmp_path, "-c", "user.name=Test", "-c", "user.email=test@example.org", "commit", "-qm", "candidate")

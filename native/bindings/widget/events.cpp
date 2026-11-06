@@ -226,7 +226,7 @@ void bindWidgetEvents(py::module_ mod) {
 			ref->check();
 			if (!ref->keyCommand) throw py::type_error("not a key event");
 			return ref->keyCommand(key, mods);
-		});
+		}, py::arg("key"), py::arg("mods") = 0);
 	mod.def("_make_event_context", [] {
 		runtime::requireMainThread("constructing EventContext");
 		auto owner = std::make_shared<ContextStorage>();

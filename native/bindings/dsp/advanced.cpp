@@ -67,7 +67,7 @@ float* floats(const py::buffer& buf, bool writable, size_t n, bool aligned, cons
 	return static_cast<float*>(info.ptr);
 }
 
-/** Input and output may be the same buffer (PFFFT allows aliasing), but not partly overlap. */
+/** PFFFT complex transforms allow exact in-place operation, but this binding refuses partial overlap. */
 void sameOrApart(const float* in, size_t inLen, const float* out, size_t outLen, const char* what) {
 	if (in == out)
 		return;
@@ -159,21 +159,18 @@ void bindAdvanced(py::module_ m) {
 			size_t n = f.points;
 			const float* in = floats(input, false, n, true, "rfft_unordered input");
 			float* out = floats(output, true, n, true, "rfft_unordered output");
-			sameOrApart(in, n, out, n, "rfft_unordered");
 			c::member<&d::RealFFT::rfftUnordered>(f.base(), in, out);
 		}, py::arg("input"), py::arg("output"), "Forward transform in PFFFT's internal order; length floats in and out.")
 		.def("irfft_unordered", [](RealFFT& f, const py::buffer& input, const py::buffer& output) {
 			size_t n = f.points;
 			const float* in = floats(input, false, n, true, "irfft_unordered input");
 			float* out = floats(output, true, n, true, "irfft_unordered output");
-			sameOrApart(in, n, out, n, "irfft_unordered");
 			c::member<&d::RealFFT::irfftUnordered>(f.base(), in, out);
 		}, py::arg("input"), py::arg("output"), "Inverse of rfft_unordered, unscaled: irfft(rfft(x)) = length * x.")
 		.def("rfft", [](RealFFT& f, const py::buffer& input, const py::buffer& output) {
 			size_t n = f.points;
 			const float* in = floats(input, false, n, true, "rfft input");
 			float* out = floats(output, true, n, true, "rfft output");
-			sameOrApart(in, n, out, n, "rfft");
 			c::member<&d::RealFFT::rfft>(f.base(), in, out);
 		}, py::arg("input"), py::arg("output"),
 			"Forward transform in canonical order: F(0), F(n/2), re F(1), im F(1), ..., re F(n/2-1), im F(n/2-1).")
@@ -181,7 +178,6 @@ void bindAdvanced(py::module_ m) {
 			size_t n = f.points;
 			const float* in = floats(input, false, n, true, "irfft input");
 			float* out = floats(output, true, n, true, "irfft output");
-			sameOrApart(in, n, out, n, "irfft");
 			c::member<&d::RealFFT::irfft>(f.base(), in, out);
 		}, py::arg("input"), py::arg("output"), "Inverse of rfft, unscaled.")
 		.def("scale", [](RealFFT& f, const py::buffer& x) {

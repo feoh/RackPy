@@ -271,6 +271,8 @@ def test_info_names_and_python_overrides() -> None:
             return "Opens the envelope"
 
     named = Named()
+    named.description = "base description"
+    assert named.get_name() == "Gate"
     assert named.get_full_name() == "Gate input" and named.get_description() == "Opens the envelope"
     light = LightInfo()
     light.name, light.light_id = "Level", 2

@@ -151,7 +151,7 @@ void infoMethod(py::classh<Info, InfoTrampoline<Info>>& cls, const char* name, R
 	cls.def(name, [method, base](Info& info) {
 		if (auto* alias = ::rackpy::rttiCast<InfoTrampoline<Info>*>(&info)) {
 			alias->check();
-			return base(info);
+			return (info.*method)();  // virtual dispatch reaches a Python override, or the trampoline's Rack fallback
 		}
 		return (info.*method)();
 	}, doc);

@@ -215,9 +215,12 @@ def test_updating_another_owners_param_handle_does_not_crash(probe: EngineModule
     try:
         view = e.get_param_handle(probe.id, 0)
         assert view is not None and not view.ours and view.text == "foreign"
+        seen = {view}
+        old_hash = hash(view)
         with pytest.raises(OwnershipError, match="read-only"):
             view.text = "mine"
         e.update_param_handle(view, probe.id, 0)  # Rack 2.6.6: re-mapped to its own param it finds itself and unmaps
+        assert hash(view) == old_hash and view in seen
         assert e.get_param_handle(probe.id, 0) is None
     finally:
         HOOKS.engine_remove_foreign_param_handle()

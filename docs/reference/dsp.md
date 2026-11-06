@@ -488,10 +488,11 @@ copying the C++ object would free the setup twice.
 - **Buffers.** Contiguous float32 buffers, 16-byte aligned (PFFFT's SSE code
   needs it; an `array.array` or numpy array is aligned, a slice of one may
   not be), of the transform's size: `length` floats in and out for a real
-  FFT, `2 * length` (interleaved complex numbers) for a complex one. The
-  input and output may be the same buffer, but not partly overlap. Rack's
-  comments say a real FFT's output is `2 * length` floats; PFFFT writes
-  `length`.
+  FFT, `2 * length` (interleaved complex numbers) for a complex one. Rack's
+  real FFT contract permits input and output buffers to overlap, including
+  partial overlap; complex transforms permit exact in-place use, while RackPy
+  refuses partial overlap for them. Rack's comments say a real FFT's output is
+  `2 * length` floats; PFFFT writes `length`.
 - **Transforms.** `rfft(input, output)` and `irfft(input, output)` on a
   `RealFFT`, `fft` and `ifft` on a `ComplexFFT`, are the forward and inverse
   transforms; each has an `_unordered` form (`rfft_unordered`,

@@ -161,9 +161,10 @@ void bindEngine(py::module_ engine) {
 				return a.owned == o.owned;
 			return o.currentId() == a.currentId();
 		}, py::is_operator())
-		.def("__hash__", [](const EngineModule& m) {
-			return m.pythonOwned() ? py::hash(py::int_(reinterpret_cast<uintptr_t>(m.owned.get())))
-				: py::hash(py::int_(m.currentId()));
+		.def("__hash__", [](const EngineModule&) {
+			// Ownership transfer changes both the underlying identity and possibly the ID. Keep hash stable for objects
+			// already stored in Python sets or dictionaries before Engine.add_module().
+			return py::int_(0);
 		})
 		.def("__repr__", [](const EngineModule& m) {
 			return m.pythonOwned() ? std::string("<EngineModule (Python's)>") : "<EngineModule " + std::to_string(m.currentId()) + ">";

@@ -19,6 +19,7 @@
 #include "rackpy/runtime/json.hpp"
 #include "../history/history.hpp"
 #include "app.hpp"
+#include "../engine/engine.hpp"
 #include "../support/overrides.hpp"
 
 namespace pybind11 {
@@ -501,6 +502,10 @@ void bindRack(py::module_ raw, py::module_ appModule) {
 	py::class_<HostCable, ExternalWidget>(appModule, "HostCableWidget", "A cable widget Rack made, a borrowed view.")
 		.def_property("color", [](const HostCable& h) { return hostAs<CW>(h).color; },
 			[](const HostCable& h, NVGcolor c) { hostAs<CW>(h).color = c; })
+		.def("get_cable", [](const HostCable& h) -> py::object {
+			auto* cable = hostAs<CW>(h).getCable();
+			return cable ? bindings::engineCableHandle(cable->id) : py::none();
+		}, "Rack's: the engine cable this widget owns, as a Cable handle found by ID, or None.")
 		.def_property_readonly("input_plug", [](const HostCable& h) { return wrapper(hostAs<CW>(h).inputPlug); })
 		.def_property_readonly("output_plug", [](const HostCable& h) { return wrapper(hostAs<CW>(h).outputPlug); })
 		.def_property_readonly("input_port", [](const HostCable& h) { return wrapper(hostAs<CW>(h).inputPort); })

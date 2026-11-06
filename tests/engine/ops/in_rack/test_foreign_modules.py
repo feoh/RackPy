@@ -51,7 +51,10 @@ def test_another_plugins_module_into_the_engine_and_rack() -> None:
         notes.create_module_widget(module)  # its widget would remove it from the engine when deleted
     with pytest.raises(OwnershipError, match="does not have"):
         e.remove_module(module)
+    seen = {module}
+    old_hash = hash(module)
     e.add_module(module)
+    assert hash(module) == old_hash and module in seen
     assert in_engine(module) and module.id >= 0 and e.get_module(module.id) == module
     with pytest.raises(OwnershipError, match="already has"):
         e.add_module(module)

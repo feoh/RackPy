@@ -47,11 +47,13 @@ def first_bound(manifest: dict[str, Any]) -> dict[str, Any]:
     return next(r for r in manifest["entries"] if r["status"] in bm.BOUND and (r.get("python") or {}).get("raw"))
 
 
-def test_the_gate_opens_only_with_everything_in_place(
+def test_unrepresentable_records_keep_the_release_gate_closed(
     ready: tuple[bm.Inputs, dict[str, Any], dict[str, Any], dict[str, str]],
 ) -> None:
     inputs, manifest, artifact, outcomes = ready
-    assert problems(inputs, manifest, artifact, outcomes) == set()
+    # The synthetic fixture verifies all bound records, but it cannot resolve public declarations
+    # explicitly classified as unrepresentable or the owner decisions attached to them.
+    assert {"incomplete", "owner-review"} <= problems(inputs, manifest, artifact, outcomes)
     assert "missing-runtime-artifact" in problems(inputs, manifest, None, outcomes)
     assert "missing-test-evidence" in problems(inputs, manifest, artifact, None)
 

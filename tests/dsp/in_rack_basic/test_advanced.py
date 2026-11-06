@@ -177,9 +177,13 @@ def test_buffers_are_checked() -> None:
     misaligned = memoryview(floats(33))[1:]
     with pytest.raises(ValueError, match="16-byte"):
         fft.rfft(misaligned, good)
+    signal = array.array("f", [math.sin(2 * math.pi * 3 * k / 32) for k in range(32)])
+    expected = floats(32)
+    fft.rfft(signal, expected)
     shared = floats(40)
-    with pytest.raises(ValueError, match="overlap"):
-        fft.rfft(memoryview(shared)[:32], memoryview(shared)[4:36])
+    shared[:32] = signal
+    fft.rfft(memoryview(shared)[:32], memoryview(shared)[4:36])
+    assert shared[4:36].tolist() == pytest.approx(expected.tolist(), abs=1e-5)
     with pytest.raises(BufferError):
         fft.rfft(good, memoryview(floats(32)).toreadonly())
     with pytest.raises(ValueError, match="contiguous"):

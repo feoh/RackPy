@@ -275,8 +275,9 @@ void bindParamHandles(py::module_ engine, py::class_<EngineHandle>& cls) {
 			return a.ours() ? a.slot == o.slot : !o.ours() && a.moduleId == o.moduleId && a.paramId == o.paramId;
 		}, py::is_operator())
 		.def("__hash__", [](const ParamHandleRef& ref) {
-			return ref.ours() ? py::hash(py::int_(reinterpret_cast<uintptr_t>(ref.slot.get())))
-				: py::hash(py::make_tuple(ref.moduleId, ref.paramId));
+			// Rack may remap a foreign handle through update_param_handle(), changing its IDs and equality basis.
+			// Foreign views therefore need an ID-independent hash to remain usable as existing dict/set keys.
+			return ref.ours() ? py::hash(py::int_(reinterpret_cast<uintptr_t>(ref.slot.get()))) : py::ssize_t(0);
 		});
 
 	cls
