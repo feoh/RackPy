@@ -246,8 +246,8 @@ struct ParserGuards {
 			throw py::value_error("process_system: clock_division is 0, and Rack would divide by it");
 	}
 	static void mpeChannel(const P& p, int channel, const char* what) {
-		if (p.channels > 1 && p.polyMode == P::MPE_MODE && channel >= N)
-			throw py::index_error(std::string(what) + ": in MPE mode the channel must be below " + std::to_string(N));
+		if (p.channels > 1 && p.polyMode == P::MPE_MODE && (channel < 0 || channel >= N))
+			throw py::index_error(std::string(what) + ": in MPE mode the channel must be from 0 to " + std::to_string(N - 1));
 	}
 };
 
@@ -258,7 +258,7 @@ void checkJsonEnum(py::dict json, const char* key, int count) {
 	py::object v = json[key];
 	if (py::isinstance<py::int_>(v) && !py::isinstance<py::bool_>(v)) {
 		long long x = v.cast<long long>();
-		if (x < 0 || x > count)
+		if (x < 0 || x >= count)
 			throw py::value_error(std::string("from_json: ") + key + " is " + std::to_string(x) + "; Rack would make an invalid enum");
 	}
 }

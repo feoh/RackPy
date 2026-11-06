@@ -252,12 +252,14 @@ void bindParamHandles(py::module_ engine, py::class_<EngineHandle>& cls) {
 			[](ParamHandleRef& ref, const std::string& text) {
 				if (!ref.ours())
 					throw runtime::Ownership("another owner's parameter handle is read-only");
+				runtime::requireMainThread("setting a parameter handle's text");
 				ref.slot->handle.text = text;
 			}, "Rack's: the label Rack shows for the mapping.")
 		.def_property("color", [](const ParamHandleRef& ref) { return ref.get().color; },
 			[](ParamHandleRef& ref, NVGcolor color) {
 				if (!ref.ours())
 					throw runtime::Ownership("another owner's parameter handle is read-only");
+				runtime::requireMainThread("setting a parameter handle's color");
 				ref.slot->handle.color = color;
 			}, "Rack's: the colour of the mapping's indicator on the param's widget.")
 		.def("__eq__", [](const ParamHandleRef& a, py::handle b) {

@@ -59,7 +59,8 @@ void testTheAbiWalk() {
 	CHECK(baseOffset(typeid(Both), typeid(Other)) > 0);
 	CHECK(baseOffset(typeid(Both), typeid(Root)) == 0);
 	CHECK(baseOffset(typeid(Diamond), typeid(Root)) == -1);  // ambiguous, as dynamic_cast says
-	CHECK(baseOffset(typeid(Diamond), typeid(Right)) == (offsetOf<Diamond, Right>(*new Diamond)));
+	Diamond diamond;
+	CHECK(baseOffset(typeid(Diamond), typeid(Right)) == (offsetOf<Diamond, Right>(diamond)));
 	CHECK(baseOffset(typeid(Hidden), typeid(Other)) == -1);  // private
 	CHECK(baseOffset(typeid(ViaVirtual), typeid(Other)) == -1);  // virtual: offset known only at run time
 	CHECK(baseOffset(typeid(ViaVirtual), typeid(Root)) >= 0);

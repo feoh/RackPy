@@ -308,6 +308,10 @@ def test_convert_template() -> None:
         dsp.convert[C.c_int16, float](array.array("f", [0.0]), array.array("i", [0]), 1)
     with pytest.raises(ValueError, match="shorter"):
         dsp.convert[C.c_int16, float](array.array("f", [0.0] * 4), out, 5)
+    # The required-byte multiplication must not wrap and turn a huge len into a tiny buffer request.
+    huge_len = 1 << (C.sizeof(C.c_size_t) * 8 - 2)
+    with pytest.raises(ValueError, match="shorter"):
+        dsp.convert[float, float](array.array("f", [1.0]), array.array("f", [0.0]), huge_len)
     with pytest.raises(BufferError):
         dsp.convert[float, float](array.array("f", [1.0]), memoryview(array.array("f", [0.0])).toreadonly(), 1)
     # Overlapping arrays of different types would be undefined in Rack's loop; the same type is a copy.

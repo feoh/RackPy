@@ -176,6 +176,9 @@ widget shows the mapping's `color` and `text`.
   again by its IDs, or `None`. Passing the module itself is Rack's deprecated
   form.
 - `module` is the module once it is in the engine, else `None`.
+- `text` and `color` are read and written on Rack's main (UI) thread only;
+  off-thread access raises `ThreadError`. This keeps a worker from racing the
+  UI while it reads the registered handle's label or indicator color.
 - `remove_param_handle` takes Python's handle out of the engine.
 
 Rack's engine keeps raw pointers to its handles, so RackPy keeps each handle

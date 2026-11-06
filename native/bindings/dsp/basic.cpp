@@ -21,7 +21,9 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <cstring>
+#include <limits>
 #include <string>
 #include <utility>
 #include <vector>
@@ -139,7 +141,14 @@ void* samples(const py::buffer& buf, bool writable, size_t count, const char* wh
 			info.format + "'");
 	if (info.ndim != 1 || info.strides[0] != info.itemsize)
 		throw py::value_error(std::string("convert: ") + what + " needs a contiguous one-dimensional buffer");
-	if ((size_t) info.size * (size_t) info.itemsize < count * Sample<T>::bytes)
+	if (info.size < 0 || info.itemsize <= 0)
+		throw py::value_error(std::string("convert: ") + what + " has an invalid buffer length");
+	const size_t elements = static_cast<size_t>(info.size);
+	const size_t itemsize = static_cast<size_t>(info.itemsize);
+	if (elements > std::numeric_limits<size_t>::max() / itemsize)
+		throw py::value_error(std::string("convert: ") + what + " has an overflowing buffer length");
+	const size_t available = elements * itemsize;
+	if (count > available / Sample<T>::bytes)
 		throw py::value_error(std::string("convert: ") + what + " is shorter than len samples");
 	return info.ptr;
 }
@@ -158,11 +167,17 @@ py::cpp_function convertFunction() {
 				throw py::error_already_set();
 			const From* src = static_cast<const From*>(samples<From>(in, false, n, "in"));
 			To* dst = static_cast<To*>(samples<To>(out, true, n, "out"));
-			const char* a = reinterpret_cast<const char*>(src);
-			const char* b = reinterpret_cast<const char*>(dst);
+			const size_t inBytes = n * Sample<From>::bytes;  // samples() proved these products fit
+			const size_t outBytes = n * Sample<To>::bytes;
+			const uintptr_t a = reinterpret_cast<uintptr_t>(src);
+			const uintptr_t b = reinterpret_cast<uintptr_t>(dst);
+			const uintptr_t maxAddress = std::numeric_limits<uintptr_t>::max();
+			if (inBytes > maxAddress || outBytes > maxAddress ||
+				a > maxAddress - static_cast<uintptr_t>(inBytes) || b > maxAddress - static_cast<uintptr_t>(outBytes))
+				throw py::value_error("convert: buffer address range overflows");
 			// Rack's loop reads in[i] and writes out[i] through two pointer types: if the arrays overlap
 			// and the types differ, that is undefined (strict aliasing), so refuse it.
-			if (!std::is_same<To, From>::value && a < b + n * Sample<To>::bytes && b < a + n * Sample<From>::bytes)
+			if (!std::is_same<To, From>::value && a < b + outBytes && b < a + inBytes)
 				throw py::value_error("convert: in and out overlap; Rack's loop needs separate arrays for different types");
 			c::convertBuffer<To, From>(src, dst, n);
 		},

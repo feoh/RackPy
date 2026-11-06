@@ -5,6 +5,7 @@ The RuntimeProbe is a C++ module with one param, one input and one output, so
 it is an EngineModule: a module RackPy did not create.
 """
 
+import threading
 import warnings
 from collections.abc import Iterator
 
@@ -12,7 +13,7 @@ import pytest
 from _rackpy_host import _testing as HOOKS
 
 from rackpy import raw
-from rackpy.errors import EngineLockError, OwnershipError
+from rackpy.errors import EngineLockError, OwnershipError, ThreadError
 from rackpy.raw.engine import Cable, Engine, EngineModule, Module, ParamHandle
 
 SENTINEL_ID = 2**53
@@ -91,6 +92,25 @@ def test_a_param_handle_python_makes(probe: EngineModule) -> None:
     e.add_param_handle(h)
     try:
         assert registered(h)
+        thread_errors: list[ThreadError] = []
+
+        def write_text() -> None:
+            h.text = "worker"
+
+        def write_color() -> None:
+            h.color = raw.nanovg.rgb(0, 0, 0)
+
+        def write_on_worker() -> None:
+            for write in (write_text, write_color):
+                try:
+                    write()
+                except ThreadError as error:
+                    thread_errors.append(error)
+
+        worker = threading.Thread(target=write_on_worker)
+        worker.start()
+        worker.join()
+        assert len(thread_errors) == 2 and h.text == "Cutoff" and h.color == raw.nanovg.rgb(255, 128, 0)
         with pytest.raises(OwnershipError, match="already has"):
             e.add_param_handle(h)
         with pytest.raises(OwnershipError, match="update_param_handle"):

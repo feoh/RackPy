@@ -11,7 +11,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <cmath>
 #include <list>
 #include <map>
 #include <memory>
@@ -52,12 +51,6 @@ struct ModuleInfoView {
 
 void requireMain(const char* what) {
 	runtime::requireMainThread(what);
-}
-
-float finite(float v, const char* name) {
-	if (!std::isfinite(v))
-		throw py::value_error(std::string(name) + " must be finite");
-	return v;
 }
 
 }  // namespace
@@ -116,7 +109,7 @@ void bindSettings(py::module_ m) {
 		return st::field; \
 	}, [](const Settings&, float value) { \
 		requireMain("changing Rack's settings"); \
-		st::field = finite(value, #python); \
+		st::field = value; \
 	});
 #define RACKPY_READONLY_SETTING(python, field) \
 	cls.def_property_readonly(#python, [](const Settings&) { \

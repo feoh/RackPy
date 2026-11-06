@@ -60,8 +60,10 @@ def test_settings_read_and_write(restore: None) -> None:
     assert isinstance(S.is_plugin, bool) and S.settings_path.endswith("settings.json")
     S.rack_brightness = 0.25
     assert S.rack_brightness == 0.25
-    with pytest.raises(ValueError, match="finite"):
-        S.rack_brightness = math.nan
+    S.rack_brightness = math.nan
+    assert math.isnan(S.rack_brightness)
+    S.rack_brightness = math.inf
+    assert S.rack_brightness == math.inf
     S.window_size = Vec(800, 600)
     assert (S.window_size.x, S.window_size.y) == (800, 600)
     S.cable_colors = [raw.nanovg.rgb(255, 0, 0)]

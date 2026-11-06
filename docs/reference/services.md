@@ -224,8 +224,10 @@ the reverse, so it would fail if a property reached the wrong global.
 
 - **Read-only.** Rack sets `headless` and `is_plugin` at start-up and relies
   on them afterwards, so they cannot be changed.
-- **Checks.** Float settings must be finite, and `thread_count` must be at
-  least 1. Rack's engine reads `thread_count` at each block; changing it takes
+- **Checks.** Float settings are assigned without clamping or finite-value
+  validation, matching Rack's public globals; non-finite values may have
+  surprising effects in Rack's consumers. `thread_count` must be at least 1.
+  Rack's engine reads `thread_count` at each block; changing it takes
   Rack's exclusive engine lock (with the GIL released), so it waits for the
   current block and synchronizes the update with that read.
 - **Copies.** `plugin_settings` (Rack's `pluginSettingsJ`) is Python data;

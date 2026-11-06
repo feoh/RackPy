@@ -408,6 +408,13 @@ def test_midi_parser_refuses_what_rack_would_get_wrong() -> None:
         p.press_note(60, 9, 100)
     with pytest.raises(IndexError):
         p.release_note(60, 9, 0)
+    with pytest.raises(IndexError, match="0 to 3"):
+        p.release_note(60, -1, 0)  # the signed channel reaches Rack's unchecked gates[channel] in MPE mode
+    non_mpe = dsp.MidiParser[4]()
+    non_mpe.set_channels(2)
+    non_mpe.press_note(60, 0, 100)
+    non_mpe.release_note(60, -1, 0)  # outside MPE, -1 asks Rack to find the note's active channel
+    assert not non_mpe.gates[0]
     with pytest.raises(ValueError, match="MIDI channel 9"):
         p.process_cc(message([0xB9, 0x01, 5]))  # the mod wheel, by MIDI channel
     with pytest.raises(ValueError, match="MIDI channel 9"):
@@ -433,7 +440,7 @@ def test_midi_parser_refuses_what_rack_would_get_wrong() -> None:
         with pytest.raises(ValueError, match="rotate_index"):
             p.rotate_index = bad
     # Patch JSON is untrusted.
-    for invalid in ({"channels": 99}, {"monoMode": 9}, {"polyMode": -1}):
+    for invalid in ({"channels": 99}, {"monoMode": 9}, {"monoMode": 4}, {"polyMode": -1}, {"polyMode": 4}):
         with pytest.raises(ValueError):
             p.from_json(invalid)
     p.from_json({"channels": 2, "clockDivision": 3})
