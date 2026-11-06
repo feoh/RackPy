@@ -117,14 +117,20 @@ struct ConvolverArray {
 			default: return {v.tmpBlock, 2 * v.blockSize};
 		}
 	}
-	float& at(int i) const {
+	float& at(py::ssize_t i) const {
 		auto [data, n] = resolve();
-		int size = (int) n;
-		if (i < 0)
-			i += size;
-		if (i < 0 || i >= size)
-			throw py::index_error("index out of range (the array has " + std::to_string(n) + " floats)");
-		return data[i];
+		size_t index;
+		if (i < 0) {
+			size_t magnitude = static_cast<size_t>(-(i + 1)) + 1;
+			if (magnitude > n)
+				throw py::index_error("index out of range (the array has " + std::to_string(n) + " floats)");
+			index = n - magnitude;
+		} else {
+			index = static_cast<size_t>(i);
+			if (index >= n)
+				throw py::index_error("index out of range (the array has " + std::to_string(n) + " floats)");
+		}
+		return data[index];
 	}
 };
 
@@ -228,8 +234,8 @@ void bindAdvanced(py::module_ m) {
 	py::class_<ConvolverArray>(m, "ConvolverArray", "One of RealTimeConvolver's arrays, as a live view that finds the "
 		"array again at each access (set_kernel reallocates); it keeps the convolver alive.")
 		.def("__len__", [](const ConvolverArray& v) { return v.resolve().second; })
-		.def("__getitem__", [](const ConvolverArray& v, int i) { return v.at(i); }, py::arg("i"))
-		.def("__setitem__", [](const ConvolverArray& v, int i, float x) { v.at(i) = x; }, py::arg("i"), py::arg("x"))
+		.def("__getitem__", [](const ConvolverArray& v, py::ssize_t i) { return v.at(i); }, py::arg("i"))
+		.def("__setitem__", [](const ConvolverArray& v, py::ssize_t i, float x) { v.at(i) = x; }, py::arg("i"), py::arg("x"))
 		.def("tolist", [](const ConvolverArray& v) {
 			auto [data, n] = v.resolve();
 			if (n == 0)

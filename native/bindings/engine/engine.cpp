@@ -56,6 +56,22 @@ void requireEmptyRack(const EngineHandle& h, const char* what) {
 			"widgets own: clear the rack first (Rack's patch manager does)");
 }
 
+RackModule* masterModuleNoLock(Engine& engine, py::handle value) {
+	if (value.is_none())
+		return nullptr;
+	if (py::isinstance<ModuleRef>(value))
+		return &value.cast<const ModuleRef&>().get();
+	if (!py::isinstance<EngineModule>(value))
+		throw py::type_error("expected a rackpy.raw.engine.Module, EngineModule, or None");
+	const auto& module = value.cast<const EngineModule&>();
+	if (module.pythonOwned())
+		return module.owned->module.get();
+	RackModule* found = engine.getModule_NoLock(module.currentId());
+	if (!found)
+		throw runtime::StaleHandle("module " + std::to_string(module.currentId()) + " is no longer in Rack's engine");
+	return found;
+}
+
 }  // namespace
 
 void underEngineLock(Engine& engine, bool exclusive, const std::function<void()>& f) {
@@ -319,25 +335,13 @@ void bindEngine(py::module_ engine) {
 			"Rack's: a SaveEvent for every module, as before Rack saves a patch.")
 		// The master module and timing
 		.def("set_master_module", [](const EngineHandle& h, py::object module) {
-			RackModule* m = module.is_none() ? nullptr : &engineModule(h, module);
-			locked(h, "set_master_module", [m](Engine& e) { e.setMasterModule(m); });
-		}, py::arg("module"), "Rack's: the module whose audio clock steps the engine, or None for Rack's own thread.")
+			locked(h, "set_master_module", [module](Engine& e) { e.setMasterModule(masterModuleNoLock(e, module)); });
+		}, py::arg("module"), "Rack's: the module whose audio clock steps the engine (it need not be in it), or None for Rack's own thread.")
 		.def("set_master_module_no_lock", [](const EngineHandle& h, py::object module) {
 			Engine& engine = h.get();
 			requireLockHeld("set_master_module_no_lock");
-			RackModule* m = nullptr;
-			if (py::isinstance<EngineModule>(module)) {
-				m = engine.getModule_NoLock(module.cast<const EngineModule&>().currentId());
-				if (!m)
-					throw runtime::StaleHandle("the module is no longer in Rack's engine");
-			}
-			else if (!module.is_none()) {
-				m = &moduleArgument(module);  // a RackPy module: no lock needed to resolve it
-				if (engine.getModule_NoLock(m->id) != m)
-					throw runtime::Ownership("the module is not in Rack's engine");
-			}
-			engine.setMasterModule_NoLock(m);
-		}, py::arg("module"), "Rack's setMasterModule_NoLock: only inside a callback Rack runs under the exclusive lock.")
+			engine.setMasterModule_NoLock(masterModuleNoLock(engine, module));
+		}, py::arg("module"), "Rack's setMasterModule_NoLock: only inside a callback Rack runs under the exclusive lock; the module need not be in the engine.")
 		.def("get_master_module", [](const EngineHandle& h) { return engineModuleHandle(h.get().getMasterModule()); })
 		.def("step_block", [](const EngineHandle& h, int frames) {
 			if (frames < 1 || frames > (1 << 16))

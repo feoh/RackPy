@@ -91,6 +91,13 @@ def rp24a(state: dict[str, Any]) -> None:
     e.reset_module(m)
     RESULT["reset"] = e.get_param_value(m, 0)
     master = e.get_master_module()
+    outside = model.create_module()
+    assert isinstance(outside, Module)
+    e.set_master_module(outside)
+    RESULT["external_master"] = [e.get_master_module() is outside, not e.has_module(outside)]
+    assert RESULT["external_master"] == [True, True]
+    e.set_master_module(master)
+    outside.close()
     e.set_master_module(m)  # Rack's own thread stops stepping
     try:
         frame, block, time = e.get_frame(), e.get_block(), e.get_block_time()
@@ -155,6 +162,8 @@ def rp24b(state: dict[str, Any]) -> None:
     RESULT["cable_readded"] = [c.in_engine, c.id == cable_id]
 
     h = ParamHandle()
+    external_master = model.create_module()
+    assert isinstance(external_master, Module)
     h.text = "Python"
     e.add_param_handle(h)
     e.update_param_handle(h, owned.id, 0)
@@ -168,11 +177,22 @@ def rp24b(state: dict[str, Any]) -> None:
         e.update_param_handle_no_lock(h, owned.id, 0)
         e.set_master_module_no_lock(a)
         moved = e.get_master_module() is a
+        e.set_master_module_no_lock(external_master)
+        external_moved = e.get_master_module() is external_master
         e.set_master_module_no_lock(master)
-        RESULT["no_lock"] = [found, handle, h.module_id == owned.id, moved, e.get_master_module() is master]
+        RESULT["no_lock"] = [
+            found,
+            handle,
+            h.module_id == owned.id,
+            moved,
+            external_moved,
+            e.get_master_module() is master,
+        ]
+        assert external_moved
 
     ON_RESET.append(no_lock)
     e.reset_module(a)
+    external_master.close()
     # Keep only the two widgetless modules and their cable in the engine's own JSON. This is loaded later in
     # the disposable test Rack after its scene is cleared; it must never touch a user's live patch.
     patch = e.to_json()
