@@ -877,11 +877,12 @@ def test_switches_buttons_sliders_ports_screws_and_panels() -> None:
             widget.close()
 
 
-def test_svg_loads_are_transactional() -> None:
+def test_svg_reload_matches_rack_failure_semantics() -> None:
     image = svg()
     with pytest.raises(raw.Exception):
         image.load_file("/nonexistent.svg")
-    assert image.get_size() == Vec(30, 30)  # unlike Rack's, the previous image stays
+    assert image.get_size() == Vec() and image.handle is None
+    image = svg()
     image.load_string("not an svg")  # NanoSVG parses anything, here into an empty image
     assert image.get_size() == Vec() and image.handle is not None
 

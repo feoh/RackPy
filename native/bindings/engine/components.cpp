@@ -151,9 +151,9 @@ void infoMethod(py::classh<Info, InfoTrampoline<Info>>& cls, const char* name, R
 	cls.def(name, [method, base](Info& info) {
 		if (auto* alias = ::rackpy::rttiCast<InfoTrampoline<Info>*>(&info)) {
 			alias->check();
-			return (info.*method)();  // virtual dispatch reaches a Python override, or the trampoline's Rack fallback
+			return base(info);  // qualified Rack implementation: super() must not re-enter the Python override
 		}
-		return (info.*method)();
+		return (info.*method)();  // real Rack subclasses retain virtual dispatch
 	}, doc);
 }
 
