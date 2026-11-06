@@ -173,6 +173,33 @@ validation of this exact commit or its artifacts. The run's optional external
 link checker failed on GitHub HTTP 429; required documentation and candidate,
 native and host jobs passed.
 
+## Newer CI-only candidate (2026-11-06)
+
+[CI run 42263701004](https://github.com/feoh/RackPy/actions/runs/42263701004)
+completed successfully on source commit `449cbaec87865a13e175dbc44d1c62b07b296f7e`.
+It built and exercised separate Linux x86_64, macOS x86_64/arm64 and Windows
+x86_64 candidates. These are **not the published `v0.1.0.dev1` assets**, and the
+workflow retained evidence, not the candidate binaries. Manifests, checksums and
+verification summaries downloaded from that run are preserved in
+[`candidate-ci-449cbae/`](candidate-ci-449cbae/) (summary trailing whitespace
+normalized by repository hooks); hashes identify CI's artifact
+bytes, which were not independently downloaded or rehashed in this audit. The
+manifest consistency checker also passed locally with each of the four
+candidate introspection files downloaded from that run; that is an export
+consistency check, not independent proof of every binding's semantics.
+
+Linux Ubuntu 16.04 and 20.04 checks reported all ten examples loading, patch
+reopen, windowed rendering, upgrade and uninstall. macOS and Windows reports
+also record ten examples and patch reopen, but explicitly report their candidate
+windowed checks **not run**: those runners could not create an OpenGL window.
+A green job does not turn those OPEN checks into passes. The Linux dynamic
+audio-path guard does not establish equivalent macOS/Windows instrumentation.
+This evidence does not extend the published Linux-only support statement or
+prove physical-device performance, full API coverage, or official-sample parity.
+
+A new publication needs explicit owner approval and fresh, obtainable artifacts
+from an approved source; the retained CI evidence is not an artifact download.
+
 ## Scope and remaining gates
 
 - This is an **early partial preview**, not complete supported-public-API

@@ -1,0 +1,245 @@
+machine: Microsoft Windows Server 2025 Datacenter 10.0.26100 (build 26100), AMD64, win-x64
+Rack:  at C:\Users\runneradmin\.cache\rackpy\sdk\host\extracted\win-x64-2852c52c052155af\Rack2Free
+environment: APPDATA COMPUTERNAME COMSPEC GITHUB_ACTIONS LOCALAPPDATA NUMBER_OF_PROCESSORS OS PATH PATHEXT PROCESSOR_ARCHITECTURE PROGRAMDATA PROGRAMFILES PSExecutionPolicyPreference PSMODULEPATH SYSTEMDRIVE SYSTEMROOT TEMP TMP USERDOMAIN USERNAME USERPROFILE WINDIR
+PATH: C:\Windows\System32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0
+info  System32\vcruntime140.dll present (a Visual C++ redistributable is installed): True
+ok    every artifact matches SHA256SUMS
+windowed: Rack gets no OpenGL window here: [1.275 warn src/window/Window.cpp:256 errorCallback] GLFW error 65542: WGL: The driver does not appear to support OpenGL
+example plugins: 10
+ok    RackPyConfiguration-1: Rack exited cleanly
+ok    RackPyConfiguration-1: RackPy started
+ok    RackPyConfiguration-1: loaded RackPyConfiguration
+ok    RackPyConfiguration-1: no module failed
+ok    RackPyConfiguration-1: no Python error
+ok    RackPyConfiguration-1: Python finalized
+ok    RackPyConfiguration-1: the only Python Rack loaded is the plugin's bundled runtime
+ok    RackPyConfiguration-1: every DLL Rack loaded is Rack's, the plugin's or Windows'
+ok    RackPyConfiguration-1: Rack extracted the package
+ok    RackPyConfiguration-1: the autosave keeps all 2 modules
+ok    RackPyConfiguration-2: Rack exited cleanly
+ok    RackPyConfiguration-2: RackPy started
+ok    RackPyConfiguration-2: loaded RackPyConfiguration
+ok    RackPyConfiguration-2: no module failed
+ok    RackPyConfiguration-2: no Python error
+ok    RackPyConfiguration-2: Python finalized
+ok    RackPyConfiguration-2: reopened, all 2 modules still there
+OPEN  RackPyConfiguration-window: windowed rendering of 2 model(s) not run: Rack gets no OpenGL 2.0 window on this PC
+ok    RackPyDarkPanels-1: Rack exited cleanly
+ok    RackPyDarkPanels-1: RackPy started
+ok    RackPyDarkPanels-1: loaded RackPyDarkPanels
+ok    RackPyDarkPanels-1: no module failed
+ok    RackPyDarkPanels-1: no Python error
+ok    RackPyDarkPanels-1: Python finalized
+ok    RackPyDarkPanels-1: the only Python Rack loaded is the plugin's bundled runtime
+ok    RackPyDarkPanels-1: every DLL Rack loaded is Rack's, the plugin's or Windows'
+ok    RackPyDarkPanels-1: Rack extracted the package
+ok    RackPyDarkPanels-1: the autosave keeps all 1 modules
+ok    RackPyDarkPanels-2: Rack exited cleanly
+ok    RackPyDarkPanels-2: RackPy started
+ok    RackPyDarkPanels-2: loaded RackPyDarkPanels
+ok    RackPyDarkPanels-2: no module failed
+ok    RackPyDarkPanels-2: no Python error
+ok    RackPyDarkPanels-2: Python finalized
+ok    RackPyDarkPanels-2: reopened, all 1 modules still there
+OPEN  RackPyDarkPanels-window: windowed rendering of 1 model(s) not run: Rack gets no OpenGL 2.0 window on this PC
+ok    RackPyDrawing-1: Rack exited cleanly
+ok    RackPyDrawing-1: RackPy started
+ok    RackPyDrawing-1: loaded RackPyDrawing
+ok    RackPyDrawing-1: no module failed
+ok    RackPyDrawing-1: no Python error
+ok    RackPyDrawing-1: Python finalized
+ok    RackPyDrawing-1: the only Python Rack loaded is the plugin's bundled runtime
+ok    RackPyDrawing-1: every DLL Rack loaded is Rack's, the plugin's or Windows'
+ok    RackPyDrawing-1: Rack extracted the package
+ok    RackPyDrawing-1: the autosave keeps all 1 modules
+ok    RackPyDrawing-2: Rack exited cleanly
+ok    RackPyDrawing-2: RackPy started
+ok    RackPyDrawing-2: loaded RackPyDrawing
+ok    RackPyDrawing-2: no module failed
+ok    RackPyDrawing-2: no Python error
+ok    RackPyDrawing-2: Python finalized
+ok    RackPyDrawing-2: reopened, all 1 modules still there
+OPEN  RackPyDrawing-window: windowed rendering of 1 model(s) not run: Rack gets no OpenGL 2.0 window on this PC
+ok    RackPyDsp-1: Rack exited cleanly
+ok    RackPyDsp-1: RackPy started
+ok    RackPyDsp-1: loaded RackPyDsp
+ok    RackPyDsp-1: no module failed
+ok    RackPyDsp-1: no Python error
+ok    RackPyDsp-1: Python finalized
+ok    RackPyDsp-1: the only Python Rack loaded is the plugin's bundled runtime
+ok    RackPyDsp-1: every DLL Rack loaded is Rack's, the plugin's or Windows'
+ok    RackPyDsp-1: Rack extracted the package
+ok    RackPyDsp-1: the autosave keeps all 1 modules
+ok    RackPyDsp-2: Rack exited cleanly
+ok    RackPyDsp-2: RackPy started
+ok    RackPyDsp-2: loaded RackPyDsp
+ok    RackPyDsp-2: no module failed
+ok    RackPyDsp-2: no Python error
+ok    RackPyDsp-2: Python finalized
+ok    RackPyDsp-2: reopened, all 1 modules still there
+OPEN  RackPyDsp-window: windowed rendering of 1 model(s) not run: Rack gets no OpenGL 2.0 window on this PC
+ok    RackPyExpanders-1: Rack exited cleanly
+ok    RackPyExpanders-1: RackPy started
+ok    RackPyExpanders-1: loaded RackPyExpanders
+ok    RackPyExpanders-1: no module failed
+ok    RackPyExpanders-1: no Python error
+ok    RackPyExpanders-1: Python finalized
+ok    RackPyExpanders-1: the only Python Rack loaded is the plugin's bundled runtime
+ok    RackPyExpanders-1: every DLL Rack loaded is Rack's, the plugin's or Windows'
+ok    RackPyExpanders-1: Rack extracted the package
+ok    RackPyExpanders-1: the autosave keeps all 3 modules
+ok    RackPyExpanders-2: Rack exited cleanly
+ok    RackPyExpanders-2: RackPy started
+ok    RackPyExpanders-2: loaded RackPyExpanders
+ok    RackPyExpanders-2: no module failed
+ok    RackPyExpanders-2: no Python error
+ok    RackPyExpanders-2: Python finalized
+ok    RackPyExpanders-2: reopened, all 3 modules still there
+OPEN  RackPyExpanders-window: windowed rendering of 3 model(s) not run: Rack gets no OpenGL 2.0 window on this PC
+ok    RackPyMenus-1: Rack exited cleanly
+ok    RackPyMenus-1: RackPy started
+ok    RackPyMenus-1: loaded RackPyMenus
+ok    RackPyMenus-1: no module failed
+ok    RackPyMenus-1: no Python error
+ok    RackPyMenus-1: Python finalized
+ok    RackPyMenus-1: the only Python Rack loaded is the plugin's bundled runtime
+ok    RackPyMenus-1: every DLL Rack loaded is Rack's, the plugin's or Windows'
+ok    RackPyMenus-1: Rack extracted the package
+ok    RackPyMenus-1: the autosave keeps all 1 modules
+ok    RackPyMenus-2: Rack exited cleanly
+ok    RackPyMenus-2: RackPy started
+ok    RackPyMenus-2: loaded RackPyMenus
+ok    RackPyMenus-2: no module failed
+ok    RackPyMenus-2: no Python error
+ok    RackPyMenus-2: Python finalized
+ok    RackPyMenus-2: reopened, all 1 modules still there
+OPEN  RackPyMenus-window: windowed rendering of 1 model(s) not run: Rack gets no OpenGL 2.0 window on this PC
+ok    RackPyOscillator-1: Rack exited cleanly
+ok    RackPyOscillator-1: RackPy started
+ok    RackPyOscillator-1: loaded RackPyOscillator
+ok    RackPyOscillator-1: no module failed
+ok    RackPyOscillator-1: no Python error
+ok    RackPyOscillator-1: Python finalized
+ok    RackPyOscillator-1: the only Python Rack loaded is the plugin's bundled runtime
+ok    RackPyOscillator-1: every DLL Rack loaded is Rack's, the plugin's or Windows'
+ok    RackPyOscillator-1: Rack extracted the package
+ok    RackPyOscillator-1: the autosave keeps all 1 modules
+ok    RackPyOscillator-2: Rack exited cleanly
+ok    RackPyOscillator-2: RackPy started
+ok    RackPyOscillator-2: loaded RackPyOscillator
+ok    RackPyOscillator-2: no module failed
+ok    RackPyOscillator-2: no Python error
+ok    RackPyOscillator-2: Python finalized
+ok    RackPyOscillator-2: reopened, all 1 modules still there
+OPEN  RackPyOscillator-window: windowed rendering of 1 model(s) not run: Rack gets no OpenGL 2.0 window on this PC
+ok    RackPyPolyphony-1: Rack exited cleanly
+ok    RackPyPolyphony-1: RackPy started
+ok    RackPyPolyphony-1: loaded RackPyPolyphony
+ok    RackPyPolyphony-1: no module failed
+ok    RackPyPolyphony-1: no Python error
+ok    RackPyPolyphony-1: Python finalized
+ok    RackPyPolyphony-1: the only Python Rack loaded is the plugin's bundled runtime
+ok    RackPyPolyphony-1: every DLL Rack loaded is Rack's, the plugin's or Windows'
+ok    RackPyPolyphony-1: Rack extracted the package
+ok    RackPyPolyphony-1: the autosave keeps all 2 modules
+ok    RackPyPolyphony-2: Rack exited cleanly
+ok    RackPyPolyphony-2: RackPy started
+ok    RackPyPolyphony-2: loaded RackPyPolyphony
+ok    RackPyPolyphony-2: no module failed
+ok    RackPyPolyphony-2: no Python error
+ok    RackPyPolyphony-2: Python finalized
+ok    RackPyPolyphony-2: reopened, all 2 modules still there
+OPEN  RackPyPolyphony-window: windowed rendering of 2 model(s) not run: Rack gets no OpenGL 2.0 window on this PC
+ok    RackPyStateEvents-1: Rack exited cleanly
+ok    RackPyStateEvents-1: RackPy started
+ok    RackPyStateEvents-1: loaded RackPyStateEvents
+ok    RackPyStateEvents-1: no module failed
+ok    RackPyStateEvents-1: no Python error
+ok    RackPyStateEvents-1: Python finalized
+ok    RackPyStateEvents-1: the only Python Rack loaded is the plugin's bundled runtime
+ok    RackPyStateEvents-1: every DLL Rack loaded is Rack's, the plugin's or Windows'
+ok    RackPyStateEvents-1: Rack extracted the package
+ok    RackPyStateEvents-1: the autosave keeps all 1 modules
+ok    RackPyStateEvents-2: Rack exited cleanly
+ok    RackPyStateEvents-2: RackPy started
+ok    RackPyStateEvents-2: loaded RackPyStateEvents
+ok    RackPyStateEvents-2: no module failed
+ok    RackPyStateEvents-2: no Python error
+ok    RackPyStateEvents-2: Python finalized
+ok    RackPyStateEvents-2: reopened, all 1 modules still there
+OPEN  RackPyStateEvents-window: windowed rendering of 1 model(s) not run: Rack gets no OpenGL 2.0 window on this PC
+ok    RackPyTemplate-1: Rack exited cleanly
+ok    RackPyTemplate-1: RackPy started
+ok    RackPyTemplate-1: loaded RackPyTemplate
+ok    RackPyTemplate-1: no module failed
+ok    RackPyTemplate-1: no Python error
+ok    RackPyTemplate-1: Python finalized
+ok    RackPyTemplate-1: the only Python Rack loaded is the plugin's bundled runtime
+ok    RackPyTemplate-1: every DLL Rack loaded is Rack's, the plugin's or Windows'
+ok    RackPyTemplate-1: Rack extracted the package
+ok    RackPyTemplate-1: the autosave keeps all 1 modules
+ok    RackPyTemplate-2: Rack exited cleanly
+ok    RackPyTemplate-2: RackPy started
+ok    RackPyTemplate-2: loaded RackPyTemplate
+ok    RackPyTemplate-2: no module failed
+ok    RackPyTemplate-2: no Python error
+ok    RackPyTemplate-2: Python finalized
+ok    RackPyTemplate-2: reopened, all 1 modules still there
+OPEN  RackPyTemplate-window: windowed rendering of 1 model(s) not run: Rack gets no OpenGL 2.0 window on this PC
+ok    two RackPy plugins: one is refused, by name
+ok    two RackPy plugins: Rack exits cleanly
+ok    a loader of another RackPy version: refused with the reason
+ok    a loader of another RackPy version: Rack exits cleanly
+ok    an incomplete Python runtime: refused with the reason
+ok    an incomplete Python runtime: Rack exits cleanly
+info  a missing vcruntime140.dll: System32 has one, so this PC cannot show the failure
+ok    dll-missing: Rack exited cleanly
+ok    dll-missing: RackPy started
+ok    dll-missing: loaded RackPyConfiguration
+ok    dll-missing: no module failed
+ok    dll-missing: no Python error
+ok    dll-missing: Python finalized
+ok    a damaged python314.dll: refused with Windows' reason
+ok    a damaged python314.dll: Rack exits cleanly
+ok    decoys: Rack exited cleanly
+ok    decoys: RackPy started
+ok    decoys: loaded RackPyConfiguration
+ok    decoys: no module failed
+ok    decoys: no Python error
+ok    decoys: Python finalized
+ok    decoys: the only Python Rack loaded is the plugin's bundled runtime
+ok    decoys: every DLL Rack loaded is Rack's, the plugin's or Windows'
+ok    decoys: no DLL from the current directory or PATH was loaded
+ok    an unreadable python314.dll: refused with Windows' reason
+ok    an unreadable python314.dll: Rack exits cleanly
+ok    motw-package: Rack exited cleanly
+ok    motw-package: RackPy started
+ok    motw-package: loaded RackPyConfiguration
+ok    motw-package: no module failed
+ok    motw-package: no Python error
+ok    motw-package: Python finalized
+info  a downloaded package: 0 extracted file(s) carry the Mark of the Web
+info  a folder whose every file has the Mark of the Web: Rack's exit status 0; plugin loaded: True; RackPy started: True
+ok    unicode: Rack exited cleanly
+ok    unicode: RackPy started
+ok    unicode: loaded RackPyConfiguration
+ok    unicode: no module failed
+ok    unicode: no Python error
+ok    unicode: Python finalized
+ok    unicode: the only Python Rack loaded is the plugin's bundled runtime
+ok    unicode: every DLL Rack loaded is Rack's, the plugin's or Windows'
+info  a 368-character runtime path: Rack's exit status killed; plugin loaded: False
+info  LongPathsEnabled: 1
+ok    upgrade: Rack exited cleanly
+ok    upgrade: RackPy started
+ok    upgrade: loaded RackPyConfiguration
+ok    upgrade: no module failed
+ok    upgrade: no Python error
+ok    upgrade: Python finalized
+ok    upgrade: the only Python Rack loaded is the plugin's bundled runtime
+ok    upgrade: every DLL Rack loaded is Rack's, the plugin's or Windows'
+ok    upgrade: the patch still has its 2 modules
+ok    uninstall: Rack exits cleanly
+ok    uninstall: RackPy is gone
+
+RESULT: every check run here passed; 10 OPEN (not run on this machine, not passed)

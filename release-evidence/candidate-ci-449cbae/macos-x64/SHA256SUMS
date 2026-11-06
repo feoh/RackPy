@@ -1,0 +1,14 @@
+b2df5dbd5d39938848d5405d7cd591138567e6776c6095703cabcbdec7b25486  RackPyConfiguration-2.0.0-mac-x64.vcvplugin
+bf5623c20932edb09cd9b730636d0f7caff2b3e2ccc8c7690200442cade6d0bd  RackPyDarkPanels-2.0.0-mac-x64.vcvplugin
+f4da8353f2c8d961b443715019fb92c7d8ae6d4950e81a5e3bd41ecf03732b0c  RackPyDrawing-2.0.0-mac-x64.vcvplugin
+5c5ba433b3598c065d5eec2960a6b2134c7fdfee3ac96bbe2edc4ad0fa176e33  RackPyDsp-2.0.0-mac-x64.vcvplugin
+753b4ac560c9aba97d1c0972b222ff041537966b84d68f3860a01cb7b9d287c9  RackPyExpanders-2.0.0-mac-x64.vcvplugin
+202d43d6b352d3ba832ff78df30e7003fb31db2427aae94e0aacbb3ffc5e062c  RackPyMenus-2.0.0-mac-x64.vcvplugin
+95b1e5bdbf616c05dc91195cca2cb070f62b799f4e5fa7ae5f26a851b23e264d  RackPyOscillator-2.0.0-mac-x64.vcvplugin
+88a7177c5451e5f7ebf2fbe05d24abea58bef79fb0353ab16cccf78c53c9f6d5  RackPyPolyphony-2.0.0-mac-x64.vcvplugin
+5ccfc1dc906ef6d99d9b34f3e79cfb8b6fe2130c13053253e08d370812a7bf1e  RackPyStateEvents-2.0.0-mac-x64.vcvplugin
+0aae6b5fb7b19fa5c9c2800257eb8039ff57c3f2db261de38ebde97dd3f6162c  RackPyTemplate-2.0.0-mac-x64.vcvplugin
+77d4520e49e68f254cfb025b32d0d54820953c11ba246700728e83f39603553e  manifest.json
+539a7925b6164f982670307dde1440abf43fa8e803c5acb532b7758ae9bada4b  rackpy-0.1.0.dev1+g449cbaec8-source.tar.gz
+1997178579e38bd7ed7162fbeebfcdd0fccd9a68c947a917b89fc7dd30a6fd60  rackpy-0.1.0.dev1-py3-none-any.whl
+cb74c75347721c6d24111b306de9e3565f35828c520f0bee8c3413e2a4eb39d0  rackpy-runtime-0.1.0.dev1+g449cbaec8-mac-x64.tar.zst

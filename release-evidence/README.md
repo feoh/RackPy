@@ -1,9 +1,10 @@
 # Release evidence
 
-What RackPy's full-surface claim rests on, platform by platform (RP-42). Everything here except this README and
-`coverage/scope-review.md` is written by `bin/release-evidence collect RUN` from one finished CI run, and names
-that run and its commit: the evidence is tied to an immutable ref, not to a working tree. `collect` and `promote`
-require a completed run for the current commit and reject tracked working-tree changes. These checks do not lock
+What a future RackPy full-surface claim must rest on, platform by platform (RP-42). The coverage, sample and
+run reports listed below are written by `bin/release-evidence collect RUN` from one finished CI run and name that
+run and its commit. The separate candidate audit and its retained CI evidence do not constitute those reports.
+`collect` and `promote` require a completed run for the current commit and reject tracked working-tree changes.
+These checks do not lock
 the checkout: do not edit or switch its files while collecting or promoting evidence.
 
 The owner-approved practical partial-candidate audit is recorded separately in
@@ -50,8 +51,9 @@ state, not a failure to hide.
 
 Reported, not waived:
 
-- No real GPU: CI draws Rack's window with software OpenGL (Mesa llvmpipe on Linux and Windows, Apple's software
-  renderer on macOS).
+- No real GPU: CI uses software OpenGL for applicable tests. In the candidate install checks of
+  [run 42263701004](https://github.com/feoh/RackPy/actions/runs/42263701004), the macOS and Windows runners
+  could not create a Rack OpenGL window; their windowed candidate checks remain open.
 - The audio-path guard (`LD_PRELOAD`) exists on Linux only; on macOS and Windows its tests are skipped, so the
   samples that cite them do not pass there (RP-43).
 - `rack::system::runProcessDetached` on Windows asks UAC to elevate; it has no unattended test there.

@@ -1,0 +1,522 @@
+{
+  "artifacts": [
+    {
+      "content_sha256": "08303a6a763b11011b3b663758c362e376985b46590b4a8ac189b44c1b1888b3",
+      "file": "rackpy-runtime-0.1.0.dev1+g449cbaec8-mac-x64.tar.zst",
+      "role": "runtime bundle: input to bin/rackpy-plugin build; not itself a plugin to install",
+      "sha256": "cb74c75347721c6d24111b306de9e3565f35828c520f0bee8c3413e2a4eb39d0",
+      "size": 27720907
+    },
+    {
+      "content_sha256": "0f49c735eeca70d3b26eb63a043700bb72ab4c0b422036d1243bc90442628455",
+      "example": "configuration",
+      "file": "RackPyConfiguration-2.0.0-mac-x64.vcvplugin",
+      "models": [
+        "Shaper",
+        "Splitter"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "b2df5dbd5d39938848d5405d7cd591138567e6776c6095703cabcbdec7b25486",
+      "size": 27722265,
+      "slug": "RackPyConfiguration"
+    },
+    {
+      "content_sha256": "92bb6821706fd5ca2843490115c3875dac759e472e00a14cc9cbdec75c9c3d41",
+      "example": "dark-panels",
+      "file": "RackPyDarkPanels-2.0.0-mac-x64.vcvplugin",
+      "models": [
+        "Lantern"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "bf5623c20932edb09cd9b730636d0f7caff2b3e2ccc8c7690200442cade6d0bd",
+      "size": 27725050,
+      "slug": "RackPyDarkPanels"
+    },
+    {
+      "content_sha256": "f1a71717addf7acc2966547cd220269b2e8370c09046a41fb2fee60ee70e1b6f",
+      "example": "drawing",
+      "file": "RackPyDrawing-2.0.0-mac-x64.vcvplugin",
+      "models": [
+        "Meter"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "f4da8353f2c8d961b443715019fb92c7d8ae6d4950e81a5e3bd41ecf03732b0c",
+      "size": 27721802,
+      "slug": "RackPyDrawing"
+    },
+    {
+      "content_sha256": "181a265176a972d852790ae8f6543a75b03e9ddca238e6570591c3cc070f6482",
+      "example": "dsp",
+      "file": "RackPyDsp-2.0.0-mac-x64.vcvplugin",
+      "models": [
+        "Filter"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "5c5ba433b3598c065d5eec2960a6b2134c7fdfee3ac96bbe2edc4ad0fa176e33",
+      "size": 27732379,
+      "slug": "RackPyDsp"
+    },
+    {
+      "content_sha256": "94ec09e6bdaeed980806ab27b9ce61e3890d113acdb9d47dc8ebaeb9392ac00c",
+      "example": "expanders",
+      "file": "RackPyExpanders-2.0.0-mac-x64.vcvplugin",
+      "models": [
+        "Source",
+        "Receiver",
+        "Peeker"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "753b4ac560c9aba97d1c0972b222ff041537966b84d68f3860a01cb7b9d287c9",
+      "size": 27729857,
+      "slug": "RackPyExpanders"
+    },
+    {
+      "content_sha256": "802a5d90716122f84b440d5658f4a878a2f8dcbc7f3316b3b403ec32c2139cf5",
+      "example": "menus",
+      "file": "RackPyMenus-2.0.0-mac-x64.vcvplugin",
+      "models": [
+        "Switchboard"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "202d43d6b352d3ba832ff78df30e7003fb31db2427aae94e0aacbb3ffc5e062c",
+      "size": 27724825,
+      "slug": "RackPyMenus"
+    },
+    {
+      "content_sha256": "b436eeb777d5ce46001b8d1814df305dd4bc3f11669f95094fa0814591690b01",
+      "example": "oscillator",
+      "file": "RackPyOscillator-2.0.0-mac-x64.vcvplugin",
+      "models": [
+        "Oscillator"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "95b1e5bdbf616c05dc91195cca2cb070f62b799f4e5fa7ae5f26a851b23e264d",
+      "size": 27729058,
+      "slug": "RackPyOscillator"
+    },
+    {
+      "content_sha256": "5cda0b057d1b8c20862404ee49466783aca4b35a21af32cc649e048b5f5370a1",
+      "example": "polyphony",
+      "file": "RackPyPolyphony-2.0.0-mac-x64.vcvplugin",
+      "models": [
+        "PolySine",
+        "PolySineScalar"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "88a7177c5451e5f7ebf2fbe05d24abea58bef79fb0353ab16cccf78c53c9f6d5",
+      "size": 27729203,
+      "slug": "RackPyPolyphony"
+    },
+    {
+      "content_sha256": "66fb140e971d95f5d41d4a01da66cadaa3d49b9ffc6d3687b3d6ebe784d2963a",
+      "example": "state-and-events",
+      "file": "RackPyStateEvents-2.0.0-mac-x64.vcvplugin",
+      "models": [
+        "Sequencer"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "5ccfc1dc906ef6d99d9b34f3e79cfb8b6fe2130c13053253e08d370812a7bf1e",
+      "size": 27728150,
+      "slug": "RackPyStateEvents"
+    },
+    {
+      "content_sha256": "13fb87fc4ceff7e3405e8b03ef7ba7c5662521c2bbe7b674c82b8aed21834038",
+      "example": "template",
+      "file": "RackPyTemplate-2.0.0-mac-x64.vcvplugin",
+      "models": [
+        "Starter"
+      ],
+      "role": "example plugin: copy into Rack's plugins folder",
+      "sha256": "0aae6b5fb7b19fa5c9c2800257eb8039ff57c3f2db261de38ebde97dd3f6162c",
+      "size": 27724352,
+      "slug": "RackPyTemplate"
+    },
+    {
+      "content_sha256": "a11d39df0c997b4d37e81474575173cef438317c198ff81fc0d72a7c8092bbf9",
+      "file": "rackpy-0.1.0.dev1-py3-none-any.whl",
+      "role": "developer package: pip/uv-installable rackpy for editors, type checkers and offline graph tests; runs nothing in Rack",
+      "sha256": "1997178579e38bd7ed7162fbeebfcdd0fccd9a68c947a917b89fc7dd30a6fd60",
+      "size": 147749
+    },
+    {
+      "content_sha256": "e34d5ba1e187878dbe80f883ca0be7f37fa78c9be25b905c10738895b1fc0635",
+      "file": "rackpy-0.1.0.dev1+g449cbaec8-source.tar.gz",
+      "role": "corresponding source (GPL-3.0-or-later)",
+      "sha256": "539a7925b6164f982670307dde1440abf43fa8e803c5acb532b7758ae9bada4b",
+      "size": 2470165
+    }
+  ],
+  "commit": "449cbaec87865a13e175dbc44d1c62b07b296f7e",
+  "dirty": false,
+  "excluded_from_runtime": {
+    "bin/idle3": "starts IDLE",
+    "bin/idle3.14": "starts IDLE",
+    "bin/pip": "starts pip",
+    "bin/pip3": "starts pip",
+    "bin/pip3.14": "starts pip",
+    "lib/itcl4.3.8": "Tcl's library, needed only by _tkinter",
+    "lib/libtcl9.0.dylib": "Tcl, needed only by _tkinter",
+    "lib/libtcl9tk9.0.dylib": "Tk, needed only by _tkinter",
+    "lib/python3.14/ensurepip": "bundles a pip wheel",
+    "lib/python3.14/idlelib": "IDLE, a Tk application",
+    "lib/python3.14/lib-dynload/_dbm.cpython-314-darwin.so": "Berkeley DB: the Sleepycat license adds its own source obligations, and Rack plugins have no use for it",
+    "lib/python3.14/lib-dynload/_tkinter.cpython-314-darwin.so": "Tk's GUI event loop cannot run in Rack",
+    "lib/python3.14/site-packages/pip": "pip cannot install into a running Rack; it vendors other libraries",
+    "lib/python3.14/site-packages/pip-26.2.2.dist-info": "pip's metadata",
+    "lib/python3.14/tkinter": "imports _tkinter",
+    "lib/python3.14/turtle.py": "imports tkinter",
+    "lib/python3.14/turtledemo": "Tk demonstrations",
+    "lib/tcl9": "Tcl's library, needed only by _tkinter",
+    "lib/tcl9.0": "Tcl's library, needed only by _tkinter",
+    "lib/thread3.0.6": "Tcl's thread extension, needed only by _tkinter",
+    "lib/tk9.0": "Tk's library, needed only by _tkinter"
+  },
+  "inputs": {
+    "build_tools": {
+      "git": "git version 2.55.0",
+      "python": "3.14.7",
+      "uv": "uv 0.9.18 (0cee76417 2025-12-16)",
+      "zlib": "1.2.12",
+      "zstd": "1.5.7"
+    },
+    "commit": "449cbaec87865a13e175dbc44d1c62b07b296f7e",
+    "dirty": false,
+    "macos_floor": "10.15",
+    "python_runtime": {
+      "file": "cpython-3.14.9+20261021-x86_64-apple-darwin-install_only.tar.gz",
+      "flavor": "install_only",
+      "platform": "x86_64-apple-darwin",
+      "release": "20261021",
+      "root": "python",
+      "sha256": "600cf336dd007e7c72318214fd0708a56c555b516964175df4a748e4ff0487a2",
+      "source": "https://github.com/astral-sh/python-build-standalone",
+      "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.14.9%2B20261021-x86_64-apple-darwin-install_only.tar.gz",
+      "version": "3.14.9"
+    },
+    "rack": {
+      "commit": "061ccf63c1758599396ac1bb10d47345d9d34076",
+      "version": "2.6.6"
+    },
+    "rack_sdk": {
+      "platform": "mac-x64",
+      "root": "Rack-SDK",
+      "sha256": "9b8b0d7582ca25fac879f8f64de40f2481df2fd903b65f3abb5d6801689060ec",
+      "size": 8080438,
+      "url": "https://vcvrack.com/downloads/Rack-SDK-2.6.6-mac-x64.zip"
+    },
+    "rackpy_version": "0.1.0.dev1+g449cbaec8",
+    "toolchain": {
+      "compiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+      "machine": "x86_64",
+      "macos": "15.7.9",
+      "sdk": "15.5"
+    },
+    "uv_lock_sha256": "0b39e006a997291126bdef991c3797eb0f9a8c7912c00fc6a054907718715058"
+  },
+  "mach_o": {
+    "RackPy/plugin.dylib": {
+      "code_signature": {
+        "authority": [],
+        "checked": true,
+        "error": null,
+        "flags": "0x2(adhoc)",
+        "signature": "adhoc",
+        "team": "not set",
+        "valid": true
+      },
+      "cpu": "mac-x64",
+      "install_name": "@rpath/plugin.dylib",
+      "minos": "10.15",
+      "needed": [
+        "/tmp/Rack2/libRack.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "runpath": [],
+      "sdk": "15.5"
+    },
+    "RackPy/python/bin/python3.14": {
+      "code_signature": {
+        "authority": [],
+        "checked": true,
+        "error": null,
+        "flags": "0x2(adhoc)",
+        "signature": "adhoc",
+        "team": "not set",
+        "valid": true
+      },
+      "cpu": "mac-x64",
+      "install_name": null,
+      "minos": "10.15",
+      "needed": [
+        "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+        "/usr/lib/libSystem.B.dylib",
+        "/usr/lib/libz.1.dylib",
+        "/usr/lib/libedit.3.dylib",
+        "/usr/lib/libncurses.5.4.dylib",
+        "/usr/lib/libpanel.5.4.dylib",
+        "/System/Library/Frameworks/SystemConfiguration.framework/Versions/A/SystemConfiguration"
+      ],
+      "runpath": [
+        "@executable_path/../lib"
+      ],
+      "sdk": "15.0"
+    },
+    "RackPy/python/lib/libpython3.14.dylib": {
+      "code_signature": {
+        "authority": [],
+        "checked": true,
+        "error": null,
+        "flags": "0x2(adhoc)",
+        "signature": "adhoc",
+        "team": "not set",
+        "valid": true
+      },
+      "cpu": "mac-x64",
+      "install_name": "@rpath/libpython3.14.dylib",
+      "minos": "10.15",
+      "needed": [
+        "/usr/lib/libSystem.B.dylib",
+        "/usr/lib/libz.1.dylib",
+        "/usr/lib/libedit.3.dylib",
+        "/usr/lib/libncurses.5.4.dylib",
+        "/usr/lib/libpanel.5.4.dylib",
+        "/System/Library/Frameworks/SystemConfiguration.framework/Versions/A/SystemConfiguration",
+        "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
+      ],
+      "runpath": [],
+      "sdk": "15.0"
+    },
+    "RackPy/rackpy_host.so": {
+      "code_signature": {
+        "authority": [],
+        "checked": true,
+        "error": null,
+        "flags": "0x2(adhoc)",
+        "signature": "adhoc",
+        "team": "not set",
+        "valid": true
+      },
+      "cpu": "mac-x64",
+      "install_name": "@rpath/rackpy_host.so",
+      "minos": "10.15",
+      "needed": [
+        "@rpath/libpython3.14.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "runpath": [
+        "@loader_path/python/lib"
+      ],
+      "sdk": "15.5"
+    },
+    "plugins/RackPyDsp/kernels/dsp.so": {
+      "code_signature": {
+        "authority": [],
+        "checked": true,
+        "error": null,
+        "flags": "0x2(adhoc)",
+        "signature": "adhoc",
+        "team": "not set",
+        "valid": true
+      },
+      "cpu": "mac-x64",
+      "install_name": "@rpath/dsp.so",
+      "minos": "10.15",
+      "needed": [
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "runpath": [],
+      "sdk": "15.5"
+    },
+    "plugins/RackPyExpanders/kernels/expanders.so": {
+      "code_signature": {
+        "authority": [],
+        "checked": true,
+        "error": null,
+        "flags": "0x2(adhoc)",
+        "signature": "adhoc",
+        "team": "not set",
+        "valid": true
+      },
+      "cpu": "mac-x64",
+      "install_name": "@rpath/expanders.so",
+      "minos": "10.15",
+      "needed": [
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "runpath": [],
+      "sdk": "15.5"
+    },
+    "plugins/RackPyPolyphony/kernels/polyphony.so": {
+      "code_signature": {
+        "authority": [],
+        "checked": true,
+        "error": null,
+        "flags": "0x2(adhoc)",
+        "signature": "adhoc",
+        "team": "not set",
+        "valid": true
+      },
+      "cpu": "mac-x64",
+      "install_name": "@rpath/polyphony.so",
+      "minos": "10.15",
+      "needed": [
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "runpath": [],
+      "sdk": "15.5"
+    }
+  },
+  "macos_floor": "10.15",
+  "note": "RackPy release candidate. Not published: nothing here may be distributed without owner approval.",
+  "platform": "mac-x64",
+  "rackpy_version": "0.1.0.dev1+g449cbaec8",
+  "schema_version": 1,
+  "source_date_epoch": 1793986760,
+  "third_party": [
+    {
+      "component": "CPython 3.14.9",
+      "licenses": [
+        "Python-2.0",
+        "CNRI-Python"
+      ],
+      "text": "licenses/python/LICENSE.cpython.txt",
+      "used_by": "the interpreter"
+    },
+    {
+      "component": "libraries of the _bz2 module (bz2)",
+      "licenses": [
+        "bzip2-1.0.6"
+      ],
+      "text": "licenses/python/LICENSE.bzip2.txt",
+      "used_by": "_bz2"
+    },
+    {
+      "component": "libraries of the _ctypes module (ffi)",
+      "licenses": [
+        "MIT"
+      ],
+      "text": "licenses/python/LICENSE.libffi.txt",
+      "used_by": "_ctypes"
+    },
+    {
+      "component": "libraries of the _curses module ()",
+      "licenses": [
+        "X11"
+      ],
+      "text": "licenses/python/LICENSE.ncurses.txt",
+      "used_by": "_curses"
+    },
+    {
+      "component": "libraries of the _curses_panel module ()",
+      "licenses": [
+        "X11"
+      ],
+      "text": "licenses/python/LICENSE.ncurses.txt",
+      "used_by": "_curses_panel"
+    },
+    {
+      "component": "libraries of the _decimal module (mpdec)",
+      "licenses": [
+        "BSD-2-Clause"
+      ],
+      "text": "licenses/python/LICENSE.mpdecimal.txt",
+      "used_by": "_decimal"
+    },
+    {
+      "component": "libraries of the _hashlib module (crypto)",
+      "licenses": [
+        "Apache-2.0"
+      ],
+      "text": "licenses/python/LICENSE.openssl-3.txt",
+      "used_by": "_hashlib"
+    },
+    {
+      "component": "libraries of the _lzma module (lzma)",
+      "licenses": [
+        "0BSD"
+      ],
+      "text": "licenses/python/LICENSE.liblzma.txt",
+      "used_by": "_lzma"
+    },
+    {
+      "component": "libraries of the _sqlite3 module (sqlite3)",
+      "licenses": [
+        "Zlib"
+      ],
+      "text": "licenses/python/LICENSE.sqlite.txt, licenses/python/LICENSE.zlib-ng.txt, licenses/python/LICENSE.zlib.txt",
+      "used_by": "_sqlite3"
+    },
+    {
+      "component": "libraries of the _ssl module (crypto, ssl)",
+      "licenses": [
+        "Apache-2.0"
+      ],
+      "text": "licenses/python/LICENSE.openssl-3.txt",
+      "used_by": "_ssl"
+    },
+    {
+      "component": "libraries of the _uuid module (uuid)",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "text": "licenses/python/LICENSE.libuuid.txt",
+      "used_by": "_uuid"
+    },
+    {
+      "component": "libraries of the _zstd module (zstd)",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "text": "licenses/python/LICENSE.zstd.txt",
+      "used_by": "_zstd"
+    },
+    {
+      "component": "libraries of the binascii module ()",
+      "licenses": [
+        "Zlib"
+      ],
+      "text": "licenses/python/LICENSE.zlib-ng.txt, licenses/python/LICENSE.zlib.txt",
+      "used_by": "binascii"
+    },
+    {
+      "component": "libraries of the pyexpat module (expat)",
+      "licenses": [
+        "MIT"
+      ],
+      "text": "licenses/python/LICENSE.expat.txt",
+      "used_by": "pyexpat"
+    },
+    {
+      "component": "libraries of the readline module ()",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "text": "licenses/python/LICENSE.libedit.txt",
+      "used_by": "readline"
+    },
+    {
+      "component": "libraries of the zlib module ()",
+      "licenses": [
+        "Zlib"
+      ],
+      "text": "licenses/python/LICENSE.zlib-ng.txt, licenses/python/LICENSE.zlib.txt",
+      "used_by": "zlib"
+    },
+    {
+      "component": "pybind11 3.1.0",
+      "licenses": [
+        "BSD-3-Clause"
+      ],
+      "text": "licenses/pybind11-LICENSE",
+      "used_by": "compiled into rackpy_host.so"
+    }
+  ],
+  "upstream_machine_like_paths": [
+    "python/lib/python3.14/_sysconfig_vars__darwin_darwin.json: /Users/runner"
+  ]
+}
