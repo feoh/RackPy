@@ -1,0 +1,1027 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Security and trust" href="security.html"><link rel="prev" title="The embedded runtime" href="../runtime.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>Callbacks and the laboratory - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input aria-label="Toggle navigation of Reference" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/explanation/callbacks.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/explanation/callbacks.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="callbacks-and-the-laboratory">
+<h1>Callbacks and the laboratory<a class="headerlink" href="#callbacks-and-the-laboratory" title="Link to this heading">¶</a></h1>
+<p>Rack calls back into a module from several threads. Where a callback runs
+decides whether Python may run there, and RackPy’s rules follow from that
+(<a class="reference internal" href="../decisions/003-lifetimes-and-threads.html"><span class="std std-doc">ADR 003</span></a>, the
+<a class="reference internal" href="../reference/callback-matrix.html"><span class="std std-doc">callback matrix</span></a>).</p>
+<div class="warning admonition">
+<p class="admonition-title">The laboratory is not real-time audio</p>
+<p>The callback laboratory runs Python versions of a module’s audio callbacks
+<strong>offline</strong>, for experiments, teaching and tests. Rack’s engine never runs a
+laboratory module, a patch can never create or enable one, and nothing about
+its speed says anything about production performance. Production modules
+process audio with <a class="reference internal" href="../how-to/dsp.html"><span class="std std-doc">native kernels</span></a>.</p>
+</div>
+<section id="every-public-virtual-domain-python-path-or-blocker">
+<h2>Every public virtual: domain, Python path or blocker<a class="headerlink" href="#every-public-virtual-domain-python-path-or-blocker" title="Link to this heading">¶</a></h2>
+<p>The <a class="reference internal" href="../reference/callback-paths.html"><span class="std std-doc">generated execution inventory</span></a> joins
+<strong>all 434 public virtual declarations</strong> from <code class="docutils literal notranslate"><span class="pre">bin/callback-matrix</span></code> to
+<code class="docutils literal notranslate"><span class="pre">bindings/manifest.json</span></code>: exact upstream ID (including overloads), execution
+domain, Python names, status and per-symbol semantics. Regenerate it with
+<code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">bin/generate_bindings.py</span> <span class="pre">generate</span></code>; <code class="docutils literal notranslate"><span class="pre">check</span></code> and
+<code class="docutils literal notranslate"><span class="pre">tests/coverage/test_callback_paths.py</span></code> enforce freshness and the unchanged
+denominator. It includes destructors (owner/GC lifetime mappings, not Python
+virtual overrides) and <code class="docutils literal notranslate"><span class="pre">Exception::what</span></code> (a value/exception translation).</p>
+<p>A callable wrapper or native adapter is <strong>not</strong> synchronous Python callback
+coverage. The 33 audio and MIDI driver/device virtuals (<code class="docutils literal notranslate"><span class="pre">audio::Driver</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audio::Device</span></code>, <code class="docutils literal notranslate"><span class="pre">midi::Driver</span></code>, <code class="docutils literal notranslate"><span class="pre">midi::Device::getName</span></code>, <code class="docutils literal notranslate"><span class="pre">Input</span></code> and
+<code class="docutils literal notranslate"><span class="pre">InputQueue::onMessage</span></code>) have a native production path, natively configured
+answers or queued notifications, plus a laboratory Python path since RP-22F
+(<a class="reference internal" href="#laboratory-audio-and-midi-drivers">laboratory audio and MIDI drivers</a>). The five <code class="docutils literal notranslate"><span class="pre">audio::Port</span></code> stream
+virtuals have synchronous Python overrides on a <strong>Python-driven device</strong>,
+never on Rack’s driver threads; queued Rack notifications are a different
+path (<a class="reference internal" href="../reference/audio.html"><span class="std std-doc">audio</span></a>).</p>
+<p>The audit also kept <strong>21 UI virtuals</strong> on <code class="docutils literal notranslate"><span class="pre">PlugWidget</span></code>, <code class="docutils literal notranslate"><span class="pre">RackScrollWidget</span></code>,
+<code class="docutils literal notranslate"><span class="pre">RackWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">Scene</span></code> as blockers, because only borrowed host views
+reached them. RP-28F
+(<code class="docutils literal notranslate"><span class="pre">tk-rackpy-28f-python-subclass-trampolines-for-plugw-154b61</span></code>) found that no
+plugin can override them: the last three have PRIVATE constructors, and only
+<code class="docutils literal notranslate"><span class="pre">CableWidget</span></code>’s constructor makes a usable <code class="docutils literal notranslate"><span class="pre">PlugWidget</span></code>. By a decision
+the owner approved on 2026-10-26 (<a class="reference internal" href="../coverage.html#completeness-policy"><span class="std std-ref">coverage policy 11</span></a>),
+the host views’ calls on Rack’s own instances are their mappings, and the
+records are <code class="docutils literal notranslate"><span class="pre">implemented</span></code> again.</p>
+<p>None of these entries disappear from the denominator, and this inventory
+promotes nothing to <code class="docutils literal notranslate"><span class="pre">verified</span></code>. Laboratory paths prove only the documented
+offline semantics, not driver/engine scheduling equivalence or support on
+macOS/Windows.</p>
+</section>
+<section id="why-python-never-runs-on-rack-s-audio-threads">
+<h2>Why Python never runs on Rack’s audio threads<a class="headerlink" href="#why-python-never-runs-on-rack-s-audio-threads" title="Link to this heading">¶</a></h2>
+<p>Rack calls a module’s <code class="docutils literal notranslate"><span class="pre">process()</span></code> once per sample, on its engine threads,
+while it holds its engine lock. Python there would need the GIL, which any
+other Python thread may hold for milliseconds; at 48 kHz a frame lasts about
+21 µs. RP-07 measured it: with one busy Python thread, the 99th percentile of
+a per-frame Python call was about 1.1 ms (<a class="reference internal" href="../decisions/004-performance-budgets.html"><span class="std std-doc">ADR 004</span></a>).
+So in normal use RackPy refuses every Python override of a callback Rack can
+run on an engine or audio driver thread:</p>
+<ul class="simple">
+<li><p>a <a class="reference internal" href="../reference/python/rackpy/plugin/index.html#rackpy.plugin.ModuleClass" title="rackpy.plugin.ModuleClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">rackpy.plugin.ModuleClass</span></code></a> that defines <code class="docutils literal notranslate"><span class="pre">process</span></code>,
+<code class="docutils literal notranslate"><span class="pre">process_bypass</span></code>, <code class="docutils literal notranslate"><span class="pre">step</span></code>, <code class="docutils literal notranslate"><span class="pre">on_sample_rate_change</span></code>, <code class="docutils literal notranslate"><span class="pre">on_set_master</span></code>,
+<code class="docutils literal notranslate"><span class="pre">on_unset_master</span></code> or <code class="docutils literal notranslate"><span class="pre">on_expander_change</span></code> is refused with <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> when
+the class is defined, and the message points to native kernels and to the
+laboratory;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Module.set_event_handlers</span></code> refuses the sample-rate and master events;</p></li>
+<li><p>a Python <code class="docutils literal notranslate"><span class="pre">Quantity</span></code> cannot define the value methods Rack also calls from
+its engine thread (<a class="reference internal" href="../reference/values.html#quantity"><span class="std std-ref">values</span></a>).</p></li>
+</ul>
+</section>
+<section id="why-the-laboratory-is-a-bench-not-rack-s-engine">
+<h2>Why the laboratory is a bench, not Rack’s engine<a class="headerlink" href="#why-the-laboratory-is-a-bench-not-rack-s-engine" title="Link to this heading">¶</a></h2>
+<p>The obvious design, running a Python <code class="docutils literal notranslate"><span class="pre">process()</span></code> inside Rack’s own engine on
+a laboratory switch, cannot be built from Rack’s public API (RP-22, step 1).
+Rack’s engine threads call <code class="docutils literal notranslate"><span class="pre">Module::doProcess</span></code>, which picks <code class="docutils literal notranslate"><span class="pre">process</span></code> or
+<code class="docutils literal notranslate"><span class="pre">processBypass</span></code>; it, and everything a host needs to imitate the engine, is
+<code class="docutils literal notranslate"><span class="pre">PRIVATE</span></code> in the pinned SDK:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Declaration (<code class="docutils literal notranslate"><span class="pre">include/</span></code>)</p></th>
+<th class="head"><p>Why a host needs it</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">engine::Module::doProcess(const</span> <span class="pre">ProcessArgs&amp;)</span></code></p></td>
+<td><p>the per-frame call that chooses process or processBypass</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">engine::Module::setBypassed(bool)</span></code></p></td>
+<td><p>the bypass state processBypass depends on</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">engine::Module::setExpanderModule(Module*,</span> <span class="pre">uint8_t)</span></code></p></td>
+<td><p>expander pointers between neighbours</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">engine::Engine::Engine()</span></code>, <code class="docutils literal notranslate"><span class="pre">~Engine()</span></code></p></td>
+<td><p>a second, offline engine</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Inside Rack’s real engine, a Python <code class="docutils literal notranslate"><span class="pre">process()</span></code> would run on engine worker
+threads (where Python is refused) or block them on the GIL. So the
+laboratory provides its own host instead.</p>
+</section>
+<section id="the-laboratory-bench">
+<h2>The laboratory bench<a class="headerlink" href="#the-laboratory-bench" title="Link to this heading">¶</a></h2>
+<p>A <a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.Bench" title="rackpy.laboratory.Bench"><code class="xref py py-class docutils literal notranslate"><span class="pre">rackpy.laboratory.Bench</span></code></a> is an offline host for RackPy modules.
+Python steps it on Rack’s main thread, and it does what Rack 2.6.6’s engine
+does, using only public API:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">step(frames)</span></code> processes every module once per frame, in the order they
+were added, calling <code class="docutils literal notranslate"><span class="pre">process</span></code>, or <code class="docutils literal notranslate"><span class="pre">process_bypass</span></code> for a bypassed module,
+with Rack’s <code class="docutils literal notranslate"><span class="pre">ProcessArgs</span></code> (sample rate, sample time, frame); then it moves
+every cable’s voltages (one cable copies its output’s channels, stacked
+cables sum, non-finite voltages become 0), then flips requested expander
+messages. Signals through a cable therefore arrive one frame later, and
+feedback loops behave as in Rack.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">add</span></code>, <code class="docutils literal notranslate"><span class="pre">remove</span></code>, <code class="docutils literal notranslate"><span class="pre">connect</span></code>, <code class="docutils literal notranslate"><span class="pre">disconnect</span></code>, <code class="docutils literal notranslate"><span class="pre">set_bypassed</span></code>,
+<code class="docutils literal notranslate"><span class="pre">set_sample_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">set_master_module</span></code>, <code class="docutils literal notranslate"><span class="pre">reset_module</span></code>,
+<code class="docutils literal notranslate"><span class="pre">randomize_module</span></code>, <code class="docutils literal notranslate"><span class="pre">prepare_save</span></code> and <code class="docutils literal notranslate"><span class="pre">prepare_save_module</span></code> dispatch the
+events Rack’s engine dispatches, in the same order: adding gives
+<code class="docutils literal notranslate"><span class="pre">AddEvent</span></code> then <code class="docutils literal notranslate"><span class="pre">SampleRateChangeEvent</span></code>; a cable gives a <code class="docutils literal notranslate"><span class="pre">PortChangeEvent</span></code>
+to each port it newly connects; bypassing clears the outputs first;
+removing gives <code class="docutils literal notranslate"><span class="pre">RemoveEvent</span></code>, then <code class="docutils literal notranslate"><span class="pre">UnsetMasterEvent</span></code> if it was the
+master, then clears its neighbours’ expanders and its own.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_expander(module,</span> <span class="pre">side,</span> <span class="pre">neighbour)</span></code> places a module beside another,
+as Rack’s rack does for adjacent module widgets (it sets the expander’s
+module ID); at the next <code class="docutils literal notranslate"><span class="pre">step</span></code>, as in Rack’s <code class="docutils literal notranslate"><span class="pre">stepBlock</span></code>, the expander’s
+pointer follows and each module whose neighbour changed gets an
+<code class="docutils literal notranslate"><span class="pre">ExpanderChangeEvent</span></code>. Rack’s own <code class="docutils literal notranslate"><span class="pre">setExpanderModule</span></code> is <code class="docutils literal notranslate"><span class="pre">PRIVATE</span></code>; the
+bench repeats what it does with the public <code class="docutils literal notranslate"><span class="pre">Expander</span></code> fields.
+Because Rack’s engine does not run a bench’s modules, Python may use
+their <a class="reference internal" href="../reference/engine-module.html#id2"><span class="std std-ref">expanders</span></a> directly:
+assign RackPy message buffers, write them, request a flip and read the
+swapped buffers after the step.</p></li>
+</ul>
+<p>It runs ordinary RackPy modules (with native kernels) and laboratory modules
+side by side. In the live-Rack tests, a patch of kernels, a bypass route,
+stacked and polyphonic cables, non-finite voltages and a feedback loop gives
+the same port values on a bench as in Rack’s engine, frame for frame
+(<code class="docutils literal notranslate"><span class="pre">tests/laboratory/in_rack/test_engine_reference.py</span></code>). The same sequence of
+edits made in Rack’s engine and on a bench gives each module the same
+events, in the same order (<code class="docutils literal notranslate"><span class="pre">tests/laboratory/in_rack/test_engine_events.py</span></code>).</p>
+<p>What a bench does <strong>not</strong> reproduce: engine worker threads and their
+scheduling, the audio driver thread and master-module timing, parameter
+smoothing, the CPU meter, plug lights, and Rack’s random module IDs (a bench
+gives the lowest free one). A module’s own <code class="docutils literal notranslate"><span class="pre">is_bypassed()</span></code> reads Rack’s
+engine and stays <code class="docutils literal notranslate"><span class="pre">False</span></code> on a bench, and Rack’s <code class="docutils literal notranslate"><span class="pre">toJson</span></code> does not save a
+bench’s bypass state; ask the bench. A bench has no audio clock, so its
+master module is only a designation.</p>
+</section>
+<section id="laboratory-modules">
+<h2>Laboratory modules<a class="headerlink" href="#laboratory-modules" title="Link to this heading">¶</a></h2>
+<p>Trusted code enables the laboratory with <a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.enable" title="rackpy.laboratory.enable"><code class="xref py py-func docutils literal notranslate"><span class="pre">rackpy.laboratory.enable()</span></code></a>;
+until then every laboratory call raises
+<a class="reference internal" href="../reference/python/rackpy/errors/index.html#rackpy.errors.LaboratoryError" title="rackpy.errors.LaboratoryError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LaboratoryError</span></code></a>. A laboratory module is a
+<a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.ModuleClass" title="rackpy.laboratory.ModuleClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">rackpy.laboratory.ModuleClass</span></code></a>, which is a
+<a class="reference internal" href="../reference/python/rackpy/plugin/index.html#rackpy.plugin.ModuleClass" title="rackpy.plugin.ModuleClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">rackpy.plugin.ModuleClass</span></code></a> that may also override <code class="docutils literal notranslate"><span class="pre">process</span></code>,
+<code class="docutils literal notranslate"><span class="pre">process_bypass</span></code> and the deprecated <code class="docutils literal notranslate"><span class="pre">step</span></code>, every module event and Rack’s
+JSON virtuals:</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">laboratory_bench.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">laboratory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.laboratory</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bench</span><span class="p">,</span> <span class="n">ModuleClass</span><span class="p">,</span> <span class="n">ProcessArgs</span>
+
+<span class="n">laboratory</span><span class="o">.</span><span class="n">enable</span><span class="p">()</span>  <span class="c1"># trusted code only; patches never enable it</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Doubler</span><span class="p">(</span><span class="n">ModuleClass</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">ProcessArgs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># offline: on the bench, never in Rack's engine</span>
+        <span class="n">inp</span><span class="p">,</span> <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">set_channels</span><span class="p">(</span><span class="n">inp</span><span class="o">.</span><span class="n">get_channels</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">inp</span><span class="o">.</span><span class="n">get_channels</span><span class="p">()):</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">set_voltage</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">inp</span><span class="o">.</span><span class="n">get_voltage</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="n">c</span><span class="p">)</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">bench</span> <span class="o">=</span> <span class="n">Bench</span><span class="p">(</span><span class="mi">48000</span><span class="p">)</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">doubler</span> <span class="o">=</span> <span class="n">Doubler</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">doubler</span><span class="o">.</span><span class="n">module</span><span class="p">)</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">doubler</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_voltage</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># the cable delivers the source's voltage one frame later</span>
+    <span class="k">assert</span> <span class="n">doubler</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_voltage</span><span class="p">()</span> <span class="o">==</span> <span class="mf">3.0</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">laboratory</span><span class="o">.</span><span class="n">disable</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">super().process(args)</span></code> and <code class="docutils literal notranslate"><span class="pre">super().process_bypass(args)</span></code> run Rack’s own
+implementations, as in a C++ subclass: Rack’s <code class="docutils literal notranslate"><span class="pre">process</span></code> calls <code class="docutils literal notranslate"><span class="pre">step()</span></code>, and
+its <code class="docutils literal notranslate"><span class="pre">processBypass</span></code> copies each bypass route’s input to its output.</p>
+<p><strong>Events and JSON.</strong> The event methods (<code class="docutils literal notranslate"><span class="pre">on_add</span></code>, <code class="docutils literal notranslate"><span class="pre">on_remove</span></code>,
+<code class="docutils literal notranslate"><span class="pre">on_bypass</span></code>, <code class="docutils literal notranslate"><span class="pre">on_un_bypass</span></code>, <code class="docutils literal notranslate"><span class="pre">on_port_change</span></code>, <code class="docutils literal notranslate"><span class="pre">on_reset</span></code>, <code class="docutils literal notranslate"><span class="pre">on_randomize</span></code>,
+<code class="docutils literal notranslate"><span class="pre">on_save</span></code>, <code class="docutils literal notranslate"><span class="pre">on_sample_rate_change</span></code>, <code class="docutils literal notranslate"><span class="pre">on_set_master</span></code>, <code class="docutils literal notranslate"><span class="pre">on_unset_master</span></code>,
+<code class="docutils literal notranslate"><span class="pre">on_expander_change</span></code>) and the JSON methods (<code class="docutils literal notranslate"><span class="pre">module_to_json</span></code>,
+<code class="docutils literal notranslate"><span class="pre">module_from_json</span></code>, <code class="docutils literal notranslate"><span class="pre">params_to_json</span></code>, <code class="docutils literal notranslate"><span class="pre">params_from_json</span></code>, <code class="docutils literal notranslate"><span class="pre">data_to_json</span></code>,
+<code class="docutils literal notranslate"><span class="pre">data_from_json</span></code>) are called synchronously, where Rack would call them, and
+<em>replace</em> Rack’s implementation: <code class="docutils literal notranslate"><span class="pre">super()</span></code> runs it. That is the difference
+from <a class="reference internal" href="../reference/python/rackpy/plugin/index.html#rackpy.plugin.ModuleClass" title="rackpy.plugin.ModuleClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">rackpy.plugin.ModuleClass</span></code></a>, whose <code class="docutils literal notranslate"><span class="pre">on_reset</span></code> runs <em>after</em>
+Rack has reset the parameters; a laboratory <code class="docutils literal notranslate"><span class="pre">on_reset</span></code> that does not call
+<code class="docutils literal notranslate"><span class="pre">super()</span></code> resets nothing, as in C++. Rack’s own <code class="docutils literal notranslate"><span class="pre">toJson</span></code> calls the Python
+<code class="docutils literal notranslate"><span class="pre">params_to_json</span></code> and <code class="docutils literal notranslate"><span class="pre">data_to_json</span></code> and uses what they return; returning
+<code class="docutils literal notranslate"><span class="pre">None</span></code> gives Rack’s <code class="docutils literal notranslate"><span class="pre">NULL</span></code>. <code class="docutils literal notranslate"><span class="pre">module_to_json</span></code>/<code class="docutils literal notranslate"><span class="pre">module_from_json</span></code> are Rack’s
+<code class="docutils literal notranslate"><span class="pre">Module::toJson</span></code>/<code class="docutils literal notranslate"><span class="pre">fromJson</span></code> (<code class="docutils literal notranslate"><span class="pre">ModuleClass.to_json</span></code> remains the custom-data
+handler that <code class="docutils literal notranslate"><span class="pre">data_to_json</span></code>’s <code class="docutils literal notranslate"><span class="pre">super()</span></code> calls). Rack’s <code class="docutils literal notranslate"><span class="pre">toJson</span></code> and
+<code class="docutils literal notranslate"><span class="pre">fromJson</span></code> name the module’s model, so <code class="docutils literal notranslate"><span class="pre">super()</span></code> there needs
+<code class="docutils literal notranslate"><span class="pre">ModuleClass.create(model)</span></code>; the model only names the module. Parameter
+values go through Rack’s engine, so parameter JSON, reset and randomize of a
+module with parameters need Rack’s live context (<code class="docutils literal notranslate"><span class="pre">ContextError</span></code> otherwise).</p>
+<p>The five deprecated no-argument Module events have distinct <code class="docutils literal notranslate"><span class="pre">on_add_legacy</span></code>,
+<code class="docutils literal notranslate"><span class="pre">on_remove_legacy</span></code>, <code class="docutils literal notranslate"><span class="pre">on_reset_legacy</span></code>, <code class="docutils literal notranslate"><span class="pre">on_randomize_legacy</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">on_sample_rate_change_legacy</span></code> override slots. Defining one or explicitly
+calling its base warns. Rack’s default modern event dispatches the legacy
+virtual; a modern override suppresses it unless it calls <code class="docutils literal notranslate"><span class="pre">super()</span></code>. This
+internal dispatch alone does not issue a deprecation warning.</p>
+<p>The rules that keep it contained:</p>
+<ul class="simple">
+<li><p><strong>Never in Rack’s engine.</strong> <code class="docutils literal notranslate"><span class="pre">Engine.add_module</span></code> refuses a laboratory
+module, <code class="docutils literal notranslate"><span class="pre">ModuleClass.factory()</span></code> refuses a laboratory class (so no model
+can create one, and no patch), and <code class="docutils literal notranslate"><span class="pre">set_kernel</span></code> refuses it (its audio is
+its Python <code class="docutils literal notranslate"><span class="pre">process</span></code>).</p></li>
+<li><p><strong>Errors go to the caller.</strong> An override that raises stops the frame
+before the cables step, and <code class="docutils literal notranslate"><span class="pre">Bench.step</span></code> raises the error; an error inside
+Rack’s code called through <code class="docutils literal notranslate"><span class="pre">super()</span></code> reaches the override that called it.
+An event override that raises does not stop the operation (Rack’s engine
+would carry on): the other modules still get their events, and the bench
+call raises the first error afterwards.</p></li>
+<li><p><strong>No reentry.</strong> A callback may not step, edit or clear any bench, as a C++
+callback may not re-enter Rack’s non-recursive engine lock; that raises
+<code class="docutils literal notranslate"><span class="pre">LaboratoryError</span></code>. Callbacks nested through Rack’s code (a <code class="docutils literal notranslate"><span class="pre">process</span></code> that
+calls <code class="docutils literal notranslate"><span class="pre">super().process</span></code>, whose <code class="docutils literal notranslate"><span class="pre">step</span></code> calls <code class="docutils literal notranslate"><span class="pre">process</span></code>, …) stop with
+<code class="docutils literal notranslate"><span class="pre">RecursionError</span></code> after 200 levels.</p></li>
+<li><p><strong>Main thread only</strong>, like the rest of the module API.</p></li>
+</ul>
+</section>
+<section id="laboratory-quantities">
+<h2>Laboratory quantities<a class="headerlink" href="#laboratory-quantities" title="Link to this heading">¶</a></h2>
+<p>Rack calls a quantity’s value and range methods (<code class="docutils literal notranslate"><span class="pre">get_value</span></code>, <code class="docutils literal notranslate"><span class="pre">set_value</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_min_value</span></code>, <code class="docutils literal notranslate"><span class="pre">get_max_value</span></code>, <code class="docutils literal notranslate"><span class="pre">get_default_value</span></code>) from its engine
+thread too, for a module’s parameters (Core MIDI-Map), so outside the
+laboratory a Python quantity cannot override them. The laboratory’s
+<a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.Quantity" title="rackpy.laboratory.Quantity"><code class="xref py py-class docutils literal notranslate"><span class="pre">rackpy.laboratory.Quantity</span></code></a>, <a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.ParamQuantity" title="rackpy.laboratory.ParamQuantity"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParamQuantity</span></code></a>
+and <a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.SwitchQuantity" title="rackpy.laboratory.SwitchQuantity"><code class="xref py py-class docutils literal notranslate"><span class="pre">SwitchQuantity</span></code></a> may; creating one needs
+<code class="docutils literal notranslate"><span class="pre">enable()</span></code>. Rack’s own code that calls them (display values and strings,
+<code class="docutils literal notranslate"><span class="pre">reset</span></code>, <code class="docutils literal notranslate"><span class="pre">randomize</span></code>, scaled values, <code class="docutils literal notranslate"><span class="pre">paramsToJson</span></code>, <code class="docutils literal notranslate"><span class="pre">paramsFromJson</span></code>,
+<code class="docutils literal notranslate"><span class="pre">setImmediateValue</span></code>’s clamping) reaches the Python override synchronously,
+and an override’s error reaches the Python caller. <code class="docutils literal notranslate"><span class="pre">super()</span></code> runs Rack’s
+implementation.</p>
+<p>Only a laboratory module takes a laboratory parameter quantity, through
+<code class="docutils literal notranslate"><span class="pre">config_param(...,</span> <span class="pre">quantity_type=...)</span></code> or its <code class="docutils literal notranslate"><span class="pre">param_quantities</span></code>; an ordinary
+module raises <code class="docutils literal notranslate"><span class="pre">LaboratoryError</span></code>, because Rack’s engine can call its
+quantities on its own threads. Were Rack ever to call a laboratory quantity
+from one of its threads, RackPy would refuse to run Python there (a
+<code class="docutils literal notranslate"><span class="pre">refused_rack_thread</span></code> diagnostic) and Rack’s implementation would answer; the
+test-hooks build checks exactly that.</p>
+</section>
+<section id="a-laboratory-midi-output-device">
+<h2>A laboratory MIDI output device<a class="headerlink" href="#a-laboratory-midi-output-device" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">midi::OutputDevice::sendMessage</span></code> runs on Rack’s engine threads, when a
+module’s <code class="docutils literal notranslate"><span class="pre">process</span></code> sends MIDI, so a production device Python configures
+only queues what it receives (<a class="reference internal" href="../reference/midi.html#python-drivers-and-devices"><span class="std std-ref">MIDI devices</span></a>).
+<a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.MidiOutputDevice" title="rackpy.laboratory.MidiOutputDevice"><code class="xref py py-class docutils literal notranslate"><span class="pre">rackpy.laboratory.MidiOutputDevice</span></code></a> is a device whose
+<code class="docutils literal notranslate"><span class="pre">send_message(message)</span></code> a Python subclass overrides. It is never one of
+Rack’s drivers’ devices: <code class="docutils literal notranslate"><span class="pre">device.connect(output)</span></code> points a
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw.midi.Output</span></code> you made at it, and Rack’s <code class="docutils literal notranslate"><span class="pre">Output::sendMessage</span></code>
+(which applies the port’s channel) then calls the override synchronously,
+for example from a laboratory module’s <code class="docutils literal notranslate"><span class="pre">process</span></code> on a bench. Deleting the
+device disconnects its ports; a deleted port leaves the device. It also has
+a configured <code class="docutils literal notranslate"><span class="pre">name</span></code> and an overridable <code class="docutils literal notranslate"><span class="pre">get_name</span></code>, and a
+<a class="reference internal" href="#laboratory-audio-and-midi-drivers">laboratory MIDI driver</a> can hold it.</p>
+</section>
+<section id="laboratory-audio-and-midi-drivers">
+<h2>Laboratory audio and MIDI drivers<a class="headerlink" href="#laboratory-audio-and-midi-drivers" title="Link to this heading">¶</a></h2>
+<p>Rack calls an audio or MIDI driver’s and device’s virtuals from its driver
+threads, and Core’s Audio module reads a device’s channels and rate on the
+audio thread. So in production, a driver Python configures
+(<code class="docutils literal notranslate"><span class="pre">rackpy.raw.audio.PythonDriver</span></code>, <code class="docutils literal notranslate"><span class="pre">rackpy.raw.midi.PythonDriver</span></code>) answers
+natively, and a Python <code class="docutils literal notranslate"><span class="pre">Input</span></code> gets its messages queued for the UI thread
+(<a class="reference internal" href="../reference/audio.html#python-drivers-and-devices"><span class="std std-ref">audio</span></a>,
+<a class="reference internal" href="../reference/midi.html#python-drivers-and-devices"><span class="std std-ref">MIDI</span></a>). The laboratory classes let
+a Python subclass override these virtuals instead, offline:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Class</p></th>
+<th class="head"><p>Rack virtuals it may override</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.AudioDriver" title="rackpy.laboratory.AudioDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">rackpy.laboratory.AudioDriver</span></code></a></p></td>
+<td><p>every <code class="docutils literal notranslate"><span class="pre">audio::Driver</span></code> virtual: <code class="docutils literal notranslate"><span class="pre">get_name</span></code>, <code class="docutils literal notranslate"><span class="pre">get_device_ids</span></code>, <code class="docutils literal notranslate"><span class="pre">get_default_device_id</span></code>, <code class="docutils literal notranslate"><span class="pre">get_device_name</span></code>, <code class="docutils literal notranslate"><span class="pre">get_device_num_inputs</span></code>, <code class="docutils literal notranslate"><span class="pre">get_device_num_outputs</span></code>, <code class="docutils literal notranslate"><span class="pre">subscribe</span></code>, <code class="docutils literal notranslate"><span class="pre">unsubscribe</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.AudioDevice" title="rackpy.laboratory.AudioDevice"><code class="xref py py-class docutils literal notranslate"><span class="pre">rackpy.laboratory.AudioDevice</span></code></a></p></td>
+<td><p>every <code class="docutils literal notranslate"><span class="pre">audio::Device</span></code> virtual: <code class="docutils literal notranslate"><span class="pre">get_name</span></code>, channel counts, sample rates and block sizes and their setters, <code class="docutils literal notranslate"><span class="pre">subscribe</span></code>, <code class="docutils literal notranslate"><span class="pre">unsubscribe</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.MidiDriver" title="rackpy.laboratory.MidiDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">rackpy.laboratory.MidiDriver</span></code></a></p></td>
+<td><p>every <code class="docutils literal notranslate"><span class="pre">midi::Driver</span></code> virtual, for inputs and outputs</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.MidiInputDevice" title="rackpy.laboratory.MidiInputDevice"><code class="xref py py-class docutils literal notranslate"><span class="pre">rackpy.laboratory.MidiInputDevice</span></code></a>, <a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.MidiOutputDevice" title="rackpy.laboratory.MidiOutputDevice"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiOutputDevice</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">midi::Device::getName</span></code> (and the output’s <code class="docutils literal notranslate"><span class="pre">send_message</span></code>, above)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.MidiInput" title="rackpy.laboratory.MidiInput"><code class="xref py py-class docutils literal notranslate"><span class="pre">rackpy.laboratory.MidiInput</span></code></a>, <a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.MidiInputQueue" title="rackpy.laboratory.MidiInputQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiInputQueue</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Input::onMessage</span></code>, <code class="docutils literal notranslate"><span class="pre">InputQueue::onMessage</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Rack never lists a laboratory driver: nothing registers it, so Rack’s menus,
+patches and driver threads cannot find it. <code class="docutils literal notranslate"><span class="pre">driver.connect(port)</span></code> points a
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw.audio.Port</span></code> or <code class="docutils literal notranslate"><span class="pre">rackpy.raw.midi</span></code> port you made at it. From then
+on, <strong>Rack’s own port code calls the overrides synchronously</strong>, on the main
+thread, where it would call a C++ driver’s: <code class="docutils literal notranslate"><span class="pre">Port::setDeviceId</span></code> subscribes
+through <code class="docutils literal notranslate"><span class="pre">subscribe</span></code> (and the driver’s <code class="docutils literal notranslate"><span class="pre">super()</span></code> calls the device’s
+<code class="docutils literal notranslate"><span class="pre">subscribe</span></code>), <code class="docutils literal notranslate"><span class="pre">Port::getSampleRate</span></code> asks the device, <code class="docutils literal notranslate"><span class="pre">Port::toJson</span></code> takes
+the device’s name, <code class="docutils literal notranslate"><span class="pre">Input::getDefaultDeviceId</span></code> asks the MIDI driver, and
+Rack’s <code class="docutils literal notranslate"><span class="pre">MidiDriverChoice</span></code> and <code class="docutils literal notranslate"><span class="pre">MidiDeviceChoice</span></code> widgets show the names they
+return. Rack’s <code class="docutils literal notranslate"><span class="pre">InputDevice::onMessage</span></code>, called by a <code class="docutils literal notranslate"><span class="pre">MidiInputDevice</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">push_message</span></code> or by Rack’s Loopback driver when Python sends, calls a
+laboratory input’s <code class="docutils literal notranslate"><span class="pre">on_message</span></code> synchronously. An override’s error reaches
+the Python caller of the port method, through Rack’s code.</p>
+<p>One virtual has no Rack caller for a driver Rack does not list:
+<code class="docutils literal notranslate"><span class="pre">audio::Driver::getDefaultDeviceId</span></code>, which Rack 2.6.6 calls only from
+<code class="docutils literal notranslate"><span class="pre">audio::Port::setDriverId</span></code> (<code class="docutils literal notranslate"><span class="pre">src/audio.cpp</span></code>, line 116), after finding the
+driver by its registered ID. <code class="docutils literal notranslate"><span class="pre">connect</span></code> therefore <strong>repeats</strong> what
+<code class="docutils literal notranslate"><span class="pre">setDriverId</span></code> does once it has found a driver: the port leaves its device,
+takes the driver, asks <code class="docutils literal notranslate"><span class="pre">get_default_device_id()</span></code> and subscribes to that
+device through Rack’s <code class="docutils literal notranslate"><span class="pre">Port::setDeviceId</span></code>. That call comes from RackPy’s
+reproduction of <code class="docutils literal notranslate"><span class="pre">setDriverId</span></code>, not from Rack’s own function, as a
+<a class="reference internal" href="#the-laboratory-bench">bench</a> reproduces Rack’s engine. Registering the
+driver with Rack’s public <code class="docutils literal notranslate"><span class="pre">addDriver</span></code> would be irreversible (Rack has no
+public removal) and would expose it to Rack’s UI and driver threads. MIDI
+<code class="docutils literal notranslate"><span class="pre">connect</span></code> repeats <code class="docutils literal notranslate"><span class="pre">setDriverId</span></code> the same way, through the port’s virtuals;
+the MIDI default-device virtuals also have Rack’s own callers.</p>
+<p><code class="docutils literal notranslate"><span class="pre">super()</span></code> is the native answer, which is the configured behaviour, as for
+the production drivers: the driver’s name, the devices given to
+<code class="docutils literal notranslate"><span class="pre">add_device</span></code> (or <code class="docutils literal notranslate"><span class="pre">add_input_device</span></code>/<code class="docutils literal notranslate"><span class="pre">add_output_device</span></code>) and the first as
+the default; a device’s <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">num_inputs</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code> and so on, whose
+setters record requests for <code class="docutils literal notranslate"><span class="pre">take_requests()</span></code>; Rack’s <code class="docutils literal notranslate"><span class="pre">InputQueue</span></code> queue.
+Base methods called from Python run that native answer, never the override.
+A driver keeps its devices alive until <code class="docutils literal notranslate"><span class="pre">remove_device</span></code>, so a device that
+<code class="docutils literal notranslate"><span class="pre">subscribe</span></code> returns outlives the call; <code class="docutils literal notranslate"><span class="pre">subscribe</span></code> must return one of the
+driver’s own devices, or <code class="docutils literal notranslate"><span class="pre">None</span></code>, else <code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code>. Callbacks receive
+the ports’ own Python objects (the lifetime-tracked <code class="docutils literal notranslate"><span class="pre">rackpy.raw</span></code> ports, never
+addresses) and owned <code class="docutils literal notranslate"><span class="pre">Message</span></code> copies.</p>
+<p>The rules that keep it contained:</p>
+<ul class="simple">
+<li><p><strong>Explicit enablement.</strong> Creating any of these classes needs
+<a class="reference internal" href="../reference/python/rackpy/laboratory/index.html#rackpy.laboratory.enable" title="rackpy.laboratory.enable"><code class="xref py py-func docutils literal notranslate"><span class="pre">enable()</span></code></a>, and so does <code class="docutils literal notranslate"><span class="pre">connect</span></code>. A
+<code class="docutils literal notranslate"><span class="pre">MidiInput</span></code>’s constructor sets a native per-instance mark after checking
+enablement; an ordinary <code class="docutils literal notranslate"><span class="pre">rackpy.raw.midi.Input</span></code> subclass, or one that
+bypasses the laboratory constructor, keeps the queued production path.
+Every <code class="docutils literal notranslate"><span class="pre">MidiInputQueue</span></code> is a laboratory one: its only constructor checks
+enablement. It is a <code class="docutils literal notranslate"><span class="pre">rackpy.raw.midi.Input</span></code>, but not a
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw.midi.InputQueue</span></code>, which is final.</p></li>
+<li><p><strong>Never Rack’s threads.</strong> Only ports Python made reach these objects, and
+Python calls their methods on the main thread. Were a Rack thread ever to
+call one, RackPy would run no Python (a <code class="docutils literal notranslate"><span class="pre">refused_rack_thread</span></code> diagnostic):
+the native configured answer would come back, Rack’s queue would take an
+<code class="docutils literal notranslate"><span class="pre">InputQueue</span></code>’s message, and a <code class="docutils literal notranslate"><span class="pre">MidiInput</span></code>’s message would be queued for
+the UI thread as for any Python input. The test-hooks build checks every
+virtual that way.</p></li>
+<li><p><strong>Teardown runs no Python.</strong> When a port is released (deleted, or Rack’s
+context closing), Rack’s <code class="docutils literal notranslate"><span class="pre">~Port</span></code> and <code class="docutils literal notranslate"><span class="pre">setDeviceId(-1)</span></code> unsubscribe through
+the driver natively, and the port is never handed to Python. A released
+port also leaves every laboratory device natively, so an override that
+left a subscription inconsistent leaves no dangling port behind. When a
+device is removed or deleted, or a driver deleted, every Python port using
+it leaves it and points nowhere; a device view retained from a callback
+then raises <code class="docutils literal notranslate"><span class="pre">StaleHandleError</span></code>. A driver detaches its ports before it
+lets its devices go, so a device’s <code class="docutils literal notranslate"><span class="pre">__del__</span></code> or weakref callback that
+asks a port about its driver finds none.</p></li>
+<li><p><strong>Teardown happens on the main thread only.</strong> Rack’s UI reads a port’s
+driver and device on the main thread without the GIL, so a laboratory
+driver or device is never destroyed anywhere else. If its last reference
+goes on a Python thread, its Python object goes there, but the native
+driver or device (which answers Rack’s calls natively meanwhile) is
+destroyed at the next UI step, or at context close, and its ports point
+nowhere from then on. (Python-made ports dropped on another thread are
+leaked with a warning, as before.)</p></li>
+<li><p><strong>Kept alive while Rack’s port code uses them.</strong> Rack’s <code class="docutils literal notranslate"><span class="pre">Port::setDeviceId</span></code>
+unsubscribes and then subscribes through the same driver, so an override
+of <code class="docutils literal notranslate"><span class="pre">subscribe</span></code> or <code class="docutils literal notranslate"><span class="pre">unsubscribe</span></code> that drops the last reference to its
+driver or device cannot free it under Rack: whenever such an override
+runs, every laboratory driver and device is kept alive until the Python
+port call (<code class="docutils literal notranslate"><span class="pre">set_device_id</span></code>, <code class="docutils literal notranslate"><span class="pre">connect</span></code>, …) returns, or, when Rack’s own
+code called (its menu items), until the next UI step.</p></li>
+<li><p><strong>No subscription changes during a delivery.</strong> A laboratory input’s
+<code class="docutils literal notranslate"><span class="pre">on_message</span></code> runs inside Rack’s <code class="docutils literal notranslate"><span class="pre">InputDevice::onMessage</span></code>, which is
+iterating the device’s subscribers. Until the Python call that delivered
+the message (<code class="docutils literal notranslate"><span class="pre">push_message</span></code>, <code class="docutils literal notranslate"><span class="pre">send_message</span></code> through Rack’s Loopback
+driver, …) returns, anything that would change a subscriber set raises
+<code class="docutils literal notranslate"><span class="pre">LaboratoryError</span></code>: a port’s <code class="docutils literal notranslate"><span class="pre">set_device_id</span></code>, <code class="docutils literal notranslate"><span class="pre">set_driver_id</span></code>, <code class="docutils literal notranslate"><span class="pre">reset</span></code> and
+<code class="docutils literal notranslate"><span class="pre">from_json</span></code>, making a MIDI port, <code class="docutils literal notranslate"><span class="pre">connect</span></code>, the drivers’ and devices’
+<code class="docutils literal notranslate"><span class="pre">subscribe_*</span></code>/<code class="docutils literal notranslate"><span class="pre">unsubscribe_*</span></code>, and removing a device, and Rack’s own code
+that would change a Python port’s subscription (its MIDI menu items,
+through <code class="docutils literal notranslate"><span class="pre">Port::setDeviceId</span></code>). A port, driver or device that Python is
+deallocating (its reference count is 0, for example while its attributes
+are cleared) gets no delivery and is never kept alive. Objects dropped
+meanwhile (the delivered port itself, a laboratory driver or device) are
+kept alive and go when that call returns; Rack’s own main-thread
+deliveries (its computer keyboard driver) release them at the next UI
+step, and count as a delivery until Rack’s loop returns.</p></li>
+</ul>
+</section>
+<section id="a-laboratory-midi-generator">
+<h2>A laboratory MIDI generator<a class="headerlink" href="#a-laboratory-midi-generator" title="Link to this heading">¶</a></h2>
+<p>Rack’s <code class="docutils literal notranslate"><span class="pre">dsp::MidiGenerator&lt;N&gt;</span></code> turns gates and CV into MIDI and hands each
+message to its virtual <code class="docutils literal notranslate"><span class="pre">onMessage</span></code>, which a module calls from <code class="docutils literal notranslate"><span class="pre">process</span></code> on
+Rack’s engine thread. So <code class="docutils literal notranslate"><span class="pre">rackpy.raw.dsp.MidiGenerator[N]</span></code> implements it
+natively, recording the messages for <code class="docutils literal notranslate"><span class="pre">take_messages()</span></code>, and refuses a
+subclass that defines <code class="docutils literal notranslate"><span class="pre">on_message</span></code>. A subclass of
+<code class="docutils literal notranslate"><span class="pre">rackpy.laboratory.MidiGenerator[N]</span></code> (created after <code class="docutils literal notranslate"><span class="pre">enable()</span></code>) may: Rack’s
+generator calls the override synchronously, in its own order, with each
+message’s bytes and frame; <code class="docutils literal notranslate"><span class="pre">super().on_message(message)</span></code> records it, as the
+native implementation does; an error reaches the caller of the generator
+method that produced the message. Callback messages are owned copies and
+may be retained. A native per-instance mark, set by the laboratory
+constructor only after checking enablement, also gates dispatch; defining
+an inherited callback or monkeypatching a raw generator cannot opt it in.
+These are Python-owned, offline generators, never
+registered with Rack’s engine or MIDI drivers. If native code nevertheless
+calls one on a Rack thread, Python is refused (<code class="docutils literal notranslate"><span class="pre">refused_rack_thread</span></code>) and
+the native recorder answers; the test-hooks build probes that fallback.
+As with laboratory quantities, <code class="docutils literal notranslate"><span class="pre">enable()</span></code> gates creation; disabling the
+laboratory is not a revocation of already-created generators.</p>
+</section>
+<section id="re-entrant-virtual-calls-and-super">
+<h2>Re-entrant virtual calls and <code class="docutils literal notranslate"><span class="pre">super()</span></code><a class="headerlink" href="#re-entrant-virtual-calls-and-super" title="Link to this heading">¶</a></h2>
+<p>Native code that calls the same virtual again on the same Python object runs
+its Python override again, just as C++ virtual dispatch would. For example,
+an <code class="docutils literal notranslate"><span class="pre">on_message</span></code> override that calls a generator method which emits another
+message receives that nested message synchronously too. It is not silently
+sent to the native recorder. <code class="docutils literal notranslate"><span class="pre">super().on_message(message)</span></code> remains the
+explicit, non-virtual recorder call.</p>
+<p>For Python subclasses, a native base binding reached through <code class="docutils literal notranslate"><span class="pre">super()</span></code> or
+an explicit <code class="docutils literal notranslate"><span class="pre">Base.method(instance)</span></code> runs that <strong>base implementation</strong>, not
+the override. This applies across quantities, metadata, history, MIDI ports,
+widgets, UI and app controls. Native C++ subclasses (Rack’s own, or another
+plugin’s) still dispatch virtually when called through a base binding.
+Previously some bindings relied on pybind11’s current-frame heuristic to
+avoid recursive <code class="docutils literal notranslate"><span class="pre">super()</span></code> calls; those explicit base calls could redispatch
+when made outside the override. They now consistently mean the base method
+for Python subclasses. Base implementations can themselves call <em>other</em>
+virtuals, which still reach Python normally.</p>
+<p>An object Python is already deallocating (its last reference gone, for
+example while a weak reference’s callback runs) has no override: in every
+trampoline family, the native implementation answers instead, because calling
+the Python method would bring the dying object back. During <code class="docutils literal notranslate"><span class="pre">__del__</span></code> an
+object is still alive, so its overrides run as usual.</p>
+<p>A shared per-thread guard allows at most <strong>64 live native-to-Python override
+calls</strong> (including argument/result conversion), across trampoline families, to bound C++ frames invisible to
+Python’s recursion counter. Exceeding it raises <code class="docutils literal notranslate"><span class="pre">RecursionError</span></code> to a Python
+caller, or is contained/reported with that family’s normal native fallback
+when Rack called. Attribute lookup itself is bounded too; lookup errors
+preserve pybind11’s defaulted-attribute policy (no override, native fallback),
+rather than the invocation’s error policy. The counter unwinds after an
+error, so subsequent calls still work. After overflow, an exhaustion latch
+refuses retries until the whole chain unwinds; this also bounds numeric
+casters that clear a conversion error and retry. Such return-conversion
+errors keep pybind11’s normal outer <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code> instead of exposing the
+inner <code class="docutils literal notranslate"><span class="pre">RecursionError</span></code>. Laboratory module callbacks use their existing, separate
+200-level guard. Neither guard makes re-entering Rack’s engine locks or a
+laboratory Bench safe; those operations remain refused. The source audit and validation are recorded in
+<code class="docutils literal notranslate"><span class="pre">planning/trampoline-reentry-validation.md</span></code>.</p>
+</section>
+<section id="measuring-laboratory-callback-costs">
+<h2>Measuring laboratory callback costs<a class="headerlink" href="#measuring-laboratory-callback-costs" title="Link to this heading">¶</a></h2>
+<p>The reproducible benchmark is
+<code class="docutils literal notranslate"><span class="pre">tests/laboratory/in_rack_cost/test_callback_cost.py</span></code>, driven inside actual
+Rack by <code class="docutils literal notranslate"><span class="pre">tests/laboratory/test_callback_cost.py</span></code>. Raw data and exact machine,
+compiler command, source hashes, Python version, randomized execution order
+and native baseline are retained in
+<a class="reference download internal" download="" href="../_downloads/0919162163b5e698a0428b6bbb70d807/rp22-laboratory-cost.json"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">benchmarks/rp22-laboratory-cost.json</span></code></span></a>.
+See <a class="reference internal" href="../performance.html#laboratory-callback-cost-rp-22d"><span class="std std-ref">performance</span></a> for
+results and reproduction. Each timed <code class="docutils literal notranslate"><span class="pre">Bench.step(20000)</span></code> invokes one virtual
+per frame; it does <strong>not</strong> batch audio across Rack modules to improve timing.</p>
+<p>This is an <strong>offline diagnostic</strong>, not production real-time performance:
+Python already holds the GIL on the main thread, there is no competing
+Python thread, no driver or audio clock, and there are no device deadlines.
+It includes Bench scheduling and argument conversion, not just the override
+body. A fast median cannot demonstrate bounded latency, absence of GIL stalls,
+or any production audio budget in ADR 004.</p>
+</section>
+<section id="crash-isolated-failure-and-shutdown-probes">
+<h2>Crash-isolated failure and shutdown probes<a class="headerlink" href="#crash-isolated-failure-and-shutdown-probes" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">tests/laboratory/test_races.py</span></code> runs each exception, superclass recursion,
+cross-object recursion and close/delete stale-view probe in a separate actual
+Rack process with a watchdog. A signal/crash or timeout fails the outer test,
+not the outer interpreter. Recursion must raise <code class="docutils literal notranslate"><span class="pre">RecursionError</span></code>, unwind the
+native nesting/error-capture state and leave a fresh module usable. Closed or
+deleted modules invalidate retained port/voltage views; stale base callback
+calls and adding closed modules back to a bench are refused.</p>
+<p>The shutdown scenario races a Python worker’s rejected <code class="docutils literal notranslate"><span class="pre">Bench.step</span></code> attempts
+with main-thread use and the closing hook. It joins that worker while the
+interpreter is usable, but deliberately retains the bench/module/override
+cycle, laboratory quantity, MIDI generator and device through Rack teardown.
+The live-context run also retains a connected MIDI output port (constructing
+one requires Rack’s context, which the startup/headless run does not have). In both startup/headless and live-context windowed
+Rack, live native override holders must cause the documented <strong>safe refusal
+to finalize Python</strong>, with a diagnostic and normal Rack exit, never freeing
+Python underneath them (ADR 003). A second variant releases those holders in
+the closing hook and requires <code class="docutils literal notranslate"><span class="pre">Py_FinalizeEx</span> <span class="pre">returned</span> <span class="pre">0</span></code>. These are adversarial
+lifetime probes, not a claim to exhaust all schedules or prove sanitizer-clean
+behavior.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="security.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Security and trust</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../runtime.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">The embedded runtime</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Callbacks and the laboratory</a><ul>
+<li><a class="reference internal" href="#every-public-virtual-domain-python-path-or-blocker">Every public virtual: domain, Python path or blocker</a></li>
+<li><a class="reference internal" href="#why-python-never-runs-on-rack-s-audio-threads">Why Python never runs on Rack’s audio threads</a></li>
+<li><a class="reference internal" href="#why-the-laboratory-is-a-bench-not-rack-s-engine">Why the laboratory is a bench, not Rack’s engine</a></li>
+<li><a class="reference internal" href="#the-laboratory-bench">The laboratory bench</a></li>
+<li><a class="reference internal" href="#laboratory-modules">Laboratory modules</a></li>
+<li><a class="reference internal" href="#laboratory-quantities">Laboratory quantities</a></li>
+<li><a class="reference internal" href="#a-laboratory-midi-output-device">A laboratory MIDI output device</a></li>
+<li><a class="reference internal" href="#laboratory-audio-and-midi-drivers">Laboratory audio and MIDI drivers</a></li>
+<li><a class="reference internal" href="#a-laboratory-midi-generator">A laboratory MIDI generator</a></li>
+<li><a class="reference internal" href="#re-entrant-virtual-calls-and-super">Re-entrant virtual calls and <code class="docutils literal notranslate"><span class="pre">super()</span></code></a></li>
+<li><a class="reference internal" href="#measuring-laboratory-callback-costs">Measuring laboratory callback costs</a></li>
+<li><a class="reference internal" href="#crash-isolated-failure-and-shutdown-probes">Crash-isolated failure and shutdown probes</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

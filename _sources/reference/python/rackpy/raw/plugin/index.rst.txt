@@ -1,0 +1,265 @@
+rackpy.raw.plugin
+=================
+
+.. py:module:: rackpy.raw.plugin
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.plugin.plugins
+   rackpy.raw.plugin.pluginsPath
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.plugin.LibraryHandle
+   rackpy.raw.plugin.PluginList
+   rackpy.raw.plugin.Plugin
+   rackpy.raw.plugin.Model
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.plugin.create_model
+   rackpy.raw.plugin.plugin_instance
+   rackpy.raw.plugin.is_slug_valid
+   rackpy.raw.plugin.normalize_slug
+   rackpy.raw.plugin.get_plugin
+   rackpy.raw.plugin.get_plugin_fallback
+   rackpy.raw.plugin.get_model
+   rackpy.raw.plugin.get_model_fallback
+   rackpy.raw.plugin.model_from_json
+   rackpy.raw.plugin.on_destroy
+   rackpy.raw.plugin.set_settings_handlers
+
+
+Module Contents
+---------------
+
+.. py:class:: LibraryHandle
+
+.. py:class:: PluginList
+
+
+
+.. py:class:: Plugin
+
+   
+   Make an isolated plugin, not registered with Rack; close it on the main thread.
+
+
+   .. py:method:: close() -> None
+
+      Destroy an isolated plugin; loaded Rack plugins cannot be closed from Python.
+
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:attribute:: slug
+      :type:  str
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: version
+      :type:  str
+
+
+   .. py:attribute:: license
+      :type:  str
+
+
+   .. py:attribute:: brand
+      :type:  str
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+   .. py:attribute:: author
+      :type:  str
+
+
+   .. py:attribute:: author_email
+      :type:  str
+
+
+   .. py:attribute:: author_url
+      :type:  str
+
+
+   .. py:attribute:: plugin_url
+      :type:  str
+
+
+   .. py:attribute:: manual_url
+      :type:  str
+
+
+   .. py:attribute:: source_url
+      :type:  str
+
+
+   .. py:attribute:: donate_url
+      :type:  str
+
+
+   .. py:attribute:: changelog_url
+      :type:  str
+
+
+   .. py:property:: path
+      :type: str
+
+
+
+   .. py:property:: modified_timestamp
+      :type: float
+
+
+
+   .. py:property:: handle
+      :type: LibraryHandle | None
+
+
+
+   .. py:property:: models
+      :type: tuple[Model, ...]
+
+
+
+   .. py:method:: add_model(model: Model) -> None
+
+
+   .. py:method:: get_model(slug: str) -> Model | None
+
+
+   .. py:method:: get_brand() -> str
+
+
+   .. py:method:: from_json(data: dict[str, Any]) -> None
+
+
+   .. py:method:: modules_from_json(data: list[dict[str, Any]]) -> None
+
+
+.. py:class:: Model
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:attribute:: slug
+      :type:  str
+
+
+   .. py:property:: plugin
+      :type: Plugin | None
+
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+   .. py:attribute:: manual_url
+      :type:  str
+
+
+   .. py:attribute:: modular_grid_url
+      :type:  str
+
+
+   .. py:attribute:: hidden
+      :type:  bool
+
+
+   .. py:attribute:: tag_ids
+      :type:  list[int]
+
+
+   .. py:method:: get_full_name() -> str
+
+
+   .. py:method:: get_factory_preset_directory() -> str
+
+
+   .. py:method:: get_user_preset_directory() -> str
+
+
+   .. py:method:: get_manual_url() -> str
+
+
+   .. py:method:: is_favorite() -> bool
+
+
+   .. py:method:: set_favorite(favorite: bool) -> None
+
+
+   .. py:method:: from_json(data: dict[str, Any]) -> None
+
+
+   .. py:method:: append_context_menu(menu: rackpy.raw.ui.Menu, in_browser: bool = False) -> None
+
+
+   .. py:method:: create_module() -> rackpy.raw.engine.Module | rackpy.raw.engine.EngineModule
+
+      Make a module of a committed model; detached and staged models cannot make modules.
+
+
+
+   .. py:method:: create_module_widget(module: rackpy.raw.engine.Module | rackpy.raw.engine.EngineModule | None = None) -> rackpy.raw.app.ModuleWidget | rackpy.raw.app.ForeignModuleWidget
+
+      Make a widget of a committed model; detached and staged models cannot make widgets.
+
+
+
+.. py:function:: create_model(slug: str, module_factory: collections.abc.Callable[[rackpy.raw.engine.Module], object], *, widget_factory: collections.abc.Callable[[rackpy.raw.engine.Module | None], rackpy.raw.app.ModuleWidget] | None = None, hp: int = 4) -> Model
+
+.. py:function:: plugin_instance() -> Plugin
+
+.. py:function:: is_slug_valid(slug: str) -> bool
+
+.. py:function:: normalize_slug(slug: str) -> str
+
+.. py:function:: get_plugin(plugin_slug: str) -> Plugin | None
+
+.. py:function:: get_plugin_fallback(plugin_slug: str) -> Plugin | None
+
+.. py:function:: get_model(plugin_slug: str, model_slug: str) -> Model | None
+
+.. py:function:: get_model_fallback(plugin_slug: str, model_slug: str) -> Model | None
+
+.. py:function:: model_from_json(module_json: dict[str, Any]) -> Model
+
+.. py:data:: plugins
+   :type:  PluginList
+
+.. py:data:: pluginsPath
+   :type:  str
+
+.. py:function:: on_destroy[F: collections.abc.Callable[[], object]](callback: F) -> F
+
+.. py:function:: set_settings_handlers(to_json: collections.abc.Callable[[], Any] | None = None, from_json: collections.abc.Callable[[Any], object] | None = None) -> None
+

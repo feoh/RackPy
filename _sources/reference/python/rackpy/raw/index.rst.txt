@@ -1,0 +1,53 @@
+rackpy.raw
+==========
+
+.. py:module:: rackpy.raw
+
+.. autoapi-nested-parse::
+
+   The low-level mirror of the Rack API, named after Rack's C++ namespaces.
+
+   ``rack::math`` is ``rackpy.raw.math``, ``rack::color`` is ``rackpy.raw.color``
+   and the root ``rack`` namespace is ``rackpy.raw`` itself. Functions and methods
+   use snake_case; classes and constants keep their C++ names. Available only
+   inside Rack. The [binding coverage](https://github.com/feoh/RackPy/blob/main/docs/reference/coverage.md)
+   lists what is bound.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /reference/python/rackpy/raw/app/index
+   /reference/python/rackpy/raw/asset/index
+   /reference/python/rackpy/raw/audio/index
+   /reference/python/rackpy/raw/blendish/index
+   /reference/python/rackpy/raw/color/index
+   /reference/python/rackpy/raw/componentlibrary/index
+   /reference/python/rackpy/raw/dsp/index
+   /reference/python/rackpy/raw/engine/index
+   /reference/python/rackpy/raw/event/index
+   /reference/python/rackpy/raw/glfw/index
+   /reference/python/rackpy/raw/history/index
+   /reference/python/rackpy/raw/literals/index
+   /reference/python/rackpy/raw/logger/index
+   /reference/python/rackpy/raw/macros/index
+   /reference/python/rackpy/raw/math/index
+   /reference/python/rackpy/raw/midi/index
+   /reference/python/rackpy/raw/nanovg/index
+   /reference/python/rackpy/raw/network/index
+   /reference/python/rackpy/raw/plugin/index
+   /reference/python/rackpy/raw/random/index
+   /reference/python/rackpy/raw/settings/index
+   /reference/python/rackpy/raw/simd/index
+   /reference/python/rackpy/raw/sse_mathfun/index
+   /reference/python/rackpy/raw/string/index
+   /reference/python/rackpy/raw/system/index
+   /reference/python/rackpy/raw/ui/index
+   /reference/python/rackpy/raw/widget/index
+   /reference/python/rackpy/raw/window/index
+
+

@@ -1,0 +1,732 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Pass signals to the module beside yours" href="expanders.html"><link rel="prev" title="Let the user choose a file" href="choose-files.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>Draw a module’s panel - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input aria-label="Toggle navigation of Reference" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/how-to/draw-panels.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/how-to/draw-panels.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="draw-a-module-s-panel">
+<h1>Draw a module’s panel<a class="headerlink" href="#draw-a-module-s-panel" title="Link to this heading">¶</a></h1>
+<p><strong>Implemented (RP-35), Linux x86_64 inside Rack Free 2.6.6.</strong> This
+walkthrough follows two example plugins, the
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/dark-panels/README.md">Lantern</a> and
+the <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/drawing/README.md">Meter</a>. Each
+section covers one feature of the Plugin API Guide’s
+<a class="reference external" href="https://vcvrack.com/manual/PluginGuide#Dark-panels">dark panels</a> and
+<a class="reference external" href="https://vcvrack.com/manual/PluginGuide#Custom-widgets">custom widgets</a>
+sections. The pictures are screenshots of Rack’s own window, read back from
+the frames Rack drew under Xvfb with Mesa’s software OpenGL. The tests take
+them again on every run and compare them with these, so they show what the
+code does. CI has run candidate smoke checks with software rendering on Linux,
+macOS and Windows; these screenshots are not hardware-GPU evidence, and other
+GPU drivers are not tested here.</p>
+<p>The drawing reference is <a class="reference internal" href="../reference/window.html"><span class="std std-doc">Drawing and the window</span></a>;
+widgets are in <a class="reference internal" href="../reference/widgets.html"><span class="std std-doc">subclassable widgets</span></a>.</p>
+<section id="a-light-and-a-dark-panel">
+<h2>A light and a dark panel<a class="headerlink" href="#a-light-and-a-dark-panel" title="Link to this heading">¶</a></h2>
+<p>Give <code class="docutils literal notranslate"><span class="pre">raw.create_panel</span></code> two SVGs, and it makes a <code class="docutils literal notranslate"><span class="pre">ThemedSvgPanel</span></code>, which shows
+the second while Rack’s <strong>View &gt; Use dark panels if available</strong> is on. Rack’s
+themed screws and jacks (<code class="docutils literal notranslate"><span class="pre">ThemedScrew</span></code>, <code class="docutils literal notranslate"><span class="pre">ThemedPJ301MPort</span></code>) follow the same
+setting:</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">examples/dark-panels/pythonpath/rackpydarkpanels/lantern.py · from an example plugin tested in Rack</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">LanternWidget</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">ModuleWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The module's panel. Rack passes the module, or None for its browser's preview."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="n">Module</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_module</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+        <span class="c1"># Two SVGs make a ThemedSvgPanel: Rack picks one by its dark-panel setting.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_panel</span><span class="p">(</span>
+            <span class="n">raw</span><span class="o">.</span><span class="n">create_panel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">assets</span><span class="o">.</span><span class="n">plugin</span><span class="p">(</span><span class="s2">"res/Lantern.svg"</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">assets</span><span class="o">.</span><span class="n">plugin</span><span class="p">(</span><span class="s2">"res/Lantern-dark.svg"</span><span class="p">)))</span>
+        <span class="p">)</span>
+        <span class="n">grid</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">RACK_GRID_WIDTH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">app</span><span class="o">.</span><span class="n">RACK_GRID_WIDTH</span>
+        <span class="n">bottom</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">RACK_GRID_HEIGHT</span> <span class="o">-</span> <span class="n">app</span><span class="o">.</span><span class="n">RACK_GRID_WIDTH</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="p">((</span><span class="n">grid</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">bottom</span><span class="p">),</span> <span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">create_widget</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">ThemedScrew</span><span class="p">,</span> <span class="n">Vec</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">create_param_centered</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">RoundBlackKnob</span><span class="p">,</span> <span class="n">mm2px</span><span class="p">(</span><span class="n">Vec</span><span class="p">(</span><span class="mf">15.24</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">)),</span> <span class="n">module</span><span class="p">,</span> <span class="n">Param</span><span class="o">.</span><span class="n">GLOW</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">create_output_centered</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">ThemedPJ301MPort</span><span class="p">,</span> <span class="n">mm2px</span><span class="p">(</span><span class="n">Vec</span><span class="p">(</span><span class="mf">15.24</span><span class="p">,</span> <span class="mf">108.0</span><span class="p">)),</span> <span class="n">module</span><span class="p">,</span> <span class="n">Output</span><span class="o">.</span><span class="n">LEVEL</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span>
+            <span class="n">raw</span><span class="o">.</span><span class="n">create_light_centered</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">LargeLight</span><span class="p">[</span><span class="n">cl</span><span class="o">.</span><span class="n">YellowLight</span><span class="p">],</span> <span class="n">mm2px</span><span class="p">(</span><span class="n">Vec</span><span class="p">(</span><span class="mf">15.24</span><span class="p">,</span> <span class="mf">62.0</span><span class="p">)),</span> <span class="n">module</span><span class="p">,</span> <span class="n">Light</span><span class="o">.</span><span class="n">LAMP</span><span class="p">)</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Both SVGs must have the same size. Only the light one needs the components
+layer that <code class="docutils literal notranslate"><span class="pre">bin/rackpy-plugin</span> <span class="pre">add-module</span></code> reads.</p>
+<img alt="The Lantern on its light panel. A cream panel 6 HP wide with silver screws, a triangle at the top, a black knob in a dark ring, a glowing yellow lamp, and an output jack with an orange cable plugged in." src="../_images/lantern-light.png" />
+<img alt="The same Lantern with dark panels preferred. The panel is charcoal and its markings are amber; the screws and the jack are Rack's dark versions; the knob and the lamp are unchanged." src="../_images/lantern-dark.png" />
+<p><em>Left: the light panel (cream, <code class="docutils literal notranslate"><span class="pre">#e9e3d5</span></code>). Right: the same module after
+switching to dark panels. The panel is charcoal (<code class="docutils literal notranslate"><span class="pre">#1d2026</span></code>), the triangle
+and ring are amber, and Rack swaps in its dark screws and jack. The knob and
+lamp do not change.</em></p>
+</section>
+<section id="lights-stay-lit-in-a-dark-room">
+<h2>Lights stay lit in a dark room<a class="headerlink" href="#lights-stay-lit-in-a-dark-room" title="Link to this heading">¶</a></h2>
+<p><strong>View &gt; Room brightness</strong> dims everything Rack draws on a module’s panel
+layer. Rack then draws lights on a second, self-illuminating layer, which it
+does not dim:</p>
+<img alt="The dark Lantern in a room at 25% brightness. The panel, knob and jack are nearly black, while the yellow lamp and the green light of the cable plug still glow at full brightness." src="../_images/lantern-dark-room.png" />
+<p><em>At 25% room brightness the dark panel is nearly black, but the lamp and the
+cable plug’s light are as bright as before. The tests measure it: the panel’s
+pixels drop to a quarter of their brightness, and the lamp’s stay within 12
+of 255.</em></p>
+</section>
+<section id="shapes-with-nanovg">
+<h2>Shapes with NanoVG<a class="headerlink" href="#shapes-with-nanovg" title="Link to this heading">¶</a></h2>
+<p>A custom widget overrides <code class="docutils literal notranslate"><span class="pre">draw(args)</span></code>. <code class="docutils literal notranslate"><span class="pre">args.vg</span></code> is the NanoVG context for
+that call only. The Meter’s top widget fills a rounded rectangle and a circle,
+and strokes a triangle:</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">examples/drawing/pythonpath/rackpydrawing/meter.py · from an example plugin tested in Rack</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Shapes</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">TransparentWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Shapes drawn with NanoVG: a rounded panel, a filled circle, and a stroked triangle."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">w</span><span class="o">.</span><span class="n">DrawArgs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vg</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">vg</span>  <span class="c1"># valid only during this call</span>
+        <span class="k">assert</span> <span class="n">vg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="c1"># Rack always passes a context to draw()</span>
+        <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">y</span>
+        <span class="c1"># A rounded rectangle, filled dark blue-grey.</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">begin_path</span><span class="p">(</span><span class="n">vg</span><span class="p">)</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">rounded_rect</span><span class="p">(</span><span class="n">vg</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">fill_color</span><span class="p">(</span><span class="n">vg</span><span class="p">,</span> <span class="n">nvg</span><span class="o">.</span><span class="n">rgb</span><span class="p">(</span><span class="mh">0x2E</span><span class="p">,</span> <span class="mh">0x36</span><span class="p">,</span> <span class="mh">0x44</span><span class="p">))</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">vg</span><span class="p">)</span>
+        <span class="c1"># A circle, filled amber.</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">begin_path</span><span class="p">(</span><span class="n">vg</span><span class="p">)</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">vg</span><span class="p">,</span> <span class="n">width</span> <span class="o">*</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">height</span> <span class="o">*</span> <span class="mf">0.3</span><span class="p">)</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">fill_color</span><span class="p">(</span><span class="n">vg</span><span class="p">,</span> <span class="n">nvg</span><span class="o">.</span><span class="n">rgb</span><span class="p">(</span><span class="mh">0xF2</span><span class="p">,</span> <span class="mh">0xA6</span><span class="p">,</span> <span class="mh">0x3B</span><span class="p">))</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">vg</span><span class="p">)</span>
+        <span class="c1"># A triangle with a red stroke and no fill.</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">begin_path</span><span class="p">(</span><span class="n">vg</span><span class="p">)</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span><span class="n">vg</span><span class="p">,</span> <span class="n">width</span> <span class="o">*</span> <span class="mf">0.55</span><span class="p">,</span> <span class="n">height</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">)</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">line_to</span><span class="p">(</span><span class="n">vg</span><span class="p">,</span> <span class="n">width</span> <span class="o">*</span> <span class="mf">0.7</span><span class="p">,</span> <span class="n">height</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">)</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">line_to</span><span class="p">(</span><span class="n">vg</span><span class="p">,</span> <span class="n">width</span> <span class="o">*</span> <span class="mf">0.85</span><span class="p">,</span> <span class="n">height</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">)</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">close_path</span><span class="p">(</span><span class="n">vg</span><span class="p">)</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">stroke_color</span><span class="p">(</span><span class="n">vg</span><span class="p">,</span> <span class="n">nvg</span><span class="o">.</span><span class="n">rgb</span><span class="p">(</span><span class="mh">0xE0</span><span class="p">,</span> <span class="mh">0x30</span><span class="p">,</span> <span class="mh">0x30</span><span class="p">))</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">stroke_width</span><span class="p">(</span><span class="n">vg</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">stroke</span><span class="p">(</span><span class="n">vg</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The panel adds each custom widget as C++ does: create it, set its box, and add
+it (<code class="docutils literal notranslate"><span class="pre">MeterWidget</span></code> in the same file). The manual’s version of this sample says
+its triangle has a blue stroke, but the code draws a red one; this example’s
+comment says red.</p>
+</section>
+<section id="text-with-the-font-loaded-every-frame">
+<h2>Text, with the font loaded every frame<a class="headerlink" href="#text-with-the-font-loaded-every-frame" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Readout.draw</span></code> asks Rack’s window for the font on every call. Rack caches
+loaded fonts, so this is cheap. A font kept from an earlier frame stops
+working once Rack replaces its graphics context. If the font cannot be loaded,
+<code class="docutils literal notranslate"><span class="pre">load_font</span></code> returns <code class="docutils literal notranslate"><span class="pre">None</span></code> and the readout draws nothing:</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">examples/drawing/pythonpath/rackpydrawing/meter.py · from an example plugin tested in Rack</span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Readout</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">TransparentWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The input's voltage as text."""</span>
+
+    <span class="n">module</span><span class="p">:</span> <span class="n">Module</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">w</span><span class="o">.</span><span class="n">DrawArgs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">context_get</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">context</span><span class="o">.</span><span class="n">window</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="c1"># Load the font every frame: Rack caches it, and a font kept across frames goes stale</span>
+        <span class="c1"># when Rack replaces its graphics context. None means Rack could not load it (it logs</span>
+        <span class="c1"># why), so draw nothing rather than fail every frame.</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">load_font</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">assets</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">FONT</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">font</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">vg</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">vg</span>  <span class="c1"># valid only during this call</span>
+        <span class="k">assert</span> <span class="n">vg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="c1"># Rack always passes a context to draw()</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">font_face_id</span><span class="p">(</span><span class="n">vg</span><span class="p">,</span> <span class="n">font</span><span class="o">.</span><span class="n">handle</span><span class="p">)</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">font_size</span><span class="p">(</span><span class="n">vg</span><span class="p">,</span> <span class="mi">26</span><span class="p">)</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">fill_color</span><span class="p">(</span><span class="n">vg</span><span class="p">,</span> <span class="n">nvg</span><span class="o">.</span><span class="n">rgb</span><span class="p">(</span><span class="mh">0x8F</span><span class="p">,</span> <span class="mh">0xD0</span><span class="p">,</span> <span class="mh">0xFF</span><span class="p">))</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">text_align</span><span class="p">(</span><span class="n">vg</span><span class="p">,</span> <span class="n">nvg</span><span class="o">.</span><span class="n">NVG_ALIGN_RIGHT</span> <span class="o">|</span> <span class="n">nvg</span><span class="o">.</span><span class="n">NVG_ALIGN_MIDDLE</span><span class="p">)</span>
+        <span class="n">nvg</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">vg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="mi">6</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">y</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">voltage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">)</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2"> V"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The font is Rack’s own ShareTechMono, from Rack’s system folder at run time;
+the example does not ship a copy.</p>
+</section>
+<section id="a-self-lit-bar">
+<h2>A self-lit bar<a class="headerlink" href="#a-self-lit-bar" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Bar</span></code> draws only on layer 1, the layer Rack does not dim, through the
+<a class="reference internal" href="../reference/window.html#the-drawing-facade"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">rackpy.drawing</span></code></span></a> facade:</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">examples/drawing/pythonpath/rackpydrawing/meter.py · from an example plugin tested in Rack</span><a class="headerlink" href="#id4" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Bar</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">TransparentWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A bar from the centre towards the voltage, on Rack's self-lit layer: it glows in a dark room."""</span>
+
+    <span class="n">module</span><span class="p">:</span> <span class="n">Module</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">draw_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">w</span><span class="o">.</span><span class="n">DrawArgs</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">layer</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># Rack draws layer 1 after dimming the rack by the room brightness</span>
+            <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">size</span><span class="o">.</span><span class="n">y</span>
+            <span class="n">share</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">voltage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">)</span> <span class="o">/</span> <span class="n">full_scale</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">)))</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="n">share</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="n">Painter</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">rect</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">height</span> <span class="o">*</span> <span class="mf">0.6</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">share</span><span class="p">)</span> <span class="o">*</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">height</span> <span class="o">*</span> <span class="mf">0.3</span><span class="p">)</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="s2">"#6CF29BFF"</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">draw_layer</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="a-cached-scale">
+<h2>A cached scale<a class="headerlink" href="#a-cached-scale" title="Link to this heading">¶</a></h2>
+<p>Drawing every tick on every frame is wasted work: they change only with the
+RANGE switch. A <code class="docutils literal notranslate"><span class="pre">FramebufferWidget</span></code> renders its children once into an image
+and draws that image until it is marked dirty. <code class="docutils literal notranslate"><span class="pre">Scale</span></code> marks itself dirty when
+RANGE changes:</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">examples/drawing/pythonpath/rackpydrawing/meter.py · from an example plugin tested in Rack</span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Scale</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">FramebufferWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Caches Ticks: Rack renders it once into an image and draws the image every frame after."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="n">Module</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ticks</span> <span class="o">=</span> <span class="n">Ticks</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ticks</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ticks</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shown</span> <span class="o">=</span> <span class="n">full_scale</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># The ticks depend only on RANGE: mark the cache dirty when it changes, so Rack renders again.</span>
+        <span class="k">if</span> <span class="n">full_scale</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shown</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shown</span> <span class="o">=</span> <span class="n">full_scale</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_dirty</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>The tests count how often Rack draws the ticks: once to begin with, never
+in the next ten frames, and exactly once more after RANGE changes. A new
+graphics context renders it again.</p>
+<img alt="The Meter with 10 volts at its input. A dark blue-grey panel 12 HP wide. At the top, an amber circle and a red-outlined triangle on a rounded slate background. Below, the text +10.00 V in light blue. Below that, a scale of white ticks from -10 to +10 volts, with a bright green bar filling its right half. At the bottom, an input jack with the orange cable, a two-position switch, and an output jack." src="../_images/meter.png" />
+<img alt="The same Meter at 25% room brightness. The panel, shapes, text and ticks are dim, but the green bar is as bright as before." src="../_images/meter-dark-room.png" />
+<p><em>Left: the Meter reading the Lantern’s 10 V output on its 10 V range. The
+green bar fills the right half of the scale. Right: in a room at 25%, the
+shapes, text and ticks dim with the panel, and the self-lit bar does not.</em></p>
+</section>
+<section id="in-the-module-browser">
+<h2>In the module browser<a class="headerlink" href="#in-the-module-browser" title="Link to this heading">¶</a></h2>
+<p>The browser builds each preview from a module widget with no module (<code class="docutils literal notranslate"><span class="pre">None</span></code>).
+Rack’s control factories accept <code class="docutils literal notranslate"><span class="pre">None</span></code>, and the Meter’s widgets draw a resting
+meter instead of reading a module:</p>
+<img alt="The Meter's browser preview. The same panel with +0.00 V, the 5 volt scale's eleven ticks and no bar; both jacks are empty." src="../_images/meter-preview.png" />
+<p><em>The preview shows +0.00 V, the default 5 V range’s eleven ticks and no bar.</em></p>
+</section>
+<section id="what-else-the-tests-check">
+<h2>What else the tests check<a class="headerlink" href="#what-else-the-tests-check" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">tests/examples/test_drawing.py</span></code> also deletes the Meter while Rack draws it
+and undoes the deletion. It sends Rack’s graphics-context destroy and create
+events, as a host that recreates its window would, and points the readout at
+a missing font. None of these crashes or raises, and the text comes back.
+Each example also builds as its own plugin and loads in Rack.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="expanders.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Pass signals to the module beside yours</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="choose-files.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Let the user choose a file</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Draw a module’s panel</a><ul>
+<li><a class="reference internal" href="#a-light-and-a-dark-panel">A light and a dark panel</a></li>
+<li><a class="reference internal" href="#lights-stay-lit-in-a-dark-room">Lights stay lit in a dark room</a></li>
+<li><a class="reference internal" href="#shapes-with-nanovg">Shapes with NanoVG</a></li>
+<li><a class="reference internal" href="#text-with-the-font-loaded-every-frame">Text, with the font loaded every frame</a></li>
+<li><a class="reference internal" href="#a-self-lit-bar">A self-lit bar</a></li>
+<li><a class="reference internal" href="#a-cached-scale">A cached scale</a></li>
+<li><a class="reference internal" href="#in-the-module-browser">In the module browser</a></li>
+<li><a class="reference internal" href="#what-else-the-tests-check">What else the tests check</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

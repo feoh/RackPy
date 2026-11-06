@@ -1,0 +1,718 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Audio" href="audio.html"><link rel="prev" title="Undo history" href="history.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>MIDI - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Reference</a><input aria-label="Toggle navigation of Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="history.html">Undo history</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/reference/midi.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/reference/midi.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="midi">
+<h1>MIDI<a class="headerlink" href="#midi" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">rackpy.raw.midi</span></code> is Rack’s <code class="docutils literal notranslate"><span class="pre">rack::midi</span></code>: MIDI messages, Rack’s MIDI
+drivers and devices, and MIDI ports that Python owns. <strong>Implemented
+(RP-29A, RP-29C), Linux x86_64 inside Rack Free 2.6.6</strong> (see the
+<a class="reference internal" href="coverage.html"><span class="std std-doc">coverage report</span></a>).</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">midi_loopback.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">midi</span>
+
+<span class="n">LOOPBACK</span> <span class="o">=</span> <span class="o">-</span><span class="mi">12</span>  <span class="c1"># Rack's Loopback MIDI driver: what goes out on device N comes in on device N</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">NoteLog</span><span class="p">(</span><span class="n">midi</span><span class="o">.</span><span class="n">Input</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Collects the notes that arrive. RackPy calls on_message on the UI thread, not the MIDI thread."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="n">midi</span><span class="o">.</span><span class="n">Message</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">get_status</span><span class="p">()</span> <span class="o">==</span> <span class="mh">0x9</span> <span class="ow">and</span> <span class="n">message</span><span class="o">.</span><span class="n">get_value</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># note on</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">get_note</span><span class="p">())</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">open_loopback</span><span class="p">(</span><span class="n">device_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">midi</span><span class="o">.</span><span class="n">Output</span><span class="p">,</span> <span class="n">NoteLog</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Call from Rack's UI thread: an output and a NoteLog on one loopback device."""</span>
+    <span class="n">out</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="n">midi</span><span class="o">.</span><span class="n">Output</span><span class="p">(),</span> <span class="n">NoteLog</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">log</span><span class="p">):</span>
+        <span class="n">port</span><span class="o">.</span><span class="n">set_driver_id</span><span class="p">(</span><span class="n">LOOPBACK</span><span class="p">)</span>
+        <span class="n">port</span><span class="o">.</span><span class="n">set_device_id</span><span class="p">(</span><span class="n">device_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">log</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">note_on</span><span class="p">(</span><span class="n">note</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">velocity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">midi</span><span class="o">.</span><span class="n">Message</span><span class="p">:</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="n">midi</span><span class="o">.</span><span class="n">Message</span><span class="p">()</span>
+    <span class="n">message</span><span class="o">.</span><span class="n">set_status</span><span class="p">(</span><span class="mh">0x9</span><span class="p">)</span>
+    <span class="n">message</span><span class="o">.</span><span class="n">set_note</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+    <span class="n">message</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">velocity</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">message</span>
+</pre></div>
+</div>
+</div>
+<section id="messages">
+<span id="midi-messages"></span><h2>Messages<a class="headerlink" href="#messages" title="Link to this heading">¶</a></h2>
+<p>A <code class="docutils literal notranslate"><span class="pre">Message</span></code> is a value: <code class="docutils literal notranslate"><span class="pre">bytes</span></code> (three zeros at first, as a list of 0 to
+255) and <code class="docutils literal notranslate"><span class="pre">frame</span></code>, the engine frame it belongs to (-1: now). The accessors
+are Rack’s:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">get_status</span></code>/<code class="docutils literal notranslate"><span class="pre">set_status</span></code> and <code class="docutils literal notranslate"><span class="pre">get_channel</span></code>/<code class="docutils literal notranslate"><span class="pre">set_channel</span></code> read and write
+the two halves of the first byte.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_note</span></code>/<code class="docutils literal notranslate"><span class="pre">set_note</span></code> and <code class="docutils literal notranslate"><span class="pre">get_value</span></code>/<code class="docutils literal notranslate"><span class="pre">set_value</span></code> read and write the next
+two bytes. The setters mask to 7 bits.</p></li>
+<li><p>A missing byte reads as 0, and setting it does nothing (<code class="docutils literal notranslate"><span class="pre">set_size</span></code>
+changes the size).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">to_string()</span></code> is the bytes in hex.</p></li>
+</ul>
+</section>
+<section id="rack-s-drivers">
+<span id="midi-drivers"></span><h2>Rack’s drivers<a class="headerlink" href="#rack-s-drivers" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">get_driver_ids()</span></code> lists Rack’s MIDI drivers, and <code class="docutils literal notranslate"><span class="pre">get_driver(driver_id)</span></code>
+returns one as a <code class="docutils literal notranslate"><span class="pre">Driver</span></code>, a view by ID. Python never deletes a driver:
+Rack deletes every one, its own and Python’s, in its <code class="docutils literal notranslate"><span class="pre">midi::destroy()</span></code> as
+it quits, after closing its context and before the plugins’ <code class="docutils literal notranslate"><span class="pre">destroy()</span></code>, so
+a <a class="reference internal" href="plugin.html#plugin-hooks"><span class="std std-ref">destroy callback</span></a> finds a <code class="docutils literal notranslate"><span class="pre">PythonDriver</span></code> handle
+stale; a test in Rack checks this. Rack Free has these:</p>
+<ul class="simple">
+<li><p>Loopback (-12), whose 16 devices pass what is sent on device N to the
+inputs on device N.</p></li>
+<li><p>Computer keyboard/mouse.</p></li>
+<li><p>Gamepad.</p></li>
+<li><p>RtMidi’s, such as ALSA and JACK, depending on the machine.</p></li>
+</ul>
+<p>A driver lists its input and output devices and their names and defaults.
+<code class="docutils literal notranslate"><span class="pre">subscribe_input(device_id,</span> <span class="pre">port)</span></code> and <code class="docutils literal notranslate"><span class="pre">subscribe_output</span></code> make a Python port
+a subscriber of a device, apart from the port’s own device. RackPy undoes
+such a subscription when the port dies, and <code class="docutils literal notranslate"><span class="pre">unsubscribe_*</span></code> takes back only
+the subscriptions Python made. A port holds each device once: Rack’s
+subscriber sets ignore a second subscription, so subscribing (through the
+driver or the device) to a device the port already holds is refused, and
+when <code class="docutils literal notranslate"><span class="pre">set_device_id</span></code> makes a subscribed device the port’s own, that
+subscription becomes the port’s device. Unsubscribing the port’s own device is
+refused: <code class="docutils literal notranslate"><span class="pre">set_device_id(-1)</span></code> leaves it.</p>
+</section>
+<section id="ports">
+<span id="midi-ports"></span><h2>Ports<a class="headerlink" href="#ports" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Input()</span></code>, <code class="docutils literal notranslate"><span class="pre">InputQueue()</span></code> and <code class="docutils literal notranslate"><span class="pre">Output()</span></code> are Rack’s ports, owned by Python,
+on the main thread in Rack’s live UI. They need Rack’s engine to timestamp
+messages, so making one at plugin start-up raises <code class="docutils literal notranslate"><span class="pre">ContextError</span></code>. As in
+Rack, a new port takes Rack’s first driver and its default device. A port
+has Rack’s methods:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">set_driver_id</span></code> falls back to Rack’s first driver for an unknown ID, then
+takes its default device.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_device_id</span></code> takes a device, and -1 means none.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_driver</span></code> and <code class="docutils literal notranslate"><span class="pre">get_driver_id</span></code> return the port’s driver and its ID;
+<code class="docutils literal notranslate"><span class="pre">get_device_id</span></code> returns its device’s ID (-1: none) and <code class="docutils literal notranslate"><span class="pre">get_device</span></code> the
+device’s view, or <code class="docutils literal notranslate"><span class="pre">None</span></code>. The properties <code class="docutils literal notranslate"><span class="pre">driver</span></code>, <code class="docutils literal notranslate"><span class="pre">driver_id</span></code>, <code class="docutils literal notranslate"><span class="pre">device_id</span></code>
+and <code class="docutils literal notranslate"><span class="pre">device</span></code> are the same (<code class="docutils literal notranslate"><span class="pre">driver</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> for a driver that Rack’s list
+does not hold, such as a laboratory driver), and an <code class="docutils literal notranslate"><span class="pre">Input</span></code>’s <code class="docutils literal notranslate"><span class="pre">input_device</span></code> and an <code class="docutils literal notranslate"><span class="pre">Output</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">output_device</span></code> are Rack’s typed fields: an <code class="docutils literal notranslate"><span class="pre">InputDevice</span></code> or an
+<code class="docutils literal notranslate"><span class="pre">OutputDevice</span></code> view.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_device_ids</span></code>, <code class="docutils literal notranslate"><span class="pre">get_device_name</span></code>, <code class="docutils literal notranslate"><span class="pre">get_channels</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_channel_name</span></code>, <code class="docutils literal notranslate"><span class="pre">to_json</span></code>, and <code class="docutils literal notranslate"><span class="pre">from_json</span></code>, which finds the saved
+device by name.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">channel</span></code> is an input’s channel filter, or the channel an output sets on
+each message (-1: all, or leave it).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reset()</span></code> is Rack’s: <code class="docutils literal notranslate"><span class="pre">set_driver_id(-1)</span></code>, which (as -1 is no driver) falls
+back to Rack’s first driver and that driver’s default device, then the
+port’s default channel: -1 (all) for an input and 0 for an output.</p></li>
+<li><p>The read-only <code class="docutils literal notranslate"><span class="pre">context</span></code> property is the Rack context the port was made in, as
+Rack’s <code class="docutils literal notranslate"><span class="pre">Port::context</span></code> field.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">get_device_ids</span></code>, <code class="docutils literal notranslate"><span class="pre">get_default_device_id</span></code>, <code class="docutils literal notranslate"><span class="pre">set_device_id</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_device_name</span></code> and <code class="docutils literal notranslate"><span class="pre">get_channels</span></code> are Rack’s virtuals. A Python <code class="docutils literal notranslate"><span class="pre">Input</span></code>
+or <code class="docutils literal notranslate"><span class="pre">Output</span></code> subclass may override them, and Rack’s menus and its
+<code class="docutils literal notranslate"><span class="pre">set_driver_id</span></code> then call the override on the UI thread.</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">Input</span></code>.</strong> Rack delivers messages on the MIDI driver’s thread, or, for
+the Loopback driver, on whichever thread sends, often an engine thread.
+Python never runs there. The native port copies each message into a
+preallocated queue of up to 1024 messages and 64 KiB of total message bytes;
+a single message may use at most 64 KiB. RackPy calls the subclass’s
+<code class="docutils literal notranslate"><span class="pre">on_message(message)</span></code> on the UI thread at its next step. The queue never
+blocks or allocates on the sending thread: a message that finds it busy,
+full, or over either byte limit is dropped and counted in <code class="docutils literal notranslate"><span class="pre">dropped</span></code>.
+An unset frame is set from Rack’s engine timing, as Rack does.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">InputQueue</span></code></strong> is Rack’s queue port. It keeps up to 8192 messages in
+frame order, and <code class="docutils literal notranslate"><span class="pre">try_pop(max_frame)</span></code> returns the next one due, or <code class="docutils literal notranslate"><span class="pre">None</span></code>.
+A Python-owned module can attach an empty, disconnected <code class="docutils literal notranslate"><span class="pre">InputQueue</span></code> using
+<code class="docutils literal notranslate"><span class="pre">set_midi_input(index,</span> <span class="pre">queue)</span></code> (indices 0–3), then connect the port to a
+device. Its native queue delivers messages to a compatible kernel at their
+engine frames; <code class="docutils literal notranslate"><span class="pre">try_pop()</span></code> and <code class="docutils literal notranslate"><span class="pre">size()</span></code> raise <code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code> while it is
+attached. <code class="docutils literal notranslate"><span class="pre">set_midi_input(index,</span> <span class="pre">None)</span></code> detaches it while the module is
+Python-owned. For memory safety, a port permits at most 32 attachments over
+its lifetime. <code class="docutils literal notranslate"><span class="pre">module.midi_input_stats(index)</span></code> reports received, delivered,
+full-queue and long-message drops and the waiting count after the last frame.
+Messages longer than three bytes are dropped, including SysEx.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">Output.send_message(message)</span></code></strong> sends to the port’s device, setting the
+port’s channel unless it is -1.</p></li>
+</ul>
+<p>Rack’s drivers outlive its context but not RackPy’s interpreter. Every
+Python port therefore gives up its devices when Rack’s context closes, and
+is stale from then on. A port Python drops is deleted on the main thread.</p>
+</section>
+<section id="devices">
+<span id="midi-devices"></span><h2>Devices<a class="headerlink" href="#devices" title="Link to this heading">¶</a></h2>
+<p>A device belongs to its driver; Rack’s RtMidi driver deletes one when its
+last port leaves. Python reaches a device only through the port that holds
+it (<code class="docutils literal notranslate"><span class="pre">port.device</span></code>, <code class="docutils literal notranslate"><span class="pre">input_device</span></code>, <code class="docutils literal notranslate"><span class="pre">output_device</span></code>, or a driver’s
+<code class="docutils literal notranslate"><span class="pre">subscribe_*</span></code>), and the view goes stale once the port lets go.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">get_name()</span></code> is the device’s name.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">subscribed</span></code> lists the device’s subscribers: Python’s own ports, and
+read-only <code class="docutils literal notranslate"><span class="pre">PortView</span></code>s of the others, such as modules’ ports.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">InputDevice.on_message(message)</span></code> delivers a message to the subscribers,
+as the driver does when one arrives.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OutputDevice.send_message(message)</span></code> sends it as it is, without applying
+any channel.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">subscribe(port)</span></code> and <code class="docutils literal notranslate"><span class="pre">unsubscribe(port)</span></code> are Rack’s lower-level calls,
+which Rack says are not meant for plugins: a subscribed input hears the
+device as well as its own, until it unsubscribes. <code class="docutils literal notranslate"><span class="pre">unsubscribe</span></code> takes back
+only a subscription that <code class="docutils literal notranslate"><span class="pre">subscribe</span></code> made, and raises <code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code>
+otherwise (for the port’s own device, say). RackPy undoes them with the
+port, as it does a driver’s.</p></li>
+</ul>
+</section>
+<section id="python-drivers-and-devices">
+<span id="midi-python-drivers"></span><h2>Python drivers and devices<a class="headerlink" href="#python-drivers-and-devices" title="Link to this heading">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Native configured answers and queued notifications below do not preserve
+synchronous Python override semantics. Synchronous Python overrides of the
+driver, device and input virtuals exist only in the
+<a class="reference internal" href="../explanation/callbacks.html#laboratory-audio-and-midi-drivers"><span class="std std-ref">laboratory</span></a>
+(<code class="docutils literal notranslate"><span class="pre">rackpy.laboratory.MidiDriver</span></code>, <code class="docutils literal notranslate"><span class="pre">MidiInputDevice</span></code>, <code class="docutils literal notranslate"><span class="pre">MidiOutputDevice</span></code>,
+<code class="docutils literal notranslate"><span class="pre">MidiInput</span></code>, <code class="docutils literal notranslate"><span class="pre">MidiInputQueue</span></code>), offline, explicitly enabled, on the main
+thread, never on Rack’s engine or MIDI driver threads; see the
+<a class="reference internal" href="callback-paths.html"><span class="std std-doc">callback inventory</span></a>.</p>
+</div>
+<p>Python implements a MIDI driver as a natively configured <code class="docutils literal notranslate"><span class="pre">PythonDriver</span></code>
+(RP-29C), whose calls native code answers:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">add_input_device(name)</span></code> returns a <code class="docutils literal notranslate"><span class="pre">PythonInputDevice</span></code>. Its
+<code class="docutils literal notranslate"><span class="pre">push_message(message)</span></code> is Rack’s <code class="docutils literal notranslate"><span class="pre">InputDevice::onMessage</span></code>, as a driver
+calls it when a message arrives: every subscribed input gets it, filtered
+by channel and timestamped by Rack’s engine if its frame is unset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">add_output_device(name)</span></code> returns a <code class="docutils literal notranslate"><span class="pre">PythonOutputDevice</span></code>. Rack’s ports
+send to it from engine threads (modules’ <code class="docutils literal notranslate"><span class="pre">process()</span></code>), so it only queues
+each message, without blocking, in a queue of 1024 that counts drops in
+<code class="docutils literal notranslate"><span class="pre">dropped</span></code>. <code class="docutils literal notranslate"><span class="pre">take_sent()</span></code> returns the queued messages, in order, on the main
+thread. A Python <code class="docutils literal notranslate"><span class="pre">sendMessage</span></code> override exists only offline, in the
+<a class="reference internal" href="../explanation/callbacks.html#a-laboratory-midi-output-device"><span class="std std-ref">laboratory</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">remove_input_device</span></code>/<code class="docutils literal notranslate"><span class="pre">remove_output_device</span></code> unplug a device. Rack’s lists
+no longer show it, the ports that hold it keep it until they move, and it
+is deleted when the last one leaves: its <code class="docutils literal notranslate"><span class="pre">alive</span></code> is then false. A removed
+input refuses pushes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">add_driver(driver_id,</span> <span class="pre">driver)</span></code> gives the driver to Rack, which owns it
+until it quits. Taken IDs are refused.</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">rackpy.midi</span></code> facade builds messages (<code class="docutils literal notranslate"><span class="pre">note_on</span></code>, <code class="docutils literal notranslate"><span class="pre">note_off</span></code>,
+<code class="docutils literal notranslate"><span class="pre">control_change</span></code>, <code class="docutils literal notranslate"><span class="pre">message</span></code>, with range checks), finds drivers by name
+(<code class="docutils literal notranslate"><span class="pre">drivers</span></code>, <code class="docutils literal notranslate"><span class="pre">find_driver</span></code>), opens ports by driver and device name
+(<code class="docutils literal notranslate"><span class="pre">open_input</span></code>, <code class="docutils literal notranslate"><span class="pre">open_output</span></code>), and makes a virtual driver with its devices
+(<code class="docutils literal notranslate"><span class="pre">virtual_driver</span></code>). Duplicate driver or device names raise <code class="docutils literal notranslate"><span class="pre">LookupError</span></code> rather
+than selecting one silently; use IDs to disambiguate. <code class="docutils literal notranslate"><span class="pre">drivers()</span></code> also raises
+when its name map would lose a duplicate. Raw ID enumeration remains available.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="audio.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Audio</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="history.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Undo history</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">MIDI</a><ul>
+<li><a class="reference internal" href="#messages">Messages</a></li>
+<li><a class="reference internal" href="#rack-s-drivers">Rack’s drivers</a></li>
+<li><a class="reference internal" href="#ports">Ports</a></li>
+<li><a class="reference internal" href="#devices">Devices</a></li>
+<li><a class="reference internal" href="#python-drivers-and-devices">Python drivers and devices</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

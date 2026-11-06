@@ -1,0 +1,966 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Performance and safety contract" href="performance.html"><link rel="prev" title="Compatibility baseline" href="compatibility.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>API coverage contract - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="how-to/plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to/state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to/dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to/graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to/polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to/menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to/choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to/draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to/expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to/audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to/buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to/testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to/profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to/packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to/migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="reference/index.html">Reference</a><input aria-label="Toggle navigation of Reference" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference/coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="reference/crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="reference/crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="reference/mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="reference/python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="reference/python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="reference/python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="reference/python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="reference/python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="reference/python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="reference/python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="reference/python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reference/python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="reference/python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/coverage.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/coverage.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="api-coverage-contract">
+<h1>API coverage contract<a class="headerlink" href="#api-coverage-contract" title="Link to this heading">¶</a></h1>
+<p>This document defines the evidence needed to claim <strong>complete</strong> coverage, not a
+prerequisite for an honestly labeled early or partial release. The owner has
+prioritized practical plugin development and incremental improvements over
+exhaustive proof; see the <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/planning/README.md#owner-amendments">planning amendment</a>.
+The inventory and existing checks remain useful for identifying gaps and must not
+be altered to imply completeness that has not been verified.</p>
+<section id="establish-a-denominator-before-writing-bindings">
+<h2>Establish a denominator before writing bindings<a class="headerlink" href="#establish-a-denominator-before-writing-bindings" title="Link to this heading">¶</a></h2>
+<p>The denominator is the SDK inventory,
+<a class="reference download internal" download="" href="_downloads/bd309e1a69e8ea8cdf9d190e1fc5c2a1/api-surface.json"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">upstream/api-surface.json</span></code></span></a> (RP-05). It is generated
+by <code class="docutils literal notranslate"><span class="pre">bin/inventory_sdk.py</span></code>, described in the <a class="reference internal" href="reference/surface-schema.html"><span class="std std-doc">surface schema</span></a>
+and counted in the <a class="reference internal" href="reference/surface-summary.html"><span class="std std-doc">surface summary</span></a>. The tool parses
+a translation unit including only <code class="docutils literal notranslate"><span class="pre">rack.hpp</span></code> with the SDK’s defines, dependency
+headers and compiler flags, and combines AST data with preprocessor records. It
+uses regular expressions only for code the preprocessor skipped. Linux x64
+(with its SIMDe variant), macOS arm64 and x64, and Windows x64 are all
+extracted (RP-42), and CI extracts the macOS and Windows variants again on
+those platforms and compares them.</p>
+<p>Keep stable IDs from qualified C++ name, kind, canonical signature, template
+parameters, source provenance and conditional availability. Enumerate inherited
+public behavior without multiplying aliases into a misleading success count.
+Record source revision, SDK checksums, tool versions and command lines.</p>
+</section>
+<section id="pinned-surface-rp-02">
+<h2>Pinned surface (RP-02)<a class="headerlink" href="#pinned-surface-rp-02" title="Link to this heading">¶</a></h2>
+<p>RP-02 fixed the inputs and the definition of the surface. <strong>It did not count the
+surface.</strong> No coverage total exists until RP-05 produces the inventory.
+Baseline, digests and toolchain facts are in <a class="reference internal" href="compatibility.html"><span class="std std-doc">compatibility</span></a>.</p>
+<p><strong>Definition.</strong> The surface is every declaration that a translation unit
+containing only <code class="docutils literal notranslate"><span class="pre">#include</span> <span class="pre">&lt;rack.hpp&gt;</span></code> can see in a Rack-owned header, on each
+advertised platform, at Rack commit <code class="docutils literal notranslate"><span class="pre">061ccf63c1758599396ac1bb10d47345d9d34076</span></code>.
+That includes:</p>
+<ul class="simple">
+<li><p>declarations in Rack headers that are reachable only transitively, such as
+<code class="docutils literal notranslate"><span class="pre">history.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">weakptr.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">Quantity.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">color.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">app/common.hpp</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ui/common.hpp</span></code> and the <code class="docutils literal notranslate"><span class="pre">simd/sse_mathfun*.h</span></code> headers;</p></li>
+<li><p>the global-namespace C ABI hooks in <code class="docutils literal notranslate"><span class="pre">plugin/callbacks.hpp</span></code> (<code class="docutils literal notranslate"><span class="pre">init</span></code>,
+<code class="docutils literal notranslate"><span class="pre">destroy</span></code>, <code class="docutils literal notranslate"><span class="pre">settingsToJson</span></code>, <code class="docutils literal notranslate"><span class="pre">settingsFromJson</span></code>). Plugins implement them,
+so RackPy’s host provides them. They are entries even though they are not in
+<code class="docutils literal notranslate"><span class="pre">namespace</span> <span class="pre">rack</span></code>;</p></li>
+<li><p>macros defined in Rack headers, and declarations on any branch of a platform
+conditional.</p></li>
+</ul>
+<p>The Linux x64 closure reaches <strong>112 Rack headers</strong> and <strong>13 dependency headers</strong>.
+Each is listed with its SHA-256 in
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/tests/fixtures/sdk-provenance.json">tests/fixtures/sdk-provenance.json</a> and
+checked by <code class="docutils literal notranslate"><span class="pre">bin/rack-sdk</span> <span class="pre">closure</span></code>. Every reached header maps to a family in
+<a class="reference internal" href="scope.html#coverage-families"><span class="std std-ref">scope</span></a>:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Family</p></th>
+<th class="head"><p>Reached headers</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Entry point and namespace imports</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rack.hpp</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>1. Common/value utilities</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">arch</span></code>, <code class="docutils literal notranslate"><span class="pre">common</span></code>, <code class="docutils literal notranslate"><span class="pre">math</span></code>, <code class="docutils literal notranslate"><span class="pre">color</span></code>, <code class="docutils literal notranslate"><span class="pre">string</span></code>, <code class="docutils literal notranslate"><span class="pre">random</span></code>, <code class="docutils literal notranslate"><span class="pre">logger</span></code>, <code class="docutils literal notranslate"><span class="pre">Quantity</span></code>, <code class="docutils literal notranslate"><span class="pre">mutex</span></code>, <code class="docutils literal notranslate"><span class="pre">weakptr</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>2. Engine</p></td>
+<td><p>all 10 <code class="docutils literal notranslate"><span class="pre">engine/*</span></code> headers</p></td>
+</tr>
+<tr class="row-odd"><td><p>3. Plugin/model/assets/helpers</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">plugin</span></code>, <code class="docutils literal notranslate"><span class="pre">plugin/Plugin</span></code>, <code class="docutils literal notranslate"><span class="pre">plugin/Model</span></code>, <code class="docutils literal notranslate"><span class="pre">plugin/callbacks</span></code>, <code class="docutils literal notranslate"><span class="pre">asset</span></code>, <code class="docutils literal notranslate"><span class="pre">helpers</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>4. Widgets, UI, app, component library</p></td>
+<td><p>57 headers in <code class="docutils literal notranslate"><span class="pre">widget/</span></code>, <code class="docutils literal notranslate"><span class="pre">ui/</span></code>, <code class="docutils literal notranslate"><span class="pre">app/</span></code>, plus <code class="docutils literal notranslate"><span class="pre">componentlibrary</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>5. Window/rendering/context</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">window/Window</span></code>, <code class="docutils literal notranslate"><span class="pre">window/Svg</span></code>, <code class="docutils literal notranslate"><span class="pre">context</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>6. DSP and SIMD</p></td>
+<td><p>14 <code class="docutils literal notranslate"><span class="pre">dsp/*</span></code> and 5 <code class="docutils literal notranslate"><span class="pre">simd/*</span></code> headers</p></td>
+</tr>
+<tr class="row-odd"><td><p>7. Audio/MIDI</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">audio</span></code>, <code class="docutils literal notranslate"><span class="pre">midi</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>8. Services</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">settings</span></code>, <code class="docutils literal notranslate"><span class="pre">system</span></code>, <code class="docutils literal notranslate"><span class="pre">network</span></code> (synchronization is in <code class="docutils literal notranslate"><span class="pre">mutex</span></code>, family 1)</p></td>
+</tr>
+<tr class="row-odd"><td><p>9. History</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">history</span></code>, reached through <code class="docutils literal notranslate"><span class="pre">app/ModuleWidget.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">app/RackWidget.hpp</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Shipped but unreachable.</strong> These SDK headers are not reached from <code class="docutils literal notranslate"><span class="pre">rack.hpp</span></code>.
+<code class="docutils literal notranslate"><span class="pre">rack.hpp</span></code> says that including other Rack headers directly is unsupported, so
+they are outside the surface. They are recorded so that a later Rack version
+cannot pull one in unnoticed:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Header</p></th>
+<th class="head"><p>What it is</p></th>
+<th class="head"><p>Disposition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">patch.hpp</span></code></p></td>
+<td><p>Patch manager definition</p></td>
+<td><p>Outside. <code class="docutils literal notranslate"><span class="pre">Context::patch</span></code> stays an opaque handle (policy 4)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">midiloopback.hpp</span></code></p></td>
+<td><p>Loopback MIDI context</p></td>
+<td><p>Outside. <code class="docutils literal notranslate"><span class="pre">Context::midiLoopbackContext</span></code> stays opaque</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">library.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">tag.hpp</span></code></p></td>
+<td><p>VCV Library client, tag tables</p></td>
+<td><p>Outside</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">keyboard.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">gamepad.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">rtmidi.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">rtaudio.hpp</span></code></p></td>
+<td><p>Built-in driver implementations</p></td>
+<td><p>Outside. Drivers are reachable only through <code class="docutils literal notranslate"><span class="pre">audio::</span></code>/<code class="docutils literal notranslate"><span class="pre">midi::</span></code> interfaces</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">app/Browser.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">app/MenuBar.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">app/TipWindow.hpp</span></code></p></td>
+<td><p>Rack’s own application windows</p></td>
+<td><p>Outside</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack0.hpp</span></code></p></td>
+<td><p>v0 migration shim of deprecated aliases. It includes <code class="docutils literal notranslate"><span class="pre">rack.hpp</span></code>, not the reverse</p></td>
+<td><p>Outside the Rack 2 <code class="docutils literal notranslate"><span class="pre">rack.hpp</span></code> surface by owner decision, 2026-10-30. Rack 2 deprecated declarations reachable from <code class="docutils literal notranslate"><span class="pre">rack.hpp</span></code> remain in scope.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Dependency headers reached:</strong> <code class="docutils literal notranslate"><span class="pre">jansson.h</span></code>, <code class="docutils literal notranslate"><span class="pre">jansson_config.h</span></code>, <code class="docutils literal notranslate"><span class="pre">nanovg.h</span></code>,
+<code class="docutils literal notranslate"><span class="pre">nanovg_gl.h</span></code>, <code class="docutils literal notranslate"><span class="pre">nanovg_gl_utils.h</span></code>, <code class="docutils literal notranslate"><span class="pre">nanosvg.h</span></code>, <code class="docutils literal notranslate"><span class="pre">blendish.h</span></code>,
+<code class="docutils literal notranslate"><span class="pre">GLFW/glfw3.h</span></code>, <code class="docutils literal notranslate"><span class="pre">GL/glew.h</span></code>, <code class="docutils literal notranslate"><span class="pre">pffft.h</span></code> and three <code class="docutils literal notranslate"><span class="pre">speex/</span></code> headers. Their own
+APIs are not in the denominator. Policy 13 covers their role in Rack signatures.</p>
+<p><strong>Preliminary survey.</strong> <code class="docutils literal notranslate"><span class="pre">bin/rack-sdk</span> <span class="pre">survey</span></code> records lists for RP-05 to
+cross-check. Its counts are navigation data, not inventory:
+69 PRIVATE declarations, 39 attribute-deprecated declarations, 23 doc comments
+that mention deprecation, 6 “Unstable API” notes, 24 incomplete Rack record types
+and 137 template declarations. The RP-05 inventory agrees on the PRIVATE,
+attribute-deprecated and incomplete-record counts (a test checks this). It also
+found 7 comment-only deprecations that the first version of the survey missed
+because it matched only uppercase <code class="docutils literal notranslate"><span class="pre">DEPRECATED</span></code>. The survey now matches
+<code class="docutils literal notranslate"><span class="pre">Deprecated</span></code> too. The inventory additionally treats the 34 aliases in the
+deprecated <code class="docutils literal notranslate"><span class="pre">rack::event</span></code> namespace as deprecated.</p>
+<p>Two inventory hazards turned up while building the survey:</p>
+<ul class="simple">
+<li><p>Clang nests the imported record inside the <code class="docutils literal notranslate"><span class="pre">UsingShadowDecl</span></code> for
+<code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">plugin::Model;</span></code>. A naive walker therefore reports a phantom
+<code class="docutils literal notranslate"><span class="pre">rack::Model</span></code> declaration.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">std::fabs;</span></code> in <code class="docutils literal notranslate"><span class="pre">rack::simd</span></code> imports libstdc++ overloads, including a
+deprecated <code class="docutils literal notranslate"><span class="pre">std::complex</span></code> overload. Imports must not count as Rack
+declarations, and their deprecation is not Rack’s.</p></li>
+</ul>
+</section>
+<section id="completeness-policy">
+<h2>Completeness policy<a class="headerlink" href="#completeness-policy" title="Link to this heading">¶</a></h2>
+<p>These rules decide what counts toward complete coverage. They apply to every
+family task. A rule may only be relaxed with owner review, recorded in Witan and
+in this file.</p>
+<ol class="arabic">
+<li><p><strong>Scope.</strong> Exactly the <a class="reference internal" href="#pinned-surface-rp-02">pinned surface</a>. A difficult
+public declaration is not an internal one.</p></li>
+<li><p><strong>PRIVATE.</strong> Declarations carrying <code class="docutils literal notranslate"><span class="pre">PRIVATE</span></code> are <code class="docutils literal notranslate"><span class="pre">excluded_internal</span></code>; the
+attribute is the evidence. They are never callable, including from
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw</span></code>. <code class="docutils literal notranslate"><span class="pre">rack.hpp</span></code> makes <code class="docutils literal notranslate"><span class="pre">PRIVATE</span></code> a deprecation under clang and an
+<code class="docutils literal notranslate"><span class="pre">error</span></code> attribute under GCC, so the inventory must detect it from the AST and
+not rely on a failing build.</p></li>
+<li><p><strong>Pimpl internals.</strong> A public <code class="docutils literal notranslate"><span class="pre">Internal*</span> <span class="pre">internal</span></code> member whose type is an
+incomplete <code class="docutils literal notranslate"><span class="pre">Internal</span></code> struct is <code class="docutils literal notranslate"><span class="pre">excluded_internal</span></code>, with the incomplete type
+as evidence. The inventory finds 21 such types and 21 such members. They are
+never exposed.</p></li>
+<li><p><strong>Opaque forward declarations.</strong> <code class="docutils literal notranslate"><span class="pre">patch::Manager</span></code> and
+<code class="docutils literal notranslate"><span class="pre">midiloopback::Context</span></code> are declared but never defined in the closure. The
+public fields that hold them are entries. They are mapped as opaque,
+context-bound handles that support identity and null checks only. Nobody
+guesses their definitions. Operations on them are not supported API.</p></li>
+<li><p><strong>Deprecation and instability.</strong> Attribute-deprecated and comment-only
+deprecated declarations are both mapped and emit <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code>. The
+inventory records both kinds. <a class="reference download internal" download="" href="_downloads/92aca674a34fcbc15b7137c584a58a4e/deprecation-evidence.json"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">bindings/deprecation-evidence.json</span></code></span></a>
+maps each bound deprecated declaration to a warning test cited by its manifest
+record; the checker requires that evidence. The in-Rack matrix checks its
+cases against the inventory, including overload-specific calls. Members documented as “Unstable API”
+(<code class="docutils literal notranslate"><span class="pre">Param::value</span></code>, <code class="docutils literal notranslate"><span class="pre">Light::value</span></code>, <code class="docutils literal notranslate"><span class="pre">Port::voltages</span></code>, <code class="docutils literal notranslate"><span class="pre">Port::value</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Port::channels</span></code>, <code class="docutils literal notranslate"><span class="pre">Port::active</span></code>) are mapped and documented as unstable.</p></li>
+<li><p><strong>Overloads, defaults and aliases.</strong> Each overload is its own entry, and
+Python dispatch must reach each one. Default arguments are recorded and
+honoured. A typedef or alias such as <code class="docutils literal notranslate"><span class="pre">SVGPanel</span></code> is an alias entry that is
+complete only when its target is. Totals count it once.</p></li>
+<li><p><strong>Imports.</strong> <code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">namespace</span></code> directives in <code class="docutils literal notranslate"><span class="pre">rack.hpp</span></code> and using-declarations
+such as <code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">plugin::Model</span></code> or <code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">std::fabs</span></code> are import records. They
+determine expected <code class="docutils literal notranslate"><span class="pre">rackpy.raw</span></code> name paths but do not add declarations.</p></li>
+<li><p><strong>Pointers, references, arrays and unions.</strong> Every pointer or reference
+parameter, return value or field is classified as owning, borrowed,
+transferred, nullable, array or out-parameter, using RP-06 evidence. None is
+exposed as an integer address. Fixed arrays such as <code class="docutils literal notranslate"><span class="pre">Port::voltages[16]</span></code> and
+anonymous unions such as <code class="docutils literal notranslate"><span class="pre">Port::value</span></code>/<code class="docutils literal notranslate"><span class="pre">voltages</span></code> and <code class="docutils literal notranslate"><span class="pre">channels</span></code>/<code class="docutils literal notranslate"><span class="pre">active</span></code> get
+views with explicit aliasing. Mutable reference returns need explicit
+write-through semantics.</p></li>
+<li><p><strong>Macros.</strong> Each Rack macro gets one of three reviewed dispositions:</p>
+<ul class="simple">
+<li><p><em>constant</em>, mapped to a Python constant with its per-platform value, e.g.
+<code class="docutils literal notranslate"><span class="pre">RACK_MOD_CTRL</span></code>, <code class="docutils literal notranslate"><span class="pre">RACK_MOD_*_NAME</span></code>, <code class="docutils literal notranslate"><span class="pre">CHECKMARK_STRING</span></code>;</p></li>
+<li><p><em>semantic</em>, mapped to equivalent behaviour, e.g. <code class="docutils literal notranslate"><span class="pre">APP</span></code> to the current
+context accessor, <code class="docutils literal notranslate"><span class="pre">DEFER</span></code> to a context manager, <code class="docutils literal notranslate"><span class="pre">ENUMS</span></code> to an enum
+builder, and <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>/<code class="docutils literal notranslate"><span class="pre">INFO</span></code>/<code class="docutils literal notranslate"><span class="pre">WARN</span></code>/<code class="docutils literal notranslate"><span class="pre">FATAL</span></code> to logging calls that capture the
+Python caller’s location. <code class="docutils literal notranslate"><span class="pre">LENGTHOF</span></code>, <code class="docutils literal notranslate"><span class="pre">CONCAT</span></code>, <code class="docutils literal notranslate"><span class="pre">TOSTRING</span></code>, <code class="docutils literal notranslate"><span class="pre">BINARY*</span></code>,
+<code class="docutils literal notranslate"><span class="pre">RECT_ARGS</span></code>, <code class="docutils literal notranslate"><span class="pre">VEC_ARGS</span></code> and <code class="docutils literal notranslate"><span class="pre">DECLARE_VECTOR_OPERATOR_*</span></code> each need one too;</p></li>
+<li><p><em>build configuration</em>, recorded and mapped where it is observable at run
+time (<code class="docutils literal notranslate"><span class="pre">ARCH_*</span></code> become platform constants). Otherwise it is reviewed as
+having no runtime meaning (<code class="docutils literal notranslate"><span class="pre">GLEW_STATIC</span></code>, <code class="docutils literal notranslate"><span class="pre">GLEW_NO_GLU</span></code>, <code class="docutils literal notranslate"><span class="pre">NANOVG_GL2</span></code>,
+<code class="docutils literal notranslate"><span class="pre">PRIVATE</span></code>, <code class="docutils literal notranslate"><span class="pre">DEPRECATED</span></code>).</p></li>
+</ul>
+<p>A macro never silently leaves the denominator.</p>
+</li>
+<li><p><strong>Templates.</strong> These rules replace “bind whatever compiles”:</p>
+<ul class="simple">
+<li><p>Class templates with element-type parameters (<code class="docutils literal notranslate"><span class="pre">TSchmittTrigger&lt;T</span> <span class="pre">=</span> <span class="pre">float&gt;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">TBiquadFilter</span></code>, <code class="docutils literal notranslate"><span class="pre">TSlewLimiter</span></code>, …) map every instantiation that Rack
+names (<code class="docutils literal notranslate"><span class="pre">SchmittTrigger</span></code>, …) and every element type that the public
+semantics need, at least <code class="docutils literal notranslate"><span class="pre">float</span></code> and <code class="docutils literal notranslate"><span class="pre">simd::float_4</span></code>. Each mapped
+instantiation is an entry.</p></li>
+<li><p>Function templates over widget or module types (<code class="docutils literal notranslate"><span class="pre">createParam&lt;T&gt;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">createModel&lt;TModule,</span> <span class="pre">TModuleWidget&gt;</span></code>, menu-item helpers, …) map to
+factories that accept a class, including Python subclasses.</p></li>
+<li><p>Mixin templates such as <code class="docutils literal notranslate"><span class="pre">TRedLight&lt;TBase&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">LightButton&lt;TBase,</span> <span class="pre">TLight&gt;</span></code>
+map to class factories over a base type.</p></li>
+<li><p>The primary template <code class="docutils literal notranslate"><span class="pre">simd::Vector</span></code> is declared but not defined. Only
+the explicit specializations <code class="docutils literal notranslate"><span class="pre">Vector&lt;float,</span> <span class="pre">4&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">Vector&lt;int32_t,</span> <span class="pre">4&gt;</span></code>
+exist, and they are the mapped set.</p></li>
+<li><p>If a template’s parameter space cannot be represented faithfully (for
+example arbitrary <code class="docutils literal notranslate"><span class="pre">T</span></code> and size in <code class="docutils literal notranslate"><span class="pre">RingBuffer&lt;T,</span> <span class="pre">S&gt;</span></code>), propose a precise
+generic contract to the owner. The release stays blocked until the owner
+decides (<a class="reference internal" href="#release-bar">release bar</a>). While it is open, each affected
+record’s notes say <code class="docutils literal notranslate"><span class="pre">Open</span> <span class="pre">owner</span> <span class="pre">review</span> <span class="pre">item:</span></code> and name it, and
+<code class="docutils literal notranslate"><span class="pre">bin/check_coverage.py</span> <span class="pre">release</span></code> counts it as a blocker
+(<a class="reference internal" href="contributing-bindings.html#open-owner-review-items"><span class="std std-ref">Adding bindings</span></a>).</p></li>
+<li><p>Bounded contracts the owner accepted: the ring buffers, <code class="docutils literal notranslate"><span class="pre">MinBlepGenerator</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Decimator</span></code>, <code class="docutils literal notranslate"><span class="pre">Upsampler</span></code> and <code class="docutils literal notranslate"><span class="pre">SampleRateConverter</span></code> (2026-10-26), and
+<code class="docutils literal notranslate"><span class="pre">IIRFilter</span></code>, <code class="docutils literal notranslate"><span class="pre">MidiGenerator</span></code>, <code class="docutils literal notranslate"><span class="pre">MidiParser</span></code> and <code class="docutils literal notranslate"><span class="pre">polyDirect</span></code>/<code class="docutils literal notranslate"><span class="pre">polyEstrin</span></code>/
+<code class="docutils literal notranslate"><span class="pre">polyHorner</span></code> (2026-10-27), with the instantiation sets in the
+<a class="reference internal" href="reference/dsp.html#templates"><span class="std std-ref">DSP reference</span></a>. The integer templates of <code class="docutils literal notranslate"><span class="pre">math.hpp</span></code>
+take <code class="docutils literal notranslate"><span class="pre">int64_t</span></code> and <code class="docutils literal notranslate"><span class="pre">uint64_t</span></code>, and <code class="docutils literal notranslate"><span class="pre">sgn</span></code> also <code class="docutils literal notranslate"><span class="pre">float</span></code> and <code class="docutils literal notranslate"><span class="pre">double</span></code>
+(<a class="reference internal" href="reference/values.html#scalar-functions"><span class="std std-ref">values</span></a>). <code class="docutils literal notranslate"><span class="pre">SharedLock&lt;TMutex&gt;</span></code> takes
+any object with <code class="docutils literal notranslate"><span class="pre">lock_shared()</span></code> and <code class="docutils literal notranslate"><span class="pre">unlock_shared()</span></code>, and <code class="docutils literal notranslate"><span class="pre">WeakPtr&lt;T&gt;</span></code>
+any widget, <code class="docutils literal notranslate"><span class="pre">Widget</span></code> being Rack’s only <code class="docutils literal notranslate"><span class="pre">WeakBase</span></code>
+(<a class="reference internal" href="reference/services.html#sharedlock-over-any-tmutex"><span class="std std-ref">services</span></a>) (2026-10-27).</p></li>
+</ul>
+</li>
+<li><p><strong>Virtual methods and callbacks.</strong> Every virtual method is an entry with a
+callback strategy from RP-06: a UI-safe Python override, a native production
+path plus a laboratory Python path, or <em>unresolved</em>. An unresolved strategy
+blocks the family task. The C ABI hooks from policy 1 are implemented by the
+RackPy host and forward to Python where RP-06 allows it.</p>
+<p><em>Classes only Rack can make</em> (RP-28F decision, owner-approved 2026-10-26). Public API cannot override a virtual of a class whose
+constructors are all PRIVATE. The same holds for a class whose public
+constructor gives an unusable object, because the state its virtuals need
+is set only through Rack’s pimpl. Plugins, in C++ or Python, only call
+such a virtual on Rack’s own instances, so that call, through a borrowed
+host view, is its mapping. Its record says so and cites the header lines
+(and, for the pimpl case, Rack’s source lines) as evidence. In Rack 2.6.6
+these classes are <code class="docutils literal notranslate"><span class="pre">Scene</span></code>, <code class="docutils literal notranslate"><span class="pre">RackScrollWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">RackWidget</span></code> (PRIVATE
+constructors and destructors) and <code class="docutils literal notranslate"><span class="pre">PlugWidget</span></code> (only <code class="docutils literal notranslate"><span class="pre">CableWidget</span></code>’s
+constructor sets a plug’s cable and type). Their host views are final
+Python classes.</p>
+<p>The same reasoning maps <code class="docutils literal notranslate"><span class="pre">WeakHandle(void*)</span></code> (owner decision, 2026-10-27):
+only Rack’s <code class="docutils literal notranslate"><span class="pre">WeakPtr&lt;T&gt;::set()</span></code> makes a usable handle, for the object it
+points at, so <code class="docutils literal notranslate"><span class="pre">WeakPtr(widget)</span></code> reaches the constructor, and
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw.WeakHandle</span></code> is a view of Rack’s handles that Python cannot
+construct (<a class="reference internal" href="reference/services.html#the-widget-contract"><span class="std std-ref">services</span></a>).</p>
+</li>
+<li><p><strong>Platforms.</strong> A conditional declaration has per-platform availability, for
+example <code class="docutils literal notranslate"><span class="pre">string::UTF16toUTF8</span></code> on Windows only, or the macOS value of
+<code class="docutils literal notranslate"><span class="pre">RACK_MOD_CTRL</span></code>. Absent on a platform means <em>not available there</em>, recorded
+per platform. It is not an exclusion. Coverage is reported for each
+advertised platform. The SSE4.2 and SIMDe implementations of <code class="docutils literal notranslate"><span class="pre">simd::</span></code> must
+behave the same and are tested on both.</p></li>
+<li><p><strong>External boundary types.</strong> For each Rack declaration whose signature uses
+a dependency type, the necessary semantics are mapped. RP-31H applies this
+existing owner-approved policy to the GLFW key, mouse-button, modifier and
+action constants referenced by event APIs and Blendish’s <code class="docutils literal notranslate"><span class="pre">BND_CORNER_*</span></code>
+menu flags; these dependency constants are counted boundary entries, not a
+wholesale inclusion of dependency APIs. The necessary semantics include: <code class="docutils literal notranslate"><span class="pre">json_t</span></code> as Python
+values (see <a class="reference internal" href="architecture.html#exceptions-and-state"><span class="std std-ref">architecture</span></a>),
+<code class="docutils literal notranslate"><span class="pre">NVGcontext</span></code> and <code class="docutils literal notranslate"><span class="pre">NVGcolor</span></code> drawing scoped to draw arguments,
+<code class="docutils literal notranslate"><span class="pre">NSVGimage</span></code> through <code class="docutils literal notranslate"><span class="pre">window::Svg</span></code>, <code class="docutils literal notranslate"><span class="pre">GLFWwindow</span></code> in <code class="docutils literal notranslate"><span class="pre">window::Window</span></code> as an
+opaque handle, and GLFW key and modifier constants used by events. <code class="docutils literal notranslate"><span class="pre">pffft</span></code> and <code class="docutils literal notranslate"><span class="pre">speexdsp</span></code> are reached only through Rack’s <code class="docutils literal notranslate"><span class="pre">dsp</span></code>
+types. RP-05 lists which external declarations Rack signatures reach. Those
+become boundary-type entries.</p></li>
+<li><p><strong>Unknowns block.</strong> An entry that cannot be classified stays <code class="docutils literal notranslate"><span class="pre">unreviewed</span></code>
+and blocks a full-coverage release. A failed extraction is an error, never
+an empty report.
+A declaration Rack’s headers carry but Rack never defines (libRack
+exports no symbol for it, so no plugin can call it) is classified, not
+unknown: it has no runtime meaning, recorded with the evidence and
+checked against libRack’s exports (owner decision 2026-10-26, first for
+<code class="docutils literal notranslate"><span class="pre">audio::Port::getDeviceDetail</span></code>, a Rack 1 leftover with no callers).</p></li>
+</ol>
+</section>
+<section id="the-binding-manifest-rp-11">
+<h2>The binding manifest (RP-11)<a class="headerlink" href="#the-binding-manifest-rp-11" title="Link to this heading">¶</a></h2>
+<p>The per-symbol records below live in
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/bindings/manifest.json">bindings/manifest.json</a>, one per counted inventory
+entry. <code class="docutils literal notranslate"><span class="pre">bin/check_coverage.py</span> <span class="pre">check</span></code> enforces this page’s policies against the
+inventory, the reviewed exclusion allowlist, the callback and engine-lock
+tables, the cited tests and docs, and an introspection of the built package;
+<code class="docutils literal notranslate"><span class="pre">bin/generate_bindings.py</span></code> derives the registration scaffold, stubs and the
+<a class="reference internal" href="reference/coverage.html"><span class="std std-doc">coverage report</span></a> from it. The design is
+<a class="reference internal" href="decisions/008-binding-manifest.html"><span class="std std-doc">ADR 008</span></a>; the workflow is
+<a class="reference internal" href="contributing-bindings.html"><span class="std std-doc">Adding bindings</span></a>.</p>
+</section>
+<section id="per-symbol-record">
+<h2>Per-symbol record<a class="headerlink" href="#per-symbol-record" title="Link to this heading">¶</a></h2>
+<p>Each entry must have:</p>
+<ul class="simple">
+<li><p>Upstream ID, header/line, namespace, declaration kind, availability and deprecation.</p></li>
+<li><p>Public/internal decision with evidence; PRIVATE is never callable.</p></li>
+<li><p>Python raw and facade paths; overload and enum/property conversions.</p></li>
+<li><p>Ownership, nullability, thread affinity, mutability and callback strategy.</p></li>
+<li><p>Macro/template mapping and supported generic constraints or specializations.</p></li>
+<li><p>Implementation path, behavioral test node IDs and documentation anchors.</p></li>
+<li><p>Status: <code class="docutils literal notranslate"><span class="pre">unreviewed</span></code>, <code class="docutils literal notranslate"><span class="pre">planned</span></code>, <code class="docutils literal notranslate"><span class="pre">implemented</span></code>, <code class="docutils literal notranslate"><span class="pre">verified</span></code>,
+<code class="docutils literal notranslate"><span class="pre">unrepresentable</span></code>, or <code class="docutils literal notranslate"><span class="pre">excluded_internal</span></code>, with reason and reviewer.</p></li>
+<li><p>Gate ownership for anything platform-conditional or not yet representable.</p></li>
+</ul>
+<p>A “native only” implementation is not a verified Python mapping. A method that
+raises NotImplementedError is not implemented. Aliases do not compensate for
+missing overloads. Safety-restricted calls must document where their semantics
+can actually be exercised.</p>
+</section>
+<section id="known-release-gaps">
+<h2>Known release gaps<a class="headerlink" href="#known-release-gaps" title="Link to this heading">¶</a></h2>
+<p>Owner decision (2026-11-06): the practical partial-release gate may accept only the
+records listed below as known gaps. This is a bounded exception for the audited
+partial candidate, <strong>not</strong> complete API coverage; all limitations must remain
+visible in release notes and coverage reports. A manifest record opts into this
+exception with <code class="docutils literal notranslate"><span class="pre">Known</span> <span class="pre">release</span> <span class="pre">gap:</span></code> in its notes, and the checker requires its
+ID to appear in this list. No unlisted <code class="docutils literal notranslate"><span class="pre">planned</span></code> or <code class="docutils literal notranslate"><span class="pre">unrepresentable</span></code> record is
+exempt.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Manifest ID</p></th>
+<th class="head"><p>Status</p></th>
+<th class="head"><p>Known limitation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">class_template:rack::DeferWrapper&lt;type&gt;</span></code></p></td>
+<td><p>unrepresentable</p></td>
+<td><p>Python context-manager adaptation does not preserve destructor-timed raw callback semantics.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">constructor:rack::DeferWrapper::DeferWrapper&lt;F&gt;($c0)</span></code></p></td>
+<td><p>unrepresentable</p></td>
+<td><p>No safe raw-equivalent for a destructor callback that may run on arbitrary threads.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">destructor:rack::DeferWrapper::~DeferWrapper&lt;F&gt;()</span></code></p></td>
+<td><p>unrepresentable</p></td>
+<td><p>No safe raw-equivalent for destructor-triggered callback execution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">function_template:rack::deferWrapper&lt;type&gt;($0)</span></code></p></td>
+<td><p>unrepresentable</p></td>
+<td><p>The Pythonic context manager is not the raw destructor-triggered function.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">macro:BINARY_END</span></code></p></td>
+<td><p>unrepresentable</p></td>
+<td><p>Embedded binary end/range is not exposed through a safe owned/view API.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">macro:BINARY_SIZE</span></code></p></td>
+<td><p>unrepresentable</p></td>
+<td><p>Embedded binary size is not exposed as a safe bytes value.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">macro:BINARY_START</span></code></p></td>
+<td><p>unrepresentable</p></td>
+<td><p>Embedded binary data is not exposed through a safe owned/view API.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">field:rack::widget::Widget::children</span></code></p></td>
+<td><p>unrepresentable</p></td>
+<td><p>Safe read-only children view does not provide Rack’s mutable public-field semantics.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">field:rack::widget::Widget::parent</span></code></p></td>
+<td><p>unrepresentable</p></td>
+<td><p>Safe read-only parent view does not provide Rack’s mutable public-field semantics.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">constructor:rack::app::PlugWidget::PlugWidget()</span></code></p></td>
+<td><p>planned</p></td>
+<td><p>Rack’s public constructor is not exposed as a separately callable raw PlugWidget constructor.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">field:rack::audio::Device::subscribed</span></code></p></td>
+<td><p>planned</p></td>
+<td><p>Mutable set-like field writes are not mapped with Rack’s synchronization semantics.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">field:rack::audio::Port::maxInputs</span></code></p></td>
+<td><p>planned</p></td>
+<td><p>Writes while bridged are not supported.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">field:rack::audio::Port::maxOutputs</span></code></p></td>
+<td><p>planned</p></td>
+<td><p>Writes while bridged are not supported.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">function:rack::contextSet(rack::Context</span> <span class="pre">*)</span></code></p></td>
+<td><p>planned</p></td>
+<td><p>Cannot clear or select another live context through the current safe adapter.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="three-independent-checks">
+<h2>Three independent checks<a class="headerlink" href="#three-independent-checks" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p><strong>Declaration completeness:</strong> inventory diff catches new, removed, changed or
+conditionally hidden upstream declarations. Unknowns fail.</p></li>
+<li><p><strong>Reachability and behavior:</strong> import/introspect the shipped module; prove
+signatures and every overload’s semantics using native differential fixtures
+and actual-host integration where required.</p></li>
+<li><p><strong>Reader usability:</strong> mapping table links to docs; every binding has a human
+explanation of ownership/thread restrictions, and examples compile/run.</p></li>
+</ol>
+<p>The coverage report is broken down by family and platform. Header-level checkmarks
+are useful navigation, never evidence of complete bindings.</p>
+</section>
+<section id="release-bar">
+<h2>Release bar<a class="headerlink" href="#release-bar" title="Link to this heading">¶</a></h2>
+<p>A <strong>complete full-surface</strong> release requires zero public unreviewed/planned/
+unimplemented/unrepresentable entries on each advertised platform, no unexplained
+exclusions, and verified callback, macro and template mappings. Purely internal
+declarations may be excluded only with source evidence and review. Public
+deprecated APIs remain mapped and warned about until the compatibility policy
+explicitly changes.</p>
+<p>For the owner-approved practical partial release, the checker may accept a
+<code class="docutils literal notranslate"><span class="pre">planned</span></code> or <code class="docutils literal notranslate"><span class="pre">unrepresentable</span></code> record only when its manifest notes contain
+<code class="docutils literal notranslate"><span class="pre">Known</span> <span class="pre">release</span> <span class="pre">gap:</span></code> and its exact ID is listed in <a class="reference internal" href="#known-release-gaps">Known release gaps</a>.
+That exception does not turn the record into a binding, does not promote it to
+<code class="docutils literal notranslate"><span class="pre">verified</span></code>, and must never be used to claim complete coverage. All other incomplete
+records continue to fail the release gate.</p>
+<p>If an infinite C++ template space cannot have a faithful Python generic/extension
+mapping, propose a precise contract to the owner; do not silently trim scope.
+The release task remains blocked while that contract is unresolved.</p>
+<p>Each platform is judged on its own (RP-42): every bound record available there cites
+a test that passed there (<code class="docutils literal notranslate"><span class="pre">bin/check_coverage.py</span> <span class="pre">evidence</span></code>, from each test’s outcome
+that the CI jobs keep), every official sample’s tests passed there (<code class="docutils literal notranslate"><span class="pre">samples</span></code>), and
+the manifest matches what that platform’s release candidate exports inside Rack
+(<code class="docutils literal notranslate"><span class="pre">bin/rackpy-release</span> <span class="pre">introspect</span></code>, then <code class="docutils literal notranslate"><span class="pre">check</span> <span class="pre">--introspection</span></code>). A skipped test is
+not a pass except for the four explicitly listed <code class="docutils literal notranslate"><span class="pre">instrument_tests</span></code> guard cases
+in <code class="docutils literal notranslate"><span class="pre">upstream/examples.json</span></code> on macOS and Windows: those platform-specific skips
+are accepted only because the audio-path guard itself is Linux-only, and the
+reports must state that this safety proof is Linux-only. <code class="docutils literal notranslate"><span class="pre">bin/release-evidence</span> <span class="pre">collect</span></code> records all of it from one CI run in
+<code class="docutils literal notranslate"><span class="pre">release-evidence/</span></code>, with the run’s commit, and says which gates are still closed.</p>
+<p>Early <strong>preview</strong> releases may be partial only if they say so and link to all gaps.
+Changing the target SDK requires an inventory diff, compatibility work, sample
+reruns and owner-visible release notes, not a tag edit.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="performance.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Performance and safety contract</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="compatibility.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Compatibility baseline</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">API coverage contract</a><ul>
+<li><a class="reference internal" href="#establish-a-denominator-before-writing-bindings">Establish a denominator before writing bindings</a></li>
+<li><a class="reference internal" href="#pinned-surface-rp-02">Pinned surface (RP-02)</a></li>
+<li><a class="reference internal" href="#completeness-policy">Completeness policy</a></li>
+<li><a class="reference internal" href="#the-binding-manifest-rp-11">The binding manifest (RP-11)</a></li>
+<li><a class="reference internal" href="#per-symbol-record">Per-symbol record</a></li>
+<li><a class="reference internal" href="#known-release-gaps">Known release gaps</a></li>
+<li><a class="reference internal" href="#three-independent-checks">Three independent checks</a></li>
+<li><a class="reference internal" href="#release-bar">Release bar</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=8d563738"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

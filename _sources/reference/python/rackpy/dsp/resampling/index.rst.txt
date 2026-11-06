@@ -1,0 +1,54 @@
+rackpy.dsp.resampling
+=====================
+
+.. py:module:: rackpy.dsp.resampling
+
+.. autoapi-nested-parse::
+
+   Rack's MinBLEP and resamplers (RP-19B).
+
+   Rack's own objects (``rack::dsp``, also available as :mod:`rackpy.raw.dsp`):
+   ``MinBlepGenerator[z, o]`` for band-limited steps, ``SampleRateConverter[channels]``
+   (speexdsp), and ``Decimator[oversample, quality]`` and ``Upsampler[...]`` for
+   integer factors. The templates take a bounded set of sizes; see the DSP
+   reference. For tests and offline processing; per-sample audio belongs in a
+   native kernel. Available inside Rack only.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.dsp.resampling.Decimator
+   rackpy.dsp.resampling.MinBlepGenerator
+   rackpy.dsp.resampling.SampleRateConverter
+   rackpy.dsp.resampling.Upsampler
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.dsp.resampling.min_blep_impulse
+
+
+Module Contents
+---------------
+
+.. py:data:: Decimator
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: MinBlepGenerator
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: SampleRateConverter
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: Upsampler
+   :type:  rackpy.raw.simd.Template
+
+.. py:function:: min_blep_impulse(z: int, o: int, output: collections.abc.Buffer) -> None
+

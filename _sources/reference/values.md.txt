@@ -1,0 +1,288 @@
+# Values: math, colours, quantities and common helpers
+
+Family 1 of the [SDK surface](surface/common.md): `math.hpp`, `color.hpp`,
+`Quantity.hpp`, `common.hpp` and `arch.hpp` (RP-12). The string, random,
+logger, mutex and weak-pointer utilities in the same family belong to the
+services task (RP-30).
+
+Every function here runs **Rack's own C++ code**, compiled with the SDK's
+flags. `tests/values` replays more than 7,000 cases from a compiled C++
+reference through these bindings, inside Rack, and requires the results to be
+identical bit for bit, so nothing here is a Python re-implementation that
+could drift from Rack.
+
+The low-level names are in `rackpy.raw` (C++ namespace for namespace:
+`rack::math` is `rackpy.raw.math`); {py:mod}`rackpy.math` and
+{py:mod}`rackpy.types` are the tidy imports for everyday use.
+
+(values-numbers)=
+## Numbers cross as C++ numbers
+
+- A Python `float` becomes a C++ `float`: it is rounded to 32 bits, and a
+  magnitude beyond the float range becomes `±inf`, exactly as a C++ cast does.
+  `rackpy.math.crossfade(0.1, 0.1, 0)` is `0.10000000149011612`.
+- A Python `int` becomes the C++ integer type the function takes. A value that
+  does not fit raises `OverflowError`; it never wraps silently and never falls
+  through to a float overload.
+- NaN and infinities pass through with Rack's semantics: `rescale` over an
+  empty range divides by zero, giving `±inf` (or NaN when `x` is the range's
+  start), as Rack's does.
+- **The sign of a zero is not part of Rack's semantics.** Rack and RackPy are
+  compiled with `-funsafe-math-optimizations`, which implies
+  `-fno-signed-zeros`, so a function may return `0.0` or `-0.0` for the same
+  input depending on the compiler and call site: `clamp(-0.0)` is `0.0` from
+  one build and `-0.0` from another. Compare results with `==`, which treats
+  them as equal. `normalize_zero` is the exception: Rack compiles it to keep
+  signed zeros, and it always returns `+0.0`.
+- **Denormals are flushed to zero inside Rack.** Rack's `main()` sets the CPU's
+  flush-to-zero and denormals-are-zero modes (`system::resetFpuFlags()`), and
+  threads inherit them, so in a Rack process *all* float arithmetic, including
+  plain Python `float` arithmetic, treats subnormal numbers as zero:
+  `math.ldexp(1.0, -1070)` is `0.0` inside Rack and about `7.9e-323` outside it.
+  The C++ reference test runs in the same mode.
+
+(values-scalars)=
+## Scalar functions
+
+`clamp`, `clamp_safe`, `euc_mod`, `sgn` and the other helpers keep every C++
+overload. Python picks one by argument type: all-`int` arguments reach the
+`int` overload, anything else the `float` one, so `clamp(15, 0, 10)` is the
+integer `10` and `clamp(1.5)` uses the float defaults 0 and 1.
+
+The template helpers take these instantiations (RP-31K, at the owner's
+request of 2026-10-27):
+
+| Function | `T` | Outside it |
+| --- | --- | --- |
+| `is_even`, `is_odd`, `is_pow2` | `int64_t` for −2⁶³ to 2⁶³ − 1, `uint64_t` for 2⁶³ to 2⁶⁴ − 1 | `OverflowError` |
+| `sgn(x)` for an `int` | `int64_t` | `OverflowError` |
+| `sgn(x)` for a `float` | `float`, or `double` with `type="double"` | `ValueError` for another `type` |
+
+For a value that several C++ integer types can hold, every one of them gives
+the same result, so these two reach every result Rack's integer `T` can; a
+Python float is a C++ double, which a `long double` holds exactly, so `float`
+and `double` do the same for floating-point `T`. `is_pow2(2**63)` is `True`,
+as `isPow2<uint64_t>(1ull << 63)` is in C++.
+`sgn` converts its argument to a C++ float unless `type="double"`: a float
+cannot hold 1e-50, so `sgn(1e-50)` is `0.0` and `sgn(1e-50, type="double")`
+is `1.0`.
+
+Where Rack only documents a precondition, RackPy checks it, because breaking
+it in C++ would crash or hang Rack:
+
+| Function | Rack's rule | RackPy raises |
+| --- | --- | --- |
+| `euc_mod`, `euc_div`, `euc_div_mod` (int) | `b` must be positive | `ValueError` |
+| `log2` | (a negative `n` loops forever) | `ValueError` for `n < 0` |
+| `interpolate_linear(p, x)` | `p` must have `trunc(x) + 2` values | `IndexError`, also for NaN `x` or `x <= -1` (Rack truncates `x` toward 0, so `x` in (-1, 0) needs two values and extrapolates from `p[0]` and `p[1]`) |
+
+Out-parameters become return values: `euc_div_mod(-7, 3)` is `(-3, 2)` and
+`complex_mult(ar, ai, br, bi)` returns `(cr, ci)`. `interpolate_linear` copies
+`p` and never modifies it.
+
+(values-vec)=
+## Vec
+
+`Vec(x, y)` is a 2D vector of C++ floats with Rack's methods (`plus`, `norm`,
+`rotate`, …; `mult` and `div` take a `Vec` or a float, as their two C++
+overloads do) and Rack's operators: `+`, `-`, `*` and `/` with a `Vec` or a
+float, unary `+` and `-`, `==` and `!=`, and the in-place forms, which change
+the `Vec` itself. `v[0]` is `x`; every other integer index reads or writes `y`, matching Rack's `operator[]` (including negative and out-of-range indices).
+
+A `Vec` is a **mutable value**: assigning it or passing it to a function copies
+it, as in C++, and `copy.copy` makes an independent copy. Being mutable, it is
+not hashable.
+
+(values-rect)=
+## Rect
+
+`Rect(pos, size)` or `Rect(x, y, width, height)` includes its left and top
+edges but not its right and bottom ones. `Rect.inf()` is the whole plane.
+It has Rack's methods, which return new values: the static constructors
+`from_min_max` and `from_corners`; the getters (`get_left`, …, `get_center`,
+`get_top_left`, `get_top_right`, `get_bottom_left`, `get_bottom_right`);
+`contains`, which takes a `Vec` or a `Rect`, `intersects` and `equals`;
+`clamp`, `nudge`, `expand`, `intersect`, `zero_pos`, `grow`, `shrink` and
+`interpolate`; and Rack's aliases `is_containing`, `is_intersecting` and
+`is_equal`. `==` and `!=` are Rack's operators. The facade adds read-only
+properties (`left`, `right`, `top`, `bottom`, `width`, `height`, `center`)
+over Rack's getters.
+
+(values-views)=
+## Copies and views
+
+The one rule that matters: **a field read from a Rack object is a view of
+that field, not a copy.**
+
+```text
+r = Rect(1, 2, 3, 4)
+r.pos.x = 10      # changes r: r.pos is a view of r's field
+p = r.pos         # still a view; p keeps r alive
+p = copy.copy(r.pos)   # an independent Vec
+r.pos = Vec(7, 8) # assignment copies the new value into r
+```
+
+Methods and operators return new values. RackPy never hands out a copy where
+C++ returns a reference: when a later family binds a widget's `box`, writing
+`widget.box.pos.x` will move the widget, exactly as in C++.
+
+(values-color)=
+## Colours
+
+`NVGcolor(r, g, b, a=1.0)` (also `rackpy.types.Color`) is nanovg's colour, which
+Rack passes by value everywhere. It is therefore an **immutable** value: its
+components are read-only and it is hashable. Names such as
+`rackpy.raw.color.RED` and `WHITE_TRANSPARENT` are conventional module-level
+constants; Python allows rebinding a module attribute, but that does not mutate
+the original value or Rack's C++ constant. The `rackpy.raw.color` functions
+are Rack's: `lerp`, `screen`, `alpha`, `mult` (by a colour or a float), and so on.
+
+`from_hex_string` behaves as Rack's implementation does, which is not what its
+header says. `color.hpp` documents "returns WHITE on error", but the code reads
+the text with `sscanf` and returns whatever it parsed: opaque black for text it
+cannot read at all, and a partial colour for partial input (`"#ff"` is opaque
+red). It never raises. RackPy follows the implementation, and the C++ reference
+test checks that it does.
+
+(values-quantity)=
+## Quantity
+
+`rackpy.raw.Quantity` is `rack::Quantity`, the value-with-bounds-and-labels
+that knobs and sliders display. What a Python subclass may override depends on
+where Rack calls each method ([callback matrix](callback-matrix.md)):
+
+| Methods | Rack calls them | In Python |
+| --- | --- | --- |
+| `get_display_value`, `set_display_value`, `get_display_precision`, `get_display_value_string`, `set_display_value_string`, `get_label`, `get_unit`, `get_string` | on the UI thread | override freely |
+| `reset`, `randomize` | sometimes with audio stopped | override, but keep it brief (ADR 004: 1 ms) |
+| `get_value`, `set_value`, `get_min_value`, `get_max_value`, `get_default_value` | plain quantities: UI; parameter quantities: also **engine thread** (Core MIDI-Map) | plain `Quantity` and `ValueQuantity` subclasses may override on the main thread; `ParamQuantity` subclasses defining them raise `TypeError` |
+
+When Rack calls a plain quantity's value method off the main thread, RackPy
+never invokes Python: it uses the C++ base answer and records one bounded
+refusal diagnostic per object. The result may therefore differ from the Python
+override. Do not use such overrides for production audio. Parameter quantities
+can use Python value overrides only in the separately enabled
+[callback laboratory](../explanation/callbacks.md#laboratory-quantities).
+
+{py:class}`rackpy.types.ValueQuantity` keeps its value, bounds and default
+natively, so Rack can read the base values from any thread. Like Rack's
+`ParamQuantity`, it clamps a new value to its bounds with `clamp_safe`. Because
+`fmin(NaN, max)` is `max`, a NaN becomes the **maximum**. `set_display_value_string` accepts Rack's formula
+language (`"c4"`, `"1+1"`, `"dbtogain(-6)"`) and leaves the value unchanged if
+the text does not parse.
+
+When Rack calls a Python override and it raises, the error is caught at the
+boundary, logged and recorded as a `callback_raised` diagnostic, and Rack's
+default answers instead. When your own Python code calls the method, the error
+reaches you as usual.
+
+(values-exception)=
+## Exception
+
+`rackpy.raw.Exception` is `rack::Exception`. Rack's C++ exceptions arrive in
+Python as this type, a `RuntimeError`, with `msg` and `what()` giving the
+message. The printf-style constructor is `Exception.printf(format, *args)`,
+which uses Rack's `string.f` formatter with checked arguments, so
+`printf("%lld ports", 3)` reads `3 ports` and `%a` formats a hexadecimal float.
+Like `string.f`, it refuses `%n` and `%p` and embedded NULs in `%s` arguments;
+the format itself is a C string and ends at its first NUL.
+
+(values-common)=
+## Configuration strings and helpers
+
+| C++ | Python |
+| --- | --- |
+| `APP_NAME`, `APP_VERSION`, `APP_OS`, `APP_CPU`, `API_URL`, … | `rackpy.raw.APP_NAME`, … (the running Rack's values) |
+| `bitCast<To, From>(x)` | `rackpy.raw.bit_cast(x, to, from_)` with type names `i8` … `u64`, `f32`, `f64`; different sizes raise `ValueError`, as they fail to compile in C++ |
+| `42_u8`, `0.5_f32`, … | `rackpy.raw.literals.u8(42)`, `rackpy.raw.literals.f32(0.5)`, … with C++'s conversions (`u8(256)` is 0) |
+| `construct<T>(&T::field, value, …)` | `rackpy.raw.construct(cls, field=value, …)` |
+| `get(map, key, def)`, `get(vector, i, def)` | `rackpy.raw.get(container, key, default=None)`: never inserts; an index outside the sequence gives `default` |
+| `DeferWrapper`, `deferWrapper(f)`, `DEFER({...})` | `with rackpy.raw.defer_wrapper(f):` or `with rackpy.raw.macros.DEFER(f):` runs `f` when the block exits; `DeferWrapper.f` is the stored callable |
+
+C++ value-initializes `get`'s default (`0`, `""`); Python cannot know the
+container's element type, so its default is `None`. `DeferWrapper` is currently
+a Pythonic context-manager adaptation: its callable runs on `with` exit, but
+unlike Rack's destructor, dropping a wrapper that was never entered does not
+run it. This does not count as complete raw coverage.
+
+(values-macros)=
+## Macros
+
+Each of Rack's macros has a reviewed disposition (coverage policy 9):
+
+| Macro | Python |
+| --- | --- |
+| `ARCH_LIN`, `ARCH_X64` (and `ARCH_WIN`, `ARCH_MAC`, `ARCH_ARM64` on their platforms) | constants in `rackpy.raw.macros`, defined only on the platform the plugin was built for |
+| `RACK_MOD_CTRL`, `RACK_MOD_CTRL_NAME` | constants in `rackpy.raw.macros`: GLFW's Super modifier and `"⌘"` on macOS, its Control modifier and `"Ctrl"` elsewhere, as `widget/event.hpp` defines them per platform |
+| `fopen` (Windows only) | `macros.fopen`, which is [`fopen_u8`](#values-fopen) |
+| `VEC_ARGS(v)`, `RECT_ARGS(r)` | `macros.VEC_ARGS(v)` is `(v.x, v.y)`; `macros.RECT_ARGS(r)` is the four floats |
+| `LENGTHOF(arr)` | `macros.LENGTHOF(arr)`, which is `len(arr)` |
+| `ENUMS(name, count)` | `macros.ENUMS(name, count, start)` returns `{name: start, name_LAST: start + count - 1}` |
+| `DEFER(code)` | `macros.DEFER(f)`, a context manager |
+| `DEPRECATED` | `macros.DEPRECATED`, a decorator whose target emits `DeprecationWarning` |
+| `CONCAT`, `CONCAT_LITERAL`, `TOSTRING`, `TOSTRING_LITERAL` | **no runtime meaning**: they paste and quote tokens for the preprocessor; Python builds strings directly |
+| `BINARY` | **no runtime meaning**: this is a linker directive for data embedded in a C++ plugin; a Python plugin reads its files through asset paths (RP-30) |
+| `BINARY_START`, `BINARY_END`, `BINARY_SIZE` | Runtime pointer/length expressions for linker-embedded C++ plugin data. RackPy does not expose raw addresses; a safe byte-view equivalent is an open coverage decision, so these declarations remain a release blocker rather than being counted as implemented. |
+| `PRIVATE` | **no runtime meaning**: an attribute that marks Rack's internal declarations (a deprecation warning under clang, an error otherwise); RackPy never calls them. The manifest records it as `implemented` with `python.kind = "no_runtime_meaning"`, not as `excluded_internal`. |
+
+(values-fopen)=
+## Files by UTF-8 name: `fopen_u8` (Windows only)
+
+On Windows, the C runtime's `fopen` reads a file name in the ANSI code page,
+so `common.hpp` declares `fopen_u8`, which converts the UTF-8 name and mode
+to UTF-16 and calls `_wfopen`, and `#define`s `fopen` to it. RackPy maps
+both: `rackpy.raw.fopen_u8(filename, mode)` and `rackpy.raw.macros.fopen`,
+the same function. On Linux and macOS neither name exists, as in C++.
+
+It returns a `rackpy.raw.CFile`, which owns the `FILE*`: `read(size=-1)`
+(`fread`; `b''` at the end), `write(data)` (`fwrite` of all of a bytes-like
+object), `seek(offset, whence=0)` and `tell()` (64-bit), `flush()` and
+`close()`. A `with` block closes it, and so does Python when it frees the
+object; closing twice does nothing, and any other call on a closed file raises
+`ValueError`. Where C returns `NULL` or a call fails, it raises `OSError`
+(`FileNotFoundError` and so on) with the C runtime's `errno`, read where
+Rack's `_wfopen` set it, in msvcrt, and passed to Python as a number. A file
+name or mode with a NUL character raises `ValueError`, as C would stop at it.
+Calls hold the GIL, so a `close` cannot race a `read`; it is file I/O, not for
+the audio thread.
+
+(values-json)=
+## JSON
+
+Rack's state and settings APIs exchange jansson `json_t`. RackPy never hands
+Python a `json_t`; it converts at the boundary, in both directions, with one
+policy (`native/runtime/json.cpp`), described by `rackpy.types.JSON`:
+
+- `null`, booleans, integers, reals, strings, arrays and objects become `None`,
+  `bool`, `int`, `float`, `str`, `list` and `dict`; tuples are accepted as arrays.
+- Integers must fit jansson's 64-bit `json_int_t` (`OverflowError` otherwise).
+- NaN and infinities raise `ValueError`: JSON cannot represent them.
+- Object keys must be `str` (`TypeError`). Neither keys nor strings may
+  contain NUL characters (`ValueError`): jansson writes NUL as `\u0000`, but
+  Rack loads patches, presets and the clipboard without `JSON_ALLOW_NUL`, so it
+  would refuse the whole file (RP-15C).
+- From `json_t`, strings that are not valid UTF-8 raise `UnicodeDecodeError`.
+  jansson's own loader refuses them; only a plugin's `json_string_nocheck`
+  can make one.
+- Anything nested more than 64 levels deep, which includes a list that
+  contains itself, raises `ValueError`.
+
+Later families use this for `dataToJson`, `paramsFromJson`, plugin settings and
+so on (RP-15).
+
+(values-boundaries)=
+## Buffers and opaque handles (design for later families)
+
+Two more boundary policies, designed here and implemented where they first
+appear:
+
+- **Buffers.** Native arrays (a port's 16 voltages, a DSP block) reach Python
+  through the buffer protocol only from an object that owns or keeps alive the
+  storage: a snapshot copy, or a view that is valid only inside the callback
+  that provided it and raises afterwards (ADR 003, decisions 8 and 10). RP-13
+  implements port voltage views.
+- **Opaque handles.** Pointers Python must not dereference (`GLFWwindow*`,
+  `NVGcontext*`, `Context::patch`) become handle objects that support identity
+  and a null check and nothing else, never an integer address (coverage
+  policies 4, 8 and 13): `rackpy.raw.window.NativeHandle` ([drawing and the
+  window](window.md#the-context)).

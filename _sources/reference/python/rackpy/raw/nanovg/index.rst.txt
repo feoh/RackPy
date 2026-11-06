@@ -1,0 +1,611 @@
+rackpy.raw.nanovg
+=================
+
+.. py:module:: rackpy.raw.nanovg
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.nanovg.Xform
+   rackpy.raw.nanovg.NVG_PI
+   rackpy.raw.nanovg.NVG_CCW
+   rackpy.raw.nanovg.NVG_CW
+   rackpy.raw.nanovg.NVG_SOLID
+   rackpy.raw.nanovg.NVG_HOLE
+   rackpy.raw.nanovg.NVG_BUTT
+   rackpy.raw.nanovg.NVG_ROUND
+   rackpy.raw.nanovg.NVG_SQUARE
+   rackpy.raw.nanovg.NVG_BEVEL
+   rackpy.raw.nanovg.NVG_MITER
+   rackpy.raw.nanovg.NVG_ALIGN_LEFT
+   rackpy.raw.nanovg.NVG_ALIGN_CENTER
+   rackpy.raw.nanovg.NVG_ALIGN_RIGHT
+   rackpy.raw.nanovg.NVG_ALIGN_TOP
+   rackpy.raw.nanovg.NVG_ALIGN_MIDDLE
+   rackpy.raw.nanovg.NVG_ALIGN_BOTTOM
+   rackpy.raw.nanovg.NVG_ALIGN_BASELINE
+   rackpy.raw.nanovg.NVG_ZERO
+   rackpy.raw.nanovg.NVG_ONE
+   rackpy.raw.nanovg.NVG_SRC_COLOR
+   rackpy.raw.nanovg.NVG_ONE_MINUS_SRC_COLOR
+   rackpy.raw.nanovg.NVG_DST_COLOR
+   rackpy.raw.nanovg.NVG_ONE_MINUS_DST_COLOR
+   rackpy.raw.nanovg.NVG_SRC_ALPHA
+   rackpy.raw.nanovg.NVG_ONE_MINUS_SRC_ALPHA
+   rackpy.raw.nanovg.NVG_DST_ALPHA
+   rackpy.raw.nanovg.NVG_ONE_MINUS_DST_ALPHA
+   rackpy.raw.nanovg.NVG_SRC_ALPHA_SATURATE
+   rackpy.raw.nanovg.NVG_SOURCE_OVER
+   rackpy.raw.nanovg.NVG_SOURCE_IN
+   rackpy.raw.nanovg.NVG_SOURCE_OUT
+   rackpy.raw.nanovg.NVG_ATOP
+   rackpy.raw.nanovg.NVG_DESTINATION_OVER
+   rackpy.raw.nanovg.NVG_DESTINATION_IN
+   rackpy.raw.nanovg.NVG_DESTINATION_OUT
+   rackpy.raw.nanovg.NVG_DESTINATION_ATOP
+   rackpy.raw.nanovg.NVG_LIGHTER
+   rackpy.raw.nanovg.NVG_COPY
+   rackpy.raw.nanovg.NVG_XOR
+   rackpy.raw.nanovg.NVG_IMAGE_GENERATE_MIPMAPS
+   rackpy.raw.nanovg.NVG_IMAGE_REPEATX
+   rackpy.raw.nanovg.NVG_IMAGE_REPEATY
+   rackpy.raw.nanovg.NVG_IMAGE_FLIPY
+   rackpy.raw.nanovg.NVG_IMAGE_PREMULTIPLIED
+   rackpy.raw.nanovg.NVG_IMAGE_NEAREST
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.nanovg.NVGcolor
+   rackpy.raw.nanovg.NVGpaint
+   rackpy.raw.nanovg.NVGglyphPosition
+   rackpy.raw.nanovg.NVGtextRow
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.nanovg.global_composite_operation
+   rackpy.raw.nanovg.global_composite_blend_func
+   rackpy.raw.nanovg.global_composite_blend_func_separate
+   rackpy.raw.nanovg.rgb
+   rackpy.raw.nanovg.rgbf
+   rackpy.raw.nanovg.rgba
+   rackpy.raw.nanovg.rgbaf
+   rackpy.raw.nanovg.lerp_rgba
+   rackpy.raw.nanovg.trans_rgba
+   rackpy.raw.nanovg.trans_rgbaf
+   rackpy.raw.nanovg.hsl
+   rackpy.raw.nanovg.hsla
+   rackpy.raw.nanovg.save
+   rackpy.raw.nanovg.restore
+   rackpy.raw.nanovg.reset
+   rackpy.raw.nanovg.shape_anti_alias
+   rackpy.raw.nanovg.stroke_color
+   rackpy.raw.nanovg.stroke_paint
+   rackpy.raw.nanovg.fill_color
+   rackpy.raw.nanovg.fill_paint
+   rackpy.raw.nanovg.miter_limit
+   rackpy.raw.nanovg.stroke_width
+   rackpy.raw.nanovg.line_cap
+   rackpy.raw.nanovg.line_join
+   rackpy.raw.nanovg.global_alpha
+   rackpy.raw.nanovg.global_tint
+   rackpy.raw.nanovg.get_global_tint
+   rackpy.raw.nanovg.alpha
+   rackpy.raw.nanovg.tint
+   rackpy.raw.nanovg.reset_transform
+   rackpy.raw.nanovg.transform
+   rackpy.raw.nanovg.translate
+   rackpy.raw.nanovg.rotate
+   rackpy.raw.nanovg.skew_x
+   rackpy.raw.nanovg.skew_y
+   rackpy.raw.nanovg.scale
+   rackpy.raw.nanovg.current_transform
+   rackpy.raw.nanovg.transform_identity
+   rackpy.raw.nanovg.transform_translate
+   rackpy.raw.nanovg.transform_scale
+   rackpy.raw.nanovg.transform_rotate
+   rackpy.raw.nanovg.transform_skew_x
+   rackpy.raw.nanovg.transform_skew_y
+   rackpy.raw.nanovg.transform_multiply
+   rackpy.raw.nanovg.transform_premultiply
+   rackpy.raw.nanovg.transform_inverse
+   rackpy.raw.nanovg.transform_point
+   rackpy.raw.nanovg.deg_to_rad
+   rackpy.raw.nanovg.rad_to_deg
+   rackpy.raw.nanovg.image_size
+   rackpy.raw.nanovg.linear_gradient
+   rackpy.raw.nanovg.box_gradient
+   rackpy.raw.nanovg.radial_gradient
+   rackpy.raw.nanovg.image_pattern
+   rackpy.raw.nanovg.scissor
+   rackpy.raw.nanovg.intersect_scissor
+   rackpy.raw.nanovg.reset_scissor
+   rackpy.raw.nanovg.begin_path
+   rackpy.raw.nanovg.move_to
+   rackpy.raw.nanovg.line_to
+   rackpy.raw.nanovg.bezier_to
+   rackpy.raw.nanovg.quad_to
+   rackpy.raw.nanovg.arc_to
+   rackpy.raw.nanovg.close_path
+   rackpy.raw.nanovg.path_winding
+   rackpy.raw.nanovg.arc
+   rackpy.raw.nanovg.rect
+   rackpy.raw.nanovg.rounded_rect
+   rackpy.raw.nanovg.rounded_rect_varying
+   rackpy.raw.nanovg.ellipse
+   rackpy.raw.nanovg.circle
+   rackpy.raw.nanovg.fill
+   rackpy.raw.nanovg.stroke
+   rackpy.raw.nanovg.find_font
+   rackpy.raw.nanovg.add_fallback_font_id
+   rackpy.raw.nanovg.add_fallback_font
+   rackpy.raw.nanovg.reset_fallback_fonts_id
+   rackpy.raw.nanovg.reset_fallback_fonts
+   rackpy.raw.nanovg.font_size
+   rackpy.raw.nanovg.font_blur
+   rackpy.raw.nanovg.text_letter_spacing
+   rackpy.raw.nanovg.text_line_height
+   rackpy.raw.nanovg.text_align
+   rackpy.raw.nanovg.font_face_id
+   rackpy.raw.nanovg.font_face
+   rackpy.raw.nanovg.text
+   rackpy.raw.nanovg.text_box
+   rackpy.raw.nanovg.text_bounds
+   rackpy.raw.nanovg.text_box_bounds
+   rackpy.raw.nanovg.text_glyph_positions
+   rackpy.raw.nanovg.text_metrics
+   rackpy.raw.nanovg.text_break_lines
+
+
+Module Contents
+---------------
+
+.. py:class:: NVGcolor(r: float, g: float, b: float, a: float = 1.0)
+
+   .. py:property:: r
+      :type: float
+
+
+
+   .. py:property:: g
+      :type: float
+
+
+
+   .. py:property:: b
+      :type: float
+
+
+
+   .. py:property:: a
+      :type: float
+
+
+
+   .. py:property:: rgba
+      :type: tuple[float, float, float, float]
+
+
+
+.. py:data:: Xform
+
+.. py:data:: NVG_PI
+   :type:  float
+
+.. py:data:: NVG_CCW
+   :type:  int
+
+.. py:data:: NVG_CW
+   :type:  int
+
+.. py:data:: NVG_SOLID
+   :type:  int
+
+.. py:data:: NVG_HOLE
+   :type:  int
+
+.. py:data:: NVG_BUTT
+   :type:  int
+
+.. py:data:: NVG_ROUND
+   :type:  int
+
+.. py:data:: NVG_SQUARE
+   :type:  int
+
+.. py:data:: NVG_BEVEL
+   :type:  int
+
+.. py:data:: NVG_MITER
+   :type:  int
+
+.. py:data:: NVG_ALIGN_LEFT
+   :type:  int
+
+.. py:data:: NVG_ALIGN_CENTER
+   :type:  int
+
+.. py:data:: NVG_ALIGN_RIGHT
+   :type:  int
+
+.. py:data:: NVG_ALIGN_TOP
+   :type:  int
+
+.. py:data:: NVG_ALIGN_MIDDLE
+   :type:  int
+
+.. py:data:: NVG_ALIGN_BOTTOM
+   :type:  int
+
+.. py:data:: NVG_ALIGN_BASELINE
+   :type:  int
+
+.. py:data:: NVG_ZERO
+   :type:  int
+
+.. py:data:: NVG_ONE
+   :type:  int
+
+.. py:data:: NVG_SRC_COLOR
+   :type:  int
+
+.. py:data:: NVG_ONE_MINUS_SRC_COLOR
+   :type:  int
+
+.. py:data:: NVG_DST_COLOR
+   :type:  int
+
+.. py:data:: NVG_ONE_MINUS_DST_COLOR
+   :type:  int
+
+.. py:data:: NVG_SRC_ALPHA
+   :type:  int
+
+.. py:data:: NVG_ONE_MINUS_SRC_ALPHA
+   :type:  int
+
+.. py:data:: NVG_DST_ALPHA
+   :type:  int
+
+.. py:data:: NVG_ONE_MINUS_DST_ALPHA
+   :type:  int
+
+.. py:data:: NVG_SRC_ALPHA_SATURATE
+   :type:  int
+
+.. py:data:: NVG_SOURCE_OVER
+   :type:  int
+
+.. py:data:: NVG_SOURCE_IN
+   :type:  int
+
+.. py:data:: NVG_SOURCE_OUT
+   :type:  int
+
+.. py:data:: NVG_ATOP
+   :type:  int
+
+.. py:data:: NVG_DESTINATION_OVER
+   :type:  int
+
+.. py:data:: NVG_DESTINATION_IN
+   :type:  int
+
+.. py:data:: NVG_DESTINATION_OUT
+   :type:  int
+
+.. py:data:: NVG_DESTINATION_ATOP
+   :type:  int
+
+.. py:data:: NVG_LIGHTER
+   :type:  int
+
+.. py:data:: NVG_COPY
+   :type:  int
+
+.. py:data:: NVG_XOR
+   :type:  int
+
+.. py:data:: NVG_IMAGE_GENERATE_MIPMAPS
+   :type:  int
+
+.. py:data:: NVG_IMAGE_REPEATX
+   :type:  int
+
+.. py:data:: NVG_IMAGE_REPEATY
+   :type:  int
+
+.. py:data:: NVG_IMAGE_FLIPY
+   :type:  int
+
+.. py:data:: NVG_IMAGE_PREMULTIPLIED
+   :type:  int
+
+.. py:data:: NVG_IMAGE_NEAREST
+   :type:  int
+
+.. py:class:: NVGpaint
+
+   .. py:property:: xform
+      :type: Xform
+
+
+
+   .. py:property:: extent
+      :type: tuple[float, float]
+
+
+
+   .. py:property:: radius
+      :type: float
+
+
+
+   .. py:property:: feather
+      :type: float
+
+
+
+   .. py:property:: inner_color
+      :type: NVGcolor
+
+
+
+   .. py:property:: outer_color
+      :type: NVGcolor
+
+
+
+   .. py:property:: image
+      :type: int
+
+
+
+.. py:class:: NVGglyphPosition
+
+   .. py:property:: index
+      :type: int
+
+
+
+   .. py:property:: x
+      :type: float
+
+
+
+   .. py:property:: minx
+      :type: float
+
+
+
+   .. py:property:: maxx
+      :type: float
+
+
+
+.. py:class:: NVGtextRow
+
+   .. py:property:: start
+      :type: int
+
+
+
+   .. py:property:: end
+      :type: int
+
+
+
+   .. py:property:: next
+      :type: int
+
+
+
+   .. py:property:: width
+      :type: float
+
+
+
+   .. py:property:: minx
+      :type: float
+
+
+
+   .. py:property:: maxx
+      :type: float
+
+
+
+.. py:function:: global_composite_operation(vg: rackpy.raw.widget.GraphicsContext, op: int) -> None
+
+.. py:function:: global_composite_blend_func(vg: rackpy.raw.widget.GraphicsContext, sfactor: int, dfactor: int) -> None
+
+.. py:function:: global_composite_blend_func_separate(vg: rackpy.raw.widget.GraphicsContext, src_rgb: int, dst_rgb: int, src_alpha: int, dst_alpha: int) -> None
+
+.. py:function:: rgb(r: int, g: int, b: int) -> NVGcolor
+
+.. py:function:: rgbf(r: float, g: float, b: float) -> NVGcolor
+
+.. py:function:: rgba(r: int, g: int, b: int, a: int) -> NVGcolor
+
+.. py:function:: rgbaf(r: float, g: float, b: float, a: float) -> NVGcolor
+
+.. py:function:: lerp_rgba(c0: NVGcolor, c1: NVGcolor, u: float) -> NVGcolor
+
+.. py:function:: trans_rgba(c0: NVGcolor, a: int) -> NVGcolor
+
+.. py:function:: trans_rgbaf(c0: NVGcolor, a: float) -> NVGcolor
+
+.. py:function:: hsl(h: float, s: float, l: float) -> NVGcolor
+
+.. py:function:: hsla(h: float, s: float, l: float, a: int) -> NVGcolor
+
+.. py:function:: save(vg: rackpy.raw.widget.GraphicsContext) -> None
+
+.. py:function:: restore(vg: rackpy.raw.widget.GraphicsContext) -> None
+
+.. py:function:: reset(vg: rackpy.raw.widget.GraphicsContext) -> None
+
+.. py:function:: shape_anti_alias(vg: rackpy.raw.widget.GraphicsContext, enabled: bool) -> None
+
+.. py:function:: stroke_color(vg: rackpy.raw.widget.GraphicsContext, color: NVGcolor) -> None
+
+.. py:function:: stroke_paint(vg: rackpy.raw.widget.GraphicsContext, paint: NVGpaint) -> None
+
+.. py:function:: fill_color(vg: rackpy.raw.widget.GraphicsContext, color: NVGcolor) -> None
+
+.. py:function:: fill_paint(vg: rackpy.raw.widget.GraphicsContext, paint: NVGpaint) -> None
+
+.. py:function:: miter_limit(vg: rackpy.raw.widget.GraphicsContext, limit: float) -> None
+
+.. py:function:: stroke_width(vg: rackpy.raw.widget.GraphicsContext, size: float) -> None
+
+.. py:function:: line_cap(vg: rackpy.raw.widget.GraphicsContext, cap: int) -> None
+
+.. py:function:: line_join(vg: rackpy.raw.widget.GraphicsContext, join: int) -> None
+
+.. py:function:: global_alpha(vg: rackpy.raw.widget.GraphicsContext, alpha: float) -> None
+
+.. py:function:: global_tint(vg: rackpy.raw.widget.GraphicsContext, tint: NVGcolor) -> None
+
+.. py:function:: get_global_tint(vg: rackpy.raw.widget.GraphicsContext) -> NVGcolor
+
+.. py:function:: alpha(vg: rackpy.raw.widget.GraphicsContext, alpha: float) -> None
+
+.. py:function:: tint(vg: rackpy.raw.widget.GraphicsContext, tint: NVGcolor) -> None
+
+.. py:function:: reset_transform(vg: rackpy.raw.widget.GraphicsContext) -> None
+
+.. py:function:: transform(vg: rackpy.raw.widget.GraphicsContext, a: float, b: float, c: float, d: float, e: float, f: float) -> None
+
+.. py:function:: translate(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float) -> None
+
+.. py:function:: rotate(vg: rackpy.raw.widget.GraphicsContext, angle: float) -> None
+
+.. py:function:: skew_x(vg: rackpy.raw.widget.GraphicsContext, angle: float) -> None
+
+.. py:function:: skew_y(vg: rackpy.raw.widget.GraphicsContext, angle: float) -> None
+
+.. py:function:: scale(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float) -> None
+
+.. py:function:: current_transform(vg: rackpy.raw.widget.GraphicsContext) -> Xform
+
+.. py:function:: transform_identity() -> Xform
+
+.. py:function:: transform_translate(tx: float, ty: float) -> Xform
+
+.. py:function:: transform_scale(sx: float, sy: float) -> Xform
+
+.. py:function:: transform_rotate(a: float) -> Xform
+
+.. py:function:: transform_skew_x(a: float) -> Xform
+
+.. py:function:: transform_skew_y(a: float) -> Xform
+
+.. py:function:: transform_multiply(dst: Xform, src: Xform) -> Xform
+
+.. py:function:: transform_premultiply(dst: Xform, src: Xform) -> Xform
+
+.. py:function:: transform_inverse(src: Xform) -> Xform | None
+
+.. py:function:: transform_point(xform: Xform, x: float, y: float) -> tuple[float, float]
+
+.. py:function:: deg_to_rad(deg: float) -> float
+
+.. py:function:: rad_to_deg(rad: float) -> float
+
+.. py:function:: image_size(vg: rackpy.raw.widget.GraphicsContext, image: int | rackpy.raw.window.Image) -> tuple[int, int]
+
+.. py:function:: linear_gradient(vg: rackpy.raw.widget.GraphicsContext, sx: float, sy: float, ex: float, ey: float, icol: NVGcolor, ocol: NVGcolor) -> NVGpaint
+
+.. py:function:: box_gradient(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float, w: float, h: float, r: float, f: float, icol: NVGcolor, ocol: NVGcolor) -> NVGpaint
+
+.. py:function:: radial_gradient(vg: rackpy.raw.widget.GraphicsContext, cx: float, cy: float, inr: float, outr: float, icol: NVGcolor, ocol: NVGcolor) -> NVGpaint
+
+.. py:function:: image_pattern(vg: rackpy.raw.widget.GraphicsContext, ox: float, oy: float, ex: float, ey: float, angle: float, image: int | rackpy.raw.window.Image, alpha: float) -> NVGpaint
+
+.. py:function:: scissor(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float, w: float, h: float) -> None
+
+.. py:function:: intersect_scissor(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float, w: float, h: float) -> None
+
+.. py:function:: reset_scissor(vg: rackpy.raw.widget.GraphicsContext) -> None
+
+.. py:function:: begin_path(vg: rackpy.raw.widget.GraphicsContext) -> None
+
+.. py:function:: move_to(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float) -> None
+
+.. py:function:: line_to(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float) -> None
+
+.. py:function:: bezier_to(vg: rackpy.raw.widget.GraphicsContext, c1x: float, c1y: float, c2x: float, c2y: float, x: float, y: float) -> None
+
+.. py:function:: quad_to(vg: rackpy.raw.widget.GraphicsContext, cx: float, cy: float, x: float, y: float) -> None
+
+.. py:function:: arc_to(vg: rackpy.raw.widget.GraphicsContext, x1: float, y1: float, x2: float, y2: float, radius: float) -> None
+
+.. py:function:: close_path(vg: rackpy.raw.widget.GraphicsContext) -> None
+
+.. py:function:: path_winding(vg: rackpy.raw.widget.GraphicsContext, dir: int) -> None
+
+.. py:function:: arc(vg: rackpy.raw.widget.GraphicsContext, cx: float, cy: float, r: float, a0: float, a1: float, dir: int) -> None
+
+.. py:function:: rect(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float, w: float, h: float) -> None
+
+.. py:function:: rounded_rect(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float, w: float, h: float, r: float) -> None
+
+.. py:function:: rounded_rect_varying(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float, w: float, h: float, rad_top_left: float, rad_top_right: float, rad_bottom_right: float, rad_bottom_left: float) -> None
+
+.. py:function:: ellipse(vg: rackpy.raw.widget.GraphicsContext, cx: float, cy: float, rx: float, ry: float) -> None
+
+.. py:function:: circle(vg: rackpy.raw.widget.GraphicsContext, cx: float, cy: float, r: float) -> None
+
+.. py:function:: fill(vg: rackpy.raw.widget.GraphicsContext) -> None
+
+.. py:function:: stroke(vg: rackpy.raw.widget.GraphicsContext) -> None
+
+.. py:function:: find_font(vg: rackpy.raw.widget.GraphicsContext, name: str) -> int
+
+.. py:function:: add_fallback_font_id(vg: rackpy.raw.widget.GraphicsContext, base_font: int | rackpy.raw.window.Font, fallback_font: int | rackpy.raw.window.Font) -> int
+
+.. py:function:: add_fallback_font(vg: rackpy.raw.widget.GraphicsContext, base_font: str, fallback_font: str) -> int
+
+.. py:function:: reset_fallback_fonts_id(vg: rackpy.raw.widget.GraphicsContext, base_font: int | rackpy.raw.window.Font) -> None
+
+.. py:function:: reset_fallback_fonts(vg: rackpy.raw.widget.GraphicsContext, base_font: str) -> None
+
+.. py:function:: font_size(vg: rackpy.raw.widget.GraphicsContext, size: float) -> None
+
+.. py:function:: font_blur(vg: rackpy.raw.widget.GraphicsContext, blur: float) -> None
+
+.. py:function:: text_letter_spacing(vg: rackpy.raw.widget.GraphicsContext, spacing: float) -> None
+
+.. py:function:: text_line_height(vg: rackpy.raw.widget.GraphicsContext, line_height: float) -> None
+
+.. py:function:: text_align(vg: rackpy.raw.widget.GraphicsContext, align: int) -> None
+
+.. py:function:: font_face_id(vg: rackpy.raw.widget.GraphicsContext, font: int | rackpy.raw.window.Font) -> None
+
+.. py:function:: font_face(vg: rackpy.raw.widget.GraphicsContext, font: str) -> None
+
+.. py:function:: text(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float, string: str) -> float
+
+.. py:function:: text_box(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float, break_row_width: float, string: str) -> None
+
+.. py:function:: text_bounds(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float, string: str) -> tuple[float, tuple[float, float, float, float]]
+
+.. py:function:: text_box_bounds(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float, break_row_width: float, string: str) -> tuple[float, float, float, float]
+
+.. py:function:: text_glyph_positions(vg: rackpy.raw.widget.GraphicsContext, x: float, y: float, string: str) -> list[NVGglyphPosition]
+
+.. py:function:: text_metrics(vg: rackpy.raw.widget.GraphicsContext) -> tuple[float, float, float]
+
+.. py:function:: text_break_lines(vg: rackpy.raw.widget.GraphicsContext, string: str, break_row_width: float) -> list[NVGtextRow]
+

@@ -1,0 +1,104 @@
+rackpy.raw.network
+==================
+
+.. py:module:: rackpy.raw.network
+
+.. autoapi-nested-parse::
+
+   rack::network: HTTP requests, downloads and URLs.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.network.METHOD_GET
+   rackpy.raw.network.METHOD_POST
+   rackpy.raw.network.METHOD_PUT
+   rackpy.raw.network.METHOD_DELETE
+   rackpy.raw.network.CookieMap
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.network.Method
+   rackpy.raw.network.DownloadProgress
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.network.request_json
+   rackpy.raw.network.request_download
+   rackpy.raw.network.encode_url
+   rackpy.raw.network.url_path
+
+
+Module Contents
+---------------
+
+.. py:class:: Method
+
+
+
+   Enum where members are also (and must be) ints
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+
+   .. py:attribute:: METHOD_GET
+      :value: 0
+
+
+
+   .. py:attribute:: METHOD_POST
+      :value: 1
+
+
+
+   .. py:attribute:: METHOD_PUT
+      :value: 2
+
+
+
+   .. py:attribute:: METHOD_DELETE
+      :value: 3
+
+
+
+.. py:data:: METHOD_GET
+   :type:  Method
+
+.. py:data:: METHOD_POST
+   :type:  Method
+
+.. py:data:: METHOD_PUT
+   :type:  Method
+
+.. py:data:: METHOD_DELETE
+   :type:  Method
+
+.. py:data:: CookieMap
+
+.. py:function:: request_json(method: Method, url: str, data: Any = None, cookies: dict[str, str] = ...) -> Any
+
+.. py:class:: DownloadProgress
+
+   .. py:property:: value
+      :type: float
+
+
+
+.. py:function:: request_download(url: str, filename: str | os.PathLike[str], progress: DownloadProgress | None = None, cookies: dict[str, str] = ...) -> bool
+
+.. py:function:: encode_url(s: str) -> str
+
+.. py:function:: url_path(url: str) -> str
+

@@ -1,0 +1,52 @@
+rackpy.dsp.graph_codegen
+========================
+
+.. py:module:: rackpy.dsp.graph_codegen
+
+.. autoapi-nested-parse::
+
+   The compiled tier for DSP graphs (RP-21C): a graph as C++ for a kernel library.
+
+   :func:`emit` writes one C++ source file that defines a kernel type for each
+   graph and registers them with ``RACKPY_KERNEL_LIBRARY``. Each kernel
+   composes RackPy's node types from ``rackpy/graph.hpp`` statically, in the
+   plan's order, so the compiler sees the whole graph: no dispatch per node, and
+   constants and channel counts it can propagate. Build the file as any kernel
+   library (see *Process audio*), list it in ``rackpy-loader.json``, and use the
+   types like any kernel: ``rackpy.dsp.kernel.load("namespace.Name")()``.
+
+   The generated code computes exactly what the plan interpreter computes: the
+   nodes are the same functions, and each node's result passes a register
+   barrier (``settle``) so that ``-funsafe-math-optimizations`` cannot
+   reassociate across nodes. A kernel's fields are the graph's wiring
+   (``input[0]``, ...), defaulting to the graph's own indices, then its controls.
+
+   Native extension nodes are not composed: their types live in other
+   libraries, out of a generated library's reach. Graphs that use them run on
+   the interpreter (:meth:`rackpy.dsp.graph.Graph.compile`). Expander nodes are
+   composed through RackPy's expander services (``rackpy/expanders.hpp``,
+   RP-23C), which RackPy gives the library when it loads it; graphs with them
+   always take the polyphonic path.
+
+   ``bin/rackpy-graph emit`` runs this from the command line. Pure Python.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.dsp.graph_codegen.emit
+
+
+Module Contents
+---------------
+
+.. py:function:: emit(graphs: collections.abc.Mapping[str, rackpy.dsp.graph.Graph | rackpy.dsp.graph.Plan], namespace: str, source: str = '') -> str
+
+   C++ for a kernel library that registers each graph as ``namespace.Name``.
+
+   Raises :class:`~rackpy.dsp.graph.GraphError` for what cannot be compiled.
+
+

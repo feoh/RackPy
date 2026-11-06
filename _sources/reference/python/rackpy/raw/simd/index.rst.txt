@@ -1,0 +1,301 @@
+rackpy.raw.simd
+===============
+
+.. py:module:: rackpy.raw.simd
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.simd.Vector
+   rackpy.raw.simd.movemask_inverse
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.simd.float_4
+   rackpy.raw.simd.int32_4
+   rackpy.raw.simd.Template
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.simd.andnot
+   rackpy.raw.simd.movemask
+   rackpy.raw.simd.rsqrt
+   rackpy.raw.simd.rcp
+   rackpy.raw.simd.ifelse
+   rackpy.raw.simd.fmax
+   rackpy.raw.simd.fmin
+   rackpy.raw.simd.sqrt
+   rackpy.raw.simd.log
+   rackpy.raw.simd.log10
+   rackpy.raw.simd.log2
+   rackpy.raw.simd.exp
+   rackpy.raw.simd.sin
+   rackpy.raw.simd.cos
+   rackpy.raw.simd.tan
+   rackpy.raw.simd.atan
+   rackpy.raw.simd.atan2
+   rackpy.raw.simd.trunc
+   rackpy.raw.simd.floor
+   rackpy.raw.simd.ceil
+   rackpy.raw.simd.round
+   rackpy.raw.simd.fmod
+   rackpy.raw.simd.hypot
+   rackpy.raw.simd.fabs
+   rackpy.raw.simd.abs
+   rackpy.raw.simd.arg
+   rackpy.raw.simd.pow
+   rackpy.raw.simd.clamp
+   rackpy.raw.simd.rescale
+   rackpy.raw.simd.crossfade
+   rackpy.raw.simd.sgn
+
+
+Module Contents
+---------------
+
+.. py:class:: float_4
+              float_4(x: float)
+              float_4(x1: float, x2: float, x3: float, x4: float)
+              float_4(v: float_4)
+              float_4(a: int32_4)
+
+   .. py:attribute:: size
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: type
+      :type:  ClassVar[float_4.type[float]]
+
+
+   .. py:method:: zero() -> float_4
+      :staticmethod:
+
+
+
+   .. py:method:: mask() -> float_4
+      :staticmethod:
+
+
+
+   .. py:method:: load(x: collections.abc.Buffer) -> float_4
+      :staticmethod:
+
+
+
+   .. py:method:: store(x: collections.abc.Buffer) -> None
+
+
+   .. py:method:: cast(a: int32_4) -> float_4
+      :staticmethod:
+
+
+
+   .. py:property:: s
+      :type: memoryview
+
+
+
+   .. py:property:: v
+      :type: float_4
+
+
+
+   .. py:method:: tolist() -> list[float]
+
+
+   .. py:method:: pre_increment() -> float_4
+
+
+   .. py:method:: pre_decrement() -> float_4
+
+
+   .. py:method:: post_increment() -> float_4
+
+
+   .. py:method:: post_decrement() -> float_4
+
+
+.. py:class:: int32_4
+              int32_4(x: int)
+              int32_4(x1: int, x2: int, x3: int, x4: int)
+              int32_4(v: int32_4)
+              int32_4(a: float_4)
+
+   .. py:attribute:: size
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: type
+      :type:  ClassVar[int32_4.type[int]]
+
+
+   .. py:method:: zero() -> int32_4
+      :staticmethod:
+
+
+
+   .. py:method:: mask() -> int32_4
+      :staticmethod:
+
+
+
+   .. py:method:: load(x: collections.abc.Buffer) -> int32_4
+      :staticmethod:
+
+
+
+   .. py:method:: store(x: collections.abc.Buffer) -> None
+
+
+   .. py:method:: cast(a: float_4) -> int32_4
+      :staticmethod:
+
+
+
+   .. py:property:: s
+      :type: memoryview
+
+
+
+   .. py:property:: v
+      :type: int32_4
+
+
+
+   .. py:method:: tolist() -> list[int]
+
+
+   .. py:method:: pre_increment() -> int32_4
+
+
+   .. py:method:: pre_decrement() -> int32_4
+
+
+   .. py:method:: post_increment() -> int32_4
+
+
+   .. py:method:: post_decrement() -> int32_4
+
+
+.. py:class:: Template
+
+   A C++ template: ``Vector[float, 4]``, ``movemask_inverse[float_4]``.
+
+
+   .. py:property:: specializations
+      :type: dict[tuple[Any, ...], Any]
+
+
+
+.. py:data:: Vector
+   :type:  Template
+
+.. py:data:: movemask_inverse
+   :type:  Template
+
+.. py:function:: andnot(a: float_4 | float, b: float_4 | float) -> float_4
+
+.. py:function:: movemask(a: float_4) -> int
+                 movemask(a: int32_4) -> int
+
+.. py:function:: rsqrt(x: float_4 | float) -> float_4
+
+.. py:function:: rcp(x: float_4 | float) -> float_4
+
+.. py:function:: ifelse(cond: bool, a: float, b: float) -> float
+                 ifelse(mask: float_4 | float, a: float_4 | float, b: float_4 | float) -> float_4
+
+.. py:function:: fmax(x: float, b: float) -> float
+                 fmax(x: float_4 | float, b: float_4 | float) -> float_4
+
+.. py:function:: fmin(x: float, b: float) -> float
+                 fmin(x: float_4 | float, b: float_4 | float) -> float_4
+
+.. py:function:: sqrt(x: float) -> float
+                 sqrt(x: float_4) -> float_4
+
+.. py:function:: log(x: float) -> float
+                 log(x: float_4) -> float_4
+
+.. py:function:: log10(x: float) -> float
+                 log10(x: float_4) -> float_4
+
+.. py:function:: log2(x: float) -> float
+                 log2(x: float_4) -> float_4
+
+.. py:function:: exp(x: float) -> float
+                 exp(x: float_4) -> float_4
+
+.. py:function:: sin(x: float) -> float
+                 sin(x: float_4) -> float_4
+
+.. py:function:: cos(x: float) -> float
+                 cos(x: float_4) -> float_4
+
+.. py:function:: tan(x: float) -> float
+                 tan(x: float_4) -> float_4
+
+.. py:function:: atan(x: float) -> float
+                 atan(x: float_4) -> float_4
+
+.. py:function:: atan2(x: float, y: float) -> float
+                 atan2(x: float_4 | float, y: float_4 | float) -> float_4
+
+.. py:function:: trunc(x: float) -> float
+                 trunc(x: float_4) -> float_4
+
+.. py:function:: floor(x: float) -> float
+                 floor(x: float_4) -> float_4
+
+.. py:function:: ceil(x: float) -> float
+                 ceil(x: float_4) -> float_4
+
+.. py:function:: round(x: float) -> float
+                 round(x: float_4) -> float_4
+
+.. py:function:: fmod(a: float, b: float) -> float
+                 fmod(a: float_4 | float, b: float_4 | float) -> float_4
+
+.. py:function:: hypot(a: float, b: float) -> float
+                 hypot(a: float_4 | float, b: float_4 | float) -> float_4
+
+.. py:function:: fabs(x: float) -> float
+                 fabs(x: float_4) -> float_4
+
+.. py:function:: abs(x: float) -> float
+                 abs(z: complex) -> float
+                 abs(a: float_4) -> float_4
+                 abs(a: tuple[float_4 | float, float_4 | float]) -> float_4
+
+.. py:function:: arg(z: complex) -> float
+                 arg(a: tuple[float_4 | float, float_4 | float]) -> float_4
+
+.. py:function:: pow(a: float, b: int) -> float
+                 pow(a: float, b: float) -> float
+                 pow(a: float_4, b: int) -> float_4
+                 pow(a: float, b: float_4) -> float_4
+                 pow(a: float_4 | float, b: float_4 | float) -> float_4
+
+.. py:function:: clamp(x: float, a: float = 0.0, b: float = 1.0) -> float
+                 clamp(x: float_4 | float, a: float_4 | float = ..., b: float_4 | float = ...) -> float_4
+
+.. py:function:: rescale(x: float, x_min: float, x_max: float, y_min: float, y_max: float) -> float
+                 rescale(x: float_4 | float, x_min: float_4 | float, x_max: float_4 | float, y_min: float_4 | float, y_max: float_4 | float) -> float_4
+
+.. py:function:: crossfade(a: float, b: float, p: float) -> float
+                 crossfade(a: float_4 | float, b: float_4 | float, p: float_4 | float) -> float_4
+
+.. py:function:: sgn(x: float) -> float
+                 sgn(x: float_4) -> float_4
+

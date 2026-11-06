@@ -1,0 +1,106 @@
+rackpy.raw.random
+=================
+
+.. py:module:: rackpy.raw.random
+
+.. autoapi-nested-parse::
+
+   rack::random: Rack's random number generator.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.random.Xoroshiro128Plus
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.random.local
+   rackpy.raw.random.init
+   rackpy.raw.random.get
+   rackpy.raw.random.get_uint32
+   rackpy.raw.random.get_uint16
+   rackpy.raw.random.get_uint8
+   rackpy.raw.random.get_bool
+   rackpy.raw.random.get_float
+   rackpy.raw.random.get_double
+   rackpy.raw.random.u64
+   rackpy.raw.random.u32
+   rackpy.raw.random.uniform
+   rackpy.raw.random.normal
+   rackpy.raw.random.buffer
+   rackpy.raw.random.vector
+
+
+Module Contents
+---------------
+
+.. py:class:: Xoroshiro128Plus
+              Xoroshiro128Plus(s0: int, s1: int = 0)
+
+   .. py:attribute:: result_type
+      :type:  ClassVar[type[int]]
+
+
+   .. py:attribute:: state
+      :type:  list[int]
+
+
+   .. py:method:: seed(s0: int, s1: int = 0) -> None
+
+
+   .. py:method:: is_seeded() -> bool
+
+
+   .. py:method:: rotl(x: int, k: int) -> int
+      :staticmethod:
+
+
+
+   .. py:method:: min() -> int
+      :staticmethod:
+
+
+
+   .. py:method:: max() -> int
+      :staticmethod:
+
+
+
+.. py:function:: local() -> Xoroshiro128Plus
+
+.. py:function:: init() -> None
+
+.. py:function:: get(type: str = 'uint64') -> int | bool | float
+
+.. py:function:: get_uint32() -> int
+
+.. py:function:: get_uint16() -> int
+
+.. py:function:: get_uint8() -> int
+
+.. py:function:: get_bool() -> bool
+
+.. py:function:: get_float() -> float
+
+.. py:function:: get_double() -> float
+
+.. py:function:: u64() -> int
+
+.. py:function:: u32() -> int
+
+.. py:function:: uniform() -> float
+
+.. py:function:: normal() -> float
+
+.. py:function:: buffer(out: bytearray | memoryview) -> None
+
+.. py:function:: vector(len: int) -> bytes
+

@@ -1,0 +1,94 @@
+rackpy.raw.color
+================
+
+.. py:module:: rackpy.raw.color
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.color.BLACK_TRANSPARENT
+   rackpy.raw.color.WHITE_TRANSPARENT
+   rackpy.raw.color.BLACK
+   rackpy.raw.color.RED
+   rackpy.raw.color.GREEN
+   rackpy.raw.color.BLUE
+   rackpy.raw.color.CYAN
+   rackpy.raw.color.MAGENTA
+   rackpy.raw.color.YELLOW
+   rackpy.raw.color.WHITE
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.color.is_equal
+   rackpy.raw.color.clamp
+   rackpy.raw.color.minus
+   rackpy.raw.color.plus
+   rackpy.raw.color.mult
+   rackpy.raw.color.lerp
+   rackpy.raw.color.screen
+   rackpy.raw.color.alpha
+   rackpy.raw.color.from_hex_string
+   rackpy.raw.color.to_hex_string
+
+
+Module Contents
+---------------
+
+.. py:function:: is_equal(a: rackpy.raw.nanovg.NVGcolor, b: rackpy.raw.nanovg.NVGcolor) -> bool
+
+.. py:function:: clamp(a: rackpy.raw.nanovg.NVGcolor) -> rackpy.raw.nanovg.NVGcolor
+
+.. py:function:: minus(a: rackpy.raw.nanovg.NVGcolor, b: rackpy.raw.nanovg.NVGcolor) -> rackpy.raw.nanovg.NVGcolor
+
+.. py:function:: plus(a: rackpy.raw.nanovg.NVGcolor, b: rackpy.raw.nanovg.NVGcolor) -> rackpy.raw.nanovg.NVGcolor
+
+.. py:function:: mult(a: rackpy.raw.nanovg.NVGcolor, b: rackpy.raw.nanovg.NVGcolor) -> rackpy.raw.nanovg.NVGcolor
+                 mult(a: rackpy.raw.nanovg.NVGcolor, x: float) -> rackpy.raw.nanovg.NVGcolor
+
+.. py:function:: lerp(a: rackpy.raw.nanovg.NVGcolor, b: rackpy.raw.nanovg.NVGcolor, t: float) -> rackpy.raw.nanovg.NVGcolor
+
+.. py:function:: screen(a: rackpy.raw.nanovg.NVGcolor, b: rackpy.raw.nanovg.NVGcolor) -> rackpy.raw.nanovg.NVGcolor
+
+.. py:function:: alpha(a: rackpy.raw.nanovg.NVGcolor, alpha: float) -> rackpy.raw.nanovg.NVGcolor
+
+.. py:function:: from_hex_string(s: str) -> rackpy.raw.nanovg.NVGcolor
+
+.. py:function:: to_hex_string(c: rackpy.raw.nanovg.NVGcolor) -> str
+
+.. py:data:: BLACK_TRANSPARENT
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: WHITE_TRANSPARENT
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: BLACK
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: RED
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: GREEN
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: BLUE
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: CYAN
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: MAGENTA
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: YELLOW
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: WHITE
+   :type:  rackpy.raw.nanovg.NVGcolor
+

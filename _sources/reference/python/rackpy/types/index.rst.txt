@@ -1,0 +1,96 @@
+rackpy.types
+============
+
+.. py:module:: rackpy.types
+
+.. autoapi-nested-parse::
+
+   Value types RackPy shares across the API: colours, quantities and JSON. Available inside Rack only.
+
+   ``Color`` is Rack's ``NVGcolor``: an immutable value. ``ValueQuantity`` is
+   RackPy's own Quantity that stores its value natively, so Rack may read it from
+   any thread. ``JSON`` is what every Rack API that takes or returns ``json_t``
+   accepts and gives back (the conversion rules are in the values reference).
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.types.JSON
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.types.ValueQuantity
+   rackpy.types.Color
+
+
+Module Contents
+---------------
+
+.. py:class:: ValueQuantity(min_value: float = 0.0, max_value: float = 1.0, default_value: float = 0.0, label: str = '', unit: str = '')
+
+
+
+   .. py:attribute:: min_value
+      :type:  float
+
+
+   .. py:attribute:: max_value
+      :type:  float
+
+
+   .. py:attribute:: default_value
+      :type:  float
+
+
+   .. py:attribute:: label
+      :type:  str
+
+
+   .. py:attribute:: unit
+      :type:  str
+
+
+.. py:class:: Color(r: float, g: float, b: float, a: float = 1.0)
+
+   .. py:property:: r
+      :type: float
+
+
+
+   .. py:property:: g
+      :type: float
+
+
+
+   .. py:property:: b
+      :type: float
+
+
+
+   .. py:property:: a
+      :type: float
+
+
+
+   .. py:property:: rgba
+      :type: tuple[float, float, float, float]
+
+
+
+.. py:type:: JSON
+   :canonical: bool | int | float | str | list[JSON] | tuple[JSON, ...] | dict[str, JSON] | None
+
+
+   A value that converts to and from Rack's json_t.
+
+   No NaN or infinity, str keys, no NUL characters, at most 64 levels deep.
+
+

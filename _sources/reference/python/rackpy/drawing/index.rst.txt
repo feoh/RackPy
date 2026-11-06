@@ -1,0 +1,238 @@
+rackpy.drawing
+==============
+
+.. py:module:: rackpy.drawing
+
+.. autoapi-nested-parse::
+
+   Pythonic drawing for widgets' ``draw()`` callbacks, over :mod:`rackpy.raw.nanovg`. Inside Rack only.
+
+   ``Painter(args)`` wraps the callback's ``GraphicsContext`` and expires with it.
+   Colours are an ``NVGcolor``, a ``"#RRGGBB"``/``"#RRGGBBAA"`` string, or an
+   ``(r, g, b)``/``(r, g, b, a)`` tuple of 0-1 floats. Fonts and images are
+   loaded through Rack's window on every call, as Rack advises: its caches make
+   that cheap, and they expire with the window. Everything here is the raw
+   layer's behaviour in another shape; nothing has native semantics of its own.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.drawing.Color
+   rackpy.drawing.DEFAULT_FONT
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.drawing.TextBounds
+   rackpy.drawing.Path2D
+   rackpy.drawing.DrawTarget
+   rackpy.drawing.Painter
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.drawing.color
+
+
+Module Contents
+---------------
+
+.. py:data:: Color
+
+.. py:data:: DEFAULT_FONT
+   :value: 'res/fonts/DejaVuSans.ttf'
+
+
+   Rack's UI font, as a path in Rack's system folder.
+
+
+.. py:function:: color(value: Color) -> rackpy.raw.nanovg.NVGcolor
+
+   An ``NVGcolor`` from any accepted colour. Unlike Rack's ``fromHexString``, bad text raises ``ValueError``.
+
+
+.. py:class:: TextBounds
+
+   Text measured with :meth:`Painter.measure`: the advance and the box it covers.
+
+
+   .. py:attribute:: advance
+      :type:  float
+
+
+   .. py:attribute:: xmin
+      :type:  float
+
+
+   .. py:attribute:: ymin
+      :type:  float
+
+
+   .. py:attribute:: xmax
+      :type:  float
+
+
+   .. py:attribute:: ymax
+      :type:  float
+
+
+   .. py:property:: width
+      :type: float
+
+
+
+   .. py:property:: height
+      :type: float
+
+
+
+.. py:class:: Path2D(vg: rackpy.raw.widget.GraphicsContext)
+
+   A path being built; every method returns the path, and ``fill``/``stroke`` draw it.
+
+
+   .. py:method:: move_to(x: float, y: float) -> Self
+
+
+   .. py:method:: line_to(x: float, y: float) -> Self
+
+
+   .. py:method:: bezier_to(c1x: float, c1y: float, c2x: float, c2y: float, x: float, y: float) -> Self
+
+
+   .. py:method:: quad_to(cx: float, cy: float, x: float, y: float) -> Self
+
+
+   .. py:method:: arc_to(x1: float, y1: float, x2: float, y2: float, radius: float) -> Self
+
+
+   .. py:method:: arc(cx: float, cy: float, r: float, a0: float, a1: float, *, clockwise: bool = True) -> Self
+
+
+   .. py:method:: rect(x: float, y: float, width: float, height: float, radius: float = 0) -> Self
+
+
+   .. py:method:: circle(cx: float, cy: float, r: float) -> Self
+
+
+   .. py:method:: ellipse(cx: float, cy: float, rx: float, ry: float) -> Self
+
+
+   .. py:method:: close() -> Self
+
+
+   .. py:method:: hole() -> Self
+
+      Makes the last shape cut a hole in the ones before it.
+
+
+
+   .. py:method:: fill(paint: Color | rackpy.raw.nanovg.NVGpaint) -> Self
+
+
+   .. py:method:: stroke(paint: Color | rackpy.raw.nanovg.NVGpaint, width: float = 1) -> Self
+
+
+.. py:class:: DrawTarget
+
+
+
+   An object carrying a drawing context, such as a widget's draw arguments.
+
+
+   .. py:property:: vg
+      :type: rackpy.raw.widget.GraphicsContext | None
+
+
+
+.. py:class:: Painter(target: rackpy.raw.widget.GraphicsContext | DrawTarget)
+
+   Draws in one drawing callback: ``Painter(args)`` in ``draw``/``draw_layer``, ``Painter(vg)`` in ``draw_vg``.
+
+
+   .. py:attribute:: vg
+      :type:  rackpy.raw.widget.GraphicsContext
+
+
+   .. py:method:: saved() -> collections.abc.Iterator[Self]
+
+      Saves the render state (transform, style, clip) and restores it after the block.
+
+
+
+   .. py:method:: clipped(x: float, y: float, width: float, height: float) -> collections.abc.Iterator[Self]
+
+      Draws the block clipped to the rectangle (within any clip already set).
+
+
+
+   .. py:method:: translate(x: float, y: float) -> Self
+
+
+   .. py:method:: scale(x: float, y: float | None = None) -> Self
+
+
+   .. py:method:: rotate(angle: float) -> Self
+
+
+   .. py:method:: alpha(alpha: float) -> Self
+
+      Multiplies the alpha of what follows (until the state is restored).
+
+
+
+   .. py:method:: path() -> Path2D
+
+      Starts a new path.
+
+
+
+   .. py:method:: rect(x: float, y: float, width: float, height: float, radius: float = 0) -> Path2D
+
+
+   .. py:method:: circle(cx: float, cy: float, r: float) -> Path2D
+
+
+   .. py:method:: line(x0: float, y0: float, x1: float, y1: float) -> Path2D
+
+
+   .. py:method:: linear_gradient(x0: float, y0: float, x1: float, y1: float, start: Color, end: Color) -> rackpy.raw.nanovg.NVGpaint
+
+
+   .. py:method:: radial_gradient(cx: float, cy: float, inner: float, outer: float, start: Color, end: Color) -> rackpy.raw.nanovg.NVGpaint
+
+
+   .. py:method:: box_gradient(x: float, y: float, width: float, height: float, radius: float, feather: float, start: Color, end: Color) -> rackpy.raw.nanovg.NVGpaint
+
+
+   .. py:method:: text(text: str, x: float, y: float, *, size: float = 12, color: Color = '#ffffff', font: str | pathlib.Path | rackpy.raw.window.Font = DEFAULT_FONT, align: str = 'left baseline', width: float | None = None) -> float
+
+      Draw text and return the text's ending x. With ``width``, wrap in a box and return ``x + width`` instead.
+
+      ``font`` is a Font, an absolute path, or a path in Rack's system folder; ``align`` is a
+      horizontal word (left, center, right) and a vertical one (top, middle, bottom, baseline).
+
+
+
+   .. py:method:: measure(text: str, x: float = 0, y: float = 0, *, size: float = 12, font: str | pathlib.Path | rackpy.raw.window.Font = DEFAULT_FONT, align: str = 'left baseline') -> TextBounds
+
+      Where :meth:`text` would draw ``text``, without drawing it.
+
+
+
+   .. py:method:: image(image: str | pathlib.Path | rackpy.raw.window.Image, x: float, y: float, width: float, height: float, *, alpha: float = 1) -> None
+
+      Draws an image stretched over the rectangle. ``image`` is an Image or a file path.
+
+
+

@@ -1,0 +1,72 @@
+rackpy.services.network
+=======================
+
+.. py:module:: rackpy.services.network
+
+.. autoapi-nested-parse::
+
+   HTTP, over :mod:`rackpy.raw.network`.
+
+   Rack's requests block the calling thread (with the GIL released) in curl, which allows 30 seconds
+   to connect and sets no overall limit. Any failure (no connection, an HTTP error, a body that is
+   not JSON) returns ``None``, as Rack does. Never call them from code that must not wait.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.services.network.encode_url
+   rackpy.services.network.url_path
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.services.network.get_json
+   rackpy.services.network.post_json
+   rackpy.services.network.put_json
+   rackpy.services.network.delete_json
+   rackpy.services.network.download
+
+
+Module Contents
+---------------
+
+.. py:data:: encode_url
+
+.. py:data:: url_path
+
+.. py:function:: get_json(url: str, params: dict[str, str] | None = None, *, cookies: dict[str, str] | None = None) -> rackpy.types.JSON
+
+   GET a JSON API; ``params`` become the query (string values only, as Rack does). None on failure.
+
+
+.. py:function:: post_json(url: str, data: object = None, *, cookies: dict[str, str] | None = None) -> rackpy.types.JSON
+
+   POST ``data`` as a JSON body. RackPy validates the value at runtime; None on failure.
+
+
+.. py:function:: put_json(url: str, data: object = None, *, cookies: dict[str, str] | None = None) -> rackpy.types.JSON
+
+   Refuse to send: Rack 2.6.6's PUT with a JSON body actually sends POST.
+
+
+.. py:function:: delete_json(url: str, *, cookies: dict[str, str] | None = None) -> rackpy.types.JSON
+
+   DELETE. None on failure.
+
+
+.. py:function:: download(url: str, filename: str | os.PathLike[str], on_progress: collections.abc.Callable[[float], object] | None = None, *, cookies: dict[str, str] | None = None) -> bool
+
+   Download to ``filename`` and return whether it succeeded.
+
+   Rack writes its progress pointer without synchronization. RackPy therefore reads it only after the request
+   returns and calls ``on_progress`` once with the final fraction; live progress is unavailable. If the callback
+   raises, the download has already finished and the error propagates.
+
+

@@ -1,0 +1,546 @@
+rackpy.dsp.graph
+================
+
+.. py:module:: rackpy.dsp.graph
+
+.. autoapi-nested-parse::
+
+   DSP graphs: a module's per-sample processing, described in Python (RP-21).
+
+   A :class:`Graph` is built from native node types: ports, parameters and
+   controls in, arithmetic, oscillators and Rack's own triggers in between,
+   outputs and lights out. Python only describes the graph; it never runs per
+   sample. Arbitrary Python functions are not compiled: an expression on
+   signals, such as ``a * b + 1``, builds nodes, and anything else (``if
+   signal:``, ``math.sin(signal)``) is refused.
+
+   Every edge carries a polyphonic signal of 0 to 16 channels per frame, as
+   Rack's cables do. Inputs carry their cable's channels; a mono operand
+   broadcasts across the other's channels, and channels missing from a shorter
+   operand read 0 V. Feedback within the module needs an explicit
+   :meth:`Graph.delay` of one sample: a cycle without one is refused, with its
+   path, rather than given hidden latency.
+
+   A graph may also exchange signals with the modules beside it, through
+   Rack's expanders: :meth:`Graph.expander_send` writes a signal into a lane of
+   the neighbour's ``"rackpy.graph"`` message, and :meth:`Graph.expander_receive`
+   reads what the neighbour sent, exactly one frame later, as Rack's double
+   buffers deliver it (RP-23B).
+
+   :meth:`Graph.plan` validates the graph and lowers it to a :class:`Plan`,
+   the description its execution tiers share. :meth:`Graph.compile` turns it
+   into a native kernel run by the plan interpreter on Rack's engine thread,
+   for ``Module.set_kernel``; :mod:`rackpy.dsp.graph_reference` evaluates it
+   offline, for tests and teaching; :mod:`rackpy.dsp.graph_codegen` emits a
+   compiled tier that composes the nodes statically.
+
+   This module is pure Python and works outside Rack, except for
+   :meth:`Graph.compile`.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.dsp.graph.MAX_CHANNELS
+   rackpy.dsp.graph.EXPANDER_SCHEMA
+   rackpy.dsp.graph.LANE
+   rackpy.dsp.graph.MAX_LANES
+   rackpy.dsp.graph.OPS
+
+
+Exceptions
+----------
+
+.. autoapisummary::
+
+   rackpy.dsp.graph.GraphError
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.dsp.graph.Op
+   rackpy.dsp.graph.Node
+   rackpy.dsp.graph.NodeType
+   rackpy.dsp.graph.Control
+   rackpy.dsp.graph.NodeDict
+   rackpy.dsp.graph.ControlDict
+   rackpy.dsp.graph.PlanDict
+   rackpy.dsp.graph.Plan
+   rackpy.dsp.graph.Signal
+   rackpy.dsp.graph.Delay
+   rackpy.dsp.graph.Forward
+   rackpy.dsp.graph.Graph
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.dsp.graph.node_types
+
+
+Module Contents
+---------------
+
+.. py:data:: MAX_CHANNELS
+   :type:  Final
+   :value: 16
+
+
+   Rack's ``PORT_MAX_CHANNELS``: the most channels a signal carries.
+
+
+.. py:data:: EXPANDER_SCHEMA
+   :type:  Final
+   :value: 'rackpy.graph'
+
+
+   The schema of the expander messages graphs exchange (:meth:`Graph.expander_send`).
+
+
+.. py:data:: LANE
+   :type:  Final
+   :value: 17
+
+
+   Values in one lane of a ``"rackpy.graph"`` message: the channel count, then the voltages.
+
+
+.. py:data:: MAX_LANES
+   :type:  Final
+   :value: 64
+
+
+   The most lanes a graph addresses on one side.
+
+
+.. py:exception:: GraphError
+
+
+
+   A graph that cannot run: the message says which node, where it was made, and what to change.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+
+.. py:class:: Op
+
+   A native node type: how many signals it reads, which numbers configure it, and whether it makes a signal.
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: inputs
+      :type:  int
+
+
+   .. py:attribute:: args
+      :type:  tuple[str, ...]
+
+
+   .. py:attribute:: signal
+      :type:  bool
+
+
+   .. py:attribute:: doc
+      :type:  str
+
+
+.. py:data:: OPS
+   :type:  Final[dict[str, Op]]
+
+.. py:class:: Node
+
+   One node of a plan: ``op`` reads the signals of the earlier nodes ``inputs``, configured by ``args``.
+
+   For a native extension node (``op`` is ``"namespace.Name"``), ``names``
+   names each of ``args``; for RackPy's own node types it is empty.
+
+
+   .. py:attribute:: op
+      :type:  str
+
+
+   .. py:attribute:: inputs
+      :type:  tuple[int, ...]
+
+
+   .. py:attribute:: args
+      :type:  tuple[float, ...]
+
+
+   .. py:attribute:: names
+      :type:  tuple[str, ...]
+      :value: ()
+
+
+
+.. py:class:: NodeType
+
+   A native extension node type from a kernel library: see :func:`node_types`.
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: doc
+      :type:  str
+
+
+   .. py:attribute:: inputs
+      :type:  int
+
+
+   .. py:attribute:: args
+      :type:  tuple[str, ...]
+
+
+.. py:function:: node_types() -> tuple[NodeType, ...]
+
+   The native extension node types that kernel libraries registered. Available inside Rack only.
+
+
+.. py:class:: Control
+
+   A named control: the ``control`` node it sets, and its starting value.
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: node
+      :type:  int
+
+
+   .. py:attribute:: default
+      :type:  float
+
+
+.. py:class:: NodeDict
+
+
+
+   A :class:`Node` as plain data, in :meth:`Plan.to_dict`.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+
+   .. py:attribute:: op
+      :type:  str
+
+
+   .. py:attribute:: inputs
+      :type:  list[int]
+
+
+   .. py:attribute:: args
+      :type:  list[float]
+
+
+   .. py:attribute:: names
+      :type:  NotRequired[list[str]]
+
+
+.. py:class:: ControlDict
+
+
+
+   A :class:`Control` as plain data, in :meth:`Plan.to_dict`.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: node
+      :type:  int
+
+
+   .. py:attribute:: default
+      :type:  float
+
+
+.. py:class:: PlanDict
+
+
+
+   A :class:`Plan` as plain data: what :meth:`Plan.to_dict` returns and the native interpreter reads.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+
+   .. py:attribute:: nodes
+      :type:  list[NodeDict]
+
+
+   .. py:attribute:: latches
+      :type:  list[list[int]]
+
+
+   .. py:attribute:: controls
+      :type:  list[ControlDict]
+
+
+.. py:class:: Plan
+
+   A validated graph, lowered for execution.
+
+   ``nodes`` run in order once per frame; each reads only earlier nodes'
+   signals, except that a ``delay`` node gives the signal ``latches`` feeds
+   it, as of the end of the previous frame. After every node has run, each
+   ``(delay, source)`` latch stores the source's signal for the next frame.
+
+
+   .. py:attribute:: nodes
+      :type:  tuple[Node, ...]
+
+
+   .. py:attribute:: latches
+      :type:  tuple[tuple[int, int], ...]
+
+
+   .. py:attribute:: controls
+      :type:  tuple[Control, ...]
+
+
+   .. py:method:: to_dict() -> PlanDict
+
+      The plan as plain data (lists, numbers, strings).
+
+
+
+.. py:class:: Signal(graph: Graph, node_id: int)
+
+   A per-sample value in a graph: the output of one node. Combine signals with arithmetic and comparisons.
+
+
+   .. py:property:: graph
+      :type: Graph
+
+
+
+   .. py:method:: clamp(low: Signal | float = 0.0, high: Signal | float = 1.0) -> Signal
+
+      ``rack::math::clamp(self, low, high)``.
+
+
+
+.. py:class:: Delay(graph: Graph, node_id: int)
+
+
+
+   A one-sample delay: the signal :meth:`Delay.feed` gives it, one frame later. The only way to close a cycle.
+
+
+   .. py:method:: feed(source: Signal | float) -> None
+
+      Sets what the delay outputs on the next frame; once.
+
+
+
+.. py:class:: Forward(graph: Graph, node_id: int)
+
+
+
+   A signal named before it is defined; :meth:`Forward.bind` defines it, once. Adds no delay.
+
+
+   .. py:method:: bind(source: Signal | float) -> None
+
+
+.. py:class:: Graph
+
+   A module's per-sample processing, built from native nodes. See the module documentation.
+
+
+   .. py:method:: input(port: int) -> Signal
+
+      An input port's voltages, with the cable's channels (0 when unpatched).
+
+
+
+   .. py:method:: param(index: int) -> Signal
+
+      A parameter's value.
+
+
+
+   .. py:method:: constant(value: float) -> Signal
+
+
+   .. py:method:: control(name: str, default: float = 0.0) -> Signal
+
+      A number Python may change while the plan runs, by name.
+
+
+
+   .. py:method:: sample_rate() -> Signal
+
+
+   .. py:method:: sample_time() -> Signal
+
+
+   .. py:method:: audio_input(channel: int = 0) -> Signal
+
+      A device input sample in device units (full scale 1), or zero when absent.
+
+
+
+   .. py:method:: midi_cv(output: int = 0, *, input: int = 0, channels: int = 1, mono_mode: int = 0, poly_mode: int = 0, pitch_bend_range: float = 2.0, smooth: bool = True, clock_division: int = 24, retrigger_on_resume: bool = False, release_velocity: bool = False) -> Signal
+
+      A Core MIDI-CV output (0-11) fed by a module's timed MIDI input (0-3).
+
+      Each node has independent parser state. Output order and settings match
+      ``rackpy.MidiToCV``; this node needs Rack and cannot run offline.
+
+
+
+   .. py:method:: minimum(a: Signal | float, b: Signal | float) -> Signal
+
+      ``std::fmin(a, b)`` per channel.
+
+
+
+   .. py:method:: maximum(a: Signal | float, b: Signal | float) -> Signal
+
+      ``std::fmax(a, b)`` per channel.
+
+
+
+   .. py:method:: clamp(x: Signal | float, low: Signal | float = 0.0, high: Signal | float = 1.0) -> Signal
+
+      ``rack::math::clamp(x, low, high)`` per channel.
+
+
+
+   .. py:method:: where(condition: Signal | float, a: Signal | float, b: Signal | float) -> Signal
+
+      ``a`` where ``condition`` is above 0, else ``b``, per channel.
+
+
+
+   .. py:method:: pitch_to_freq(pitch: Signal | float) -> Signal
+
+      V/oct to Hz, 0 V being C4: ``dsp::FREQ_C4 * std::pow(2.f, pitch)``.
+
+
+
+   .. py:method:: sin2pi(phase: Signal | float) -> Signal
+
+      ``std::sin(2.f * float(M_PI) * phase)``.
+
+
+
+   .. py:method:: phasor(freq: Signal | float) -> Signal
+
+      A phase from 0 to 1 per channel at ``freq`` Hz, as Rack's tutorial oscillator keeps it.
+
+
+
+   .. py:method:: schmitt(x: Signal | float, low: float = 0.0, high: float = 1.0) -> Signal
+
+      1 on the frame ``x`` rises to ``high`` (from at most ``low``), per channel: Rack's ``SchmittTrigger``.
+
+
+
+   .. py:method:: pulse(trigger: Signal | float, duration: float = 0.001) -> Signal
+
+      A gate of ``duration`` seconds started by each frame ``trigger`` is above 0: Rack's ``PulseGenerator``.
+
+
+
+   .. py:method:: node(name: str, *inputs: Signal | float, **args: float) -> Signal
+
+      A native extension node from a kernel library, ``"namespace.Name"``: its signals and named numbers.
+
+      The type, its inputs and its numbers are checked when the graph is
+      compiled, inside Rack (:func:`node_types` lists the types). The
+      offline reference cannot run extension nodes.
+
+
+
+   .. py:method:: expander_receive(side: int, lane: int = 0) -> Signal
+
+      What the neighbour on ``side`` (0 left, 1 right) sent in ``lane``, one frame later, read once.
+
+      The module must hold ``"rackpy.graph"`` messages with room for the lane
+      on that side (:func:`rackpy.engine.expanders.graph_messages`); the
+      signal has 0 channels whenever nothing arrived.
+
+
+
+   .. py:method:: delay(initial: float = 0.0) -> Delay
+
+      A one-sample delay; give it its source with :meth:`Delay.feed`.
+
+
+
+   .. py:method:: forward() -> Forward
+
+      A signal to use before defining it with :meth:`Forward.bind`. Adds no delay.
+
+
+
+   .. py:method:: output(port: int, signal: Signal | float) -> None
+
+      Writes ``signal`` to an output port, once per port.
+
+
+
+   .. py:method:: audio_output(channel: int, signal: Signal | float) -> None
+
+      Send the sum of ``signal``'s channels to a device output, once per channel.
+
+      Device samples are in units of full scale 1; scale voltages as needed.
+
+
+
+   .. py:method:: light(index: int, brightness: Signal | float) -> None
+
+      Sets a light's brightness from channel 0 of ``brightness``, once per light.
+
+
+
+   .. py:method:: expander_send(side: int, signal: Signal | float, lane: int = 0) -> None
+
+      Sends ``signal`` to the neighbour on ``side`` (0 left, 1 right) in ``lane``, once per lane.
+
+      It arrives one frame later, at the neighbour's ``expander_receive`` on
+      the facing side. It is written only if the neighbour is a RackPy
+      module, its facing expander points back to this module, and it holds
+      ``"rackpy.graph"`` messages with room for the lane; otherwise nothing
+      is sent.
+
+
+
+   .. py:method:: compile() -> _rackpy_host.dsp.Kernel
+
+      The graph as a native kernel, run by the plan interpreter: hand it to ``Module.set_kernel``.
+
+      The plan is checked again natively, and its kernel allocates all its
+      state now, on the main thread. Its fields are the ports, params and
+      lights the graph uses, which ``set_kernel`` checks against the
+      module; its controls change with ``Kernel.set``. Available inside
+      Rack only.
+
+
+
+   .. py:method:: plan() -> Plan
+
+      Validates the graph and lowers it: see :class:`Plan`. Raises :class:`GraphError`.
+
+
+

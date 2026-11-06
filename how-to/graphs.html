@@ -1,0 +1,918 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Make a module polyphonic" href="polyphony.html"><link rel="prev" title="Process audio" href="dsp.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>Describe DSP as a graph - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dsp.html">Process audio</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input aria-label="Toggle navigation of Reference" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/how-to/graphs.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/how-to/graphs.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="describe-dsp-as-a-graph">
+<h1>Describe DSP as a graph<a class="headerlink" href="#describe-dsp-as-a-graph" title="Link to this heading">¶</a></h1>
+<p>A <strong>graph</strong> describes a module’s per-sample processing in Python, built from
+native node types: ports, parameters and controls in, arithmetic,
+oscillators and Rack’s own triggers in between, outputs and lights out.
+Python only describes it; nothing in a graph runs Python per sample.</p>
+<p><strong>Implemented (RP-21A, RP-21B, RP-21C; expander nodes RP-23B and
+RP-23C), Linux x86_64 inside Rack Free 2.6.6.</strong> <a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html#module-rackpy.dsp.graph" title="rackpy.dsp.graph"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rackpy.dsp.graph</span></code></a> builds, validates and lowers graphs.
+<a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html#rackpy.dsp.graph.Graph.compile" title="rackpy.dsp.graph.Graph.compile"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compile()</span></code></a> turns one into a native
+<a class="reference internal" href="dsp.html"><span class="std std-doc">kernel</span></a> that the <strong>plan interpreter</strong> runs on Rack’s engine
+thread, straight from Python. The <strong>compiled tier</strong>
+(<a class="reference internal" href="../reference/python/rackpy/dsp/graph_codegen/index.html#module-rackpy.dsp.graph_codegen" title="rackpy.dsp.graph_codegen"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rackpy.dsp.graph_codegen</span></code></a>, <code class="docutils literal notranslate"><span class="pre">bin/rackpy-graph</span></code>) turns graphs into
+C++ for a kernel library, for the lowest cost. Both compute exactly the same
+results. <a class="reference internal" href="../reference/python/rackpy/dsp/graph_reference/index.html#module-rackpy.dsp.graph_reference" title="rackpy.dsp.graph_reference"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rackpy.dsp.graph_reference</span></code></a> evaluates graphs offline, in
+Python, for tests and teaching.</p>
+<p>Building, checking and the offline reference work outside Rack;
+<code class="docutils literal notranslate"><span class="pre">compile()</span></code> needs Rack.</p>
+<section id="run-a-graph-in-a-module">
+<h2>Run a graph in a module<a class="headerlink" href="#run-a-graph-in-a-module" title="Link to this heading">¶</a></h2>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">Rack’s tutorial oscillator as a graph, run natively · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.dsp.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">Graph</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+
+<span class="c1"># Rack's tutorial oscillator as a graph: a sine at the pitch knob plus the V/oct</span>
+<span class="c1"># input, and a light blinking at 1 Hz. "level" is a control.</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">()</span>
+<span class="n">pitch</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">param</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">g</span><span class="o">.</span><span class="n">input</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">control</span><span class="p">(</span><span class="s2">"level"</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">g</span><span class="o">.</span><span class="n">sin2pi</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">phasor</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">pitch_to_freq</span><span class="p">(</span><span class="n">pitch</span><span class="p">))))</span>
+<span class="n">g</span><span class="o">.</span><span class="n">light</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">phasor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">oscillator</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">num_params</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_inputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_outputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_lights</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_param</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"Pitch"</span><span class="p">,</span> <span class="s2">" V"</span><span class="p">)</span>
+    <span class="c1"># The plan interpreter runs the graph natively every frame; Python never runs there.</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">set_kernel</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">compile</span><span class="p">())</span>
+
+
+<span class="n">module</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">oscillator</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">kernel</span>
+    <span class="k">assert</span> <span class="n">kernel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">kernel</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">kernel</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">controls</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">kernel</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+    <span class="n">kernel</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"level"</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">)</span>  <span class="c1"># reaches the plan at a frame boundary</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">kernel</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="s2">"level"</span><span class="p">])</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Output:</p>
+<div class="rackpy-example-output highlight-text notranslate"><div class="highlight"><pre><span></span>rackpy.Graph ('level',)
+['input[0]', 'level', 'light[0]', 'output[0]', 'param[0]']
+2.5
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">compile()</span></code> checks the plan again natively and allocates everything the plan
+needs, on the main thread. The kernel’s fields are the ports, params and
+lights the graph uses (<code class="docutils literal notranslate"><span class="pre">input[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">light[0]</span></code>, …), which <code class="docutils literal notranslate"><span class="pre">set_kernel</span></code>
+checks against the module’s configuration, followed by its controls, which
+<code class="docutils literal notranslate"><span class="pre">Kernel.set</span></code> changes through RP-17’s bounded queue at a frame boundary.
+Replacing a module’s kernel, plan or not, happens at a frame boundary, and
+the old one is freed on the main thread. Rack’s reset (Initialize) starts
+the nodes’ state over (phases, triggers, pulses, delays) and keeps the
+controls Python set.</p>
+<p><strong>Cost.</strong> The interpreter runs a plan’s nodes in order through one <code class="docutils literal notranslate"><span class="pre">switch</span></code>,
+with no virtual call per node, and writes constants and controls in
+advance. That still costs more than the same DSP fused by hand in C++: about
+1.3 to 1.6 ns per node per frame on the planning machine
+(<code class="docutils literal notranslate"><span class="pre">benchmarks/rp21-graph-cost.json</span></code>). Where that matters, compile the graph.</p>
+</section>
+<section id="compile-graphs-into-a-kernel-library">
+<h2>Compile graphs into a kernel library<a class="headerlink" href="#compile-graphs-into-a-kernel-library" title="Link to this heading">¶</a></h2>
+<p>The compiled tier writes C++ that composes RackPy’s node types (from
+<code class="docutils literal notranslate"><span class="pre">rackpy/graph.hpp</span></code>) statically, one kernel type per graph, registered in a
+kernel library. Write the graphs in a Python file as a dict of kernel type
+names to graphs (<code class="docutils literal notranslate"><span class="pre">GRAPHS</span></code>, unless you pass <code class="docutils literal notranslate"><span class="pre">--variable</span></code>), then:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bin/rackpy-graph<span class="w"> </span>emit<span class="w"> </span>tests/dsp/in_rack_libraries/graphs.py<span class="w"> </span>graphs<span class="w"> </span>--output<span class="w"> </span>graphs.cpp
+</pre></div>
+</div>
+<p>Build <code class="docutils literal notranslate"><span class="pre">graphs.cpp</span></code> as any <a class="reference internal" href="dsp.html#write-a-kernel-in-c"><span class="std std-ref">kernel library</span></a>, list
+it in <code class="docutils literal notranslate"><span class="pre">rackpy-loader.json</span></code>, and use its types like any kernel:
+<code class="docutils literal notranslate"><span class="pre">rackpy.dsp.kernel.load(&quot;graphs.Tutorial&quot;)()</span></code>. A type’s fields are the
+graph’s wiring (<code class="docutils literal notranslate"><span class="pre">input[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">light[0]</span></code>, …), each defaulting to the graph’s
+own index, then its controls; <code class="docutils literal notranslate"><span class="pre">-1</span></code> is refused. RackPy’s tests compile
+exactly this example (<code class="docutils literal notranslate"><span class="pre">tests/dsp/kernel_library/graphs.cpp</span></code>, checked to be
+current) and run every kernel against the plan interpreter inside Rack.</p>
+<ul class="simple">
+<li><p><strong>Exact.</strong> Each node is the same function the interpreter calls, and a
+register barrier after each node (<code class="docutils literal notranslate"><span class="pre">settle</span></code>) stops the SDK’s
+<code class="docutils literal notranslate"><span class="pre">-funsafe-math-optimizations</span></code> from folding or reassociating across nodes,
+so the two tiers agree bit for bit.</p></li>
+<li><p><strong>Fast when it can be.</strong> While every input and delay carries at most one
+channel (so every signal does), a compiled kernel computes one value per
+node; otherwise it runs the general 0 to 16 channel code.</p></li>
+<li><p><strong>RackPy’s node types only.</strong> Graphs that use native extension nodes are
+refused (their types live in other libraries); compile those with
+<code class="docutils literal notranslate"><span class="pre">Graph.compile()</span></code>.</p></li>
+<li><p><strong>Trusted.</strong> <code class="docutils literal notranslate"><span class="pre">emit</span></code> runs the Python file you give it.</p></li>
+</ul>
+<p>On the planning machine a compiled mono plan costs about 1.5 to 1.7 ns per
+frame more than the same DSP fused by hand in C++, RackPy’s own fixed cost
+per kernel module included, and 16 voices run faster than a hand-written
+loop (<code class="docutils literal notranslate"><span class="pre">benchmarks/rp21-graph-cost.json</span></code>).</p>
+</section>
+<section id="build-and-check-a-graph">
+<h2>Build and check a graph<a class="headerlink" href="#build-and-check-a-graph" title="Link to this heading">¶</a></h2>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">A VCA, a blinking light and a counter, checked with the offline reference · Runs with plain Python; tested</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.dsp.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">Graph</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.dsp.graph_reference</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">()</span>
+<span class="c1"># A VCA: input 0 times parameter 0, on output 0, for every channel of the cable.</span>
+<span class="n">g</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">input</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">g</span><span class="o">.</span><span class="n">param</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="c1"># A light that blinks at 1 Hz: a phase from 0 to 1, compared with 0.5.</span>
+<span class="n">g</span><span class="o">.</span><span class="n">light</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">phasor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="c1"># Feedback needs an explicit one-sample delay: a counter on output 1.</span>
+<span class="n">count</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">delay</span><span class="p">()</span>
+<span class="n">count</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+
+<span class="n">plan</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">([</span><span class="n">node</span><span class="o">.</span><span class="n">op</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">plan</span><span class="o">.</span><span class="n">nodes</span><span class="p">])</span>
+
+<span class="c1"># The offline reference: 4 frames at a sample rate of 4 Hz, with a 2-channel cable on input 0.</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="p">[[</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">},</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">lights</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>Output:</p>
+<div class="rackpy-example-output highlight-text notranslate"><div class="highlight"><pre><span></span>['input', 'param', 'mul', 'output', 'constant', 'phasor', 'constant', 'lt', 'light', 'delay', 'constant', 'add', 'output']
+[[0.5, -1.0], [0.5, -1.0], [0.5, -1.0], [0.5, -1.0]]
+[1.0, 0.0, 0.0, 1.0]
+[[0.0], [1.0], [2.0], [3.0]]
+</pre></div>
+</div>
+<p>Arithmetic and comparisons on signals build nodes: <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">*</span> <span class="pre">b</span> <span class="pre">+</span> <span class="pre">1</span></code> is three
+nodes (a constant among them), and <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;</span> <span class="pre">0.5</span></code> is a signal of 1 and 0. Numbers
+become constants. <a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html#rackpy.dsp.graph.Graph.plan" title="rackpy.dsp.graph.Graph.plan"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plan()</span></code></a> checks the graph
+and lowers it to a <a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html#rackpy.dsp.graph.Plan" title="rackpy.dsp.graph.Plan"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plan</span></code></a>: the nodes the outputs
+and lights need, in execution order, each reading only earlier nodes.</p>
+</section>
+<section id="arbitrary-python-is-not-compiled">
+<h2>Arbitrary Python is not compiled<a class="headerlink" href="#arbitrary-python-is-not-compiled" title="Link to this heading">¶</a></h2>
+<p>A graph is made only of registered native node types. Python functions,
+lambdas and branches on signals are not translated into native code, and
+RackPy refuses them rather than guessing: <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">signal:</span></code>, <code class="docutils literal notranslate"><span class="pre">float(signal)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">math.sin(signal)</span></code> raise <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>, and passing anything other than a
+signal or a number to a node raises
+<a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html#rackpy.dsp.graph.GraphError" title="rackpy.dsp.graph.GraphError"><code class="xref py py-class docutils literal notranslate"><span class="pre">GraphError</span></code></a>. Choose per sample with
+<a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html#rackpy.dsp.graph.Graph.where" title="rackpy.dsp.graph.Graph.where"><code class="xref py py-meth docutils literal notranslate"><span class="pre">where()</span></code></a>, and use the node functions
+(<a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html#rackpy.dsp.graph.Graph.sin2pi" title="rackpy.dsp.graph.Graph.sin2pi"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sin2pi()</span></code></a>,
+<a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html#rackpy.dsp.graph.Graph.pitch_to_freq" title="rackpy.dsp.graph.Graph.pitch_to_freq"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pitch_to_freq()</span></code></a>, …) instead of <code class="docutils literal notranslate"><span class="pre">math</span></code>.</p>
+</section>
+<section id="nodes">
+<h2>Nodes<a class="headerlink" href="#nodes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Node</p></th>
+<th class="head"><p>What it gives</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">input(port)</span></code></p></td>
+<td><p>an input port’s voltages; its channels are the cable’s (0 when unpatched)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">param(index)</span></code>, <code class="docutils literal notranslate"><span class="pre">constant(value)</span></code></p></td>
+<td><p>a parameter’s value; a fixed number (mono)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">control(name,</span> <span class="pre">default)</span></code></p></td>
+<td><p>a number Python may change while the graph runs, by name (mono)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sample_rate()</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_time()</span></code></p></td>
+<td><p>the engine’s sample rate, and one frame’s duration (mono)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">+</span> <span class="pre">-</span> <span class="pre">*</span> <span class="pre">/</span></code>, <code class="docutils literal notranslate"><span class="pre">-x</span></code>, <code class="docutils literal notranslate"><span class="pre">abs(x)</span></code></p></td>
+<td><p>IEEE float arithmetic per channel (division by zero gives an infinity or NaN)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;</span> <span class="pre">&lt;=</span> <span class="pre">&gt;</span> <span class="pre">&gt;=</span></code></p></td>
+<td><p>1 where true, else 0</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">minimum</span></code>, <code class="docutils literal notranslate"><span class="pre">maximum</span></code>, <code class="docutils literal notranslate"><span class="pre">clamp</span></code>, <code class="docutils literal notranslate"><span class="pre">where</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">std::fmin</span></code>, <code class="docutils literal notranslate"><span class="pre">std::fmax</span></code>, <code class="docutils literal notranslate"><span class="pre">rack::math::clamp</span></code>, and a choice per channel</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pitch_to_freq(pitch)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dsp::FREQ_C4</span> <span class="pre">*</span> <span class="pre">std::pow(2.f,</span> <span class="pre">pitch)</span></code>: V/oct to Hz, 0 V being C4</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sin2pi(phase)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">std::sin(2.f</span> <span class="pre">*</span> <span class="pre">float(M_PI)</span> <span class="pre">*</span> <span class="pre">phase)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">phasor(freq)</span></code></p></td>
+<td><p>a phase from 0 to 1 per channel, kept as Rack’s tutorial oscillator keeps it</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">schmitt(x,</span> <span class="pre">low,</span> <span class="pre">high)</span></code></p></td>
+<td><p>Rack’s <code class="docutils literal notranslate"><span class="pre">dsp::SchmittTrigger</span></code>: 1 on the frame <code class="docutils literal notranslate"><span class="pre">x</span></code> rises to <code class="docutils literal notranslate"><span class="pre">high</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pulse(trigger,</span> <span class="pre">duration)</span></code></p></td>
+<td><p>Rack’s <code class="docutils literal notranslate"><span class="pre">dsp::PulseGenerator</span></code>: 1 for <code class="docutils literal notranslate"><span class="pre">duration</span></code> seconds after each trigger</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">delay(initial)</span></code></p></td>
+<td><p>the signal it is fed, one frame later</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">output(port,</span> <span class="pre">signal)</span></code>, <code class="docutils literal notranslate"><span class="pre">light(index,</span> <span class="pre">brightness)</span></code></p></td>
+<td><p>write an output (at least one channel) or a light’s brightness (channel 0)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">expander_send(side,</span> <span class="pre">signal,</span> <span class="pre">lane)</span></code>, <code class="docutils literal notranslate"><span class="pre">expander_receive(side,</span> <span class="pre">lane)</span></code></p></td>
+<td><p>send a signal to the module beside it, and receive one, a frame later: see <a class="reference internal" href="#expanders">expanders</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">audio_input(channel)</span></code>, <code class="docutils literal notranslate"><span class="pre">audio_output(channel,</span> <span class="pre">signal)</span></code></p></td>
+<td><p>device input and output samples: see <a class="reference internal" href="#audio-and-midi">audio and MIDI</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">midi_cv(output,</span> <span class="pre">...)</span></code></p></td>
+<td><p>one of Core MIDI-CV’s outputs from a timed MIDI input: see <a class="reference internal" href="#audio-and-midi">audio and MIDI</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Every operation computes in float32, as Rack does.</p>
+</section>
+<section id="audio-and-midi">
+<h2>Audio and MIDI<a class="headerlink" href="#audio-and-midi" title="Link to this heading">¶</a></h2>
+<p>The RP-31J I/O path is <strong>work in progress</strong>. Inside Rack, a module can attach
+an audio port and MIDI queues before the engine owns it; the native graph
+interpreter and generated kernel libraries can access their per-frame data.
+See <a class="reference internal" href="../reference/midi.html"><span class="std std-doc">MIDI</span></a> for attachment and ownership constraints.
+The offline reference refuses these nodes because it has no device endpoint.</p>
+<p><code class="docutils literal notranslate"><span class="pre">audio_input(channel)</span></code> reads device units (full scale 1), returning zero when
+no channel is available. <code class="docutils literal notranslate"><span class="pre">audio_output(channel,</span> <span class="pre">signal)</span></code> sends the sum of the
+signal’s channels in those same units; write each device channel at most once.
+Multiply a device sample by 10 to produce Rack’s usual voltage scale, and
+scale Rack voltages down before sending them to a device. A graph with only
+an audio output is a valid sink. The bridge can clock Rack as the audio master
+or operate as a secondary port. Startup and sample-rate transition equivalence
+to Core Audio is still under study.</p>
+<p><code class="docutils literal notranslate"><span class="pre">midi_cv(output,</span> <span class="pre">input=0,</span> <span class="pre">...)</span></code> processes messages due on one of the module’s
+four MIDI inputs. The output index 0-11 follows <code class="docutils literal notranslate"><span class="pre">rackpy.MidiToCV</span></code>’s order
+(pitch, gate, velocity, aftertouch, pitch wheel, modulation wheel, retrigger,
+clock, divided clock, start, stop, continue). Each node owns an independent
+parser and settings, including polyphony, priority modes and wheel smoothing;
+use the same settings for nodes meant to represent one MIDI-CV module. A
+compiled graph uses RackPy’s I/O services and runs the polyphonic path.</p>
+</section>
+<section id="channels">
+<h2>Channels<a class="headerlink" href="#channels" title="Link to this heading">¶</a></h2>
+<p>Every signal has 0 to 16 channels per frame, as Rack’s cables do, and the
+count can change from one frame to the next. An operation has as many
+channels as its widest operand: a mono operand applies to every channel, and
+channels missing from a shorter one read 0 V. Oscillators, triggers and
+pulses have at least one channel, and an output always gets at least one,
+as <code class="docutils literal notranslate"><span class="pre">Port::setChannels</span></code> does for a patched output.</p>
+</section>
+<section id="feedback">
+<h2>Feedback<a class="headerlink" href="#feedback" title="Link to this heading">¶</a></h2>
+<p>Rack processes one sample at a time, so feedback within a module needs one
+sample of delay. Make it explicit with
+<a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html#rackpy.dsp.graph.Graph.delay" title="rackpy.dsp.graph.Graph.delay"><code class="xref py py-meth docutils literal notranslate"><span class="pre">delay()</span></code></a> and give it its source with
+<code class="docutils literal notranslate"><span class="pre">feed()</span></code>. <a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html#rackpy.dsp.graph.Graph.forward" title="rackpy.dsp.graph.Graph.forward"><code class="xref py py-meth docutils literal notranslate"><span class="pre">forward()</span></code></a> names a signal before it
+is defined, without adding any delay, so a cycle built with forward
+references alone is refused, naming each node in the cycle and the line
+that made it. RackPy never adds latency to make a graph run.</p>
+</section>
+<section id="native-extension-nodes">
+<h2>Native extension nodes<a class="headerlink" href="#native-extension-nodes" title="Link to this heading">¶</a></h2>
+<p>RackPy’s node types cover oscillators, arithmetic, triggers, lights and
+polyphony. For anything else, a <a class="reference internal" href="dsp.html#write-a-kernel-in-c"><span class="std std-ref">kernel library</span></a>
+adds native node types in C++: it implements <code class="docutils literal notranslate"><span class="pre">rackpy::graph::Node</span></code>
+(<code class="docutils literal notranslate"><span class="pre">process</span></code> reads its input signals and writes its output signal, channel
+count included, under the same real-time rules as a kernel) and registers
+<code class="docutils literal notranslate"><span class="pre">rackpy::graph::NodeType</span></code>s with <code class="docutils literal notranslate"><span class="pre">RACKPY_GRAPH_NODES</span></code>, under its namespace.
+Python uses them by name:</p>
+<div class="literal-block-wrapper rackpy-conceptual docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">Inside Rack, with the example kernel library loaded (its test runs this) · not runnable, not an available API</span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
+<div class="rackpy-conceptual highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">folded</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="s2">"example.Fold"</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">input</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">drive</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+<span class="n">held</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="s2">"example.Hold"</span><span class="p">,</span> <span class="n">folded</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">input</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p><a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html#rackpy.dsp.graph.node_types" title="rackpy.dsp.graph.node_types"><code class="xref py py-func docutils literal notranslate"><span class="pre">node_types()</span></code></a> lists the types loaded, with their
+inputs and argument names. The node type, its inputs and its arguments (by
+name, in any order, all required) are checked when the graph is compiled;
+the type’s own <code class="docutils literal notranslate"><span class="pre">create</span></code> may refuse its arguments (<code class="docutils literal notranslate"><span class="pre">ValueError</span></code>). A node that
+writes a channel count outside 0 to 16 fails the plan: the module is
+silenced and the failure is recorded, as for a failing kernel. The plan
+interpreter calls an extension node through one virtual call per frame, and
+the offline reference cannot run one.</p>
+</section>
+<section id="expanders">
+<h2>Expanders<a class="headerlink" href="#expanders" title="Link to this heading">¶</a></h2>
+<p>A graph can exchange signals with the modules beside it, through Rack’s
+<a class="reference internal" href="../reference/engine-module.html#id2"><span class="std std-ref">expanders</span></a> (RP-23B).
+<a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html#rackpy.dsp.graph.Graph.expander_send" title="rackpy.dsp.graph.Graph.expander_send"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expander_send()</span></code></a> writes a signal into a lane
+of the neighbour’s message on one side (0 left, 1 right), and
+<a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html#rackpy.dsp.graph.Graph.expander_receive" title="rackpy.dsp.graph.Graph.expander_receive"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expander_receive()</span></code></a> reads what the neighbour
+on a side sent. A message arrives <strong>exactly one frame</strong> after it was sent,
+in whatever order and on however many threads Rack’s engine processes the
+two modules, because Rack swaps each side’s two buffers at the end of the
+frame:</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">A module and its expander, stepped on a laboratory bench and by the offline reference · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id4" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">laboratory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.dsp.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">Graph</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.dsp.graph_reference</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_pair</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine.expanders</span><span class="w"> </span><span class="kn">import</span> <span class="n">graph_messages</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.laboratory</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bench</span>
+
+<span class="c1"># A module that sends its knob's value to the module on its right...</span>
+<span class="n">send</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">()</span>
+<span class="n">send</span><span class="o">.</span><span class="n">expander_send</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">send</span><span class="o">.</span><span class="n">param</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+<span class="c1"># ...and an expander that outputs what arrives from its left, one frame later.</span>
+<span class="n">receive</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">()</span>
+<span class="n">receive</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">receive</span><span class="o">.</span><span class="n">expander_receive</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+<span class="n">host</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="n">host</span><span class="o">.</span><span class="n">set_kernel</span><span class="p">(</span><span class="n">send</span><span class="o">.</span><span class="n">compile</span><span class="p">())</span>
+<span class="n">expander</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="n">graph_messages</span><span class="p">(</span><span class="n">expander</span><span class="o">.</span><span class="n">left_expander</span><span class="p">)</span>  <span class="c1"># a module receives in its own messages</span>
+<span class="n">expander</span><span class="o">.</span><span class="n">set_kernel</span><span class="p">(</span><span class="n">receive</span><span class="o">.</span><span class="n">compile</span><span class="p">())</span>
+
+<span class="c1"># In a patch, Rack's engine runs both kernels and swaps the messages. Here a</span>
+<span class="c1"># laboratory bench steps them the same way, offline (trusted code only).</span>
+<span class="n">laboratory</span><span class="o">.</span><span class="n">enable</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">bench</span> <span class="o">=</span> <span class="n">Bench</span><span class="p">(</span><span class="mi">48000</span><span class="p">)</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">expander</span><span class="p">)</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">set_expander</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">expander</span><span class="p">)</span>  <span class="c1"># Rack does this for adjacent modules</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">set_expander</span><span class="p">(</span><span class="n">expander</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">host</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">):</span>
+        <span class="n">host</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="n">bench</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">expander</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_voltage</span><span class="p">())</span>  <span class="c1"># 0.0, then 1.0, then 2.0</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">laboratory</span><span class="o">.</span><span class="n">disable</span><span class="p">()</span>
+
+<span class="c1"># The offline reference agrees, frame for frame.</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">run_pair</span><span class="p">(</span><span class="n">send</span><span class="p">,</span> <span class="n">receive</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">left_inputs</span><span class="o">=</span><span class="p">{</span><span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">]}})</span>
+<span class="k">assert</span> <span class="n">b</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="p">[[</span><span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<p>Output:</p>
+<div class="rackpy-example-output highlight-text notranslate"><div class="highlight"><pre><span></span>0.0
+1.0
+2.0
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Messages.</strong> A module receives in its own messages: give the side it
+receives on <code class="docutils literal notranslate"><span class="pre">&quot;rackpy.graph&quot;</span></code> messages with
+<a class="reference internal" href="../reference/python/rackpy/engine/expanders/index.html#rackpy.engine.expanders.graph_messages" title="rackpy.engine.expanders.graph_messages"><code class="xref py py-func docutils literal notranslate"><span class="pre">rackpy.engine.expanders.graph_messages()</span></code></a> (one lane per signal, up
+to 64), before the module goes to Rack’s engine. The sender writes into
+the neighbour’s producer message and requests the flip; the receiver reads
+its consumer message. Each lane holds a channel count and 16 voltages.</p></li>
+<li><p><strong>Checks.</strong> On Rack’s engine thread, before touching anything, a send
+checks that the neighbour is a RackPy module, that its facing expander
+points back to the sender, and that its messages there have the
+<code class="docutils literal notranslate"><span class="pre">&quot;rackpy.graph&quot;</span></code> schema and room for the lane; a receive checks that the
+neighbour is a RackPy module and that its own messages fit. Otherwise
+nothing is sent, and the receive gives 0 channels. These checks take no
+lock and allocate nothing; a foreign plugin’s pointer is never read.</p></li>
+<li><p><strong>Read once.</strong> A receive marks its lane read. So when the neighbour is
+removed, moved away, or stops sending, the next frame receives 0 channels
+instead of repeating the last message.</p></li>
+<li><p><strong>Lanes.</strong> Each lane of each side is sent by one node and received by one
+node at most; a graph that only sends is valid.</p></li>
+</ul>
+<p>Both tiers compose these nodes: the compiled tier
+(<a class="reference internal" href="../reference/python/rackpy/dsp/graph_codegen/index.html#module-rackpy.dsp.graph_codegen" title="rackpy.dsp.graph_codegen"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rackpy.dsp.graph_codegen</span></code></a>) calls RackPy’s expander services, which
+RackPy gives the generated library when it loads it, and takes the
+polyphonic path for a graph that exchanges, since a received lane’s channel
+count is known only when it is read. Graphs exchange with RackPy modules
+only; a C++ kernel library can define <a class="reference internal" href="dsp.html#exchange-expander-messages-from-c"><span class="std std-ref">message layouts of its
+own</span></a>. To watch what arrives while
+Rack’s engine runs, turn on <code class="docutils literal notranslate"><span class="pre">expander.snapshots</span></code> and read
+<code class="docutils literal notranslate"><span class="pre">expander.snapshot()</span></code> (<a class="reference internal" href="../reference/engine-module.html#id2"><span class="std std-ref">snapshots</span></a>).
+<a class="reference internal" href="../reference/python/rackpy/dsp/graph_reference/index.html#rackpy.dsp.graph_reference.run_pair" title="rackpy.dsp.graph_reference.run_pair"><code class="xref py py-func docutils literal notranslate"><span class="pre">rackpy.dsp.graph_reference.run_pair()</span></code></a> evaluates two graphs side by
+side, one frame apart, and the live-Rack tests check Rack’s own engine
+against it frame for frame, at 44.1, 48 and 96 kHz with 1, 2 and 4 engine
+threads, for both tiers.</p>
+</section>
+<section id="the-offline-reference">
+<h2>The offline reference<a class="headerlink" href="#the-offline-reference" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="../reference/python/rackpy/dsp/graph_reference/index.html#rackpy.dsp.graph_reference.run" title="rackpy.dsp.graph_reference.run"><code class="xref py py-func docutils literal notranslate"><span class="pre">rackpy.dsp.graph_reference.run()</span></code></a> evaluates a graph for a number of
+frames, given each patched input’s channels per frame, parameter values,
+control changes by frame, sample-rate changes and what each expander lane
+receives; its result records what each lane sent. It rounds every operation
+to float32. Arithmetic, comparisons, <code class="docutils literal notranslate"><span class="pre">minimum</span></code>, <code class="docutils literal notranslate"><span class="pre">maximum</span></code> and <code class="docutils literal notranslate"><span class="pre">clamp</span></code> match
+float32 exactly; <code class="docutils literal notranslate"><span class="pre">sin2pi</span></code> and <code class="docutils literal notranslate"><span class="pre">pitch_to_freq</span></code> round Python’s double-precision
+functions, which may differ from the C library’s by one unit in the last
+place. It is thousands of times slower than native code and is never the
+production path.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="polyphony.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Make a module polyphonic</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="dsp.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Process audio</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Describe DSP as a graph</a><ul>
+<li><a class="reference internal" href="#run-a-graph-in-a-module">Run a graph in a module</a></li>
+<li><a class="reference internal" href="#compile-graphs-into-a-kernel-library">Compile graphs into a kernel library</a></li>
+<li><a class="reference internal" href="#build-and-check-a-graph">Build and check a graph</a></li>
+<li><a class="reference internal" href="#arbitrary-python-is-not-compiled">Arbitrary Python is not compiled</a></li>
+<li><a class="reference internal" href="#nodes">Nodes</a></li>
+<li><a class="reference internal" href="#audio-and-midi">Audio and MIDI</a></li>
+<li><a class="reference internal" href="#channels">Channels</a></li>
+<li><a class="reference internal" href="#feedback">Feedback</a></li>
+<li><a class="reference internal" href="#native-extension-nodes">Native extension nodes</a></li>
+<li><a class="reference internal" href="#expanders">Expanders</a></li>
+<li><a class="reference internal" href="#the-offline-reference">The offline reference</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

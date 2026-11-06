@@ -1,0 +1,1407 @@
+rackpy.raw.app
+==============
+
+.. py:module:: rackpy.raw.app
+
+.. autoapi-nested-parse::
+
+   rack::app: Rack's controls, ports, lights and panels (RP-28A).
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.app.RACK_GRID_WIDTH
+   rackpy.raw.app.RACK_GRID_HEIGHT
+   rackpy.raw.app.RACK_GRID_SIZE
+   rackpy.raw.app.RACK_OFFSET
+   rackpy.raw.app.SVGKnob
+   rackpy.raw.app.SVGSlider
+   rackpy.raw.app.SVGSwitch
+   rackpy.raw.app.SVGButton
+   rackpy.raw.app.SVGPort
+   rackpy.raw.app.SVGScrew
+   rackpy.raw.app.SVGPanel
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.app.ParamWidget
+   rackpy.raw.app.Knob
+   rackpy.raw.app.SliderKnob
+   rackpy.raw.app.Switch
+   rackpy.raw.app.PortWidget
+   rackpy.raw.app.LightWidget
+   rackpy.raw.app.MultiLightWidget
+   rackpy.raw.app.ModuleLightWidget
+   rackpy.raw.app.CircularShadow
+   rackpy.raw.app.SvgKnob
+   rackpy.raw.app.SvgSlider
+   rackpy.raw.app.SvgSwitch
+   rackpy.raw.app.SvgButton
+   rackpy.raw.app.SvgPort
+   rackpy.raw.app.ThemedSvgPort
+   rackpy.raw.app.SvgScrew
+   rackpy.raw.app.ThemedSvgScrew
+   rackpy.raw.app.PanelBorder
+   rackpy.raw.app.SvgPanel
+   rackpy.raw.app.ThemedSvgPanel
+   rackpy.raw.app.RailWidget
+   rackpy.raw.app.ForeignModuleWidget
+   rackpy.raw.app.ModuleWidget
+   rackpy.raw.app.HostScene
+   rackpy.raw.app.HostRackScrollWidget
+   rackpy.raw.app.HostRackWidget
+   rackpy.raw.app.HostCableWidget
+   rackpy.raw.app.HostPlugWidget
+   rackpy.raw.app.CableWidget
+   rackpy.raw.app.LedDisplay
+   rackpy.raw.app.LedDisplaySeparator
+   rackpy.raw.app.LedDisplayChoice
+   rackpy.raw.app.AudioDriverChoice
+   rackpy.raw.app.AudioDeviceChoice
+   rackpy.raw.app.AudioSampleRateChoice
+   rackpy.raw.app.AudioBlockSizeChoice
+   rackpy.raw.app.AudioDeviceMenuChoice
+   rackpy.raw.app.AudioDisplay
+   rackpy.raw.app.AudioButton
+   rackpy.raw.app.MidiDriverChoice
+   rackpy.raw.app.MidiDeviceChoice
+   rackpy.raw.app.MidiChannelChoice
+   rackpy.raw.app.MidiDisplay
+   rackpy.raw.app.MidiButton
+   rackpy.raw.app.LedDisplayTextField
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.app.append_audio_menu
+   rackpy.raw.app.append_midi_menu
+
+
+Module Contents
+---------------
+
+.. py:data:: RACK_GRID_WIDTH
+   :type:  float
+
+.. py:data:: RACK_GRID_HEIGHT
+   :type:  float
+
+.. py:data:: RACK_GRID_SIZE
+   :type:  rackpy.raw.math.Vec
+
+.. py:data:: RACK_OFFSET
+   :type:  rackpy.raw.math.Vec
+
+.. py:class:: ParamWidget
+
+
+
+   .. py:attribute:: module
+      :type:  rackpy.raw.engine.Module | None
+
+
+   .. py:attribute:: param_id
+      :type:  int
+
+
+   .. py:method:: init_param_quantity() -> None
+
+
+   .. py:method:: append_context_menu(menu: rackpy.raw.ui.Menu | rackpy.raw.widget.HostWidget) -> None
+
+
+   .. py:method:: get_param_quantity() -> rackpy.raw.engine.ParamQuantityView | rackpy.raw.engine.ParamQuantity | None
+
+
+   .. py:method:: create_tooltip() -> None
+
+
+   .. py:method:: destroy_tooltip() -> None
+
+
+   .. py:method:: create_context_menu() -> None
+
+
+   .. py:method:: reset_action() -> None
+
+
+.. py:class:: Knob
+
+
+
+   .. py:attribute:: horizontal
+      :type:  bool
+
+
+   .. py:attribute:: smooth
+      :type:  bool
+
+
+   .. py:attribute:: snap
+      :type:  bool
+
+
+   .. py:attribute:: speed
+      :type:  float
+
+
+   .. py:attribute:: force_linear
+      :type:  bool
+
+
+   .. py:attribute:: min_angle
+      :type:  float
+
+
+   .. py:attribute:: max_angle
+      :type:  float
+
+
+.. py:class:: SliderKnob
+
+
+
+.. py:class:: Switch
+
+
+
+   .. py:attribute:: momentary
+      :type:  bool
+
+
+.. py:class:: PortWidget
+
+
+
+   .. py:attribute:: module
+      :type:  rackpy.raw.engine.Module | None
+
+
+   .. py:attribute:: type
+      :type:  rackpy.raw.engine.Port.Type
+
+
+   .. py:attribute:: port_id
+      :type:  int
+
+
+   .. py:method:: get_port() -> rackpy.raw.engine.Input | rackpy.raw.engine.Output | None
+
+
+   .. py:method:: get_port_info() -> rackpy.raw.engine.PortInfoView | rackpy.raw.engine.PortInfo | None
+
+
+   .. py:method:: create_tooltip() -> None
+
+
+   .. py:method:: destroy_tooltip() -> None
+
+
+   .. py:method:: create_context_menu() -> None
+
+
+   .. py:method:: append_context_menu(menu: rackpy.raw.ui.Menu | rackpy.raw.widget.HostWidget) -> None
+
+
+   .. py:method:: delete_top_cable_action() -> None
+
+
+.. py:class:: LightWidget
+
+
+
+   .. py:attribute:: bg_color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+   .. py:attribute:: color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+   .. py:attribute:: border_color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+   .. py:method:: draw_background(args: Any) -> None
+
+
+   .. py:method:: draw_light(args: Any) -> None
+
+
+   .. py:method:: draw_halo(args: Any) -> None
+
+
+.. py:class:: MultiLightWidget
+
+
+
+   .. py:property:: base_colors
+      :type: collections.abc.Sequence[rackpy.raw.nanovg.NVGcolor]
+
+
+
+   .. py:method:: get_num_colors() -> int
+
+
+   .. py:method:: add_base_color(base_color: rackpy.raw.nanovg.NVGcolor) -> None
+
+
+   .. py:method:: set_brightnesses(brightnesses: list[float]) -> None
+
+
+.. py:class:: ModuleLightWidget
+
+
+
+   .. py:attribute:: module
+      :type:  rackpy.raw.engine.Module | None
+
+
+   .. py:attribute:: first_light_id
+      :type:  int
+
+
+   .. py:method:: get_light(color_id: int) -> rackpy.raw.engine.Light | None
+
+
+   .. py:method:: get_light_info() -> rackpy.raw.engine.LightInfoView | rackpy.raw.engine.LightInfo | None
+
+
+   .. py:method:: create_tooltip() -> None
+
+
+   .. py:method:: destroy_tooltip() -> None
+
+
+.. py:class:: CircularShadow
+
+
+
+   .. py:attribute:: blur_radius
+      :type:  float
+
+
+   .. py:attribute:: opacity
+      :type:  float
+
+
+.. py:class:: SvgKnob
+
+
+
+   .. py:property:: fb
+      :type: rackpy.raw.widget.HostFramebufferWidget
+
+
+
+   .. py:property:: sw
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+   .. py:property:: shadow
+      :type: rackpy.raw.widget.HostCircularShadow
+
+
+
+   .. py:property:: tw
+      :type: rackpy.raw.widget.HostTransformWidget
+
+
+
+   .. py:method:: set_svg(svg: rackpy.raw.window.Svg | None) -> None
+
+
+   .. py:method:: set_svg_legacy(svg: rackpy.raw.window.Svg | None) -> None
+
+
+.. py:class:: SvgSlider
+
+
+
+   .. py:property:: fb
+      :type: rackpy.raw.widget.HostFramebufferWidget
+
+
+
+   .. py:property:: background
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+   .. py:property:: handle
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+   .. py:attribute:: min_handle_pos
+      :type:  rackpy.raw.math.Vec
+
+
+   .. py:attribute:: max_handle_pos
+      :type:  rackpy.raw.math.Vec
+
+
+   .. py:method:: set_background_svg(svg: rackpy.raw.window.Svg | None) -> None
+
+
+   .. py:method:: set_handle_svg(svg: rackpy.raw.window.Svg | None) -> None
+
+
+   .. py:method:: set_handle_pos(min_handle_pos: rackpy.raw.math.Vec, max_handle_pos: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: set_handle_pos_centered(min_handle_pos_centered: rackpy.raw.math.Vec, max_handle_pos_centered: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: set_background_svg_legacy(svg: rackpy.raw.window.Svg | None) -> None
+
+
+   .. py:method:: set_handle_svg_legacy(svg: rackpy.raw.window.Svg | None) -> None
+
+
+   .. py:method:: set_svgs(background_svg: rackpy.raw.window.Svg | None, handle_svg: rackpy.raw.window.Svg | None) -> None
+
+
+.. py:class:: SvgSwitch
+
+
+
+   .. py:property:: fb
+      :type: rackpy.raw.widget.HostFramebufferWidget
+
+
+
+   .. py:property:: sw
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+   .. py:property:: shadow
+      :type: rackpy.raw.widget.HostCircularShadow
+
+
+
+   .. py:attribute:: frames
+      :type:  list[rackpy.raw.window.Svg | None]
+
+
+   .. py:attribute:: latch
+      :type:  bool
+
+
+   .. py:method:: add_frame(svg: rackpy.raw.window.Svg | None) -> None
+
+
+.. py:class:: SvgButton
+
+
+
+   .. py:property:: fb
+      :type: rackpy.raw.widget.HostFramebufferWidget
+
+
+
+   .. py:property:: sw
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+   .. py:property:: shadow
+      :type: rackpy.raw.widget.HostCircularShadow
+
+
+
+   .. py:attribute:: frames
+      :type:  list[rackpy.raw.window.Svg | None]
+
+
+   .. py:method:: add_frame(svg: rackpy.raw.window.Svg | None) -> None
+
+
+.. py:class:: SvgPort
+
+
+
+   .. py:property:: fb
+      :type: rackpy.raw.widget.HostFramebufferWidget
+
+
+
+   .. py:property:: sw
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+   .. py:property:: shadow
+      :type: rackpy.raw.widget.HostCircularShadow
+
+
+
+   .. py:method:: set_svg(svg: rackpy.raw.window.Svg | None) -> None
+
+
+   .. py:method:: set_svg_legacy(svg: rackpy.raw.window.Svg | None) -> None
+
+
+.. py:class:: ThemedSvgPort
+
+
+
+   .. py:attribute:: light_svg
+      :type:  rackpy.raw.window.Svg | None
+
+
+   .. py:attribute:: dark_svg
+      :type:  rackpy.raw.window.Svg | None
+
+
+   .. py:method:: set_svg(light_svg: rackpy.raw.window.Svg | None, dark_svg: rackpy.raw.window.Svg | None) -> None
+
+
+.. py:class:: SvgScrew
+
+
+
+   .. py:property:: fb
+      :type: rackpy.raw.widget.HostFramebufferWidget
+
+
+
+   .. py:property:: sw
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+   .. py:method:: set_svg(svg: rackpy.raw.window.Svg | None) -> None
+
+
+.. py:class:: ThemedSvgScrew
+
+
+
+   .. py:attribute:: light_svg
+      :type:  rackpy.raw.window.Svg | None
+
+
+   .. py:attribute:: dark_svg
+      :type:  rackpy.raw.window.Svg | None
+
+
+   .. py:method:: set_svg(light_svg: rackpy.raw.window.Svg | None, dark_svg: rackpy.raw.window.Svg | None) -> None
+
+
+.. py:class:: PanelBorder
+
+
+
+.. py:class:: SvgPanel
+
+
+
+   .. py:property:: fb
+      :type: rackpy.raw.widget.HostFramebufferWidget
+
+
+
+   .. py:property:: sw
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+   .. py:property:: panel_border
+      :type: rackpy.raw.widget.HostWidget
+
+
+
+   .. py:attribute:: svg
+      :type:  rackpy.raw.window.Svg | None
+
+
+   .. py:method:: set_background(svg: rackpy.raw.window.Svg | None) -> None
+
+
+.. py:class:: ThemedSvgPanel
+
+
+
+   .. py:attribute:: light_svg
+      :type:  rackpy.raw.window.Svg | None
+
+
+   .. py:attribute:: dark_svg
+      :type:  rackpy.raw.window.Svg | None
+
+
+   .. py:method:: set_background(light_svg: rackpy.raw.window.Svg | None, dark_svg: rackpy.raw.window.Svg | None) -> None
+
+
+.. py:class:: RailWidget
+
+
+
+.. py:class:: ForeignModuleWidget
+
+   A module widget a model's own code made, which Python owns until Rack's rack takes it.
+
+
+   .. py:property:: owned
+      :type: bool
+
+
+
+   .. py:property:: added
+      :type: bool
+
+
+
+   .. py:property:: model
+      :type: rackpy.raw.plugin.Model | None
+
+
+
+   .. py:property:: module
+      :type: rackpy.raw.engine.Module | rackpy.raw.engine.EngineModule | None
+
+
+
+   .. py:attribute:: box
+      :type:  rackpy.raw.math.Rect
+
+
+   .. py:method:: close() -> None
+
+
+.. py:class:: ModuleWidget
+              ModuleWidget(module: rackpy.raw.engine.Module | None)
+
+
+
+   Rack's module widget; a widget factory makes one for a model's module (or None, a browser preview).
+
+
+   .. py:property:: model
+      :type: rackpy.raw.plugin.Model | None
+
+
+
+   .. py:property:: module
+      :type: rackpy.raw.engine.Module | None
+
+
+
+   .. py:method:: get_model() -> rackpy.raw.plugin.Model | None
+
+
+   .. py:method:: set_model(model: rackpy.raw.plugin.Model) -> None
+
+
+   .. py:method:: get_module() -> rackpy.raw.engine.Module | None
+
+
+   .. py:method:: set_module(module: rackpy.raw.engine.Module | None) -> None
+
+
+   .. py:method:: get_panel() -> rackpy.raw.widget.Widget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:method:: set_panel(panel: rackpy.raw.widget.Widget | rackpy.raw.window.Svg | None) -> None
+
+
+   .. py:method:: add_param(param: ParamWidget) -> None
+
+
+   .. py:method:: add_input(input: PortWidget) -> None
+
+
+   .. py:method:: add_output(output: PortWidget) -> None
+
+
+   .. py:method:: get_param(param_id: int) -> ParamWidget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:method:: get_input(port_id: int) -> PortWidget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:method:: get_output(port_id: int) -> PortWidget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:method:: get_params() -> list[ParamWidget | rackpy.raw.widget.HostWidget]
+
+
+   .. py:method:: get_ports() -> list[PortWidget | rackpy.raw.widget.HostWidget]
+
+
+   .. py:method:: get_inputs() -> list[PortWidget | rackpy.raw.widget.HostWidget]
+
+
+   .. py:method:: get_outputs() -> list[PortWidget | rackpy.raw.widget.HostWidget]
+
+
+   .. py:method:: append_context_menu(menu: rackpy.raw.ui.Menu | rackpy.raw.widget.HostWidget) -> None
+
+
+   .. py:method:: to_json() -> Any
+
+
+   .. py:method:: from_json(data: Any) -> None
+
+
+   .. py:method:: paste_json_action(data: Any) -> bool
+
+
+   .. py:method:: copy_clipboard() -> None
+
+
+   .. py:method:: paste_clipboard_action() -> bool
+
+
+   .. py:method:: load(filename: str) -> None
+
+
+   .. py:method:: load_action(filename: str) -> None
+
+
+   .. py:method:: load_template() -> None
+
+
+   .. py:method:: load_dialog() -> None
+
+
+   .. py:method:: save(filename: str) -> None
+
+
+   .. py:method:: save_template() -> None
+
+
+   .. py:method:: save_template_dialog() -> None
+
+
+   .. py:method:: has_template() -> bool
+
+
+   .. py:method:: clear_template() -> None
+
+
+   .. py:method:: clear_template_dialog() -> None
+
+
+   .. py:method:: save_dialog() -> None
+
+
+   .. py:method:: disconnect() -> None
+
+
+   .. py:method:: reset_action() -> None
+
+
+   .. py:method:: randomize_action() -> None
+
+
+   .. py:method:: append_disconnect_actions(complex_action: rackpy.raw.history.ComplexAction) -> None
+
+
+   .. py:method:: disconnect_action() -> None
+
+
+   .. py:method:: clone_action(clone_cables: bool = True) -> None
+
+
+   .. py:method:: bypass_action(bypassed: bool) -> None
+
+
+   .. py:method:: remove_action() -> None
+
+
+   .. py:method:: create_context_menu() -> None
+
+
+   .. py:method:: get_grid_position() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: set_grid_position(pos: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: get_grid_size() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_grid_box() -> rackpy.raw.math.Rect
+
+
+.. py:data:: SVGKnob
+
+.. py:data:: SVGSlider
+
+.. py:data:: SVGSwitch
+
+.. py:data:: SVGButton
+
+.. py:data:: SVGPort
+
+.. py:data:: SVGScrew
+
+.. py:data:: SVGPanel
+
+.. py:class:: HostScene
+
+
+
+   Rack's Scene (Context.scene), a borrowed view.
+
+
+   .. py:property:: rack_scroll
+      :type: HostRackScrollWidget
+
+
+
+   .. py:property:: rack
+      :type: HostRackWidget
+
+
+
+   .. py:property:: menu_bar
+      :type: rackpy.raw.widget.HostWidget
+
+
+
+   .. py:property:: browser
+      :type: rackpy.raw.widget.HostWidget
+
+
+
+   .. py:attribute:: mouse_pos
+      :type:  rackpy.raw.math.Vec
+
+
+   .. py:method:: get_mouse_pos() -> rackpy.raw.math.Vec
+
+
+.. py:class:: HostRackScrollWidget
+
+
+
+   Checked nonowning host identity; not a transferable Widget.
+
+
+   .. py:property:: zoom_widget
+      :type: rackpy.raw.widget.HostWidget
+
+
+
+   .. py:property:: rack_widget
+      :type: HostRackWidget
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: get_grid_offset() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: set_grid_offset(grid_offset: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: get_zoom() -> float
+
+
+   .. py:method:: set_zoom(zoom: float) -> None
+                  set_zoom(zoom: float, pivot: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: zoom_to_modules() -> None
+
+
+   .. py:method:: zoom_to_bound(bound: rackpy.raw.math.Rect) -> None
+
+
+.. py:class:: HostRackWidget
+
+
+
+   Rack's RackWidget: modules, cables and selection.
+
+
+   .. py:property:: touched_param
+      :type: ParamWidget | rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:method:: get_touched_param() -> ParamWidget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:method:: set_touched_param(param_widget: ParamWidget | rackpy.raw.widget.HostWidget | None) -> None
+
+
+   .. py:method:: get_module_container() -> rackpy.raw.widget.HostWidget
+
+
+   .. py:method:: get_plug_container() -> rackpy.raw.widget.HostWidget
+
+
+   .. py:method:: get_cable_container() -> rackpy.raw.widget.HostWidget
+
+
+   .. py:method:: get_mouse_pos() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: clear() -> None
+
+
+   .. py:method:: merge_json(data: Any) -> Any
+
+
+   .. py:method:: from_json(data: Any) -> None
+
+
+   .. py:method:: paste_json_action(data: Any) -> None
+
+
+   .. py:method:: paste_module_json_action(data: Any) -> None
+
+
+   .. py:method:: paste_clipboard_action() -> None
+
+
+   .. py:method:: add_module(module_widget: ModuleWidget | ForeignModuleWidget) -> None
+
+
+   .. py:method:: add_module_at_mouse(module_widget: ModuleWidget | ForeignModuleWidget) -> None
+
+
+   .. py:method:: remove_module(module_widget: ModuleWidget) -> None
+
+
+   .. py:method:: get_module(module_id: int) -> ModuleWidget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:method:: get_modules() -> list[ModuleWidget | rackpy.raw.widget.HostWidget]
+
+
+   .. py:method:: has_modules() -> bool
+
+
+   .. py:method:: request_module_pos(module_widget: ModuleWidget | rackpy.raw.widget.HostWidget, pos: rackpy.raw.math.Vec) -> bool
+
+
+   .. py:method:: set_module_pos_nearest(module_widget: ModuleWidget | rackpy.raw.widget.HostWidget, pos: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: set_module_pos_force(module_widget: ModuleWidget | rackpy.raw.widget.HostWidget, pos: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: set_module_pos_squeeze(module_widget: ModuleWidget | rackpy.raw.widget.HostWidget, pos: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: update_module_old_positions() -> None
+
+
+   .. py:method:: add_cable(cable_widget: CableWidget) -> None
+
+
+   .. py:method:: remove_cable(cable_widget: CableWidget) -> None
+
+
+   .. py:method:: get_module_drag_action() -> rackpy.raw.history.ComplexAction
+
+
+   .. py:method:: update_selection_from_rect() -> None
+
+
+   .. py:method:: select_all() -> None
+
+
+   .. py:method:: deselect_all() -> None
+
+
+   .. py:method:: select(module_widget: ModuleWidget | rackpy.raw.widget.HostWidget, selected: bool = True) -> None
+
+
+   .. py:method:: has_selection() -> bool
+
+
+   .. py:method:: get_selected() -> list[ModuleWidget | rackpy.raw.widget.HostWidget]
+
+
+   .. py:method:: is_selected(module_widget: ModuleWidget | rackpy.raw.widget.HostWidget) -> bool
+
+
+   .. py:method:: selection_to_json(cables: bool = True) -> Any
+
+
+   .. py:method:: load_selection(path: str) -> None
+
+
+   .. py:method:: load_selection_dialog() -> None
+
+
+   .. py:method:: save_selection(path: str) -> None
+
+
+   .. py:method:: save_selection_dialog() -> None
+
+
+   .. py:method:: copy_clipboard_selection() -> None
+
+
+   .. py:method:: reset_selection_action() -> None
+
+
+   .. py:method:: randomize_selection_action() -> None
+
+
+   .. py:method:: disconnect_selection_action() -> None
+
+
+   .. py:method:: clone_selection_action(clone_cables: bool = True) -> None
+
+
+   .. py:method:: bypass_selection_action(bypassed: bool) -> None
+
+
+   .. py:method:: is_selection_bypassed() -> bool
+
+
+   .. py:method:: delete_selection_action() -> None
+
+
+   .. py:method:: request_selection_pos(delta: rackpy.raw.math.Vec) -> bool
+
+
+   .. py:method:: set_selection_pos_nearest(delta: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: append_selection_context_menu(menu: rackpy.raw.ui.Menu | rackpy.raw.widget.HostWidget) -> None
+
+
+   .. py:method:: clear_cables() -> None
+
+
+   .. py:method:: clear_cables_action() -> None
+
+
+   .. py:method:: clear_cables_on_port(port: PortWidget | rackpy.raw.widget.HostWidget) -> None
+
+
+   .. py:method:: get_incomplete_cable() -> HostCableWidget | CableWidget | None
+
+
+   .. py:method:: get_top_plug(port: PortWidget | rackpy.raw.widget.HostWidget) -> HostPlugWidget | None
+
+
+   .. py:method:: get_top_cable(port: PortWidget | rackpy.raw.widget.HostWidget) -> HostCableWidget | CableWidget | None
+
+
+   .. py:method:: get_cable(cable_id: int) -> HostCableWidget | CableWidget | None
+                  get_cable(output_port: PortWidget | rackpy.raw.widget.HostWidget, input_port: PortWidget | rackpy.raw.widget.HostWidget) -> HostCableWidget | CableWidget | None
+
+
+   .. py:method:: get_cables() -> list[HostCableWidget | CableWidget]
+
+
+   .. py:method:: get_complete_cables() -> list[HostCableWidget | CableWidget]
+
+
+   .. py:method:: get_incomplete_cables() -> list[HostCableWidget | CableWidget]
+
+
+   .. py:method:: get_cables_on_port(port: PortWidget | rackpy.raw.widget.HostWidget) -> list[HostCableWidget | CableWidget]
+
+
+   .. py:method:: get_complete_cables_on_port(port: PortWidget | rackpy.raw.widget.HostWidget) -> list[HostCableWidget | CableWidget]
+
+
+   .. py:method:: get_next_cable_color_id() -> int
+
+
+   .. py:method:: set_next_cable_color_id(id: int) -> None
+
+
+   .. py:method:: get_next_cable_color() -> rackpy.raw.nanovg.NVGcolor
+
+
+.. py:class:: HostCableWidget
+
+
+
+   A cable widget Rack made, a borrowed view.
+
+
+   .. py:attribute:: color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+   .. py:property:: input_plug
+      :type: HostPlugWidget
+
+
+
+   .. py:property:: output_plug
+      :type: HostPlugWidget
+
+
+
+   .. py:method:: get_cable() -> rackpy.raw.engine.Cable | None
+
+
+   .. py:property:: input_port
+      :type: PortWidget | rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:property:: output_port
+      :type: PortWidget | rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:property:: hovered_input_port
+      :type: PortWidget | rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:property:: hovered_output_port
+      :type: PortWidget | rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:method:: is_complete() -> bool
+
+
+   .. py:method:: update_cable() -> None
+
+
+   .. py:method:: get_plug(type: Any) -> HostPlugWidget
+
+
+   .. py:method:: get_port(type: Any) -> PortWidget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:method:: get_hovered_port(type: Any) -> PortWidget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:method:: get_input_pos() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_output_pos() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: merge_json(data: Any) -> Any
+
+
+   .. py:method:: from_json(data: Any) -> None
+
+
+.. py:class:: HostPlugWidget
+
+
+
+   Checked nonowning host identity; not a transferable Widget.
+
+
+   .. py:method:: get_cable() -> HostCableWidget | CableWidget | None
+
+
+   .. py:method:: get_type() -> Any
+
+
+.. py:class:: CableWidget
+
+
+
+   Rack's cable widget, made by Python: set its ports, RackWidget.add_cable it, then update_cable or set_cable.
+
+
+   .. py:attribute:: color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+   .. py:property:: input_plug
+      :type: HostPlugWidget
+
+
+
+   .. py:property:: output_plug
+      :type: HostPlugWidget
+
+
+
+   .. py:attribute:: input_port
+      :type:  PortWidget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:attribute:: output_port
+      :type:  PortWidget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:attribute:: hovered_input_port
+      :type:  PortWidget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:attribute:: hovered_output_port
+      :type:  PortWidget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:property:: cable
+      :type: rackpy.raw.engine.Cable | None
+
+
+
+   .. py:method:: is_complete() -> bool
+
+
+   .. py:method:: update_cable() -> None
+
+
+   .. py:method:: set_cable(cable: rackpy.raw.engine.Cable | None) -> None
+
+
+   .. py:method:: get_cable() -> rackpy.raw.engine.Cable | None
+
+
+   .. py:method:: release_cable() -> rackpy.raw.engine.Cable | None
+
+
+   .. py:method:: get_plug(type: Any) -> HostPlugWidget
+
+
+   .. py:method:: get_port(type: Any) -> PortWidget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:method:: get_hovered_port(type: Any) -> PortWidget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:method:: get_input_pos() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_output_pos() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: merge_json(data: Any) -> Any
+
+
+   .. py:method:: from_json(data: Any) -> None
+
+
+.. py:class:: LedDisplay
+
+
+
+.. py:class:: LedDisplaySeparator
+
+
+
+.. py:class:: LedDisplayChoice
+
+
+
+   .. py:attribute:: text
+      :type:  str
+
+
+   .. py:attribute:: font_path
+      :type:  str
+
+
+   .. py:attribute:: text_offset
+      :type:  rackpy.raw.math.Vec
+
+
+   .. py:attribute:: color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+   .. py:attribute:: bg_color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+.. py:class:: AudioDriverChoice
+
+
+
+   .. py:attribute:: port
+      :type:  rackpy.raw.audio.Port | None
+
+
+.. py:class:: AudioDeviceChoice
+
+
+
+   .. py:attribute:: port
+      :type:  rackpy.raw.audio.Port | None
+
+
+.. py:class:: AudioSampleRateChoice
+
+
+
+   .. py:attribute:: port
+      :type:  rackpy.raw.audio.Port | None
+
+
+.. py:class:: AudioBlockSizeChoice
+
+
+
+   .. py:attribute:: port
+      :type:  rackpy.raw.audio.Port | None
+
+
+.. py:class:: AudioDeviceMenuChoice
+
+
+
+.. py:class:: AudioDisplay
+
+
+
+   .. py:method:: set_audio_port(port: rackpy.raw.audio.Port | None) -> None
+
+
+   .. py:property:: driver_choice
+      :type: rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:property:: driver_separator
+      :type: rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:property:: device_choice
+      :type: rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:property:: device_separator
+      :type: rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:property:: sample_rate_choice
+      :type: rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:property:: sample_rate_separator
+      :type: rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:property:: buffer_size_choice
+      :type: rackpy.raw.widget.HostWidget | None
+
+
+
+.. py:class:: AudioButton
+
+
+
+   .. py:attribute:: port
+      :type:  rackpy.raw.audio.Port | None
+
+
+   .. py:method:: set_audio_port(port: rackpy.raw.audio.Port | None) -> None
+
+
+.. py:class:: MidiDriverChoice
+
+
+
+   .. py:attribute:: port
+      :type:  rackpy.raw.midi.Port | None
+
+
+.. py:class:: MidiDeviceChoice
+
+
+
+   .. py:attribute:: port
+      :type:  rackpy.raw.midi.Port | None
+
+
+.. py:class:: MidiChannelChoice
+
+
+
+   .. py:attribute:: port
+      :type:  rackpy.raw.midi.Port | None
+
+
+.. py:class:: MidiDisplay
+
+
+
+   .. py:method:: set_midi_port(port: rackpy.raw.midi.Port | None) -> None
+
+
+   .. py:property:: driver_choice
+      :type: rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:property:: driver_separator
+      :type: rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:property:: device_choice
+      :type: rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:property:: device_separator
+      :type: rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:property:: channel_choice
+      :type: rackpy.raw.widget.HostWidget | None
+
+
+
+.. py:class:: MidiButton
+
+
+
+   .. py:attribute:: port
+      :type:  rackpy.raw.midi.Port | None
+
+
+   .. py:method:: set_midi_port(port: rackpy.raw.midi.Port | None) -> None
+
+
+.. py:function:: append_audio_menu(menu: rackpy.raw.ui.Menu, port: rackpy.raw.audio.Port | None) -> None
+
+.. py:function:: append_midi_menu(menu: rackpy.raw.ui.Menu, port: rackpy.raw.midi.Port | None) -> None
+
+.. py:class:: LedDisplayTextField
+
+
+
+   .. py:attribute:: font_path
+      :type:  str
+
+
+   .. py:attribute:: text_offset
+      :type:  rackpy.raw.math.Vec
+
+
+   .. py:attribute:: color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+   .. py:attribute:: bg_color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+

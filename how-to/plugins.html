@@ -1,0 +1,764 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Save and restore a module’s state" href="state.html"><link rel="prev" title="Security and trust" href="../explanation/security.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>Register models - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input aria-label="Toggle navigation of Reference" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/how-to/plugins.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/how-to/plugins.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="register-models">
+<h1>Register models<a class="headerlink" href="#register-models" title="Link to this heading">¶</a></h1>
+<p><strong>Implemented (RP-16A, RP-16B, RP-28B), Linux x86_64 inside Rack Free
+2.6.6.</strong> A model’s widget is a Python module widget
+(<a class="reference internal" href="#give-a-model-a-module-widget">below</a>), or RackPy’s plain panel without
+one. Modules process audio with <a class="reference internal" href="dsp.html"><span class="std std-doc">kernels</span></a>, and plugin settings are
+in <a class="reference internal" href="state.html"><span class="std std-doc">state</span></a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Models and patches cannot create or enable laboratory modules. Python audio
+callbacks are refused in normal <code class="docutils literal notranslate"><span class="pre">ModuleClass</span></code>; use native kernels for audio.
+The explicitly enabled <a class="reference internal" href="../explanation/callbacks.html"><span class="std std-doc">laboratory</span></a> runs only
+offline on the main thread, never Rack’s engine or driver threads. Loading
+patch data never opts into executing Python callback code.</p>
+</div>
+<p>To start a plugin of your own, <code class="docutils literal notranslate"><span class="pre">bin/rackpy-plugin</span></code> creates a project, generates
+a module and its widget from an SVG panel, and builds a plugin directory from a
+RackPy bundle: see the
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/template/README.md">plugin template</a>
+and, for a module with sound, the
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/oscillator/README.md">oscillator</a>.
+The <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/configuration/README.md">configuration</a>,
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/state-and-events/README.md">state and events</a>
+and <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/menus/README.md">menus</a> examples
+show a module’s controls, bypass and presets, its events and saved state, and
+its context menu.</p>
+<p>A Rack plugin offers <em>models</em>: the entries in Rack’s module browser. Each
+model makes <em>modules</em>, the instances in a patch. In a RackPy plugin, the
+trusted entry module (named by <code class="docutils literal notranslate"><span class="pre">entry</span></code> in <code class="docutils literal notranslate"><span class="pre">rackpy-loader.json</span></code>) adds its
+models while Rack loads the plugin:</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">register_models.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rackpy.assets</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.plugin</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleClass</span><span class="p">,</span> <span class="n">on_destroy</span><span class="p">,</span> <span class="n">plugin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSON</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">controls</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">num_params</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_inputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_outputs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_param</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"Level"</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_input</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"In"</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_output</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"Out"</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Notes</span><span class="p">(</span><span class="n">ModuleClass</span><span class="p">):</span>
+    <span class="n">SCHEMA</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">num_params</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_inputs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_outputs</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"schema"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">SCHEMA</span><span class="p">,</span> <span class="s2">"text"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">JSON</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"text"</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># patch data is untrusted: keep only what you expect</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">Module</span><span class="o">.</span><span class="n">ResetEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Initialize, after Rack reset the parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s2">""</span>
+
+
+<span class="n">plugin</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s2">"PyControls"</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="n">hp</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">plugin</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s2">"PyNotes"</span><span class="p">,</span> <span class="n">Notes</span><span class="p">,</span> <span class="n">hp</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="k">assert</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">slug</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">plugin</span><span class="o">.</span><span class="n">raw</span><span class="o">.</span><span class="n">models</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"PyControls"</span><span class="p">,</span> <span class="s2">"PyNotes"</span><span class="p">]</span>
+<span class="k">assert</span> <span class="n">rackpy</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">plugin</span><span class="p">(</span><span class="s2">"plugin.json"</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
+
+
+<span class="nd">@on_destroy</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">goodbye</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">pass</span>  <span class="c1"># Python-only cleanup; Rack's objects are gone by now</span>
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">plugin.add_model(slug,</span> <span class="pre">module,</span> <span class="pre">hp=...)</span></code> takes the model’s slug and how to
+build its modules, either way shown above:</p>
+<ul class="simple">
+<li><p>a <em>module factory</em>, the same constructor callback you give <code class="docutils literal notranslate"><span class="pre">Module.create</span></code>
+(<a class="reference internal" href="../reference/engine-module.html"><span class="std std-doc">module construction</span></a>): configure the module
+there and set its <a class="reference internal" href="state.html"><span class="std std-doc">state handlers</span></a>;</p></li>
+<li><p>a <code class="docutils literal notranslate"><span class="pre">ModuleClass</span></code> subclass: Rack’s module gets one instance, which
+<code class="docutils literal notranslate"><span class="pre">configure()</span></code> sets up through <code class="docutils literal notranslate"><span class="pre">self.module</span></code>, and whose <code class="docutils literal notranslate"><span class="pre">to_json()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">from_json()</span></code> are the module’s state handlers. The instance lives exactly
+as long as Rack’s module, so keep per-module Python state on it.</p></li>
+</ul>
+<p>Rack builds a module every time it needs one, on its main thread: when you
+add it from the browser, when a patch loads, when you undo a deletion or
+duplicate a module. Do not start threads or touch files there.</p>
+<section id="give-a-model-a-module-widget">
+<h2>Give a model a module widget<a class="headerlink" href="#give-a-model-a-module-widget" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">add_model</span></code>’s <code class="docutils literal notranslate"><span class="pre">widget=</span></code> is the model’s module widget: a
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw.app.ModuleWidget</span></code> subclass, or a function, that Rack calls with
+the module, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for its browser’s preview. Build the panel and controls
+in it, as a C++ module widget’s constructor does:</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">module_widget.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">raw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.plugin</span><span class="w"> </span><span class="kn">import</span> <span class="n">plugin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">app</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.raw.math</span><span class="w"> </span><span class="kn">import</span> <span class="n">Vec</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.raw.window</span><span class="w"> </span><span class="kn">import</span> <span class="n">Svg</span>
+
+<span class="c1"># Original artwork, inline: a 4 HP panel and a jack.</span>
+<span class="n">PANEL</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s1">'&lt;svg xmlns="http://www.w3.org/2000/svg" width="60" height="380"&gt;'</span>
+    <span class="s1">'&lt;rect width="60" height="380" fill="#283038"/&gt;&lt;rect x="6" y="6" width="48" height="14" fill="#48525e"/&gt;&lt;/svg&gt;'</span>
+<span class="p">)</span>
+<span class="n">JACK</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s1">'&lt;svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"&gt;'</span>
+    <span class="s1">'&lt;circle cx="12" cy="12" r="11" fill="#aab2bc"/&gt;&lt;circle cx="12" cy="12" r="5" fill="#0e1216"/&gt;&lt;/svg&gt;'</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">svg</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Svg</span><span class="p">:</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">Svg</span><span class="p">()</span>
+    <span class="n">image</span><span class="o">.</span><span class="n">load_string</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">image</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">blink</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_param</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"Rate"</span><span class="p">,</span> <span class="s2">" Hz"</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_output</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"Pulse"</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_light</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"Blink"</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Jack</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">SvgPort</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_svg</span><span class="p">(</span><span class="n">svg</span><span class="p">(</span><span class="n">JACK</span><span class="p">))</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Rate</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">Knob</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">Vec</span><span class="p">(</span><span class="mi">26</span><span class="p">,</span> <span class="mi">26</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Lamp</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">ModuleLightWidget</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">box</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">Vec</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_base_color</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">nanovg</span><span class="o">.</span><span class="n">rgb</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">196</span><span class="p">,</span> <span class="mi">64</span><span class="p">))</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">BlinkWidget</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">ModuleWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Rack calls this with the module, or None for its module browser's preview."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="n">Module</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_module</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>  <span class="c1"># first, as Rack's module widgets do</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_panel</span><span class="p">(</span><span class="n">svg</span><span class="p">(</span><span class="n">PANEL</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">create_param_centered</span><span class="p">(</span><span class="n">Rate</span><span class="p">,</span> <span class="n">Vec</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">90</span><span class="p">),</span> <span class="n">module</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">create_light_centered</span><span class="p">(</span><span class="n">Lamp</span><span class="p">,</span> <span class="n">Vec</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">150</span><span class="p">),</span> <span class="n">module</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">create_output_centered</span><span class="p">(</span><span class="n">Jack</span><span class="p">,</span> <span class="n">Vec</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">300</span><span class="p">),</span> <span class="n">module</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+
+<span class="n">plugin</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s2">"PyBlink"</span><span class="p">,</span> <span class="n">blink</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="n">BlinkWidget</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Call <code class="docutils literal notranslate"><span class="pre">self.set_module(module)</span></code> first. The widget owns its module from then
+on, and its ports connect cables (<a class="reference internal" href="../reference/app.html#module-widgets"><span class="std std-ref">module widgets</span></a>).
+Without <code class="docutils literal notranslate"><span class="pre">widget=</span></code>, the model gets a plain panel <code class="docutils literal notranslate"><span class="pre">hp</span></code> wide.</p>
+</section>
+<section id="module-events">
+<h2>Module events<a class="headerlink" href="#module-events" title="Link to this heading">¶</a></h2>
+<p>A <code class="docutils literal notranslate"><span class="pre">ModuleClass</span></code> may also override Rack’s module events: <code class="docutils literal notranslate"><span class="pre">on_add</span></code>,
+<code class="docutils literal notranslate"><span class="pre">on_remove</span></code>, <code class="docutils literal notranslate"><span class="pre">on_bypass</span></code>, <code class="docutils literal notranslate"><span class="pre">on_un_bypass</span></code>, <code class="docutils literal notranslate"><span class="pre">on_port_change</span></code>, <code class="docutils literal notranslate"><span class="pre">on_reset</span></code>,
+<code class="docutils literal notranslate"><span class="pre">on_randomize</span></code> and <code class="docutils literal notranslate"><span class="pre">on_save</span></code>, each called with Rack’s event, as <code class="docutils literal notranslate"><span class="pre">on_reset</span></code>
+above is. A factory function installs the same handlers with
+<code class="docutils literal notranslate"><span class="pre">module.set_event_handlers(on_reset=...,</span> <span class="pre">...)</span></code> in the constructor callback.
+Only the events you handle cost anything.</p>
+<p>They run on Rack’s main thread after Rack’s own behaviour; by the time
+<code class="docutils literal notranslate"><span class="pre">on_reset</span></code> runs, Rack has already reset the parameters. For all but
+<code class="docutils literal notranslate"><span class="pre">on_save</span></code>, Rack has stopped audio while the handler runs, so keep them short:
+RackPy records <code class="docutils literal notranslate"><span class="pre">slow_exclusive_callback</span></code> in <code class="docutils literal notranslate"><span class="pre">rackpy.runtime.diagnostics()</span></code>
+when one takes over 1 ms, and calls that need Rack’s engine lock raise
+<code class="docutils literal notranslate"><span class="pre">EngineLockError</span></code> there. Errors are logged and contained. Rack’s sample-rate
+and master events can arrive on audio threads, so Python cannot handle them
+(RP-22’s laboratory); kernels get the sample rate natively
+(<a class="reference internal" href="dsp.html"><span class="std std-doc">processing audio</span></a>).</p>
+</section>
+<section id="plugin-json-lists-the-same-models">
+<h2>plugin.json lists the same models<a class="headerlink" href="#plugin-json-lists-the-same-models" title="Link to this heading">¶</a></h2>
+<p>Rack reads a plugin’s models from two places and rejects the plugin unless
+they match: what <code class="docutils literal notranslate"><span class="pre">init()</span></code> registers and the <code class="docutils literal notranslate"><span class="pre">&quot;modules&quot;</span></code> list in
+<code class="docutils literal notranslate"><span class="pre">plugin.json</span></code>, which also gives each model its name, description and tags:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"modules"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">"slug"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PyControls"</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Controls"</span><span class="p">,</span><span class="w"> </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A level control"</span><span class="p">,</span><span class="w"> </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Utility"</span><span class="p">]},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">"slug"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PyNotes"</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Notes"</span><span class="p">,</span><span class="w"> </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Text saved with the patch"</span><span class="p">,</span><span class="w"> </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Utility"</span><span class="p">]}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>RackPy checks this when the entry module returns. If a slug is listed but
+not added, or added but not listed, RackPy adds <strong>no</strong> model, shuts its Python
+down and writes the difference to Rack’s log
+(<code class="docutils literal notranslate"><span class="pre">RackPy</span> <span class="pre">host</span> <span class="pre">initialization</span> <span class="pre">failed</span> <span class="pre">(4):</span> <span class="pre">...</span> <span class="pre">listed</span> <span class="pre">but</span> <span class="pre">not</span> <span class="pre">added:</span> <span class="pre">...</span></code>).
+Rack then skips the plugin and keeps running. The same happens if the entry
+module raises (<code class="docutils literal notranslate"><span class="pre">failed</span> <span class="pre">(3)</span></code>): models it added before the error are dropped.</p>
+<p>Models can be added only during that import. <code class="docutils literal notranslate"><span class="pre">add_model</span></code> raises
+<code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code> later, <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> for a slug that is not valid
+(<code class="docutils literal notranslate"><span class="pre">rackpy.raw.plugin.is_slug_valid</span></code>: letters, digits, <code class="docutils literal notranslate"><span class="pre">-</span></code> and <code class="docutils literal notranslate"><span class="pre">_</span></code>) or already
+added, and <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> for a factory that is not callable.</p>
+</section>
+<section id="when-the-entry-module-fails">
+<h2>When the entry module fails<a class="headerlink" href="#when-the-entry-module-fails" title="Link to this heading">¶</a></h2>
+<p>Rack’s log (<code class="docutils literal notranslate"><span class="pre">log.txt</span></code> in the Rack user folder) gets the traceback and a
+line saying what failed, <code class="docutils literal notranslate"><span class="pre">RackPy</span> <span class="pre">host</span> <span class="pre">initialization</span> <span class="pre">failed</span> <span class="pre">(3):</span> <span class="pre">...</span></code>. An
+entry module that does not exist is named as such, and so is a module it
+imports that the plugin does not ship: RackPy runs only the plugin’s own
+files (<code class="docutils literal notranslate"><span class="pre">pythonpath/</span></code>) and Python’s standard library, never packages
+installed elsewhere on the computer.</p>
+<p>The standard library comes first. A plugin file or folder named like a
+standard module, such as <code class="docutils literal notranslate"><span class="pre">json.py</span></code> or <code class="docutils literal notranslate"><span class="pre">random/</span></code>, is never imported: Python
+finds the standard one, for RackPy and for every other import. Rack’s log
+names any such file as the plugin loads (“named like part of Python’s
+standard library”); rename it.</p>
+</section>
+<section id="when-a-module-factory-fails">
+<h2>When a module factory fails<a class="headerlink" href="#when-a-module-factory-fails" title="Link to this heading">¶</a></h2>
+<p>Rack expects a module every time it asks for one and cannot handle a failure,
+so RackPy never lets one reach it. If the factory raises, the error goes to
+Rack’s log and <code class="docutils literal notranslate"><span class="pre">rackpy.runtime.diagnostics()</span></code>, and Rack gets a
+<strong>placeholder</strong>: a module without controls, on a panel labelled
+“(failed)”. It keeps everything the patch saved for that module and writes it
+back unchanged, so saving the patch does not lose the module’s state. Fix
+the script and reload the patch to get the real module back.</p>
+</section>
+<section id="files-and-shutdown">
+<h2>Files and shutdown<a class="headerlink" href="#files-and-shutdown" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">rackpy.assets.plugin(&quot;res/table.json&quot;)</span></code> is a file in the plugin’s own
+folder, <code class="docutils literal notranslate"><span class="pre">rackpy.assets.system(...)</span></code> one in Rack’s, both read-only, and
+<code class="docutils literal notranslate"><span class="pre">rackpy.assets.user(...)</span></code> one in Rack’s user folder, which you may write. They
+return <code class="docutils literal notranslate"><span class="pre">pathlib.Path</span></code>. Files that belong to one module in one patch go in its
+<a class="reference internal" href="state.html#files-next-to-the-patch"><span class="std std-ref">patch storage</span></a> instead.</p>
+<p>When Rack exits it first closes its context, which runs
+<code class="docutils literal notranslate"><span class="pre">rackpy.runtime.on_context_closing</span></code> callbacks while Rack’s objects still
+work, and later calls the plugin’s <code class="docutils literal notranslate"><span class="pre">destroy()</span></code>, which runs
+<code class="docutils literal notranslate"><span class="pre">rackpy.plugin.on_destroy</span></code> callbacks. By then every handle is stale, so use
+<code class="docutils literal notranslate"><span class="pre">on_destroy</span></code> for Python-only cleanup.</p>
+</section>
+<section id="threads-and-lifetime">
+<h2>Threads and lifetime<a class="headerlink" href="#threads-and-lifetime" title="Link to this heading">¶</a></h2>
+<p>Plugins and models belong to Rack for its whole run; the Python objects
+(<code class="docutils literal notranslate"><span class="pre">rackpy.raw.plugin.Plugin</span></code> and <code class="docutils literal notranslate"><span class="pre">Model</span></code>) are handles to them, used on the main
+thread only. A model added from Python keeps its factory until Rack shuts
+down, and RackPy releases it before Python stops.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="state.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Save and restore a module’s state</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../explanation/security.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Security and trust</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Register models</a><ul>
+<li><a class="reference internal" href="#give-a-model-a-module-widget">Give a model a module widget</a></li>
+<li><a class="reference internal" href="#module-events">Module events</a></li>
+<li><a class="reference internal" href="#plugin-json-lists-the-same-models">plugin.json lists the same models</a></li>
+<li><a class="reference internal" href="#when-the-entry-module-fails">When the entry module fails</a></li>
+<li><a class="reference internal" href="#when-a-module-factory-fails">When a module factory fails</a></li>
+<li><a class="reference internal" href="#files-and-shutdown">Files and shutdown</a></li>
+<li><a class="reference internal" href="#threads-and-lifetime">Threads and lifetime</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

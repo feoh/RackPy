@@ -1,0 +1,157 @@
+rackpy.midi
+===========
+
+.. py:module:: rackpy.midi
+
+.. autoapi-nested-parse::
+
+   MIDI, Pythonically, over :mod:`rackpy.raw.midi`. Inside Rack's live UI only.
+
+   Everything here is synchronous and runs on Rack's main thread. A message
+   arrives at an :class:`~rackpy.raw.midi.Input` subclass's ``on_message`` on the
+   UI thread, queued (never on the MIDI driver's thread); an ``InputQueue`` keeps
+   messages until you pop them. The raw layer's rules apply unchanged (see the
+   MIDI reference page); nothing here has native semantics of its own.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.midi.LOOPBACK
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.midi.Message
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.midi.message
+   rackpy.midi.note_on
+   rackpy.midi.note_off
+   rackpy.midi.control_change
+   rackpy.midi.drivers
+   rackpy.midi.find_driver
+   rackpy.midi.open_input
+   rackpy.midi.open_output
+   rackpy.midi.virtual_driver
+
+
+Module Contents
+---------------
+
+.. py:class:: Message
+
+   Rack's MIDI message: bytes (three zeros at first) and the engine frame it belongs to (-1: now).
+
+
+   .. py:attribute:: bytes
+      :type:  list[int]
+
+
+   .. py:attribute:: frame
+      :type:  int
+
+
+   .. py:method:: get_size() -> int
+
+
+   .. py:method:: set_size(size: int) -> None
+
+
+   .. py:method:: get_channel() -> int
+
+
+   .. py:method:: set_channel(channel: int) -> None
+
+
+   .. py:method:: get_status() -> int
+
+
+   .. py:method:: set_status(status: int) -> None
+
+
+   .. py:method:: get_note() -> int
+
+
+   .. py:method:: set_note(note: int) -> None
+
+
+   .. py:method:: get_value() -> int
+
+
+   .. py:method:: set_value(value: int) -> None
+
+
+   .. py:method:: to_string() -> str
+
+
+   .. py:method:: get_frame() -> int
+
+
+   .. py:method:: set_frame(frame: int) -> None
+
+
+.. py:data:: LOOPBACK
+   :value: -12
+
+
+   Rack's Loopback driver: what goes out on device N comes in on device N.
+
+
+.. py:function:: message(*data: int, frame: int = -1) -> rackpy.raw.midi.Message
+
+   A message with these bytes (0-255) and engine frame (-1: now).
+
+
+.. py:function:: note_on(note: int, velocity: int = 100, *, channel: int = 0, frame: int = -1) -> rackpy.raw.midi.Message
+
+   Note on (status 9): note and velocity 0-127, channel 0-15.
+
+
+.. py:function:: note_off(note: int, velocity: int = 0, *, channel: int = 0, frame: int = -1) -> rackpy.raw.midi.Message
+
+   Note off (status 8).
+
+
+.. py:function:: control_change(controller: int, value: int, *, channel: int = 0, frame: int = -1) -> rackpy.raw.midi.Message
+
+   Control change (status 0xb).
+
+
+.. py:function:: drivers() -> dict[str, rackpy.raw.midi.Driver]
+
+   Rack's MIDI drivers by name; raise LookupError on duplicate names.
+
+
+.. py:function:: find_driver(driver: str | int) -> rackpy.raw.midi.Driver
+
+   A driver by name or ID. LookupError if absent or the name is ambiguous.
+
+
+.. py:function:: open_input[I: rackpy.raw.midi.Input](driver: str | int, device: str | int | None = None, *, channel: int = -1, kind: type[I]) -> I
+                 open_input(driver: str | int, device: str | int | None = None, *, channel: int = -1) -> rackpy.raw.midi.InputQueue
+
+   A new input port (an InputQueue unless ``kind`` is an Input subclass) on a driver's device, by name or ID.
+
+
+.. py:function:: open_output(driver: str | int, device: str | int | None = None, *, channel: int = 0) -> rackpy.raw.midi.Output
+
+   A new output port on a driver's device; ``channel`` is set on every message (-1: keep the message's).
+
+
+.. py:function:: virtual_driver(driver_id: int, name: str, *, inputs: tuple[str, ...] = (), outputs: tuple[str, ...] = ()) -> rackpy.raw.midi.PythonDriver
+
+   A Python MIDI driver with these input and output devices, given to Rack (which keeps it until it quits).
+
+

@@ -1,0 +1,56 @@
+rackpy.raw.blendish
+===================
+
+.. py:module:: rackpy.raw.blendish
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.blendish.BND_CORNER_ALL
+   rackpy.raw.blendish.BND_CORNER_DOWN
+   rackpy.raw.blendish.BND_CORNER_DOWN_LEFT
+   rackpy.raw.blendish.BND_CORNER_DOWN_RIGHT
+   rackpy.raw.blendish.BND_CORNER_LEFT
+   rackpy.raw.blendish.BND_CORNER_NONE
+   rackpy.raw.blendish.BND_CORNER_RIGHT
+   rackpy.raw.blendish.BND_CORNER_TOP
+   rackpy.raw.blendish.BND_CORNER_TOP_LEFT
+   rackpy.raw.blendish.BND_CORNER_TOP_RIGHT
+
+
+Module Contents
+---------------
+
+.. py:data:: BND_CORNER_ALL
+   :type:  int
+
+.. py:data:: BND_CORNER_DOWN
+   :type:  int
+
+.. py:data:: BND_CORNER_DOWN_LEFT
+   :type:  int
+
+.. py:data:: BND_CORNER_DOWN_RIGHT
+   :type:  int
+
+.. py:data:: BND_CORNER_LEFT
+   :type:  int
+
+.. py:data:: BND_CORNER_NONE
+   :type:  int
+
+.. py:data:: BND_CORNER_RIGHT
+   :type:  int
+
+.. py:data:: BND_CORNER_TOP
+   :type:  int
+
+.. py:data:: BND_CORNER_TOP_LEFT
+   :type:  int
+
+.. py:data:: BND_CORNER_TOP_RIGHT
+   :type:  int
+

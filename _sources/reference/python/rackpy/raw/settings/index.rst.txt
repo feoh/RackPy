@@ -1,0 +1,423 @@
+rackpy.raw.settings
+===================
+
+.. py:module:: rackpy.raw.settings
+
+.. autoapi-nested-parse::
+
+   rack::settings: Rack's settings.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.settings.KNOB_MODE_LINEAR
+   rackpy.raw.settings.KNOB_MODE_SCALED_LINEAR
+   rackpy.raw.settings.KNOB_MODE_ROTARY_ABSOLUTE
+   rackpy.raw.settings.KNOB_MODE_ROTARY_RELATIVE
+   rackpy.raw.settings.BROWSER_SORT_UPDATED
+   rackpy.raw.settings.BROWSER_SORT_LAST_USED
+   rackpy.raw.settings.BROWSER_SORT_MOST_USED
+   rackpy.raw.settings.BROWSER_SORT_BRAND
+   rackpy.raw.settings.BROWSER_SORT_NAME
+   rackpy.raw.settings.BROWSER_SORT_RANDOM
+   rackpy.raw.settings.settings
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.settings.KnobMode
+   rackpy.raw.settings.BrowserSort
+   rackpy.raw.settings.ModuleInfo
+   rackpy.raw.settings.ModuleInfoView
+   rackpy.raw.settings.PluginWhitelist
+   rackpy.raw.settings.Settings
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.settings.get_module_info
+   rackpy.raw.settings.is_module_whitelisted
+   rackpy.raw.settings.reset_cables
+
+
+Module Contents
+---------------
+
+.. py:class:: KnobMode
+
+
+
+   Enum where members are also (and must be) ints
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+
+   .. py:attribute:: KNOB_MODE_LINEAR
+      :value: 0
+
+
+
+   .. py:attribute:: KNOB_MODE_SCALED_LINEAR
+      :value: 1
+
+
+
+   .. py:attribute:: KNOB_MODE_ROTARY_ABSOLUTE
+      :value: 2
+
+
+
+   .. py:attribute:: KNOB_MODE_ROTARY_RELATIVE
+      :value: 3
+
+
+
+.. py:class:: BrowserSort
+
+
+
+   Enum where members are also (and must be) ints
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+
+   .. py:attribute:: BROWSER_SORT_UPDATED
+      :value: 0
+
+
+
+   .. py:attribute:: BROWSER_SORT_LAST_USED
+      :value: 1
+
+
+
+   .. py:attribute:: BROWSER_SORT_MOST_USED
+      :value: 2
+
+
+
+   .. py:attribute:: BROWSER_SORT_BRAND
+      :value: 3
+
+
+
+   .. py:attribute:: BROWSER_SORT_NAME
+      :value: 4
+
+
+
+   .. py:attribute:: BROWSER_SORT_RANDOM
+      :value: 5
+
+
+
+.. py:data:: KNOB_MODE_LINEAR
+   :type:  KnobMode
+
+.. py:data:: KNOB_MODE_SCALED_LINEAR
+   :type:  KnobMode
+
+.. py:data:: KNOB_MODE_ROTARY_ABSOLUTE
+   :type:  KnobMode
+
+.. py:data:: KNOB_MODE_ROTARY_RELATIVE
+   :type:  KnobMode
+
+.. py:data:: BROWSER_SORT_UPDATED
+   :type:  BrowserSort
+
+.. py:data:: BROWSER_SORT_LAST_USED
+   :type:  BrowserSort
+
+.. py:data:: BROWSER_SORT_MOST_USED
+   :type:  BrowserSort
+
+.. py:data:: BROWSER_SORT_BRAND
+   :type:  BrowserSort
+
+.. py:data:: BROWSER_SORT_NAME
+   :type:  BrowserSort
+
+.. py:data:: BROWSER_SORT_RANDOM
+   :type:  BrowserSort
+
+.. py:class:: ModuleInfo
+
+   .. py:attribute:: enabled
+      :type:  bool
+
+
+   .. py:attribute:: favorite
+      :type:  bool
+
+
+   .. py:attribute:: added
+      :type:  int
+
+
+   .. py:attribute:: last_added
+      :type:  float
+
+
+.. py:class:: ModuleInfoView
+
+   .. py:attribute:: enabled
+      :type:  bool
+
+
+   .. py:attribute:: favorite
+      :type:  bool
+
+
+   .. py:attribute:: added
+      :type:  int
+
+
+   .. py:attribute:: last_added
+      :type:  float
+
+
+.. py:class:: PluginWhitelist
+
+   .. py:attribute:: subscribed
+      :type:  bool
+
+
+   .. py:property:: module_slugs
+      :type: collections.abc.Set[str]
+
+
+
+.. py:class:: Settings
+
+   Rack's settings, one property each. Main thread.
+
+
+   .. py:attribute:: settings_path
+      :type:  str
+
+
+   .. py:attribute:: dev_mode
+      :type:  bool
+
+
+   .. py:property:: headless
+      :type: bool
+
+
+
+   .. py:property:: is_plugin
+      :type: bool
+
+
+
+   .. py:attribute:: restart
+      :type:  bool
+
+
+   .. py:attribute:: language
+      :type:  str
+
+
+   .. py:attribute:: safe_mode
+      :type:  bool
+
+
+   .. py:attribute:: token
+      :type:  str
+
+
+   .. py:attribute:: window_maximized
+      :type:  bool
+
+
+   .. py:attribute:: window_size
+      :type:  rackpy.raw.math.Vec
+
+
+   .. py:attribute:: window_pos
+      :type:  rackpy.raw.math.Vec
+
+
+   .. py:attribute:: invert_zoom
+      :type:  bool
+
+
+   .. py:attribute:: mouse_wheel_zoom
+      :type:  bool
+
+
+   .. py:attribute:: pixel_ratio
+      :type:  float
+
+
+   .. py:attribute:: ui_theme
+      :type:  str
+
+
+   .. py:attribute:: cable_opacity
+      :type:  float
+
+
+   .. py:attribute:: cable_tension
+      :type:  float
+
+
+   .. py:attribute:: rack_brightness
+      :type:  float
+
+
+   .. py:attribute:: spotlight_brightness
+      :type:  float
+
+
+   .. py:attribute:: spotlight_radius
+      :type:  float
+
+
+   .. py:attribute:: halo_brightness
+      :type:  float
+
+
+   .. py:attribute:: allow_cursor_lock
+      :type:  bool
+
+
+   .. py:attribute:: knob_mode
+      :type:  KnobMode
+
+
+   .. py:attribute:: knob_scroll
+      :type:  bool
+
+
+   .. py:attribute:: knob_linear_sensitivity
+      :type:  float
+
+
+   .. py:attribute:: knob_scroll_sensitivity
+      :type:  float
+
+
+   .. py:attribute:: sample_rate
+      :type:  float
+
+
+   .. py:attribute:: thread_count
+      :type:  int
+
+
+   .. py:attribute:: tooltips
+      :type:  bool
+
+
+   .. py:attribute:: cpu_meter
+      :type:  bool
+
+
+   .. py:attribute:: lock_modules
+      :type:  bool
+
+
+   .. py:attribute:: squeeze_modules
+      :type:  bool
+
+
+   .. py:attribute:: prefer_dark_panels
+      :type:  bool
+
+
+   .. py:attribute:: frame_rate_limit
+      :type:  float
+
+
+   .. py:attribute:: autosave_interval
+      :type:  float
+
+
+   .. py:attribute:: skip_load_on_launch
+      :type:  bool
+
+
+   .. py:attribute:: last_patch_directory
+      :type:  str
+
+
+   .. py:attribute:: last_selection_directory
+      :type:  str
+
+
+   .. py:property:: recent_patch_paths
+      :type: collections.abc.Sequence[str]
+
+
+
+   .. py:property:: cable_colors
+      :type: collections.abc.Sequence[rackpy.raw.nanovg.NVGcolor]
+
+
+
+   .. py:property:: cable_labels
+      :type: collections.abc.Sequence[str]
+
+
+
+   .. py:attribute:: cable_auto_rotate
+      :type:  bool
+
+
+   .. py:attribute:: auto_check_updates
+      :type:  bool
+
+
+   .. py:attribute:: verify_https_certs
+      :type:  bool
+
+
+   .. py:attribute:: show_tips_on_launch
+      :type:  bool
+
+
+   .. py:attribute:: tip_index
+      :type:  int
+
+
+   .. py:attribute:: browser_sort
+      :type:  BrowserSort
+
+
+   .. py:attribute:: browser_zoom
+      :type:  float
+
+
+   .. py:attribute:: plugin_settings
+      :type:  Any
+
+
+   .. py:attribute:: module_infos
+      :type:  dict[str, dict[str, ModuleInfo]]
+
+
+   .. py:attribute:: module_whitelist
+      :type:  dict[str, PluginWhitelist]
+
+
+.. py:data:: settings
+   :type:  Settings
+
+.. py:function:: get_module_info(plugin_slug: str, module_slug: str) -> ModuleInfoView | None
+
+.. py:function:: is_module_whitelisted(plugin_slug: str, module_slug: str) -> bool
+
+.. py:function:: reset_cables() -> None
+

@@ -1,0 +1,40 @@
+rackpy.dsp.ringbuffer
+=====================
+
+.. py:module:: rackpy.dsp.ringbuffer
+
+.. autoapi-nested-parse::
+
+   Rack's ring buffers (RP-19C).
+
+   Rack's own objects (``rack::dsp``, also available as :mod:`rackpy.raw.dsp`):
+   ``RingBuffer[T, S]``, a single-producer single-consumer queue,
+   ``DoubleRingBuffer[T, S]``, which keeps a linear copy, and
+   ``AppleRingBuffer[T, S, N]``, a window sliding along a block. ``T`` is float,
+   ``float_4`` or ``Frame[2]``, ``Frame[8]`` or ``Frame[16]``; see the DSP
+   reference for the sizes. Available inside Rack only.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.dsp.ringbuffer.AppleRingBuffer
+   rackpy.dsp.ringbuffer.DoubleRingBuffer
+   rackpy.dsp.ringbuffer.RingBuffer
+
+
+Module Contents
+---------------
+
+.. py:data:: AppleRingBuffer
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: DoubleRingBuffer
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: RingBuffer
+   :type:  rackpy.raw.simd.Template
+

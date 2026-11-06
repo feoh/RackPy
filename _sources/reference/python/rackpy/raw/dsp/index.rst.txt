@@ -1,0 +1,2152 @@
+rackpy.raw.dsp
+==============
+
+.. py:module:: rackpy.raw.dsp
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.dsp.FREQ_C4
+   rackpy.raw.dsp.FREQ_A4
+   rackpy.raw.dsp.FREQ_SEMITONE
+   rackpy.raw.dsp.convert
+   rackpy.raw.dsp.TSchmittTrigger
+   rackpy.raw.dsp.TTimer
+   rackpy.raw.dsp.TRCFilter
+   rackpy.raw.dsp.TExponentialFilter
+   rackpy.raw.dsp.TPeakFilter
+   rackpy.raw.dsp.TSlewLimiter
+   rackpy.raw.dsp.TExponentialSlewLimiter
+   rackpy.raw.dsp.TBiquadFilter
+   rackpy.raw.dsp.IIRFilter
+   rackpy.raw.dsp.VUMeter
+   rackpy.raw.dsp.MidiGenerator
+   rackpy.raw.dsp.MidiParser
+   rackpy.raw.dsp.MinBlepGenerator
+   rackpy.raw.dsp.Decimator
+   rackpy.raw.dsp.Upsampler
+   rackpy.raw.dsp.SampleRateConverter
+   rackpy.raw.dsp.RingBuffer
+   rackpy.raw.dsp.DoubleRingBuffer
+   rackpy.raw.dsp.AppleRingBuffer
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.dsp.Int24
+   rackpy.raw.dsp.Float4Samples
+   rackpy.raw.dsp.Frame
+   rackpy.raw.dsp.BooleanTrigger
+   rackpy.raw.dsp.SchmittTrigger
+   rackpy.raw.dsp.TSchmittTrigger_float_4
+   rackpy.raw.dsp.PulseGenerator
+   rackpy.raw.dsp.Timer
+   rackpy.raw.dsp.TTimer_float_4
+   rackpy.raw.dsp.ClockDivider
+   rackpy.raw.dsp.FloatArray
+   rackpy.raw.dsp.Float4Array
+   rackpy.raw.dsp.RCFilter
+   rackpy.raw.dsp.ExponentialFilter
+   rackpy.raw.dsp.PeakFilter
+   rackpy.raw.dsp.SlewLimiter
+   rackpy.raw.dsp.ExponentialSlewLimiter
+   rackpy.raw.dsp.IIRFilter_3_3_float
+   rackpy.raw.dsp.BiquadFilter
+   rackpy.raw.dsp.TRCFilter_float_4
+   rackpy.raw.dsp.TExponentialFilter_float_4
+   rackpy.raw.dsp.TPeakFilter_float_4
+   rackpy.raw.dsp.TSlewLimiter_float_4
+   rackpy.raw.dsp.TExponentialSlewLimiter_float_4
+   rackpy.raw.dsp.IIRFilter_3_3_float_4
+   rackpy.raw.dsp.TBiquadFilter_float_4
+   rackpy.raw.dsp.VuMeter
+   rackpy.raw.dsp.VuMeter2
+   rackpy.raw.dsp.Int8Array
+   rackpy.raw.dsp.UInt8Array
+   rackpy.raw.dsp.Int16Array
+   rackpy.raw.dsp.BoolArray
+   rackpy.raw.dsp.ExponentialFilterArray
+   rackpy.raw.dsp.PulseGeneratorArray
+   rackpy.raw.dsp.MidiGenerator_16
+   rackpy.raw.dsp.MidiParser_16
+   rackpy.raw.dsp.PFFFT_Setup
+   rackpy.raw.dsp.RealFFT
+   rackpy.raw.dsp.ComplexFFT
+   rackpy.raw.dsp.ConvolverArray
+   rackpy.raw.dsp.RealTimeConvolver
+   rackpy.raw.dsp.MinBlepGenerator_16_32_float
+   rackpy.raw.dsp.SpeexResamplerState
+   rackpy.raw.dsp.SampleRateConverter_16
+   rackpy.raw.dsp.Decimator_16_16_float
+   rackpy.raw.dsp.Upsampler_16_16
+   rackpy.raw.dsp.RingBuffer_float_1024
+   rackpy.raw.dsp.DoubleRingBuffer_float_1024
+   rackpy.raw.dsp.AppleRingBuffer_float_64_1024
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.dsp.sinc
+   rackpy.raw.dsp.amplitude_to_db
+   rackpy.raw.dsp.db_to_amplitude
+   rackpy.raw.dsp.quadratic_bipolar
+   rackpy.raw.dsp.cubic
+   rackpy.raw.dsp.quartic_bipolar
+   rackpy.raw.dsp.quintic
+   rackpy.raw.dsp.sqrt_bipolar
+   rackpy.raw.dsp.exponential_bipolar
+   rackpy.raw.dsp.poly_direct
+   rackpy.raw.dsp.poly_horner
+   rackpy.raw.dsp.poly_estrin
+   rackpy.raw.dsp.exp2_floor
+   rackpy.raw.dsp.approx_exp2_floor
+   rackpy.raw.dsp.exp2_taylor5
+   rackpy.raw.dsp.approx_exp2_taylor5
+   rackpy.raw.dsp.hann
+   rackpy.raw.dsp.blackman
+   rackpy.raw.dsp.blackman_nuttall
+   rackpy.raw.dsp.blackman_harris
+   rackpy.raw.dsp.hann_window
+   rackpy.raw.dsp.blackman_window
+   rackpy.raw.dsp.blackman_nuttall_window
+   rackpy.raw.dsp.blackman_harris_window
+   rackpy.raw.dsp.step_euler
+   rackpy.raw.dsp.step_rk2
+   rackpy.raw.dsp.step_rk4
+   rackpy.raw.dsp.convolve_naive
+   rackpy.raw.dsp.boxcar_lowpass_ir
+   rackpy.raw.dsp.min_blep_impulse
+
+
+Module Contents
+---------------
+
+.. py:data:: FREQ_C4
+   :type:  float
+
+.. py:data:: FREQ_A4
+   :type:  float
+
+.. py:data:: FREQ_SEMITONE
+   :type:  float
+
+.. py:function:: sinc(x: float) -> float
+                 sinc(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: amplitude_to_db(amp: float) -> float
+                 amplitude_to_db(amp: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: db_to_amplitude(db: float) -> float
+                 db_to_amplitude(db: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: quadratic_bipolar(x: float) -> float
+                 quadratic_bipolar(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: cubic(x: float) -> float
+                 cubic(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: quartic_bipolar(x: float) -> float
+                 quartic_bipolar(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: quintic(x: float) -> float
+                 quintic(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: sqrt_bipolar(x: float) -> float
+                 sqrt_bipolar(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: exponential_bipolar(b: float, x: float) -> float
+                 exponential_bipolar(b: rackpy.raw.simd.float_4 | float, x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: poly_direct(a: collections.abc.Sequence[float], x: float) -> float
+                 poly_direct(a: collections.abc.Sequence[rackpy.raw.simd.float_4 | float], x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: poly_horner(a: collections.abc.Sequence[float], x: float) -> float
+                 poly_horner(a: collections.abc.Sequence[rackpy.raw.simd.float_4 | float], x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: poly_estrin(a: collections.abc.Sequence[float], x: float) -> float
+                 poly_estrin(a: collections.abc.Sequence[rackpy.raw.simd.float_4 | float], x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: exp2_floor(x: float) -> tuple[float, float]
+                 exp2_floor(x: rackpy.raw.simd.float_4) -> tuple[rackpy.raw.simd.float_4, rackpy.raw.simd.float_4]
+
+.. py:function:: approx_exp2_floor(x: float) -> tuple[float, float]
+                 approx_exp2_floor(x: rackpy.raw.simd.float_4) -> tuple[rackpy.raw.simd.float_4, rackpy.raw.simd.float_4]
+
+.. py:function:: exp2_taylor5(x: float) -> float
+                 exp2_taylor5(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: approx_exp2_taylor5(x: float) -> float
+                 approx_exp2_taylor5(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: hann(p: float) -> float
+                 hann(p: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: blackman(alpha: float, p: float) -> float
+                 blackman(alpha: rackpy.raw.simd.float_4 | float, p: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: blackman_nuttall(p: float) -> float
+                 blackman_nuttall(p: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: blackman_harris(p: float) -> float
+                 blackman_harris(p: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: hann_window(x: collections.abc.Buffer, len: int) -> None
+
+.. py:function:: blackman_window(alpha: float, x: collections.abc.Buffer, len: int) -> None
+
+.. py:function:: blackman_nuttall_window(x: collections.abc.Buffer, len: int) -> None
+
+.. py:function:: blackman_harris_window(x: collections.abc.Buffer, len: int) -> None
+
+.. py:function:: step_euler(t: float, dt: float, x: collections.abc.Buffer, len: int, f: collections.abc.Callable[[float, memoryview, Any], object]) -> None
+                 step_euler(t: rackpy.raw.simd.float_4 | float, dt: rackpy.raw.simd.float_4 | float, x: list[rackpy.raw.simd.float_4], len: int, f: collections.abc.Callable[[rackpy.raw.simd.float_4, Any, Any], object]) -> None
+
+.. py:function:: step_rk2(t: float, dt: float, x: collections.abc.Buffer, len: int, f: collections.abc.Callable[[float, memoryview, Any], object]) -> None
+                 step_rk2(t: rackpy.raw.simd.float_4 | float, dt: rackpy.raw.simd.float_4 | float, x: list[rackpy.raw.simd.float_4], len: int, f: collections.abc.Callable[[rackpy.raw.simd.float_4, Any, Any], object]) -> None
+
+.. py:function:: step_rk4(t: float, dt: float, x: collections.abc.Buffer, len: int, f: collections.abc.Callable[[float, memoryview, Any], object]) -> None
+                 step_rk4(t: rackpy.raw.simd.float_4 | float, dt: rackpy.raw.simd.float_4 | float, x: list[rackpy.raw.simd.float_4], len: int, f: collections.abc.Callable[[rackpy.raw.simd.float_4, Any, Any], object]) -> None
+
+.. py:class:: Int24
+              Int24(i: int)
+
+   .. py:attribute:: i
+      :type:  int
+
+
+.. py:data:: convert
+   :type:  rackpy.raw.simd.Template
+
+.. py:class:: Float4Samples
+
+.. py:class:: Frame
+
+   .. py:attribute:: CHANNELS
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: type
+      :type:  ClassVar[Frame.type[float] | Frame.type[rackpy.raw.simd.float_4]]
+
+
+   .. py:property:: samples
+      :type: Any
+
+
+
+.. py:class:: BooleanTrigger
+
+   .. py:class:: State
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: LOW
+         :value: 0
+
+
+
+      .. py:attribute:: HIGH
+         :value: 1
+
+
+
+      .. py:attribute:: UNINITIALIZED
+         :value: 2
+
+
+
+
+   .. py:class:: Event
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: NONE
+         :value: 0
+
+
+
+      .. py:attribute:: TRIGGERED
+         :value: 1
+
+
+
+      .. py:attribute:: UNTRIGGERED
+         :value: -1
+
+
+
+
+   .. py:attribute:: s
+      :type:  BooleanTrigger
+
+
+   .. py:attribute:: state
+      :type:  bool
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process(in_: bool) -> bool
+
+
+   .. py:method:: process_event(in_: bool) -> BooleanTrigger
+
+
+   .. py:method:: is_high() -> bool
+
+
+.. py:class:: SchmittTrigger
+
+   .. py:class:: State
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: LOW
+         :value: 0
+
+
+
+      .. py:attribute:: HIGH
+         :value: 1
+
+
+
+      .. py:attribute:: UNINITIALIZED
+         :value: 2
+
+
+
+
+   .. py:class:: Event
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: NONE
+         :value: 0
+
+
+
+      .. py:attribute:: TRIGGERED
+         :value: 1
+
+
+
+      .. py:attribute:: UNTRIGGERED
+         :value: -1
+
+
+
+
+   .. py:attribute:: s
+      :type:  SchmittTrigger
+
+
+   .. py:attribute:: state
+      :type:  bool
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process(in_: float, low_threshold: float = 0.0, high_threshold: float = 1.0) -> bool
+
+
+   .. py:method:: process_event(in_: float, low_threshold: float = 0.0, high_threshold: float = 1.0) -> SchmittTrigger
+
+
+   .. py:method:: is_high() -> bool
+
+
+.. py:class:: TSchmittTrigger_float_4
+
+   .. py:attribute:: state
+      :type:  rackpy.raw.simd.float_4
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process(in_: rackpy.raw.simd.float_4 | float, low_threshold: rackpy.raw.simd.float_4 | float = ..., high_threshold: rackpy.raw.simd.float_4 | float = ...) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: is_high() -> rackpy.raw.simd.float_4
+
+
+.. py:class:: PulseGenerator
+
+   .. py:attribute:: remaining
+      :type:  float
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process(delta_time: float) -> bool
+
+
+   .. py:method:: is_high() -> bool
+
+
+   .. py:method:: trigger(duration: float = 0.001) -> None
+
+
+.. py:class:: Timer
+
+   .. py:attribute:: time
+      :type:  float
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process(delta_time: float) -> float
+
+
+   .. py:method:: get_time() -> float
+
+
+.. py:class:: TTimer_float_4
+
+   .. py:attribute:: time
+      :type:  rackpy.raw.simd.float_4
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process(delta_time: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: get_time() -> rackpy.raw.simd.float_4
+
+
+.. py:data:: TSchmittTrigger
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: TTimer
+   :type:  rackpy.raw.simd.Template
+
+.. py:class:: ClockDivider
+
+   .. py:attribute:: clock
+      :type:  int
+
+
+   .. py:attribute:: division
+      :type:  int
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_division(division: int) -> None
+
+
+   .. py:method:: get_division() -> int
+
+
+   .. py:method:: get_clock() -> int
+
+
+   .. py:method:: process() -> bool
+
+
+.. py:class:: FloatArray
+
+   .. py:property:: readonly
+      :type: bool
+
+
+
+   .. py:method:: tolist() -> list[float]
+
+
+.. py:class:: Float4Array
+
+   .. py:property:: readonly
+      :type: bool
+
+
+
+   .. py:method:: tolist() -> list[rackpy.raw.simd.float_4]
+
+
+.. py:class:: RCFilter
+
+   .. py:attribute:: c
+      :type:  float
+
+
+   .. py:property:: xstate
+      :type: FloatArray
+
+
+
+   .. py:property:: ystate
+      :type: FloatArray
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_cutoff(r: float) -> None
+
+
+   .. py:method:: set_cutoff_freq(f: float) -> None
+
+
+   .. py:method:: process(x: float) -> None
+
+
+   .. py:method:: lowpass() -> float
+
+
+   .. py:method:: highpass() -> float
+
+
+.. py:class:: ExponentialFilter
+
+   .. py:attribute:: out
+      :type:  float
+
+
+   .. py:attribute:: lambda_
+      :type:  float
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_lambda(lambda_: float) -> None
+
+
+   .. py:method:: set_tau(tau: float) -> None
+
+
+   .. py:method:: process(delta_time: float, in_: float) -> float
+                  process(in_: float) -> float
+
+
+.. py:class:: PeakFilter
+
+   .. py:attribute:: out
+      :type:  float
+
+
+   .. py:attribute:: lambda_
+      :type:  float
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_lambda(lambda_: float) -> None
+
+
+   .. py:method:: set_tau(tau: float) -> None
+
+
+   .. py:method:: peak() -> float
+
+
+   .. py:method:: set_rate(r: float) -> None
+
+
+   .. py:method:: process(delta_time: float, in_: float) -> float
+                  process(in_: float) -> float
+
+
+.. py:class:: SlewLimiter
+
+   .. py:attribute:: out
+      :type:  float
+
+
+   .. py:attribute:: rise
+      :type:  float
+
+
+   .. py:attribute:: fall
+      :type:  float
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_rise_fall(rise: float, fall: float) -> None
+
+
+   .. py:method:: process(delta_time: float, in_: float) -> float
+                  process(in_: float) -> float
+
+
+.. py:class:: ExponentialSlewLimiter
+
+   .. py:attribute:: out
+      :type:  float
+
+
+   .. py:attribute:: rise_lambda
+      :type:  float
+
+
+   .. py:attribute:: fall_lambda
+      :type:  float
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_rise_fall(rise_lambda: float, fall_lambda: float) -> None
+
+
+   .. py:method:: set_rise_fall_tau(rise_tau: float, fall_tau: float) -> None
+
+
+   .. py:method:: process(delta_time: float, in_: float) -> float
+                  process(in_: float) -> float
+
+
+.. py:class:: IIRFilter_3_3_float
+
+   .. py:attribute:: B_ORDER
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: A_ORDER
+      :type:  ClassVar[int]
+
+
+   .. py:property:: b
+      :type: FloatArray
+
+
+
+   .. py:property:: a
+      :type: FloatArray
+
+
+
+   .. py:property:: x
+      :type: FloatArray
+
+
+
+   .. py:property:: y
+      :type: FloatArray
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_coefficients(b: collections.abc.Sequence[float], a: collections.abc.Sequence[float]) -> None
+
+
+   .. py:method:: process(in_: float) -> float
+
+
+   .. py:method:: get_transfer_function(s: float) -> complex
+
+
+   .. py:method:: get_frequency_response(f: float) -> float
+
+
+   .. py:method:: get_frequency_phase(f: float) -> float
+
+
+.. py:class:: BiquadFilter
+
+
+
+   .. py:class:: Type
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: LOWPASS_1POLE
+         :value: 0
+
+
+
+      .. py:attribute:: HIGHPASS_1POLE
+         :value: 1
+
+
+
+      .. py:attribute:: LOWPASS
+         :value: 2
+
+
+
+      .. py:attribute:: HIGHPASS
+         :value: 3
+
+
+
+      .. py:attribute:: LOWSHELF
+         :value: 4
+
+
+
+      .. py:attribute:: HIGHSHELF
+         :value: 5
+
+
+
+      .. py:attribute:: BANDPASS
+         :value: 6
+
+
+
+      .. py:attribute:: PEAK
+         :value: 7
+
+
+
+      .. py:attribute:: NOTCH
+         :value: 8
+
+
+
+      .. py:attribute:: NUM_TYPES
+         :value: 9
+
+
+
+
+   .. py:method:: set_parameters(type: BiquadFilter, f: float, q: float, v: float) -> None
+
+
+.. py:class:: TRCFilter_float_4
+
+   .. py:attribute:: c
+      :type:  rackpy.raw.simd.float_4
+
+
+   .. py:property:: xstate
+      :type: Float4Array
+
+
+
+   .. py:property:: ystate
+      :type: Float4Array
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_cutoff(r: rackpy.raw.simd.float_4 | float) -> None
+
+
+   .. py:method:: set_cutoff_freq(f: rackpy.raw.simd.float_4 | float) -> None
+
+
+   .. py:method:: process(x: rackpy.raw.simd.float_4 | float) -> None
+
+
+   .. py:method:: lowpass() -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: highpass() -> rackpy.raw.simd.float_4
+
+
+.. py:class:: TExponentialFilter_float_4
+
+   .. py:attribute:: out
+      :type:  rackpy.raw.simd.float_4
+
+
+   .. py:attribute:: lambda_
+      :type:  rackpy.raw.simd.float_4
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_lambda(lambda_: rackpy.raw.simd.float_4 | float) -> None
+
+
+   .. py:method:: set_tau(tau: rackpy.raw.simd.float_4 | float) -> None
+
+
+   .. py:method:: process(delta_time: rackpy.raw.simd.float_4 | float, in_: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+                  process(in_: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+
+.. py:class:: TPeakFilter_float_4
+
+   .. py:attribute:: out
+      :type:  rackpy.raw.simd.float_4
+
+
+   .. py:attribute:: lambda_
+      :type:  rackpy.raw.simd.float_4
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_lambda(lambda_: rackpy.raw.simd.float_4 | float) -> None
+
+
+   .. py:method:: set_tau(tau: rackpy.raw.simd.float_4 | float) -> None
+
+
+   .. py:method:: peak() -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: set_rate(r: rackpy.raw.simd.float_4 | float) -> None
+
+
+   .. py:method:: process(delta_time: rackpy.raw.simd.float_4 | float, in_: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+                  process(in_: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+
+.. py:class:: TSlewLimiter_float_4
+
+   .. py:attribute:: out
+      :type:  rackpy.raw.simd.float_4
+
+
+   .. py:attribute:: rise
+      :type:  rackpy.raw.simd.float_4
+
+
+   .. py:attribute:: fall
+      :type:  rackpy.raw.simd.float_4
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_rise_fall(rise: rackpy.raw.simd.float_4 | float, fall: rackpy.raw.simd.float_4 | float) -> None
+
+
+   .. py:method:: process(delta_time: rackpy.raw.simd.float_4 | float, in_: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+                  process(in_: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+
+.. py:class:: TExponentialSlewLimiter_float_4
+
+   .. py:attribute:: out
+      :type:  rackpy.raw.simd.float_4
+
+
+   .. py:attribute:: rise_lambda
+      :type:  rackpy.raw.simd.float_4
+
+
+   .. py:attribute:: fall_lambda
+      :type:  rackpy.raw.simd.float_4
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_rise_fall(rise_lambda: rackpy.raw.simd.float_4 | float, fall_lambda: rackpy.raw.simd.float_4 | float) -> None
+
+
+   .. py:method:: set_rise_fall_tau(rise_tau: rackpy.raw.simd.float_4 | float, fall_tau: rackpy.raw.simd.float_4 | float) -> None
+
+
+   .. py:method:: process(delta_time: rackpy.raw.simd.float_4 | float, in_: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+                  process(in_: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+
+.. py:class:: IIRFilter_3_3_float_4
+
+   .. py:attribute:: B_ORDER
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: A_ORDER
+      :type:  ClassVar[int]
+
+
+   .. py:property:: b
+      :type: Float4Array
+
+
+
+   .. py:property:: a
+      :type: Float4Array
+
+
+
+   .. py:property:: x
+      :type: Float4Array
+
+
+
+   .. py:property:: y
+      :type: Float4Array
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_coefficients(b: collections.abc.Sequence[rackpy.raw.simd.float_4 | float], a: collections.abc.Sequence[rackpy.raw.simd.float_4 | float]) -> None
+
+
+   .. py:method:: process(in_: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: get_transfer_function(s: rackpy.raw.simd.float_4 | float) -> tuple[rackpy.raw.simd.float_4, rackpy.raw.simd.float_4]
+
+
+   .. py:method:: get_frequency_response(f: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: get_frequency_phase(f: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+
+.. py:class:: TBiquadFilter_float_4
+
+
+
+   .. py:attribute:: Type
+      :type:  ClassVar[type[BiquadFilter]]
+
+
+   .. py:method:: set_parameters(type: BiquadFilter, f: float, q: float, v: float) -> None
+
+
+.. py:data:: TRCFilter
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: TExponentialFilter
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: TPeakFilter
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: TSlewLimiter
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: TExponentialSlewLimiter
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: TBiquadFilter
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: IIRFilter
+   :type:  rackpy.raw.simd.Template
+
+.. py:class:: VuMeter
+
+   .. py:attribute:: db_interval
+      :type:  float
+
+
+   .. py:attribute:: db_scaled
+      :type:  float
+
+
+   .. py:method:: set_value(v: float) -> None
+
+
+   .. py:method:: get_brightness(i: int) -> float
+
+
+.. py:data:: VUMeter
+
+.. py:class:: VuMeter2
+
+   .. py:class:: Mode
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: PEAK
+         :value: 0
+
+
+
+      .. py:attribute:: RMS
+         :value: 1
+
+
+
+
+   .. py:attribute:: mode
+      :type:  VuMeter2
+
+
+   .. py:attribute:: v
+      :type:  float
+
+
+   .. py:attribute:: lambda_
+      :type:  float
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process(delta_time: float, value: float) -> None
+
+
+   .. py:method:: get_brightness(db_min: float, db_max: float) -> float
+
+
+.. py:class:: Int8Array
+
+
+
+.. py:class:: UInt8Array
+
+
+
+.. py:class:: Int16Array
+
+
+
+.. py:class:: BoolArray
+
+   .. py:property:: readonly
+      :type: bool
+
+
+
+   .. py:method:: tolist() -> list[bool]
+
+
+.. py:class:: ExponentialFilterArray
+
+   .. py:property:: readonly
+      :type: bool
+
+
+
+   .. py:method:: tolist() -> list[ExponentialFilter]
+
+
+.. py:class:: PulseGeneratorArray
+
+   .. py:property:: readonly
+      :type: bool
+
+
+
+   .. py:method:: tolist() -> list[PulseGenerator]
+
+
+.. py:class:: MidiGenerator_16
+
+   .. py:attribute:: CHANNELS
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: channels
+      :type:  int
+
+
+   .. py:attribute:: channel_pressure
+      :type:  int
+
+
+   .. py:attribute:: pw
+      :type:  int
+
+
+   .. py:attribute:: clk
+      :type:  bool
+
+
+   .. py:attribute:: start
+      :type:  bool
+
+
+   .. py:attribute:: stop
+      :type:  bool
+
+
+   .. py:attribute:: cont
+      :type:  bool
+
+
+   .. py:attribute:: frame
+      :type:  int
+
+
+   .. py:property:: vels
+      :type: Int8Array
+
+
+
+   .. py:property:: notes
+      :type: Int8Array
+
+
+
+   .. py:property:: gates
+      :type: BoolArray
+
+
+
+   .. py:property:: key_pressures
+      :type: Int8Array
+
+
+
+   .. py:property:: ccs
+      :type: Int8Array
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: panic() -> None
+
+
+   .. py:method:: set_channels(channels: int) -> None
+
+
+   .. py:method:: set_velocity(vel: int, c: int) -> None
+
+
+   .. py:method:: set_note_gate(note: int, gate: bool, c: int) -> None
+
+
+   .. py:method:: set_key_pressure(val: int, c: int) -> None
+
+
+   .. py:method:: set_channel_pressure(val: int) -> None
+
+
+   .. py:method:: set_cc(cc: int, id: int) -> None
+
+
+   .. py:method:: set_mod_wheel(cc: int) -> None
+
+
+   .. py:method:: set_volume(cc: int) -> None
+
+
+   .. py:method:: set_balance(cc: int) -> None
+
+
+   .. py:method:: set_pan(cc: int) -> None
+
+
+   .. py:method:: set_sustain_pedal(cc: int) -> None
+
+
+   .. py:method:: set_pitch_wheel(pw: int) -> None
+
+
+   .. py:method:: set_clock(clk: bool) -> None
+
+
+   .. py:method:: set_start(start: bool) -> None
+
+
+   .. py:method:: set_continue(cont: bool) -> None
+
+
+   .. py:method:: set_stop(stop: bool) -> None
+
+
+   .. py:method:: set_frame(frame: int) -> None
+
+
+   .. py:method:: take_messages() -> list[rackpy.raw.midi.Message]
+
+
+.. py:class:: MidiParser_16
+
+   .. py:class:: MonoMode
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: LAST_PRIORITY_MODE
+         :value: 0
+
+
+
+      .. py:attribute:: FIRST_PRIORITY_MODE
+         :value: 1
+
+
+
+      .. py:attribute:: LOWEST_PRIORITY_MODE
+         :value: 2
+
+
+
+      .. py:attribute:: HIGHEST_PRIORITY_MODE
+         :value: 3
+
+
+
+      .. py:attribute:: NUM_MONO_MODES
+         :value: 4
+
+
+
+
+   .. py:class:: PolyMode
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: ROTATE_MODE
+         :value: 0
+
+
+
+      .. py:attribute:: REUSE_MODE
+         :value: 1
+
+
+
+      .. py:attribute:: RESET_MODE
+         :value: 2
+
+
+
+      .. py:attribute:: MPE_MODE
+         :value: 3
+
+
+
+      .. py:attribute:: NUM_POLY_MODES
+         :value: 4
+
+
+
+
+   .. py:attribute:: MAX_CHANNELS
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: channels
+      :type:  int
+
+
+   .. py:attribute:: mono_mode
+      :type:  MidiParser_16
+
+
+   .. py:attribute:: retrigger_on_resume
+      :type:  bool
+
+
+   .. py:attribute:: poly_mode
+      :type:  MidiParser_16
+
+
+   .. py:attribute:: release_velocity_enabled
+      :type:  bool
+
+
+   .. py:attribute:: pw_range
+      :type:  float
+
+
+   .. py:attribute:: smooth
+      :type:  bool
+
+
+   .. py:attribute:: clock_division
+      :type:  int
+
+
+   .. py:attribute:: clock
+      :type:  int
+
+
+   .. py:attribute:: pedal
+      :type:  bool
+
+
+   .. py:attribute:: held_notes
+      :type:  list[int]
+
+
+   .. py:attribute:: rotate_index
+      :type:  int
+
+
+   .. py:attribute:: clock_pulse
+      :type:  PulseGenerator
+
+
+   .. py:attribute:: clock_divider_pulse
+      :type:  PulseGenerator
+
+
+   .. py:attribute:: start_pulse
+      :type:  PulseGenerator
+
+
+   .. py:attribute:: stop_pulse
+      :type:  PulseGenerator
+
+
+   .. py:attribute:: continue_pulse
+      :type:  PulseGenerator
+
+
+   .. py:property:: notes
+      :type: UInt8Array
+
+
+
+   .. py:property:: gates
+      :type: BoolArray
+
+
+
+   .. py:property:: velocities
+      :type: UInt8Array
+
+
+
+   .. py:property:: aftertouches
+      :type: UInt8Array
+
+
+
+   .. py:property:: pws
+      :type: Int16Array
+
+
+
+   .. py:property:: mods
+      :type: UInt8Array
+
+
+
+   .. py:property:: pw_filters
+      :type: ExponentialFilterArray
+
+
+
+   .. py:property:: mod_filters
+      :type: ExponentialFilterArray
+
+
+
+   .. py:property:: retrigger_pulses
+      :type: PulseGeneratorArray
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: panic() -> None
+
+
+   .. py:method:: process_filters(delta_time: float) -> None
+
+
+   .. py:method:: process_pulses(delta_time: float) -> None
+
+
+   .. py:method:: process_message(msg: rackpy.raw.midi.Message) -> None
+
+
+   .. py:method:: process_cc(msg: rackpy.raw.midi.Message) -> None
+
+
+   .. py:method:: process_system(msg: rackpy.raw.midi.Message) -> None
+
+
+   .. py:method:: assign_channel(note: int) -> int
+
+
+   .. py:method:: press_note(note: int, channel: int, velocity: int) -> None
+
+
+   .. py:method:: release_note(note: int, channel: int, velocity: int) -> None
+
+
+   .. py:method:: refresh_held() -> None
+
+
+   .. py:method:: press_pedal() -> None
+
+
+   .. py:method:: release_pedal() -> None
+
+
+   .. py:method:: get_channels() -> int
+
+
+   .. py:method:: set_channels(channels: int) -> None
+
+
+   .. py:method:: set_mono_mode(mono_mode: MidiParser_16) -> None
+
+
+   .. py:method:: set_poly_mode(poly_mode: MidiParser_16) -> None
+
+
+   .. py:method:: get_pitch_voltage(channel: int) -> float
+
+
+   .. py:method:: set_filter_lambda(lambda_: float) -> None
+
+
+   .. py:method:: get_pw(channel: int) -> float
+
+
+   .. py:method:: get_mod(channel: int) -> float
+
+
+   .. py:method:: get_wheel_channels() -> int
+
+
+   .. py:method:: to_json() -> dict[str, Any]
+
+
+   .. py:method:: from_json(json: dict[str, Any]) -> None
+
+
+.. py:data:: MidiGenerator
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: MidiParser
+   :type:  rackpy.raw.simd.Template
+
+.. py:class:: PFFFT_Setup
+
+.. py:class:: RealFFT(length: int)
+
+   .. py:attribute:: length
+      :type:  int
+
+
+   .. py:property:: setup
+      :type: PFFFT_Setup
+
+
+
+   .. py:method:: rfft_unordered(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: irfft_unordered(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: rfft(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: irfft(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: scale(x: collections.abc.Buffer) -> None
+
+
+.. py:class:: ComplexFFT(length: int)
+
+   .. py:attribute:: length
+      :type:  int
+
+
+   .. py:property:: setup
+      :type: PFFFT_Setup
+
+
+
+   .. py:method:: fft_unordered(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: ifft_unordered(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: fft(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: ifft(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: scale(x: collections.abc.Buffer) -> None
+
+
+.. py:function:: convolve_naive(in_: collections.abc.Buffer, kernel: collections.abc.Buffer, len: int) -> float
+
+.. py:function:: boxcar_lowpass_ir(out: collections.abc.Buffer, len: int, cutoff: float = 0.5) -> None
+
+.. py:class:: ConvolverArray
+
+   .. py:method:: tolist() -> list[float]
+
+
+.. py:class:: RealTimeConvolver(block_size: int)
+
+   .. py:attribute:: input_pos
+      :type:  int
+
+
+   .. py:property:: kernel_ffts
+      :type: ConvolverArray
+
+
+
+   .. py:property:: input_ffts
+      :type: ConvolverArray
+
+
+
+   .. py:property:: output_tail
+      :type: ConvolverArray
+
+
+
+   .. py:property:: tmp_block
+      :type: ConvolverArray
+
+
+
+   .. py:property:: block_size
+      :type: int
+
+
+
+   .. py:property:: kernel_blocks
+      :type: int
+
+
+
+   .. py:property:: pffft
+      :type: PFFFT_Setup
+
+
+
+   .. py:method:: set_kernel(kernel: collections.abc.Buffer | None, length: int) -> None
+
+
+   .. py:method:: process_block(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+.. py:function:: min_blep_impulse(z: int, o: int, output: collections.abc.Buffer) -> None
+
+.. py:class:: MinBlepGenerator_16_32_float
+
+   .. py:attribute:: Z
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: O
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: pos
+      :type:  int
+
+
+   .. py:property:: buf
+      :type: Any
+
+
+
+   .. py:property:: impulse
+      :type: FloatArray
+
+
+
+   .. py:method:: insert_discontinuity(p: float, x: Any) -> None
+
+
+   .. py:method:: process() -> Any
+
+
+.. py:class:: SpeexResamplerState
+
+.. py:class:: SampleRateConverter_16
+
+   .. py:attribute:: MAX_CHANNELS
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: quality
+      :type:  int
+
+
+   .. py:attribute:: in_rate
+      :type:  int
+
+
+   .. py:attribute:: out_rate
+      :type:  int
+
+
+   .. py:property:: st
+      :type: SpeexResamplerState
+
+
+
+   .. py:property:: channels
+      :type: int
+
+
+
+   .. py:method:: set_channels(channels: int) -> None
+
+
+   .. py:method:: set_quality(quality: int) -> None
+
+
+   .. py:method:: set_rates(in_rate: int, out_rate: int) -> None
+
+
+   .. py:method:: refresh_state() -> None
+
+
+   .. py:method:: process(in_: collections.abc.Buffer, in_stride: int, in_frames: int, out: collections.abc.Buffer, out_stride: int, out_frames: int) -> tuple[int, int]
+                  process(in_: list[Frame], in_frames: int, out: list[Frame], out_frames: int) -> tuple[int, int]
+
+
+.. py:class:: Decimator_16_16_float(cutoff: float = 0.9)
+
+   .. py:attribute:: OVERSAMPLE
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: QUALITY
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: in_index
+      :type:  int
+
+
+   .. py:property:: in_buffer
+      :type: Any
+
+
+
+   .. py:property:: kernel
+      :type: FloatArray
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process(in_: Any) -> Any
+
+
+.. py:class:: Upsampler_16_16(cutoff: float = 0.9)
+
+   .. py:attribute:: OVERSAMPLE
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: QUALITY
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: in_index
+      :type:  int
+
+
+   .. py:property:: in_buffer
+      :type: FloatArray
+
+
+
+   .. py:property:: kernel
+      :type: FloatArray
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process(in_: float, out: collections.abc.Buffer) -> None
+
+
+.. py:data:: MinBlepGenerator
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: Decimator
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: Upsampler
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: SampleRateConverter
+   :type:  rackpy.raw.simd.Template
+
+.. py:class:: RingBuffer_float_1024
+
+   .. py:attribute:: S
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: start
+      :type:  int
+
+
+   .. py:attribute:: end
+      :type:  int
+
+
+   .. py:property:: data
+      :type: FloatArray
+
+
+
+   .. py:method:: push(t: Any) -> None
+
+
+   .. py:method:: push_buffer(t: collections.abc.Buffer, n: int) -> None
+
+
+   .. py:method:: shift() -> Any
+
+
+   .. py:method:: shift_buffer(t: collections.abc.Buffer, n: int) -> None
+
+
+   .. py:method:: clear() -> None
+
+
+   .. py:method:: empty() -> bool
+
+
+   .. py:method:: full() -> bool
+
+
+   .. py:method:: size() -> int
+
+
+   .. py:method:: capacity() -> int
+
+
+.. py:class:: DoubleRingBuffer_float_1024
+
+   .. py:attribute:: S
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: start
+      :type:  int
+
+
+   .. py:attribute:: end
+      :type:  int
+
+
+   .. py:property:: data
+      :type: FloatArray
+
+
+
+   .. py:method:: push(t: Any) -> None
+
+
+   .. py:method:: shift() -> Any
+
+
+   .. py:method:: clear() -> None
+
+
+   .. py:method:: empty() -> bool
+
+
+   .. py:method:: full() -> bool
+
+
+   .. py:method:: size() -> int
+
+
+   .. py:method:: capacity() -> int
+
+
+   .. py:method:: end_data() -> FloatArray
+
+
+   .. py:method:: end_incr(n: int) -> None
+
+
+   .. py:method:: start_data() -> FloatArray
+
+
+   .. py:method:: start_incr(n: int) -> None
+
+
+.. py:class:: AppleRingBuffer_float_64_1024
+
+   .. py:attribute:: S
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: N
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: start
+      :type:  int
+
+
+   .. py:attribute:: end
+      :type:  int
+
+
+   .. py:property:: data
+      :type: FloatArray
+
+
+
+   .. py:method:: return_buffer() -> None
+
+
+   .. py:method:: push(t: Any) -> None
+
+
+   .. py:method:: shift() -> Any
+
+
+   .. py:method:: empty() -> bool
+
+
+   .. py:method:: full() -> bool
+
+
+   .. py:method:: size() -> int
+
+
+   .. py:method:: capacity() -> int
+
+
+   .. py:method:: end_data(n: int) -> FloatArray
+
+
+   .. py:method:: end_incr(n: int) -> None
+
+
+   .. py:method:: start_data() -> FloatArray
+
+
+   .. py:method:: start_incr(n: int) -> None
+
+
+.. py:data:: RingBuffer
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: DoubleRingBuffer
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: AppleRingBuffer
+   :type:  rackpy.raw.simd.Template
+

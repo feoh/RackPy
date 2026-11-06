@@ -1,0 +1,136 @@
+rackpy.dsp.graph_reference
+==========================
+
+.. py:module:: rackpy.dsp.graph_reference
+
+.. autoapi-nested-parse::
+
+   The offline reference for DSP graphs (RP-21): a plan, evaluated in Python.
+
+   This is **not** how a graph runs in a module. It evaluates a
+   :class:`~rackpy.dsp.graph.Plan` one frame at a time in pure Python, for
+   tests, teaching and checking a graph before using it: thousands of times
+   slower than the native tiers, and never on Rack's engine thread.
+
+   It follows the plan's semantics with float32 arithmetic: every operation is
+   rounded to float32, as the native nodes compute. Addition, subtraction,
+   multiplication, division, comparisons, ``min``, ``max`` and ``clamp`` match
+   float32 hardware exactly; ``sin2pi`` and ``pitch_to_freq`` round Python's
+   double-precision ``sin`` and ``pow``, which can differ from the C library's
+   float functions by one unit in the last place. Triggers and pulses follow
+   Rack's ``dsp::SchmittTrigger`` and ``dsp::PulseGenerator``, and outputs follow
+   ``Port::setChannels`` on a patched output (at least one channel).
+   Expander lanes are given (``received``) and recorded (``Result.sent``), or
+   exchanged between two graphs by :func:`run_pair`, one frame apart.
+
+   This module is pure Python and works outside Rack.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.dsp.graph_reference.Lane
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.dsp.graph_reference.Result
+   rackpy.dsp.graph_reference.RunOptions
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.dsp.graph_reference.run
+   rackpy.dsp.graph_reference.run_pair
+
+
+Module Contents
+---------------
+
+.. py:class:: Result
+
+   What a run wrote: each output port's voltages per frame (one list of channels each), each light's brightness,
+   and what each expander lane ``(side, lane)`` sent per frame (one list of channels each, possibly empty).
+
+
+   .. py:attribute:: outputs
+      :type:  dict[int, list[list[float]]]
+
+
+   .. py:attribute:: lights
+      :type:  dict[int, list[float]]
+
+
+   .. py:attribute:: sent
+      :type:  dict[tuple[int, int], list[list[float]]]
+
+
+.. py:data:: Lane
+
+   An expander lane: ``(side, lane)``, side 0 left and 1 right.
+
+
+.. py:function:: run(graph: rackpy.dsp.graph.Graph | rackpy.dsp.graph.Plan, frames: int, *, sample_rate: float = 44100.0, rate_changes: collections.abc.Mapping[int, float] | None = None, inputs: collections.abc.Mapping[int, collections.abc.Sequence[collections.abc.Sequence[float]]] | None = None, params: collections.abc.Mapping[int, float | collections.abc.Sequence[float]] | None = None, controls: collections.abc.Mapping[int, collections.abc.Mapping[str, float]] | None = None, received: collections.abc.Mapping[Lane, collections.abc.Sequence[collections.abc.Sequence[float]]] | None = None) -> Result
+
+   Evaluates ``graph`` for ``frames`` frames.
+
+   - ``inputs``: each patched input port's voltages, one list of channels (0
+     to 16) per frame. Ports not given are unpatched (0 channels).
+   - ``params``: each parameter's value, constant or one per frame; 0 if not given.
+   - ``controls``: control changes, by frame: ``{100: {"gain": 0.5}}`` sets
+     ``gain`` before frame 100 runs.
+   - ``rate_changes``: new sample rates, by the frame they apply from.
+   - ``received``: what each ``expander_receive`` lane gets, one list of
+     channels per frame (an empty list when nothing arrived, as when the
+     neighbour sent nothing the frame before). Lanes not given receive
+     nothing. :attr:`Result.sent` has what each ``expander_send`` lane sent;
+     :func:`run_pair` connects two graphs side by side.
+
+
+.. py:class:: RunOptions
+
+
+
+   One graph's inputs for :func:`run_pair`: :func:`run`'s keyword arguments of the same names.
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+
+   .. py:attribute:: inputs
+      :type:  collections.abc.Mapping[int, collections.abc.Sequence[collections.abc.Sequence[float]]]
+
+
+   .. py:attribute:: params
+      :type:  collections.abc.Mapping[int, float | collections.abc.Sequence[float]]
+
+
+   .. py:attribute:: controls
+      :type:  collections.abc.Mapping[int, collections.abc.Mapping[str, float]]
+
+
+   .. py:attribute:: rate_changes
+      :type:  collections.abc.Mapping[int, float]
+
+
+.. py:function:: run_pair(left: rackpy.dsp.graph.Graph | rackpy.dsp.graph.Plan, right: rackpy.dsp.graph.Graph | rackpy.dsp.graph.Plan, frames: int, *, sample_rate: float = 44100.0, left_inputs: RunOptions | None = None, right_inputs: RunOptions | None = None) -> tuple[Result, Result]
+
+   Evaluates two graphs side by side, ``left`` to the left of ``right``, exchanging expander lanes.
+
+   What ``left`` sends on its right side (1) arrives at ``right``'s
+   ``expander_receive`` on its left side (0) one frame later, and the other
+   way round, as Rack's double-buffered expander messages deliver it in
+   either processing order. It assumes both modules hold ``"rackpy.graph"``
+   messages with room for every lane used, on their facing sides. Lanes on
+   the outer sides receive nothing. ``left_inputs`` and ``right_inputs`` take
+   :func:`run`'s ``inputs``, ``params``, ``controls`` and ``rate_changes``.
+
+

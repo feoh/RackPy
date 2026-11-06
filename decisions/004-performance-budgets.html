@@ -1,0 +1,828 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="ADR 005: Build system, pins, test policy and CI" href="005-build-and-ci.html"><link rel="prev" title="ADR 003: Thread affinity, lifetimes and callback semantics" href="003-lifetimes-and-threads.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>ADR 004: Performance and real-time budgets - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input aria-label="Toggle navigation of Reference" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/decisions/004-performance-budgets.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/decisions/004-performance-budgets.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="adr-004-performance-and-real-time-budgets">
+<h1>ADR 004: Performance and real-time budgets<a class="headerlink" href="#adr-004-performance-and-real-time-budgets" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><strong>Status:</strong> Accepted as the working budgets for implementation. Of two
+revisions to the candidate budgets in <a class="reference internal" href="../performance.html"><span class="std std-doc">performance</span></a>, the
+owner approved the graph-plan budget on 2026-10-26; the <code class="docutils literal notranslate"><span class="pre">ui-exclusive</span></code>
+budget still needs <strong>owner approval</strong> (marked below). Every number comes from the planning
+machine, which is <strong>not</strong> controlled hardware; RP-43 repeats them on
+controlled hardware with an audio interface before any performance claim.</p></li>
+<li><p><strong>Date:</strong> 2026-10-21</p></li>
+<li><p><strong>Task:</strong> RP-07</p></li>
+<li><p><strong>Evidence:</strong> <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/benchmarks/baseline.json">benchmarks/baseline.json</a>
+(raw data and environment), <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/benchmarks/spike/README.md">benchmarks/spike</a>,
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/tests/integration/test_perf_guard.py">tests/integration/test_perf_guard.py</a></p></li>
+</ul>
+<section id="method">
+<h2>Method<a class="headerlink" href="#method" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">bin/perf-baseline</span> <span class="pre">run</span></code> rebuilds everything from pinned inputs and writes
+<code class="docutils literal notranslate"><span class="pre">benchmarks/baseline.json</span></code> in about 7 minutes. It measures:</p>
+<ul class="simple">
+<li><p><strong>Microbenchmarks.</strong> Plain C++ modules against the RackPy production shape:
+a generic module that drains an (empty) SPSC command queue and calls a native
+kernel, which Python chose and configured, through a virtual interface. Both
+sides use the same DSP source and the SDK’s flags (<code class="docutils literal notranslate"><span class="pre">-O3</span> <span class="pre">-march=nehalem</span> <span class="pre">-funsafe-math-optimizations</span></code>). Each <code class="docutils literal notranslate"><span class="pre">process()</span></code> call is one frame, as in Rack;
+nothing is batched. 21 repetitions of 2,000 blocks of 256 frames per variant,
+in randomized order, repeated on P-cores 4, 6 and 8. Numbers are nanoseconds
+per <code class="docutils literal notranslate"><span class="pre">process()</span></code> call.</p></li>
+<li><p><strong>Equivalence.</strong> 200,000 frames, compared bit for bit.</p></li>
+<li><p><strong>An audio-path guard.</strong> An <code class="docutils literal notranslate"><span class="pre">LD_PRELOAD</span></code> library counts malloc/free and
+friends, <code class="docutils literal notranslate"><span class="pre">pthread_mutex_lock</span></code>, <code class="docutils literal notranslate"><span class="pre">write</span></code> and <code class="docutils literal notranslate"><span class="pre">PyGILState_Ensure</span></code> while a thread
+is marked as on the audio path.</p></li>
+<li><p><strong>The Python laboratory.</strong> A Python subclass of a native kernel, called once
+per frame through a pybind11 trampoline, which is the RP-22 shape.</p></li>
+<li><p><strong>Real host.</strong> Rack Free 2.6.6 headless, pinned to P-cores 4–7, reading Rack’s
+own engine meter (time spent in <code class="docutils literal notranslate"><span class="pre">stepBlock</span></code> as a fraction of real time). 1, 16
+and 64 modules at 44.1, 48 and 96 kHz, 3 repetitions in randomized order. Plus
+a two-module cable feedback loop, and slow-UI and exclusive-lock checks in
+windowed Rack under Xvfb.</p></li>
+</ul>
+<p>Environment: Intel Core i9-14900K (hybrid P/E cores), Linux 7.2.11 CachyOS,
+GCC 16.2.1, <code class="docutils literal notranslate"><span class="pre">powersave</span></code> governor, <code class="docutils literal notranslate"><span class="pre">balance_performance</span></code> energy preference, turbo
+on, load average about 0.6. These were left as found.</p>
+</section>
+<section id="results">
+<h2>Results<a class="headerlink" href="#results" title="Link to this heading">¶</a></h2>
+<section id="rackpy-s-fixed-cost-on-the-audio-path">
+<h3>RackPy’s fixed cost on the audio path<a class="headerlink" href="#rackpy-s-fixed-cost-on-the-audio-path" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Workload</p></th>
+<th class="head"><p>Native p50</p></th>
+<th class="head"><p>RackPy p50</p></th>
+<th class="head"><p>Overhead p50</p></th>
+<th class="head"><p>Overhead p99</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>trivial (<code class="docutils literal notranslate"><span class="pre">out</span> <span class="pre">=</span> <span class="pre">in</span></code>)</p></td>
+<td><p>2.17 ns</p></td>
+<td><p>3.07 ns</p></td>
+<td><p>+0.90 ns (+41%)</p></td>
+<td><p>+36%</p></td>
+</tr>
+<tr class="row-odd"><td><p>gain</p></td>
+<td><p>2.19</p></td>
+<td><p>3.07</p></td>
+<td><p>+0.88 ns (+40%)</p></td>
+<td><p>+27%</p></td>
+</tr>
+<tr class="row-even"><td><p>sine (tutorial oscillator)</p></td>
+<td><p>9.36</p></td>
+<td><p>10.23</p></td>
+<td><p>+0.87 ns (<strong>+9.3%</strong>)</p></td>
+<td><p>+9.1%</p></td>
+</tr>
+<tr class="row-odd"><td><p>poly16 (16 voices)</p></td>
+<td><p>14.66</p></td>
+<td><p>15.65</p></td>
+<td><p>+0.99 ns (<strong>+6.7%</strong>)</p></td>
+<td><p>+6.8%</p></td>
+</tr>
+<tr class="row-even"><td><p>poly16 with <code class="docutils literal notranslate"><span class="pre">float_4</span></code></p></td>
+<td><p>35.84</p></td>
+<td><p>35.79</p></td>
+<td><p>−0.05 ns (0%)</p></td>
+<td><p>0%</p></td>
+</tr>
+<tr class="row-odd"><td><p>sine→gain chain as a plan of 3 virtual nodes</p></td>
+<td><p>9.41</p></td>
+<td><p>12.44</p></td>
+<td><p>+3.02 ns (<strong>+32%</strong>)</p></td>
+<td><p>+32%</p></td>
+</tr>
+<tr class="row-even"><td><p>the same plan composed at compile time</p></td>
+<td><p>9.41</p></td>
+<td><p>10.56</p></td>
+<td><p>+1.15 ns (+12%)</p></td>
+<td><p>+12%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The overhead is a constant <strong>0.9–1.0 ns per frame per module</strong>: one virtual call
+and one empty-queue check. Percentages only look large for kernels that do
+almost nothing. At 48 kHz, 0.9 ns is 0.004% of a 20.8 µs frame budget.</p>
+</section>
+<section id="correctness">
+<h3>Correctness<a class="headerlink" href="#correctness" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Five of seven RackPy-shaped kernels produce <strong>bit-identical</strong> output to their
+native twins. Both plan variants differ from the fused native chain by at most
+<strong>1 ULP</strong> (2.4×10⁻⁷ V): the SDK’s unsafe-math flag lets the compiler
+reassociate the fused version, while separate nodes round in between.</p></li>
+<li><p>Feedback loop in Rack: each module’s output equalled its processed frame count
+<strong>exactly</strong> (188,800), for native and RackPy-shaped modules. This holds only
+under one-frame scheduling with Rack’s one-sample cable delay; any internal
+batching would break it.</p></li>
+</ul>
+</section>
+<section id="in-a-real-host">
+<h3>In a real host<a class="headerlink" href="#in-a-real-host" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Patch</p></th>
+<th class="head"><p>Native meter</p></th>
+<th class="head"><p>RackPy-shaped meter</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1 sine, 48 kHz</p></td>
+<td><p>1.06%</p></td>
+<td><p>1.07%</p></td>
+</tr>
+<tr class="row-odd"><td><p>16 sines, 48 kHz</p></td>
+<td><p>8.64%</p></td>
+<td><p>8.84%</p></td>
+</tr>
+<tr class="row-even"><td><p>64 sines, 44.1 kHz</p></td>
+<td><p>28.3%</p></td>
+<td><p>30.8%</p></td>
+</tr>
+<tr class="row-odd"><td><p>64 sines, 48 kHz</p></td>
+<td><p>30.0%</p></td>
+<td><p>31.9%</p></td>
+</tr>
+<tr class="row-even"><td><p>64 sines, 96 kHz</p></td>
+<td><p>48.9%</p></td>
+<td><p>49.3%</p></td>
+</tr>
+<tr class="row-odd"><td><p>16 × 16-voice poly, 48 kHz</p></td>
+<td><p>43.2%</p></td>
+<td><p>42.5%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Medians of 3 runs. Run-to-run spread is several points, so these differences are
+within noise. What they do show is that <strong>Rack’s own per-module cost dominates</strong>:
+64 native sines take about 97 ns per module per frame in Rack against 9 ns of
+DSP, so RackPy’s 1 ns is small even beside Rack. Every run kept real time:
+about 379,000 frames per module in 8 s at 48 kHz, 758,000 at 96 kHz.</p>
+</section>
+<section id="python">
+<h3>Python<a class="headerlink" href="#python" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Case</p></th>
+<th class="head"><p>ns per frame</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Native kernel through the binding</p></td>
+<td><p>2.6 (p99 3.2)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Python kernel, GIL per frame</p></td>
+<td><p>318 (p99 334)</p></td>
+</tr>
+<tr class="row-even"><td><p>Python kernel, GIL per 256-frame block</p></td>
+<td><p>278 (p99 287)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Python kernel while one other Python thread is busy</p></td>
+<td><p>810,769 (<strong>p99 1,126,570</strong>)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A single uncontended Python oscillator uses about 1.5% of a 48 kHz frame. But as
+soon as any other Python code runs, the GIL hand-off (default switch interval
+5 ms) makes one frame take over a millisecond, more than 50 times the whole frame
+budget. <strong>Per-frame Python is laboratory-only</strong>, and releasing the GIL elsewhere
+does not make Python safe on the audio path.</p>
+<p>Embedding: <code class="docutils literal notranslate"><span class="pre">Py_InitializeFromConfig</span></code> took 5.1 ms and +9.0 MB RSS; importing the
+binding and defining one class took 32 ms and +5.0 MB.</p>
+</section>
+<section id="ui-and-locks-windowed-rack">
+<h3>UI and locks (windowed Rack)<a class="headerlink" href="#ui-and-locks-windowed-rack" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>A Python UI callback that slept <strong>100 ms on every frame</strong> for 2.2 s: audio
+processed 94,815 frames against 96,069 expected (98.7%, within the fallback
+engine thread’s block granularity). <strong>A slow Python UI does not stall audio.</strong></p></li>
+<li><p>Python sleeping 50 ms inside <code class="docutils literal notranslate"><span class="pre">onReset</span></code> (exclusive engine lock): <strong>0 frames</strong>
+processed in 80.6 ms. Every millisecond of Python in a <code class="docutils literal notranslate"><span class="pre">ui-exclusive</span></code>
+callback is a millisecond of silence, and with a real device a dropout.</p></li>
+</ul>
+</section>
+<section id="instrumentation">
+<h3>Instrumentation<a class="headerlink" href="#instrumentation" title="Link to this heading">¶</a></h3>
+<p>The guard reported <strong>zero</strong> heap, lock, write and GIL events for every
+production variant. It caught every deliberately injected violation: malloc and
+free (100,000 each per 100,000 frames), <code class="docutils literal notranslate"><span class="pre">new</span></code> (200,000), a mutex (100,000), a
+<code class="docutils literal notranslate"><span class="pre">write</span></code> (100,000), and a per-frame Python call (102,400 GIL acquisitions, plus
+307,200 mutex locks from CPython itself). An early injection went undetected
+because GCC elided a <code class="docutils literal notranslate"><span class="pre">std::vector</span></code> new/delete pair at <code class="docutils literal notranslate"><span class="pre">-O3</span></code>. Injected
+violations must be impossible to optimize away.</p>
+</section>
+</section>
+<section id="budgets">
+<h2>Budgets<a class="headerlink" href="#budgets" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Budget</p></th>
+<th class="head"><p>Value</p></th>
+<th class="head"><p>Basis</p></th>
+<th class="head"><p>Status</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Production audio path: Python, GIL, refcount, heap, locks, IO, logging</p></td>
+<td><p><strong>Zero</strong>, enforced by the guard in CI plus a check that kernel objects reference no <code class="docutils literal notranslate"><span class="pre">Py*</span></code> symbols</p></td>
+<td><p>Guard validated</p></td>
+<td><p>Frozen</p></td>
+</tr>
+<tr class="row-odd"><td><p>Fixed overhead of a RackPy module vs. the equivalent C++ module</p></td>
+<td><p><strong>≤ 1.5 ns per frame</strong> absolute on this CPU class, and <strong>≤ 10% p50 / ≤ 20% p99</strong> for kernels of at least sine-oscillator cost</p></td>
+<td><p>0.87–0.99 ns; sine +9.3%, poly16 +6.7%</p></td>
+<td><p>Frozen. For trivial kernels report nanoseconds, not ratios.</p></td>
+</tr>
+<tr class="row-even"><td><p>Graph plans (RP-21) vs. hand-fused native</p></td>
+<td><p><strong>≤ 1.5 ns per frame per plan</strong>, ≤ 1 ULP output difference</p></td>
+<td><p>Virtual nodes +3.0 ns; static composition +1.15 ns</p></td>
+<td><p><strong>Approved by the owner, 2026-10-26.</strong> Replaces “≤10%” for plans: the remaining 12% is stores between nodes, not RackPy dispatch. RP-21’s compiled tier measured +1.46 to 1.67 ns (<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/benchmarks/rp21-graph-cost.json">rp21-graph-cost.json</a>); the owner also approved keeping it bit-identical to the interpreter at about 0.25 ns on sine→gain, the excess. The interpreter is not held to this budget.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Python inside a <code class="docutils literal notranslate"><span class="pre">ui-exclusive</span></code> callback</p></td>
+<td><p><strong>≤ 1 ms p99 per call</strong>, with a UI-thread diagnostic when exceeded</p></td>
+<td><p>Audio stops for the whole call</p></td>
+<td><p><strong>Owner approval needed.</strong> New budget.</p></td>
+</tr>
+<tr class="row-even"><td><p>Slow Python UI</p></td>
+<td><p>Must not reduce frames processed</p></td>
+<td><p>98.7% with 100 ms sleeps per UI frame</p></td>
+<td><p>Frozen as a test</p></td>
+</tr>
+<tr class="row-odd"><td><p>Audio deadline misses attributable to RackPy</p></td>
+<td><p>Zero in a 30-minute stress run</p></td>
+<td><p>Not measurable here: no audio device</p></td>
+<td><p>Unchanged; RP-43 on controlled hardware</p></td>
+</tr>
+<tr class="row-even"><td><p>Interactive UI response</p></td>
+<td><p>p95 &lt; 50 ms</p></td>
+<td><p>Not measured</p></td>
+<td><p>Unchanged; RP-43</p></td>
+</tr>
+<tr class="row-odd"><td><p>Lifetime stability</p></td>
+<td><p>No live-object growth over 1,000 create/delete cycles</p></td>
+<td><p>RP-38, in Rack with the engine running: 1,000 create/delete and 1,000 save/reload cycles returned every RackPy counter exactly, with resident memory unchanged (<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/planning/rp-38-validation.md">validation</a>)</p></td>
+<td><p>Met on Linux x86_64 (<code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">stress</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>Plugin start-up before user scripts</p></td>
+<td><p>≤ 250 ms and ≤ 64 MB RSS</p></td>
+<td><p>Runtime 5 ms / 9 MB; the full bindings are still unknown. RP-08 skeleton in Rack: 12 ms, +14.2 MiB (<a class="reference internal" href="005-build-and-ci.html#results-on-the-planning-machine"><span class="std std-ref">ADR 005</span></a>)</p></td>
+<td><p>Provisional; re-measure in RP-11</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="recommendation-go-with-conditions">
+<h2>Recommendation: go, with conditions<a class="headerlink" href="#recommendation-go-with-conditions" title="Link to this heading">¶</a></h2>
+<p>The native-path design meets its budget with room to spare. Python stays off the
+audio path by construction, and the guard can prove it. Scaffolding and binding
+work (RP-08 onward) can fan out, on these conditions:</p>
+<ol class="arabic simple">
+<li><p><strong>RP-21:</strong> compose graph plans at compile time (or generate code) from a
+registry of native node types. A virtual call per node does not meet the
+budget.</p></li>
+<li><p><strong>RP-14:</strong> enforce the <code class="docutils literal notranslate"><span class="pre">ui-exclusive</span></code> Python budget and emit a diagnostic.</p></li>
+<li><p><strong>RP-08:</strong> run <code class="docutils literal notranslate"><span class="pre">tests/integration/test_perf_guard.py</span></code>, the guard over the
+real kernels, and the <code class="docutils literal notranslate"><span class="pre">Py*</span></code> symbol check in CI. Include SDK headers with
+<code class="docutils literal notranslate"><span class="pre">-isystem</span></code>: GCC 16 reports a false <code class="docutils literal notranslate"><span class="pre">-Warray-bounds</span></code> inside Rack’s
+<code class="docutils literal notranslate"><span class="pre">Port::setChannels</span></code>.</p></li>
+<li><p><strong>RP-43:</strong> repeat <code class="docutils literal notranslate"><span class="pre">bin/perf-baseline</span></code> on controlled hardware with a fixed
+governor and an audio interface, and add the 30-minute deadline-miss run.</p></li>
+<li><p><strong>Owner:</strong> approve or adjust the two revised budgets above.</p></li>
+</ol>
+</section>
+<section id="other-findings">
+<h2>Other findings<a class="headerlink" href="#other-findings" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Rack silently deletes a patch cable whose module widgets have no
+<code class="docutils literal notranslate"><span class="pre">PortWidget</span></code> for its ends (<code class="docutils literal notranslate"><span class="pre">RackWidget::fromJson</span></code> catches the failure from
+<code class="docutils literal notranslate"><span class="pre">CableWidget::setCable</span></code>). The benchmark plugin’s first feedback runs had no
+cables for this reason.</p></li>
+<li><p>Rack removes cables before modules at shutdown, so a module’s final output
+says nothing about the patch. Measure while connected.</p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="005-build-and-ci.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">ADR 005: Build system, pins, test policy and CI</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="003-lifetimes-and-threads.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">ADR 003: Thread affinity, lifetimes and callback semantics</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">ADR 004: Performance and real-time budgets</a><ul>
+<li><a class="reference internal" href="#method">Method</a></li>
+<li><a class="reference internal" href="#results">Results</a><ul>
+<li><a class="reference internal" href="#rackpy-s-fixed-cost-on-the-audio-path">RackPy’s fixed cost on the audio path</a></li>
+<li><a class="reference internal" href="#correctness">Correctness</a></li>
+<li><a class="reference internal" href="#in-a-real-host">In a real host</a></li>
+<li><a class="reference internal" href="#python">Python</a></li>
+<li><a class="reference internal" href="#ui-and-locks-windowed-rack">UI and locks (windowed Rack)</a></li>
+<li><a class="reference internal" href="#instrumentation">Instrumentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#budgets">Budgets</a></li>
+<li><a class="reference internal" href="#recommendation-go-with-conditions">Recommendation: go, with conditions</a></li>
+<li><a class="reference internal" href="#other-findings">Other findings</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

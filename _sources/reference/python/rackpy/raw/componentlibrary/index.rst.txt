@@ -1,0 +1,892 @@
+rackpy.raw.componentlibrary
+===========================
+
+.. py:module:: rackpy.raw.componentlibrary
+
+.. autoapi-nested-parse::
+
+   rack::componentlibrary: Rack's components (native classes) and its class templates (RP-28C).
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.componentlibrary.SCHEME_BLACK_TRANSPARENT
+   rackpy.raw.componentlibrary.SCHEME_BLACK
+   rackpy.raw.componentlibrary.SCHEME_WHITE
+   rackpy.raw.componentlibrary.SCHEME_RED
+   rackpy.raw.componentlibrary.SCHEME_ORANGE
+   rackpy.raw.componentlibrary.SCHEME_YELLOW
+   rackpy.raw.componentlibrary.SCHEME_GREEN
+   rackpy.raw.componentlibrary.SCHEME_CYAN
+   rackpy.raw.componentlibrary.SCHEME_BLUE
+   rackpy.raw.componentlibrary.SCHEME_PURPLE
+   rackpy.raw.componentlibrary.SCHEME_LIGHT_GRAY
+   rackpy.raw.componentlibrary.SCHEME_DARK_GRAY
+   rackpy.raw.componentlibrary.LEDSlider
+   rackpy.raw.componentlibrary.LEDButton
+   rackpy.raw.componentlibrary.LEDBezel
+   rackpy.raw.componentlibrary.LEDBezelLight
+   rackpy.raw.componentlibrary.LEDSliderLight
+   rackpy.raw.componentlibrary.LEDLightSlider
+   rackpy.raw.componentlibrary.VCVLightButton
+   rackpy.raw.componentlibrary.LEDLightButton
+   rackpy.raw.componentlibrary.LEDLightBezel
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.componentlibrary.Template
+   rackpy.raw.componentlibrary.AliasTemplate
+   rackpy.raw.componentlibrary.RoundKnob
+   rackpy.raw.componentlibrary.Davies1900hKnob
+   rackpy.raw.componentlibrary.Rogan
+   rackpy.raw.componentlibrary.SynthTechAlco
+   rackpy.raw.componentlibrary.Trimpot
+   rackpy.raw.componentlibrary.BefacoBigKnob
+   rackpy.raw.componentlibrary.BefacoTinyKnob
+   rackpy.raw.componentlibrary.RoundBlackKnob
+   rackpy.raw.componentlibrary.RoundSmallBlackKnob
+   rackpy.raw.componentlibrary.RoundLargeBlackKnob
+   rackpy.raw.componentlibrary.RoundBigBlackKnob
+   rackpy.raw.componentlibrary.RoundHugeBlackKnob
+   rackpy.raw.componentlibrary.RoundBlackSnapKnob
+   rackpy.raw.componentlibrary.Davies1900hWhiteKnob
+   rackpy.raw.componentlibrary.Davies1900hBlackKnob
+   rackpy.raw.componentlibrary.Davies1900hRedKnob
+   rackpy.raw.componentlibrary.Davies1900hLargeWhiteKnob
+   rackpy.raw.componentlibrary.Davies1900hLargeBlackKnob
+   rackpy.raw.componentlibrary.Davies1900hLargeRedKnob
+   rackpy.raw.componentlibrary.Rogan6PSWhite
+   rackpy.raw.componentlibrary.Rogan5PSGray
+   rackpy.raw.componentlibrary.Rogan3PSBlue
+   rackpy.raw.componentlibrary.Rogan3PSRed
+   rackpy.raw.componentlibrary.Rogan3PSGreen
+   rackpy.raw.componentlibrary.Rogan3PSWhite
+   rackpy.raw.componentlibrary.Rogan3PBlue
+   rackpy.raw.componentlibrary.Rogan3PRed
+   rackpy.raw.componentlibrary.Rogan3PGreen
+   rackpy.raw.componentlibrary.Rogan3PWhite
+   rackpy.raw.componentlibrary.Rogan2SGray
+   rackpy.raw.componentlibrary.Rogan2PSBlue
+   rackpy.raw.componentlibrary.Rogan2PSRed
+   rackpy.raw.componentlibrary.Rogan2PSGreen
+   rackpy.raw.componentlibrary.Rogan2PSWhite
+   rackpy.raw.componentlibrary.Rogan2PBlue
+   rackpy.raw.componentlibrary.Rogan2PRed
+   rackpy.raw.componentlibrary.Rogan2PGreen
+   rackpy.raw.componentlibrary.Rogan2PWhite
+   rackpy.raw.componentlibrary.Rogan1PSBlue
+   rackpy.raw.componentlibrary.Rogan1PSRed
+   rackpy.raw.componentlibrary.Rogan1PSGreen
+   rackpy.raw.componentlibrary.Rogan1PSWhite
+   rackpy.raw.componentlibrary.Rogan1PBlue
+   rackpy.raw.componentlibrary.Rogan1PRed
+   rackpy.raw.componentlibrary.Rogan1PGreen
+   rackpy.raw.componentlibrary.Rogan1PWhite
+   rackpy.raw.componentlibrary.BefacoSlidePot
+   rackpy.raw.componentlibrary.VCVSlider
+   rackpy.raw.componentlibrary.NKK
+   rackpy.raw.componentlibrary.CKSS
+   rackpy.raw.componentlibrary.CKSSThree
+   rackpy.raw.componentlibrary.CKSSThreeHorizontal
+   rackpy.raw.componentlibrary.CKD6
+   rackpy.raw.componentlibrary.TL1105
+   rackpy.raw.componentlibrary.VCVButton
+   rackpy.raw.componentlibrary.VCVLatch
+   rackpy.raw.componentlibrary.BefacoSwitch
+   rackpy.raw.componentlibrary.BefacoPush
+   rackpy.raw.componentlibrary.VCVBezel
+   rackpy.raw.componentlibrary.VCVBezelLatch
+   rackpy.raw.componentlibrary.PB61303
+   rackpy.raw.componentlibrary.PJ301MPort
+   rackpy.raw.componentlibrary.DarkPJ301MPort
+   rackpy.raw.componentlibrary.ThemedPJ301MPort
+   rackpy.raw.componentlibrary.PJ3410Port
+   rackpy.raw.componentlibrary.CL1362Port
+   rackpy.raw.componentlibrary.ScrewSilver
+   rackpy.raw.componentlibrary.AudioButton_ADAT
+   rackpy.raw.componentlibrary.AudioButton_USB_B
+   rackpy.raw.componentlibrary.MidiButton_MIDI_DIN
+   rackpy.raw.componentlibrary.ScrewBlack
+   rackpy.raw.componentlibrary.ThemedScrew
+   rackpy.raw.componentlibrary.SegmentDisplay
+   rackpy.raw.componentlibrary.TSvgLight
+   rackpy.raw.componentlibrary.TGrayModuleLightWidget
+   rackpy.raw.componentlibrary.TWhiteLight
+   rackpy.raw.componentlibrary.TRedLight
+   rackpy.raw.componentlibrary.TGreenLight
+   rackpy.raw.componentlibrary.TBlueLight
+   rackpy.raw.componentlibrary.TYellowLight
+   rackpy.raw.componentlibrary.TGreenRedLight
+   rackpy.raw.componentlibrary.TRedGreenBlueLight
+   rackpy.raw.componentlibrary.LargeLight
+   rackpy.raw.componentlibrary.MediumLight
+   rackpy.raw.componentlibrary.SmallLight
+   rackpy.raw.componentlibrary.TinyLight
+   rackpy.raw.componentlibrary.LargeSimpleLight
+   rackpy.raw.componentlibrary.MediumSimpleLight
+   rackpy.raw.componentlibrary.SmallSimpleLight
+   rackpy.raw.componentlibrary.TinySimpleLight
+   rackpy.raw.componentlibrary.RectangleLight
+   rackpy.raw.componentlibrary.VCVBezelLight
+   rackpy.raw.componentlibrary.PB61303Light
+   rackpy.raw.componentlibrary.LightSlider
+   rackpy.raw.componentlibrary.VCVSliderLight
+   rackpy.raw.componentlibrary.VCVLightSlider
+   rackpy.raw.componentlibrary.MomentarySwitch
+   rackpy.raw.componentlibrary.LightButton
+   rackpy.raw.componentlibrary.VCVLightLatch
+   rackpy.raw.componentlibrary.VCVLightBezel
+   rackpy.raw.componentlibrary.VCVLightBezelLatch
+   rackpy.raw.componentlibrary.SvgLight
+   rackpy.raw.componentlibrary.GrayModuleLightWidget
+   rackpy.raw.componentlibrary.WhiteLight
+   rackpy.raw.componentlibrary.RedLight
+   rackpy.raw.componentlibrary.GreenLight
+   rackpy.raw.componentlibrary.BlueLight
+   rackpy.raw.componentlibrary.YellowLight
+   rackpy.raw.componentlibrary.GreenRedLight
+   rackpy.raw.componentlibrary.RedGreenBlueLight
+   rackpy.raw.componentlibrary.LEDSliderGreen
+   rackpy.raw.componentlibrary.LEDSliderRed
+   rackpy.raw.componentlibrary.LEDSliderYellow
+   rackpy.raw.componentlibrary.LEDSliderBlue
+   rackpy.raw.componentlibrary.LEDSliderWhite
+
+
+Module Contents
+---------------
+
+.. py:data:: SCHEME_BLACK_TRANSPARENT
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: SCHEME_BLACK
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: SCHEME_WHITE
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: SCHEME_RED
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: SCHEME_ORANGE
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: SCHEME_YELLOW
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: SCHEME_GREEN
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: SCHEME_CYAN
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: SCHEME_BLUE
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: SCHEME_PURPLE
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: SCHEME_LIGHT_GRAY
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:data:: SCHEME_DARK_GRAY
+   :type:  rackpy.raw.nanovg.NVGcolor
+
+.. py:class:: Template
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+   .. py:method:: default() -> type[Any]
+      :classmethod:
+
+
+
+.. py:class:: AliasTemplate
+
+   A C++ alias template: ``Alias[A]`` is the aliased specialization.
+
+
+.. py:class:: RoundKnob
+
+
+
+   .. py:property:: bg
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+.. py:class:: Davies1900hKnob
+
+
+
+   .. py:property:: bg
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+.. py:class:: Rogan
+
+
+
+   .. py:property:: bg
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+   .. py:property:: fg
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+.. py:class:: SynthTechAlco
+
+
+
+   .. py:property:: bg
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+.. py:class:: Trimpot
+
+
+
+   .. py:property:: bg
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+.. py:class:: BefacoBigKnob
+
+
+
+   .. py:property:: bg
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+.. py:class:: BefacoTinyKnob
+
+
+
+   .. py:property:: bg
+      :type: rackpy.raw.widget.HostSvgWidget
+
+
+
+.. py:class:: RoundBlackKnob
+
+
+
+.. py:class:: RoundSmallBlackKnob
+
+
+
+.. py:class:: RoundLargeBlackKnob
+
+
+
+.. py:class:: RoundBigBlackKnob
+
+
+
+.. py:class:: RoundHugeBlackKnob
+
+
+
+.. py:class:: RoundBlackSnapKnob
+
+
+
+.. py:class:: Davies1900hWhiteKnob
+
+
+
+.. py:class:: Davies1900hBlackKnob
+
+
+
+.. py:class:: Davies1900hRedKnob
+
+
+
+.. py:class:: Davies1900hLargeWhiteKnob
+
+
+
+.. py:class:: Davies1900hLargeBlackKnob
+
+
+
+.. py:class:: Davies1900hLargeRedKnob
+
+
+
+.. py:class:: Rogan6PSWhite
+
+
+
+.. py:class:: Rogan5PSGray
+
+
+
+.. py:class:: Rogan3PSBlue
+
+
+
+.. py:class:: Rogan3PSRed
+
+
+
+.. py:class:: Rogan3PSGreen
+
+
+
+.. py:class:: Rogan3PSWhite
+
+
+
+.. py:class:: Rogan3PBlue
+
+
+
+.. py:class:: Rogan3PRed
+
+
+
+.. py:class:: Rogan3PGreen
+
+
+
+.. py:class:: Rogan3PWhite
+
+
+
+.. py:class:: Rogan2SGray
+
+
+
+.. py:class:: Rogan2PSBlue
+
+
+
+.. py:class:: Rogan2PSRed
+
+
+
+.. py:class:: Rogan2PSGreen
+
+
+
+.. py:class:: Rogan2PSWhite
+
+
+
+.. py:class:: Rogan2PBlue
+
+
+
+.. py:class:: Rogan2PRed
+
+
+
+.. py:class:: Rogan2PGreen
+
+
+
+.. py:class:: Rogan2PWhite
+
+
+
+.. py:class:: Rogan1PSBlue
+
+
+
+.. py:class:: Rogan1PSRed
+
+
+
+.. py:class:: Rogan1PSGreen
+
+
+
+.. py:class:: Rogan1PSWhite
+
+
+
+.. py:class:: Rogan1PBlue
+
+
+
+.. py:class:: Rogan1PRed
+
+
+
+.. py:class:: Rogan1PGreen
+
+
+
+.. py:class:: Rogan1PWhite
+
+
+
+.. py:class:: BefacoSlidePot
+
+
+
+.. py:class:: VCVSlider
+
+
+
+.. py:class:: NKK
+
+
+
+.. py:class:: CKSS
+
+
+
+.. py:class:: CKSSThree
+
+
+
+.. py:class:: CKSSThreeHorizontal
+
+
+
+.. py:class:: CKD6
+
+
+
+.. py:class:: TL1105
+
+
+
+.. py:class:: VCVButton
+
+
+
+.. py:class:: VCVLatch
+
+
+
+.. py:class:: BefacoSwitch
+
+
+
+.. py:class:: BefacoPush
+
+
+
+.. py:class:: VCVBezel
+
+
+
+.. py:class:: VCVBezelLatch
+
+
+
+.. py:class:: PB61303
+
+
+
+.. py:class:: PJ301MPort
+
+
+
+.. py:class:: DarkPJ301MPort
+
+
+
+.. py:class:: ThemedPJ301MPort
+
+
+
+.. py:class:: PJ3410Port
+
+
+
+.. py:class:: CL1362Port
+
+
+
+.. py:class:: ScrewSilver
+
+
+
+.. py:class:: AudioButton_ADAT
+
+
+
+.. py:class:: AudioButton_USB_B
+
+
+
+.. py:class:: MidiButton_MIDI_DIN
+
+
+
+.. py:class:: ScrewBlack
+
+
+
+.. py:class:: ThemedScrew
+
+
+
+.. py:class:: SegmentDisplay
+
+
+
+   .. py:attribute:: lights_len
+      :type:  int
+
+
+   .. py:attribute:: vertical
+      :type:  bool
+
+
+   .. py:attribute:: margin
+      :type:  float
+
+
+   .. py:method:: set_lights(module: rackpy.raw.engine.Module | None, first_light_id: int, lights_len: int, light_base: type[Any] | None = None) -> None
+
+
+.. py:data:: LEDSlider
+
+.. py:data:: LEDButton
+
+.. py:data:: LEDBezel
+
+.. py:class:: TSvgLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+   .. py:attribute:: fb
+      :type:  rackpy.raw.widget.FramebufferWidget
+
+
+   .. py:attribute:: sw
+      :type:  rackpy.raw.widget.SvgWidget
+
+
+   .. py:method:: set_svg(svg: rackpy.raw.window.Svg | None) -> None
+
+
+.. py:class:: TGrayModuleLightWidget
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: TWhiteLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: TRedLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: TGreenLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: TBlueLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: TYellowLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: TGreenRedLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: TRedGreenBlueLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: LargeLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: MediumLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: SmallLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: TinyLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: LargeSimpleLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: MediumSimpleLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: SmallSimpleLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: TinySimpleLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: RectangleLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+   .. py:method:: draw_background(args: Any) -> None
+
+
+   .. py:method:: draw_light(args: Any) -> None
+
+
+.. py:class:: VCVBezelLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: PB61303Light
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: LightSlider
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+   .. py:attribute:: light
+      :type:  rackpy.raw.app.ModuleLightWidget
+
+
+   .. py:method:: get_light() -> rackpy.raw.app.ModuleLightWidget
+
+
+   .. py:method:: step() -> None
+
+
+.. py:class:: VCVSliderLight
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: VCVLightSlider
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: MomentarySwitch
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: LightButton
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+   .. py:attribute:: light
+      :type:  rackpy.raw.app.ModuleLightWidget
+
+
+   .. py:method:: get_light() -> rackpy.raw.app.ModuleLightWidget
+
+
+.. py:class:: VCVLightLatch
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:class:: VCVLightBezel
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+   .. py:attribute:: light
+      :type:  rackpy.raw.app.ModuleLightWidget
+
+
+   .. py:method:: get_light() -> rackpy.raw.app.ModuleLightWidget
+
+
+.. py:class:: VCVLightBezelLatch
+
+
+
+   A C++ class template: ``Template[Arg]`` is a cached specialization deriving from it and its base.
+
+
+.. py:data:: LEDBezelLight
+   :type:  AliasTemplate
+
+.. py:data:: LEDSliderLight
+   :type:  AliasTemplate
+
+.. py:data:: LEDLightSlider
+   :type:  AliasTemplate
+
+.. py:data:: VCVLightButton
+   :type:  AliasTemplate
+
+.. py:data:: LEDLightButton
+   :type:  AliasTemplate
+
+.. py:data:: LEDLightBezel
+   :type:  AliasTemplate
+
+.. py:class:: SvgLight
+
+
+
+   .. py:attribute:: fb
+      :type:  rackpy.raw.widget.FramebufferWidget
+
+
+   .. py:attribute:: sw
+      :type:  rackpy.raw.widget.SvgWidget
+
+
+   .. py:method:: set_svg(svg: rackpy.raw.window.Svg | None) -> None
+
+
+.. py:class:: GrayModuleLightWidget
+
+
+
+.. py:class:: WhiteLight
+
+
+
+.. py:class:: RedLight
+
+
+
+.. py:class:: GreenLight
+
+
+
+.. py:class:: BlueLight
+
+
+
+.. py:class:: YellowLight
+
+
+
+.. py:class:: GreenRedLight
+
+
+
+.. py:class:: RedGreenBlueLight
+
+
+
+.. py:class:: LEDSliderGreen
+
+
+
+.. py:class:: LEDSliderRed
+
+
+
+.. py:class:: LEDSliderYellow
+
+
+
+.. py:class:: LEDSliderBlue
+
+
+
+.. py:class:: LEDSliderWhite
+
+
+

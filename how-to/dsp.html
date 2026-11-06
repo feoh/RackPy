@@ -1,0 +1,987 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Describe DSP as a graph" href="graphs.html"><link rel="prev" title="Save and restore a module’s state" href="state.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>Process audio - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input aria-label="Toggle navigation of Reference" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../reference/python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/how-to/dsp.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/how-to/dsp.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="process-audio">
+<h1>Process audio<a class="headerlink" href="#process-audio" title="Link to this heading">¶</a></h1>
+<p><strong>Implemented (RP-17A, RP-17B), Linux x86_64 inside Rack Free 2.6.6.</strong> Two
+built-in kernel types and kernels you write in C++. Rack’s DSP helpers
+(filters, FFTs, MinBLEP, resamplers, ring buffers, …) are
+<a class="reference internal" href="../reference/dsp.html"><span class="std std-doc">bound for Python</span></a> (RP-18, RP-19) for design, analysis
+and tests, and its SIMD vectors <a class="reference internal" href="../reference/simd.html"><span class="std std-doc">too</span></a> (RP-20).
+<a class="reference internal" href="graphs.html"><span class="std std-doc">DSP graphs</span></a> built in Python run as kernels too, through the
+native plan interpreter or compiled into a kernel library (RP-21).</p>
+<p>Rack calls every module’s <code class="docutils literal notranslate"><span class="pre">process()</span></code> once per sample, tens of thousands of
+times a second, on its engine thread. Python is far too slow and too
+unpredictable for that (<a class="reference internal" href="../decisions/004-performance-budgets.html"><span class="std std-doc">performance budgets</span></a>),
+so in RackPy the code that runs there is native: a <strong>kernel</strong>. Python picks a
+kernel type, wires it to the module’s ports, parameters and lights by index,
+and hands it to the module:</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">module_kernel.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.dsp.kernel</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gain</span><span class="p">,</span> <span class="n">Sine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">voice</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">num_params</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_inputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_outputs</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_param</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"Pitch"</span><span class="p">,</span> <span class="s2">" V"</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_param</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">"Level"</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_input</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"V/oct"</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_output</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"Sine"</span><span class="p">)</span>
+    <span class="c1"># Rack's engine runs this native kernel every frame; Python never runs there.</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">set_kernel</span><span class="p">(</span><span class="n">Sine</span><span class="p">(</span><span class="n">pitch_input</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">pitch_param</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">amplitude</span><span class="o">=</span><span class="mf">5.0</span><span class="p">))</span>
+
+
+<span class="n">module</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">voice</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">kernel</span>
+    <span class="k">assert</span> <span class="n">kernel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">kernel</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="n">Sine</span>
+    <span class="n">kernel</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"amplitude"</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">)</span>  <span class="c1"># a control: reaches the kernel at a frame boundary</span>
+    <span class="k">assert</span> <span class="n">kernel</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="s2">"amplitude"</span><span class="p">]</span> <span class="o">==</span> <span class="mf">2.5</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">set_kernel</span><span class="p">(</span><span class="n">Gain</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>  <span class="c1"># replaces the Sine kernel</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">kernel</span><span class="o">.</span><span class="n">alive</span> <span class="ow">and</span> <span class="n">module</span><span class="o">.</span><span class="n">kernel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">module</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="n">Gain</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Python <code class="docutils literal notranslate"><span class="pre">process()</span></code> is <strong>laboratory only</strong>, explicitly enabled by trusted code
+for offline experiments and tests on the main thread. The
+<a class="reference internal" href="../explanation/callbacks.html"><span class="std std-doc">callback laboratory</span></a> never runs in Rack’s engine
+or driver threads; a model/patch cannot create or enable a laboratory module.
+Normal-mode Python audio overrides are rejected. Neither laboratory timings
+nor the bound DSP helpers make Python production-real-time safe.</p>
+</div>
+<section id="kernels-and-their-fields">
+<h2>Kernels and their fields<a class="headerlink" href="#kernels-and-their-fields" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">rackpy.dsp.kernel</span></code> has the kernel types. Calling one with keyword arguments
+makes a kernel:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Gain(input=,</span> <span class="pre">output=,</span> <span class="pre">param=-1,</span> <span class="pre">gain=1.0)</span></code> multiplies each channel of the
+input by <code class="docutils literal notranslate"><span class="pre">gain</span></code>, and by the parameter’s value if <code class="docutils literal notranslate"><span class="pre">param</span></code> names one. The
+output gets the input’s channel count.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Sine(output=,</span> <span class="pre">pitch_input=-1,</span> <span class="pre">pitch_param=-1,</span> <span class="pre">amplitude=5.0)</span></code> is a sine
+oscillator for each channel of a V/oct pitch input (0 V is C4), at least
+one; <code class="docutils literal notranslate"><span class="pre">pitch_param</span></code> adds a parameter’s value to the pitch.</p></li>
+</ul>
+<p>A type’s <code class="docutils literal notranslate"><span class="pre">fields</span></code> list what it takes: ports, parameters and lights by index
+(<code class="docutils literal notranslate"><span class="pre">-1</span></code> for “none” where a field is optional), and numbers. <code class="docutils literal notranslate"><span class="pre">controls</span></code> are the
+numbers you may change later. Bad fields raise <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> or <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>
+when you create the kernel; <code class="docutils literal notranslate"><span class="pre">module.set_kernel(kernel)</span></code> then checks the
+indices against the module’s configuration (<code class="docutils literal notranslate"><span class="pre">ValueError</span></code> names the field),
+so configure the module first.</p>
+</section>
+<section id="changing-a-running-module">
+<h2>Changing a running module<a class="headerlink" href="#changing-a-running-module" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">kernel.set(&quot;amplitude&quot;,</span> <span class="pre">2.5)</span></code> changes a control. While Rack’s engine runs
+the module, the value goes through a bounded queue and reaches the kernel at
+the next frame boundary, before it processes that frame. The queue holds
+<code class="docutils literal notranslate"><span class="pre">CONTROL_CAPACITY</span></code> (256) values; if the engine has not consumed them,
+<code class="docutils literal notranslate"><span class="pre">set</span></code> raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> rather than wait. Parameters, ports and lights the
+kernel reads change as usual, through Rack.</p>
+<p><code class="docutils literal notranslate"><span class="pre">module.set_kernel(other)</span></code> replaces the kernel at a frame boundary; the old
+one is deleted on the main thread later, never on the audio thread. Its
+Python handle stops working (<code class="docutils literal notranslate"><span class="pre">alive</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>). A kernel belongs to one
+module: make a new one for each. <code class="docutils literal notranslate"><span class="pre">module.kernel</span></code> returns the current kernel.</p>
+</section>
+<section id="reset-sample-rate-bypass-and-failures">
+<h2>Reset, sample rate, bypass and failures<a class="headerlink" href="#reset-sample-rate-bypass-and-failures" title="Link to this heading">¶</a></h2>
+<p>Rack’s Initialize resets the kernel, and a sample-rate change reaches it
+before the next frame; neither runs Python. A bypassed module does what Rack
+does for bypass (its bypass routes), and the kernel is not called. If a
+kernel reports a failure, RackPy silences the module’s outputs, records a
+<code class="docutils literal notranslate"><span class="pre">kernel_failed</span></code> diagnostic (<code class="docutils literal notranslate"><span class="pre">rackpy.runtime.diagnostics()</span></code>), and stops calling
+it; <code class="docutils literal notranslate"><span class="pre">module.kernel_failed</span></code> is then <code class="docutils literal notranslate"><span class="pre">True</span></code> until Initialize or <code class="docutils literal notranslate"><span class="pre">set_kernel</span></code>.</p>
+<p>For bypass behavior other than copying routes (C++ plugins override
+<code class="docutils literal notranslate"><span class="pre">processBypass</span></code>), give the module a second kernel with
+<code class="docutils literal notranslate"><span class="pre">module.set_bypass_kernel(kernel)</span></code>. While the module is bypassed, Rack’s
+engine runs that kernel instead of copying the routes, with the same frame
+boundary handover, controls, reset, sample-rate and failure handling as
+<code class="docutils literal notranslate"><span class="pre">set_kernel</span></code> (<code class="docutils literal notranslate"><span class="pre">module.bypass_kernel</span></code>, <code class="docutils literal notranslate"><span class="pre">module.bypass_kernel_failed</span></code>). The
+kernel the module runs unbypassed is not called. A compiled
+<a class="reference internal" href="graphs.html"><span class="std std-doc">graph</span></a> is a convenient bypass kernel:</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">bypass_kernel.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.dsp.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">Graph</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+
+<span class="n">through</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">()</span>
+<span class="n">through</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">through</span><span class="o">.</span><span class="n">input</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">through</span><span class="o">.</span><span class="n">param</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">bypassed</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">()</span>
+<span class="n">bypassed</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">bypassed</span><span class="o">.</span><span class="n">input</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>  <span class="c1"># bypassed: the input, inverted, at unity gain</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">inverter</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">num_params</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_inputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_outputs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_param</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"Level"</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">set_kernel</span><span class="p">(</span><span class="n">through</span><span class="o">.</span><span class="n">compile</span><span class="p">())</span>
+    <span class="c1"># Rack's engine runs this one instead of copying bypass routes while the module is bypassed.</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">set_bypass_kernel</span><span class="p">(</span><span class="n">bypassed</span><span class="o">.</span><span class="n">compile</span><span class="p">())</span>
+
+
+<span class="n">module</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">inverter</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">kernel</span><span class="p">,</span> <span class="n">bypass</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">kernel</span><span class="p">,</span> <span class="n">module</span><span class="o">.</span><span class="n">bypass_kernel</span>
+    <span class="k">assert</span> <span class="n">kernel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bypass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bypass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">kernel</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">module</span><span class="o">.</span><span class="n">bypass_kernel_failed</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="what-it-costs">
+<h2>What it costs<a class="headerlink" href="#what-it-costs" title="Link to this heading">¶</a></h2>
+<p>On the planning machine (not controlled hardware; the raw data and
+environment are in <code class="docutils literal notranslate"><span class="pre">benchmarks/rp17-kernel-overhead.json</span></code>), RackPy’s kernel
+path costs <strong>0.64 ns per frame</strong> on top of the same DSP written as a plain
+C++ module for a sine oscillator (+7.6%), and 0.80 ns for a one-multiply
+gain. That is within the budgets frozen in
+<a class="reference internal" href="../decisions/004-performance-budgets.html"><span class="std std-doc">ADR 004</span></a> (at most 1.5 ns, and 10%
+for kernels at least as costly as a sine). The built-in kernels do more than
+that reference (polyphony, an optional parameter), which adds about 1.5 ns
+per frame on these workloads.</p>
+</section>
+<section id="threads">
+<h2>Threads<a class="headerlink" href="#threads" title="Link to this heading">¶</a></h2>
+<p>Create kernels, call <code class="docutils literal notranslate"><span class="pre">set_kernel</span></code>, <code class="docutils literal notranslate"><span class="pre">set_bypass_kernel</span></code> and <code class="docutils literal notranslate"><span class="pre">set</span></code> on Rack’s main thread
+(<code class="docutils literal notranslate"><span class="pre">ThreadError</span></code> otherwise). The engine thread only runs the kernel. A test in
+RackPy’s suite runs the kernel path under an allocation and lock detector
+and requires zero heap, lock, write or GIL calls on it, bypassed frames
+included.</p>
+</section>
+<section id="write-a-kernel-in-c">
+<h2>Write a kernel in C++<a class="headerlink" href="#write-a-kernel-in-c" title="Link to this heading">¶</a></h2>
+<p>When the built-in kernels are not enough, write your own in C++ and ship it
+in your plugin as a <strong>kernel library</strong>. RackPy loads the libraries listed in
+<code class="docutils literal notranslate"><span class="pre">rackpy-loader.json</span></code> before your entry module runs:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">"kernels"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"kernels/kernels_example.so"</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>A library includes RackPy’s <code class="docutils literal notranslate"><span class="pre">rackpy/kernel.hpp</span></code> (from RackPy’s
+<code class="docutils literal notranslate"><span class="pre">native/include</span></code>) after <code class="docutils literal notranslate"><span class="pre">&lt;rack.hpp&gt;</span></code>, implements <code class="docutils literal notranslate"><span class="pre">rackpy::Kernel</span></code>, and
+registers its types with <code class="docutils literal notranslate"><span class="pre">RACKPY_KERNEL_LIBRARY</span></code>. It may also add node types
+for <a class="reference internal" href="graphs.html#native-extension-nodes"><span class="std std-ref">DSP graphs</span></a> with <code class="docutils literal notranslate"><span class="pre">rackpy/graph.hpp</span></code>
+and <code class="docutils literal notranslate"><span class="pre">RACKPY_GRAPH_NODES</span></code>. This wavefolder, with a graph node version of the
+same fold and a sample-and-hold node, is the example RackPy’s tests build and
+run in Rack:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// SPDX-License-Identifier: GPL-3.0-or-later</span>
+<span class="c1">// An example RackPy kernel library (RP-17B): a wavefolder. Built with the</span>
+<span class="c1">// Rack SDK's plugin flags, listed in rackpy-loader.json as</span>
+<span class="c1">// "kernels": ["kernels/kernels_example.so"], and used from Python as</span>
+<span class="c1">// rackpy.dsp.kernel.load("example.Fold"). It also adds graph node types</span>
+<span class="c1">// (RP-21C): Graph.node("example.Fold", ...) and Graph.node("example.Hold", ...).</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;rack.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;rackpy/graph.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;rackpy/kernel.hpp&gt;</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cmath&gt;</span>
+
+<span class="k">namespace</span><span class="w"> </span><span class="p">{</span>
+
+<span class="cm">/** Folds each channel of the input back into [-limit, limit], after a gain. */</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">Fold</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">Kernel</span><span class="w"> </span><span class="p">{</span>
+<span class="w">	</span><span class="kt">int</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">output</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">float</span><span class="w"> </span><span class="n">gain</span><span class="p">,</span><span class="w"> </span><span class="n">limit</span><span class="p">;</span>
+
+<span class="w">	</span><span class="k">explicit</span><span class="w"> </span><span class="n">Fold</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
+<span class="w">		</span><span class="o">:</span><span class="w"> </span><span class="n">input</span><span class="p">((</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="w"> </span><span class="n">output</span><span class="p">((</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="w"> </span><span class="n">gain</span><span class="p">((</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="n">v</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span><span class="w"> </span><span class="n">limit</span><span class="p">((</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="n">v</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">limit</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mf">0.f</span><span class="p">)</span>
+<span class="w">			</span><span class="k">throw</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">invalid_argument</span><span class="p">(</span><span class="s">"example.Fold: limit must be positive"</span><span class="p">);</span>
+<span class="w">	</span><span class="p">}</span>
+
+<span class="w">	</span><span class="k">static</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="nf">fold</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">limit</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="kt">float</span><span class="w"> </span><span class="n">period</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">4.f</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">limit</span><span class="p">;</span>
+<span class="w">		</span><span class="kt">float</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">fmod</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">limit</span><span class="p">,</span><span class="w"> </span><span class="n">period</span><span class="p">);</span>
+<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">t</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.f</span><span class="p">)</span>
+<span class="w">			</span><span class="n">t</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">period</span><span class="p">;</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">2.f</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">limit</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">limit</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">3.f</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">limit</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
+
+<span class="w">	</span><span class="c1">// Runs on Rack's engine thread every frame: no allocation, locks, IO or exceptions.</span>
+<span class="w">	</span><span class="kt">bool</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="n">rack</span><span class="o">::</span><span class="n">engine</span><span class="o">::</span><span class="n">Module</span><span class="o">&amp;</span><span class="w"> </span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">rack</span><span class="o">::</span><span class="n">engine</span><span class="o">::</span><span class="n">Module</span><span class="o">::</span><span class="n">ProcessArgs</span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="n">rack</span><span class="o">::</span><span class="n">engine</span><span class="o">::</span><span class="n">Input</span><span class="o">&amp;</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m</span><span class="p">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">input</span><span class="p">];</span>
+<span class="w">		</span><span class="n">rack</span><span class="o">::</span><span class="n">engine</span><span class="o">::</span><span class="n">Output</span><span class="o">&amp;</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m</span><span class="p">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">output</span><span class="p">];</span>
+<span class="w">		</span><span class="kt">int</span><span class="w"> </span><span class="n">channels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">getChannels</span><span class="p">();</span>
+<span class="w">		</span><span class="n">out</span><span class="p">.</span><span class="n">setChannels</span><span class="p">(</span><span class="n">channels</span><span class="p">);</span>
+<span class="w">		</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">channels</span><span class="p">;</span><span class="w"> </span><span class="n">c</span><span class="o">++</span><span class="p">)</span>
+<span class="w">			</span><span class="n">out</span><span class="p">.</span><span class="n">setVoltage</span><span class="p">(</span><span class="n">fold</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">getVoltage</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">gain</span><span class="p">,</span><span class="w"> </span><span class="n">limit</span><span class="p">),</span><span class="w"> </span><span class="n">c</span><span class="p">);</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
+
+<span class="w">	</span><span class="kt">void</span><span class="w"> </span><span class="nf">setControl</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">slot</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">slot</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">			</span><span class="n">gain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="n">value</span><span class="p">;</span>
+<span class="w">		</span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">slot</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">			</span><span class="n">limit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="n">value</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="cm">/** The same fold as a graph node: each channel of its input, times `drive`, folded into [-limit, limit]. */</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">FoldNode</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">Node</span><span class="w"> </span><span class="p">{</span>
+<span class="w">	</span><span class="kt">float</span><span class="w"> </span><span class="n">drive</span><span class="p">,</span><span class="w"> </span><span class="n">limit</span><span class="p">;</span>
+<span class="w">	</span><span class="n">FoldNode</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">drive</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">limit</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">drive</span><span class="p">(</span><span class="n">drive</span><span class="p">),</span><span class="w"> </span><span class="n">limit</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">	</span><span class="kt">void</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">Signal</span><span class="o">&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">Signal</span><span class="o">*</span><span class="w"> </span><span class="k">const</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">		</span><span class="k">const</span><span class="w"> </span><span class="n">rack</span><span class="o">::</span><span class="n">engine</span><span class="o">::</span><span class="n">Module</span><span class="o">::</span><span class="n">ProcessArgs</span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">map1</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">in</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="k">this</span><span class="p">](</span><span class="kt">float</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">Fold</span><span class="o">::</span><span class="n">fold</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">drive</span><span class="p">,</span><span class="w"> </span><span class="n">limit</span><span class="p">);</span><span class="w"> </span><span class="p">});</span>
+<span class="w">	</span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="cm">/** Sample and hold: each channel of input 0, taken when the same channel of input 1 rises to 1 V. */</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">Hold</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">Node</span><span class="w"> </span><span class="p">{</span>
+<span class="w">	</span><span class="n">rack</span><span class="o">::</span><span class="n">dsp</span><span class="o">::</span><span class="n">SchmittTrigger</span><span class="w"> </span><span class="n">trigger</span><span class="p">[</span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">MAX_CHANNELS</span><span class="p">];</span>
+<span class="w">	</span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">Signal</span><span class="w"> </span><span class="n">held</span><span class="p">;</span>
+<span class="w">	</span><span class="kt">void</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">Signal</span><span class="o">&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">Signal</span><span class="o">*</span><span class="w"> </span><span class="k">const</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">		</span><span class="k">const</span><span class="w"> </span><span class="n">rack</span><span class="o">::</span><span class="n">engine</span><span class="o">::</span><span class="n">Module</span><span class="o">::</span><span class="n">ProcessArgs</span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">max</span><span class="p">(</span><span class="n">in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">channels</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">channels</span><span class="p">);</span>
+<span class="w">		</span><span class="n">held</span><span class="p">.</span><span class="n">channels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<span class="w">		</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">c</span><span class="o">++</span><span class="p">)</span>
+<span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">trigger</span><span class="p">[</span><span class="n">c</span><span class="p">].</span><span class="n">process</span><span class="p">(</span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">lane</span><span class="p">(</span><span class="o">*</span><span class="n">in</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">c</span><span class="p">)))</span>
+<span class="w">				</span><span class="n">held</span><span class="p">.</span><span class="n">v</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">lane</span><span class="p">(</span><span class="o">*</span><span class="n">in</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">c</span><span class="p">);</span>
+<span class="w">		</span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">held</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
+<span class="w">	</span><span class="kt">void</span><span class="w"> </span><span class="nf">reset</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="n">held</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">Signal</span><span class="p">();</span>
+<span class="w">		</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">trigger</span><span class="p">)</span>
+<span class="w">			</span><span class="n">t</span><span class="p">.</span><span class="n">reset</span><span class="p">();</span>
+<span class="w">	</span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w">  </span><span class="c1">// namespace</span>
+
+<span class="n">RACKPY_GRAPH_NODES</span><span class="p">(</span><span class="n">registrar</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">	</span><span class="n">registrar</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">NodeType</span><span class="p">{</span>
+<span class="w">		</span><span class="s">"Fold"</span><span class="p">,</span>
+<span class="w">		</span><span class="s">"Each channel of its input, times drive, folded back into [-limit, limit]."</span><span class="p">,</span>
+<span class="w">		</span><span class="mi">1</span><span class="p">,</span>
+<span class="w">		</span><span class="p">{</span><span class="s">"drive"</span><span class="p">,</span><span class="w"> </span><span class="s">"limit"</span><span class="p">},</span>
+<span class="w">		</span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">Node</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">				</span><span class="k">throw</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">invalid_argument</span><span class="p">(</span><span class="s">"example.Fold: limit must be positive"</span><span class="p">);</span>
+<span class="w">			</span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">FoldNode</span><span class="o">&gt;</span><span class="p">((</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+<span class="w">		</span><span class="p">},</span>
+<span class="w">	</span><span class="p">});</span>
+<span class="w">	</span><span class="n">registrar</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">NodeType</span><span class="p">{</span>
+<span class="w">		</span><span class="s">"Hold"</span><span class="p">,</span>
+<span class="w">		</span><span class="s">"Sample and hold: input 0, taken when input 1 rises to 1 V (Rack's SchmittTrigger)."</span><span class="p">,</span>
+<span class="w">		</span><span class="mi">2</span><span class="p">,</span>
+<span class="w">		</span><span class="p">{},</span>
+<span class="w">		</span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">rackpy</span><span class="o">::</span><span class="n">graph</span><span class="o">::</span><span class="n">Node</span><span class="o">&gt;</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Hold</span><span class="p">);</span><span class="w"> </span><span class="p">},</span>
+<span class="w">	</span><span class="p">});</span>
+<span class="p">}</span>
+
+<span class="n">RACKPY_KERNEL_LIBRARY</span><span class="p">(</span><span class="s">"example"</span><span class="p">,</span><span class="w"> </span><span class="n">registrar</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">	</span><span class="n">registrar</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">rackpy</span><span class="o">::</span><span class="n">KernelType</span><span class="p">{</span>
+<span class="w">		</span><span class="s">"Fold"</span><span class="p">,</span>
+<span class="w">		</span><span class="s">"Folds each input channel back into [-limit, limit] after a gain."</span><span class="p">,</span>
+<span class="w">		</span><span class="p">{</span>
+<span class="w">			</span><span class="p">{</span><span class="s">"input"</span><span class="p">,</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">Field</span><span class="o">::</span><span class="n">INPUT</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="s">"the input port"</span><span class="p">},</span>
+<span class="w">			</span><span class="p">{</span><span class="s">"output"</span><span class="p">,</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">Field</span><span class="o">::</span><span class="n">OUTPUT</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="s">"the output port"</span><span class="p">},</span>
+<span class="w">			</span><span class="p">{</span><span class="s">"gain"</span><span class="p">,</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">Field</span><span class="o">::</span><span class="n">NUMBER</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="s">"applied before folding (a control)"</span><span class="p">},</span>
+<span class="w">			</span><span class="p">{</span><span class="s">"limit"</span><span class="p">,</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">Field</span><span class="o">::</span><span class="n">NUMBER</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="s">"the fold threshold in volts (a control)"</span><span class="p">},</span>
+<span class="w">		</span><span class="p">},</span>
+<span class="w">		</span><span class="p">{</span><span class="s">"gain"</span><span class="p">,</span><span class="w"> </span><span class="s">"limit"</span><span class="p">},</span>
+<span class="w">		</span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">Fold</span><span class="o">&gt;</span><span class="p">(</span><span class="n">v</span><span class="p">);</span><span class="w"> </span><span class="p">},</span>
+<span class="w">	</span><span class="p">});</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Python then uses it like a built-in type, under the library’s namespace:
+<code class="docutils literal notranslate"><span class="pre">rackpy.dsp.kernel.load(&quot;example.Fold&quot;)</span></code> returns the type, and
+<code class="docutils literal notranslate"><span class="pre">module.set_kernel(Fold(input=0,</span> <span class="pre">output=0,</span> <span class="pre">limit=5))</span></code> gives a module the
+kernel (RackPy’s test <code class="docutils literal notranslate"><span class="pre">tests/dsp/in_rack_libraries/test_libraries.py</span></code> does
+exactly this inside Rack).</p>
+<p>Build it as you would a Rack plugin: with the Rack SDK’s compiler flags
+(<code class="docutils literal notranslate"><span class="pre">-fPIC</span> <span class="pre">-O3</span> <span class="pre">-march=nehalem</span> <span class="pre">-funsafe-math-optimizations</span></code> and the rest of
+<code class="docutils literal notranslate"><span class="pre">compile.mk</span></code>), <code class="docutils literal notranslate"><span class="pre">-I</span></code> the SDK’s <code class="docutils literal notranslate"><span class="pre">include</span></code> and <code class="docutils literal notranslate"><span class="pre">dep/include</span></code> and RackPy’s
+<code class="docutils literal notranslate"><span class="pre">native/include</span></code>, linked as a shared library against <code class="docutils literal notranslate"><span class="pre">-lRack</span></code> with
+<code class="docutils literal notranslate"><span class="pre">-static-libstdc++</span> <span class="pre">-static-libgcc</span></code>, as for any plugin. RackPy’s own build does
+exactly that for the example (<code class="docutils literal notranslate"><span class="pre">rackpy_kernels_example</span></code> in <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code>).</p>
+<p>In a plugin project made by <code class="docutils literal notranslate"><span class="pre">bin/rackpy-plugin</span></code>, put the source in
+<code class="docutils literal notranslate"><span class="pre">kernels/NAME.cpp</span></code> and list <code class="docutils literal notranslate"><span class="pre">NAME</span></code> under <code class="docutils literal notranslate"><span class="pre">&quot;kernels&quot;</span></code> in <code class="docutils literal notranslate"><span class="pre">rackpy-plugin.json</span></code>.
+RackPy’s build compiles the examples’ libraries this way, and <code class="docutils literal notranslate"><span class="pre">bin/rackpy-plugin</span> <span class="pre">build</span> <span class="pre">--kernels</span> <span class="pre">DIR</span></code> copies <code class="docutils literal notranslate"><span class="pre">DIR/NAME.so</span></code> into the plugin’s <code class="docutils literal notranslate"><span class="pre">kernels/</span></code> folder
+and lists it in <code class="docutils literal notranslate"><span class="pre">rackpy-loader.json</span></code>. The
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/polyphony/README.md">polyphony</a>,
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/dsp/README.md">dsp</a> and
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/expanders/README.md">expanders</a>
+examples are such projects.</p>
+<p>The rules:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">process</span></code>, <code class="docutils literal notranslate"><span class="pre">reset</span></code>, <code class="docutils literal notranslate"><span class="pre">sampleRateChange</span></code> and <code class="docutils literal notranslate"><span class="pre">setControl</span></code> run where audio
+is produced: no allocation, locks, IO, logging or exceptions (they are
+<code class="docutils literal notranslate"><span class="pre">noexcept</span></code>). Allocate in the constructor. Return <code class="docutils literal notranslate"><span class="pre">false</span></code> from <code class="docutils literal notranslate"><span class="pre">process</span></code> to
+fail, as described above.</p></li>
+<li><p>The constructor runs on the main thread when Python creates the kernel. If
+it throws, Python gets <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> with your message.</p></li>
+<li><p>Names are identifiers. Python sees <code class="docutils literal notranslate"><span class="pre">namespace.Name</span></code>. <code class="docutils literal notranslate"><span class="pre">rackpy</span></code> and names
+starting with <code class="docutils literal notranslate"><span class="pre">rackpy_</span></code> are reserved.</p></li>
+<li><p>A library loads all or nothing, kernel types and graph node types
+together. If it cannot be loaded, was built for another kernel ABI
+(<code class="docutils literal notranslate"><span class="pre">rackpy::KERNEL_ABI</span></code>) or graph ABI (<code class="docutils literal notranslate"><span class="pre">rackpy::graph::GRAPH_ABI</span></code>), defines
+only part of <code class="docutils literal notranslate"><span class="pre">RACKPY_GRAPH_NODES</span></code>, throws while registering, repeats a
+type name, uses a reserved namespace or a bad name, gives a node type more
+than 8 inputs or repeated argument names, or its path leaves the plugin
+folder, Rack’s log says <code class="docutils literal notranslate"><span class="pre">RackPy</span> <span class="pre">skipped</span> <span class="pre">kernel</span> <span class="pre">library</span> <span class="pre">...</span></code> with the
+reason, none of its types appear, and the other libraries still load.</p></li>
+<li><p>Libraries stay loaded until Rack exits. They are trusted code from your
+plugin, like your Python.</p></li>
+</ul>
+</section>
+<section id="exchange-expander-messages-from-c">
+<h2>Exchange expander messages from C++<a class="headerlink" href="#exchange-expander-messages-from-c" title="Link to this heading">¶</a></h2>
+<p>A kernel (or a graph node) in a library can exchange messages with the
+modules beside it through Rack’s <a class="reference internal" href="../reference/engine-module.html#id2"><span class="std std-ref">expanders</span></a>,
+under a message layout of its own: a <strong>schema</strong>, named in your library’s
+namespace, whose size and meaning you define. RackPy does the checks Rack
+leaves to every module, before your code touches a neighbour’s buffer: that
+the neighbour is a RackPy module, that it points back, and that its buffers
+have your schema and are big enough. Include <code class="docutils literal notranslate"><span class="pre">rackpy/expanders.hpp</span></code>, define
+<code class="docutils literal notranslate"><span class="pre">RACKPY_EXPANDERS</span></code> once, and RackPy gives your library its expander services
+when it loads it. This library is RackPy’s tested example:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// SPDX-License-Identifier: GPL-3.0-or-later</span>
+<span class="c1">// An example RackPy kernel library that exchanges expander messages with a</span>
+<span class="c1">// schema of its own (RP-23C). "levels.Send" writes its input's channel count</span>
+<span class="c1">// and voltages to the module on its right; "levels.Receive" outputs what</span>
+<span class="c1">// arrives from its left, one frame later. The receiver owns the messages:</span>
+<span class="c1">// its Python code gives the side it receives on two "levels.Levels" buffers</span>
+<span class="c1">// of 17 values, allocate_messages(module.left_expander, "levels.Levels", 17).</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;rack.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;rackpy/expanders.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;rackpy/kernel.hpp&gt;</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;algorithm&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdexcept&gt;</span>
+
+<span class="k">namespace</span><span class="w"> </span><span class="p">{</span>
+
+<span class="cm">/** The layout this library defines for "levels.Levels": a channel count, then the voltages. */</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rack</span><span class="o">::</span><span class="n">engine</span><span class="o">::</span><span class="n">PORT_MAX_CHANNELS</span><span class="p">;</span>
+
+<span class="k">const</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">expander</span><span class="o">::</span><span class="n">Schema</span><span class="o">*</span><span class="w"> </span><span class="nf">levels</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">who</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">	</span><span class="c1">// Main thread: the kernel's constructor. Null if RackPy gave this library no expander services.</span>
+<span class="w">	</span><span class="k">const</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">expander</span><span class="o">::</span><span class="n">Schema</span><span class="o">*</span><span class="w"> </span><span class="n">schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">expander</span><span class="o">::</span><span class="n">schema</span><span class="p">(</span><span class="s">"levels.Levels"</span><span class="p">);</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">schema</span><span class="p">)</span>
+<span class="w">		</span><span class="k">throw</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">invalid_argument</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">who</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">": RackPy gave this library no expander services"</span><span class="p">);</span>
+<span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="n">schema</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">Send</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">Kernel</span><span class="w"> </span><span class="p">{</span>
+<span class="w">	</span><span class="kt">int</span><span class="w"> </span><span class="n">input</span><span class="p">;</span>
+<span class="w">	</span><span class="k">const</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">expander</span><span class="o">::</span><span class="n">Schema</span><span class="o">*</span><span class="w"> </span><span class="n">schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">levels</span><span class="p">(</span><span class="s">"levels.Send"</span><span class="p">);</span>
+<span class="w">	</span><span class="n">rackpy</span><span class="o">::</span><span class="n">expander</span><span class="o">::</span><span class="n">Link</span><span class="w"> </span><span class="n">link</span><span class="p">;</span><span class="w">  </span><span class="c1">// RackPy's, to check the neighbour only when it changes</span>
+
+<span class="w">	</span><span class="k">explicit</span><span class="w"> </span><span class="n">Send</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">input</span><span class="p">((</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">			</span><span class="k">throw</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">invalid_argument</span><span class="p">(</span><span class="s">"levels.Send: input must be wired"</span><span class="p">);</span>
+<span class="w">	</span><span class="p">}</span>
+
+<span class="w">	</span><span class="c1">// Rack's engine thread, every frame: no allocation, locks, IO or exceptions.</span>
+<span class="w">	</span><span class="kt">bool</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="n">rack</span><span class="o">::</span><span class="n">engine</span><span class="o">::</span><span class="n">Module</span><span class="o">&amp;</span><span class="w"> </span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">rack</span><span class="o">::</span><span class="n">engine</span><span class="o">::</span><span class="n">Module</span><span class="o">::</span><span class="n">ProcessArgs</span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="c1">// The right neighbour's producer buffer (and the flip requested), only if the neighbour is a RackPy</span>
+<span class="w">		</span><span class="c1">// module whose left side holds "levels.Levels" messages of at least SIZE values. Otherwise nothing.</span>
+<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="o">*</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">expander</span><span class="o">::</span><span class="n">send</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">schema</span><span class="p">,</span><span class="w"> </span><span class="n">SIZE</span><span class="p">,</span><span class="w"> </span><span class="n">link</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">			</span><span class="n">rack</span><span class="o">::</span><span class="n">engine</span><span class="o">::</span><span class="n">Input</span><span class="o">&amp;</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m</span><span class="p">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">input</span><span class="p">];</span>
+<span class="w">			</span><span class="kt">int</span><span class="w"> </span><span class="n">channels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">getChannels</span><span class="p">();</span>
+<span class="w">			</span><span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="n">channels</span><span class="p">;</span>
+<span class="w">			</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">channels</span><span class="p">;</span><span class="w"> </span><span class="n">c</span><span class="o">++</span><span class="p">)</span>
+<span class="w">				</span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">getVoltage</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+<span class="w">		</span><span class="p">}</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">Receive</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">Kernel</span><span class="w"> </span><span class="p">{</span>
+<span class="w">	</span><span class="kt">int</span><span class="w"> </span><span class="n">output</span><span class="p">;</span>
+<span class="w">	</span><span class="k">const</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">expander</span><span class="o">::</span><span class="n">Schema</span><span class="o">*</span><span class="w"> </span><span class="n">schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">levels</span><span class="p">(</span><span class="s">"levels.Receive"</span><span class="p">);</span>
+<span class="w">	</span><span class="n">rackpy</span><span class="o">::</span><span class="n">expander</span><span class="o">::</span><span class="n">Link</span><span class="w"> </span><span class="n">neighbour</span><span class="p">,</span><span class="w"> </span><span class="n">own</span><span class="p">;</span>
+
+<span class="w">	</span><span class="k">explicit</span><span class="w"> </span><span class="n">Receive</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">output</span><span class="p">((</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">output</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">			</span><span class="k">throw</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">invalid_argument</span><span class="p">(</span><span class="s">"levels.Receive: output must be wired"</span><span class="p">);</span>
+<span class="w">	</span><span class="p">}</span>
+
+<span class="w">	</span><span class="kt">bool</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="n">rack</span><span class="o">::</span><span class="n">engine</span><span class="o">::</span><span class="n">Module</span><span class="o">&amp;</span><span class="w"> </span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">rack</span><span class="o">::</span><span class="n">engine</span><span class="o">::</span><span class="n">Module</span><span class="o">::</span><span class="n">ProcessArgs</span><span class="o">&amp;</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="c1">// This module's consumer buffer on the left: what the neighbour wrote during the previous frame.</span>
+<span class="w">		</span><span class="kt">float</span><span class="o">*</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">expander</span><span class="o">::</span><span class="n">receive</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">schema</span><span class="p">,</span><span class="w"> </span><span class="n">SIZE</span><span class="p">,</span><span class="w"> </span><span class="n">args</span><span class="p">.</span><span class="n">frame</span><span class="p">,</span><span class="w"> </span><span class="n">neighbour</span><span class="p">,</span><span class="w"> </span><span class="n">own</span><span class="p">);</span>
+<span class="w">		</span><span class="kt">int</span><span class="w"> </span><span class="n">channels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">min</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">max</span><span class="p">((</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">rack</span><span class="o">::</span><span class="n">engine</span><span class="o">::</span><span class="n">PORT_MAX_CHANNELS</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">		</span><span class="n">rack</span><span class="o">::</span><span class="n">engine</span><span class="o">::</span><span class="n">Output</span><span class="o">&amp;</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m</span><span class="p">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">output</span><span class="p">];</span>
+<span class="w">		</span><span class="n">out</span><span class="p">.</span><span class="n">setChannels</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">max</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span>
+<span class="w">		</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">max</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"> </span><span class="n">c</span><span class="o">++</span><span class="p">)</span>
+<span class="w">			</span><span class="n">out</span><span class="p">.</span><span class="n">setVoltage</span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">channels</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="p">]</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">0.f</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">);</span>
+<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<span class="w">			</span><span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.f</span><span class="p">;</span><span class="w">  </span><span class="c1">// read once: a neighbour that stops sending is heard as silence</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">	</span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w">  </span><span class="c1">// namespace</span>
+
+<span class="n">RACKPY_KERNEL_LIBRARY</span><span class="p">(</span><span class="s">"levels"</span><span class="p">,</span><span class="w"> </span><span class="n">registrar</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">	</span><span class="n">registrar</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">rackpy</span><span class="o">::</span><span class="n">KernelType</span><span class="p">{</span>
+<span class="w">		</span><span class="s">"Send"</span><span class="p">,</span>
+<span class="w">		</span><span class="s">"Sends its input's channels to the module on its right, as a levels.Levels message."</span><span class="p">,</span>
+<span class="w">		</span><span class="p">{{</span><span class="s">"input"</span><span class="p">,</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">Field</span><span class="o">::</span><span class="n">INPUT</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="s">"the input port"</span><span class="p">}},</span>
+<span class="w">		</span><span class="p">{},</span>
+<span class="w">		</span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">Send</span><span class="o">&gt;</span><span class="p">(</span><span class="n">v</span><span class="p">);</span><span class="w"> </span><span class="p">},</span>
+<span class="w">	</span><span class="p">});</span>
+<span class="w">	</span><span class="n">registrar</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">rackpy</span><span class="o">::</span><span class="n">KernelType</span><span class="p">{</span>
+<span class="w">		</span><span class="s">"Receive"</span><span class="p">,</span>
+<span class="w">		</span><span class="s">"Outputs the levels.Levels message from the module on its left, one frame later."</span><span class="p">,</span>
+<span class="w">		</span><span class="p">{{</span><span class="s">"output"</span><span class="p">,</span><span class="w"> </span><span class="n">rackpy</span><span class="o">::</span><span class="n">Field</span><span class="o">::</span><span class="n">OUTPUT</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="s">"the output port"</span><span class="p">}},</span>
+<span class="w">		</span><span class="p">{},</span>
+<span class="w">		</span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">Receive</span><span class="o">&gt;</span><span class="p">(</span><span class="n">v</span><span class="p">);</span><span class="w"> </span><span class="p">},</span>
+<span class="w">	</span><span class="p">});</span>
+<span class="p">}</span>
+
+<span class="c1">// RackPy gives this library its expander services when it loads it.</span>
+<span class="n">RACKPY_EXPANDERS</span>
+</pre></div>
+</div>
+<p>In Python, the receiving module owns the messages of the side it receives on,
+as in Rack: give it two buffers of your schema with
+<code class="docutils literal notranslate"><span class="pre">allocate_messages(module.left_expander,</span> <span class="pre">&quot;levels.Levels&quot;,</span> <span class="pre">17)</span></code>
+(<a class="reference internal" href="../reference/python/rackpy/engine/expanders/index.html#module-rackpy.engine.expanders" title="rackpy.engine.expanders"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rackpy.engine.expanders</span></code></a>) before Rack’s engine runs the module, and
+use the kernels like any others: <code class="docutils literal notranslate"><span class="pre">load(&quot;levels.Send&quot;)(input=0)</span></code>. RackPy’s
+test <code class="docutils literal notranslate"><span class="pre">tests/dsp/in_rack_libraries/test_libraries.py</span></code> runs this pair in Rack’s
+own engine.</p>
+<p>The contract:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">schema(name)</span></code> runs on the main thread, in a kernel’s constructor; it
+returns null when RackPy gave the library no services (throw, as the
+example does, so that Python gets <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>). A name is 1 to 64
+letters, digits, <code class="docutils literal notranslate"><span class="pre">_</span></code>, <code class="docutils literal notranslate"><span class="pre">.</span></code> or <code class="docutils literal notranslate"><span class="pre">-</span></code>; use your namespace as a prefix.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">send(module,</span> <span class="pre">side,</span> <span class="pre">schema,</span> <span class="pre">size,</span> <span class="pre">link)</span></code> returns the neighbour’s producer
+buffer and requests the flip; <code class="docutils literal notranslate"><span class="pre">receive(module,</span> <span class="pre">side,</span> <span class="pre">schema,</span> <span class="pre">size,</span> <span class="pre">frame,</span> <span class="pre">neighbour,</span> <span class="pre">own)</span></code> returns this module’s consumer buffer. Either returns
+null when the check fails: write or read nothing then. Both run on Rack’s
+engine thread without locks or allocation. Keep the <code class="docutils literal notranslate"><span class="pre">Link</span></code>s in your kernel,
+one per call site; RackPy uses them to check a neighbour only when it
+changes. Pass <code class="docutils literal notranslate"><span class="pre">ProcessArgs::frame</span></code> to <code class="docutils literal notranslate"><span class="pre">receive</span></code>, so that RackPy can copy
+the message for Python’s snapshots before you change anything.</p></li>
+<li><p>A message arrives one frame after it was written, whatever the order and
+the number of engine threads, because Rack swaps the two buffers after
+every module of the frame has run. Mark what you have read (the example
+zeroes its count), or a neighbour that stops sending is heard again.</p></li>
+<li><p>The buffers belong to the receiving RackPy module. Never assign a RackPy
+module’s expander slots, flip flags or buffers yourself, never keep a
+buffer pointer past the frame, and write only within <code class="docutils literal notranslate"><span class="pre">size</span></code> values.</p></li>
+<li><p>Rack’s own expander API stays available for another plugin’s modules:
+check <code class="docutils literal notranslate"><span class="pre">neighbour-&gt;model</span></code> first, then interpret its <code class="docutils literal notranslate"><span class="pre">void*</span></code> as that
+plugin documents, as Rack’s manual describes. RackPy cannot check that
+for you, and Python never sees such a pointer except as an opaque
+<code class="docutils literal notranslate"><span class="pre">ForeignMessage</span></code>.</p></li>
+<li><p>A library built for another <code class="docutils literal notranslate"><span class="pre">rackpy::expander::EXPANDER_ABI</span></code>, or that
+defines only part of <code class="docutils literal notranslate"><span class="pre">RACKPY_EXPANDERS</span></code>, is skipped as a whole, with the
+reason in Rack’s log.</p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="graphs.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Describe DSP as a graph</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="state.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Save and restore a module’s state</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Process audio</a><ul>
+<li><a class="reference internal" href="#kernels-and-their-fields">Kernels and their fields</a></li>
+<li><a class="reference internal" href="#changing-a-running-module">Changing a running module</a></li>
+<li><a class="reference internal" href="#reset-sample-rate-bypass-and-failures">Reset, sample rate, bypass and failures</a></li>
+<li><a class="reference internal" href="#what-it-costs">What it costs</a></li>
+<li><a class="reference internal" href="#threads">Threads</a></li>
+<li><a class="reference internal" href="#write-a-kernel-in-c">Write a kernel in C++</a></li>
+<li><a class="reference internal" href="#exchange-expander-messages-from-c">Exchange expander messages from C++</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

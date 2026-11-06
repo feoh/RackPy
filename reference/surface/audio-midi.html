@@ -1,0 +1,1562 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="8. Settings, system and network" href="services.html"><link rel="prev" title="6. DSP and SIMD" href="dsp.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>7. Audio and MIDI - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">Reference</a><input aria-label="Toggle navigation of Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/reference/surface/audio-midi.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/reference/surface/audio-midi.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="audio-and-midi">
+<h1>7. Audio and MIDI<a class="headerlink" href="#audio-and-midi" title="Link to this heading">¶</a></h1>
+<p>Audio and MIDI driver, device and port interfaces and their callbacks.</p>
+<div class="warning admonition">
+<p class="admonition-title">Not bound yet</p>
+<p>This is the coverage obligation for family 7, not available API. Each row is
+a declaration in the pinned Rack 2.6.6 SDK that a full-coverage
+release must map to Python (<a class="reference internal" href="../../coverage.html"><span class="std std-doc">coverage contract</span></a>). Totals are in
+the <a class="reference internal" href="../coverage.html"><span class="std std-doc">coverage report</span></a>.</p>
+</div>
+<p>175 entries. 166 bound. Generated from upstream/api-surface.json and bindings/manifest.json; the status column is each declaration’s record in the binding manifest.</p>
+<div class="table-wrapper rackpy-surface docutils container">
+<table class="rackpy-surface docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Declaration</p></th>
+<th class="head"><p>Kind</p></th>
+<th class="head"><p>Header</p></th>
+<th class="head"><p>Flags</p></th>
+<th class="head"><p>Status</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::Port()</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L163">audio.hpp:163</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Input::Input()</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L240">midi.hpp:240</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputQueue::InputQueue()</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L261">midi.hpp:261</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::Message()</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L26">midi.hpp:26</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Output::Output()</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L276">midi.hpp:276</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::Port()</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L212">midi.hpp:212</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::~Device()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L79">audio.hpp:79</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Driver::~Driver()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L26">audio.hpp:26</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::~Port()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L164">audio.hpp:164</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Device::~Device()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L158">midi.hpp:158</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver::~Driver()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L102">midi.hpp:102</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Input::~Input()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L241">midi.hpp:241</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputQueue::~InputQueue()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L262">midi.hpp:262</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Output::~Output()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L277">midi.hpp:277</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::~Port()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L213">midi.hpp:213</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::processMutex</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L77">audio.hpp:77</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::subscribed</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L75">audio.hpp:75</a></p></td>
+<td><p></p></td>
+<td><p>planned</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::context</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L161">audio.hpp:161</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::device</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L160">audio.hpp:160</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::deviceId</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L157">audio.hpp:157</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::driver</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L159">audio.hpp:159</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::driverId</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L156">audio.hpp:156</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::inputOffset</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L149">audio.hpp:149</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::maxInputs</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L152">audio.hpp:152</a></p></td>
+<td><p></p></td>
+<td><p>planned</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::maxOutputs</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L153">audio.hpp:153</a></p></td>
+<td><p></p></td>
+<td><p>planned</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::outputOffset</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L150">audio.hpp:150</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Input::inputDevice</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L238">midi.hpp:238</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputDevice::subscribed</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L165">midi.hpp:165</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputQueue::internal</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L259">midi.hpp:259</a></p></td>
+<td><p></p></td>
+<td><p>excluded (internal)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::bytes</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L18">midi.hpp:18</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::frame</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L24">midi.hpp:24</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Output::outputDevice</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L274">midi.hpp:274</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::OutputDevice::subscribed</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L175">midi.hpp:175</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::channel</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L202">midi.hpp:202</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::context</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L210">midi.hpp:210</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::device</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L209">midi.hpp:209</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::deviceId</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L206">midi.hpp:206</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::driver</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L208">midi.hpp:208</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::driverId</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L205">midi.hpp:205</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::addDriver(int,</span> <span class="pre">rack::audio::Driver</span> <span class="pre">*)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L218">audio.hpp:218</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::destroy()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L214">audio.hpp:214</a></p></td>
+<td><p></p></td>
+<td><p>excluded (internal)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::getDriver(int)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L220">audio.hpp:220</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::getDriverIds()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L219">audio.hpp:219</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::init()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L213">audio.hpp:213</a></p></td>
+<td><p></p></td>
+<td><p>excluded (internal)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::addDriver(int,</span> <span class="pre">rack::midi::Driver</span> <span class="pre">*)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L294">midi.hpp:294</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::destroy()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L292">midi.hpp:292</a></p></td>
+<td><p></p></td>
+<td><p>excluded (internal)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::getDriver(int)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L296">midi.hpp:296</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::getDriverIds()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L295">midi.hpp:295</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::init()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L291">midi.hpp:291</a></p></td>
+<td><p></p></td>
+<td><p>excluded (internal)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::getBlockSize()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L111">audio.hpp:111</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::getBlockSizes()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L107">audio.hpp:107</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::getName()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L81">audio.hpp:81</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::getNumInputs()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L84">audio.hpp:84</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::getNumOutputs()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L87">audio.hpp:87</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::getSampleRate()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L98">audio.hpp:98</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::getSampleRates()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L94">audio.hpp:94</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::onStartStream()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L133">audio.hpp:133</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::onStopStream()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L135">audio.hpp:135</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::processBuffer(const</span> <span class="pre">float</span> <span class="pre">*,</span> <span class="pre">int,</span> <span class="pre">float</span> <span class="pre">*,</span> <span class="pre">int,</span> <span class="pre">int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L131">audio.hpp:131</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::setBlockSize(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L115">audio.hpp:115</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::setSampleRate(float)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L102">audio.hpp:102</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::subscribe(rack::audio::Port</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L120">audio.hpp:120</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device::unsubscribe(rack::audio::Port</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L124">audio.hpp:124</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Driver::getDefaultDeviceId()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L36">audio.hpp:36</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Driver::getDeviceIds()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L32">audio.hpp:32</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Driver::getDeviceName(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L40">audio.hpp:40</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Driver::getDeviceNumInputs(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L44">audio.hpp:44</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Driver::getDeviceNumOutputs(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L48">audio.hpp:48</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Driver::getName()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L28">audio.hpp:28</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Driver::subscribe(int,</span> <span class="pre">rack::audio::Port</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L55">audio.hpp:55</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Driver::unsubscribe(int,</span> <span class="pre">rack::audio::Port</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L61">audio.hpp:61</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::fromJson(json_t</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L194">audio.hpp:194</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getBlockSize()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L186">audio.hpp:186</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getBlockSizes()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L185">audio.hpp:185</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getDevice()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L172">audio.hpp:172</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getDeviceDetail(int,</span> <span class="pre">int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L179">audio.hpp:179</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getDeviceId()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L174">audio.hpp:174</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getDeviceIds()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L173">audio.hpp:173</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getDeviceName(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L178">audio.hpp:178</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getDeviceNumInputs(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L176">audio.hpp:176</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getDeviceNumOutputs(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L177">audio.hpp:177</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getDriver()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L167">audio.hpp:167</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getDriverId()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L168">audio.hpp:168</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getDriverName()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L170">audio.hpp:170</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getNumInputs()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L190">audio.hpp:190</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getNumOutputs()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L191">audio.hpp:191</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getSampleRate()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L182">audio.hpp:182</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::getSampleRates()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L181">audio.hpp:181</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::onStartStream()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L208">audio.hpp:208</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::onStopStream()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L209">audio.hpp:209</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::processBuffer(const</span> <span class="pre">float</span> <span class="pre">*,</span> <span class="pre">int,</span> <span class="pre">float</span> <span class="pre">*,</span> <span class="pre">int,</span> <span class="pre">int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L199">audio.hpp:199</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::processInput(const</span> <span class="pre">float</span> <span class="pre">*,</span> <span class="pre">int,</span> <span class="pre">int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L204">audio.hpp:204</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::processOutput(float</span> <span class="pre">*,</span> <span class="pre">int,</span> <span class="pre">int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L207">audio.hpp:207</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::reset()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L165">audio.hpp:165</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::setBlockSize(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L187">audio.hpp:187</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::setDeviceId(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L175">audio.hpp:175</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::setDriverId(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L169">audio.hpp:169</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::setSampleRate(float)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L183">audio.hpp:183</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port::toJson()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L193">audio.hpp:193</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Device::getName()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L159">midi.hpp:159</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver::getDefaultInputDeviceId()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L112">midi.hpp:112</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver::getDefaultOutputDeviceId()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L135">midi.hpp:135</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver::getInputDeviceIds()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L108">midi.hpp:108</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver::getInputDeviceName(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L116">midi.hpp:116</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver::getName()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L104">midi.hpp:104</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver::getOutputDeviceIds()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L132">midi.hpp:132</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver::getOutputDeviceName(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L138">midi.hpp:138</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver::subscribeInput(int,</span> <span class="pre">rack::midi::Input</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L122">midi.hpp:122</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver::subscribeOutput(int,</span> <span class="pre">rack::midi::Output</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L141">midi.hpp:141</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver::unsubscribeInput(int,</span> <span class="pre">rack::midi::Input</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L128">midi.hpp:128</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver::unsubscribeOutput(int,</span> <span class="pre">rack::midi::Output</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L144">midi.hpp:144</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Input::getChannels()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L249">midi.hpp:249</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Input::getDefaultDeviceId()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L245">midi.hpp:245</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Input::getDeviceIds()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L244">midi.hpp:244</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Input::getDeviceName(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L247">midi.hpp:247</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Input::onMessage(const</span> <span class="pre">rack::midi::Message</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L251">midi.hpp:251</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Input::reset()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L242">midi.hpp:242</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Input::setDeviceId(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L246">midi.hpp:246</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputDevice::onMessage(const</span> <span class="pre">rack::midi::Message</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L171">midi.hpp:171</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputDevice::subscribe(rack::midi::Input</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L167">midi.hpp:167</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputDevice::unsubscribe(rack::midi::Input</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L169">midi.hpp:169</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputQueue::onMessage(const</span> <span class="pre">rack::midi::Message</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L263">midi.hpp:263</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputQueue::size()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L268">midi.hpp:268</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputQueue::tryPop(rack::midi::Message</span> <span class="pre">*,</span> <span class="pre">int64_t)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L267">midi.hpp:267</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::getChannel()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L35">midi.hpp:35</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::getFrame()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L81">midi.hpp:81</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::getNote()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L57">midi.hpp:57</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::getSize()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L28">midi.hpp:28</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::getStatus()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L46">midi.hpp:46</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::getValue()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L68">midi.hpp:68</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::setChannel(uint8_t)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L40">midi.hpp:40</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::setFrame(int64_t)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L85">midi.hpp:85</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::setNote(uint8_t)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L62">midi.hpp:62</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::setSize(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L31">midi.hpp:31</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::setStatus(uint8_t)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L51">midi.hpp:51</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::setValue(uint8_t)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L73">midi.hpp:73</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message::toString()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L79">midi.hpp:79</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Output::getChannels()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L285">midi.hpp:285</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Output::getDefaultDeviceId()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L281">midi.hpp:281</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Output::getDeviceIds()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L280">midi.hpp:280</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Output::getDeviceName(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L283">midi.hpp:283</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Output::reset()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L278">midi.hpp:278</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Output::sendMessage(const</span> <span class="pre">rack::midi::Message</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L287">midi.hpp:287</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Output::setDeviceId(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L282">midi.hpp:282</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::OutputDevice::sendMessage(const</span> <span class="pre">rack::midi::Message</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L181">midi.hpp:181</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::OutputDevice::subscribe(rack::midi::Output</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L177">midi.hpp:177</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::OutputDevice::unsubscribe(rack::midi::Output</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L179">midi.hpp:179</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::fromJson(json_t</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L232">midi.hpp:232</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::getChannel()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L227">midi.hpp:227</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::getChannelName(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L229">midi.hpp:229</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::getChannels()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L226">midi.hpp:226</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::getDefaultDeviceId()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L221">midi.hpp:221</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::getDevice()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L219">midi.hpp:219</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::getDeviceId()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L222">midi.hpp:222</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::getDeviceIds()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L220">midi.hpp:220</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::getDeviceName(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L224">midi.hpp:224</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::getDriver()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L215">midi.hpp:215</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::getDriverId()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L216">midi.hpp:216</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::setChannel(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L228">midi.hpp:228</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::setDeviceId(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L223">midi.hpp:223</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::setDriverId(int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L217">midi.hpp:217</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port::toJson()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L231">midi.hpp:231</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputQueue::Internal</span></code></p></td>
+<td><p>opaque record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L258">midi.hpp:258</a></p></td>
+<td><p></p></td>
+<td><p>excluded (internal)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L74">audio.hpp:74</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Driver</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L25">audio.hpp:25</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Port</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/audio.hpp#L147">audio.hpp:147</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Device</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L157">midi.hpp:157</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L101">midi.hpp:101</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Input</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L236">midi.hpp:236</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputDevice</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L164">midi.hpp:164</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputQueue</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L257">midi.hpp:257</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Message</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L16">midi.hpp:16</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Output</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L272">midi.hpp:272</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::OutputDevice</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L174">midi.hpp:174</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Port</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/midi.hpp#L195">midi.hpp:195</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="services.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">8. Settings, system and network</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="dsp.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">6. DSP and SIMD</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

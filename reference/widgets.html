@@ -1,0 +1,820 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="UI widgets and menus" href="ui.html"><link rel="prev" title="Plugins and models" href="plugin.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>Subclassable widgets and events - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Reference</a><input aria-label="Toggle navigation of Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin.html">Plugins and models</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/reference/widgets.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/reference/widgets.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="subclassable-widgets-and-events">
+<h1>Subclassable widgets and events<a class="headerlink" href="#subclassable-widgets-and-events" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">rackpy.raw.widget.Widget</span></code> is Rack’s <code class="docutils literal notranslate"><span class="pre">rack::widget::Widget</span></code>, and Python can
+subclass it. Rack calls the subclass’s overrides (<code class="docutils literal notranslate"><span class="pre">step</span></code>, drawing, event
+handlers and the coordinate queries) on its UI thread. The typed bases
+<code class="docutils literal notranslate"><span class="pre">TransparentWidget</span></code>, <code class="docutils literal notranslate"><span class="pre">OpaqueWidget</span></code>, <code class="docutils literal notranslate"><span class="pre">ZoomWidget</span></code>, <code class="docutils literal notranslate"><span class="pre">TransformWidget</span></code>,
+<code class="docutils literal notranslate"><span class="pre">SvgWidget</span></code>, <code class="docutils literal notranslate"><span class="pre">FramebufferWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">OpenGlWidget</span></code> are Rack’s own classes
+too, with their fields and methods. This page is about these classes;
+<a class="reference internal" href="widget-trees.html"><span class="std std-doc">detached widget trees</span></a> covers the older native-only
+<code class="docutils literal notranslate"><span class="pre">WidgetNode</span></code> adapter.</p>
+<p><strong>Implemented, Linux x86_64 inside Rack Free 2.6.6 (RP-25).</strong> The records
+these classes touch are <strong>implemented</strong> in the <a class="reference internal" href="coverage.html"><span class="std std-doc">coverage report</span></a>.
+Rack’s input dispatcher is in <a class="reference internal" href="ui.html#context-and-input"><span class="std std-ref">UI widgets and menus</span></a>, and
+NanoVG drawing and <code class="docutils literal notranslate"><span class="pre">rack::window</span></code> are in <a class="reference internal" href="window.html"><span class="std std-doc">drawing and the window</span></a>.
+Module removal and null-module
+browser previews are tested through test hooks that follow Rack’s code; a
+smoke test in Rack’s real module browser with Python module widgets waits for
+RP-28. The names below are the raw layer; there is no <code class="docutils literal notranslate"><span class="pre">rackpy.widget</span></code> facade
+for them yet. Accessing Rack’s deprecated <code class="docutils literal notranslate"><span class="pre">widget.SVGWidget</span></code> and
+<code class="docutils literal notranslate"><span class="pre">ui.ScrollBar</span></code> aliases warns; use <code class="docutils literal notranslate"><span class="pre">widget.SvgWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">ui.Scrollbar</span></code>.</p>
+<section id="creating-and-owning-widgets">
+<h2>Creating and owning widgets<a class="headerlink" href="#creating-and-owning-widgets" title="Link to this heading">¶</a></h2>
+<p>A widget can only be created on Rack’s main thread once Rack’s UI context is
+live, so never during plugin start-up (<code class="docutils literal notranslate"><span class="pre">ContextError</span></code> there). A new widget
+belongs to Python. Each widget has exactly one native owner:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">parent.add_child(child)</span></code> hands <code class="docutils literal notranslate"><span class="pre">child</span></code> to <code class="docutils literal notranslate"><span class="pre">parent</span></code>, as do
+<code class="docutils literal notranslate"><span class="pre">add_child_bottom</span></code>, <code class="docutils literal notranslate"><span class="pre">add_child_above</span></code> and <code class="docutils literal notranslate"><span class="pre">add_child_below</span></code>. Rack’s parent
+now deletes it. The Python object stays alive, with the same identity, for
+as long as the native widget does, even if Python drops every reference to
+it: <code class="docutils literal notranslate"><span class="pre">parent.children[0]</span> <span class="pre">is</span> <span class="pre">child</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">parent.remove_child(child)</span></code> and <code class="docutils literal notranslate"><span class="pre">child.remove_from_parent()</span></code> give it back
+to Python.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">parent.children</span></code> is Rack’s child list as a live, read-only sequence
+(<code class="docutils literal notranslate"><span class="pre">WidgetChildren</span></code>): <code class="docutils literal notranslate"><span class="pre">len()</span></code>, indexing, slicing, <code class="docutils literal notranslate"><span class="pre">in</span></code>, <code class="docutils literal notranslate"><span class="pre">index()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">count()</span></code> see the list as it is now, it compares equal to a tuple of the
+same children, and <code class="docutils literal notranslate"><span class="pre">copy()</span></code> takes a tuple snapshot. Iterating walks the
+children present when the loop starts. It has no <code class="docutils literal notranslate"><span class="pre">append</span></code> or <code class="docutils literal notranslate"><span class="pre">remove</span></code>:
+change the list with the methods above, which keep each child’s single
+owner. <code class="docutils literal notranslate"><span class="pre">has_child(child)</span></code> checks direct membership, and <code class="docutils literal notranslate"><span class="pre">get_parent()</span></code>
+returns the current parent or <code class="docutils literal notranslate"><span class="pre">None</span></code>. The <code class="docutils literal notranslate"><span class="pre">parent</span></code> property is read-only;
+change tree ownership only with the methods above, which preserve Rack’s
+ownership and dispatch semantics. Once the parent is deleted the view raises
+<code class="docutils literal notranslate"><span class="pre">StaleHandleError</span></code>; it does not keep the parent alive.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">close()</span></code> deletes a detached widget and its subtree. Closing a widget that
+has a parent raises <code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code>; remove it first.</p></li>
+<li><p>When Rack deletes a widget (its parent is closed or cleared, or a parent’s
+<code class="docutils literal notranslate"><span class="pre">step()</span></code> honours <code class="docutils literal notranslate"><span class="pre">request_delete()</span></code>), the Python object stays, but
+<code class="docutils literal notranslate"><span class="pre">alive</span></code> becomes <code class="docutils literal notranslate"><span class="pre">False</span></code> and every other access raises <code class="docutils literal notranslate"><span class="pre">StaleHandleError</span></code>.</p></li>
+<li><p>Adding a widget that already has a parent, to itself or to one of its
+descendants raises <code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code> and changes nothing.</p></li>
+<li><p>A class may have only one of these native bases (<code class="docutils literal notranslate"><span class="pre">TypeError</span></code> otherwise);
+ordinary Python mixins are fine.</p></li>
+</ul>
+<p>Widgets that RackPy did not create, such as Rack’s scene, appear as
+<code class="docutils literal notranslate"><span class="pre">HostWidget</span></code>: a checked, nonowning handle with <code class="docutils literal notranslate"><span class="pre">alive</span></code>, <code class="docutils literal notranslate"><span class="pre">parent</span></code> and
+<code class="docutils literal notranslate"><span class="pre">get_box()</span></code>. It can be passed where Rack takes a widget pointer (an ancestor,
+an event target) but never owned or deleted.</p>
+<p><code class="docutils literal notranslate"><span class="pre">get_position()</span></code> returns the widget’s box position in its parent’s coordinates;
+its box can also be accessed directly through the checked <code class="docutils literal notranslate"><span class="pre">box</span></code> view.</p>
+<p>All access is main-thread only (<code class="docutils literal notranslate"><span class="pre">ThreadError</span></code>), and widgets of another
+context are refused. When Rack’s context closes, RackPy deletes every widget
+it still manages and their handles become stale. If a worker thread drops the
+last reference to a widget, deletion waits for the UI thread.</p>
+</section>
+<section id="overrides-that-rack-calls">
+<h2>Overrides that Rack calls<a class="headerlink" href="#overrides-that-rack-calls" title="Link to this heading">¶</a></h2>
+<p>Rack calls an override instead of its own implementation; call <code class="docutils literal notranslate"><span class="pre">super()</span></code> to
+get Rack’s behaviour as well:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Override</p></th>
+<th class="head"><p>Rack calls it</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">step()</span></code></p></td>
+<td><p>every frame, for widgets in the scene</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">draw(args)</span></code>, <code class="docutils literal notranslate"><span class="pre">draw_layer(args,</span> <span class="pre">layer)</span></code></p></td>
+<td><p>when drawing, see <a class="reference internal" href="#drawing">drawing</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">draw_vg(graphics)</span></code></p></td>
+<td><p>after <code class="docutils literal notranslate"><span class="pre">draw(args)</span></code>: Rack’s deprecated <code class="docutils literal notranslate"><span class="pre">draw(NVGcontext*)</span></code>; defining or calling it warns</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">draw_framebuffer()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FramebufferWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">OpenGlWidget</span></code> only, while rendering</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">on_hover(event)</span></code> … <code class="docutils literal notranslate"><span class="pre">on_context_destroy(event)</span></code></p></td>
+<td><p>for each of Rack’s 31 widget events</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_children_bounding_box()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_visible_children_bounding_box()</span></code></p></td>
+<td><p>layout queries</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_relative_offset(value,</span> <span class="pre">ancestor)</span></code>, <code class="docutils literal notranslate"><span class="pre">get_relative_zoom(ancestor)</span></code>, <code class="docutils literal notranslate"><span class="pre">get_viewport(rect)</span></code></p></td>
+<td><p>coordinate queries</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The methods of the RackPy classes themselves, which is what <code class="docutils literal notranslate"><span class="pre">super()</span></code>
+reaches, run <strong>Rack’s</strong> implementation for that class. That is also how to
+deliver an event yourself: on a plain <code class="docutils literal notranslate"><span class="pre">FramebufferWidget</span></code>,
+<code class="docutils literal notranslate"><span class="pre">frame.on_button(event)</span></code> dispatches the click to its children by position,
+as Rack would. Rack’s handler runs without the GIL, since it may take the
+engine lock (a port’s shift-click removes its top cable); overrides it
+reaches take the GIL back.</p>
+<p>Exceptions never reach Rack. RackPy logs them, and then:</p>
+<ul class="simple">
+<li><p>for <code class="docutils literal notranslate"><span class="pre">step</span></code>, drawing and event handlers, Rack carries on without running its
+own implementation again (it is not replayed after a failed <code class="docutils literal notranslate"><span class="pre">super()</span></code> call);</p></li>
+<li><p>for the queries that return a value, Rack uses its own result.</p></li>
+</ul>
+<p>While Rack is inside one of these calls, changing the tree (<code class="docutils literal notranslate"><span class="pre">add_child</span></code>,
+<code class="docutils literal notranslate"><span class="pre">remove_child</span></code>, <code class="docutils literal notranslate"><span class="pre">clear_children</span></code>, <code class="docutils literal notranslate"><span class="pre">close</span></code>) raises <code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code>, because
+Rack may be iterating the very list being changed. Call <code class="docutils literal notranslate"><span class="pre">request_delete()</span></code>
+instead, or change the tree afterwards. Stepping another widget from inside a
+callback is refused for the same reason; only the current widget’s
+<code class="docutils literal notranslate"><span class="pre">super().step()</span></code> is allowed.</p>
+</section>
+<section id="events">
+<h2>Events<a class="headerlink" href="#events" title="Link to this heading">¶</a></h2>
+<p>Event records mirror Rack’s: <code class="docutils literal notranslate"><span class="pre">Widget.HoverEvent</span></code> (also
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw.widget.HoverEvent</span></code>) derives from <code class="docutils literal notranslate"><span class="pre">BaseEvent</span></code> and
+<code class="docutils literal notranslate"><span class="pre">PositionBaseEvent</span></code>, <code class="docutils literal notranslate"><span class="pre">Widget.DragHoverEvent</span></code> from <code class="docutils literal notranslate"><span class="pre">DragBaseEvent</span></code>, and so on,
+with Rack’s fields in snake case (<code class="docutils literal notranslate"><span class="pre">mouse_delta</span></code>, <code class="docutils literal notranslate"><span class="pre">scroll_delta</span></code>, <code class="docutils literal notranslate"><span class="pre">key_name</span></code>,
+<code class="docutils literal notranslate"><span class="pre">clip_box</span></code>).</p>
+<p>A record you create, such as <code class="docutils literal notranslate"><span class="pre">HoverEvent(pos=Vec(3,</span> <span class="pre">4),</span> <span class="pre">context=EventContext())</span></code>,
+is yours and writable. A record Rack passes to a handler is read-only
+(<code class="docutils literal notranslate"><span class="pre">TypeError</span></code> on assignment) and <strong>expires when the handler returns</strong>: keeping
+it and using it later raises <code class="docutils literal notranslate"><span class="pre">StaleHandleError</span></code>. Field reads are copies, so
+values you keep stay valid.</p>
+<p><code class="docutils literal notranslate"><span class="pre">EventContext</span></code> carries the state that propagation shares: <code class="docutils literal notranslate"><span class="pre">propagating</span></code>,
+<code class="docutils literal notranslate"><span class="pre">consumed</span></code> and <code class="docutils literal notranslate"><span class="pre">target</span></code>. <code class="docutils literal notranslate"><span class="pre">BaseEvent.consume(widget)</span></code>, <code class="docutils literal notranslate"><span class="pre">stop_propagating()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">set_target()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_target()</span></code>, <code class="docutils literal notranslate"><span class="pre">is_consumed()</span></code> and <code class="docutils literal notranslate"><span class="pre">is_propagating()</span></code> are Rack’s; without a
+context they do nothing, as in Rack. A target that Rack later deletes raises
+<code class="docutils literal notranslate"><span class="pre">StaleHandleError</span></code> instead of dangling. <code class="docutils literal notranslate"><span class="pre">PathDropEvent.paths</span></code> is a list of
+strings; <code class="docutils literal notranslate"><span class="pre">HoverKeyEvent.is_key_command(key,</span> <span class="pre">mods)</span></code> is Rack’s check.</p>
+<section id="finding-widgets-and-forwarding-events">
+<h3>Finding widgets and forwarding events<a class="headerlink" href="#finding-widgets-and-forwarding-events" title="Link to this heading">¶</a></h3>
+<p>Rack’s member templates take a class where C++ takes a type argument:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">get_ancestor_of_type(cls)</span></code> and <code class="docutils literal notranslate"><span class="pre">get_first_descendant_of_type(cls)</span></code> are
+<code class="docutils literal notranslate"><span class="pre">getAncestorOfType&lt;T&gt;()</span></code> and <code class="docutils literal notranslate"><span class="pre">getFirstDescendantOfType&lt;T&gt;()</span></code>: the nearest
+ancestor, or the first descendant depth-first in child order, that is a
+<code class="docutils literal notranslate"><span class="pre">cls</span></code>, else <code class="docutils literal notranslate"><span class="pre">None</span></code>. <code class="docutils literal notranslate"><span class="pre">cls</span></code> is any bound widget class (this page’s, and
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw.app</span></code>’s, <code class="docutils literal notranslate"><span class="pre">ui</span></code>’s and <code class="docutils literal notranslate"><span class="pre">componentlibrary</span></code>’s) or a Python subclass
+of one. A bound class matches Rack’s own widgets too, by their native type
+(Rack’s scene is an <code class="docutils literal notranslate"><span class="pre">OpaqueWidget</span></code>, and <code class="docutils literal notranslate"><span class="pre">raw.create_menu()</span></code> makes a Rack
+<code class="docutils literal notranslate"><span class="pre">ui.Menu</span></code>); a Python subclass only matches widgets with that Python class.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">recurse_event(method,</span> <span class="pre">event)</span></code> and <code class="docutils literal notranslate"><span class="pre">recurse_position_event(method,</span> <span class="pre">event)</span></code>
+are Rack’s <code class="docutils literal notranslate"><span class="pre">recurseEvent</span></code> and <code class="docutils literal notranslate"><span class="pre">recursePositionEvent</span></code>, for a container that
+dispatches an event to its children itself. <code class="docutils literal notranslate"><span class="pre">method</span></code> is the handler, such as
+<code class="docutils literal notranslate"><span class="pre">Widget.on_hover</span></code>, and is called on each child, topmost first, while the
+event propagates, so the children’s overrides run. The position form skips
+invisible children and those whose box does not contain <code class="docutils literal notranslate"><span class="pre">event.pos</span></code>, and
+passes the position in the child’s coordinates. A handler that does not
+match the event raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>, where C++ would not compile.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">get_key_name(key)</span></code> and <code class="docutils literal notranslate"><span class="pre">get_key_command_name(key,</span> <span class="pre">mods)</span></code> are Rack’s display
+names for GLFW key codes (<code class="docutils literal notranslate"><span class="pre">&quot;A&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Ctrl+Shift+A&quot;</span></code>, empty for control codes),
+in Rack’s language. They need only the main thread, not a window.</p>
+</section>
+</section>
+<section id="drawing">
+<h2>Drawing<a class="headerlink" href="#drawing" title="Link to this heading">¶</a></h2>
+<p>Rack draws a widget by calling <code class="docutils literal notranslate"><span class="pre">draw(args)</span></code> with a <code class="docutils literal notranslate"><span class="pre">DrawArgs</span></code> record:
+<code class="docutils literal notranslate"><span class="pre">args.vg</span></code> is an opaque <code class="docutils literal notranslate"><span class="pre">GraphicsContext</span></code>, <code class="docutils literal notranslate"><span class="pre">args.fb</span></code> the target <code class="docutils literal notranslate"><span class="pre">Framebuffer</span></code>
+or <code class="docutils literal notranslate"><span class="pre">None</span></code>, and <code class="docutils literal notranslate"><span class="pre">args.clip_box</span></code> the visible part in the widget’s own
+coordinates. Both handles expire with the call. Within a draw call you can
+draw with <a class="reference internal" href="window.html#drawing-with-nanovg"><span class="std std-ref">NanoVG</span></a> or draw an <code class="docutils literal notranslate"><span class="pre">Svg</span></code>
+(<code class="docutils literal notranslate"><span class="pre">svg.draw(args.vg)</span></code>), call <code class="docutils literal notranslate"><span class="pre">super().draw(args)</span></code> to draw the children, or call
+<code class="docutils literal notranslate"><span class="pre">self.draw_child(child,</span> <span class="pre">args,</span> <span class="pre">layer)</span></code> as Rack’s <code class="docutils literal notranslate"><span class="pre">drawChild</span></code> does.</p>
+<p><code class="docutils literal notranslate"><span class="pre">FramebufferWidget.render()</span></code> is Rack’s off-screen rendering and calls the
+children’s <code class="docutils literal notranslate"><span class="pre">draw</span></code> overrides synchronously, so it also works outside Rack’s
+frame loop. It refuses to nest inside a draw call (<code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code>), an
+<code class="docutils literal notranslate"><span class="pre">oversample</span></code> that is not finite and positive (<code class="docutils literal notranslate"><span class="pre">ValueError</span></code>), and sizes beyond
+Rack’s integer range. <code class="docutils literal notranslate"><span class="pre">get_framebuffer()</span></code> returns a checked handle that
+becomes stale when the widget re-renders, deletes its framebuffer, or Rack’s
+graphics context goes away; <code class="docutils literal notranslate"><span class="pre">get_image_handle()</span></code> is Rack’s NanoVG image ID
+(-1 before rendering), not an address. <code class="docutils literal notranslate"><span class="pre">get_framebuffer_size()</span></code> returns the
+current framebuffer dimensions, and <code class="docutils literal notranslate"><span class="pre">delete_framebuffer()</span></code> frees the image
+and invalidates existing framebuffer handles. <code class="docutils literal notranslate"><span class="pre">set_dirty(dirty=True)</span></code> marks it for
+redrawing; pass <code class="docutils literal notranslate"><span class="pre">False</span></code> to mark it clean.</p>
+<p>When Rack destroys its graphics context (the window closes), RackPy deletes
+the framebuffers of every widget it manages, even if a Python
+<code class="docutils literal notranslate"><span class="pre">on_context_destroy</span></code> override did not call <code class="docutils literal notranslate"><span class="pre">super()</span></code>, and their
+<code class="docutils literal notranslate"><span class="pre">get_framebuffer()</span></code> handles become stale. On a new graphics context they are
+marked dirty so that they render again. Rack Free never recreates its window:
+the tests check recreation by sending Rack’s own two events through the
+scene, as a host that recreates its window would.</p>
+</section>
+<section id="typed-bases">
+<h2>Typed bases<a class="headerlink" href="#typed-bases" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">TransparentWidget</span></code> ignores position events (hover, button, key and text
+while hovered, scroll, drag hover, path drops): neither it nor its children
+see them. <code class="docutils literal notranslate"><span class="pre">OpaqueWidget</span></code> delivers them to its children and stops their
+propagation. It also consumes hover, drag-hover and left-button events if a
+child did not; other position events are stopped without being consumed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ZoomWidget</span></code> scales its children: <code class="docutils literal notranslate"><span class="pre">zoom</span></code> is the raw field, <code class="docutils literal notranslate"><span class="pre">set_zoom()</span></code> is
+Rack’s setter, and positions and offsets go through the zoom.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TransformWidget.transform</span></code> is a live, checked view of Rack’s six-float
+matrix (<code class="docutils literal notranslate"><span class="pre">copy()</span></code> returns a tuple); <code class="docutils literal notranslate"><span class="pre">identity()</span></code>, <code class="docutils literal notranslate"><span class="pre">translate()</span></code>, <code class="docutils literal notranslate"><span class="pre">scale()</span></code>
+and <code class="docutils literal notranslate"><span class="pre">rotate(angle,</span> <span class="pre">origin)</span></code> are Rack’s.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SvgWidget.svg</span></code> is the raw field: assigning it does not resize the widget,
+while <code class="docutils literal notranslate"><span class="pre">set_svg()</span></code> and <code class="docutils literal notranslate"><span class="pre">wrap()</span></code> do. It accepts <code class="docutils literal notranslate"><span class="pre">None</span></code> or a loaded <code class="docutils literal notranslate"><span class="pre">Svg</span></code>; an
+unloaded <code class="docutils literal notranslate"><span class="pre">Svg</span></code> raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>. <code class="docutils literal notranslate"><span class="pre">SVGWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">set_svg_legacy()</span></code> are
+Rack’s deprecated spellings; both warn. <code class="docutils literal notranslate"><span class="pre">rackpy.raw.window.Svg</span></code> loads SVGs
+(<code class="docutils literal notranslate"><span class="pre">load_string</span></code>, <code class="docutils literal notranslate"><span class="pre">load_file</span></code>, <code class="docutils literal notranslate"><span class="pre">Svg.load</span></code>; see <a class="reference internal" href="window.html#svgs"><span class="std std-ref">SVGs</span></a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FramebufferWidget</span></code> has Rack’s <code class="docutils literal notranslate"><span class="pre">dirty</span></code>, <code class="docutils literal notranslate"><span class="pre">bypassed</span></code>, <code class="docutils literal notranslate"><span class="pre">oversample</span></code>,
+<code class="docutils literal notranslate"><span class="pre">dirty_on_subpixel_change</span></code> and a checked <code class="docutils literal notranslate"><span class="pre">viewport_margin</span></code> view.
+<code class="docutils literal notranslate"><span class="pre">OpenGlWidget</span></code> derives from it.</p></li>
+</ul>
+</section>
+<section id="adding-widgets-to-rack-s-scene">
+<h2>Adding widgets to Rack’s scene<a class="headerlink" href="#adding-widgets-to-rack-s-scene" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">widget.attach_to_scene()</span></code> appends the widget to Rack’s scene, which then
+owns it, so it takes part in Rack’s frame loop (stepping, drawing, input)
+like Rack’s own widgets. <code class="docutils literal notranslate"><span class="pre">remove_from_parent()</span></code> gives it back. A widget
+still in the scene when the window closes receives Rack’s <code class="docutils literal notranslate"><span class="pre">ContextDestroy</span></code>
+event, then RackPy deletes it with the rest of its managed widgets. The tests
+check attachment, detachment and that teardown, not frame-loop delivery.</p>
+</section>
+<section id="inside-module-widgets-and-browser-previews">
+<h2>Inside module widgets and browser previews<a class="headerlink" href="#inside-module-widgets-and-browser-previews" title="Link to this heading">¶</a></h2>
+<p>A Python widget can also belong to a module’s panel widget (<code class="docutils literal notranslate"><span class="pre">ModuleWidget</span></code>).
+Module widgets cannot be written in Python yet (RP-16 and RP-28), so the
+tests use RackPy’s test-only RuntimeProbe module to show what Rack does:</p>
+<ul class="simple">
+<li><p><strong>Deleting a module.</strong> Rack removes the module widget from the rack and
+deletes it, without the GIL. The Python child gets one <code class="docutils literal notranslate"><span class="pre">on_remove</span></code> while its
+parent still exists, then Rack deletes it and its handle goes stale. Only
+after that does the engine remove the module.</p></li>
+<li><p><strong>Browser previews.</strong> The module browser builds each preview from a
+<code class="docutils literal notranslate"><span class="pre">ModuleWidget</span></code> with no module, in a zoomed <code class="docutils literal notranslate"><span class="pre">FramebufferWidget</span></code>; it steps it
+once, renders it, and deletes it with the preview. A Python child is stepped
+and drawn there like anywhere else, so it must not assume a module exists.</p></li>
+</ul>
+</section>
+<section id="runnable-ui-exercise">
+<h2>Runnable UI exercise<a class="headerlink" href="#runnable-ui-exercise" title="Link to this heading">¶</a></h2>
+<p>This listing defines a subclass and a function; call the function from
+Rack’s UI thread, <strong>not</strong> at import time. The actual-host widget suite calls
+it from a RuntimeProbe UI step.</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">A Python widget receiving a click and drawing in Rack · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">widget</span> <span class="k">as</span> <span class="n">w</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.raw.math</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rect</span><span class="p">,</span> <span class="n">Vec</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Swatch</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">OpaqueWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Counts clicks and frames; Rack calls both overrides on its UI thread."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clicks</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frames</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">w</span><span class="o">.</span><span class="n">ButtonEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clicks</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">on_button</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>  <span class="c1"># OpaqueWidget consumes the click</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">draw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">w</span><span class="o">.</span><span class="n">DrawArgs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frames</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c1"># args and args.vg expire when this call returns</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">exercise_widgets</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Call from Rack's UI thread after its context exists, not plugin startup."""</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">FramebufferWidget</span><span class="p">()</span>
+    <span class="n">swatch</span> <span class="o">=</span> <span class="n">Swatch</span><span class="p">()</span>
+    <span class="n">frame</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="n">swatch</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="n">Rect</span><span class="p">(</span><span class="n">Vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Vec</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+    <span class="n">frame</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">swatch</span><span class="p">)</span>  <span class="c1"># the frame owns the swatch now</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">click</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">ButtonEvent</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">Vec</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">button</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">w</span><span class="o">.</span><span class="n">EventContext</span><span class="p">())</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">on_button</span><span class="p">(</span><span class="n">click</span><span class="p">)</span>  <span class="c1"># Rack's own dispatch, by position, to the swatch</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>  <span class="c1"># Rack's framebuffer rendering calls Swatch.draw</span>
+        <span class="k">assert</span> <span class="n">click</span><span class="o">.</span><span class="n">get_target</span><span class="p">()</span> <span class="ow">is</span> <span class="n">swatch</span>
+        <span class="k">return</span> <span class="n">swatch</span><span class="o">.</span><span class="n">clicks</span><span class="p">,</span> <span class="n">swatch</span><span class="o">.</span><span class="n">frames</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># deletes the swatch too</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="validation-boundary">
+<h2>Validation boundary<a class="headerlink" href="#validation-boundary" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">tests/widget/test_tree.py</span></code> runs the <code class="docutils literal notranslate"><span class="pre">tests/widget/in_rack</span></code> suite in actual
+Rack Free’s live UI under Xvfb. It covers ownership transfer and identity for
+every base, subclass peers kept alive by Rack, error containment, refused
+mutations, worker release, event propagation and consumption, expiring and
+read-only callback records, every event handler’s base implementation, the
+typed bases’ fields, SVG and framebuffer lifetimes, and Python drawing driven
+by <code class="docutils literal notranslate"><span class="pre">FramebufferWidget.render()</span></code>. It also covers scene attachment, a scene
+widget receiving the real window teardown, module deletion and a null-module
+browser preview (through test hooks that follow Rack’s code), a simulated
+graphics context recreation, the typed lookups (including Rack-owned
+ancestors), both event recursion templates and the key names. It does not
+cover Rack’s actual browser window, input from a real mouse or keyboard,
+frame-loop delivery, macOS or Windows.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="ui.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">UI widgets and menus</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="plugin.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Plugins and models</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Subclassable widgets and events</a><ul>
+<li><a class="reference internal" href="#creating-and-owning-widgets">Creating and owning widgets</a></li>
+<li><a class="reference internal" href="#overrides-that-rack-calls">Overrides that Rack calls</a></li>
+<li><a class="reference internal" href="#events">Events</a><ul>
+<li><a class="reference internal" href="#finding-widgets-and-forwarding-events">Finding widgets and forwarding events</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#drawing">Drawing</a></li>
+<li><a class="reference internal" href="#typed-bases">Typed bases</a></li>
+<li><a class="reference internal" href="#adding-widgets-to-rack-s-scene">Adding widgets to Rack’s scene</a></li>
+<li><a class="reference internal" href="#inside-module-widgets-and-browser-previews">Inside module widgets and browser previews</a></li>
+<li><a class="reference internal" href="#runnable-ui-exercise">Runnable UI exercise</a></li>
+<li><a class="reference internal" href="#validation-boundary">Validation boundary</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

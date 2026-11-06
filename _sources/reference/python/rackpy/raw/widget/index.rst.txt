@@ -1,0 +1,1550 @@
+rackpy.raw.widget
+=================
+
+.. py:module:: rackpy.raw.widget
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.widget.PositionBaseEvent
+   rackpy.raw.widget.KeyBaseEvent
+   rackpy.raw.widget.TextBaseEvent
+   rackpy.raw.widget.DragBaseEvent
+   rackpy.raw.widget.DrawArgs
+   rackpy.raw.widget.HoverEvent
+   rackpy.raw.widget.ButtonEvent
+   rackpy.raw.widget.DoubleClickEvent
+   rackpy.raw.widget.HoverKeyEvent
+   rackpy.raw.widget.HoverTextEvent
+   rackpy.raw.widget.HoverScrollEvent
+   rackpy.raw.widget.EnterEvent
+   rackpy.raw.widget.LeaveEvent
+   rackpy.raw.widget.SelectEvent
+   rackpy.raw.widget.DeselectEvent
+   rackpy.raw.widget.SelectKeyEvent
+   rackpy.raw.widget.SelectTextEvent
+   rackpy.raw.widget.DragStartEvent
+   rackpy.raw.widget.DragEndEvent
+   rackpy.raw.widget.DragMoveEvent
+   rackpy.raw.widget.DragHoverEvent
+   rackpy.raw.widget.DragEnterEvent
+   rackpy.raw.widget.DragLeaveEvent
+   rackpy.raw.widget.DragDropEvent
+   rackpy.raw.widget.PathDropEvent
+   rackpy.raw.widget.ActionEvent
+   rackpy.raw.widget.ChangeEvent
+   rackpy.raw.widget.DirtyEvent
+   rackpy.raw.widget.RepositionEvent
+   rackpy.raw.widget.ResizeEvent
+   rackpy.raw.widget.AddEvent
+   rackpy.raw.widget.RemoveEvent
+   rackpy.raw.widget.ShowEvent
+   rackpy.raw.widget.HideEvent
+   rackpy.raw.widget.ContextCreateEvent
+   rackpy.raw.widget.ContextDestroyEvent
+   rackpy.raw.widget.SVGWidget
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.widget.GraphicsContext
+   rackpy.raw.widget.Framebuffer
+   rackpy.raw.widget.WidgetChildren
+   rackpy.raw.widget.HostWidget
+   rackpy.raw.widget.HostFramebufferWidget
+   rackpy.raw.widget.HostSvgWidget
+   rackpy.raw.widget.HostTransformWidget
+   rackpy.raw.widget.HostCircularShadow
+   rackpy.raw.widget.EventContext
+   rackpy.raw.widget.BaseEvent
+   rackpy.raw.widget.Widget
+   rackpy.raw.widget.TransparentWidget
+   rackpy.raw.widget.OpaqueWidget
+   rackpy.raw.widget.TransformWidget
+   rackpy.raw.widget.ZoomWidget
+   rackpy.raw.widget.SvgWidget
+   rackpy.raw.widget.FramebufferWidget
+   rackpy.raw.widget.OpenGlWidget
+   rackpy.raw.widget.TransformMatrix
+   rackpy.raw.widget.WidgetVecView
+   rackpy.raw.widget.WidgetBoxView
+   rackpy.raw.widget.WidgetNode
+   rackpy.raw.widget.EventState
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.widget.get_key_name
+   rackpy.raw.widget.get_key_command_name
+
+
+Module Contents
+---------------
+
+.. py:class:: GraphicsContext
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+.. py:class:: Framebuffer
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+.. py:class:: WidgetChildren
+
+
+
+   Rack's Widget::children: a live, read-only, checked view (main thread only).
+
+   Iteration walks the children present when it starts. Change the children
+   through ``add_child``, ``remove_child`` and the other ownership methods.
+
+
+   .. py:method:: index(value: object) -> int
+
+
+   .. py:method:: count(value: object) -> int
+
+
+   .. py:method:: copy() -> tuple[Widget | HostWidget, ...]
+
+
+.. py:class:: HostWidget
+
+   Checked nonowning host identity; not a transferable Widget.
+
+
+   .. py:method:: get_weak_count() -> int
+
+
+   .. py:property:: weak_handle
+      :type: rackpy.raw.WeakHandle | None
+
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: parent
+      :type: Widget | HostWidget | None
+
+
+
+   .. py:method:: get_box() -> rackpy.raw.math.Rect
+
+
+   .. py:method:: add_child(child: Widget) -> None
+
+
+   .. py:method:: step() -> None
+
+
+   .. py:method:: draw(args: Any) -> None
+
+
+   .. py:method:: draw_layer(args: Any, layer: int) -> None
+
+
+   .. py:method:: on_hover(event: Any) -> None
+
+
+   .. py:method:: on_button(event: Any) -> None
+
+
+   .. py:method:: on_double_click(event: Any) -> None
+
+
+   .. py:method:: on_hover_key(event: Any) -> None
+
+
+   .. py:method:: on_hover_text(event: Any) -> None
+
+
+   .. py:method:: on_hover_scroll(event: Any) -> None
+
+
+   .. py:method:: on_enter(event: Any) -> None
+
+
+   .. py:method:: on_leave(event: Any) -> None
+
+
+   .. py:method:: on_select(event: Any) -> None
+
+
+   .. py:method:: on_deselect(event: Any) -> None
+
+
+   .. py:method:: on_select_key(event: Any) -> None
+
+
+   .. py:method:: on_select_text(event: Any) -> None
+
+
+   .. py:method:: on_drag_start(event: Any) -> None
+
+
+   .. py:method:: on_drag_end(event: Any) -> None
+
+
+   .. py:method:: on_drag_move(event: Any) -> None
+
+
+   .. py:method:: on_drag_hover(event: Any) -> None
+
+
+   .. py:method:: on_drag_enter(event: Any) -> None
+
+
+   .. py:method:: on_drag_leave(event: Any) -> None
+
+
+   .. py:method:: on_drag_drop(event: Any) -> None
+
+
+   .. py:method:: on_path_drop(event: Any) -> None
+
+
+   .. py:method:: on_action(event: Any) -> None
+
+
+   .. py:method:: on_change(event: Any) -> None
+
+
+   .. py:method:: on_dirty(event: Any) -> None
+
+
+   .. py:method:: on_reposition(event: Any) -> None
+
+
+   .. py:method:: on_resize(event: Any) -> None
+
+
+   .. py:method:: on_show(event: Any) -> None
+
+
+   .. py:method:: on_hide(event: Any) -> None
+
+
+.. py:class:: HostFramebufferWidget
+
+
+
+   A Rack-owned FramebufferWidget's public fields.
+
+
+   .. py:attribute:: dirty
+      :type:  bool
+
+
+   .. py:attribute:: bypassed
+      :type:  bool
+
+
+   .. py:attribute:: oversample
+      :type:  float
+
+
+   .. py:attribute:: dirty_on_subpixel_change
+      :type:  bool
+
+
+   .. py:method:: set_dirty(dirty: bool = True) -> None
+
+
+   .. py:method:: get_framebuffer_size() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_image_handle() -> int
+
+
+.. py:class:: HostSvgWidget
+
+
+
+   A Rack-owned SvgWidget's public fields.
+
+
+   .. py:attribute:: svg
+      :type:  rackpy.raw.window.Svg | None
+
+
+   .. py:method:: set_svg(svg: rackpy.raw.window.Svg | None) -> None
+
+
+   .. py:method:: wrap() -> None
+
+
+.. py:class:: HostTransformWidget
+
+
+
+   A Rack-owned TransformWidget's public fields.
+
+
+   .. py:property:: transform
+      :type: tuple[float, float, float, float, float, float]
+
+
+
+   .. py:method:: identity() -> None
+
+
+   .. py:method:: translate(delta: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: scale(scale: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: rotate(angle: float) -> None
+                  rotate(angle: float, origin: rackpy.raw.math.Vec) -> None
+
+
+.. py:class:: HostCircularShadow
+
+
+
+   A Rack-owned CircularShadow's public fields.
+
+
+   .. py:attribute:: blur_radius
+      :type:  float
+
+
+   .. py:attribute:: opacity
+      :type:  float
+
+
+.. py:class:: EventContext(*, propagating: bool = ..., consumed: bool = ..., target: Widget | HostWidget | None = ...)
+
+   .. py:attribute:: propagating
+      :type:  bool
+
+
+   .. py:attribute:: consumed
+      :type:  bool
+
+
+   .. py:attribute:: target
+      :type:  Widget | HostWidget | None
+
+
+.. py:class:: BaseEvent(*, context: EventContext | None = ...)
+
+   .. py:attribute:: context
+      :type:  EventContext | None
+
+
+   .. py:method:: stop_propagating() -> None
+
+
+   .. py:method:: is_propagating() -> bool
+
+
+   .. py:method:: set_target(widget: Widget | HostWidget | None) -> None
+
+
+   .. py:method:: get_target() -> Widget | HostWidget | None
+
+
+   .. py:method:: consume(widget: Widget | HostWidget | None) -> None
+
+
+   .. py:method:: unconsume() -> None
+
+
+   .. py:method:: is_consumed() -> bool
+
+
+.. py:class:: Widget
+
+   .. py:type:: BaseEvent
+      :canonical: _BaseEvent
+
+
+
+   .. py:method:: get_weak_count() -> int
+
+
+   .. py:property:: weak_handle
+      :type: rackpy.raw.WeakHandle | None
+
+
+
+   .. py:class:: PositionBaseEvent(*, pos: rackpy.raw.math.Vec | WidgetVecView = ...)
+
+      .. py:property:: pos
+         :type: rackpy.raw.math.Vec
+
+
+
+
+   .. py:class:: KeyBaseEvent(*, key: int = ..., scancode: int = ..., key_name: str = ..., action: int = ..., mods: int = ...)
+
+      .. py:attribute:: key
+         :type:  int
+
+
+      .. py:attribute:: scancode
+         :type:  int
+
+
+      .. py:attribute:: key_name
+         :type:  str
+
+
+      .. py:attribute:: action
+         :type:  int
+
+
+      .. py:attribute:: mods
+         :type:  int
+
+
+      .. py:method:: is_key_command(key: int, mods: int = 0) -> bool
+
+
+
+   .. py:class:: TextBaseEvent(*, codepoint: int = ...)
+
+      .. py:attribute:: codepoint
+         :type:  int
+
+
+
+   .. py:class:: DragBaseEvent(*, context: EventContext | None = ..., button: int = ...)
+
+
+
+      .. py:attribute:: button
+         :type:  int
+
+
+
+   .. py:class:: DrawArgs(*, vg: GraphicsContext | None = ..., fb: Framebuffer | None = ..., clip_box: rackpy.raw.math.Rect | WidgetBoxView = ...)
+
+      .. py:attribute:: vg
+         :type:  GraphicsContext | None
+
+
+      .. py:attribute:: fb
+         :type:  Framebuffer | None
+
+
+      .. py:property:: clip_box
+         :type: rackpy.raw.math.Rect
+
+
+
+
+   .. py:class:: HoverEvent(*, context: EventContext | None = ..., pos: rackpy.raw.math.Vec | WidgetVecView = ..., mouse_delta: rackpy.raw.math.Vec | WidgetVecView = ...)
+
+
+
+      .. py:property:: mouse_delta
+         :type: rackpy.raw.math.Vec
+
+
+
+
+   .. py:class:: ButtonEvent(*, context: EventContext | None = ..., pos: rackpy.raw.math.Vec | WidgetVecView = ..., button: int = ..., action: int = ..., mods: int = ...)
+
+
+
+      .. py:attribute:: button
+         :type:  int
+
+
+      .. py:attribute:: action
+         :type:  int
+
+
+      .. py:attribute:: mods
+         :type:  int
+
+
+
+   .. py:class:: DoubleClickEvent(*, context: EventContext | None = ...)
+
+
+
+
+   .. py:class:: HoverKeyEvent(*, context: EventContext | None = ..., pos: rackpy.raw.math.Vec | WidgetVecView = ..., key: int = ..., scancode: int = ..., key_name: str = ..., action: int = ..., mods: int = ...)
+
+
+
+
+   .. py:class:: HoverTextEvent(*, context: EventContext | None = ..., pos: rackpy.raw.math.Vec | WidgetVecView = ..., codepoint: int = ...)
+
+
+
+
+   .. py:class:: HoverScrollEvent(*, context: EventContext | None = ..., pos: rackpy.raw.math.Vec | WidgetVecView = ..., scroll_delta: rackpy.raw.math.Vec | WidgetVecView = ...)
+
+
+
+      .. py:property:: scroll_delta
+         :type: rackpy.raw.math.Vec
+
+
+
+
+   .. py:class:: EnterEvent(*, context: EventContext | None = ...)
+
+
+
+
+   .. py:class:: LeaveEvent(*, context: EventContext | None = ...)
+
+
+
+
+   .. py:class:: SelectEvent(*, context: EventContext | None = ...)
+
+
+
+
+   .. py:class:: DeselectEvent(*, context: EventContext | None = ...)
+
+
+
+
+   .. py:class:: SelectKeyEvent(*, context: EventContext | None = ..., key: int = ..., scancode: int = ..., key_name: str = ..., action: int = ..., mods: int = ...)
+
+
+
+
+   .. py:class:: SelectTextEvent(*, context: EventContext | None = ..., codepoint: int = ...)
+
+
+
+
+   .. py:class:: DragStartEvent(*, context: EventContext | None = ..., button: int = ...)
+
+
+
+
+   .. py:class:: DragEndEvent(*, context: EventContext | None = ..., button: int = ...)
+
+
+
+
+   .. py:class:: DragMoveEvent(*, context: EventContext | None = ..., button: int = ..., mouse_delta: rackpy.raw.math.Vec | WidgetVecView = ...)
+
+
+
+      .. py:property:: mouse_delta
+         :type: rackpy.raw.math.Vec
+
+
+
+
+   .. py:class:: DragHoverEvent(*, context: EventContext | None = ..., button: int = ..., pos: rackpy.raw.math.Vec | WidgetVecView = ..., origin: Widget | HostWidget | None = ..., mouse_delta: rackpy.raw.math.Vec | WidgetVecView = ...)
+
+
+
+      .. py:attribute:: origin
+         :type:  Widget | HostWidget | None
+
+
+      .. py:property:: mouse_delta
+         :type: rackpy.raw.math.Vec
+
+
+
+
+   .. py:class:: DragEnterEvent(*, context: EventContext | None = ..., button: int = ..., origin: Widget | HostWidget | None = ...)
+
+
+
+      .. py:attribute:: origin
+         :type:  Widget | HostWidget | None
+
+
+
+   .. py:class:: DragLeaveEvent(*, context: EventContext | None = ..., button: int = ..., origin: Widget | HostWidget | None = ...)
+
+
+
+      .. py:attribute:: origin
+         :type:  Widget | HostWidget | None
+
+
+
+   .. py:class:: DragDropEvent(*, context: EventContext | None = ..., button: int = ..., origin: Widget | HostWidget | None = ...)
+
+
+
+      .. py:attribute:: origin
+         :type:  Widget | HostWidget | None
+
+
+
+   .. py:class:: PathDropEvent(paths: collections.abc.Sequence[str] = (), *, context: EventContext | None = ..., pos: rackpy.raw.math.Vec | WidgetVecView = ...)
+
+
+
+      .. py:property:: paths
+         :type: list[str]
+
+
+
+
+   .. py:class:: ActionEvent(*, context: EventContext | None = ...)
+
+
+
+
+   .. py:class:: ChangeEvent(*, context: EventContext | None = ...)
+
+
+
+
+   .. py:class:: DirtyEvent(*, context: EventContext | None = ...)
+
+
+
+
+   .. py:class:: RepositionEvent(*, context: EventContext | None = ...)
+
+
+
+
+   .. py:class:: ResizeEvent(*, context: EventContext | None = ...)
+
+
+
+
+   .. py:class:: AddEvent(*, context: EventContext | None = ...)
+
+
+
+
+   .. py:class:: RemoveEvent(*, context: EventContext | None = ...)
+
+
+
+
+   .. py:class:: ShowEvent(*, context: EventContext | None = ...)
+
+
+
+
+   .. py:class:: HideEvent(*, context: EventContext | None = ...)
+
+
+
+
+   .. py:class:: ContextCreateEvent(*, context: EventContext | None = ..., vg: GraphicsContext | None = ...)
+
+
+
+      .. py:attribute:: vg
+         :type:  GraphicsContext | None
+
+
+
+   .. py:class:: ContextDestroyEvent(*, context: EventContext | None = ..., vg: GraphicsContext | None = ...)
+
+
+
+      .. py:attribute:: vg
+         :type:  GraphicsContext | None
+
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: box
+      :type: WidgetBoxView
+
+
+
+   .. py:attribute:: visible
+      :type:  bool
+
+
+   .. py:attribute:: requested_delete
+      :type:  bool
+
+
+   .. py:property:: parent
+      :type: Widget | HostWidget | None
+
+
+
+   .. py:property:: children
+      :type: WidgetChildren
+
+
+
+   .. py:method:: close() -> None
+
+
+   .. py:method:: add_child(child: Widget) -> None
+
+
+   .. py:method:: add_child_bottom(child: Widget) -> None
+
+
+   .. py:method:: add_child_above(child: Widget, sibling: Widget) -> None
+
+
+   .. py:method:: add_child_below(child: Widget, sibling: Widget) -> None
+
+
+   .. py:method:: remove_child(child: Widget) -> None
+
+
+   .. py:method:: clear_children() -> None
+
+
+   .. py:method:: remove_from_parent() -> None
+
+
+   .. py:method:: attach_to_scene() -> None
+
+
+   .. py:method:: step() -> None
+
+
+   .. py:method:: request_delete() -> None
+
+
+   .. py:method:: has_child(child: Widget | HostWidget | None) -> bool
+
+
+   .. py:method:: get_parent() -> Widget | HostWidget | None
+
+
+   .. py:method:: get_box() -> rackpy.raw.math.Rect
+
+
+   .. py:method:: set_box(box: rackpy.raw.math.Rect | WidgetBoxView) -> None
+
+
+   .. py:method:: get_position() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: set_position(position: rackpy.raw.math.Vec | WidgetVecView) -> None
+
+
+   .. py:method:: get_size() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: set_size(size: rackpy.raw.math.Vec | WidgetVecView) -> None
+
+
+   .. py:method:: is_visible() -> bool
+
+
+   .. py:method:: set_visible(visible: bool) -> None
+
+
+   .. py:method:: show() -> None
+
+
+   .. py:method:: hide() -> None
+
+
+   .. py:method:: get_children_bounding_box() -> rackpy.raw.math.Rect
+
+
+   .. py:method:: get_visible_children_bounding_box() -> rackpy.raw.math.Rect
+
+
+   .. py:method:: get_relative_offset(value: rackpy.raw.math.Vec | WidgetVecView, ancestor: Widget | HostWidget | None) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_relative_zoom(ancestor: Widget | HostWidget | None) -> float
+
+
+   .. py:method:: get_absolute_offset(position: rackpy.raw.math.Vec | WidgetVecView) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_absolute_zoom() -> float
+
+
+   .. py:method:: get_viewport(rect: rackpy.raw.math.Rect | WidgetBoxView = ...) -> rackpy.raw.math.Rect
+
+
+   .. py:method:: is_descendant_of(ancestor: Widget | HostWidget | None) -> bool
+
+
+   .. py:method:: draw(args: DrawArgs) -> None
+
+
+   .. py:method:: draw_vg(graphics: GraphicsContext) -> None
+
+
+   .. py:method:: draw_layer(args: DrawArgs, layer: int) -> None
+
+
+   .. py:method:: draw_child(child: Widget | HostWidget, args: DrawArgs, layer: int = 0) -> None
+
+
+   .. py:method:: on_hover(event: HoverEvent) -> None
+
+
+   .. py:method:: on_button(event: ButtonEvent) -> None
+
+
+   .. py:method:: on_double_click(event: DoubleClickEvent) -> None
+
+
+   .. py:method:: on_hover_key(event: HoverKeyEvent) -> None
+
+
+   .. py:method:: on_hover_text(event: HoverTextEvent) -> None
+
+
+   .. py:method:: on_hover_scroll(event: HoverScrollEvent) -> None
+
+
+   .. py:method:: on_enter(event: EnterEvent) -> None
+
+
+   .. py:method:: on_leave(event: LeaveEvent) -> None
+
+
+   .. py:method:: on_select(event: SelectEvent) -> None
+
+
+   .. py:method:: on_deselect(event: DeselectEvent) -> None
+
+
+   .. py:method:: on_select_key(event: SelectKeyEvent) -> None
+
+
+   .. py:method:: on_select_text(event: SelectTextEvent) -> None
+
+
+   .. py:method:: on_drag_start(event: DragStartEvent) -> None
+
+
+   .. py:method:: on_drag_end(event: DragEndEvent) -> None
+
+
+   .. py:method:: on_drag_move(event: DragMoveEvent) -> None
+
+
+   .. py:method:: on_drag_hover(event: DragHoverEvent) -> None
+
+
+   .. py:method:: on_drag_enter(event: DragEnterEvent) -> None
+
+
+   .. py:method:: on_drag_leave(event: DragLeaveEvent) -> None
+
+
+   .. py:method:: on_drag_drop(event: DragDropEvent) -> None
+
+
+   .. py:method:: on_path_drop(event: PathDropEvent) -> None
+
+
+   .. py:method:: on_action(event: ActionEvent) -> None
+
+
+   .. py:method:: on_change(event: ChangeEvent) -> None
+
+
+   .. py:method:: on_dirty(event: DirtyEvent) -> None
+
+
+   .. py:method:: on_reposition(event: RepositionEvent) -> None
+
+
+   .. py:method:: on_resize(event: ResizeEvent) -> None
+
+
+   .. py:method:: on_add(event: AddEvent) -> None
+
+
+   .. py:method:: on_remove(event: RemoveEvent) -> None
+
+
+   .. py:method:: on_show(event: ShowEvent) -> None
+
+
+   .. py:method:: on_hide(event: HideEvent) -> None
+
+
+   .. py:method:: on_context_create(event: ContextCreateEvent) -> None
+
+
+   .. py:method:: on_context_destroy(event: ContextDestroyEvent) -> None
+
+
+   .. py:method:: get_ancestor_of_type[T: Widget](cls: type[T]) -> T | HostWidget | None
+
+
+   .. py:method:: get_first_descendant_of_type[T: Widget](cls: type[T]) -> T | HostWidget | None
+
+
+   .. py:method:: recurse_event(method: collections.abc.Callable[..., None], event: BaseEvent) -> None
+
+
+   .. py:method:: recurse_position_event(method: collections.abc.Callable[..., None], event: BaseEvent) -> None
+
+
+.. py:data:: PositionBaseEvent
+
+.. py:data:: KeyBaseEvent
+
+.. py:data:: TextBaseEvent
+
+.. py:data:: DragBaseEvent
+
+.. py:data:: DrawArgs
+
+.. py:data:: HoverEvent
+
+.. py:data:: ButtonEvent
+
+.. py:data:: DoubleClickEvent
+
+.. py:data:: HoverKeyEvent
+
+.. py:data:: HoverTextEvent
+
+.. py:data:: HoverScrollEvent
+
+.. py:data:: EnterEvent
+
+.. py:data:: LeaveEvent
+
+.. py:data:: SelectEvent
+
+.. py:data:: DeselectEvent
+
+.. py:data:: SelectKeyEvent
+
+.. py:data:: SelectTextEvent
+
+.. py:data:: DragStartEvent
+
+.. py:data:: DragEndEvent
+
+.. py:data:: DragMoveEvent
+
+.. py:data:: DragHoverEvent
+
+.. py:data:: DragEnterEvent
+
+.. py:data:: DragLeaveEvent
+
+.. py:data:: DragDropEvent
+
+.. py:data:: PathDropEvent
+
+.. py:data:: ActionEvent
+
+.. py:data:: ChangeEvent
+
+.. py:data:: DirtyEvent
+
+.. py:data:: RepositionEvent
+
+.. py:data:: ResizeEvent
+
+.. py:data:: AddEvent
+
+.. py:data:: RemoveEvent
+
+.. py:data:: ShowEvent
+
+.. py:data:: HideEvent
+
+.. py:data:: ContextCreateEvent
+
+.. py:data:: ContextDestroyEvent
+
+.. py:class:: TransparentWidget
+
+
+
+.. py:class:: OpaqueWidget
+
+
+
+.. py:class:: TransformWidget
+
+
+
+   .. py:property:: transform
+      :type: TransformMatrix
+
+
+
+   .. py:method:: identity() -> None
+
+
+   .. py:method:: translate(delta: rackpy.raw.math.Vec | WidgetVecView) -> None
+
+
+   .. py:method:: scale(scale: rackpy.raw.math.Vec | WidgetVecView) -> None
+
+
+   .. py:method:: rotate(angle: float) -> None
+                  rotate(angle: float, origin: rackpy.raw.math.Vec | WidgetVecView) -> None
+
+
+.. py:class:: ZoomWidget
+
+
+
+   .. py:attribute:: zoom
+      :type:  float
+
+
+   .. py:method:: get_zoom() -> float
+
+
+   .. py:method:: set_zoom(zoom: float) -> None
+
+
+.. py:class:: SvgWidget
+
+
+
+   .. py:attribute:: svg
+      :type:  rackpy.raw.window.Svg | None
+
+
+   .. py:method:: wrap() -> None
+
+
+   .. py:method:: set_svg(svg: rackpy.raw.window.Svg | None) -> None
+
+
+   .. py:method:: set_svg_legacy(svg: rackpy.raw.window.Svg | None) -> None
+
+
+.. py:data:: SVGWidget
+
+.. py:class:: FramebufferWidget
+
+
+
+   .. py:attribute:: dirty
+      :type:  bool
+
+
+   .. py:attribute:: bypassed
+      :type:  bool
+
+
+   .. py:attribute:: oversample
+      :type:  float
+
+
+   .. py:attribute:: dirty_on_subpixel_change
+      :type:  bool
+
+
+   .. py:property:: viewport_margin
+      :type: WidgetVecView
+
+
+
+   .. py:method:: set_dirty(dirty: bool = True) -> None
+
+
+   .. py:method:: get_image_handle() -> int
+
+
+   .. py:method:: get_framebuffer() -> Framebuffer | None
+
+
+   .. py:method:: get_framebuffer_size() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: delete_framebuffer() -> None
+
+
+   .. py:method:: render(scale: rackpy.raw.math.Vec | WidgetVecView = ..., offset_f: rackpy.raw.math.Vec | WidgetVecView = ..., clip_box: rackpy.raw.math.Rect | WidgetBoxView = ...) -> None
+
+
+   .. py:method:: draw_framebuffer() -> None
+
+
+.. py:class:: OpenGlWidget
+
+
+
+.. py:class:: TransformMatrix
+
+   .. py:method:: copy() -> tuple[float, float, float, float, float, float]
+
+
+.. py:class:: WidgetVecView
+
+   .. py:attribute:: x
+      :type:  float
+
+
+   .. py:attribute:: y
+      :type:  float
+
+
+   .. py:method:: neg() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: plus(b: rackpy.raw.math.Vec | WidgetVecView) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: minus(b: rackpy.raw.math.Vec | WidgetVecView) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: mult(s: float) -> rackpy.raw.math.Vec
+                  mult(b: rackpy.raw.math.Vec | WidgetVecView) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: div(s: float) -> rackpy.raw.math.Vec
+                  div(b: rackpy.raw.math.Vec | WidgetVecView) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: dot(b: rackpy.raw.math.Vec | WidgetVecView) -> float
+
+
+   .. py:method:: arg() -> float
+
+
+   .. py:method:: norm() -> float
+
+
+   .. py:method:: normalize() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: square() -> float
+
+
+   .. py:method:: area() -> float
+
+
+   .. py:method:: rotate(angle: float) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: flip() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: min(b: rackpy.raw.math.Vec | WidgetVecView) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: max(b: rackpy.raw.math.Vec | WidgetVecView) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: abs() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: round() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: floor() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: ceil() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: equals(b: rackpy.raw.math.Vec | WidgetVecView) -> bool
+
+
+   .. py:method:: is_zero() -> bool
+
+
+   .. py:method:: is_finite() -> bool
+
+
+   .. py:method:: clamp(bound: rackpy.raw.math.Rect | WidgetBoxView) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: clamp_safe(bound: rackpy.raw.math.Rect | WidgetBoxView) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: crossfade(b: rackpy.raw.math.Vec | WidgetVecView, p: float) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: is_equal(b: rackpy.raw.math.Vec | WidgetVecView) -> bool
+
+
+   .. py:method:: copy() -> rackpy.raw.math.Vec
+
+
+.. py:class:: WidgetBoxView
+
+   .. py:property:: pos
+      :type: WidgetVecView
+
+
+
+   .. py:property:: size
+      :type: WidgetVecView
+
+
+
+   .. py:method:: contains(v: rackpy.raw.math.Vec | WidgetVecView) -> bool
+                  contains(r: rackpy.raw.math.Rect | WidgetBoxView) -> bool
+
+
+   .. py:method:: intersects(r: rackpy.raw.math.Rect | WidgetBoxView) -> bool
+
+
+   .. py:method:: equals(r: rackpy.raw.math.Rect | WidgetBoxView) -> bool
+
+
+   .. py:method:: get_left() -> float
+
+
+   .. py:method:: get_right() -> float
+
+
+   .. py:method:: get_top() -> float
+
+
+   .. py:method:: get_bottom() -> float
+
+
+   .. py:method:: get_width() -> float
+
+
+   .. py:method:: get_height() -> float
+
+
+   .. py:method:: get_center() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_top_left() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_top_right() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_bottom_left() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_bottom_right() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: clamp(bound: rackpy.raw.math.Rect | WidgetBoxView) -> rackpy.raw.math.Rect
+
+
+   .. py:method:: nudge(bound: rackpy.raw.math.Rect | WidgetBoxView) -> rackpy.raw.math.Rect
+
+
+   .. py:method:: expand(b: rackpy.raw.math.Rect | WidgetBoxView) -> rackpy.raw.math.Rect
+
+
+   .. py:method:: intersect(b: rackpy.raw.math.Rect | WidgetBoxView) -> rackpy.raw.math.Rect
+
+
+   .. py:method:: zero_pos() -> rackpy.raw.math.Rect
+
+
+   .. py:method:: grow(delta: rackpy.raw.math.Vec | WidgetVecView) -> rackpy.raw.math.Rect
+
+
+   .. py:method:: shrink(delta: rackpy.raw.math.Vec | WidgetVecView) -> rackpy.raw.math.Rect
+
+
+   .. py:method:: interpolate(p: rackpy.raw.math.Vec | WidgetVecView) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: is_containing(v: rackpy.raw.math.Vec | WidgetVecView) -> bool
+
+
+   .. py:method:: is_intersecting(r: rackpy.raw.math.Rect | WidgetBoxView) -> bool
+
+
+   .. py:method:: is_equal(r: rackpy.raw.math.Rect | WidgetBoxView) -> bool
+
+
+   .. py:property:: left
+      :type: float
+
+
+
+   .. py:property:: right
+      :type: float
+
+
+
+   .. py:property:: top
+      :type: float
+
+
+
+   .. py:property:: bottom
+      :type: float
+
+
+
+   .. py:property:: width
+      :type: float
+
+
+
+   .. py:property:: height
+      :type: float
+
+
+
+   .. py:property:: center
+      :type: rackpy.raw.math.Vec
+
+
+
+   .. py:method:: copy() -> rackpy.raw.math.Rect
+
+
+.. py:function:: get_key_name(key: int) -> str
+
+.. py:function:: get_key_command_name(key: int, mods: int = 0) -> str
+
+.. py:class:: WidgetNode
+
+   Detached native-only tree adapter; not the complete Widget binding.
+
+
+   .. py:method:: create() -> WidgetNode
+      :staticmethod:
+
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: box
+      :type: WidgetBoxView
+
+
+
+   .. py:property:: visible
+      :type: bool
+
+
+
+   .. py:property:: parent
+      :type: WidgetNode | None
+
+
+
+   .. py:property:: children
+      :type: tuple[WidgetNode, ...]
+
+
+
+   .. py:method:: close() -> None
+
+
+   .. py:method:: add_child(child: WidgetNode) -> None
+
+
+   .. py:method:: add_child_bottom(child: WidgetNode) -> None
+
+
+   .. py:method:: add_child_above(child: WidgetNode, sibling: WidgetNode) -> None
+
+
+   .. py:method:: add_child_below(child: WidgetNode, sibling: WidgetNode) -> None
+
+
+   .. py:method:: remove_child(child: WidgetNode) -> None
+
+
+   .. py:method:: clear_children() -> None
+
+
+   .. py:method:: request_delete() -> None
+
+
+   .. py:property:: requested_delete
+      :type: bool
+
+
+
+   .. py:method:: step() -> None
+
+
+   .. py:method:: has_child(child: WidgetNode) -> bool
+
+
+   .. py:method:: get_box() -> rackpy.raw.math.Rect
+
+
+   .. py:method:: set_box(box: rackpy.raw.math.Rect) -> None
+
+
+   .. py:method:: is_visible() -> bool
+
+
+   .. py:method:: set_visible(visible: bool) -> None
+
+
+   .. py:method:: get_children_bounding_box() -> rackpy.raw.math.Rect
+
+
+   .. py:method:: get_visible_children_bounding_box() -> rackpy.raw.math.Rect
+
+
+   .. py:method:: get_position() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: set_position(position: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: get_size() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: set_size(size: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: hide() -> None
+
+
+   .. py:method:: show() -> None
+
+
+   .. py:method:: is_descendant_of(ancestor: WidgetNode | None) -> bool
+
+
+   .. py:method:: get_absolute_offset(position: rackpy.raw.math.Vec) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_relative_offset(position: rackpy.raw.math.Vec, ancestor: WidgetNode | None) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_absolute_zoom() -> float
+
+
+   .. py:method:: get_relative_zoom(ancestor: WidgetNode | None) -> float
+
+
+   .. py:method:: get_viewport(rect: rackpy.raw.math.Rect = ...) -> rackpy.raw.math.Rect
+
+
+.. py:class:: EventState
+
+   .. py:attribute:: root_widget
+      :type:  Widget | HostWidget | None
+
+
+   .. py:attribute:: hovered_widget
+      :type:  Widget | HostWidget | None
+
+
+   .. py:attribute:: dragged_widget
+      :type:  Widget | HostWidget | None
+
+
+   .. py:attribute:: drag_hovered_widget
+      :type:  Widget | HostWidget | None
+
+
+   .. py:attribute:: selected_widget
+      :type:  Widget | HostWidget | None
+
+
+   .. py:attribute:: last_clicked_widget
+      :type:  Widget | HostWidget | None
+
+
+   .. py:attribute:: drag_button
+      :type:  int
+
+
+   .. py:attribute:: last_click_time
+      :type:  float
+
+
+   .. py:attribute:: held_keys
+      :type:  set[int]
+
+
+   .. py:method:: get_root_widget() -> Widget | HostWidget | None
+
+
+   .. py:method:: get_hovered_widget() -> Widget | HostWidget | None
+
+
+   .. py:method:: get_dragged_widget() -> Widget | HostWidget | None
+
+
+   .. py:method:: get_drag_hovered_widget() -> Widget | HostWidget | None
+
+
+   .. py:method:: get_selected_widget() -> Widget | HostWidget | None
+
+
+   .. py:method:: set_hovered_widget(w: Widget | HostWidget | None) -> None
+
+
+   .. py:method:: set_drag_hovered_widget(w: Widget | HostWidget | None) -> None
+
+
+   .. py:method:: set_selected_widget(w: Widget | HostWidget | None) -> None
+
+
+   .. py:method:: set_dragged_widget(w: Widget | HostWidget | None, button: int) -> None
+
+
+   .. py:method:: set_hovered(w: Widget | HostWidget | None) -> None
+
+
+   .. py:method:: set_drag_hovered(w: Widget | HostWidget | None) -> None
+
+
+   .. py:method:: set_selected(w: Widget | HostWidget | None) -> None
+
+
+   .. py:method:: set_dragged(w: Widget | HostWidget | None, button: int) -> None
+
+
+   .. py:method:: finalize_widget(w: Widget | HostWidget | None) -> None
+
+
+   .. py:method:: handle_button(pos: rackpy.raw.math.Vec, button: int, action: int, mods: int) -> bool
+
+
+   .. py:method:: handle_hover(pos: rackpy.raw.math.Vec, mouse_delta: rackpy.raw.math.Vec) -> bool
+
+
+   .. py:method:: handle_leave() -> bool
+
+
+   .. py:method:: handle_scroll(pos: rackpy.raw.math.Vec, scroll_delta: rackpy.raw.math.Vec) -> bool
+
+
+   .. py:method:: handle_text(pos: rackpy.raw.math.Vec, codepoint: int) -> bool
+
+
+   .. py:method:: handle_key(pos: rackpy.raw.math.Vec, key: int, scancode: int, action: int, mods: int) -> bool
+
+
+   .. py:method:: handle_drop(pos: rackpy.raw.math.Vec, paths: list[str]) -> bool
+
+
+   .. py:method:: handle_dirty() -> bool
+
+

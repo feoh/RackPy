@@ -1,0 +1,40 @@
+rackpy
+======
+
+.. py:module:: rackpy
+
+.. autoapi-nested-parse::
+
+   RackPy: Python for VCV Rack plugins.
+
+   Native bindings require the RackPy host running inside
+   VCV Rack; the API and cross-platform coverage remain incomplete. See
+   https://github.com/feoh/RackPy for the coverage contract.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /reference/python/rackpy/assets/index
+   /reference/python/rackpy/audio/index
+   /reference/python/rackpy/dialog/index
+   /reference/python/rackpy/drawing/index
+   /reference/python/rackpy/dsp/index
+   /reference/python/rackpy/engine/index
+   /reference/python/rackpy/errors/index
+   /reference/python/rackpy/laboratory/index
+   /reference/python/rackpy/math/index
+   /reference/python/rackpy/midi/index
+   /reference/python/rackpy/plugin/index
+   /reference/python/rackpy/raw/index
+   /reference/python/rackpy/runtime/index
+   /reference/python/rackpy/services/index
+   /reference/python/rackpy/simd/index
+   /reference/python/rackpy/types/index
+   /reference/python/rackpy/widget/index
+
+

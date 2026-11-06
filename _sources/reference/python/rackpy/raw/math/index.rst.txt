@@ -1,0 +1,312 @@
+rackpy.raw.math
+===============
+
+.. py:module:: rackpy.raw.math
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.math.Vec
+   rackpy.raw.math.Rect
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.math.is_even
+   rackpy.raw.math.is_odd
+   rackpy.raw.math.clamp
+   rackpy.raw.math.clamp_safe
+   rackpy.raw.math.euc_mod
+   rackpy.raw.math.euc_div
+   rackpy.raw.math.euc_div_mod
+   rackpy.raw.math.log2
+   rackpy.raw.math.is_pow2
+   rackpy.raw.math.sgn
+   rackpy.raw.math.normalize_zero
+   rackpy.raw.math.is_near
+   rackpy.raw.math.chop
+   rackpy.raw.math.rescale
+   rackpy.raw.math.crossfade
+   rackpy.raw.math.interpolate_linear
+   rackpy.raw.math.complex_mult
+
+
+Module Contents
+---------------
+
+.. py:function:: is_even(x: int) -> bool
+
+.. py:function:: is_odd(x: int) -> bool
+
+.. py:function:: clamp(x: int, a: int, b: int) -> int
+                 clamp(x: float | int, a: float | int = 0, b: float | int = 1) -> int | float
+
+.. py:function:: clamp_safe(x: int, a: int, b: int) -> int
+                 clamp_safe(x: float | int, a: float | int = 0, b: float | int = 1) -> int | float
+
+.. py:function:: euc_mod(a: int, b: int) -> int
+                 euc_mod(a: float, b: float) -> float
+
+.. py:function:: euc_div(a: int, b: int) -> int
+
+.. py:function:: euc_div_mod(a: int, b: int) -> tuple[int, int]
+
+.. py:function:: log2(n: int) -> int
+
+.. py:function:: is_pow2(n: int) -> bool
+
+.. py:function:: sgn(x: int) -> int
+                 sgn(x: float, type: Literal['float', 'double'] = 'float') -> float
+
+.. py:function:: normalize_zero(x: float) -> float
+
+.. py:function:: is_near(a: float, b: float, epsilon: float = 1e-06) -> bool
+
+.. py:function:: chop(x: float, epsilon: float = 1e-06) -> float
+
+.. py:function:: rescale(x: float, x_min: float, x_max: float, y_min: float, y_max: float) -> float
+
+.. py:function:: crossfade(a: float, b: float, p: float) -> float
+
+.. py:function:: interpolate_linear(p: collections.abc.Sequence[float], x: float) -> float
+
+.. py:function:: complex_mult(ar: float, ai: float, br: float, bi: float) -> tuple[float, float]
+
+.. py:class:: Vec
+              Vec(xy: float)
+              Vec(view: rackpy.raw.widget.WidgetVecView)
+              Vec(x: float, y: float)
+
+   .. py:attribute:: x
+      :type:  float
+
+
+   .. py:attribute:: y
+      :type:  float
+
+
+   .. py:method:: neg() -> Vec
+
+
+   .. py:method:: plus(b: Vec | rackpy.raw.widget.WidgetVecView) -> Vec
+
+
+   .. py:method:: minus(b: Vec | rackpy.raw.widget.WidgetVecView) -> Vec
+
+
+   .. py:method:: mult(s: float) -> Vec
+                  mult(b: Vec | rackpy.raw.widget.WidgetVecView) -> Vec
+
+
+   .. py:method:: div(s: float) -> Vec
+                  div(b: Vec | rackpy.raw.widget.WidgetVecView) -> Vec
+
+
+   .. py:method:: dot(b: Vec | rackpy.raw.widget.WidgetVecView) -> float
+
+
+   .. py:method:: arg() -> float
+
+
+   .. py:method:: norm() -> float
+
+
+   .. py:method:: normalize() -> Vec
+
+
+   .. py:method:: square() -> float
+
+
+   .. py:method:: area() -> float
+
+
+   .. py:method:: rotate(angle: float) -> Vec
+
+
+   .. py:method:: flip() -> Vec
+
+
+   .. py:method:: min(b: Vec | rackpy.raw.widget.WidgetVecView) -> Vec
+
+
+   .. py:method:: max(b: Vec | rackpy.raw.widget.WidgetVecView) -> Vec
+
+
+   .. py:method:: abs() -> Vec
+
+
+   .. py:method:: round() -> Vec
+
+
+   .. py:method:: floor() -> Vec
+
+
+   .. py:method:: ceil() -> Vec
+
+
+   .. py:method:: equals(b: Vec | rackpy.raw.widget.WidgetVecView) -> bool
+
+
+   .. py:method:: is_zero() -> bool
+
+
+   .. py:method:: is_finite() -> bool
+
+
+   .. py:method:: clamp(bound: Rect | rackpy.raw.widget.WidgetBoxView) -> Vec
+
+
+   .. py:method:: clamp_safe(bound: Rect | rackpy.raw.widget.WidgetBoxView) -> Vec
+
+
+   .. py:method:: crossfade(b: Vec | rackpy.raw.widget.WidgetVecView, p: float) -> Vec
+
+
+   .. py:method:: is_equal(b: Vec | rackpy.raw.widget.WidgetVecView) -> bool
+
+
+.. py:class:: Rect
+              Rect(view: rackpy.raw.widget.WidgetBoxView)
+              Rect(pos: Vec | rackpy.raw.widget.WidgetVecView, size: Vec | rackpy.raw.widget.WidgetVecView)
+              Rect(pos_x: float, pos_y: float, size_x: float, size_y: float)
+
+   .. py:attribute:: pos
+      :type:  Vec
+
+
+   .. py:attribute:: size
+      :type:  Vec
+
+
+   .. py:method:: from_min_max(a: Vec | rackpy.raw.widget.WidgetVecView, b: Vec | rackpy.raw.widget.WidgetVecView) -> Rect
+      :staticmethod:
+
+
+
+   .. py:method:: from_corners(a: Vec | rackpy.raw.widget.WidgetVecView, b: Vec | rackpy.raw.widget.WidgetVecView) -> Rect
+      :staticmethod:
+
+
+
+   .. py:method:: inf() -> Rect
+      :staticmethod:
+
+
+
+   .. py:method:: contains(v: Vec | rackpy.raw.widget.WidgetVecView) -> bool
+                  contains(r: Rect | rackpy.raw.widget.WidgetBoxView) -> bool
+
+
+   .. py:method:: intersects(r: Rect | rackpy.raw.widget.WidgetBoxView) -> bool
+
+
+   .. py:method:: equals(r: Rect | rackpy.raw.widget.WidgetBoxView) -> bool
+
+
+   .. py:method:: get_left() -> float
+
+
+   .. py:method:: get_right() -> float
+
+
+   .. py:method:: get_top() -> float
+
+
+   .. py:method:: get_bottom() -> float
+
+
+   .. py:method:: get_width() -> float
+
+
+   .. py:method:: get_height() -> float
+
+
+   .. py:method:: get_center() -> Vec
+
+
+   .. py:method:: get_top_left() -> Vec
+
+
+   .. py:method:: get_top_right() -> Vec
+
+
+   .. py:method:: get_bottom_left() -> Vec
+
+
+   .. py:method:: get_bottom_right() -> Vec
+
+
+   .. py:method:: clamp(bound: Rect | rackpy.raw.widget.WidgetBoxView) -> Rect
+
+
+   .. py:method:: nudge(bound: Rect | rackpy.raw.widget.WidgetBoxView) -> Rect
+
+
+   .. py:method:: expand(b: Rect | rackpy.raw.widget.WidgetBoxView) -> Rect
+
+
+   .. py:method:: intersect(b: Rect | rackpy.raw.widget.WidgetBoxView) -> Rect
+
+
+   .. py:method:: zero_pos() -> Rect
+
+
+   .. py:method:: grow(delta: Vec | rackpy.raw.widget.WidgetVecView) -> Rect
+
+
+   .. py:method:: shrink(delta: Vec | rackpy.raw.widget.WidgetVecView) -> Rect
+
+
+   .. py:method:: interpolate(p: Vec | rackpy.raw.widget.WidgetVecView) -> Vec
+
+
+   .. py:method:: is_containing(v: Vec | rackpy.raw.widget.WidgetVecView) -> bool
+
+
+   .. py:method:: is_intersecting(r: Rect | rackpy.raw.widget.WidgetBoxView) -> bool
+
+
+   .. py:method:: is_equal(r: Rect | rackpy.raw.widget.WidgetBoxView) -> bool
+
+
+   .. py:property:: left
+      :type: float
+
+
+
+   .. py:property:: right
+      :type: float
+
+
+
+   .. py:property:: top
+      :type: float
+
+
+
+   .. py:property:: bottom
+      :type: float
+
+
+
+   .. py:property:: width
+      :type: float
+
+
+
+   .. py:property:: height
+      :type: float
+
+
+
+   .. py:property:: center
+      :type: Vec
+
+
+

@@ -1,0 +1,956 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="SIMD: four lanes at a time" href="simd.html"><link rel="prev" title="Audio" href="audio.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>Services - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Reference</a><input aria-label="Toggle navigation of Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Audio</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/reference/services.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/reference/services.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="services">
+<h1>Services<a class="headerlink" href="#services" title="Link to this heading">¶</a></h1>
+<p>Rack’s services: text, random numbers and the log (<strong>RP-30A</strong>), files and
+HTTP (<strong>RP-30B</strong>), and settings, Rack’s shared mutex and weak pointers
+(<strong>RP-30C</strong>). <strong>Implemented, Linux x86_64 inside Rack Free 2.6.6:</strong>
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw.string</span></code>, <code class="docutils literal notranslate"><span class="pre">rackpy.raw.random</span></code>, <code class="docutils literal notranslate"><span class="pre">rackpy.raw.logger</span></code>, the logging
+macros, <code class="docutils literal notranslate"><span class="pre">rackpy.raw.system</span></code>, <code class="docutils literal notranslate"><span class="pre">rackpy.raw.network</span></code>, <code class="docutils literal notranslate"><span class="pre">rackpy.raw.settings</span></code>,
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw.SharedMutex</span></code>/<code class="docutils literal notranslate"><span class="pre">SharedLock</span></code> and <code class="docutils literal notranslate"><span class="pre">rackpy.raw.WeakPtr</span></code>, with the
+<code class="docutils literal notranslate"><span class="pre">rackpy.services</span></code> facade (see the <a class="reference internal" href="coverage.html"><span class="std std-doc">coverage report</span></a>).</p>
+<section id="text-rackpy-raw-string">
+<span id="services-string"></span><h2>Text: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.string</span></code><a class="headerlink" href="#text-rackpy-raw-string" title="Link to this heading">¶</a></h2>
+<p>Rack’s <code class="docutils literal notranslate"><span class="pre">string::f</span></code> is printf, a variadic C call whose argument types its
+format decides. <code class="docutils literal notranslate"><span class="pre">f(format,</span> <span class="pre">*args)</span></code> reads the format, checks each conversion
+against its Python argument, converts the argument to the C type the
+conversion and its length modifier name (<code class="docutils literal notranslate"><span class="pre">%d</span></code> an <code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">%lld</span></code> a
+<code class="docutils literal notranslate"><span class="pre">long</span> <span class="pre">long</span></code>, <code class="docutils literal notranslate"><span class="pre">%u</span></code> an <code class="docutils literal notranslate"><span class="pre">unsigned</span></code>, <code class="docutils literal notranslate"><span class="pre">%f</span></code> a <code class="docutils literal notranslate"><span class="pre">double</span></code>, <code class="docutils literal notranslate"><span class="pre">%s</span></code> a str or bytes, <code class="docutils literal notranslate"><span class="pre">%c</span></code> an
+int or a single-byte ASCII str), and formats it with Rack’s <code class="docutils literal notranslate"><span class="pre">string::f</span></code>. A <code class="docutils literal notranslate"><span class="pre">*</span></code>
+width or precision takes an <code class="docutils literal notranslate"><span class="pre">int</span></code> argument before the value, as in C, and
+Rack’s printf applies C’s rules to it: a negative width left-justifies, a
+negative precision counts as none. <code class="docutils literal notranslate"><span class="pre">%n</span></code> (it writes through a pointer) and
+<code class="docutils literal notranslate"><span class="pre">%p</span></code> (an address) are refused. The <code class="docutils literal notranslate"><span class="pre">t</span></code> length modifier is supported for signed
+<code class="docutils literal notranslate"><span class="pre">%td</span></code>/<code class="docutils literal notranslate"><span class="pre">%ti</span></code>, but not for unsigned <code class="docutils literal notranslate"><span class="pre">%to</span></code>/<code class="docutils literal notranslate"><span class="pre">%tu</span></code>/<code class="docutils literal notranslate"><span class="pre">%tx</span></code>/<code class="docutils literal notranslate"><span class="pre">%tX</span></code>; <code class="docutils literal notranslate"><span class="pre">%lc</span></code> and <code class="docutils literal notranslate"><span class="pre">%ls</span></code> are
+also refused because wide-character formatting is not mapped to Python strings.
+These valid C printf forms raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> as unsupported conversions. Too
+few or too many arguments, a
+wrong type or a value the C type cannot hold raises. <code class="docutils literal notranslate"><span class="pre">fv(format,</span> <span class="pre">args)</span></code> is
+<code class="docutils literal notranslate"><span class="pre">string::fV</span></code>, with a sequence for C’s <code class="docutils literal notranslate"><span class="pre">va_list</span></code>.</p>
+<p>The rest are Rack’s functions under snake-case names:</p>
+<ul class="simple">
+<li><p><strong>Case and trimming.</strong> <code class="docutils literal notranslate"><span class="pre">lowercase</span></code> and <code class="docutils literal notranslate"><span class="pre">uppercase</span></code> change ASCII letters
+only, and <code class="docutils literal notranslate"><span class="pre">trim</span></code> removes surrounding whitespace.</p></li>
+<li><p><strong>Cutting to length.</strong> <code class="docutils literal notranslate"><span class="pre">truncate</span></code>, <code class="docutils literal notranslate"><span class="pre">truncate_prefix</span></code>, <code class="docutils literal notranslate"><span class="pre">ellipsize</span></code> and
+<code class="docutils literal notranslate"><span class="pre">ellipsize_prefix</span></code> count codepoints.</p></li>
+<li><p><strong>Comparing.</strong> <code class="docutils literal notranslate"><span class="pre">starts_with</span></code>, <code class="docutils literal notranslate"><span class="pre">ends_with</span></code>, <code class="docutils literal notranslate"><span class="pre">strcasecmp</span></code> and
+<code class="docutils literal notranslate"><span class="pre">CaseInsensitiveCompare</span></code> (a less-than).</p></li>
+<li><p><strong>Joining and splitting.</strong> <code class="docutils literal notranslate"><span class="pre">join(container,</span> <span class="pre">seperator)</span></code>, with Rack’s
+spelling, and <code class="docutils literal notranslate"><span class="pre">split(s,</span> <span class="pre">seperator,</span> <span class="pre">max_tokens)</span></code>, which raises Rack’s
+<code class="docutils literal notranslate"><span class="pre">Exception</span></code> for an empty separator.</p></li>
+<li><p><strong>Positions.</strong> <code class="docutils literal notranslate"><span class="pre">position_to_location</span></code> and <code class="docutils literal notranslate"><span class="pre">location_to_position</span></code> convert
+between a byte position and a <code class="docutils literal notranslate"><span class="pre">Location</span></code> (line and column, from 0).
+Rack’s <code class="docutils literal notranslate"><span class="pre">positionToLocation</span></code> counts the column codepoint by codepoint and
+never advances at a NUL or an invalid UTF-8 byte, so text with one before
+<code class="docutils literal notranslate"><span class="pre">pos</span></code> on its line raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> instead of hanging. <code class="docutils literal notranslate"><span class="pre">location_to_position</span></code>
+also refuses text that Rack would not advance through while walking the
+requested line and columns.</p></li>
+<li><p><strong>Base64.</strong> <code class="docutils literal notranslate"><span class="pre">to_base64</span></code> takes bytes (a contiguous byte buffer). <code class="docutils literal notranslate"><span class="pre">from_base64</span></code> returns bytes and
+skips characters that are not Base64; Rack’s header says it raises, but
+Rack 2.6.6 never does.</p></li>
+<li><p><strong>Time.</strong> <code class="docutils literal notranslate"><span class="pre">format_time(format,</span> <span class="pre">timestamp)</span></code> is <code class="docutils literal notranslate"><span class="pre">strftime</span></code> of the local
+time, and <code class="docutils literal notranslate"><span class="pre">format_time_iso</span></code>. An out-of-range timestamp raises
+<code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, where Rack would pass <code class="docutils literal notranslate"><span class="pre">strftime</span></code> a null time.</p></li>
+<li><p><strong>UTF-8.</strong> Positions are byte positions in the UTF-8 text (a str is
+encoded as UTF-8; bytes are used as they are). <code class="docutils literal notranslate"><span class="pre">utf8_to_utf32</span></code> returns
+codepoints, and <code class="docutils literal notranslate"><span class="pre">utf32_to_utf8</span></code> returns bytes, skipping codepoints past
+U+10FFFF. Rack 2.6.6’s <code class="docutils literal notranslate"><span class="pre">UTF8toUTF32</span></code> never returns on invalid UTF-8,
+because it skips an invalid sequence without advancing, so invalid bytes
+raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>. <code class="docutils literal notranslate"><span class="pre">utf8_next_codepoint</span></code>, <code class="docutils literal notranslate"><span class="pre">utf8_prev_codepoint</span></code>,
+<code class="docutils literal notranslate"><span class="pre">utf8_length</span></code>, <code class="docutils literal notranslate"><span class="pre">utf8_codepoint_index</span></code> and <code class="docutils literal notranslate"><span class="pre">utf8_codepoint_pos</span></code> stop at
+an invalid byte, as Rack’s do.</p></li>
+<li><p><strong>UTF-16, on Windows only.</strong> <code class="docutils literal notranslate"><span class="pre">utf16_to_utf8(w)</span></code> takes UTF-16 code units
+(ints, so an unpaired surrogate can be passed) and returns UTF-8 bytes;
+<code class="docutils literal notranslate"><span class="pre">utf8_to_utf16(s)</span></code> takes a str or bytes and returns code units. Rack
+declares <code class="docutils literal notranslate"><span class="pre">UTF16toUTF8</span></code> and <code class="docutils literal notranslate"><span class="pre">UTF8toUTF16</span></code> only on Windows, where they call
+Windows’ own converters without flags, which replace what they cannot
+convert with U+FFFD. Elsewhere the two names do not exist.</p></li>
+<li><p><strong>Versions.</strong> <code class="docutils literal notranslate"><span class="pre">Version</span></code> is Rack’s version: dotted <code class="docutils literal notranslate"><span class="pre">parts</span></code>, compared part
+by part with integers as numbers (<code class="docutils literal notranslate"><span class="pre">1.a.0</span> <span class="pre">&lt;</span> <span class="pre">1.0.0</span> <span class="pre">&lt;</span> <span class="pre">1.10.0</span></code>), with
+<code class="docutils literal notranslate"><span class="pre">get_major</span></code>, <code class="docutils literal notranslate"><span class="pre">get_minor</span></code> and <code class="docutils literal notranslate"><span class="pre">get_revision</span></code>.</p></li>
+<li><p><strong>Translations.</strong> <code class="docutils literal notranslate"><span class="pre">translate(id)</span></code>, in Rack’s language, else English, else
+empty; <code class="docutils literal notranslate"><span class="pre">translate(id,</span> <span class="pre">language)</span></code>; <code class="docutils literal notranslate"><span class="pre">get_languages()</span></code>; and <code class="docutils literal notranslate"><span class="pre">init()</span></code>, which
+reloads Rack’s translation files. All run on the main thread.</p></li>
+</ul>
+</section>
+<section id="random-numbers-rackpy-raw-random">
+<span id="services-random"></span><h2>Random numbers: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.random</span></code><a class="headerlink" href="#random-numbers-rackpy-raw-random" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Xoroshiro128Plus</span></code> is Rack’s generator, as a value. It is unseeded at first
+(it returns zeros), or seeded with <code class="docutils literal notranslate"><span class="pre">Xoroshiro128Plus(s0,</span> <span class="pre">s1=0)</span></code> or
+<code class="docutils literal notranslate"><span class="pre">seed()</span></code>, which draw one number as Rack’s do. Calling it returns the next
+64-bit number, <code class="docutils literal notranslate"><span class="pre">state</span></code> is its two state words, and <code class="docutils literal notranslate"><span class="pre">is_seeded()</span></code> reports
+whether those words are nonzero. <code class="docutils literal notranslate"><span class="pre">result_type</span></code> is Python <code class="docutils literal notranslate"><span class="pre">int</span></code>. <code class="docutils literal notranslate"><span class="pre">rotl(x,</span> <span class="pre">k)</span></code> needs <code class="docutils literal notranslate"><span class="pre">k</span></code>
+from 1 to 63: Rack’s shift by 64 for <code class="docutils literal notranslate"><span class="pre">k</span></code> 0 is undefined in C++.</p>
+<p><code class="docutils literal notranslate"><span class="pre">local()</span></code> is Rack’s own generator: one for the whole process, kept until
+Rack quits. Seeding or drawing through this reference changes the same state
+Rack uses. <code class="docutils literal notranslate"><span class="pre">init()</span></code> seeds it from the clock and system randomness only if it is
+not already seeded; subsequent calls leave an existing seeded state unchanged.
+Rack’s engine threads and UI use it without a lock, so Python’s draws race with
+theirs, as Rack’s own do. <code class="docutils literal notranslate"><span class="pre">u64</span></code>, <code class="docutils literal notranslate"><span class="pre">u32</span></code>, <code class="docutils literal notranslate"><span class="pre">uniform</span></code> (<code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1)</span></code>), <code class="docutils literal notranslate"><span class="pre">normal</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get(type)</span></code>, <code class="docutils literal notranslate"><span class="pre">get_uint32</span></code> and the other <code class="docutils literal notranslate"><span class="pre">get_*</span></code>, <code class="docutils literal notranslate"><span class="pre">buffer(out)</span></code> (it fills a
+writable, contiguous byte buffer) and
+<code class="docutils literal notranslate"><span class="pre">vector(len)</span></code> draw from it. For reproducible numbers, make a generator of
+your own.</p>
+<p><code class="docutils literal notranslate"><span class="pre">get(type)</span></code> is Rack’s <code class="docutils literal notranslate"><span class="pre">get&lt;T&gt;</span></code>, with <code class="docutils literal notranslate"><span class="pre">T</span></code> named as a string: Rack’s
+specializations <code class="docutils literal notranslate"><span class="pre">uint64</span></code> (the default), <code class="docutils literal notranslate"><span class="pre">uint32</span></code>, <code class="docutils literal notranslate"><span class="pre">uint16</span></code>, <code class="docutils literal notranslate"><span class="pre">uint8</span></code> (the top
+bits), <code class="docutils literal notranslate"><span class="pre">bool</span></code>, <code class="docutils literal notranslate"><span class="pre">float</span></code> and <code class="docutils literal notranslate"><span class="pre">double</span></code>, and, through Rack’s primary template,
+<code class="docutils literal notranslate"><span class="pre">int64</span></code>, <code class="docutils literal notranslate"><span class="pre">int32</span></code>, <code class="docutils literal notranslate"><span class="pre">int16</span></code> and <code class="docutils literal notranslate"><span class="pre">int8</span></code>: the next 64-bit number converted to the
+signed type, so its low bits, as GCC converts. Any other name raises
+<code class="docutils literal notranslate"><span class="pre">ValueError</span></code>. Seeded draws of every type match Rack’s own (the compiled
+reference in <code class="docutils literal notranslate"><span class="pre">tests/values</span></code>).</p>
+</section>
+<section id="the-log-rackpy-raw-logger">
+<span id="services-logger"></span><h2>The log: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.logger</span></code><a class="headerlink" href="#the-log-rackpy-raw-logger" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">log(level,</span> <span class="pre">filename,</span> <span class="pre">line,</span> <span class="pre">func,</span> <span class="pre">format,</span> <span class="pre">*args)</span></code> is Rack’s log. It formats
+the message as <code class="docutils literal notranslate"><span class="pre">string.f</span></code> does, then passes it to Rack’s log as one <code class="docutils literal notranslate"><span class="pre">%s</span></code>
+argument: the same text, without Python’s format string ever reaching
+Rack’s printf. It is thread-safe and releases the GIL. <code class="docutils literal notranslate"><span class="pre">Level</span></code> has Rack’s
+levels, <code class="docutils literal notranslate"><span class="pre">DEBUG_LEVEL</span></code>, <code class="docutils literal notranslate"><span class="pre">INFO_LEVEL</span></code>, <code class="docutils literal notranslate"><span class="pre">WARN_LEVEL</span></code> and <code class="docutils literal notranslate"><span class="pre">FATAL_LEVEL</span></code>, which
+Rack’s log labels <code class="docutils literal notranslate"><span class="pre">debug</span></code>, <code class="docutils literal notranslate"><span class="pre">info</span></code>, <code class="docutils literal notranslate"><span class="pre">warn</span></code> and <code class="docutils literal notranslate"><span class="pre">fatal</span></code>; it writes every
+level. <code class="docutils literal notranslate"><span class="pre">get_log_path()</span></code> reads Rack’s log path variable, and <code class="docutils literal notranslate"><span class="pre">set_log_path()</span></code>
+sets it; both require Rack’s main thread. Rack opened its log at start-up, so
+changing the variable does not redirect later messages.</p>
+<p><code class="docutils literal notranslate"><span class="pre">rackpy.raw.macros.DEBUG</span></code>, <code class="docutils literal notranslate"><span class="pre">INFO</span></code>, <code class="docutils literal notranslate"><span class="pre">WARN</span></code> and <code class="docutils literal notranslate"><span class="pre">FATAL</span></code> are Rack’s macros.
+Each logs at its level with the Python caller’s file, line and function, as
+the macros do with <code class="docutils literal notranslate"><span class="pre">__FILE__</span></code>, <code class="docutils literal notranslate"><span class="pre">__LINE__</span></code> and <code class="docutils literal notranslate"><span class="pre">__FUNCTION__</span></code>. As in Rack,
+<code class="docutils literal notranslate"><span class="pre">FATAL</span></code> does not stop anything.</p>
+</section>
+<section id="files-time-and-processes-rackpy-raw-system">
+<span id="services-system"></span><h2>Files, time and processes: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.system</span></code><a class="headerlink" href="#files-time-and-processes-rackpy-raw-system" title="Link to this heading">¶</a></h2>
+<p>Paths are str or <code class="docutils literal notranslate"><span class="pre">os.PathLike</span></code> and come back as str. Calls that touch the
+disk or sleep release the GIL. They block the calling thread, which never
+runs on Rack’s audio path; on the main thread, Rack’s window waits.</p>
+<ul>
+<li><p><strong>Paths.</strong> <code class="docutils literal notranslate"><span class="pre">join(path1,</span> <span class="pre">path2,</span> <span class="pre">*paths)</span></code> (Rack’s variadic template),
+<code class="docutils literal notranslate"><span class="pre">get_directory</span></code>, <code class="docutils literal notranslate"><span class="pre">get_filename</span></code>, <code class="docutils literal notranslate"><span class="pre">get_stem</span></code> and <code class="docutils literal notranslate"><span class="pre">get_extension</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_absolute</span></code>, and <code class="docutils literal notranslate"><span class="pre">get_canonical</span></code> (the path must exist). Rack 2.6.6
+follows <code class="docutils literal notranslate"><span class="pre">std::filesystem</span></code>, which differs from some examples in its header:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">join(&quot;/a&quot;,</span> <span class="pre">&quot;&quot;)</span></code> gives <code class="docutils literal notranslate"><span class="pre">&quot;/a/&quot;</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_directory(&quot;/&quot;)</span></code> gives <code class="docutils literal notranslate"><span class="pre">&quot;/&quot;</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_filename(&quot;/foo/bar/&quot;)</span></code> and <code class="docutils literal notranslate"><span class="pre">get_filename(&quot;/&quot;)</span></code> give <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_stem(&quot;/foo/.bar&quot;)</span></code> gives <code class="docutils literal notranslate"><span class="pre">&quot;.bar&quot;</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_extension(&quot;/foo/.hidden&quot;)</span></code> gives <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>, and for <code class="docutils literal notranslate"><span class="pre">&quot;/foo/..&quot;</span></code> gives
+<code class="docutils literal notranslate"><span class="pre">&quot;.&quot;</span></code>.</p></li>
+</ul>
+<p>RackPy keeps Rack’s results.</p>
+</li>
+<li><p><strong>Files and directories.</strong> <code class="docutils literal notranslate"><span class="pre">exists</span></code>, <code class="docutils literal notranslate"><span class="pre">is_file</span></code>, <code class="docutils literal notranslate"><span class="pre">is_directory</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_file_size</span></code>, <code class="docutils literal notranslate"><span class="pre">get_entries(dir,</span> <span class="pre">depth)</span></code> (<code class="docutils literal notranslate"><span class="pre">-1</span></code> recurses all the way),
+<code class="docutils literal notranslate"><span class="pre">rename</span></code>, <code class="docutils literal notranslate"><span class="pre">copy</span></code>, <code class="docutils literal notranslate"><span class="pre">create_directory</span></code>, <code class="docutils literal notranslate"><span class="pre">create_directories</span></code>,
+<code class="docutils literal notranslate"><span class="pre">create_symbolic_link</span></code>, <code class="docutils literal notranslate"><span class="pre">remove</span></code>, <code class="docutils literal notranslate"><span class="pre">remove_recursively</span></code> (returns a count),
+<code class="docutils literal notranslate"><span class="pre">read_file</span></code> (bytes) and <code class="docutils literal notranslate"><span class="pre">write_file</span></code>. Most return whether they
+succeeded; <code class="docutils literal notranslate"><span class="pre">read_file</span></code> and <code class="docutils literal notranslate"><span class="pre">write_file</span></code> raise Rack’s <code class="docutils literal notranslate"><span class="pre">Exception</span></code>.
+<code class="docutils literal notranslate"><span class="pre">get_working_directory</span></code>, <code class="docutils literal notranslate"><span class="pre">set_working_directory</span></code> (the whole process’s)
+and <code class="docutils literal notranslate"><span class="pre">get_temp_directory</span></code>.</p></li>
+<li><p><strong>Archives.</strong> <code class="docutils literal notranslate"><span class="pre">archive_directory(archive_path,</span> <span class="pre">dir_path,</span> <span class="pre">level)</span></code> writes a
+<code class="docutils literal notranslate"><span class="pre">.tar.zst</span></code>, <code class="docutils literal notranslate"><span class="pre">archive_directory_to_bytes</span></code> returns one, and
+<code class="docutils literal notranslate"><span class="pre">unarchive_to_directory(archive,</span> <span class="pre">dir_path)</span></code> unpacks a path or bytes. As
+Rack documents, a zero-byte file in an archive deletes the existing file.
+Rack 2.6.6 refuses absolute entry paths but follows <code class="docutils literal notranslate"><span class="pre">../</span></code> entries out of
+the directory, so unpack only archives you trust;
+<code class="docutils literal notranslate"><span class="pre">rackpy.services.system.unarchive</span></code> checks the entries first.</p></li>
+<li><p><strong>Time.</strong> <code class="docutils literal notranslate"><span class="pre">get_time</span></code> (monotonic, for measuring), <code class="docutils literal notranslate"><span class="pre">get_unix_time</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_thread_time</span></code> and <code class="docutils literal notranslate"><span class="pre">sleep(seconds)</span></code>, which returns at once for zero or less
+and refuses NaN, infinity and more than 9e9 seconds (the clock cannot hold it).</p></li>
+<li><p><strong>System.</strong> <code class="docutils literal notranslate"><span class="pre">get_logical_core_count</span></code>, <code class="docutils literal notranslate"><span class="pre">get_operating_system_info</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_stack_trace</span></code> and <code class="docutils literal notranslate"><span class="pre">set_thread_name</span></code> (the calling thread’s; Rack names it
+only on Linux, cut to 15 bytes, and macOS and Windows ignore the call).</p></li>
+<li><p><strong>FPU flags.</strong> <code class="docutils literal notranslate"><span class="pre">get_fpu_flags</span></code>, <code class="docutils literal notranslate"><span class="pre">set_fpu_flags</span></code> and <code class="docutils literal notranslate"><span class="pre">reset_fpu_flags</span></code>
+act on the calling thread’s floating-point flags (MXCSR on x64, FPCR on
+arm64); <code class="docutils literal notranslate"><span class="pre">reset</span></code> sets flush-to-zero, and on x64 denormals-are-zero (arm64
+always treats denormal inputs as zero), with round-to-nearest, as Rack’s
+engine threads run, and Python’s own arithmetic on that thread follows
+them. <code class="docutils literal notranslate"><span class="pre">set_fpu_flags</span></code> refuses, with <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, flags that would kill the
+process: Rack hands any value to the CPU, where a reserved MXCSR bit (16 to
+31) faults and a cleared exception mask (bits 7 to 12) makes Python’s own
+float arithmetic die with <code class="docutils literal notranslate"><span class="pre">SIGFPE</span></code>, and on arm64 an FPCR trap-enable bit
+(8 to 12 and 15) does the same where the CPU traps. Everything else Rack
+accepts goes through.</p></li>
+<li><p><strong>Opening things.</strong> <code class="docutils literal notranslate"><span class="pre">open_browser(url)</span></code> and <code class="docutils literal notranslate"><span class="pre">open_directory(path)</span></code> open
+the desktop’s handler without blocking. On Linux and macOS Rack runs
+<code class="docutils literal notranslate"><span class="pre">xdg-open</span> <span class="pre">&quot;&lt;string&gt;&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">open</span> <span class="pre">&quot;&lt;string&gt;&quot;</span></code> through the shell, so RackPy
+refuses <code class="docutils literal notranslate"><span class="pre">&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">\</span></code>, <code class="docutils literal notranslate"><span class="pre">$</span></code> and <code class="docutils literal notranslate"><span class="pre">`</span></code>, which would run shell code. Windows’
+<code class="docutils literal notranslate"><span class="pre">ShellExecuteW</span></code> runs no shell, so nothing is refused there (its paths have
+backslashes). <code class="docutils literal notranslate"><span class="pre">run_process_detached</span></code> is implemented by Rack on
+Windows only and asserts elsewhere, so RackPy refuses it on Linux and
+macOS. On Windows it asks for elevation (a UAC prompt) and shows Windows’
+error box if the program is missing; both block Rack’s UI thread until
+answered. It has no unattended test there.</p></li>
+</ul>
+</section>
+<section id="http-rackpy-raw-network">
+<span id="services-network"></span><h2>HTTP: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.network</span></code><a class="headerlink" href="#http-rackpy-raw-network" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">request_json(method,</span> <span class="pre">url,</span> <span class="pre">data,</span> <span class="pre">cookies)</span></code> requests a JSON API.
+<code class="docutils literal notranslate"><span class="pre">request_download(url,</span> <span class="pre">filename,</span> <span class="pre">progress,</span> <span class="pre">cookies)</span></code> downloads a file and
+writes its 0-to-1 progress to <code class="docutils literal notranslate"><span class="pre">DownloadProgress</span></code>. Do not read <code class="docutils literal notranslate"><span class="pre">value</span></code> while the
+request is running: Rack writes it from the download thread without
+synchronization. Read it only after <code class="docutils literal notranslate"><span class="pre">request_download</span></code> returns. Both requests
+block in curl, which allows 30 seconds to connect and sets no overall limit,
+with the GIL released.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Method</span></code> has <code class="docutils literal notranslate"><span class="pre">METHOD_GET</span></code>, <code class="docutils literal notranslate"><span class="pre">METHOD_POST</span></code>, <code class="docutils literal notranslate"><span class="pre">METHOD_PUT</span></code> and
+<code class="docutils literal notranslate"><span class="pre">METHOD_DELETE</span></code>. In Rack 2.6.6, <code class="docutils literal notranslate"><span class="pre">METHOD_PUT</span></code> with JSON data actually sends
+POST because of Rack’s curl options; without data it can read stdin. Do not
+use it for PUT. The <code class="docutils literal notranslate"><span class="pre">services.network.put_json</span></code> facade raises
+<code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code> rather than sending an unintended request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">request_json</span></code> sends <code class="docutils literal notranslate"><span class="pre">data</span></code> as the query for <code class="docutils literal notranslate"><span class="pre">METHOD_GET</span></code> (string values
+only, as Rack does) or as the JSON body otherwise. It returns the parsed
+answer, or <code class="docutils literal notranslate"><span class="pre">None</span></code> on any failure: no connection, a malformed URL, or a
+body that is not JSON.</p></li>
+<li><p>Cookies are a dict (<code class="docutils literal notranslate"><span class="pre">CookieMap</span></code>), and Rack’s cookie header ends with <code class="docutils literal notranslate"><span class="pre">;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">request_download</span></code> returns whether it succeeded; an HTTP error fails.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">encode_url(s)</span></code> URL-encodes a string, and <code class="docutils literal notranslate"><span class="pre">url_path(url)</span></code> returns a
+URL’s path.</p></li>
+</ul>
+</section>
+<section id="settings-rackpy-raw-settings">
+<span id="services-settings"></span><h2>Settings: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.settings</span></code><a class="headerlink" href="#settings-rackpy-raw-settings" title="Link to this heading">¶</a></h2>
+<p>Rack keeps its settings in globals, which its UI reads and writes on the
+main thread. <code class="docutils literal notranslate"><span class="pre">rackpy.raw.settings.settings</span></code> has one property for each of
+them, such as <code class="docutils literal notranslate"><span class="pre">prefer_dark_panels</span></code>, <code class="docutils literal notranslate"><span class="pre">rack_brightness</span></code>, <code class="docutils literal notranslate"><span class="pre">cable_colors</span></code>,
+<code class="docutils literal notranslate"><span class="pre">knob_mode</span></code> and <code class="docutils literal notranslate"><span class="pre">thread_count</span></code>. The properties work on the main thread only.
+Rack writes the settings to <code class="docutils literal notranslate"><span class="pre">settings_path</span></code> when it quits.</p>
+<p>Each property reads and writes the Rack global of the same name in
+snake case (<code class="docutils literal notranslate"><span class="pre">cable_opacity</span></code> is <code class="docutils literal notranslate"><span class="pre">settings::cableOpacity</span></code>), except
+<code class="docutils literal notranslate"><span class="pre">plugin_settings</span></code>, which is <code class="docutils literal notranslate"><span class="pre">pluginSettingsJ</span></code>. A test in Rack
+writes a new value to every property and reads Rack’s global from C++, and
+the reverse, so it would fail if a property reached the wrong global.</p>
+<ul class="simple">
+<li><p><strong>Read-only.</strong> Rack sets <code class="docutils literal notranslate"><span class="pre">headless</span></code> and <code class="docutils literal notranslate"><span class="pre">is_plugin</span></code> at start-up and relies
+on them afterwards, so they cannot be changed.</p></li>
+<li><p><strong>Checks.</strong> Float settings are assigned without clamping or finite-value
+validation, matching Rack’s public globals; non-finite values may have
+surprising effects in Rack’s consumers. <code class="docutils literal notranslate"><span class="pre">thread_count</span></code> must be at least 1.
+Rack’s engine reads <code class="docutils literal notranslate"><span class="pre">thread_count</span></code> at each block; changing it takes
+Rack’s exclusive engine lock (with the GIL released), so it waits for the
+current block and synchronizes the update with that read.</p></li>
+<li><p><strong>Copies.</strong> <code class="docutils literal notranslate"><span class="pre">plugin_settings</span></code> (Rack’s <code class="docutils literal notranslate"><span class="pre">pluginSettingsJ</span></code>) is Python data;
+assign it to replace Rack’s. <code class="docutils literal notranslate"><span class="pre">module_infos</span></code> and <code class="docutils literal notranslate"><span class="pre">module_whitelist</span></code> are
+copies too, and assigning one replaces Rack’s whole mapping. Reading
+<code class="docutils literal notranslate"><span class="pre">cable_colors</span></code>, <code class="docutils literal notranslate"><span class="pre">cable_labels</span></code> or <code class="docutils literal notranslate"><span class="pre">recent_patch_paths</span></code> returns a list copy;
+changing the list or its colors does not change Rack. Assign a list back
+to replace the setting. <code class="docutils literal notranslate"><span class="pre">PluginWhitelist.module_slugs</span></code> similarly returns
+a set copy; assign a set to replace it.</p></li>
+<li><p><strong>One module.</strong> <code class="docutils literal notranslate"><span class="pre">get_module_info(plugin_slug,</span> <span class="pre">module_slug)</span></code> returns a
+<code class="docutils literal notranslate"><span class="pre">ModuleInfoView</span></code>, which writes straight to Rack’s entry, or <code class="docutils literal notranslate"><span class="pre">None</span></code>.
+<code class="docutils literal notranslate"><span class="pre">is_module_whitelisted</span></code> and <code class="docutils literal notranslate"><span class="pre">reset_cables</span></code> are Rack’s functions.</p></li>
+<li><p><strong>Re-rendering.</strong> Rack’s themed widgets (<code class="docutils literal notranslate"><span class="pre">ThemedSvgPanel</span></code>, and the themed
+ports and screws) pick their SVG from <code class="docutils literal notranslate"><span class="pre">prefer_dark_panels</span></code> in <code class="docutils literal notranslate"><span class="pre">step()</span></code>.
+So changing the setting re-renders them at the next frame, and their
+framebuffers are marked dirty. This is tested in Rack.</p></li>
+<li><p><strong>Not refreshed.</strong> Writing <code class="docutils literal notranslate"><span class="pre">ui_theme</span></code> alone does not refresh the UI;
+Rack’s View menu also refreshes the theme.</p></li>
+<li><p><strong>The login token.</strong> <code class="docutils literal notranslate"><span class="pre">token</span></code> is the user’s VCV login token. Never log it.
+Rack’s library client sends it to VCV’s server as a cookie.</p></li>
+</ul>
+<p>Some settings take effect only at start-up, or at quit, so writing them in
+a running Rack does less, or more, than it seems:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">restart</span></code>.</strong> When Rack quits with it set, it starts again (Rack’s menus
+set it after a language change or a library update). Rack does not
+save it.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">safe_mode</span></code>.</strong> Rack reads it at start-up, when it skips loading plugins
+and the autosave. Its patch manager also reads it as Rack quits: set, it
+deletes the autosave instead of saving it. Rack always saves it as <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">dev_mode</span></code>.</strong> Rack chooses its directories and plugin folder from it at
+start-up; later, it changes only what Rack’s menus show and whether
+Rack checks for updates. Rack does not save it.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">verify_https_certs</span></code>.</strong> Rack’s HTTP client reads it at every request,
+Rack’s own and <code class="docutils literal notranslate"><span class="pre">rackpy.raw.network</span></code>’s. <code class="docutils literal notranslate"><span class="pre">false</span></code> turns off certificate
+checks for every HTTPS request, which lets anyone on the network forge
+the replies. Rack saves it.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">window_pos</span></code>, <code class="docutils literal notranslate"><span class="pre">window_size</span></code>, <code class="docutils literal notranslate"><span class="pre">window_maximized</span></code>.</strong> Rack’s window
+writes them as it moves and resizes, and reads them only when it opens.
+Writing them does not move the window, and Rack overwrites them at the
+window’s next move. Rack’s default <code class="docutils literal notranslate"><span class="pre">window_pos</span></code> is NaN, NaN: no saved
+position.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">settings_path</span></code>.</strong> Where Rack saves the settings when it quits.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>.</strong> 0 means the audio device’s rate. Rack’s engine reads
+it only when a device suggests a rate.</p></li>
+</ul>
+<section id="settings-values">
+<span id="services-settings-values"></span><h3>Settings values<a class="headerlink" href="#settings-values" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">KnobMode</span></code></strong> is how dragging a knob changes it: <code class="docutils literal notranslate"><span class="pre">KNOB_MODE_LINEAR</span></code> (0),
+<code class="docutils literal notranslate"><span class="pre">KNOB_MODE_SCALED_LINEAR</span></code> (1), <code class="docutils literal notranslate"><span class="pre">KNOB_MODE_ROTARY_ABSOLUTE</span></code> (2) and
+<code class="docutils literal notranslate"><span class="pre">KNOB_MODE_ROTARY_RELATIVE</span></code> (3), Rack’s values, also exported from the
+module. <code class="docutils literal notranslate"><span class="pre">knob_mode</span></code> is one.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">BrowserSort</span></code></strong> is the module browser’s order: <code class="docutils literal notranslate"><span class="pre">BROWSER_SORT_UPDATED</span></code>
+(0), <code class="docutils literal notranslate"><span class="pre">BROWSER_SORT_LAST_USED</span></code> (1), <code class="docutils literal notranslate"><span class="pre">BROWSER_SORT_MOST_USED</span></code> (2),
+<code class="docutils literal notranslate"><span class="pre">BROWSER_SORT_BRAND</span></code> (3), <code class="docutils literal notranslate"><span class="pre">BROWSER_SORT_NAME</span></code> (4) and
+<code class="docutils literal notranslate"><span class="pre">BROWSER_SORT_RANDOM</span></code> (5). <code class="docutils literal notranslate"><span class="pre">browser_sort</span></code> is one.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">ModuleInfo</span></code></strong> is Rack’s record of one module in the browser, a value:
+<code class="docutils literal notranslate"><span class="pre">enabled</span></code> (true at first), <code class="docutils literal notranslate"><span class="pre">favorite</span></code>, <code class="docutils literal notranslate"><span class="pre">added</span></code> (how many times it was
+added) and <code class="docutils literal notranslate"><span class="pre">last_added</span></code>, a Unix time, or NaN if never. <code class="docutils literal notranslate"><span class="pre">module_infos</span></code>
+maps plugin slugs to module slugs to copies; a <code class="docutils literal notranslate"><span class="pre">ModuleInfoView</span></code> from
+<code class="docutils literal notranslate"><span class="pre">get_module_info</span></code> has the same fields and writes Rack’s.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">PluginWhitelist</span></code></strong> is Rack’s record of which of one plugin’s modules
+the user subscribed to, a value: <code class="docutils literal notranslate"><span class="pre">subscribed</span></code> (the whole plugin) and
+<code class="docutils literal notranslate"><span class="pre">module_slugs</span></code>, a set copy (assign a new set). <code class="docutils literal notranslate"><span class="pre">module_whitelist</span></code> maps
+plugin slugs to copies. <code class="docutils literal notranslate"><span class="pre">is_module_whitelisted(plugin,</span> <span class="pre">module)</span></code> is
+Rack’s check: true for a plugin with no entry or a subscribed one, else
+whether <code class="docutils literal notranslate"><span class="pre">module_slugs</span></code> has the module.</p></li>
+</ul>
+</section>
+</section>
+<section id="rack-s-shared-mutex-rackpy-raw-sharedmutex">
+<span id="services-mutex"></span><h2>Rack’s shared mutex: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.SharedMutex</span></code><a class="headerlink" href="#rack-s-shared-mutex-rackpy-raw-sharedmutex" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">SharedMutex</span></code> is Rack’s read-write lock: many readers, or one writer. It
+has Rack’s <code class="docutils literal notranslate"><span class="pre">lock</span></code>, <code class="docutils literal notranslate"><span class="pre">try_lock</span></code>, <code class="docutils literal notranslate"><span class="pre">unlock</span></code>, <code class="docutils literal notranslate"><span class="pre">lock_shared</span></code>, <code class="docutils literal notranslate"><span class="pre">try_lock_shared</span></code>
+and <code class="docutils literal notranslate"><span class="pre">unlock_shared</span></code>, and <code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">mutex:</span></code> holds it for writing. Rack’s public
+<code class="docutils literal notranslate"><span class="pre">rwlock</span></code> field is a <code class="docutils literal notranslate"><span class="pre">pthread_rwlock_t</span></code>, an opaque, platform-specific OS type
+that is the mutex’s storage. By owner decision it is represented by the
+<code class="docutils literal notranslate"><span class="pre">SharedMutex</span></code> object and its methods, never as a separate Python value: RackPy
+exposes neither the field nor its direct pthread operations, because a raw
+handle would let Python bypass the holder checks below. The methods are a
+checked adapter, not direct access to that field.
+<code class="docutils literal notranslate"><span class="pre">SharedLock(m)</span></code> is Rack’s <code class="docutils literal notranslate"><span class="pre">SharedLock&lt;TMutex&gt;</span></code>: it holds <code class="docutils literal notranslate"><span class="pre">m</span></code> shared from
+construction until <code class="docutils literal notranslate"><span class="pre">release()</span></code>, or until its <code class="docutils literal notranslate"><span class="pre">with</span></code> block ends.</p>
+<section id="sharedlock-over-any-tmutex">
+<span id="services-shared-lock"></span><h3><code class="docutils literal notranslate"><span class="pre">SharedLock</span></code> over any <code class="docutils literal notranslate"><span class="pre">TMutex</span></code><a class="headerlink" href="#sharedlock-over-any-tmutex" title="Link to this heading">¶</a></h3>
+<p>Rack’s <code class="docutils literal notranslate"><span class="pre">SharedLock&lt;TMutex&gt;</span></code> only calls <code class="docutils literal notranslate"><span class="pre">m.lock_shared()</span></code> when it is made and
+<code class="docutils literal notranslate"><span class="pre">m.unlock_shared()</span></code> when it ends, so <code class="docutils literal notranslate"><span class="pre">m</span></code> can be any object with those two
+methods, not only a <code class="docutils literal notranslate"><span class="pre">SharedMutex</span></code>:</p>
+<ul class="simple">
+<li><p><strong>A <code class="docutils literal notranslate"><span class="pre">SharedMutex</span></code></strong> (exactly that class) is held natively, with the
+misuse checks and the GIL released while it waits, below.</p></li>
+<li><p><strong>Any other object</strong>, a Python subclass of <code class="docutils literal notranslate"><span class="pre">SharedMutex</span></code> included, has its
+<code class="docutils literal notranslate"><span class="pre">lock_shared()</span></code> and <code class="docutils literal notranslate"><span class="pre">unlock_shared()</span></code> called from Python, with the GIL
+held and no native lock held, so a Python lock that waits (and lets the
+GIL go) cannot deadlock with it. An object without both methods raises
+<code class="docutils literal notranslate"><span class="pre">TypeError</span></code>.</p></li>
+<li><p><strong>Errors propagate.</strong> If <code class="docutils literal notranslate"><span class="pre">lock_shared()</span></code> raises, no lock is made. If
+<code class="docutils literal notranslate"><span class="pre">unlock_shared()</span></code> raises in <code class="docutils literal notranslate"><span class="pre">release()</span></code> or at the end of a <code class="docutils literal notranslate"><span class="pre">with</span></code> block,
+the error propagates and the lock still counts as held, so <code class="docutils literal notranslate"><span class="pre">release()</span></code>
+can try again; a successful <code class="docutils literal notranslate"><span class="pre">release()</span></code> happens once.</p></li>
+<li><p><strong>Dropped while held,</strong> a lock calls <code class="docutils literal notranslate"><span class="pre">unlock_shared()</span></code>, as C++ would at the
+end of its scope, but only on the thread that made it; an error there is
+reported through <code class="docutils literal notranslate"><span class="pre">sys.unraisablehook</span></code>. On another thread, <code class="docutils literal notranslate"><span class="pre">unlock_shared()</span></code>
+is not called and the drop is reported as unraisable. During Python shutdown,
+Python-backed mutexes are not called and failures are reported in Rack’s log;
+a native mutex can still be unlocked on the acquiring thread. Release a lock
+explicitly to let go of it reliably.</p></li>
+</ul>
+<p>Rack’s mutex asserts on every pthread error, which would stop Rack. RackPy
+records which threads hold the mutex and raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> before pthread
+sees a misuse:</p>
+<ul class="simple">
+<li><p>a thread locking a mutex it already holds;</p></li>
+<li><p>a thread unlocking a mutex it does not hold.</p></li>
+</ul>
+<p>As in Rack, <code class="docutils literal notranslate"><span class="pre">unlock()</span></code> and <code class="docutils literal notranslate"><span class="pre">unlock_shared()</span></code> each release whichever hold the
+thread has, shared or for writing: Rack’s <code class="docutils literal notranslate"><span class="pre">unlock_shared()</span></code> just calls
+<code class="docutils literal notranslate"><span class="pre">unlock()</span></code>, which is <code class="docutils literal notranslate"><span class="pre">pthread_rwlock_unlock</span></code>.</p>
+<p>Other risks remain:</p>
+<ul class="simple">
+<li><p><strong>Waiting releases the GIL,</strong> so a Python thread holding the mutex can
+still run and let it go.</p></li>
+<li><p><strong>Deadlocks between threads are not detected.</strong> Two threads that each
+wait for a mutex the other holds deadlock, as in C++.</p></li>
+<li><p><strong>A mutex dropped while held is leaked.</strong> Destroying a held rwlock is
+undefined, so RackPy logs a warning and leaks it instead.</p></li>
+<li><p><strong>Not for Rack’s audio path.</strong> A blocking lock does not belong there, and
+Python never runs there.</p></li>
+</ul>
+</section>
+</section>
+<section id="weak-pointers-rackpy-raw-weakptr">
+<span id="services-weakptr"></span><h2>Weak pointers: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.WeakPtr</span></code><a class="headerlink" href="#weak-pointers-rackpy-raw-weakptr" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rackpy.raw.WeakHandle">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rackpy.raw.</span></span><span class="sig-name descname"><span class="pre">WeakHandle</span></span><a class="headerlink" href="#rackpy.raw.WeakHandle" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s shared weak-handle view, exposing <code class="docutils literal notranslate"><span class="pre">ptr</span></code> (a widget or <code class="docutils literal notranslate"><span class="pre">None</span></code>) and
+<code class="docutils literal notranslate"><span class="pre">count</span></code>. Python cannot construct a usable handle; Rack creates it for a
+<code class="docutils literal notranslate"><span class="pre">WeakPtr</span></code> and the view keeps it alive.</p>
+</dd></dl>
+
+<p>In the <code class="docutils literal notranslate"><span class="pre">rack.hpp</span></code> closure, Rack’s <code class="docutils literal notranslate"><span class="pre">WeakBase</span></code> is a base of <code class="docutils literal notranslate"><span class="pre">Widget</span></code>. So a
+<code class="docutils literal notranslate"><span class="pre">WeakPtr</span></code> points at a widget, RackPy’s or Rack’s own, and <code class="docutils literal notranslate"><span class="pre">get()</span></code> returns
+<code class="docutils literal notranslate"><span class="pre">None</span></code> once Rack deletes it. Weak pointers work on the main thread only,
+because Rack’s are not thread-safe. That includes letting go of one: Rack’s
+destructor releases a count that is not atomic, so a <code class="docutils literal notranslate"><span class="pre">WeakPtr</span></code> or <code class="docutils literal notranslate"><span class="pre">WeakHandle</span></code>
+that Python drops or collects on another thread leaves Rack’s count alone and
+logs a warning. The count, a few bytes, is then never released.</p>
+<section id="the-widget-contract">
+<span id="services-weakptr-contract"></span><h3>The widget contract<a class="headerlink" href="#the-widget-contract" title="Link to this heading">¶</a></h3>
+<p>This is the contract for <code class="docutils literal notranslate"><span class="pre">WeakPtr&lt;T&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">WeakBase</span></code> and <code class="docutils literal notranslate"><span class="pre">WeakHandle</span></code>
+(owner decision, 2026-10-27):</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">T</span></code> is any widget.</strong> <code class="docutils literal notranslate"><span class="pre">WeakPtr&lt;T&gt;</span></code> needs <code class="docutils literal notranslate"><span class="pre">T</span></code> to derive from <code class="docutils literal notranslate"><span class="pre">WeakBase</span></code>
+(Rack’s <code class="docutils literal notranslate"><span class="pre">set()</span></code> uses <code class="docutils literal notranslate"><span class="pre">T::weakHandle</span></code>, <code class="docutils literal notranslate"><span class="pre">weakptr.hpp:64-88</span></code>), and in Rack
+2.6.6 <code class="docutils literal notranslate"><span class="pre">Widget</span></code> is the only <code class="docutils literal notranslate"><span class="pre">WeakBase</span></code> subclass (<code class="docutils literal notranslate"><span class="pre">widget/Widget.hpp:21</span></code>).
+So the instantiations are <code class="docutils literal notranslate"><span class="pre">WeakPtr&lt;Widget&gt;</span></code> and its subclasses, as Rack’s
+own <code class="docutils literal notranslate"><span class="pre">WeakPtr&lt;ModuleWidget&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">WeakPtr&lt;PortWidget&gt;</span></code> and
+<code class="docutils literal notranslate"><span class="pre">WeakPtr&lt;TextField&gt;</span></code> are. One <code class="docutils literal notranslate"><span class="pre">WeakPtr</span></code> class covers them: <code class="docutils literal notranslate"><span class="pre">get()</span></code>
+returns the widget’s own Python object or host view, so no subclass’s type
+is lost. Anything that is not a widget (or <code class="docutils literal notranslate"><span class="pre">None</span></code>) is refused.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">WeakBase</span></code> is <code class="docutils literal notranslate"><span class="pre">Widget</span></code>’s base.</strong> Its <code class="docutils literal notranslate"><span class="pre">weakHandle</span></code> field and
+<code class="docutils literal notranslate"><span class="pre">getWeakCount()</span></code> are <code class="docutils literal notranslate"><span class="pre">Widget.weak_handle</span></code> and <code class="docutils literal notranslate"><span class="pre">Widget.get_weak_count()</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">~WeakBase</span></code> runs when a widget is deleted, which clears its handle’s
+pointer (<code class="docutils literal notranslate"><span class="pre">get()</span></code> turns <code class="docutils literal notranslate"><span class="pre">None</span></code>). A plugin’s own non-widget C++ class
+deriving from <code class="docutils literal notranslate"><span class="pre">WeakBase</span></code> is that plugin’s code, not Rack’s API; Python
+objects have <code class="docutils literal notranslate"><span class="pre">weakref</span></code> for that.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">WeakHandle(void*)</span></code> runs inside <code class="docutils literal notranslate"><span class="pre">WeakPtr</span></code>.</strong> Rack’s <code class="docutils literal notranslate"><span class="pre">WeakPtr::set()</span></code> makes
+an object’s handle with <code class="docutils literal notranslate"><span class="pre">new</span> <span class="pre">WeakHandle(ptr)</span></code> when it has none
+(<code class="docutils literal notranslate"><span class="pre">weakptr.hpp:80-83</span></code>) and deletes it with its last pointer
+(<code class="docutils literal notranslate"><span class="pre">weakptr.hpp:66-77</span></code>), as <code class="docutils literal notranslate"><span class="pre">WeakPtr(widget)</span></code> and <code class="docutils literal notranslate"><span class="pre">set(widget)</span></code> do here. A
+handle made any other way belongs to no object and no pointer, so only
+Rack makes usable ones, as with the classes only Rack can make
+(<a class="reference internal" href="../coverage.html#completeness-policy"><span class="std std-ref">coverage policy 11</span></a>); <code class="docutils literal notranslate"><span class="pre">WeakHandle</span></code>
+is a view, and Python cannot construct one.</p></li>
+<li><p><strong>Rack’s members.</strong> <code class="docutils literal notranslate"><span class="pre">WeakPtr()</span></code>, <code class="docutils literal notranslate"><span class="pre">WeakPtr(widget)</span></code>, <code class="docutils literal notranslate"><span class="pre">get()</span></code>, <code class="docutils literal notranslate"><span class="pre">set()</span></code>,
+truth testing, and <code class="docutils literal notranslate"><span class="pre">__copy__</span></code> (Rack’s copy). Assigning one <code class="docutils literal notranslate"><span class="pre">WeakPtr</span></code> to
+another retargets the destination to the widget returned by the source’s
+<code class="docutils literal notranslate"><span class="pre">get()</span></code>; it does not replace the Python destination object. <code class="docutils literal notranslate"><span class="pre">weak_handle</span></code> is
+the <code class="docutils literal notranslate"><span class="pre">WeakHandle</span></code> the pointers share.</p></li>
+<li><p><strong>On widgets.</strong> <code class="docutils literal notranslate"><span class="pre">Widget</span></code> and <code class="docutils literal notranslate"><span class="pre">HostWidget</span></code> have Rack’s
+<code class="docutils literal notranslate"><span class="pre">get_weak_count()</span></code> and <code class="docutils literal notranslate"><span class="pre">weak_handle</span></code>.</p></li>
+<li><p><strong>Handles.</strong> A <code class="docutils literal notranslate"><span class="pre">WeakHandle</span></code> view has <code class="docutils literal notranslate"><span class="pre">ptr</span></code> (the widget, or <code class="docutils literal notranslate"><span class="pre">None</span></code>) and
+<code class="docutils literal notranslate"><span class="pre">count</span></code>. The view holds the handle alive, so it counts as one of its
+pointers.</p></li>
+</ul>
+</section>
+</section>
+<section id="the-facade-rackpy-services">
+<h2>The facade: <code class="docutils literal notranslate"><span class="pre">rackpy.services</span></code><a class="headerlink" href="#the-facade-rackpy-services" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">rackpy.services.system</span></code>.</strong> <code class="docutils literal notranslate"><span class="pre">read_bytes</span></code>, <code class="docutils literal notranslate"><span class="pre">write_bytes</span></code>, <code class="docutils literal notranslate"><span class="pre">entries</span></code>
+(<code class="docutils literal notranslate"><span class="pre">pathlib.Path</span></code>s), <code class="docutils literal notranslate"><span class="pre">temp_directory</span></code>, <code class="docutils literal notranslate"><span class="pre">archive</span></code> (to a path, or as bytes),
+<code class="docutils literal notranslate"><span class="pre">unarchive(source,</span> <span class="pre">directory,</span> <span class="pre">trust=False)</span></code> and <code class="docutils literal notranslate"><span class="pre">open_url</span></code>. Unless trusted,
+<code class="docutils literal notranslate"><span class="pre">unarchive</span></code> reads the archive with Python’s <code class="docutils literal notranslate"><span class="pre">tarfile</span></code> first and raises
+<code class="docutils literal notranslate"><span class="pre">ValueError</span></code> for an absolute or <code class="docutils literal notranslate"><span class="pre">../</span></code> entry, or a link out of the
+directory, before Rack writes anything.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">rackpy.services.network</span></code>.</strong> <code class="docutils literal notranslate"><span class="pre">get_json(url,</span> <span class="pre">params)</span></code>, <code class="docutils literal notranslate"><span class="pre">post_json</span></code>,
+<code class="docutils literal notranslate"><span class="pre">put_json</span></code> and <code class="docutils literal notranslate"><span class="pre">delete_json</span></code>, plus <code class="docutils literal notranslate"><span class="pre">download(url,</span> <span class="pre">filename,</span> <span class="pre">on_progress)</span></code>,
+which calls <code class="docutils literal notranslate"><span class="pre">on_progress</span></code> once with the final fraction after Rack’s request
+completes. Rack’s progress pointer is unsynchronized, so live progress is unavailable.
+JSON helpers return <code class="docutils literal notranslate"><span class="pre">rackpy.types.JSON</span></code>;
+<code class="docutils literal notranslate"><span class="pre">None</span></code> may be either a JSON null or a failure. Narrow the result before
+treating it as an object or an array. Input bodies are typed as <code class="docutils literal notranslate"><span class="pre">object</span></code>
+and validated by the JSON converter at runtime; see <a class="reference internal" href="values.html"><span class="std std-doc">values</span></a> for
+supported values and limits. Also <code class="docutils literal notranslate"><span class="pre">encode_url</span></code> and <code class="docutils literal notranslate"><span class="pre">url_path</span></code>.</p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="simd.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">SIMD: four lanes at a time</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="audio.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Audio</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Services</a><ul>
+<li><a class="reference internal" href="#text-rackpy-raw-string">Text: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.string</span></code></a></li>
+<li><a class="reference internal" href="#random-numbers-rackpy-raw-random">Random numbers: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.random</span></code></a></li>
+<li><a class="reference internal" href="#the-log-rackpy-raw-logger">The log: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.logger</span></code></a></li>
+<li><a class="reference internal" href="#files-time-and-processes-rackpy-raw-system">Files, time and processes: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.system</span></code></a></li>
+<li><a class="reference internal" href="#http-rackpy-raw-network">HTTP: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.network</span></code></a></li>
+<li><a class="reference internal" href="#settings-rackpy-raw-settings">Settings: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.settings</span></code></a><ul>
+<li><a class="reference internal" href="#settings-values">Settings values</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rack-s-shared-mutex-rackpy-raw-sharedmutex">Rack’s shared mutex: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.SharedMutex</span></code></a><ul>
+<li><a class="reference internal" href="#sharedlock-over-any-tmutex"><code class="docutils literal notranslate"><span class="pre">SharedLock</span></code> over any <code class="docutils literal notranslate"><span class="pre">TMutex</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weak-pointers-rackpy-raw-weakptr">Weak pointers: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.WeakPtr</span></code></a><ul>
+<li><a class="reference internal" href="#rackpy.raw.WeakHandle"><code class="docutils literal notranslate"><span class="pre">rackpy.raw.WeakHandle</span></code></a></li>
+<li><a class="reference internal" href="#the-widget-contract">The widget contract</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-facade-rackpy-services">The facade: <code class="docutils literal notranslate"><span class="pre">rackpy.services</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

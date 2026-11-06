@@ -1,0 +1,120 @@
+rackpy.dsp.midi
+===============
+
+.. py:module:: rackpy.dsp.midi
+
+.. autoapi-nested-parse::
+
+   Rack's VU meter and its MIDI generator and parser (RP-18D).
+
+   Rack's own objects (``rack::dsp``, also available as :mod:`rackpy.raw.dsp`),
+   each holding its C++ state. ``MidiGenerator[channels]`` turns gates and CV
+   into MIDI messages, which ``take_messages()`` returns; ``MidiParser[channels]``
+   turns messages into gates, CV and pulses, as Rack's MIDI to CV does. For 1 to
+   16 channels. For tests and offline processing; per-sample work belongs in a
+   native kernel. Available inside Rack only.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.dsp.midi.MidiGenerator
+   rackpy.dsp.midi.MidiParser
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.dsp.midi.VuMeter2
+
+
+Module Contents
+---------------
+
+.. py:data:: MidiGenerator
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: MidiParser
+   :type:  rackpy.raw.simd.Template
+
+.. py:class:: VuMeter2
+
+   .. py:class:: Mode
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: PEAK
+         :value: 0
+
+
+
+      .. py:attribute:: RMS
+         :value: 1
+
+
+
+
+   .. py:attribute:: mode
+      :type:  VuMeter2
+
+
+   .. py:attribute:: v
+      :type:  float
+
+
+   .. py:attribute:: lambda_
+      :type:  float
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process(delta_time: float, value: float) -> None
+
+
+   .. py:method:: get_brightness(db_min: float, db_max: float) -> float
+
+

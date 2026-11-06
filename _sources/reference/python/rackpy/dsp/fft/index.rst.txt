@@ -1,0 +1,144 @@
+rackpy.dsp.fft
+==============
+
+.. py:module:: rackpy.dsp.fft
+
+.. autoapi-nested-parse::
+
+   Rack's FFTs and FIR convolution (RP-19A).
+
+   Rack's own PFFFT wrappers (``rack::dsp``, also available as
+   :mod:`rackpy.raw.dsp`): ``RealFFT`` and ``ComplexFFT`` transform float32
+   buffers, which PFFFT needs 16-byte aligned (an ``array.array`` or numpy array
+   is); ``RealTimeConvolver`` convolves a block at a time with a long impulse
+   response. Lengths and buffers are checked before Rack sees them. For analysis,
+   tables and offline processing; per-sample audio belongs in a native kernel.
+   Available inside Rack only.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.dsp.fft.ComplexFFT
+   rackpy.dsp.fft.RealFFT
+   rackpy.dsp.fft.RealTimeConvolver
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.dsp.fft.boxcar_lowpass_ir
+   rackpy.dsp.fft.convolve_naive
+
+
+Module Contents
+---------------
+
+.. py:class:: ComplexFFT(length: int)
+
+   .. py:attribute:: length
+      :type:  int
+
+
+   .. py:property:: setup
+      :type: PFFFT_Setup
+
+
+
+   .. py:method:: fft_unordered(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: ifft_unordered(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: fft(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: ifft(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: scale(x: collections.abc.Buffer) -> None
+
+
+.. py:class:: RealFFT(length: int)
+
+   .. py:attribute:: length
+      :type:  int
+
+
+   .. py:property:: setup
+      :type: PFFFT_Setup
+
+
+
+   .. py:method:: rfft_unordered(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: irfft_unordered(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: rfft(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: irfft(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+   .. py:method:: scale(x: collections.abc.Buffer) -> None
+
+
+.. py:class:: RealTimeConvolver(block_size: int)
+
+   .. py:attribute:: input_pos
+      :type:  int
+
+
+   .. py:property:: kernel_ffts
+      :type: ConvolverArray
+
+
+
+   .. py:property:: input_ffts
+      :type: ConvolverArray
+
+
+
+   .. py:property:: output_tail
+      :type: ConvolverArray
+
+
+
+   .. py:property:: tmp_block
+      :type: ConvolverArray
+
+
+
+   .. py:property:: block_size
+      :type: int
+
+
+
+   .. py:property:: kernel_blocks
+      :type: int
+
+
+
+   .. py:property:: pffft
+      :type: PFFFT_Setup
+
+
+
+   .. py:method:: set_kernel(kernel: collections.abc.Buffer | None, length: int) -> None
+
+
+   .. py:method:: process_block(input: collections.abc.Buffer, output: collections.abc.Buffer) -> None
+
+
+.. py:function:: boxcar_lowpass_ir(out: collections.abc.Buffer, len: int, cutoff: float = 0.5) -> None
+
+.. py:function:: convolve_naive(in_: collections.abc.Buffer, kernel: collections.abc.Buffer, len: int) -> float
+

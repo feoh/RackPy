@@ -1,0 +1,23 @@
+rackpy.services
+===============
+
+.. py:module:: rackpy.services
+
+.. autoapi-nested-parse::
+
+   Rack's services, Pythonically: files and archives (:mod:`rackpy.services.system`) and HTTP
+   (:mod:`rackpy.services.network`), over :mod:`rackpy.raw.system` and :mod:`rackpy.raw.network`.
+   Inside Rack only.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /reference/python/rackpy/services/network/index
+   /reference/python/rackpy/services/system/index
+
+

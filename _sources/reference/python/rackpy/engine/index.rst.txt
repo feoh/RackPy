@@ -1,0 +1,458 @@
+rackpy.engine
+=============
+
+.. py:module:: rackpy.engine
+
+.. autoapi-nested-parse::
+
+   Rack's engine objects, as one tidy import. Available inside Rack only.
+
+   Ports, parameters and lights (:mod:`rackpy.engine.components`), scoped
+   module construction (:mod:`rackpy.engine.module`), module expanders and their
+   messages (:mod:`rackpy.engine.expanders`), and Rack's running engine and undo
+   history (:mod:`rackpy.engine.host`). Models are registered with
+   :mod:`rackpy.plugin`.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /reference/python/rackpy/engine/components/index
+   /reference/python/rackpy/engine/expanders/index
+   /reference/python/rackpy/engine/host/index
+   /reference/python/rackpy/engine/module/index
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.engine.PORT_MAX_CHANNELS
+   rackpy.engine.Module
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.engine.Input
+   rackpy.engine.Light
+   rackpy.engine.LightInfo
+   rackpy.engine.Output
+   rackpy.engine.Param
+   rackpy.engine.Port
+   rackpy.engine.PortInfo
+   rackpy.engine.ParamQuantity
+   rackpy.engine.SwitchQuantity
+
+
+Package Contents
+----------------
+
+.. py:data:: PORT_MAX_CHANNELS
+   :type:  int
+
+.. py:class:: Input
+
+
+
+.. py:class:: Light
+
+   .. py:attribute:: value
+      :type:  float
+
+
+   .. py:attribute:: brightness
+      :type:  float
+
+
+   .. py:method:: set_brightness(brightness: float) -> None
+
+
+   .. py:method:: get_brightness() -> float
+
+
+   .. py:method:: set_brightness_smooth(brightness: float, frames: int = 1) -> None
+                  set_brightness_smooth(brightness: float, delta_time: float, lambda_: float = 30.0) -> None
+
+
+   .. py:method:: set_smooth_brightness(brightness: float, delta_time: float) -> None
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+.. py:class:: LightInfo
+
+   .. py:attribute:: module
+      :type:  Module | None
+
+
+   .. py:attribute:: light_id
+      :type:  int
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:method:: get_name() -> str
+
+
+   .. py:method:: get_description() -> str
+
+
+.. py:class:: Output
+
+
+
+.. py:class:: Param
+
+   .. py:attribute:: value
+      :type:  float
+
+
+   .. py:method:: get_value() -> float
+
+
+   .. py:method:: set_value(value: float) -> None
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+.. py:class:: Port
+
+   .. py:class:: Type
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: INPUT
+         :value: 0
+
+
+
+      .. py:attribute:: OUTPUT
+         :value: 1
+
+
+
+
+   .. py:attribute:: value
+      :type:  float
+
+
+   .. py:attribute:: channels
+      :type:  int
+
+
+   .. py:attribute:: active
+      :type:  int
+
+
+   .. py:attribute:: voltage
+      :type:  float
+
+
+   .. py:attribute:: channel_count
+      :type:  int
+
+
+   .. py:method:: set_voltage(voltage: float, channel: int = 0) -> None
+
+
+   .. py:method:: get_voltage(channel: int = 0) -> float
+
+
+   .. py:method:: get_poly_voltage(channel: int) -> float
+
+
+   .. py:method:: get_normal_voltage(normal_voltage: float, channel: int = 0) -> float
+
+
+   .. py:method:: get_normal_poly_voltage(normal_voltage: float, channel: int) -> float
+
+
+   .. py:method:: get_voltage_simd(first_channel: int) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: get_poly_voltage_simd(first_channel: int) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: get_normal_voltage_simd(normal_voltage: rackpy.raw.simd.float_4 | float, first_channel: int) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: get_normal_poly_voltage_simd(normal_voltage: rackpy.raw.simd.float_4 | float, first_channel: int) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: set_voltage_simd(voltage: rackpy.raw.simd.float_4 | float, first_channel: int) -> None
+
+
+   .. py:method:: get_voltages(first_channel: int = 0) -> Voltages
+
+
+   .. py:method:: read_voltages() -> list[float]
+
+
+   .. py:method:: write_voltages(voltages: collections.abc.Sequence[float]) -> None
+
+
+   .. py:method:: clear_voltages() -> None
+
+
+   .. py:method:: get_voltage_sum() -> float
+
+
+   .. py:method:: get_voltage_rms() -> float
+
+
+   .. py:method:: set_channels(channels: int) -> None
+
+
+   .. py:method:: get_channels() -> int
+
+
+   .. py:method:: is_connected() -> bool
+
+
+   .. py:method:: is_monophonic() -> bool
+
+
+   .. py:method:: is_polyphonic() -> bool
+
+
+   .. py:method:: normalize(normal_voltage: float) -> float
+
+
+   .. py:property:: voltages
+      :type: Voltages
+
+
+
+   .. py:property:: plug_lights
+      :type: tuple[Light, Light, Light]
+
+
+
+   .. py:property:: connected
+      :type: bool
+
+
+
+   .. py:property:: monophonic
+      :type: bool
+
+
+
+   .. py:property:: polyphonic
+      :type: bool
+
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+.. py:class:: PortInfo
+
+   .. py:attribute:: module
+      :type:  Module | None
+
+
+   .. py:attribute:: type
+      :type:  Port
+
+
+   .. py:attribute:: port_id
+      :type:  int
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:method:: get_name() -> str
+
+
+   .. py:method:: get_full_name() -> str
+
+
+   .. py:method:: get_description() -> str
+
+
+.. py:data:: Module
+
+.. py:class:: ParamQuantity
+
+
+
+   .. py:attribute:: param_id
+      :type:  int
+
+
+   .. py:attribute:: min_value
+      :type:  float
+
+
+   .. py:attribute:: max_value
+      :type:  float
+
+
+   .. py:attribute:: default_value
+      :type:  float
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: unit
+      :type:  str
+
+
+   .. py:attribute:: display_base
+      :type:  float
+
+
+   .. py:attribute:: display_multiplier
+      :type:  float
+
+
+   .. py:attribute:: display_offset
+      :type:  float
+
+
+   .. py:attribute:: display_precision
+      :type:  int
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+   .. py:attribute:: reset_enabled
+      :type:  bool
+
+
+   .. py:attribute:: randomize_enabled
+      :type:  bool
+
+
+   .. py:attribute:: smooth_enabled
+      :type:  bool
+
+
+   .. py:attribute:: snap_enabled
+      :type:  bool
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: module
+      :type: Module | None
+
+
+
+   .. py:method:: get_param() -> Param | None
+
+
+   .. py:method:: get_immediate_value() -> float
+
+
+   .. py:method:: set_immediate_value(value: float) -> None
+
+
+   .. py:method:: get_description() -> str
+
+
+   .. py:method:: set_smooth_value(value: float) -> None
+
+
+   .. py:method:: get_smooth_value() -> float
+
+
+   .. py:method:: to_json() -> dict[str, Any]
+
+
+   .. py:method:: from_json(data: Any) -> None
+
+
+.. py:class:: SwitchQuantity
+
+
+
+   .. py:property:: labels
+      :type: SwitchLabels
+
+
+

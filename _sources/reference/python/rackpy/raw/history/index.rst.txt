@@ -1,0 +1,335 @@
+rackpy.raw.history
+==================
+
+.. py:module:: rackpy.raw.history
+
+.. autoapi-nested-parse::
+
+   rack::history: undo actions and Rack's history (Context.history).
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.history.ActionView
+   rackpy.raw.history.Action
+   rackpy.raw.history.ComplexAction
+   rackpy.raw.history.ModuleAction
+   rackpy.raw.history.ModuleAdd
+   rackpy.raw.history.ModuleRemove
+   rackpy.raw.history.ModuleMove
+   rackpy.raw.history.ModuleBypass
+   rackpy.raw.history.ModuleChange
+   rackpy.raw.history.ParamChange
+   rackpy.raw.history.CableAdd
+   rackpy.raw.history.CableRemove
+   rackpy.raw.history.CableColorChange
+   rackpy.raw.history.InverseAction
+   rackpy.raw.history.State
+
+
+Module Contents
+---------------
+
+.. py:class:: ActionView
+
+   An action Rack made, found again in its tree at every use; read-only.
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: name
+      :type: str
+
+
+
+   .. py:property:: type_name
+      :type: str
+
+
+
+   .. py:property:: module_id
+      :type: int | None
+
+
+
+   .. py:property:: actions
+      :type: list[Action | ActionView] | None
+
+
+
+.. py:class:: Action
+
+   Rack's undo action. Subclass it (or ModuleAction), override undo and redo, and push it to Context.history.
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:method:: undo() -> None
+
+
+   .. py:method:: redo() -> None
+
+
+   .. py:property:: owned_by_rack
+      :type: bool
+
+
+
+.. py:class:: ComplexAction
+
+
+
+   Rack's undo action. Subclass it (or ModuleAction), override undo and redo, and push it to Context.history.
+
+
+   .. py:method:: push(action: Action) -> None
+
+
+   .. py:method:: is_empty() -> bool
+
+
+   .. py:property:: actions
+      :type: list[Action | ActionView]
+
+
+
+.. py:class:: ModuleAction
+
+
+
+   Rack's undo action. Subclass it (or ModuleAction), override undo and redo, and push it to Context.history.
+
+
+   .. py:attribute:: module_id
+      :type:  int
+
+
+.. py:class:: ModuleAdd
+
+
+
+   Rack's undo action. Subclass it (or ModuleAction), override undo and redo, and push it to Context.history.
+
+
+   .. py:attribute:: model
+      :type:  rackpy.raw.plugin.Model | None
+
+
+   .. py:attribute:: pos
+      :type:  rackpy.raw.math.Vec
+
+
+   .. py:attribute:: module_j
+      :type:  Any
+
+
+   .. py:method:: set_module(module_widget: rackpy.raw.app.ModuleWidget | rackpy.raw.widget.HostWidget) -> None
+
+
+.. py:class:: ModuleRemove
+
+
+
+   Rack's ModuleRemove, a typedef of InverseAction<ModuleAdd>: ``InverseAction[ModuleAdd]`` is this class.
+
+
+.. py:class:: ModuleMove
+
+
+
+   Rack's undo action. Subclass it (or ModuleAction), override undo and redo, and push it to Context.history.
+
+
+   .. py:attribute:: old_pos
+      :type:  rackpy.raw.math.Vec
+
+
+   .. py:attribute:: new_pos
+      :type:  rackpy.raw.math.Vec
+
+
+.. py:class:: ModuleBypass
+
+
+
+   Rack's undo action. Subclass it (or ModuleAction), override undo and redo, and push it to Context.history.
+
+
+   .. py:attribute:: bypassed
+      :type:  bool
+
+
+.. py:class:: ModuleChange
+
+
+
+   Rack's undo action. Subclass it (or ModuleAction), override undo and redo, and push it to Context.history.
+
+
+   .. py:attribute:: old_module_j
+      :type:  Any
+
+
+   .. py:attribute:: new_module_j
+      :type:  Any
+
+
+.. py:class:: ParamChange
+
+
+
+   Rack's undo action. Subclass it (or ModuleAction), override undo and redo, and push it to Context.history.
+
+
+   .. py:attribute:: param_id
+      :type:  int
+
+
+   .. py:attribute:: old_value
+      :type:  float
+
+
+   .. py:attribute:: new_value
+      :type:  float
+
+
+.. py:class:: CableAdd
+
+
+
+   Rack's undo action. Subclass it (or ModuleAction), override undo and redo, and push it to Context.history.
+
+
+   .. py:attribute:: cable_id
+      :type:  int
+
+
+   .. py:attribute:: input_module_id
+      :type:  int
+
+
+   .. py:attribute:: input_id
+      :type:  int
+
+
+   .. py:attribute:: output_module_id
+      :type:  int
+
+
+   .. py:attribute:: output_id
+      :type:  int
+
+
+   .. py:attribute:: color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+   .. py:method:: set_cable(cable_widget: rackpy.raw.app.HostCableWidget | rackpy.raw.app.CableWidget) -> None
+
+
+   .. py:method:: is_cable(cable_widget: rackpy.raw.app.HostCableWidget | rackpy.raw.app.CableWidget | None) -> bool
+
+
+.. py:class:: CableRemove
+
+
+
+   Rack's CableRemove, a typedef of InverseAction<CableAdd>: ``InverseAction[CableAdd]`` is this class.
+
+
+.. py:class:: CableColorChange
+
+
+
+   Rack's undo action. Subclass it (or ModuleAction), override undo and redo, and push it to Context.history.
+
+
+   .. py:attribute:: cable_id
+      :type:  int
+
+
+   .. py:attribute:: new_color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+   .. py:attribute:: old_color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+   .. py:method:: set_cable(cable_widget: rackpy.raw.app.HostCableWidget | rackpy.raw.app.CableWidget) -> None
+
+
+.. py:class:: InverseAction
+
+
+
+   Rack's InverseAction<TAction>: ``InverseAction[T]`` is T with its undo and redo swapped.
+
+
+   .. py:method:: undo() -> None
+
+
+   .. py:method:: redo() -> None
+
+
+.. py:class:: State
+
+   Rack's undo history (Context.history).
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:method:: push(action: Action) -> None
+
+
+   .. py:method:: undo() -> None
+
+
+   .. py:method:: redo() -> None
+
+
+   .. py:method:: can_undo() -> bool
+
+
+   .. py:method:: can_redo() -> bool
+
+
+   .. py:method:: get_undo_name() -> str
+
+
+   .. py:method:: get_redo_name() -> str
+
+
+   .. py:method:: set_saved() -> None
+
+
+   .. py:method:: is_saved() -> bool
+
+
+   .. py:property:: actions
+      :type: list[Action | ActionView]
+
+
+
+   .. py:property:: action_index
+      :type: int
+
+
+
+   .. py:property:: saved_index
+      :type: int
+
+
+

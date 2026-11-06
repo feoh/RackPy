@@ -1,0 +1,381 @@
+rackpy.dsp.digital
+==================
+
+.. py:module:: rackpy.dsp.digital
+
+.. autoapi-nested-parse::
+
+   Rack's triggers, pulse generator, timers and clock divider (RP-18B).
+
+   Rack's own objects (``rack::dsp``, also available as :mod:`rackpy.raw.dsp`),
+   each holding its C++ state, so they behave exactly as in a Rack module. For
+   vectors of four, subscript the templates: ``TSchmittTrigger[float_4]``,
+   ``TTimer[float_4]``. For testing and offline processing; per-sample audio
+   belongs in a native kernel. Available inside Rack only.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.dsp.digital.TSchmittTrigger
+   rackpy.dsp.digital.TTimer
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.dsp.digital.BooleanTrigger
+   rackpy.dsp.digital.ClockDivider
+   rackpy.dsp.digital.PulseGenerator
+   rackpy.dsp.digital.SchmittTrigger
+   rackpy.dsp.digital.Timer
+
+
+Module Contents
+---------------
+
+.. py:class:: BooleanTrigger
+
+   .. py:class:: State
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: LOW
+         :value: 0
+
+
+
+      .. py:attribute:: HIGH
+         :value: 1
+
+
+
+      .. py:attribute:: UNINITIALIZED
+         :value: 2
+
+
+
+
+   .. py:class:: Event
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: NONE
+         :value: 0
+
+
+
+      .. py:attribute:: TRIGGERED
+         :value: 1
+
+
+
+      .. py:attribute:: UNTRIGGERED
+         :value: -1
+
+
+
+
+   .. py:attribute:: s
+      :type:  BooleanTrigger
+
+
+   .. py:attribute:: state
+      :type:  bool
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process(in_: bool) -> bool
+
+
+   .. py:method:: process_event(in_: bool) -> BooleanTrigger
+
+
+   .. py:method:: is_high() -> bool
+
+
+.. py:class:: ClockDivider
+
+   .. py:attribute:: clock
+      :type:  int
+
+
+   .. py:attribute:: division
+      :type:  int
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_division(division: int) -> None
+
+
+   .. py:method:: get_division() -> int
+
+
+   .. py:method:: get_clock() -> int
+
+
+   .. py:method:: process() -> bool
+
+
+.. py:class:: PulseGenerator
+
+   .. py:attribute:: remaining
+      :type:  float
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process(delta_time: float) -> bool
+
+
+   .. py:method:: is_high() -> bool
+
+
+   .. py:method:: trigger(duration: float = 0.001) -> None
+
+
+.. py:class:: SchmittTrigger
+
+   .. py:class:: State
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: LOW
+         :value: 0
+
+
+
+      .. py:attribute:: HIGH
+         :value: 1
+
+
+
+      .. py:attribute:: UNINITIALIZED
+         :value: 2
+
+
+
+
+   .. py:class:: Event
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: NONE
+         :value: 0
+
+
+
+      .. py:attribute:: TRIGGERED
+         :value: 1
+
+
+
+      .. py:attribute:: UNTRIGGERED
+         :value: -1
+
+
+
+
+   .. py:attribute:: s
+      :type:  SchmittTrigger
+
+
+   .. py:attribute:: state
+      :type:  bool
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process(in_: float, low_threshold: float = 0.0, high_threshold: float = 1.0) -> bool
+
+
+   .. py:method:: process_event(in_: float, low_threshold: float = 0.0, high_threshold: float = 1.0) -> SchmittTrigger
+
+
+   .. py:method:: is_high() -> bool
+
+
+.. py:class:: Timer
+
+   .. py:attribute:: time
+      :type:  float
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process(delta_time: float) -> float
+
+
+   .. py:method:: get_time() -> float
+
+
+.. py:data:: TSchmittTrigger
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: TTimer
+   :type:  rackpy.raw.simd.Template
+

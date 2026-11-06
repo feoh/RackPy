@@ -1,0 +1,2588 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="2. Engine" href="engine.html"><link rel="prev" title="0. Entry point" href="entry-point.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>1. Common values and utilities - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">Reference</a><input aria-label="Toggle navigation of Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/reference/surface/common.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/reference/surface/common.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="common-values-and-utilities">
+<h1>1. Common values and utilities<a class="headerlink" href="#common-values-and-utilities" title="Link to this heading">¶</a></h1>
+<p>Math, colours, strings, random numbers, the logger, <code class="docutils literal notranslate"><span class="pre">Quantity</span></code>, mutexes, weak pointers and the common macros.</p>
+<div class="warning admonition">
+<p class="admonition-title">Not bound yet</p>
+<p>This is the coverage obligation for family 1, not available API. Each row is
+a declaration in the pinned Rack 2.6.6 SDK that a full-coverage
+release must map to Python (<a class="reference internal" href="../../coverage.html"><span class="std std-doc">coverage contract</span></a>). Totals are in
+the <a class="reference internal" href="../coverage.html"><span class="std std-doc">coverage report</span></a>.</p>
+</div>
+<p>346 entries. 336 bound. Generated from upstream/api-surface.json and bindings/manifest.json; the status column is each declaration’s record in the binding manifest.</p>
+<div class="table-wrapper rackpy-surface docutils container">
+<table class="rackpy-surface docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Declaration</p></th>
+<th class="head"><p>Kind</p></th>
+<th class="head"><p>Header</p></th>
+<th class="head"><p>Flags</p></th>
+<th class="head"><p>Status</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::Xoroshiro128Plus::result_type</span></code></p></td>
+<td><p>alias</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L27">random.hpp:27</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::DeferWrapper&lt;type&gt;</span></code></p></td>
+<td><p>class template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L194">common.hpp:194</a></p></td>
+<td><p></p></td>
+<td><p>unrepresentable</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::SharedLock&lt;type&gt;</span></code></p></td>
+<td><p>class template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/mutex.hpp#L59">mutex.hpp:59</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakPtr&lt;type&gt;</span></code></p></td>
+<td><p>class template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L47">weakptr.hpp:47</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::DeferWrapper::DeferWrapper&lt;F&gt;($c0)</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L196">common.hpp:196</a></p></td>
+<td><p></p></td>
+<td><p>unrepresentable</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Exception::Exception(const</span> <span class="pre">char</span> <span class="pre">*,</span> <span class="pre">...)</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L218">common.hpp:218</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Exception::Exception(const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L219">common.hpp:219</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::SharedLock::SharedLock&lt;TMutex&gt;($c0</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/mutex.hpp#L62">mutex.hpp:62</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::SharedMutex::SharedMutex()</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/mutex.hpp#L19">mutex.hpp:19</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakHandle::WeakHandle(void</span> <span class="pre">*)</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L11">weakptr.hpp:11</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakPtr::WeakPtr&lt;T&gt;($c0</span> <span class="pre">*)</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L51">weakptr.hpp:51</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakPtr::WeakPtr&lt;T&gt;()</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L50">weakptr.hpp:50</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakPtr::WeakPtr&lt;T&gt;(const</span> <span class="pre">rack::WeakPtr&lt;$c0&gt;</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L54">weakptr.hpp:54</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::Rect()</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L305">math.hpp:305</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::Rect(float,</span> <span class="pre">float,</span> <span class="pre">float,</span> <span class="pre">float)</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L307">math.hpp:307</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::Rect(rack::math::Vec,</span> <span class="pre">rack::math::Vec)</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L306">math.hpp:306</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::Vec()</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L193">math.hpp:193</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::Vec(float)</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L194">math.hpp:194</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::Vec(float,</span> <span class="pre">float)</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L195">math.hpp:195</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::Xoroshiro128Plus::Xoroshiro128Plus()</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L31">random.hpp:31</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::Xoroshiro128Plus::Xoroshiro128Plus(uint64_t,</span> <span class="pre">uint64_t)</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L33">random.hpp:33</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::Version::Version()</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L176">string.hpp:176</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::Version::Version(const</span> <span class="pre">char</span> <span class="pre">*)</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L178">string.hpp:178</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::Version::Version(const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>constructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L177">string.hpp:177</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakPtr::operator</span> <span class="pre">bool()</span> <span class="pre">const</span></code></p></td>
+<td><p>conversion</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L103">weakptr.hpp:103</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakPtr::operator</span> <span class="pre">type-parameter-0-0</span> <span class="pre">*()</span> <span class="pre">const</span></code></p></td>
+<td><p>conversion</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L100">weakptr.hpp:100</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::Version::operator</span> <span class="pre">basic_string()</span> <span class="pre">const</span></code></p></td>
+<td><p>conversion</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L179">string.hpp:179</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::DeferWrapper::~DeferWrapper&lt;F&gt;()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L197">common.hpp:197</a></p></td>
+<td><p></p></td>
+<td><p>unrepresentable</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::~Quantity()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L15">Quantity.hpp:15</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::SharedLock::~SharedLock&lt;TMutex&gt;()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/mutex.hpp#L65">mutex.hpp:65</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::SharedMutex::~SharedMutex()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/mutex.hpp#L24">mutex.hpp:24</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakBase::~WeakBase()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L19">weakptr.hpp:19</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakPtr::~WeakPtr&lt;T&gt;()</span></code></p></td>
+<td><p>destructor</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L61">weakptr.hpp:61</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::logger::Level</span></code></p></td>
+<td><p>enum</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/logger.hpp#L27">logger.hpp:27</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::logger::Level::DEBUG_LEVEL</span></code></p></td>
+<td><p>enumerator</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/logger.hpp#L28">logger.hpp:28</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::logger::Level::FATAL_LEVEL</span></code></p></td>
+<td><p>enumerator</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/logger.hpp#L31">logger.hpp:31</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::logger::Level::INFO_LEVEL</span></code></p></td>
+<td><p>enumerator</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/logger.hpp#L29">logger.hpp:29</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::logger::Level::WARN_LEVEL</span></code></p></td>
+<td><p>enumerator</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/logger.hpp#L30">logger.hpp:30</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::DeferWrapper::f</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L195">common.hpp:195</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Exception::msg</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L214">common.hpp:214</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::SharedLock::m</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/mutex.hpp#L60">mutex.hpp:60</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::SharedMutex::rwlock</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/mutex.hpp#L17">mutex.hpp:17</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakBase::weakHandle</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L17">weakptr.hpp:17</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakHandle::count</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L10">weakptr.hpp:10</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakHandle::ptr</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L9">weakptr.hpp:9</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakPtr::weakHandle</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L48">weakptr.hpp:48</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::pos</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L302">math.hpp:302</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::size</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L303">math.hpp:303</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::x</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L190">math.hpp:190</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::y</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L191">math.hpp:191</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::Xoroshiro128Plus::state</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L29">random.hpp:29</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::Location::column</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L54">string.hpp:54</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::Location::line</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L52">string.hpp:52</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::Version::parts</span></code></p></td>
+<td><p>field</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L174">string.hpp:174</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fopen_u8(const</span> <span class="pre">char</span> <span class="pre">*,</span> <span class="pre">const</span> <span class="pre">char</span> <span class="pre">*)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L141">common.hpp:141</a></p></td>
+<td><p>only if defined ARCH_WIN; absent in lin-x64, lin-x64-simde, mac-arm64, mac-x64</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">operator&quot;&quot;_f32(long</span> <span class="pre">double)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L127">common.hpp:127</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">operator&quot;&quot;_f32(unsigned</span> <span class="pre">long</span> <span class="pre">long)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L128">common.hpp:128</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">operator&quot;&quot;_f64(long</span> <span class="pre">double)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L129">common.hpp:129</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">operator&quot;&quot;_f64(unsigned</span> <span class="pre">long</span> <span class="pre">long)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L130">common.hpp:130</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">operator&quot;&quot;_i16(unsigned</span> <span class="pre">long</span> <span class="pre">long)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L120">common.hpp:120</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">operator&quot;&quot;_i32(unsigned</span> <span class="pre">long</span> <span class="pre">long)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L121">common.hpp:121</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">operator&quot;&quot;_i64(unsigned</span> <span class="pre">long</span> <span class="pre">long)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L122">common.hpp:122</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">operator&quot;&quot;_i8(unsigned</span> <span class="pre">long</span> <span class="pre">long)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L119">common.hpp:119</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">operator&quot;&quot;_u16(unsigned</span> <span class="pre">long</span> <span class="pre">long)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L124">common.hpp:124</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">operator&quot;&quot;_u32(unsigned</span> <span class="pre">long</span> <span class="pre">long)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L125">common.hpp:125</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">operator&quot;&quot;_u64(unsigned</span> <span class="pre">long</span> <span class="pre">long)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L126">common.hpp:126</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">operator&quot;&quot;_u8(unsigned</span> <span class="pre">long</span> <span class="pre">long)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L123">common.hpp:123</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::alpha(NVGcolor,</span> <span class="pre">float)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L56">color.hpp:56</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::clamp(NVGcolor)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L30">color.hpp:30</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::fromHexString(std::string)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L61">color.hpp:61</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::isEqual(NVGcolor,</span> <span class="pre">NVGcolor)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L28">color.hpp:28</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::lerp(NVGcolor,</span> <span class="pre">NVGcolor,</span> <span class="pre">float)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L48">color.hpp:48</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::minus(NVGcolor,</span> <span class="pre">NVGcolor)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L34">color.hpp:34</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::mult(NVGcolor,</span> <span class="pre">NVGcolor)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L42">color.hpp:42</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::mult(NVGcolor,</span> <span class="pre">float)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L46">color.hpp:46</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::plus(NVGcolor,</span> <span class="pre">NVGcolor)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L38">color.hpp:38</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::screen(NVGcolor,</span> <span class="pre">NVGcolor)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L52">color.hpp:52</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::toHexString(NVGcolor)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L65">color.hpp:65</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::logger::destroy()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/logger.hpp#L36">logger.hpp:36</a></p></td>
+<td><p></p></td>
+<td><p>excluded (internal)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::logger::init()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/logger.hpp#L35">logger.hpp:35</a></p></td>
+<td><p></p></td>
+<td><p>excluded (internal)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::logger::log(rack::logger::Level,</span> <span class="pre">const</span> <span class="pre">char</span> <span class="pre">*,</span> <span class="pre">int,</span> <span class="pre">const</span> <span class="pre">char</span> <span class="pre">*,</span> <span class="pre">const</span> <span class="pre">char</span> <span class="pre">*,</span> <span class="pre">...)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/logger.hpp#L41">logger.hpp:41</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::logger::wasTruncated()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/logger.hpp#L44">logger.hpp:44</a></p></td>
+<td><p></p></td>
+<td><p>excluded (internal)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::chop(float,</span> <span class="pre">float)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L145">math.hpp:145</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::clamp(float,</span> <span class="pre">float,</span> <span class="pre">float)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L106">math.hpp:106</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::clamp(int,</span> <span class="pre">int,</span> <span class="pre">int)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L32">math.hpp:32</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::clampSafe(float,</span> <span class="pre">float,</span> <span class="pre">float)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L113">math.hpp:113</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::clampSafe(int,</span> <span class="pre">int,</span> <span class="pre">int)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L39">math.hpp:39</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::complexMult(float,</span> <span class="pre">float,</span> <span class="pre">float,</span> <span class="pre">float,</span> <span class="pre">float</span> <span class="pre">*,</span> <span class="pre">float</span> <span class="pre">*)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L176">math.hpp:176</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::crossfade(float,</span> <span class="pre">float,</span> <span class="pre">float)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L157">math.hpp:157</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::eucDiv(int,</span> <span class="pre">int)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L58">math.hpp:58</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::eucDivMod(int,</span> <span class="pre">int,</span> <span class="pre">int</span> <span class="pre">*,</span> <span class="pre">int</span> <span class="pre">*)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L67">math.hpp:67</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::eucMod(float,</span> <span class="pre">float)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L131">math.hpp:131</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::eucMod(int,</span> <span class="pre">int)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L47">math.hpp:47</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::interpolateLinear(const</span> <span class="pre">float</span> <span class="pre">*,</span> <span class="pre">float)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L164">math.hpp:164</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::isNear(float,</span> <span class="pre">float,</span> <span class="pre">float)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L140">math.hpp:140</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::log2(int)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L77">math.hpp:77</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::normalizeZero(float)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L124">math.hpp:124</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator!=(const</span> <span class="pre">rack::math::Rect</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">rack::math::Rect</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L527">math.hpp:527</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator!=(const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L518">math.hpp:518</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator*(const</span> <span class="pre">float</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L488">math.hpp:488</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator*(const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">float</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L485">math.hpp:485</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator*(const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L482">math.hpp:482</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator*=(rack::math::Vec</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">float</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L506">math.hpp:506</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator*=(rack::math::Vec</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L503">math.hpp:503</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator+(const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L470">math.hpp:470</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator+(const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L476">math.hpp:476</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator+=(rack::math::Vec</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L497">math.hpp:497</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator-(const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L473">math.hpp:473</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator-(const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L479">math.hpp:479</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator-=(rack::math::Vec</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L500">math.hpp:500</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator/(const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">float</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L494">math.hpp:494</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator/(const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L491">math.hpp:491</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator/=(rack::math::Vec</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">float</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L512">math.hpp:512</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator/=(rack::math::Vec</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L509">math.hpp:509</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator==(const</span> <span class="pre">rack::math::Rect</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">rack::math::Rect</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L524">math.hpp:524</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::operator==(const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">rack::math::Vec</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L515">math.hpp:515</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::rescale(float,</span> <span class="pre">float,</span> <span class="pre">float,</span> <span class="pre">float,</span> <span class="pre">float)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L151">math.hpp:151</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::buffer(uint8_t</span> <span class="pre">*,</span> <span class="pre">size_t)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L145">random.hpp:145</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::get&lt;bool&gt;()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L105">random.hpp:105</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::get&lt;double&gt;()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L116">random.hpp:116</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::get&lt;float&gt;()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L110">random.hpp:110</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::get&lt;uint16_t&gt;()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L95">random.hpp:95</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::get&lt;uint32_t&gt;()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L89">random.hpp:89</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::get&lt;uint8_t&gt;()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L100">random.hpp:100</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::init()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L75">random.hpp:75</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::local()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L80">random.hpp:80</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::normal()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L129">random.hpp:129</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::u32()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L124">random.hpp:124</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::u64()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L122">random.hpp:122</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::uniform()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L126">random.hpp:126</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::vector(size_t)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L160">random.hpp:160</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::UTF16toUTF8(const</span> <span class="pre">std::wstring</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L149">string.hpp:149</a></p></td>
+<td><p>only if defined ARCH_WIN; absent in lin-x64, lin-x64-simde, mac-arm64, mac-x64</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::UTF32toUTF8(const</span> <span class="pre">std::u32string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L112">string.hpp:112</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::UTF8CodepointIndex(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">size_t)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L135">string.hpp:135</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::UTF8CodepointPos(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">size_t)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L140">string.hpp:140</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::UTF8Length(const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L130">string.hpp:130</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::UTF8NextCodepoint(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">size_t)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L121">string.hpp:121</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::UTF8PrevCodepoint(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">size_t)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L126">string.hpp:126</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::UTF8toUTF16(const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L150">string.hpp:150</a></p></td>
+<td><p>only if defined ARCH_WIN; absent in lin-x64, lin-x64-simde, mac-arm64, mac-x64</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::UTF8toUTF32(const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L116">string.hpp:116</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::convertFArg(const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L23">string.hpp:23</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::ellipsize(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">size_t)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L42">string.hpp:42</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::ellipsizePrefix(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">size_t)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L44">string.hpp:44</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::endsWith(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L48">string.hpp:48</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::f(const</span> <span class="pre">char</span> <span class="pre">*,</span> <span class="pre">...)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L17">string.hpp:17</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::fV(const</span> <span class="pre">char</span> <span class="pre">*,</span> <span class="pre">va_list)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L18">string.hpp:18</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::formatTime(const</span> <span class="pre">char</span> <span class="pre">*,</span> <span class="pre">double)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L105">string.hpp:105</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::formatTimeISO(double)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L106">string.hpp:106</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::fromBase64(const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L68">string.hpp:68</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::getLanguages()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L200">string.hpp:200</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::init()</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L201">string.hpp:201</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::locationToPosition(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">rack::string::Location)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L58">string.hpp:58</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::lowercase(const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L32">string.hpp:32</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::positionToLocation(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">size_t)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L57">string.hpp:57</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::split(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">size_t)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L102">string.hpp:102</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::startsWith(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L46">string.hpp:46</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::strcasecmp(const</span> <span class="pre">char</span> <span class="pre">*,</span> <span class="pre">const</span> <span class="pre">char</span> <span class="pre">*)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L70">string.hpp:70</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::toBase64(const</span> <span class="pre">std::vector&lt;uint8_t&gt;</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L64">string.hpp:64</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::toBase64(const</span> <span class="pre">uint8_t</span> <span class="pre">*,</span> <span class="pre">size_t)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L63">string.hpp:63</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::translate(const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L196">string.hpp:196</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::translate(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L198">string.hpp:198</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::trim(const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L36">string.hpp:36</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::truncate(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">size_t)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L38">string.hpp:38</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::truncatePrefix(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">size_t)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L40">string.hpp:40</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::uppercase(const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L34">string.hpp:34</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::bitCast&lt;type,</span> <span class="pre">type&gt;($1)</span></code></p></td>
+<td><p>function template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L156">common.hpp:156</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::construct&lt;type,</span> <span class="pre">type,</span> <span class="pre">type,</span> <span class="pre">type...&gt;($1,</span> <span class="pre">$2,</span> <span class="pre">$3...)</span></code></p></td>
+<td><p>function template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L176">common.hpp:176</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::construct&lt;type&gt;()</span></code></p></td>
+<td><p>function template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L171">common.hpp:171</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::deferWrapper&lt;type&gt;($0)</span></code></p></td>
+<td><p>function template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L203">common.hpp:203</a></p></td>
+<td><p></p></td>
+<td><p>unrepresentable</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::get&lt;type&gt;(const</span> <span class="pre">$0</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">typename</span> <span class="pre">$0::key_type</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">typename</span> <span class="pre">$0::mapped_type</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L240">common.hpp:240</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::get&lt;type&gt;(const</span> <span class="pre">$0</span> <span class="pre">&amp;,</span> <span class="pre">typename</span> <span class="pre">$0::size_type,</span> <span class="pre">const</span> <span class="pre">typename</span> <span class="pre">$0::value_type</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L251">common.hpp:251</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::isEven&lt;type&gt;($0)</span></code></p></td>
+<td><p>function template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L19">math.hpp:19</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::isOdd&lt;type&gt;($0)</span></code></p></td>
+<td><p>function template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L25">math.hpp:25</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::isPow2&lt;type&gt;($0)</span></code></p></td>
+<td><p>function template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L87">math.hpp:87</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::sgn&lt;type&gt;($0)</span></code></p></td>
+<td><p>function template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L95">math.hpp:95</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::get&lt;type&gt;()</span></code></p></td>
+<td><p>function template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L83">random.hpp:83</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::convertFArg&lt;type&gt;(const</span> <span class="pre">$0</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>function template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L22">string.hpp:22</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::f&lt;type...&gt;($0...)</span></code></p></td>
+<td><p>function template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L25">string.hpp:25</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::join&lt;type&gt;(const</span> <span class="pre">$0</span> <span class="pre">&amp;,</span> <span class="pre">std::string)</span></code></p></td>
+<td><p>function template</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L80">string.hpp:80</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ARCH_ARM64</span></code></p></td>
+<td><p>object macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/arch.hpp#L8">arch.hpp:8</a></p></td>
+<td><p>only if defined __aarch64__; absent in lin-x64, lin-x64-simde, mac-x64, win-x64</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ARCH_LIN</span></code></p></td>
+<td><p>object macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/arch.hpp#L19">arch.hpp:19</a></p></td>
+<td><p>only if defined __linux__; absent in mac-arm64, mac-x64, win-x64</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ARCH_MAC</span></code></p></td>
+<td><p>object macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/arch.hpp#L16">arch.hpp:16</a></p></td>
+<td><p>only if defined __APPLE__; absent in lin-x64, lin-x64-simde, win-x64</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ARCH_WIN</span></code></p></td>
+<td><p>object macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/arch.hpp#L13">arch.hpp:13</a></p></td>
+<td><p>only if defined _WIN32; absent in lin-x64, lin-x64-simde, mac-arm64, mac-x64</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ARCH_X64</span></code></p></td>
+<td><p>object macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/arch.hpp#L5">arch.hpp:5</a></p></td>
+<td><p>only if defined __x86_64__; absent in mac-arm64</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">BINARY</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L104">common.hpp:104</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">BINARY_END</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L106">common.hpp:106</a></p></td>
+<td><p></p></td>
+<td><p>unrepresentable</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">BINARY_SIZE</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L107">common.hpp:107</a></p></td>
+<td><p></p></td>
+<td><p>unrepresentable</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">BINARY_START</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L105">common.hpp:105</a></p></td>
+<td><p></p></td>
+<td><p>unrepresentable</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CONCAT</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L47">common.hpp:47</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CONCAT_LITERAL</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L46">common.hpp:46</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DEBUG</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/logger.hpp#L13">logger.hpp:13</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DEFER</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L207">common.hpp:207</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DEPRECATED</span></code></p></td>
+<td><p>object macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L26">common.hpp:26</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ENUMS</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L80">common.hpp:80</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">FATAL</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/logger.hpp#L16">logger.hpp:16</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">INFO</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/logger.hpp#L14">logger.hpp:14</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">LENGTHOF</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L67">common.hpp:67</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">RECT_ARGS</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L542">math.hpp:542</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TOSTRING</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L63">common.hpp:63</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TOSTRING_LITERAL</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L62">common.hpp:62</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">VEC_ARGS</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L541">math.hpp:541</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">WARN</span></code></p></td>
+<td><p>function macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/logger.hpp#L15">logger.hpp:15</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fopen</span></code></p></td>
+<td><p>object macro</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L138">common.hpp:138</a></p></td>
+<td><p>only if defined ARCH_WIN; absent in lin-x64, lin-x64-simde, mac-arm64, mac-x64</p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Exception::what()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L220">common.hpp:220</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::fromScaled(float)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L104">Quantity.hpp:104</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::getDefaultValue()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L40">Quantity.hpp:40</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::getDisplayPrecision()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L53">Quantity.hpp:53</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::getDisplayValue()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L47">Quantity.hpp:47</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::getDisplayValueString()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L56">Quantity.hpp:56</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::getLabel()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L62">Quantity.hpp:62</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::getMaxValue()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L35">Quantity.hpp:35</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::getMinValue()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L30">Quantity.hpp:30</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::getRange()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L98">Quantity.hpp:98</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::getScaledValue()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L108">Quantity.hpp:108</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::getString()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L74">Quantity.hpp:74</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::getUnit()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L69">Quantity.hpp:69</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::getValue()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L25">Quantity.hpp:25</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::isBounded()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L100">Quantity.hpp:100</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::isMax()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L87">Quantity.hpp:87</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::isMin()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L85">Quantity.hpp:85</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::moveScaledValue(float)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L110">Quantity.hpp:110</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::moveValue(float)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L95">Quantity.hpp:95</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::randomize()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L80">Quantity.hpp:80</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::reset()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L77">Quantity.hpp:77</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::setDisplayValue(float)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L50">Quantity.hpp:50</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::setDisplayValueString(std::string)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L59">Quantity.hpp:59</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::setMax()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L91">Quantity.hpp:91</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::setMin()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L89">Quantity.hpp:89</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::setScaledValue(float)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L106">Quantity.hpp:106</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::setValue(float)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L20">Quantity.hpp:20</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::toScaled(float)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L102">Quantity.hpp:102</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity::toggle()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L93">Quantity.hpp:93</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::SharedMutex::lock()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/mutex.hpp#L28">mutex.hpp:28</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::SharedMutex::lock_shared()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/mutex.hpp#L43">mutex.hpp:43</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::SharedMutex::try_lock()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/mutex.hpp#L34">mutex.hpp:34</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::SharedMutex::try_lock_shared()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/mutex.hpp#L49">mutex.hpp:49</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::SharedMutex::unlock()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/mutex.hpp#L37">mutex.hpp:37</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::SharedMutex::unlock_shared()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/mutex.hpp#L52">mutex.hpp:52</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakBase::getWeakCount()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L24">weakptr.hpp:24</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakPtr::get()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L89">weakptr.hpp:89</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakPtr::operator*()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L97">weakptr.hpp:97</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakPtr::operator-&gt;()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L94">weakptr.hpp:94</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakPtr::operator=(const</span> <span class="pre">rack::WeakPtr&lt;$c0&gt;</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L57">weakptr.hpp:57</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakPtr::set($c0</span> <span class="pre">*)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L64">weakptr.hpp:64</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::clamp(rack::math::Rect)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L384">math.hpp:384</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::contains(rack::math::Rect)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L333">math.hpp:333</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::contains(rack::math::Vec)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L326">math.hpp:326</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::equals(rack::math::Rect)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L344">math.hpp:344</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::expand(rack::math::Rect)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L401">math.hpp:401</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::fromCorners(rack::math::Vec,</span> <span class="pre">rack::math::Vec)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L315">math.hpp:315</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::fromMinMax(rack::math::Vec,</span> <span class="pre">rack::math::Vec)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L310">math.hpp:310</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::getBottom()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L356">math.hpp:356</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::getBottomLeft()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L377">math.hpp:377</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::getBottomRight()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L380">math.hpp:380</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::getCenter()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L368">math.hpp:368</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::getHeight()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L362">math.hpp:362</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::getLeft()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L347">math.hpp:347</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::getRight()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L350">math.hpp:350</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::getTop()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L353">math.hpp:353</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::getTopLeft()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L371">math.hpp:371</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::getTopRight()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L374">math.hpp:374</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::getWidth()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L359">math.hpp:359</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::grow(rack::math::Vec)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L423">math.hpp:423</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::inf()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L319">math.hpp:319</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::interpolate(rack::math::Vec)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L437">math.hpp:437</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::intersect(rack::math::Rect)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L410">math.hpp:410</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::intersects(rack::math::Rect)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L340">math.hpp:340</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::isContaining(rack::math::Vec)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L442">math.hpp:442</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::isEqual(rack::math::Rect)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L448">math.hpp:448</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::isIntersecting(rack::math::Rect)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L445">math.hpp:445</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::nudge(rack::math::Rect)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L393">math.hpp:393</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::shrink(rack::math::Vec)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L430">math.hpp:430</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect::zeroPos()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L419">math.hpp:419</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::abs()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L263">math.hpp:263</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::area()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L242">math.hpp:242</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::arg()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L230">math.hpp:230</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::ceil()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L272">math.hpp:272</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::clamp(rack::math::Rect)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L284">math.hpp:284</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::clampSafe(rack::math::Rect)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L285">math.hpp:285</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::crossfade(rack::math::Vec,</span> <span class="pre">float)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L286">math.hpp:286</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::div(float)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L221">math.hpp:221</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::div(rack::math::Vec)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L224">math.hpp:224</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::dot(rack::math::Vec)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L227">math.hpp:227</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::equals(rack::math::Vec)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L275">math.hpp:275</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::flip()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L254">math.hpp:254</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::floor()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L269">math.hpp:269</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::isEqual(rack::math::Vec)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L291">math.hpp:291</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::isFinite()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L281">math.hpp:281</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::isZero()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L278">math.hpp:278</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::max(rack::math::Vec)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L260">math.hpp:260</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::min(rack::math::Vec)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L257">math.hpp:257</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::minus(rack::math::Vec)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L212">math.hpp:212</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::mult(float)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L215">math.hpp:215</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::mult(rack::math::Vec)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L218">math.hpp:218</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::neg()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L206">math.hpp:206</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::norm()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L233">math.hpp:233</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::normalize()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L236">math.hpp:236</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::operator[](int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L197">math.hpp:197</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::operator[](int)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L200">math.hpp:200</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::plus(rack::math::Vec)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L209">math.hpp:209</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::rotate(float)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L246">math.hpp:246</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::round()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L266">math.hpp:266</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec::square()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L239">math.hpp:239</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::Xoroshiro128Plus::isSeeded()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L44">random.hpp:44</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::Xoroshiro128Plus::max()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L67">random.hpp:67</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::Xoroshiro128Plus::min()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L64">random.hpp:64</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::Xoroshiro128Plus::operator()()</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L52">random.hpp:52</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::Xoroshiro128Plus::rotl(uint64_t,</span> <span class="pre">int)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L48">random.hpp:48</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::Xoroshiro128Plus::seed(uint64_t,</span> <span class="pre">uint64_t)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L37">random.hpp:37</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::CaseInsensitiveCompare::operator()(const</span> <span class="pre">std::string</span> <span class="pre">&amp;,</span> <span class="pre">const</span> <span class="pre">std::string</span> <span class="pre">&amp;)</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L74">string.hpp:74</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::Version::getMajor()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L183">string.hpp:183</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::Version::getMinor()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L186">string.hpp:186</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::Version::getRevision()</span> <span class="pre">const</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L189">string.hpp:189</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::Version::operator&lt;(const</span> <span class="pre">rack::string::Version</span> <span class="pre">&amp;)</span></code></p></td>
+<td><p>method</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L181">string.hpp:181</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Exception</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L213">common.hpp:213</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/Quantity.hpp#L14">Quantity.hpp:14</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::SharedMutex</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/mutex.hpp#L16">mutex.hpp:16</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakBase</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L16">weakptr.hpp:16</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::WeakHandle</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/weakptr.hpp#L8">weakptr.hpp:8</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Rect</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L301">math.hpp:301</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::math::Vec</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/math.hpp#L189">math.hpp:189</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::random::Xoroshiro128Plus</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/random.hpp#L26">random.hpp:26</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::CaseInsensitiveCompare</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L72">string.hpp:72</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::Location</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L50">string.hpp:50</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::string::Version</span></code></p></td>
+<td><p>record</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/string.hpp#L173">string.hpp:173</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::API_URL</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L269">common.hpp:269</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::APP_CPU</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L267">common.hpp:267</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::APP_CPU_NAME</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L268">common.hpp:268</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::APP_EDITION</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L261">common.hpp:261</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::APP_EDITION_NAME</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L262">common.hpp:262</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::APP_NAME</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L260">common.hpp:260</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::APP_OS</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L265">common.hpp:265</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::APP_OS_NAME</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L266">common.hpp:266</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::APP_VERSION</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L264">common.hpp:264</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::APP_VERSION_MAJOR</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/common.hpp#L263">common.hpp:263</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::BLACK</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L17">color.hpp:17</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::BLACK_TRANSPARENT</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L13">color.hpp:13</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::BLUE</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L20">color.hpp:20</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::CYAN</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L21">color.hpp:21</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::GREEN</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L19">color.hpp:19</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::MAGENTA</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L22">color.hpp:22</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::RED</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L18">color.hpp:18</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::WHITE</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L24">color.hpp:24</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::WHITE_TRANSPARENT</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L14">color.hpp:14</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack::color::YELLOW</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/color.hpp#L23">color.hpp:23</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rack::logger::logPath</span></code></p></td>
+<td><p>variable</p></td>
+<td><p><a class="reference external" href="https://github.com/VCVRack/Rack/blob/061ccf63c1758599396ac1bb10d47345d9d34076/include/logger.hpp#L24">logger.hpp:24</a></p></td>
+<td><p></p></td>
+<td><p>implemented</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="engine.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">2. Engine</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="entry-point.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">0. Entry point</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

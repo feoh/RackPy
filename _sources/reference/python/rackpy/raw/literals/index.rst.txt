@@ -1,0 +1,46 @@
+rackpy.raw.literals
+===================
+
+.. py:module:: rackpy.raw.literals
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.literals.i8
+   rackpy.raw.literals.i16
+   rackpy.raw.literals.i32
+   rackpy.raw.literals.i64
+   rackpy.raw.literals.u8
+   rackpy.raw.literals.u16
+   rackpy.raw.literals.u32
+   rackpy.raw.literals.u64
+   rackpy.raw.literals.f32
+   rackpy.raw.literals.f64
+
+
+Module Contents
+---------------
+
+.. py:function:: i8(x: int) -> int
+
+.. py:function:: i16(x: int) -> int
+
+.. py:function:: i32(x: int) -> int
+
+.. py:function:: i64(x: int) -> int
+
+.. py:function:: u8(x: int) -> int
+
+.. py:function:: u16(x: int) -> int
+
+.. py:function:: u32(x: int) -> int
+
+.. py:function:: u64(x: int) -> int
+
+.. py:function:: f32(x: float) -> float
+
+.. py:function:: f64(x: float) -> float
+

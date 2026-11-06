@@ -1,0 +1,339 @@
+rackpy.dsp.filters
+==================
+
+.. py:module:: rackpy.dsp.filters
+
+.. autoapi-nested-parse::
+
+   Rack's filters: RC, exponential, peak, slew, IIR and biquad (RP-18C).
+
+   Rack's own objects (``rack::dsp``, also available as :mod:`rackpy.raw.dsp`),
+   each holding its C++ state. For vectors of four, subscript the templates:
+   ``TBiquadFilter[float_4]``; IIR filters of any order from 2 to 8 are
+   ``IIRFilter[b_order, a_order]``. :func:`process_block` runs a float filter
+   over a whole buffer natively. For design, analysis and offline processing;
+   per-sample audio belongs in a native kernel. Available inside Rack only.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.dsp.filters.IIRFilter
+   rackpy.dsp.filters.TBiquadFilter
+   rackpy.dsp.filters.TExponentialFilter
+   rackpy.dsp.filters.TExponentialSlewLimiter
+   rackpy.dsp.filters.TPeakFilter
+   rackpy.dsp.filters.TRCFilter
+   rackpy.dsp.filters.TSlewLimiter
+   rackpy.dsp.filters.TimedFilter
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.dsp.filters.BiquadFilter
+   rackpy.dsp.filters.ExponentialFilter
+   rackpy.dsp.filters.ExponentialSlewLimiter
+   rackpy.dsp.filters.PeakFilter
+   rackpy.dsp.filters.RCFilter
+   rackpy.dsp.filters.SlewLimiter
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.dsp.filters.process_block
+
+
+Module Contents
+---------------
+
+.. py:class:: BiquadFilter
+
+
+
+   .. py:class:: Type
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: LOWPASS_1POLE
+         :value: 0
+
+
+
+      .. py:attribute:: HIGHPASS_1POLE
+         :value: 1
+
+
+
+      .. py:attribute:: LOWPASS
+         :value: 2
+
+
+
+      .. py:attribute:: HIGHPASS
+         :value: 3
+
+
+
+      .. py:attribute:: LOWSHELF
+         :value: 4
+
+
+
+      .. py:attribute:: HIGHSHELF
+         :value: 5
+
+
+
+      .. py:attribute:: BANDPASS
+         :value: 6
+
+
+
+      .. py:attribute:: PEAK
+         :value: 7
+
+
+
+      .. py:attribute:: NOTCH
+         :value: 8
+
+
+
+      .. py:attribute:: NUM_TYPES
+         :value: 9
+
+
+
+
+   .. py:method:: set_parameters(type: BiquadFilter, f: float, q: float, v: float) -> None
+
+
+.. py:class:: ExponentialFilter
+
+   .. py:attribute:: out
+      :type:  float
+
+
+   .. py:attribute:: lambda_
+      :type:  float
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_lambda(lambda_: float) -> None
+
+
+   .. py:method:: set_tau(tau: float) -> None
+
+
+   .. py:method:: process(delta_time: float, in_: float) -> float
+                  process(in_: float) -> float
+
+
+.. py:class:: ExponentialSlewLimiter
+
+   .. py:attribute:: out
+      :type:  float
+
+
+   .. py:attribute:: rise_lambda
+      :type:  float
+
+
+   .. py:attribute:: fall_lambda
+      :type:  float
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_rise_fall(rise_lambda: float, fall_lambda: float) -> None
+
+
+   .. py:method:: set_rise_fall_tau(rise_tau: float, fall_tau: float) -> None
+
+
+   .. py:method:: process(delta_time: float, in_: float) -> float
+                  process(in_: float) -> float
+
+
+.. py:data:: IIRFilter
+   :type:  rackpy.raw.simd.Template
+
+.. py:class:: PeakFilter
+
+   .. py:attribute:: out
+      :type:  float
+
+
+   .. py:attribute:: lambda_
+      :type:  float
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_lambda(lambda_: float) -> None
+
+
+   .. py:method:: set_tau(tau: float) -> None
+
+
+   .. py:method:: peak() -> float
+
+
+   .. py:method:: set_rate(r: float) -> None
+
+
+   .. py:method:: process(delta_time: float, in_: float) -> float
+                  process(in_: float) -> float
+
+
+.. py:class:: RCFilter
+
+   .. py:attribute:: c
+      :type:  float
+
+
+   .. py:property:: xstate
+      :type: FloatArray
+
+
+
+   .. py:property:: ystate
+      :type: FloatArray
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_cutoff(r: float) -> None
+
+
+   .. py:method:: set_cutoff_freq(f: float) -> None
+
+
+   .. py:method:: process(x: float) -> None
+
+
+   .. py:method:: lowpass() -> float
+
+
+   .. py:method:: highpass() -> float
+
+
+.. py:class:: SlewLimiter
+
+   .. py:attribute:: out
+      :type:  float
+
+
+   .. py:attribute:: rise
+      :type:  float
+
+
+   .. py:attribute:: fall
+      :type:  float
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: set_rise_fall(rise: float, fall: float) -> None
+
+
+   .. py:method:: process(delta_time: float, in_: float) -> float
+                  process(in_: float) -> float
+
+
+.. py:data:: TBiquadFilter
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: TExponentialFilter
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: TExponentialSlewLimiter
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: TPeakFilter
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: TRCFilter
+   :type:  rackpy.raw.simd.Template
+
+.. py:data:: TSlewLimiter
+   :type:  rackpy.raw.simd.Template
+
+.. py:type:: TimedFilter
+   :canonical: ExponentialFilter | PeakFilter | SlewLimiter | ExponentialSlewLimiter
+
+
+   The float filters whose ``process`` takes a time step.
+
+
+.. py:function:: process_block(filter: TimedFilter, in_: collections.abc.Buffer, out: collections.abc.Buffer, delta_time: float) -> None
+                 process_block(filter: rackpy.raw.dsp.IIRFilter_3_3_float, in_: collections.abc.Buffer, out: collections.abc.Buffer) -> None
+
+   Run a float filter over every sample of ``in_``, writing ``out``, natively.
+
+   Each sample goes through the same Rack call as ``filter.process``, in
+   order, so the results and the filter's final state are exactly those of a
+   Python loop of ``process`` calls, only much faster. ``in_`` and ``out`` are
+   float32 buffers; ``out`` may be ``in_``. The exponential, peak and slew
+   filters need ``delta_time``; the IIR and biquad filters take none. RC
+   filters have no single output, so they are not supported.
+
+   ``BiquadFilter`` and the 3-3 IIR filter are typed; other ``IIRFilter[b_order, a_order]``
+   instantiations are created by a template, so type checkers see them as ``Any``. Other
+   objects raise ``TypeError`` at runtime.
+
+

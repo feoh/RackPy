@@ -1,0 +1,48 @@
+rackpy.dialog
+=============
+
+.. py:module:: rackpy.dialog
+
+.. autoapi-nested-parse::
+
+   Rack's native modal file chooser, for plugin-owned files and resources.
+
+   These dialogs wait for the user on Rack's main/UI thread. Call them from a UI
+   callback, never from module processing or a Rack engine callback. Choosing a
+   path does not open, execute, copy, or deserialize the selected file.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.dialog.open_file
+   rackpy.dialog.save_file
+   rackpy.dialog.choose_directory
+
+
+Module Contents
+---------------
+
+.. py:function:: open_file(*, directory: str | os.PathLike[str] | None = None, filters: str | None = None) -> pathlib.Path | None
+
+   Show Rack's open-file dialog; return the selected path, or ``None`` on cancel.
+
+   ``filters`` uses osdialog syntax, for example ``"Audio:wav,aiff;Any:*"``.
+   The starting directory is optional; the operating system chooses one if omitted.
+
+
+.. py:function:: save_file(*, directory: str | os.PathLike[str] | None = None, filename: str | None = None, filters: str | None = None) -> pathlib.Path | None
+
+   Show Rack's save-file dialog; return the chosen destination, or ``None`` on cancel.
+
+   This only selects a destination; it does not create or overwrite the file.
+
+
+.. py:function:: choose_directory(*, directory: str | os.PathLike[str] | None = None) -> pathlib.Path | None
+
+   Show Rack's directory picker; return the chosen directory, or ``None`` on cancel.
+
+

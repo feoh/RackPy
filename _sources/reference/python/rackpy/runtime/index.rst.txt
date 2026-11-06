@@ -1,0 +1,120 @@
+rackpy.runtime
+==============
+
+.. py:module:: rackpy.runtime
+
+.. autoapi-nested-parse::
+
+   The embedded Python runtime: threads, shutdown hooks and diagnostics.
+
+   Available only inside Rack, in a plugin built with RackPy. Importing it
+   anywhere else raises :class:`ImportError`.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.runtime.ThreadRole
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.runtime.Diagnostic
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.runtime.diagnostics
+   rackpy.runtime.thread_role
+   rackpy.runtime.is_main_thread
+   rackpy.runtime.on_context_closing
+
+
+Module Contents
+---------------
+
+.. py:data:: ThreadRole
+
+   ``main``: Rack's main (UI) thread. ``rack``: one of Rack's engine or driver threads, where
+   Python never runs. ``other``: a thread without a Rack context, such as one you started.
+
+
+.. py:class:: Diagnostic
+
+   One event the runtime recorded instead of interrupting Rack.
+
+
+   .. py:attribute:: sequence
+      :type:  int
+
+      1, 2, 3, ... in recording order. Pass the last one you saw to :func:`diagnostics` to get only newer ones.
+
+
+
+   .. py:attribute:: time
+      :type:  float
+
+      Seconds on Rack's clock when it was recorded.
+
+
+
+   .. py:attribute:: code
+      :type:  str
+
+      What happened, for example ``callback_raised`` or ``refused_rack_thread``.
+
+
+
+   .. py:attribute:: thread
+      :type:  ThreadRole
+
+      The thread it happened on.
+
+
+
+   .. py:attribute:: message
+      :type:  str
+
+      Detail, truncated to 159 bytes.
+
+
+
+.. py:function:: diagnostics(after: int = 0) -> list[Diagnostic]
+
+   The recorded diagnostics newer than sequence number ``after``, oldest first.
+
+   The runtime keeps the most recent 256; older ones are overwritten. Recording
+   one never blocks, allocates or calls Python, so it is safe even on the
+   audio path, which is why these are collected rather than raised.
+
+
+.. py:function:: thread_role() -> ThreadRole
+
+   Which kind of thread the caller is on.
+
+
+.. py:function:: is_main_thread() -> bool
+
+   True on Rack's main (UI) thread.
+
+
+.. py:function:: on_context_closing(callback: collections.abc.Callable[[], None]) -> collections.abc.Callable[[], None]
+
+   Run ``callback`` when Rack starts to shut down, while handles still work.
+
+   Use it to stop and join threads you started: after the callbacks return,
+   every handle to a Rack object raises :class:`~rackpy.errors.StaleHandleError`,
+   and Rack goes on to delete its modules and engine. Callbacks run on the
+   main thread, most recently registered first; one that raises is logged and
+   the others still run. Returns ``callback``, so it works as a decorator.
+
+

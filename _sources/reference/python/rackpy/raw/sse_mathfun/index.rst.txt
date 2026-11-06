@@ -1,0 +1,49 @@
+rackpy.raw.sse_mathfun
+======================
+
+.. py:module:: rackpy.raw.sse_mathfun
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.sse_mathfun.sse_mathfun_one_ps
+   rackpy.raw.sse_mathfun.sse_mathfun_log_ps
+   rackpy.raw.sse_mathfun.sse_mathfun_exp_ps
+   rackpy.raw.sse_mathfun.sse_mathfun_sin_ps
+   rackpy.raw.sse_mathfun.sse_mathfun_cos_ps
+   rackpy.raw.sse_mathfun.sse_mathfun_sincos_ps
+   rackpy.raw.sse_mathfun.sse_mathfun_tancot_ps
+   rackpy.raw.sse_mathfun.sse_mathfun_tan_ps
+   rackpy.raw.sse_mathfun.sse_mathfun_cot_ps
+   rackpy.raw.sse_mathfun.sse_mathfun_atan_ps
+   rackpy.raw.sse_mathfun.sse_mathfun_atan2_ps
+
+
+Module Contents
+---------------
+
+.. py:function:: sse_mathfun_one_ps() -> rackpy.raw.simd.float_4
+
+.. py:function:: sse_mathfun_log_ps(x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: sse_mathfun_exp_ps(x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: sse_mathfun_sin_ps(x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: sse_mathfun_cos_ps(x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: sse_mathfun_sincos_ps(x: rackpy.raw.simd.float_4 | float) -> tuple[rackpy.raw.simd.float_4, rackpy.raw.simd.float_4]
+
+.. py:function:: sse_mathfun_tancot_ps(x: rackpy.raw.simd.float_4 | float, cot_flag: int) -> rackpy.raw.simd.float_4
+
+.. py:function:: sse_mathfun_tan_ps(x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: sse_mathfun_cot_ps(x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: sse_mathfun_atan_ps(x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: sse_mathfun_atan2_ps(y: rackpy.raw.simd.float_4 | float, x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+

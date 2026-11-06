@@ -1,0 +1,268 @@
+rackpy.plugin
+=============
+
+.. py:module:: rackpy.plugin
+
+.. autoapi-nested-parse::
+
+   Add this plugin's models to Rack. Available inside Rack only.
+
+   A RackPy plugin's trusted entry module adds its models while Rack loads the
+   plugin, and ``plugin.json``'s ``"modules"`` must list exactly the same slugs.
+   A model's modules come from a function or from a :class:`ModuleClass`. See
+   the how-to page *Register models*. The raw layer is :mod:`rackpy.raw.plugin`.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.plugin.plugin
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.plugin.Model
+   rackpy.plugin.ModuleClass
+   rackpy.plugin.Plugin
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.plugin.on_destroy
+
+
+Module Contents
+---------------
+
+.. py:class:: Model
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:attribute:: slug
+      :type:  str
+
+
+   .. py:property:: plugin
+      :type: Plugin | None
+
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+   .. py:attribute:: manual_url
+      :type:  str
+
+
+   .. py:attribute:: modular_grid_url
+      :type:  str
+
+
+   .. py:attribute:: hidden
+      :type:  bool
+
+
+   .. py:attribute:: tag_ids
+      :type:  list[int]
+
+
+   .. py:method:: get_full_name() -> str
+
+
+   .. py:method:: get_factory_preset_directory() -> str
+
+
+   .. py:method:: get_user_preset_directory() -> str
+
+
+   .. py:method:: get_manual_url() -> str
+
+
+   .. py:method:: is_favorite() -> bool
+
+
+   .. py:method:: set_favorite(favorite: bool) -> None
+
+
+   .. py:method:: from_json(data: dict[str, Any]) -> None
+
+
+   .. py:method:: append_context_menu(menu: rackpy.raw.ui.Menu, in_browser: bool = False) -> None
+
+
+   .. py:method:: create_module() -> rackpy.raw.engine.Module | rackpy.raw.engine.EngineModule
+
+      Make a module of a committed model; detached and staged models cannot make modules.
+
+
+
+   .. py:method:: create_module_widget(module: rackpy.raw.engine.Module | rackpy.raw.engine.EngineModule | None = None) -> rackpy.raw.app.ModuleWidget | rackpy.raw.app.ForeignModuleWidget
+
+      Make a widget of a committed model; detached and staged models cannot make widgets.
+
+
+
+.. py:class:: ModuleClass(module: rackpy.engine.Module)
+
+   A model's module written as a class: one instance per module Rack creates.
+
+   Override :meth:`configure` to set the module up, as ``Module.create``'s
+   constructor callback would, and :meth:`to_json` and :meth:`from_json` for
+   its custom state. The instance lives as long as Rack's module, and
+   :attr:`module` is that module.
+
+
+   .. py:attribute:: module
+      :type:  rackpy.engine.Module
+
+      The module this instance belongs to.
+
+
+
+   .. py:method:: configure() -> None
+
+      Configure :attr:`module`: ``config()``, ``config_param()`` and the rest. Runs once, first.
+
+
+
+   .. py:method:: to_json() -> object
+
+      The module's custom data when Rack saves it; RackPy validates it as JSON. ``None`` saves none.
+
+
+
+   .. py:method:: from_json(data: rackpy.types.JSON) -> None
+
+      Restore the custom data Rack loaded. Validate it: it comes from a patch file.
+
+
+
+   .. py:method:: on_add(event: rackpy.engine.Module.AddEvent) -> None
+
+      Rack's engine added the module.
+
+
+
+   .. py:method:: on_remove(event: rackpy.engine.Module.RemoveEvent) -> None
+
+      Rack's engine is removing the module; it still exists.
+
+
+
+   .. py:method:: on_bypass(event: rackpy.engine.Module.BypassEvent) -> None
+
+      The module was bypassed.
+
+
+
+   .. py:method:: on_un_bypass(event: rackpy.engine.Module.UnBypassEvent) -> None
+
+      The module stopped being bypassed.
+
+
+
+   .. py:method:: on_port_change(event: rackpy.engine.Module.PortChangeEvent) -> None
+
+      A cable was connected to or disconnected from one of the module's ports (``event.connecting``,
+      ``event.type``, ``event.port_id``).
+
+
+
+   .. py:method:: on_reset(event: rackpy.engine.Module.ResetEvent) -> None
+
+      Initialize: Rack has already reset the parameters.
+
+
+
+   .. py:method:: on_randomize(event: rackpy.engine.Module.RandomizeEvent) -> None
+
+      Randomize: Rack has already randomized the parameters.
+
+
+
+   .. py:method:: on_save(event: rackpy.engine.Module.SaveEvent) -> None
+
+      The patch is being saved: write patch-storage files here.
+
+
+
+   .. py:method:: factory() -> collections.abc.Callable[[rackpy.engine.Module], None]
+      :classmethod:
+
+
+      A ``Module.create`` constructor callback that builds the module through this class.
+
+
+
+.. py:class:: Plugin
+
+   The RackPy plugin that is loading your entry module; C++ plugins call it ``pluginInstance``.
+
+
+   .. py:property:: raw
+      :type: rackpy.raw.plugin.Plugin
+
+
+      Rack's plugin object (:class:`rackpy.raw.plugin.Plugin`).
+
+
+
+   .. py:method:: add_model(slug: str, module: collections.abc.Callable[[rackpy.engine.Module], object] | type[ModuleClass], *, widget: collections.abc.Callable[[rackpy.engine.Module | None], rackpy.raw.app.ModuleWidget] | None = None, hp: int = 4) -> rackpy.raw.plugin.Model
+
+      Add a model. Rack builds one of its modules, and its widget, whenever it needs one.
+
+      ``module`` is either ``Module.create``'s constructor callback,
+      ``module(m)``, or a :class:`ModuleClass` subclass. ``widget`` is a
+      ``rackpy.raw.app.ModuleWidget`` subclass, or a function, that Rack
+      calls with the module (``None`` for a module browser preview); the
+      widget calls ``self.set_module(module)`` first, as Rack's do. Without
+      ``widget`` the module gets a plain panel ``hp`` wide. Call this only
+      from the entry module while Rack loads the plugin.
+
+
+
+   .. py:method:: set_settings_handlers(*, to_json: collections.abc.Callable[[], object] | None = None, from_json: collections.abc.Callable[[rackpy.types.JSON], object] | None = None) -> None
+
+      Save plugin-wide settings in Rack's ``settings.json``, under this plugin's slug.
+
+      Rack calls ``to_json()`` whenever it saves its settings, including as
+      it exits; returning ``None`` keeps what is stored. It calls
+      ``from_json(data)`` once, right after the plugin initializes, if
+      anything is stored, so set the handlers from the entry module. Errors
+      are logged and contained. Validate ``data``: users can edit the file.
+
+
+
+.. py:function:: on_destroy(callback: collections.abc.Callable[[], None]) -> collections.abc.Callable[[], None]
+
+   Run ``callback`` when Rack calls the plugin's ``destroy()``, as it exits.
+
+   That is after :func:`rackpy.runtime.on_context_closing`: every handle to a
+   Rack object is stale by then, so use it for Python-side cleanup only.
+   Callbacks run on the main thread, most recently registered first; one
+   that raises is logged and the others still run. Returns ``callback``, so
+   it works as a decorator.
+
+
+.. py:data:: plugin
+
+   This plugin.
+
+

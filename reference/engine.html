@@ -1,0 +1,746 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Undo history" href="history.html"><link rel="prev" title="Module construction and components" href="engine-module.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>The engine - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Reference</a><input aria-label="Toggle navigation of Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/reference/engine.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/reference/engine.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="the-engine">
+<h1>The engine<a class="headerlink" href="#the-engine" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">rackpy.raw.engine.Engine</span></code> is Rack’s <code class="docutils literal notranslate"><span class="pre">rack::engine::Engine</span></code>, reached as
+<code class="docutils literal notranslate"><span class="pre">Context.engine</span></code>. <strong>Implemented (RP-24A, RP-24B), Linux x86_64 inside Rack
+Free 2.6.6:</strong> every public <code class="docutils literal notranslate"><span class="pre">Engine</span></code> method (modules, the master module,
+timing, parameters, cables, parameter handles and the engine’s JSON), with
+<code class="docutils literal notranslate"><span class="pre">Cable</span></code> and <code class="docutils literal notranslate"><span class="pre">ParamHandle</span></code> (see the <a class="reference internal" href="coverage.html"><span class="std std-doc">coverage report</span></a>). The
+history is RP-24C.</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">engine.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">raw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.raw.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineModule</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">describe_engine</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Call from Rack's UI thread once its context exists, not at plugin startup."""</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">context_get</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">context</span><span class="o">.</span><span class="n">engine</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">engine</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">engine</span><span class="o">.</span><span class="n">get_sample_rate</span><span class="p">()</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> Hz, </span><span class="si">{</span><span class="n">engine</span><span class="o">.</span><span class="n">get_num_modules</span><span class="p">()</span><span class="si">}</span><span class="s2"> modules"</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">module_id</span> <span class="ow">in</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_module_ids</span><span class="p">():</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_module</span><span class="p">(</span><span class="n">module_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">EngineModule</span><span class="p">):</span>  <span class="c1"># another plugin's module</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="s2">"bypassed"</span> <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">is_bypassed</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"running"</span>
+            <span class="n">slug</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">slug</span> <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">model</span> <span class="k">else</span> <span class="s2">"?"</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">slug</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">module_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">module</span><span class="o">.</span><span class="n">get_num_params</span><span class="p">()</span><span class="si">}</span><span class="s2"> params"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">lines</span>
+</pre></div>
+</div>
+</div>
+<section id="threads-and-rack-s-engine-lock">
+<span id="engine-threads"></span><h2>Threads and Rack’s engine lock<a class="headerlink" href="#threads-and-rack-s-engine-lock" title="Link to this heading">¶</a></h2>
+<p>Every method runs on Rack’s main thread, in the live bound context. A method
+that takes Rack’s engine lock (Rack’s <code class="docutils literal notranslate"><span class="pre">Engine.hpp</span></code> says which) releases the
+GIL first, so Rack’s engine thread and Python callbacks inside the call
+(a module’s <code class="docutils literal notranslate"><span class="pre">on_reset</span></code>, its JSON handlers) keep running. Called from a
+callback that runs while Rack already holds the lock exclusively (a
+<code class="docutils literal notranslate"><span class="pre">ResetEvent</span></code>, say), such a method raises <code class="docutils literal notranslate"><span class="pre">EngineLockError</span></code> instead of
+deadlocking.</p>
+<p><code class="docutils literal notranslate"><span class="pre">rackpy.raw.Context.engine</span></code> is a read-only checked handle to Rack’s engine,
+or <code class="docutils literal notranslate"><span class="pre">None</span></code> after Rack deletes it. It is available only in Rack’s live UI
+context.</p>
+<p>Methods that Rack does not lock (<code class="docutils literal notranslate"><span class="pre">get_frame</span></code>, <code class="docutils literal notranslate"><span class="pre">get_sample_rate</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_param_value</span></code> and the like) read Rack’s values directly.</p>
+<p>Rack’s <code class="docutils literal notranslate"><span class="pre">_NoLock</span></code> variants (<code class="docutils literal notranslate"><span class="pre">get_module_no_lock</span></code>, <code class="docutils literal notranslate"><span class="pre">set_master_module_no_lock</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_param_handle_no_lock</span></code>, <code class="docutils literal notranslate"><span class="pre">update_param_handle_no_lock</span></code>) need the caller
+to hold the lock. Python holds it only inside a callback Rack runs under the
+exclusive lock, which RackPy tracks: there they are the methods to use, and
+anywhere else they raise <code class="docutils literal notranslate"><span class="pre">EngineLockError</span></code>.</p>
+</section>
+<section id="modules">
+<span id="engine-modules"></span><h2>Modules<a class="headerlink" href="#modules" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">get_module_ids()</span></code> lists the engine’s module IDs, and <code class="docutils literal notranslate"><span class="pre">get_module(id)</span></code> returns
+the module with that ID: a RackPy module’s own <code class="docutils literal notranslate"><span class="pre">Module</span></code> handle, an
+<code class="docutils literal notranslate"><span class="pre">EngineModule</span></code> for any other module, or <code class="docutils literal notranslate"><span class="pre">None</span></code>. An <code class="docutils literal notranslate"><span class="pre">EngineModule</span></code> holds only
+the ID and finds the module again at every use, so it goes stale
+(<code class="docutils literal notranslate"><span class="pre">StaleHandleError</span></code>, <code class="docutils literal notranslate"><span class="pre">alive</span></code> false) once the module leaves the engine; it
+never holds Rack’s pointer. It reports the model, bypass state and component
+counts. Two handles for one ID are equal. <code class="docutils literal notranslate"><span class="pre">Model.create_module()</span></code> for
+another plugin’s model also returns an <code class="docutils literal notranslate"><span class="pre">EngineModule</span></code>, which Python owns
+(<code class="docutils literal notranslate"><span class="pre">in_engine</span></code> false) until <code class="docutils literal notranslate"><span class="pre">add_module</span></code>
+(<a class="reference internal" href="app.html#modules-from-other-plugins"><span class="std std-ref">modules from other plugins</span></a>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">get_num_modules()</span></code> returns the count; <code class="docutils literal notranslate"><span class="pre">has_module(module)</span></code> tests whether a
+module is in the engine. RackPy maps both C++ <code class="docutils literal notranslate"><span class="pre">getModuleIds</span></code> overloads to
+<code class="docutils literal notranslate"><span class="pre">get_module_ids()</span></code>; it returns a list rather than writing a caller-provided
+buffer, and has no length-cap argument.</p>
+<p><code class="docutils literal notranslate"><span class="pre">reset_module</span></code>, <code class="docutils literal notranslate"><span class="pre">randomize_module</span></code> and <code class="docutils literal notranslate"><span class="pre">bypass_module</span></code> are Rack’s: they send
+the module its event under the lock, without an undo step.
+<code class="docutils literal notranslate"><span class="pre">module_to_json</span></code>, <code class="docutils literal notranslate"><span class="pre">module_from_json</span></code>, <code class="docutils literal notranslate"><span class="pre">prepare_save_module</span></code> and
+<code class="docutils literal notranslate"><span class="pre">prepare_save</span></code> are Rack’s module JSON and save events. All of them take a
+module in the engine, a <code class="docutils literal notranslate"><span class="pre">Module</span></code> or an <code class="docutils literal notranslate"><span class="pre">EngineModule</span></code>.</p>
+<section id="ownership">
+<h3>Ownership<a class="headerlink" href="#ownership" title="Link to this heading">¶</a></h3>
+<p>Rack’s engine holds its modules, but each module widget owns its module, and
+Rack deletes a module with its widget. RackPy follows that:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">add_module(module)</span></code> gives Rack’s engine a module Python owns. It must have
+a model of this plugin (<code class="docutils literal notranslate"><span class="pre">Model.create_module</span></code> makes one), since Rack saves a
+module with its plugin and model; a constructor callback cannot add its own
+module. Its handles keep working, and <code class="docutils literal notranslate"><span class="pre">get_module</span></code> returns them.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">add_module(module)</span></code> also takes another plugin’s module that Python owns
+(from <code class="docutils literal notranslate"><span class="pre">Model.create_module</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">remove_module(module)</span></code> takes a RackPy module out of the engine and gives it
+back to Python. Rack refuses nothing here, so RackPy refuses a module that a
+widget owns (delete the widget with its <code class="docutils literal notranslate"><span class="pre">remove_action</span></code>), that controls
+still point at, or that cables still connect. Another plugin’s module comes
+back to Python only when no module widget owns it and no cables touch it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">clear()</span></code> and <code class="docutils literal notranslate"><span class="pre">from_json(data)</span></code> delete every module and cable in the
+engine, so they are refused while Rack’s rack has module or cable widgets.
+Rack’s patch manager clears the rack first.</p></li>
+</ul>
+</section>
+</section>
+<section id="the-master-module-and-timing">
+<span id="engine-master"></span><h2>The master module and timing<a class="headerlink" href="#the-master-module-and-timing" title="Link to this heading">¶</a></h2>
+<p>The master module is the one whose audio clock steps the engine;
+<code class="docutils literal notranslate"><span class="pre">get_master_module()</span></code> returns its handle or <code class="docutils literal notranslate"><span class="pre">None</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">set_master_module(None)</span></code> gives that back to Rack’s own thread. Rack’s
+<code class="docutils literal notranslate"><span class="pre">stepBlock</span></code> is for the master module alone, so <code class="docutils literal notranslate"><span class="pre">step_block(frames)</span></code> needs a
+RackPy module as the master: it then advances the engine by that many frames
+(1 to 65536), and Rack’s own thread waits. Rack serializes it with any other
+stepping.</p>
+<p><code class="docutils literal notranslate"><span class="pre">set_master_module(module)</span></code> accepts only a checked module handle that is
+already in this engine (or <code class="docutils literal notranslate"><span class="pre">None</span></code>), including in the <code class="docutils literal notranslate"><span class="pre">_no_lock</span></code> form. Rack’s
+C++ method accepts a raw <code class="docutils literal notranslate"><span class="pre">Module*</span></code>; RackPy narrows that contract so it cannot
+store a detached or foreign module pointer as the engine’s master. <code class="docutils literal notranslate"><span class="pre">None</span></code>
+restores Rack’s own thread as the master.</p>
+<p><code class="docutils literal notranslate"><span class="pre">get_sample_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">get_sample_time</span></code>, <code class="docutils literal notranslate"><span class="pre">get_frame</span></code>, <code class="docutils literal notranslate"><span class="pre">get_block</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_block_frame</span></code>, <code class="docutils literal notranslate"><span class="pre">get_block_time</span></code>, <code class="docutils literal notranslate"><span class="pre">get_block_frames</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_block_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">get_meter_average</span></code> and <code class="docutils literal notranslate"><span class="pre">get_meter_max</span></code> are Rack’s
+timing values. <code class="docutils literal notranslate"><span class="pre">set_suggested_sample_rate(rate)</span></code> sets the rate unless Rack’s
+settings fix one; a rate that is not above 0 (0, negative or NaN) gives Rack’s
+fallback, 44100. Infinity is refused, because the sample time would be zero
+for every module. <code class="docutils literal notranslate"><span class="pre">yield_workers()</span></code> is Rack’s hint
+that its worker threads should block rather than spin.</p>
+</section>
+<section id="parameters">
+<span id="engine-params"></span><h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">set_param_value(module,</span> <span class="pre">param_id,</span> <span class="pre">value)</span></code> and <code class="docutils literal notranslate"><span class="pre">get_param_value</span></code> set and read
+a parameter’s raw value at once. <code class="docutils literal notranslate"><span class="pre">set_param_smooth_value</span></code> moves it smoothly
+toward the value as the engine steps, and <code class="docutils literal notranslate"><span class="pre">get_param_smooth_value</span></code> returns the
+target, or the value when nothing is smoothing. Rack indexes parameters
+unchecked, so RackPy checks every ID. Rack keeps the smoothed module’s raw
+pointer, so smoothing needs a module in the engine.</p>
+</section>
+<section id="cables">
+<span id="engine-cables"></span><h2>Cables<a class="headerlink" href="#cables" title="Link to this heading">¶</a></h2>
+<p>A <code class="docutils literal notranslate"><span class="pre">Cable()</span></code> that Python makes holds Rack’s struct: <code class="docutils literal notranslate"><span class="pre">id</span></code> (-1 until the engine
+assigns one), <code class="docutils literal notranslate"><span class="pre">output_module</span></code> and <code class="docutils literal notranslate"><span class="pre">output_id</span></code>, <code class="docutils literal notranslate"><span class="pre">input_module</span></code> and
+<code class="docutils literal notranslate"><span class="pre">input_id</span></code>. <code class="docutils literal notranslate"><span class="pre">id</span></code> accepts any signed 64-bit integer. Rack treats every negative
+cable ID as unset and assigns a non-negative ID when adding the cable to the
+engine; IDs must be unique there. Very large IDs may not round-trip through
+JSON consumers that represent integers as floating-point numbers. Its modules
+are module handles (<code class="docutils literal notranslate"><span class="pre">Module</span></code> or <code class="docutils literal notranslate"><span class="pre">EngineModule</span></code>), never Rack’s pointers. <code class="docutils literal notranslate"><span class="pre">to_json()</span></code> is Rack’s patch JSON for it, and
+<code class="docutils literal notranslate"><span class="pre">from_json(data)</span></code> sets it from patch JSON, finding the modules in Rack’s
+engine by ID (Rack’s <code class="docutils literal notranslate"><span class="pre">Exception</span></code> becomes <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">get_cable(id)</span></code> returns the engine’s cable with that ID as a <code class="docutils literal notranslate"><span class="pre">Cable</span></code> that
+finds it again by ID at every use: Rack deletes cables without telling
+anyone (a cable widget its own, <code class="docutils literal notranslate"><span class="pre">Engine.clear</span></code> the rest), and the handle
+then goes stale (<code class="docutils literal notranslate"><span class="pre">alive</span></code> false). Such a cable’s fields are read-only.
+<code class="docutils literal notranslate"><span class="pre">get_cable_ids()</span></code>, <code class="docutils literal notranslate"><span class="pre">get_num_cables()</span></code> and <code class="docutils literal notranslate"><span class="pre">has_cable(cable)</span></code> are Rack’s.
+Both C++ <code class="docutils literal notranslate"><span class="pre">getCableIds</span></code> overloads map to <code class="docutils literal notranslate"><span class="pre">get_cable_ids()</span></code>, which returns a
+list rather than writing a caller-provided buffer; it has no length-cap
+argument.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">Cable</span></code> compares by identity while Python owns it and by ID once Rack’s
+engine does, and <code class="docutils literal notranslate"><span class="pre">add_cable</span></code> changes a handle from one to the other. So its
+hash is constant: a cable you already keep in a set or dict is still found
+after <code class="docutils literal notranslate"><span class="pre">add_cable</span></code>, and two handles for one engine cable stay equal with equal
+hashes. A constant hash makes big containers slow, so key those by <code class="docutils literal notranslate"><span class="pre">cable.id</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">add_cable(cable)</span></code> gives Rack’s engine a cable Python made, and the handle
+then finds it by ID. Rack asserts, as it deletes a module, that no cable in
+the engine still touches it, and a module widget deletes its module. A cable
+with no cable widget to remove it first may therefore join only RackPy
+modules that Python put into the engine itself (<code class="docutils literal notranslate"><span class="pre">add_module</span></code>) and that no
+module widget owns. Giving such a module a widget is refused while the cable
+is there. Port IDs are checked. Cables with widgets, which users see and
+drag, are <code class="docutils literal notranslate"><span class="pre">RackWidget</span></code>’s (RP-28E).</p>
+<p><code class="docutils literal notranslate"><span class="pre">remove_cable(cable)</span></code> takes a cable that no cable widget owns out of the
+engine, and Python owns it again (with its ID). Other handles to it go
+stale.</p>
+</section>
+<section id="parameter-handles">
+<span id="engine-param-handles"></span><h2>Parameter handles<a class="headerlink" href="#parameter-handles" title="Link to this heading">¶</a></h2>
+<p>A <code class="docutils literal notranslate"><span class="pre">ParamHandle</span></code> is Rack’s weak link to one module’s param, as Core’s MIDI-Map
+uses: Rack’s engine keeps the module pointer up to date, and the param’s
+widget shows the mapping’s <code class="docutils literal notranslate"><span class="pre">color</span></code> and <code class="docutils literal notranslate"><span class="pre">text</span></code>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ParamHandle()</span></code> makes a blank handle (<code class="docutils literal notranslate"><span class="pre">module_id</span></code> -1). <code class="docutils literal notranslate"><span class="pre">add_param_handle</span></code>
+gives it to Rack’s engine, which only takes blank handles.
+<code class="docutils literal notranslate"><span class="pre">update_param_handle(handle,</span> <span class="pre">module_id,</span> <span class="pre">param_id,</span> <span class="pre">overwrite=True)</span></code> maps it,
+and <code class="docutils literal notranslate"><span class="pre">module_id</span></code> -1 unmaps it. With <code class="docutils literal notranslate"><span class="pre">overwrite</span></code>, a handle already on that
+param is unmapped; without, this one is. Rack 2.6.6 also unmaps a handle
+that is mapped again to the param it is on, because it finds the handle
+itself there. RackPy checks the param ID when the module exists. While the
+engine has the handle, its IDs change only this way. Before registration,
+Python-owned handles’ <code class="docutils literal notranslate"><span class="pre">module_id</span></code> and <code class="docutils literal notranslate"><span class="pre">param_id</span></code> may be set on the main
+thread; after registration, use <code class="docutils literal notranslate"><span class="pre">update_param_handle</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_param_handle(module_id,</span> <span class="pre">param_id)</span></code> returns the handle on a param:
+Python’s own, a read-only view of another owner’s (a module’s), found
+again by its IDs, or <code class="docutils literal notranslate"><span class="pre">None</span></code>. Passing the module itself is Rack’s deprecated
+form.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">module</span></code> is the module once it is in the engine, else <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">text</span></code> and <code class="docutils literal notranslate"><span class="pre">color</span></code> are read and written on Rack’s main (UI) thread only;
+off-thread access raises <code class="docutils literal notranslate"><span class="pre">ThreadError</span></code>. This keeps a worker from racing the
+UI while it reads the registered handle’s label or indicator color.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">remove_param_handle</span></code> takes Python’s handle out of the engine.</p></li>
+</ul>
+<p>Rack’s engine keeps raw pointers to its handles, so RackPy keeps each handle
+Python added allocated while the engine has it, even if Python drops the
+object. Rack’s <code class="docutils literal notranslate"><span class="pre">Engine.clear</span></code> (a new or loaded patch) removes every handle
+without telling its owner, and Rack has no call that says whether it did.
+RackPy detects the clear with a private sentinel handle of its own, mapped
+to a module ID Rack never assigns (2**53) and never returned. After a
+clear, <code class="docutils literal notranslate"><span class="pre">in_engine</span></code> is false and <code class="docutils literal notranslate"><span class="pre">remove_param_handle</span></code> is refused, where
+Rack’s own call would fail its assertion. Handles still in the engine when
+Rack’s context closes are removed while the engine lives.</p>
+</section>
+<section id="the-engine-s-json">
+<span id="engine-json"></span><h2>The engine’s JSON<a class="headerlink" href="#the-engine-s-json" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">to_json()</span></code> is the engine’s part of a patch: modules, cables and the master
+module. <code class="docutils literal notranslate"><span class="pre">from_json(data)</span></code> clears the engine and creates the patch’s modules
+and cables, and is refused while Rack’s rack has widgets.</p>
+</section>
+<section id="the-host-facade">
+<span id="engine-host"></span><h2>The host facade<a class="headerlink" href="#the-host-facade" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">rackpy.engine.host</span></code> puts the same calls in a more Pythonic shape, for
+scripts working on Rack’s running patch:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">engine()</span></code> and <code class="docutils literal notranslate"><span class="pre">history()</span></code> return <code class="docutils literal notranslate"><span class="pre">Context.engine</span></code> and <code class="docutils literal notranslate"><span class="pre">Context.history</span></code>,
+and raise <code class="docutils literal notranslate"><span class="pre">ContextError</span></code> outside Rack’s live UI.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">modules()</span></code>, <code class="docutils literal notranslate"><span class="pre">module(module_id)</span></code> and <code class="docutils literal notranslate"><span class="pre">cables()</span></code> list the engine’s modules
+and cables.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">connect((module,</span> <span class="pre">output_id),</span> <span class="pre">(module,</span> <span class="pre">input_id))</span></code> returns the new
+<code class="docutils literal notranslate"><span class="pre">Cable</span></code>, and <code class="docutils literal notranslate"><span class="pre">disconnect(cable)</span></code> removes it, under the rules in
+<a class="reference internal" href="#cables">Cables</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">map_param(target,</span> <span class="pre">param_id,</span> <span class="pre">text=...,</span> <span class="pre">color=...,</span> <span class="pre">overwrite=True)</span></code> returns a
+mapped <code class="docutils literal notranslate"><span class="pre">ParamHandle</span></code>, and <code class="docutils literal notranslate"><span class="pre">unmap_param(handle)</span></code> removes it. Without
+<code class="docutils literal notranslate"><span class="pre">overwrite</span></code>, a param that already has a handle keeps it, and the returned
+handle is left unmapped (<code class="docutils literal notranslate"><span class="pre">module_id</span></code> is -1), as Rack does.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">undo_step(name)</span></code> is a context manager that yields a <code class="docutils literal notranslate"><span class="pre">ComplexAction</span></code>:
+make each change, push its action to it, and the step goes to Rack’s
+history when the block ends.</p></li>
+</ul>
+<p>Every call is synchronous. It runs Rack’s code on the main thread before
+returning, and nothing is queued. On a mapping error, <code class="docutils literal notranslate"><span class="pre">map_param</span></code> attempts to
+remove its new handle. If an <code class="docutils literal notranslate"><span class="pre">undo_step</span></code> block raises, the helper attempts to
+undo the actions it collected and does not push the step. Unrecorded changes,
+errors during undo, and errors committing the step are not covered by a
+transactional rollback guarantee.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="history.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Undo history</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="engine-module.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Module construction and components</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">The engine</a><ul>
+<li><a class="reference internal" href="#threads-and-rack-s-engine-lock">Threads and Rack’s engine lock</a></li>
+<li><a class="reference internal" href="#modules">Modules</a><ul>
+<li><a class="reference internal" href="#ownership">Ownership</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-master-module-and-timing">The master module and timing</a></li>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#cables">Cables</a></li>
+<li><a class="reference internal" href="#parameter-handles">Parameter handles</a></li>
+<li><a class="reference internal" href="#the-engine-s-json">The engine’s JSON</a></li>
+<li><a class="reference internal" href="#the-host-facade">The host facade</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

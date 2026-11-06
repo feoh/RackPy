@@ -1,0 +1,1588 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="The engine" href="engine.html"><link rel="prev" title="Engine components: ports, parameters and lights" href="engine-components.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>Module construction and components - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Reference</a><input aria-label="Toggle navigation of Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/reference/engine-module.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/reference/engine-module.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-construction-and-components">
+<h1>Module construction and components<a class="headerlink" href="#module-construction-and-components" title="Link to this heading">¶</a></h1>
+<p><strong>Implemented slices: RP-14A, built-in port/light metadata adapters (RP-14B1),
+checked built-in quantities (RP-14B2a), and borrowed quantity helpers / mutable
+switch-label views (RP-14B2b1), standalone metadata backreferences (RP-14B2b2),
+unattached and attached standalone quantities (RP-14B2b3/b4), and port/light
+and parameter-quantity class factories (RP-14B2b5/b6), and constructor-scoped
+raw module vectors (RP-14B2b7), module identity (RP-14C1) and engine ownership
+with engine smoothing (RP-14C2), Linux x86_64 inside Rack Free 2.6.6.</strong>
+Later slices add <a class="reference internal" href="../how-to/plugins.html"><span class="std std-doc">model registration</span></a>, native kernels,
+lifecycle events, expanders and the offline Python callback laboratory
+(documented below). The laboratory is partial, with explicit
+<a class="reference internal" href="callback-paths.html"><span class="std std-doc">callback blockers</span></a>; see the
+<a class="reference internal" href="coverage.html"><span class="std std-doc">coverage report</span></a> for declaration-level status.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Python <code class="docutils literal notranslate"><span class="pre">process</span></code> overrides are <strong>laboratory only</strong>: explicitly enabled,
+offline, main-thread Bench execution, never Rack’s engine or driver threads.
+Normal <code class="docutils literal notranslate"><span class="pre">ModuleClass</span></code> refuses them at class definition, and a patch cannot
+create or enable a laboratory module. Use <a class="reference internal" href="../how-to/dsp.html"><span class="std std-doc">native kernels</span></a>
+for audio; see <a class="reference internal" href="callback-paths.html"><span class="std std-doc">callback paths and blockers</span></a>.</p>
+</div>
+<section id="construction-transaction">
+<h2>Construction transaction<a class="headerlink" href="#construction-transaction" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">rackpy.engine.Module</span></code> and <code class="docutils literal notranslate"><span class="pre">rackpy.raw.engine.Module</span></code> are the same native
+binding. <code class="docutils literal notranslate"><span class="pre">Module.create(configure=None)</span></code> constructs an owned, empty Rack module.
+When supplied, <code class="docutils literal notranslate"><span class="pre">configure(module)</span></code> runs synchronously on Rack’s main thread.
+Its return value is ignored; the factory returns the same Python handle it
+passed to the callback. Only that callback may call <code class="docutils literal notranslate"><span class="pre">config</span></code>, <code class="docutils literal notranslate"><span class="pre">config_bypass</span></code>,
+<code class="docutils literal notranslate"><span class="pre">config_input</span></code>, <code class="docutils literal notranslate"><span class="pre">config_output</span></code>, <code class="docutils literal notranslate"><span class="pre">config_light</span></code>, <code class="docutils literal notranslate"><span class="pre">config_param</span></code>, <code class="docutils literal notranslate"><span class="pre">config_switch</span></code>
+and <code class="docutils literal notranslate"><span class="pre">config_button</span></code>. These are construction
+operations, not engine commands.</p>
+<p><code class="docutils literal notranslate"><span class="pre">config(num_params,</span> <span class="pre">num_inputs,</span> <span class="pre">num_outputs,</span> <span class="pre">num_lights=0)</span></code> calls Rack’s
+implementation once. Counts must be nonnegative. Even <code class="docutils literal notranslate"><span class="pre">config(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></code>
+consumes the one call: a second call raises <code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code> before Rack’s
+assertion. Invalid counts are rejected before native configuration and can be
+corrected within the same callback. A failure partway through native allocation
+closes the module; it cannot be reused even if the callback catches the error.</p>
+<p>The factory seals the module before returning it. Late configuration raises
+<code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code>. Nested factories have independent construction scopes.
+<code class="docutils literal notranslate"><span class="pre">Module.create()</span></code> without a callback returns a sealed, empty module. Rack’s
+deprecated counting constructor <code class="docutils literal notranslate"><span class="pre">Module(numParams,</span> <span class="pre">numInputs,</span> <span class="pre">numOutputs,</span> <span class="pre">numLights)</span></code> is the overload <code class="docutils literal notranslate"><span class="pre">Module.create(num_params,</span> <span class="pre">num_inputs,</span> <span class="pre">num_outputs,</span> <span class="pre">num_lights=0,</span> <span class="pre">configure=None)</span></code>: it emits <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code>,
+calls <code class="docutils literal notranslate"><span class="pre">config</span></code> first and then the optional callback, in the same transaction
+(so the callback cannot call <code class="docutils literal notranslate"><span class="pre">config</span></code> again).</p>
+<p>Here is a runnable construction-only example. The documentation snippet tests
+run this exact file inside Rack:</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">module_construction.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">wire</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">num_params</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_inputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_outputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_lights</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_bypass</span><span class="p">(</span><span class="n">input_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">output_id</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+
+<span class="n">module</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">wire</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="k">assert</span> <span class="n">module</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="ow">is</span> <span class="n">module</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># No engine owns this module: no ID yet, and never bypassed.</span>
+    <span class="k">assert</span> <span class="n">module</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">module</span><span class="o">.</span><span class="n">is_bypassed</span><span class="p">()</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>This does not add the module to Rack’s engine or install a DSP callback. A Python
+subclass or an attribute named <code class="docutils literal notranslate"><span class="pre">process</span></code> is <strong>not</strong> a DSP implementation.
+There is no Module virtual trampoline in this slice. The construction callback
+is never stored in the native module, and no audio path invokes it.</p>
+</section>
+<section id="identity-and-bypass-state">
+<h2>Identity and bypass state<a class="headerlink" href="#identity-and-bypass-state" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">module.id</span></code> is Rack’s engine ID: <code class="docutils literal notranslate"><span class="pre">-1</span></code> until an engine assigns one (Rack keeps
+IDs below 2^53 so they survive JSON, but any 64-bit integer is accepted, as in
+C++). It can be assigned only inside the constructor callback; <code class="docutils literal notranslate"><span class="pre">get_id()</span></code> is
+Rack’s getter. <code class="docutils literal notranslate"><span class="pre">is_bypassed()</span></code> is Rack’s query, and is <code class="docutils literal notranslate"><span class="pre">False</span></code> until Rack’s
+engine owns and bypasses the module (<a class="reference internal" href="#engine-ownership">engine ownership</a>;
+Rack’s own model factory, RP-16, is what hands a module to the engine). Both
+need the main thread. The <code class="docutils literal notranslate"><span class="pre">model</span></code> field and <code class="docutils literal notranslate"><span class="pre">get_model()</span></code> return the module’s
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw.plugin.Model</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> before Rack creates the module from one.
+Engine ownership, its deletion path and lifecycle events are the rest of
+RP-14C.</p>
+</section>
+<section id="component-access">
+<h2>Component access<a class="headerlink" href="#component-access" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">get_num_params/inputs/outputs/lights()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">get_param/input/output/light(index)</span></code> call Rack’s corresponding getters.
+Getter IDs must satisfy <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">index</span> <span class="pre">&lt;</span> <span class="pre">count</span></code>; invalid IDs raise <code class="docutils literal notranslate"><span class="pre">IndexError</span></code>
+instead of accessing an unchecked C++ vector.</p>
+<p><code class="docutils literal notranslate"><span class="pre">params</span></code>, <code class="docutils literal notranslate"><span class="pre">inputs</span></code>, <code class="docutils literal notranslate"><span class="pre">outputs</span></code> and <code class="docutils literal notranslate"><span class="pre">lights</span></code> are checked views of Rack’s
+vectors. They support length, iteration and integer indexing (including
+Python’s negative indices); slicing and named lookup are not supported. Setting
+a component’s value writes through to the actual Rack component. Repeated
+lookups of a live component preserve Python identity. Iteration snapshots the
+component <em>handles</em>, not their changing values. During construction they also
+take Rack’s raw vector edits (<a class="reference internal" href="#raw-module-vectors">raw module vectors</a>).
+For port channel and buffer rules, see <a class="reference internal" href="engine-components.html"><span class="std std-doc">Engine components</span></a>.</p>
+</section>
+<section id="built-in-port-and-light-metadata">
+<span id="module-metadata"></span><h2>Built-in port and light metadata<a class="headerlink" href="#built-in-port-and-light-metadata" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">config_input(port_id,</span> <span class="pre">name=&quot;&quot;)</span></code>, <code class="docutils literal notranslate"><span class="pre">config_output(port_id,</span> <span class="pre">name=&quot;&quot;)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">config_light(light_id,</span> <span class="pre">name=&quot;&quot;)</span></code> configure <strong>built-in</strong> Rack metadata during
+construction. They return checked <code class="docutils literal notranslate"><span class="pre">PortInfoView</span></code> / <code class="docutils literal notranslate"><span class="pre">LightInfoView</span></code> adapters.
+IDs must be nonnegative and below the corresponding component count.</p>
+<p><code class="docutils literal notranslate"><span class="pre">get_input_info(index)</span></code>, <code class="docutils literal notranslate"><span class="pre">get_output_info(index)</span></code> and <code class="docutils literal notranslate"><span class="pre">get_light_info(index)</span></code>
+return the same live adapters. Rack initializes input/output metadata in
+<code class="docutils literal notranslate"><span class="pre">config</span></code>; light slots are <code class="docutils literal notranslate"><span class="pre">None</span></code> until explicitly configured. <code class="docutils literal notranslate"><span class="pre">input_infos</span></code>,
+<code class="docutils literal notranslate"><span class="pre">output_infos</span></code> and <code class="docutils literal notranslate"><span class="pre">light_infos</span></code> are <code class="docutils literal notranslate"><span class="pre">Components</span></code> collections with negative
+indexing and iteration; during construction they take
+<a class="reference internal" href="#raw-module-vectors">raw vector edits</a>.</p>
+<p>The adapters expose mutable <code class="docutils literal notranslate"><span class="pre">name</span></code> and <code class="docutils literal notranslate"><span class="pre">description</span></code>, <code class="docutils literal notranslate"><span class="pre">get_name()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">get_description()</span></code>. A port also has <code class="docutils literal notranslate"><span class="pre">get_full_name()</span></code> (Rack appends “ input”
+or “ output”), <code class="docutils literal notranslate"><span class="pre">type</span></code> and <code class="docutils literal notranslate"><span class="pre">port_id</span></code>; a light has <code class="docutils literal notranslate"><span class="pre">light_id</span></code>. <code class="docutils literal notranslate"><span class="pre">module</span></code> returns
+the owning Python handle (or <code class="docutils literal notranslate"><span class="pre">None</span></code>). These identity fields can be assigned
+only during construction, and <code class="docutils literal notranslate"><span class="pre">module</span></code> only the owning module or <code class="docutils literal notranslate"><span class="pre">None</span></code>;
+the seal checks that they match the slot.
+All native metadata access requires the main thread, including null-slot
+lookups. <code class="docutils literal notranslate"><span class="pre">alive</span></code> is a liveness query and may be read from any thread.</p>
+<p>Configuring the same slot again is permitted <strong>during construction</strong>. The old
+adapter immediately becomes stale; it cannot read a replacement that happens
+to reuse its address. Only that slot’s generation changes. Replacement prepares
+its native object, strings and generation before retiring the previous one, so
+a preparation exception leaves the old metadata intact. Closing the module,
+dropping its last handle, or failing construction invalidates every adapter,
+including retained collections. Views do not keep the module alive; explicitly
+retaining <code class="docutils literal notranslate"><span class="pre">view.module</span></code> does, just like retaining the original module handle.
+Once Rack’s engine owns the module, its handles no longer own it, so views
+stay valid while Rack keeps the module, even if the handle they came from is
+gone, and go stale when Rack deletes it.</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">module_metadata.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id4" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.raw.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">LightInfo</span><span class="p">,</span> <span class="n">PortInfo</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">describe</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">num_params</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_inputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_outputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_lights</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_input</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"Pitch"</span><span class="p">)</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">"Pitch control in volts."</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_output</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"Signal"</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_light</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"Activity"</span><span class="p">)</span>
+
+
+<span class="n">module</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">describe</span><span class="p">)</span>
+<span class="n">standalone_port</span><span class="p">,</span> <span class="n">standalone_light</span> <span class="o">=</span> <span class="n">PortInfo</span><span class="p">(),</span> <span class="n">LightInfo</span><span class="p">()</span>
+<span class="n">standalone_port</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">standalone_light</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+<span class="k">assert</span> <span class="n">standalone_port</span><span class="o">.</span><span class="n">module</span> <span class="ow">is</span> <span class="n">standalone_light</span><span class="o">.</span><span class="n">module</span> <span class="ow">is</span> <span class="n">module</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">get_input_info</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">info</span> <span class="ow">is</span> <span class="n">module</span><span class="o">.</span><span class="n">input_infos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">info</span><span class="o">.</span><span class="n">module</span> <span class="ow">is</span> <span class="n">module</span>
+    <span class="k">assert</span> <span class="n">info</span><span class="o">.</span><span class="n">get_full_name</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"Pitch input"</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="k">assert</span> <span class="ow">not</span> <span class="n">info</span><span class="o">.</span><span class="n">alive</span>
+<span class="k">assert</span> <span class="n">standalone_port</span><span class="o">.</span><span class="n">module</span> <span class="ow">is</span> <span class="n">standalone_light</span><span class="o">.</span><span class="n">module</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="n">standalone_port</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"Independent"</span>
+<span class="k">assert</span> <span class="n">standalone_port</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"Independent"</span>
+</pre></div>
+</div>
+</div>
+<p>Borrowed adapters are distinct from standalone, subclassable <code class="docutils literal notranslate"><span class="pre">PortInfo</span></code> /
+<code class="docutils literal notranslate"><span class="pre">LightInfo</span></code>. To put one of those classes into a slot, pass it as <code class="docutils literal notranslate"><span class="pre">info_type</span></code>
+(<a class="reference internal" href="#metadata-class-factories">metadata class factories</a>) or assign it to the
+slot (<a class="reference internal" href="#raw-module-vectors">raw module vectors</a>). Standalone metadata
+backreferences are documented in
+<a class="reference internal" href="engine-components.html#portinfo-and-lightinfo"><span class="std std-ref">Engine components</span></a>.</p>
+</section>
+<section id="metadata-class-factories">
+<h2>Metadata class factories<a class="headerlink" href="#metadata-class-factories" title="Link to this heading">¶</a></h2>
+<p>Rack’s <code class="docutils literal notranslate"><span class="pre">configInput&lt;TPortInfo&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">configOutput&lt;TPortInfo&gt;</span></code> and
+<code class="docutils literal notranslate"><span class="pre">configLight&lt;TLightInfo&gt;</span></code> construct a metadata object of the given class and
+put it in the slot. In Python, pass the class as <code class="docutils literal notranslate"><span class="pre">info_type</span></code>:
+<code class="docutils literal notranslate"><span class="pre">config_input(port_id,</span> <span class="pre">name=&quot;&quot;,</span> <span class="pre">info_type=None)</span></code>, and the same for
+<code class="docutils literal notranslate"><span class="pre">config_output</span></code> and <code class="docutils literal notranslate"><span class="pre">config_light</span></code>. <code class="docutils literal notranslate"><span class="pre">info_type</span></code> must be <code class="docutils literal notranslate"><span class="pre">PortInfo</span></code> (or
+<code class="docutils literal notranslate"><span class="pre">LightInfo</span></code> for lights) or a Python subclass; anything else raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>.
+Without <code class="docutils literal notranslate"><span class="pre">info_type</span></code> the built-in view described above is used.</p>
+<p>RackPy calls <code class="docutils literal notranslate"><span class="pre">info_type()</span></code> with no arguments, on the main thread inside the
+constructor callback, as Rack’s <code class="docutils literal notranslate"><span class="pre">new</span> <span class="pre">TPortInfo</span></code> would. Your <code class="docutils literal notranslate"><span class="pre">__init__</span></code> may set
+any field; then RackPy sets <code class="docutils literal notranslate"><span class="pre">module</span></code>, <code class="docutils literal notranslate"><span class="pre">type</span></code>, <code class="docutils literal notranslate"><span class="pre">port_id</span></code> (or <code class="docutils literal notranslate"><span class="pre">light_id</span></code>) and
+<code class="docutils literal notranslate"><span class="pre">name</span></code> exactly as Rack’s template does, so a description set in <code class="docutils literal notranslate"><span class="pre">__init__</span></code>
+survives. The call returns that same Python object, and <code class="docutils literal notranslate"><span class="pre">get_input_info</span></code>,
+<code class="docutils literal notranslate"><span class="pre">input_infos</span></code> and the other getters return it again: the identity is preserved,
+with its class and attributes. An override of <code class="docutils literal notranslate"><span class="pre">get_name</span></code> or <code class="docutils literal notranslate"><span class="pre">get_description</span></code>
+is what Rack’s UI shows. When Rack calls it without Python holding the GIL, a
+raised exception is contained and Rack’s own answer is used instead.</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">metadata_factories.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.raw.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">LightInfo</span><span class="p">,</span> <span class="n">PortInfo</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">VoltPort</span><span class="p">(</span><span class="n">PortInfo</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Rack shows this name in the port's tooltip."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">"Volts per octave."</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">" (1V/oct)"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">describe</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">num_params</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_inputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_outputs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_lights</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">pitch</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">config_input</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"Pitch"</span><span class="p">,</span> <span class="n">info_type</span><span class="o">=</span><span class="n">VoltPort</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">pitch</span><span class="o">.</span><span class="n">get_full_name</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"Pitch (1V/oct) input"</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_light</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"Activity"</span><span class="p">,</span> <span class="n">info_type</span><span class="o">=</span><span class="n">LightInfo</span><span class="p">)</span>
+
+
+<span class="n">module</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">describe</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">pitch</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">get_input_info</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pitch</span><span class="p">,</span> <span class="n">VoltPort</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pitch</span> <span class="ow">is</span> <span class="n">module</span><span class="o">.</span><span class="n">input_infos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">pitch</span><span class="o">.</span><span class="n">module</span> <span class="ow">is</span> <span class="n">module</span> <span class="ow">and</span> <span class="n">pitch</span><span class="o">.</span><span class="n">get_description</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"Volts per octave."</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="c1"># The slot owned the object; Python still has it, but it is stale now.</span>
+<span class="k">assert</span> <span class="ow">not</span> <span class="n">pitch</span><span class="o">.</span><span class="n">alive</span>
+</pre></div>
+</div>
+</div>
+<p><strong>Ownership.</strong> The slot owns the object from then on and keeps its Python
+half alive. Its fields and methods are main-thread only, like a built-in view
+(<code class="docutils literal notranslate"><span class="pre">ThreadError</span></code> elsewhere); a standalone object keeps its any-thread fields.
+When the slot replaces it, or the module is closed, collected or its
+constructor fails, the object goes back to Python, <code class="docutils literal notranslate"><span class="pre">alive</span></code> becomes <code class="docutils literal notranslate"><span class="pre">False</span></code> and
+every field or method raises <code class="docutils literal notranslate"><span class="pre">StaleHandleError</span></code>, like a pointer Rack deleted.
+The Python object itself lives as long as you reference it. It may refer back
+to its module: a slot keeps its object alive, but the module’s handle reports
+that edge to Python’s garbage collector (RP-15A), so the cycle is collected
+once nothing else refers to it.</p>
+<p><strong>Errors are atomic.</strong> The constructor runs before anything changes: if it
+raises, or returns something other than a new instance of exactly <code class="docutils literal notranslate"><span class="pre">info_type</span></code>
+(a <code class="docutils literal notranslate"><span class="pre">__new__</span></code> that returns another object), the slot keeps its old metadata.
+An object a slot already owns raises <code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code>; one a slot has released
+raises <code class="docutils literal notranslate"><span class="pre">StaleHandleError</span></code>. The constructor may reenter the module, for example
+to configure the same slot; RackPy checks the construction phase and the ID
+again afterwards, and the outer call’s object then replaces the inner one.</p>
+<p>These six records (the three templates and <code class="docutils literal notranslate"><span class="pre">get_input_info</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_output_info</span></code>, <code class="docutils literal notranslate"><span class="pre">get_light_info</span></code>) are <code class="docutils literal notranslate"><span class="pre">implemented</span></code>. Parameter quantities
+have their own class factories, described next.</p>
+</section>
+<section id="quantity-class-factories">
+<h2>Quantity class factories<a class="headerlink" href="#quantity-class-factories" title="Link to this heading">¶</a></h2>
+<p>Rack’s <code class="docutils literal notranslate"><span class="pre">configParam&lt;TParamQuantity&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">configSwitch&lt;TSwitchQuantity&gt;</span></code> and
+<code class="docutils literal notranslate"><span class="pre">configButton&lt;TSwitchQuantity&gt;</span></code> work the same way: pass the class as
+<code class="docutils literal notranslate"><span class="pre">quantity_type</span></code>. <code class="docutils literal notranslate"><span class="pre">config_param</span></code> and <code class="docutils literal notranslate"><span class="pre">config_button</span></code> take <code class="docutils literal notranslate"><span class="pre">ParamQuantity</span></code> or any
+subclass, including <code class="docutils literal notranslate"><span class="pre">SwitchQuantity</span></code>; <code class="docutils literal notranslate"><span class="pre">config_switch</span></code> needs <code class="docutils literal notranslate"><span class="pre">SwitchQuantity</span></code>
+or a subclass. RackPy checks Rack’s arguments (IDs, bounds,
+display coefficients) <strong>before</strong> it calls <code class="docutils literal notranslate"><span class="pre">quantity_type()</span></code>, then sets exactly
+the fields Rack’s template sets: <code class="docutils literal notranslate"><span class="pre">module</span></code>, <code class="docutils literal notranslate"><span class="pre">param_id</span></code>, the bounds and default,
+<code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">unit</span></code> and the display coefficients; <code class="docutils literal notranslate"><span class="pre">config_switch</span></code> also enables
+snapping, disables smoothing and replaces <code class="docutils literal notranslate"><span class="pre">labels</span></code>; <code class="docutils literal notranslate"><span class="pre">config_button</span></code> enables
+snapping and disables smoothing and randomization, and leaves <code class="docutils literal notranslate"><span class="pre">labels</span></code> as your
+constructor set them. Anything else your <code class="docutils literal notranslate"><span class="pre">__init__</span></code> sets (a description,
+<code class="docutils literal notranslate"><span class="pre">display_precision</span></code>, <code class="docutils literal notranslate"><span class="pre">randomize_enabled</span></code>) survives. Finally the Param takes the
+quantity’s default value. The call returns your object, and
+<code class="docutils literal notranslate"><span class="pre">get_param_quantity</span></code> and <code class="docutils literal notranslate"><span class="pre">param_quantities</span></code> return it again.</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">quantity_factories.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id6" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span><span class="p">,</span> <span class="n">ParamQuantity</span><span class="p">,</span> <span class="n">SwitchQuantity</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Decibels</span><span class="p">(</span><span class="n">ParamQuantity</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Rack shows this label in the knob's tooltip and menu."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">"Output level."</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">display_precision</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_label</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">" (dB)"</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Waveform</span><span class="p">(</span><span class="n">SwitchQuantity</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">randomize_enabled</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># config_switch keeps this</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">describe</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">num_params</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_inputs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_outputs</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_param</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">60</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"Level"</span><span class="p">,</span> <span class="n">quantity_type</span><span class="o">=</span><span class="n">Decibels</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_switch</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"Wave"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"Sine"</span><span class="p">,</span> <span class="s2">"Triangle"</span><span class="p">,</span> <span class="s2">"Saw"</span><span class="p">],</span> <span class="n">quantity_type</span><span class="o">=</span><span class="n">Waveform</span><span class="p">)</span>
+
+
+<span class="n">module</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">describe</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">level</span><span class="p">,</span> <span class="n">wave</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">get_param_quantity</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">module</span><span class="o">.</span><span class="n">get_param_quantity</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">Decibels</span><span class="p">)</span> <span class="ow">and</span> <span class="n">level</span><span class="o">.</span><span class="n">get_label</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"Level (dB)"</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wave</span><span class="p">,</span> <span class="n">Waveform</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">list</span><span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"Sine"</span><span class="p">,</span> <span class="s2">"Triangle"</span><span class="p">,</span> <span class="s2">"Saw"</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">wave</span><span class="o">.</span><span class="n">snap_enabled</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">wave</span><span class="o">.</span><span class="n">randomize_enabled</span>
+    <span class="k">assert</span> <span class="n">module</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">0</span>  <span class="c1"># the Param starts at the default</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="k">assert</span> <span class="ow">not</span> <span class="n">level</span><span class="o">.</span><span class="n">alive</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">wave</span><span class="o">.</span><span class="n">alive</span>
+</pre></div>
+</div>
+</div>
+<p>The ownership, retirement, error and reentrancy rules are those of
+<a class="reference internal" href="#metadata-class-factories">metadata class factories</a>: main thread only, <code class="docutils literal notranslate"><span class="pre">alive</span></code>
+becomes <code class="docutils literal notranslate"><span class="pre">False</span></code> and every member raises <code class="docutils literal notranslate"><span class="pre">StaleHandleError</span></code> once the slot
+releases the object, including a retained <code class="docutils literal notranslate"><span class="pre">labels</span></code> alias. Calls from Python
+keep the rules of <a class="reference internal" href="#standalone-quantities">attached quantities</a>:
+value and display methods need Rack’s live bound UI context, and smoothing
+writes are refused until Rack’s engine owns the module
+(<a class="reference internal" href="#engine-ownership">engine ownership</a>).</p>
+<p><strong>Calls from Rack.</strong> A slot quantity is the one place in this API that Rack
+itself may call from another thread: Core’s MIDI-Map reads and writes mapped
+parameters from the engine thread. Those calls arrive without the GIL. They
+get Rack’s own native behaviour for the mixed value/range methods, never a
+Python call and never an exception into Rack. A UI-safe override that Rack
+calls on the main thread runs through RackPy’s contained dispatch: if it
+raises, Rack’s own answer is used. Mixed value/range overrides are refused
+when the class is defined, as for every Quantity; RP-22 owns their laboratory
+semantics. Rack’s model factory (RP-16) now creates RackPy modules and adds
+them to Rack’s engine; the test hooks also make such calls in the host tests.</p>
+<p>Retiring an object hands it back to Python and may run its finalizer. An
+override that closes its own module leaves its object stale: the rest of that
+call raises <code class="docutils literal notranslate"><span class="pre">StaleHandleError</span></code>. Rack’s C++ API gives no protection against a
+callback deleting its own module, so do not do that in a callback Rack makes.</p>
+<p>The three templates and <code class="docutils literal notranslate"><span class="pre">get_param_quantity</span></code> are <code class="docutils literal notranslate"><span class="pre">implemented</span></code>, and so is
+the raw <code class="docutils literal notranslate"><span class="pre">paramQuantities</span></code> vector (<a class="reference internal" href="#raw-module-vectors">raw module vectors</a>).
+For the ParamQuantity and SwitchQuantity records themselves, see
+<a class="reference internal" href="#quantity-records-that-stay-open">what stays open</a>.</p>
+</section>
+<section id="standalone-quantities-and-weak-module-attachment">
+<span id="standalone-quantities"></span><h2>Standalone quantities and weak module attachment<a class="headerlink" href="#standalone-quantities-and-weak-module-attachment" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">rackpy.engine.ParamQuantity</span></code> and <code class="docutils literal notranslate"><span class="pre">SwitchQuantity</span></code> are aliases of the corresponding
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw.engine</span></code> classes. They construct real, Python-owned SDK objects and
+inherit <code class="docutils literal notranslate"><span class="pre">rackpy.raw.Quantity</span></code>; a SwitchQuantity also inherits ParamQuantity.
+Constructing one does not install it in a <code class="docutils literal notranslate"><span class="pre">Module</span></code> slot; pass its class to a
+<a class="reference internal" href="#quantity-class-factories">quantity class factory</a> for that. Their mutable
+<code class="docutils literal notranslate"><span class="pre">module</span></code> field is a weak backreference: assigning a live RackPy <code class="docutils literal notranslate"><span class="pre">Module</span></code> preserves
+identity but neither retains that module nor transfers quantity ownership. Assign
+<code class="docutils literal notranslate"><span class="pre">None</span></code> to detach. When the module closes, construction rolls back or becomes
+unreachable, RackPy clears the native pointer and the quantity reads <code class="docutils literal notranslate"><span class="pre">None</span></code>.
+<code class="docutils literal notranslate"><span class="pre">get_param()</span></code> follows Rack’s raw semantics and returns the matching borrowed Param,
+or <code class="docutils literal notranslate"><span class="pre">None</span></code> for a null module or invalid <code class="docutils literal notranslate"><span class="pre">param_id</span></code>.</p>
+<p>Attached value/display/helper/reset/randomize operations require a live bound Rack
+UI context and a valid parameter ID; invalid IDs are rejected before Rack’s
+unchecked vector access. Unattached values retain Rack’s null-module no-op/zero
+behavior. Smoothing writes to an attached quantity are refused unless Rack’s
+engine owns its module (<a class="reference internal" href="#engine-ownership">engine ownership</a>); use
+<code class="docutils literal notranslate"><span class="pre">set_immediate_value()</span></code> where the immediate semantics are intended.</p>
+<p>Rack’s null-module semantics are important: these quantities do <strong>not</strong> store a
+value. <code class="docutils literal notranslate"><span class="pre">get_value()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_immediate_value()</span></code> return zero, and native setters,
+reset and randomize do not change it. This also holds when <code class="docutils literal notranslate"><span class="pre">smooth_enabled</span></code> is
+true: with no module, Rack never reaches its engine. For a standalone quantity
+that actually stores a value, use <code class="docutils literal notranslate"><span class="pre">rackpy.types.ValueQuantity</span></code> instead.</p>
+<p>The same scalar/text fields listed below for borrowed quantities are mutable,
+as is <code class="docutils literal notranslate"><span class="pre">param_id</span></code> (initially -1). Assigning fields does not initialize a Param.
+Raw equal/unbounded ranges retain SDK behavior. <code class="docutils literal notranslate"><span class="pre">get_label()</span></code> supplies Rack’s
+numbered default when <code class="docutils literal notranslate"><span class="pre">name</span></code> is empty. The maximum signed 32-bit <code class="docutils literal notranslate"><span class="pre">param_id</span></code> is
+storable, but requesting that default label raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> rather than
+letting Rack overflow <code class="docutils literal notranslate"><span class="pre">paramId</span> <span class="pre">+</span> <span class="pre">1</span></code>. Explicit names still work. Switch display
+strings reject nonfinite/out-of-int-range label indices before Rack’s cast.</p>
+<p>Python subclasses may override the UI-safe virtuals <code class="docutils literal notranslate"><span class="pre">get_display_value</span></code>,
+<code class="docutils literal notranslate"><span class="pre">set_display_value</span></code>, <code class="docutils literal notranslate"><span class="pre">get_display_precision</span></code>, <code class="docutils literal notranslate"><span class="pre">get_display_value_string</span></code>,
+<code class="docutils literal notranslate"><span class="pre">set_display_value_string</span></code>, <code class="docutils literal notranslate"><span class="pre">get_label</span></code>, <code class="docutils literal notranslate"><span class="pre">get_unit</span></code>, <code class="docutils literal notranslate"><span class="pre">get_string</span></code>, <code class="docutils literal notranslate"><span class="pre">reset</span></code>,
+<code class="docutils literal notranslate"><span class="pre">randomize</span></code>, and <code class="docutils literal notranslate"><span class="pre">get_description</span></code>. Native virtual dispatch reaches those
+methods; <code class="docutils literal notranslate"><span class="pre">super()</span></code> reaches Rack’s implementation. Errors propagate to Python
+callers. Mixed value/range virtuals cannot be Python overrides in production:
+subclass definitions of <code class="docutils literal notranslate"><span class="pre">get_value</span></code>, <code class="docutils literal notranslate"><span class="pre">set_value</span></code>, <code class="docutils literal notranslate"><span class="pre">get_min_value</span></code>, <code class="docutils literal notranslate"><span class="pre">get_max_value</span></code>
+or <code class="docutils literal notranslate"><span class="pre">get_default_value</span></code> raise <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>, like Quantity. RP-22 retains their
+explicit laboratory semantics. A standalone object is UI-only; only a class
+factory installs one in a Module slot.</p>
+<p>All native access, construction and field operations require Rack’s main thread.
+Assigning a closed module or a non-Module value fails without changing an existing
+backreference. Closing or collecting a module clears the native pointer without
+keeping Python work on its teardown path; a quantity does not keep the module
+alive. Python code in an override is ordinary user code, not a sandbox or an audio
+callback. Inherited helper methods and direct base-class calls use the same
+native guards. Deprecated smooth-value methods emit <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code>.
+<code class="docutils literal notranslate"><span class="pre">to_json()</span></code> and <code class="docutils literal notranslate"><span class="pre">from_json(data)</span></code> are Rack’s; see <a class="reference internal" href="#module-json">Module JSON</a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SwitchQuantity.labels</span></code> uses the mutable <code class="docutils literal notranslate"><span class="pre">SwitchLabels</span></code> vector interface described
+below, including atomic conversion before assignment/extension and copied
+iteration. Unlike a borrowed module alias, an <strong>owned</strong> label alias keeps its
+standalone quantity alive. Its ownership edge is visible to Python’s garbage
+collector, so a subclass retaining its own label alias does not leak a cycle.
+Replacing the vector’s contents preserves retained aliases; deleting the alias
+eventually releases that ownership. This storage
+never enters the production audio path.</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">standalone_quantities.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id7" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParamQuantity</span><span class="p">,</span> <span class="n">SwitchQuantity</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantity</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.raw.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Captioned</span><span class="p">(</span><span class="n">ParamQuantity</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_label</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_label</span><span class="p">()</span> <span class="o">+</span> <span class="s2">" (preview)"</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_description</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"An unattached quantity, not an engine parameter."</span>
+
+
+<span class="n">quantity</span> <span class="o">=</span> <span class="n">Captioned</span><span class="p">()</span>
+<span class="n">quantity</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"Pitch"</span>
+<span class="n">quantity</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s2">" V"</span>
+<span class="k">assert</span> <span class="n">quantity</span><span class="o">.</span><span class="n">module</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">quantity</span><span class="o">.</span><span class="n">get_param</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="n">quantity</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>  <span class="c1"># Rack's null-module setter is a no-op, not value storage.</span>
+<span class="k">assert</span> <span class="n">quantity</span><span class="o">.</span><span class="n">get_value</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span>
+
+<span class="c1"># A weak attachment gives Rack's getParam/value semantics without transferring</span>
+<span class="c1"># this quantity into the module's engine-owned metadata slots.</span>
+<span class="n">module</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="n">quantity</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+<span class="n">quantity</span><span class="o">.</span><span class="n">param_id</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">assert</span> <span class="n">quantity</span><span class="o">.</span><span class="n">module</span> <span class="ow">is</span> <span class="n">module</span> <span class="ow">and</span> <span class="n">quantity</span><span class="o">.</span><span class="n">get_param</span><span class="p">()</span> <span class="ow">is</span> <span class="n">module</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1"># Attached value/display methods are only valid with a live bound Rack UI context.</span>
+<span class="n">quantity</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">module</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="k">assert</span> <span class="n">quantity</span><span class="o">.</span><span class="n">get_param</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="k">assert</span> <span class="n">Quantity</span><span class="o">.</span><span class="n">get_label</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="o">==</span> <span class="s2">""</span>  <span class="c1"># explicitly Quantity's base implementation</span>
+<span class="k">assert</span> <span class="n">quantity</span><span class="o">.</span><span class="n">get_string</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"Pitch (preview): 0 V"</span>  <span class="c1"># native getString dispatches to the label override</span>
+<span class="k">assert</span> <span class="n">quantity</span><span class="o">.</span><span class="n">get_description</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"An unattached"</span><span class="p">)</span>
+
+<span class="n">switch</span> <span class="o">=</span> <span class="n">SwitchQuantity</span><span class="p">()</span>
+<span class="n">switch</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Low"</span><span class="p">,</span> <span class="s2">"High"</span><span class="p">]</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">switch</span><span class="o">.</span><span class="n">labels</span>
+<span class="n">labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"Bass"</span>
+<span class="k">assert</span> <span class="n">switch</span><span class="o">.</span><span class="n">get_display_value_string</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"Bass"</span>
+<span class="n">switch</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"First"</span><span class="p">,</span> <span class="s2">"Second"</span><span class="p">]</span>
+<span class="k">assert</span> <span class="n">labels</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"First"</span><span class="p">,</span> <span class="s2">"Second"</span><span class="p">]</span>
+<span class="c1"># An owned alias keeps its standalone quantity alive; borrowed module aliases do not.</span>
+<span class="k">del</span> <span class="n">switch</span>
+<span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"Third"</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">list</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"First"</span><span class="p">,</span> <span class="s2">"Second"</span><span class="p">,</span> <span class="s2">"Third"</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="built-in-parameter-quantities">
+<h2>Built-in parameter quantities<a class="headerlink" href="#built-in-parameter-quantities" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">config_param(param_id,</span> <span class="pre">min_value,</span> <span class="pre">max_value,</span> <span class="pre">default_value,</span> <span class="pre">name=&quot;&quot;,</span> <span class="pre">unit=&quot;&quot;,</span> <span class="pre">display_base=0,</span> <span class="pre">display_multiplier=1,</span> <span class="pre">display_offset=0)</span></code> configures a built-in
+native ParamQuantity. <code class="docutils literal notranslate"><span class="pre">config_switch(param_id,</span> <span class="pre">min_value,</span> <span class="pre">max_value,</span> <span class="pre">default_value,</span> <span class="pre">name=&quot;&quot;,</span> <span class="pre">labels=())</span></code> configures a native SwitchQuantity with
+snapping enabled and smoothing disabled. <code class="docutils literal notranslate"><span class="pre">config_button(param_id,</span> <span class="pre">name=&quot;&quot;)</span></code>
+uses bounds 0–1 and default 0, also disabling module randomization of the button.
+Each also accepts <code class="docutils literal notranslate"><span class="pre">quantity_type</span></code> (<a class="reference internal" href="#quantity-class-factories">quantity class factories</a>);
+without it, they configure the built-ins described here.
+All three helpers are constructor-only. Each writes the native Param’s default,
+prepares replacements before retiring old quantities, and invalidates only the
+replaced quantity view, not the Param component itself.</p>
+<p>IDs are checked. Otherwise the helpers take what Rack’s take: infinite bounds
+(an unbounded quantity), equal or inverted bounds, a default outside them, and
+any display coefficients (a base of 1 or -1 gives infinite display values, as
+in C++). NaN is refused in the bounds, the default and the coefficients: every
+comparison with it is false, and Rack’s switch widgets and param menu convert
+<code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">-</span> <span class="pre">min</span></code> to an int, which is undefined for NaN. For the same conversion, a
+switch’s (<code class="docutils literal notranslate"><span class="pre">config_switch</span></code>, <code class="docutils literal notranslate"><span class="pre">config_button</span></code>) bounds and default must be finite
+and less than 2**31 apart.</p>
+<p><code class="docutils literal notranslate"><span class="pre">get_param_quantity(index)</span></code> and the fixed-size <code class="docutils literal notranslate"><span class="pre">param_quantities</span></code> collection
+return stable <code class="docutils literal notranslate"><span class="pre">ParamQuantityView</span></code> adapters (or <code class="docutils literal notranslate"><span class="pre">SwitchQuantityView</span></code> for switches
+and buttons). Rack’s <code class="docutils literal notranslate"><span class="pre">config</span></code> initializes <em>every</em> parameter’s quantity with
+bounds 0–1 and default 0; unlike light metadata, these slots are not initially
+null. Empty modules have empty collections. Negative indexing works only on the
+collection, not on getter/helper IDs. The views have no standalone constructor,
+no Python virtual trampoline, and do not inherit <code class="docutils literal notranslate"><span class="pre">rackpy.raw.Quantity</span></code>.</p>
+<p>Quantity views expose these native scalar/text fields for reading and writing:
+<code class="docutils literal notranslate"><span class="pre">min_value</span></code>, <code class="docutils literal notranslate"><span class="pre">max_value</span></code>, <code class="docutils literal notranslate"><span class="pre">default_value</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">unit</span></code>, <code class="docutils literal notranslate"><span class="pre">display_base</span></code>,
+<code class="docutils literal notranslate"><span class="pre">display_multiplier</span></code>, <code class="docutils literal notranslate"><span class="pre">display_offset</span></code>, <code class="docutils literal notranslate"><span class="pre">display_precision</span></code>, <code class="docutils literal notranslate"><span class="pre">description</span></code>,
+<code class="docutils literal notranslate"><span class="pre">reset_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">randomize_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">smooth_enabled</span></code>, and <code class="docutils literal notranslate"><span class="pre">snap_enabled</span></code>.
+Direct field assignments, like C++, do not reset the Param or revalidate the
+whole range. Keep the metadata coherent; use the checked construction helpers
+for initial configuration. <code class="docutils literal notranslate"><span class="pre">param_id</span></code> and <code class="docutils literal notranslate"><span class="pre">module</span></code> can be assigned only during
+construction (<code class="docutils literal notranslate"><span class="pre">module</span></code> only the owner or <code class="docutils literal notranslate"><span class="pre">None</span></code>). <code class="docutils literal notranslate"><span class="pre">get_param()</span></code> returns the
+same checked Param as the owning module, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for an ID out of range. <code class="docutils literal notranslate"><span class="pre">alive</span></code> remains a
+thread-independent liveness query. All other access requires the main thread.
+Replacement, failed construction, close and owner collection invalidate views;
+retaining a view does not keep the module alive.</p>
+<p>Metadata methods <code class="docutils literal notranslate"><span class="pre">get_min_value</span></code>, <code class="docutils literal notranslate"><span class="pre">get_max_value</span></code>, <code class="docutils literal notranslate"><span class="pre">get_default_value</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_display_precision</span></code>, <code class="docutils literal notranslate"><span class="pre">get_label</span></code>, <code class="docutils literal notranslate"><span class="pre">get_unit</span></code> and <code class="docutils literal notranslate"><span class="pre">get_description</span></code> work
+without an engine. <code class="docutils literal notranslate"><span class="pre">get_label()</span></code> falls back to a numbered label for empty names.</p>
+<section id="borrowed-quantity-helpers-and-switch-labels">
+<span id="borrowed-quantity-helpers"></span><h3>Borrowed quantity helpers and switch labels<a class="headerlink" href="#borrowed-quantity-helpers-and-switch-labels" title="Link to this heading">¶</a></h3>
+<p>The views also expose Rack’s inherited <code class="docutils literal notranslate"><span class="pre">Quantity</span></code> helpers without pretending to
+inherit the standalone Python <code class="docutils literal notranslate"><span class="pre">Quantity</span></code> class. <code class="docutils literal notranslate"><span class="pre">get_range()</span></code>, <code class="docutils literal notranslate"><span class="pre">is_bounded()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">to_scaled(value)</span></code> and <code class="docutils literal notranslate"><span class="pre">from_scaled(scaled_value)</span></code> work without an engine. They
+preserve Rack’s scaling rules, including equal bounds (scaled value 0) and
+unbounded ranges (identity conversion), and do not clamp conversion results.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SwitchQuantityView.labels</span></code> returns a <strong>mutable <code class="docutils literal notranslate"><span class="pre">SwitchLabels</span></code> alias</strong>, not a
+copied list. Integer reads/writes/deletion, negative indices, <code class="docutils literal notranslate"><span class="pre">insert</span></code>, <code class="docutils literal notranslate"><span class="pre">append</span></code>,
+<code class="docutils literal notranslate"><span class="pre">extend</span></code> and <code class="docutils literal notranslate"><span class="pre">clear</span></code> operate on the native vector. Insertion clamps an
+out-of-range index as Python lists do; other indexed operations raise
+<code class="docutils literal notranslate"><span class="pre">IndexError</span></code>. Slicing is not supported. Assigning a complete string sequence to
+<code class="docutils literal notranslate"><span class="pre">quantity.labels</span></code> replaces the vector’s contents. A retained alias sees that
+replacement and remains valid across native vector reallocations. String
+conversion failures do not partially apply a replacement or extension.</p>
+<p><code class="docutils literal notranslate"><span class="pre">labels.tolist()</span></code> and <code class="docutils literal notranslate"><span class="pre">list(labels)</span></code> return independent copies. Iteration takes
+a snapshot when the iterator is created; that copied iterator remains usable
+after vector edits or owner deletion. Operations on the <strong>alias itself</strong> always
+check its quantity’s slot generation and main-thread rule. Replacing the
+quantity, failing construction, closing the module or dropping its final handle
+makes retained aliases stale. Label aliases do not keep the module alive.
+This adds borrowed vector editing, not standalone SwitchQuantity or full
+metadata-array mutation semantics.</p>
+<p>Value/display methods require Rack’s <strong>live bound UI context</strong>. Calling them
+at plugin startup, or from a foreign context, raises <code class="docutils literal notranslate"><span class="pre">ContextError</span></code> rather than
+dereferencing a missing engine. They pin the module across GIL release and take
+a context teardown lease before calling Rack’s native implementation:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">get_value</span></code> / <code class="docutils literal notranslate"><span class="pre">set_value</span></code>, <code class="docutils literal notranslate"><span class="pre">get_immediate_value</span></code> / <code class="docutils literal notranslate"><span class="pre">set_immediate_value</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_display_value</span></code> / <code class="docutils literal notranslate"><span class="pre">set_display_value</span></code>, <code class="docutils literal notranslate"><span class="pre">get_display_value_string</span></code> /
+<code class="docutils literal notranslate"><span class="pre">set_display_value_string</span></code> (including Rack’s expression parser);</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reset</span></code> and <code class="docutils literal notranslate"><span class="pre">randomize</span></code>; deprecated <code class="docutils literal notranslate"><span class="pre">get_smooth_value</span></code> / <code class="docutils literal notranslate"><span class="pre">set_smooth_value</span></code>
+aliases emit <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_string</span></code>, <code class="docutils literal notranslate"><span class="pre">is_min</span></code>, <code class="docutils literal notranslate"><span class="pre">is_max</span></code>, <code class="docutils literal notranslate"><span class="pre">get_scaled_value</span></code>, <code class="docutils literal notranslate"><span class="pre">set_min</span></code>, <code class="docutils literal notranslate"><span class="pre">set_max</span></code>,
+<code class="docutils literal notranslate"><span class="pre">toggle</span></code>, <code class="docutils literal notranslate"><span class="pre">move_value</span></code>, <code class="docutils literal notranslate"><span class="pre">set_scaled_value</span></code> and <code class="docutils literal notranslate"><span class="pre">move_scaled_value</span></code>.
+These are native Rack helpers, including switch snapping and formatted units.</p></li>
+</ul>
+<p>Display scaling follows Rack: linear for base 0, exponential for a positive
+base, logarithmic for a negative base, then multiply and offset. Display writes
+are immediate, clamp to the range and respect snapping. Switch text lookup is
+case-insensitive; unmatched labels or invalid numeric expressions leave the
+value unchanged. Out-of-integer-range switch label indices raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>
+before Rack’s float-to-int conversion. <code class="docutils literal notranslate"><span class="pre">reset()</span></code> / <code class="docutils literal notranslate"><span class="pre">randomize()</span></code> are direct
+quantity operations: the enable flags govern <em>module-level</em> reset/randomize,
+not these direct calls.</p>
+<p><strong>Smoothing needs Rack’s engine to own the module.</strong> Rack’s smoothing slot
+keeps a raw module pointer, which Rack clears only when it removes the module
+from its engine, so for a module Python owns, <code class="docutils literal notranslate"><span class="pre">smooth_enabled=True</span></code> is metadata
+only: <code class="docutils literal notranslate"><span class="pre">set_value</span></code> (and its deprecated alias), <code class="docutils literal notranslate"><span class="pre">set_min</span></code>, <code class="docutils literal notranslate"><span class="pre">set_max</span></code>, <code class="docutils literal notranslate"><span class="pre">toggle</span></code>,
+<code class="docutils literal notranslate"><span class="pre">move_value</span></code>, <code class="docutils literal notranslate"><span class="pre">set_scaled_value</span></code> and <code class="docutils literal notranslate"><span class="pre">move_scaled_value</span></code> then raise
+<code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code> before changing any target. The helpers cannot bypass this
+guard by indirectly calling native <code class="docutils literal notranslate"><span class="pre">setValue</span></code>. <code class="docutils literal notranslate"><span class="pre">set_immediate_value</span></code> and
+display writes remain available. Once Rack’s engine owns the module, the same
+calls smooth as in Rack (<a class="reference internal" href="#engine-ownership">engine ownership</a>). No target is
+queued implicitly, and no Python callback runs on the audio thread.</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">module_quantities.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id8" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.raw.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">SwitchQuantityView</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">num_params</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_inputs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_outputs</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_param</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">"Level"</span><span class="p">,</span> <span class="s2">"%"</span><span class="p">,</span> <span class="n">display_multiplier</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_switch</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"Mode"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"Low"</span><span class="p">,</span> <span class="s2">"Middle"</span><span class="p">,</span> <span class="s2">"High"</span><span class="p">])</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config_button</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"Trigger"</span><span class="p">)</span>
+
+
+<span class="n">module</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">configure</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">get_param_quantity</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">level</span> <span class="ow">is</span> <span class="n">module</span><span class="o">.</span><span class="n">param_quantities</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">level</span><span class="o">.</span><span class="n">get_param</span><span class="p">()</span> <span class="ow">is</span> <span class="n">module</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">level</span><span class="o">.</span><span class="n">module</span> <span class="ow">is</span> <span class="n">module</span>
+    <span class="k">assert</span> <span class="n">level</span><span class="o">.</span><span class="n">display_multiplier</span> <span class="o">==</span> <span class="mi">100</span>
+    <span class="c1"># Metadata/defaults work even at plugin startup, before Rack creates its engine.</span>
+    <span class="n">param</span> <span class="o">=</span> <span class="n">level</span><span class="o">.</span><span class="n">get_param</span><span class="p">()</span>  <span class="c1"># None once the module is gone</span>
+    <span class="k">assert</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">param</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">level</span><span class="o">.</span><span class="n">default_value</span> <span class="o">==</span> <span class="mf">0.5</span>
+    <span class="k">assert</span> <span class="n">level</span><span class="o">.</span><span class="n">get_range</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">level</span><span class="o">.</span><span class="n">to_scaled</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.5</span>
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">get_param_quantity</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">SwitchQuantityView</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">mode</span><span class="o">.</span><span class="n">labels</span>  <span class="c1"># a checked write-through alias, not a list copy</span>
+    <span class="n">labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"Bass"</span>
+    <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"Extra"</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">mode</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"Bass"</span><span class="p">,</span> <span class="s2">"Middle"</span><span class="p">,</span> <span class="s2">"High"</span><span class="p">,</span> <span class="s2">"Extra"</span><span class="p">]</span>
+    <span class="n">mode</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"First"</span><span class="p">,</span> <span class="s2">"Second"</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="nb">list</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"First"</span><span class="p">,</span> <span class="s2">"Second"</span><span class="p">]</span>  <span class="c1"># same retained alias</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="k">assert</span> <span class="ow">not</span> <span class="n">level</span><span class="o">.</span><span class="n">alive</span>
+</pre></div>
+</div>
+</div>
+<p>The snippet intentionally uses metadata only so it also runs before Rack’s
+engine exists. Value/display behavior is tested separately on the live UI
+against a native C++ reference in the actual Rack process. Built-in views have
+no Python virtuals; for Python overrides, configure the slot with a
+<a class="reference internal" href="#quantity-class-factories">quantity class factory</a>.</p>
+</section>
+<section id="quantity-records-that-stay-open">
+<h3>Quantity records that stay open<a class="headerlink" href="#quantity-records-that-stay-open" title="Link to this heading">¶</a></h3>
+<p>The ParamQuantity and SwitchQuantity fields, UI virtuals (<code class="docutils literal notranslate"><span class="pre">get_label</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_unit</span></code>, the display methods, <code class="docutils literal notranslate"><span class="pre">get_description</span></code>), <code class="docutils literal notranslate"><span class="pre">reset</span></code>, <code class="docutils literal notranslate"><span class="pre">randomize</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_immediate_value</span></code>, <code class="docutils literal notranslate"><span class="pre">set_immediate_value</span></code>, <code class="docutils literal notranslate"><span class="pre">get_param</span></code> and both classes are
+<code class="docutils literal notranslate"><span class="pre">implemented</span></code> (RP-14B2b8): Python objects, slot-owned objects and built-in
+views give them their full semantics, including Python overrides of the UI
+virtuals.</p>
+<p><code class="docutils literal notranslate"><span class="pre">get_value</span></code>, <code class="docutils literal notranslate"><span class="pre">set_value</span></code>, <code class="docutils literal notranslate"><span class="pre">get_min_value</span></code>, <code class="docutils literal notranslate"><span class="pre">get_max_value</span></code> and
+<code class="docutils literal notranslate"><span class="pre">get_default_value</span></code> are <em>mixed</em>: Rack calls them from the engine thread as
+well (Core MIDI-Map). Their production path is native, and a subclass of
+<code class="docutils literal notranslate"><span class="pre">ParamQuantity</span></code> that overrides one is refused when it is defined. A Python
+override exists only in the laboratory (RP-22C): a subclass of
+<code class="docutils literal notranslate"><span class="pre">rackpy.laboratory.ParamQuantity</span></code> or <code class="docutils literal notranslate"><span class="pre">SwitchQuantity</span></code>, created after
+<code class="docutils literal notranslate"><span class="pre">rackpy.laboratory.enable()</span></code>, which only a laboratory module’s slots accept
+(an ordinary module’s raise <code class="docutils literal notranslate"><span class="pre">LaboratoryError</span></code>), so Rack’s engine thread never
+reaches it. Rack’s own code (display, <code class="docutils literal notranslate"><span class="pre">reset</span></code>, <code class="docutils literal notranslate"><span class="pre">randomize</span></code>, <code class="docutils literal notranslate"><span class="pre">paramsToJson</span></code>,
+<code class="docutils literal notranslate"><span class="pre">paramsFromJson</span></code>) then calls the Python methods synchronously on the main
+thread; see <a class="reference internal" href="../explanation/callbacks.html#laboratory-quantities"><span class="std std-ref">laboratory quantities</span></a>.
+JSON (<code class="docutils literal notranslate"><span class="pre">to_json</span></code>, <code class="docutils literal notranslate"><span class="pre">from_json</span></code>) is RP-15.</p>
+<p>Smoothing, including the deprecated <code class="docutils literal notranslate"><span class="pre">set_smooth_value</span></code>/<code class="docutils literal notranslate"><span class="pre">get_smooth_value</span></code>,
+works once Rack’s engine owns the module (RP-14C2) and is refused before.</p>
+</section>
+</section>
+<section id="raw-module-vectors">
+<h2>Raw module vectors<a class="headerlink" href="#raw-module-vectors" title="Link to this heading">¶</a></h2>
+<p>Rack’s <code class="docutils literal notranslate"><span class="pre">Module</span></code> has eight public vectors: <code class="docutils literal notranslate"><span class="pre">params</span></code>, <code class="docutils literal notranslate"><span class="pre">inputs</span></code>, <code class="docutils literal notranslate"><span class="pre">outputs</span></code>,
+<code class="docutils literal notranslate"><span class="pre">lights</span></code>, and the owning pointer vectors <code class="docutils literal notranslate"><span class="pre">paramQuantities</span></code>, <code class="docutils literal notranslate"><span class="pre">inputInfos</span></code>,
+<code class="docutils literal notranslate"><span class="pre">outputInfos</span></code> and <code class="docutils literal notranslate"><span class="pre">lightInfos</span></code>. A plugin’s C++ constructor may edit them after
+<code class="docutils literal notranslate"><span class="pre">config</span></code>. RackPy maps that <strong>inside the constructor callback</strong>, after <code class="docutils literal notranslate"><span class="pre">config</span></code>:
+item assignment, <code class="docutils literal notranslate"><span class="pre">del</span></code>, <code class="docutils literal notranslate"><span class="pre">insert</span></code>, <code class="docutils literal notranslate"><span class="pre">append</span></code>, <code class="docutils literal notranslate"><span class="pre">clear</span></code> and <code class="docutils literal notranslate"><span class="pre">resize(n)</span></code> on the
+matching collection. Negative indices count from the end, <code class="docutils literal notranslate"><span class="pre">insert</span></code> clamps its
+position like <code class="docutils literal notranslate"><span class="pre">list.insert</span></code>, and other out-of-range indices raise <code class="docutils literal notranslate"><span class="pre">IndexError</span></code>.</p>
+<ul class="simple">
+<li><p><strong>Component vectors</strong> hold values. Assigning a <code class="docutils literal notranslate"><span class="pre">Param</span></code>, <code class="docutils literal notranslate"><span class="pre">Input</span></code>, <code class="docutils literal notranslate"><span class="pre">Output</span></code> or
+<code class="docutils literal notranslate"><span class="pre">Light</span></code> copies it into the slot, like C++ assignment; the source stays
+independent. <code class="docutils literal notranslate"><span class="pre">resize</span></code> adds default components. A structural edit (anything
+but item assignment) invalidates every view of <em>that</em> vector: Rack’s vector
+may have moved its storage, as with C++ iterators. Views of the other vectors
+stay valid.</p></li>
+<li><p><strong>Metadata vectors</strong> hold owning pointers. Assign a <code class="docutils literal notranslate"><span class="pre">ParamQuantity</span></code> (or
+<code class="docutils literal notranslate"><span class="pre">SwitchQuantity</span></code>), <code class="docutils literal notranslate"><span class="pre">PortInfo</span></code> or <code class="docutils literal notranslate"><span class="pre">LightInfo</span></code> you created, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for a null
+slot. The module takes ownership, exactly as <code class="docutils literal notranslate"><span class="pre">inputInfos[i]</span> <span class="pre">=</span> <span class="pre">info</span></code> does in
+C++: no field is changed, so set <code class="docutils literal notranslate"><span class="pre">module</span></code>, the ID and the port type yourself.
+<code class="docutils literal notranslate"><span class="pre">resize</span></code> adds null slots. Built-in views, objects another slot owns and
+objects a slot has released are refused.</p></li>
+<li><p><strong>Removal releases.</strong> When a raw edit removes a pointer (assignment over it,
+<code class="docutils literal notranslate"><span class="pre">del</span></code>, <code class="docutils literal notranslate"><span class="pre">clear</span></code>, shrinking), Rack would not delete the object. A Python object
+comes back to you, still usable; if its <code class="docutils literal notranslate"><span class="pre">module</span></code> points at this module the
+link is tracked, so deleting the module later sets it to <code class="docutils literal notranslate"><span class="pre">None</span></code>. Built-in
+metadata has no other owner, so it is deleted and its views become stale.
+Replacement by a <code class="docutils literal notranslate"><span class="pre">config_*</span></code> helper and module deletion still delete, as in Rack.</p></li>
+</ul>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">raw_vectors.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id9" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span><span class="p">,</span> <span class="n">Port</span><span class="p">,</span> <span class="n">PortInfo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.raw.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Light</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">num_params</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_inputs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_outputs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_lights</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># Drop the second input, port and metadata together, as C++ would.</span>
+    <span class="k">del</span> <span class="n">module</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">del</span> <span class="n">module</span><span class="o">.</span><span class="n">input_infos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># Replace the first input's metadata with an object of our own. A raw</span>
+    <span class="c1"># assignment sets no fields, so set what the seal checks.</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">PortInfo</span><span class="p">()</span>
+    <span class="n">info</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">port_id</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">module</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Port</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">INPUT</span><span class="p">,</span> <span class="s2">"Clock"</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">input_infos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span>
+    <span class="c1"># Add a light and an empty (None) metadata slot for it.</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">lights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Light</span><span class="p">())</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">light_infos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+
+<span class="n">module</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">build</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">input_infos</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">module</span><span class="o">.</span><span class="n">get_input_info</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"Clock"</span>
+    <span class="k">assert</span> <span class="n">module</span><span class="o">.</span><span class="n">get_num_lights</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">module</span><span class="o">.</span><span class="n">get_light_info</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p><strong>The seal checks what Rack relies on.</strong> When the constructor callback
+returns, Rack’s own code (saving, reset, randomize, tooltips, the cable menu)
+assumes invariants it never checks. RackPy checks them and fails the
+construction with <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> otherwise: each component vector matches its
+metadata vector in size; every parameter has a quantity and every port has
+metadata (light slots may be <code class="docutils literal notranslate"><span class="pre">None</span></code>); every object’s <code class="docutils literal notranslate"><span class="pre">module</span></code> is this module and
+its ID (and port type) matches its slot; every bypass route is inside the port
+vectors.</p>
+<p><strong>After the seal</strong> only item assignment to the component vectors remains:
+slot assignment and structural edits raise <code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code>, and so do writes
+to the identity fields (<code class="docutils literal notranslate"><span class="pre">module</span></code>, the IDs and the port type) of any metadata a
+slot owns. Rack’s engine and UI index with those values unchecked.
+Every edit requires the main thread, and none is allowed before <code class="docutils literal notranslate"><span class="pre">config</span></code>.
+These eight records are <code class="docutils literal notranslate"><span class="pre">implemented</span></code> with this contract; <code class="docutils literal notranslate"><span class="pre">bypassRoutes</span></code> is
+RP-14C.</p>
+</section>
+<section id="ownership-and-failure">
+<h2>Ownership and failure<a class="headerlink" href="#ownership-and-failure" title="Link to this heading">¶</a></h2>
+<p>The returned handle owns its native module. Component/collection views do not
+keep it alive: closing or dropping the last module handle invalidates them.
+No pointer is exposed as an integer. <code class="docutils literal notranslate"><span class="pre">close()</span></code> is idempotent; <code class="docutils literal notranslate"><span class="pre">alive</span></code> tells
+whether the owned module remains. Reading a closed module or retained component
+raises <code class="docutils literal notranslate"><span class="pre">StaleHandleError</span></code>, never a use-after-free.</p>
+<p>Calling <code class="docutils literal notranslate"><span class="pre">close()</span></code> during construction raises <code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code> (a callback
+cannot delete the module out from under the factory). If the constructor raises,
+its original exception propagates and even escaped module/component handles
+are invalidated immediately. No half-constructed module can be published.</p>
+<p>Construction, configuration, component access and explicit close require
+Rack’s main thread; Python worker threads get <code class="docutils literal notranslate"><span class="pre">ThreadError</span></code>. Dropping a final
+Python handle on another Python thread destroys the module there, with the GIL.
+Without class-factory metadata that runs no Python. Transferred metadata goes
+back to its Python object on that thread, so a finalizer of yours may run there.
+A module Rack’s engine owns is deleted by Rack instead; see below.</p>
+</section>
+<section id="engine-ownership">
+<h2>Engine ownership<a class="headerlink" href="#engine-ownership" title="Link to this heading">¶</a></h2>
+<p>In Rack, a module belongs to the engine once Rack adds it: Rack removes it
+from the engine and deletes it when its module widget goes, or at shutdown.
+RackPy implements Rack’s side of that (RP-14C2), which RP-16’s model factory
+uses; the test hooks also hand modules to the engine in the host tests.</p>
+<ul class="simple">
+<li><p>Only a sealed module can go to the engine. Its <code class="docutils literal notranslate"><span class="pre">id</span></code> is then the one the
+engine assigned, and every handle and view stays valid, with the same
+identity.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">close()</span></code> raises <code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code>: Rack deletes it. Dropping every Python
+handle does not delete it either, and Rack can hand it out again (as a
+module widget does), giving the same kind of handle.</p></li>
+<li><p>When Rack deletes it, on its main thread without the GIL and after removing
+it from the engine, every handle, view and collection raises
+<code class="docutils literal notranslate"><span class="pre">StaleHandleError</span></code> (<code class="docutils literal notranslate"><span class="pre">alive</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>), and transferred metadata goes back
+to Python retired, taking the GIL for that alone. <code class="docutils literal notranslate"><span class="pre">close()</span></code> is then a no-op.</p></li>
+<li><p>Smoothing writes are allowed, and smooth as in Rack: <code class="docutils literal notranslate"><span class="pre">get_value</span></code> returns the
+target at once and the engine moves the Param towards it.</p></li>
+</ul>
+</section>
+<section id="module-json">
+<h2>Module JSON<a class="headerlink" href="#module-json" title="Link to this heading">¶</a></h2>
+<p>Rack’s serialization methods are bound with Rack’s behaviour (RP-15A):
+<code class="docutils literal notranslate"><span class="pre">to_json()</span></code>/<code class="docutils literal notranslate"><span class="pre">from_json(data)</span></code> (the whole module; they need a registered model,
+RP-16), <code class="docutils literal notranslate"><span class="pre">params_to_json()</span></code>/<code class="docutils literal notranslate"><span class="pre">params_from_json(data)</span></code> (Rack’s live bound UI
+context), and <code class="docutils literal notranslate"><span class="pre">data_to_json()</span></code>/<code class="docutils literal notranslate"><span class="pre">data_from_json(data)</span></code>, which reach the
+handlers set in the constructor callback with
+<code class="docutils literal notranslate"><span class="pre">set_data_handlers(to_json=...,</span> <span class="pre">from_json=...)</span></code>. A <code class="docutils literal notranslate"><span class="pre">ParamQuantity</span></code> subclass may
+override <code class="docutils literal notranslate"><span class="pre">to_json</span></code>/<code class="docutils literal notranslate"><span class="pre">from_json</span></code>; Rack’s <code class="docutils literal notranslate"><span class="pre">paramsToJson</span></code> reaches the override.
+Values cross as ordinary Python data under the runtime’s JSON policy, never as
+a shared <code class="docutils literal notranslate"><span class="pre">json_t</span></code>. A module’s handle also reports its handlers and its slots’
+transferred objects to Python’s garbage collector, so closures and subclass
+attributes that refer back to the module do not leak. Rules, threads and error
+handling are explained in <a class="reference internal" href="../how-to/state.html"><span class="std std-doc">save and restore a module’s state</span></a>.
+Patch storage directories (<code class="docutils literal notranslate"><span class="pre">get_patch_storage_directory</span></code>,
+<code class="docutils literal notranslate"><span class="pre">create_patch_storage_directory</span></code> and the <code class="docutils literal notranslate"><span class="pre">pathlib</span></code> facade <code class="docutils literal notranslate"><span class="pre">patch_storage()</span></code>)
+follow Rack’s rules (RP-15B): an engine ID is required, and RackPy never
+deletes them.</p>
+</section>
+<section id="lifecycle-events">
+<h2>Lifecycle events<a class="headerlink" href="#lifecycle-events" title="Link to this heading">¶</a></h2>
+<p>Rack tells a module about its life through events: <code class="docutils literal notranslate"><span class="pre">onAdd</span></code> and <code class="docutils literal notranslate"><span class="pre">onRemove</span></code>
+(engine membership), <code class="docutils literal notranslate"><span class="pre">onBypass</span></code>/<code class="docutils literal notranslate"><span class="pre">onUnBypass</span></code>, <code class="docutils literal notranslate"><span class="pre">onPortChange</span></code> (a cable connected
+or disconnected), <code class="docutils literal notranslate"><span class="pre">onReset</span></code> and <code class="docutils literal notranslate"><span class="pre">onRandomize</span></code> (user commands),
+<code class="docutils literal notranslate"><span class="pre">onSampleRateChange</span></code>, <code class="docutils literal notranslate"><span class="pre">onSave</span></code>, <code class="docutils literal notranslate"><span class="pre">onSetMaster</span></code>/<code class="docutils literal notranslate"><span class="pre">onUnsetMaster</span></code> (which
+module drives the engine) and <code class="docutils literal notranslate"><span class="pre">onExpanderChange</span></code> (the module beside it
+changed). RackPy’s modules handle all twelve natively
+(RP-14C3; <code class="docutils literal notranslate"><span class="pre">onExpanderChange</span></code> since RP-22B): Rack’s own behaviour runs first (resetting or randomizing the
+parameters through their quantities, and calling Rack’s deprecated
+no-argument events), then RackPy records the event. No Python runs in these
+handlers apart from what Rack’s behaviour itself calls, such as a quantity
+subclass’s <code class="docutils literal notranslate"><span class="pre">reset</span></code> override, and that Python cannot take Rack’s engine lock
+(<code class="docutils literal notranslate"><span class="pre">EngineLockError</span></code>): the engine is locked exclusively for every event except
+<code class="docutils literal notranslate"><span class="pre">onSave</span></code>.</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">lifecycle_events.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id10" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span><span class="p">,</span> <span class="n">Port</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextError</span>
+
+<span class="c1"># Rack's event records are plain values.</span>
+<span class="n">cable</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">PortChangeEvent</span><span class="p">(</span><span class="n">connecting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Port</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">INPUT</span><span class="p">,</span> <span class="n">port_id</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">cable</span><span class="o">.</span><span class="n">connecting</span> <span class="ow">and</span> <span class="n">cable</span><span class="o">.</span><span class="n">port_id</span> <span class="o">==</span> <span class="mi">0</span>
+
+<span class="n">module</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">num_params</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_inputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_outputs</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">assert</span> <span class="n">module</span><span class="o">.</span><span class="n">lifecycle_events</span><span class="p">()</span> <span class="o">==</span> <span class="p">[]</span> <span class="ow">and</span> <span class="n">module</span><span class="o">.</span><span class="n">dropped_lifecycle_events</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Rack's handler for this module, called directly as C++ plugin code may.</span>
+        <span class="n">module</span><span class="o">.</span><span class="n">on_port_change</span><span class="p">(</span><span class="n">cable</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">ContextError</span><span class="p">:</span>
+        <span class="k">pass</span>  <span class="c1"># at plugin start-up, as this example runs, Rack has no engine yet</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="p">[(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">event</span><span class="p">)]</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">lifecycle_events</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">sequence</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">Module</span><span class="o">.</span><span class="n">PortChangeEvent</span><span class="p">)</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">connecting</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p><strong>Observing events.</strong> <code class="docutils literal notranslate"><span class="pre">module.lifecycle_events()</span></code> returns the events since
+the last call, oldest first, as <code class="docutils literal notranslate"><span class="pre">(sequence,</span> <span class="pre">event)</span></code> pairs, where <code class="docutils literal notranslate"><span class="pre">event</span></code> is a
+copy of Rack’s own record: <code class="docutils literal notranslate"><span class="pre">Module.AddEvent</span></code>, <code class="docutils literal notranslate"><span class="pre">Module.PortChangeEvent</span></code> (with
+<code class="docutils literal notranslate"><span class="pre">connecting</span></code>, <code class="docutils literal notranslate"><span class="pre">type</span></code> and <code class="docutils literal notranslate"><span class="pre">port_id</span></code>), <code class="docutils literal notranslate"><span class="pre">Module.SampleRateChangeEvent</span></code> (with
+<code class="docutils literal notranslate"><span class="pre">sample_rate</span></code> and <code class="docutils literal notranslate"><span class="pre">sample_time</span></code>), <code class="docutils literal notranslate"><span class="pre">Module.ExpanderChangeEvent</span></code> (with <code class="docutils literal notranslate"><span class="pre">side</span></code>:
+0 left, 1 right) and so on. This is RackPy’s API, not Rack’s:
+Rack may dispatch the sample-rate and master events on an audio driver thread,
+and expander changes on the thread stepping its engine, so recording takes no lock, allocates nothing and never calls Python, and
+Python reads the records later on the main thread. The queue holds 64 events;
+when it is full, a new event is dropped and counted in
+<code class="docutils literal notranslate"><span class="pre">dropped_lifecycle_events</span></code>. Sequence numbers count dropped events too, so a gap
+shows a loss.</p>
+<p><strong>Calling a handler.</strong> <code class="docutils literal notranslate"><span class="pre">module.on_reset(Module.ResetEvent())</span></code> and its
+siblings call the module’s handler directly, as C++ plugin code may call
+<code class="docutils literal notranslate"><span class="pre">Module::onReset(e)</span></code>. The module must be sealed and Python-owned, and Rack’s
+live bound UI context is required, because Rack’s behaviour writes parameters
+through the engine; the handler then runs exactly as when Rack dispatches it.
+For a module Rack’s engine owns, Rack dispatches the events, under its engine
+lock, and direct calls raise <code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code>. The deprecated no-argument forms
+(<code class="docutils literal notranslate"><span class="pre">on_reset()</span></code>, <code class="docutils literal notranslate"><span class="pre">on_add()</span></code>, <code class="docutils literal notranslate"><span class="pre">on_remove()</span></code>, <code class="docutils literal notranslate"><span class="pre">on_randomize()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">on_sample_rate_change()</span></code>) warn and dispatch the deprecated virtual, whose
+Rack implementation is empty and records nothing. A laboratory module can
+override that virtual separately, as described below.</p>
+<p>Observing snapshots is not the same semantics as a synchronous Python
+handler. The UI-thread events have Python handlers (below); the sample-rate,
+master and expander events, which Rack may run on its audio threads, have
+Python overrides only in the <a class="reference internal" href="#laboratory-events-and-json">laboratory</a>.</p>
+<p><strong>Python handlers (RP-16C).</strong> <code class="docutils literal notranslate"><span class="pre">set_event_handlers(on_add=...,</span> <span class="pre">on_remove=...,</span> <span class="pre">on_bypass=...,</span> <span class="pre">on_un_bypass=...,</span> <span class="pre">on_port_change=...,</span> <span class="pre">on_reset=...,</span> <span class="pre">on_randomize=...,</span> <span class="pre">on_save=...)</span></code>, in the constructor callback only, installs
+Python handlers that the adapters above call after Rack’s behaviour and the
+snapshot, on the main thread, with errors contained; <code class="docutils literal notranslate"><span class="pre">rackpy.plugin.ModuleClass</span></code>
+installs the methods a subclass overrides. See
+<a class="reference internal" href="../how-to/plugins.html#module-events"><span class="std std-ref">module events</span></a>. <code class="docutils literal notranslate"><span class="pre">model</span></code> and
+<code class="docutils literal notranslate"><span class="pre">get_model()</span></code> are Rack’s: the module’s <code class="docutils literal notranslate"><span class="pre">rackpy.raw.plugin.Model</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code>
+for a module made directly with <code class="docutils literal notranslate"><span class="pre">Module.create</span></code>.</p>
+</section>
+<section id="laboratory-events-and-json">
+<span id="id1"></span><h2>Laboratory events and JSON<a class="headerlink" href="#laboratory-events-and-json" title="Link to this heading">¶</a></h2>
+<div class="warning admonition">
+<p class="admonition-title">Laboratory only</p>
+<p>These overrides run only on a laboratory module, on an offline
+<a class="reference internal" href="../explanation/callbacks.html#the-laboratory-bench"><span class="std std-ref">laboratory bench</span></a>, after
+trusted code calls <code class="docutils literal notranslate"><span class="pre">rackpy.laboratory.enable()</span></code>. Rack’s engine never runs
+them.</p>
+</div>
+<p>A <code class="docutils literal notranslate"><span class="pre">rackpy.laboratory.ModuleClass</span></code> may override every event above
+(<code class="docutils literal notranslate"><span class="pre">on_add</span></code>, …, <code class="docutils literal notranslate"><span class="pre">on_sample_rate_change</span></code>, <code class="docutils literal notranslate"><span class="pre">on_set_master</span></code>, <code class="docutils literal notranslate"><span class="pre">on_unset_master</span></code>,
+<code class="docutils literal notranslate"><span class="pre">on_expander_change</span></code>) and Rack’s JSON virtuals: <code class="docutils literal notranslate"><span class="pre">module_to_json</span></code> and
+<code class="docutils literal notranslate"><span class="pre">module_from_json</span></code> (Rack’s <code class="docutils literal notranslate"><span class="pre">Module::toJson</span></code> and <code class="docutils literal notranslate"><span class="pre">fromJson</span></code>; named after
+<code class="docutils literal notranslate"><span class="pre">Engine::moduleToJson</span></code>, since <code class="docutils literal notranslate"><span class="pre">ModuleClass.to_json</span></code> is the custom-data
+handler), <code class="docutils literal notranslate"><span class="pre">params_to_json</span></code>, <code class="docutils literal notranslate"><span class="pre">params_from_json</span></code>, <code class="docutils literal notranslate"><span class="pre">data_to_json</span></code> and
+<code class="docutils literal notranslate"><span class="pre">data_from_json</span></code>. Unlike the handlers above, they are true overrides: called
+synchronously where Rack would call them, <em>instead of</em> Rack’s
+implementation, and <code class="docutils literal notranslate"><span class="pre">super()</span></code> runs it (Rack’s behaviour, RackPy’s snapshot,
+the data handlers). Rack’s own <code class="docutils literal notranslate"><span class="pre">toJson</span></code> calls the Python <code class="docutils literal notranslate"><span class="pre">params_to_json</span></code> and
+<code class="docutils literal notranslate"><span class="pre">data_to_json</span></code>, and <code class="docutils literal notranslate"><span class="pre">fromJson</span></code> the <code class="docutils literal notranslate"><span class="pre">*_from_json</span></code> ones. JSON overrides return
+JSON-compatible data, <code class="docutils literal notranslate"><span class="pre">None</span></code> for Rack’s <code class="docutils literal notranslate"><span class="pre">NULL</span></code>. Rack’s <code class="docutils literal notranslate"><span class="pre">toJson</span></code> and <code class="docutils literal notranslate"><span class="pre">fromJson</span></code>
+name the module’s model: <code class="docutils literal notranslate"><span class="pre">ModuleClass.create(model)</span></code> sets one, which only
+names it. The deprecated no-argument virtuals have separate overrides:
+<code class="docutils literal notranslate"><span class="pre">on_add_legacy</span></code>, <code class="docutils literal notranslate"><span class="pre">on_remove_legacy</span></code>, <code class="docutils literal notranslate"><span class="pre">on_reset_legacy</span></code>,
+<code class="docutils literal notranslate"><span class="pre">on_randomize_legacy</span></code>, and <code class="docutils literal notranslate"><span class="pre">on_sample_rate_change_legacy</span></code>. Defining one or
+explicitly calling its base implementation warns. Rack’s default modern
+handler calls the corresponding legacy override, without a warning just for
+that internal dispatch. A modern override that omits <code class="docutils literal notranslate"><span class="pre">super()</span></code> suppresses
+that dispatch. Direct module calls and bench callbacks propagate laboratory
+override errors to their Python caller. Details: <a class="reference internal" href="../explanation/callbacks.html#laboratory-modules"><span class="std std-ref">laboratory modules</span></a>.</p>
+</section>
+<section id="native-kernels">
+<h2>Native kernels<a class="headerlink" href="#native-kernels" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">set_kernel(kernel)</span></code>, <code class="docutils literal notranslate"><span class="pre">kernel</span></code> and <code class="docutils literal notranslate"><span class="pre">kernel_failed</span></code> are RackPy’s, not Rack’s:
+they give a module its production audio path, a native kernel that Rack’s
+engine runs from the module’s <code class="docutils literal notranslate"><span class="pre">process()</span></code> every frame.
+<code class="docutils literal notranslate"><span class="pre">set_bypass_kernel(kernel)</span></code>, <code class="docutils literal notranslate"><span class="pre">bypass_kernel</span></code> and <code class="docutils literal notranslate"><span class="pre">bypass_kernel_failed</span></code> do
+the same for its <code class="docutils literal notranslate"><span class="pre">processBypass()</span></code> (<a class="reference internal" href="#bypass-configuration">bypass configuration</a>). See
+<a class="reference internal" href="../how-to/dsp.html"><span class="std std-doc">processing audio</span></a>. Rack’s <code class="docutils literal notranslate"><span class="pre">process</span></code> itself, as a Python
+override, exists only in the laboratory: see <a class="reference internal" href="#audio-callbacks">audio callbacks</a>.</p>
+</section>
+<section id="audio-callbacks-process-processbypass-and-step">
+<span id="audio-callbacks"></span><h2>Audio callbacks: process, processBypass and step<a class="headerlink" href="#audio-callbacks-process-processbypass-and-step" title="Link to this heading">¶</a></h2>
+<div class="warning admonition">
+<p class="admonition-title">Laboratory only</p>
+<p>Rack’s engine threads call <code class="docutils literal notranslate"><span class="pre">process</span></code>, <code class="docutils literal notranslate"><span class="pre">processBypass</span></code> and the deprecated
+<code class="docutils literal notranslate"><span class="pre">step()</span></code> once per sample; RackPy never runs Python there. A
+<code class="docutils literal notranslate"><span class="pre">rackpy.plugin.ModuleClass</span></code> that defines them is refused. Their Python
+overrides run only offline, on a
+<a class="reference internal" href="../explanation/callbacks.html#the-laboratory-bench"><span class="std std-ref">laboratory bench</span></a>, after
+trusted code calls <code class="docutils literal notranslate"><span class="pre">rackpy.laboratory.enable()</span></code>; that is not real-time audio.</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">rackpy.laboratory.ModuleClass</span></code> may override <code class="docutils literal notranslate"><span class="pre">process(args)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">process_bypass(args)</span></code> and <code class="docutils literal notranslate"><span class="pre">step()</span></code>; <code class="docutils literal notranslate"><span class="pre">super()</span></code> runs Rack’s implementations
+(<code class="docutils literal notranslate"><span class="pre">process</span></code> calls <code class="docutils literal notranslate"><span class="pre">step()</span></code>, <code class="docutils literal notranslate"><span class="pre">processBypass</span></code> copies the bypass routes,
+<code class="docutils literal notranslate"><span class="pre">step()</span></code> does nothing and warns as deprecated). <code class="docutils literal notranslate"><span class="pre">Module.ProcessArgs</span></code> is
+Rack’s argument record, a value with <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_time</span></code> and
+<code class="docutils literal notranslate"><span class="pre">frame</span></code>. An ordinary module’s <code class="docutils literal notranslate"><span class="pre">process</span></code> is its native kernel, and its
+<code class="docutils literal notranslate"><span class="pre">processBypass</span></code> is Rack’s, or its native bypass kernel
+(<code class="docutils literal notranslate"><span class="pre">set_bypass_kernel</span></code>, <a class="reference internal" href="#bypass-configuration">below</a>); a bench runs both, as
+Rack’s engine does. Details:
+<a class="reference internal" href="../explanation/callbacks.html#laboratory-modules"><span class="std std-ref">laboratory modules</span></a>.</p>
+</section>
+<section id="bypass-configuration">
+<h2>Bypass configuration<a class="headerlink" href="#bypass-configuration" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">config_bypass(input_id,</span> <span class="pre">output_id)</span></code> validates both port IDs and refuses a
+second route to the same output with <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>. An input may feed several
+outputs. Rack’s native <code class="docutils literal notranslate"><span class="pre">processBypass</span></code> preserves the routed channel count and
+voltages; the test-hooks build compares it against a standalone C++ reference
+for 0, 1 and 16 channels. Python reaches <code class="docutils literal notranslate"><span class="pre">processBypass</span></code> only through the
+laboratory’s <code class="docutils literal notranslate"><span class="pre">ModuleClass.process_bypass</span></code>, which is never on Rack’s audio path
+(<a class="reference internal" href="../explanation/callbacks.html#laboratory-modules"><span class="std std-ref">laboratory modules</span></a>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">Module.BypassRoute()</span></code> is an independent value with mutable <code class="docutils literal notranslate"><span class="pre">input_id</span></code> and
+<code class="docutils literal notranslate"><span class="pre">output_id</span></code>, initially -1. <code class="docutils literal notranslate"><span class="pre">module.bypass_routes</span></code> is a checked collection of
+Rack’s route vector whose items are <strong>copies</strong>: changing a copy cannot corrupt
+routing. Inside the constructor callback, after <code class="docutils literal notranslate"><span class="pre">config</span></code>, it takes Rack’s raw
+vector edits like the other <a class="reference internal" href="#raw-module-vectors">raw module vectors</a>: item
+assignment of a <code class="docutils literal notranslate"><span class="pre">BypassRoute</span></code>, <code class="docutils literal notranslate"><span class="pre">del</span></code>, <code class="docutils literal notranslate"><span class="pre">insert</span></code>, <code class="docutils literal notranslate"><span class="pre">append</span></code>, <code class="docutils literal notranslate"><span class="pre">clear</span></code> and
+<code class="docutils literal notranslate"><span class="pre">resize</span></code> (new routes are <code class="docutils literal notranslate"><span class="pre">(-1,</span> <span class="pre">-1)</span></code>). A raw edit can create a second route to
+the same output, as C++ can; <code class="docutils literal notranslate"><span class="pre">config_bypass</span></code> still refuses that, as Rack’s
+<code class="docutils literal notranslate"><span class="pre">configBypass</span></code> asserts. The seal rejects routes outside the port vectors, and
+after it route edits raise <code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code>, because Rack’s engine reads the
+routes while it processes a bypassed module.</p>
+<p>When Rack’s engine owns the module and bypasses it, Rack calls
+<code class="docutils literal notranslate"><span class="pre">processBypass</span></code> instead of <code class="docutils literal notranslate"><span class="pre">process</span></code>: each route copies its input’s channels
+and voltages to its output. The live-UI tests drive this through cables in
+the real engine with 0, 1 and 16 channels and compare the output with Rack’s
+own <code class="docutils literal notranslate"><span class="pre">processBypass</span></code> on a plain module (RP-14C4). Enabling the module again
+clears its outputs, as Rack does.</p>
+<p><code class="docutils literal notranslate"><span class="pre">set_bypass_kernel(kernel)</span></code> replaces that route copy with a native kernel,
+RackPy’s equivalent of a C++ <code class="docutils literal notranslate"><span class="pre">processBypass</span></code> override (RP-34): Rack’s engine
+runs it for every bypassed frame with no Python, and the module’s ordinary
+kernel is not called. It is checked, handed over, reset, told about sample
+rate changes and silenced on failure exactly as <code class="docutils literal notranslate"><span class="pre">set_kernel</span></code>’s kernel;
+<code class="docutils literal notranslate"><span class="pre">bypass_kernel</span></code> returns it (or <code class="docutils literal notranslate"><span class="pre">None</span></code>) and <code class="docutils literal notranslate"><span class="pre">bypass_kernel_failed</span></code> reports a
+failure. A laboratory module refuses it with <code class="docutils literal notranslate"><span class="pre">LaboratoryError</span></code>: its bypass
+is its Python <code class="docutils literal notranslate"><span class="pre">process_bypass</span></code>. See
+<a class="reference internal" href="../how-to/dsp.html#reset-sample-rate-bypass-and-failures"><span class="std std-ref">process audio</span></a>.</p>
+</section>
+<section id="expanders">
+<span id="id2"></span><h2>Expanders<a class="headerlink" href="#expanders" title="Link to this heading">¶</a></h2>
+<p>Rack gives every module two expanders, <code class="docutils literal notranslate"><span class="pre">leftExpander</span></code> and <code class="docutils literal notranslate"><span class="pre">rightExpander</span></code>:
+the ID of the module next to it on that side, a pointer to that module, and
+two message buffers that the module allocates and Rack’s engine swaps when a
+flip is requested, so a message arrives one frame after it is written. In
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw.engine</span></code> (and <code class="docutils literal notranslate"><span class="pre">rackpy.engine.expanders</span></code>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">left_expander</span></code>, <code class="docutils literal notranslate"><span class="pre">right_expander</span></code>, <code class="docutils literal notranslate"><span class="pre">get_left_expander()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_right_expander()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_expander(side)</span></code> (0 is left, any other
+<code class="docutils literal notranslate"><span class="pre">uint8_t</span></code> right, as in Rack) return a <code class="docutils literal notranslate"><span class="pre">Module.Expander</span></code> view, on a RackPy
+module and on another plugin’s <code class="docutils literal notranslate"><span class="pre">EngineModule</span></code>. A view never owns the
+module; it raises <code class="docutils literal notranslate"><span class="pre">StaleHandleError</span></code> once the module is gone. Main thread.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">module_id</span></code> is the neighbour’s ID or -1. Rack sets it on the main thread
+for adjacent modules and when it loads a patch; Python may set it while
+Rack’s engine does not run the module.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">module</span></code> is the neighbour: its own <code class="docutils literal notranslate"><span class="pre">Module</span></code> handle if RackPy made it, an
+<code class="docutils literal notranslate"><span class="pre">EngineModule</span></code> otherwise, or <code class="docutils literal notranslate"><span class="pre">None</span></code>. It is read-only, because Rack’s
+engine sets the pointer from <code class="docutils literal notranslate"><span class="pre">module_id</span></code> at every block (through
+<code class="docutils literal notranslate"><span class="pre">setExpanderModule</span></code>, which is PRIVATE). While the engine runs the module,
+RackPy finds the neighbour by <code class="docutils literal notranslate"><span class="pre">module_id</span></code> through Rack’s engine instead of
+reading a pointer the engine thread writes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">producer_message</span></code> and <code class="docutils literal notranslate"><span class="pre">consumer_message</span></code> are an <code class="docutils literal notranslate"><span class="pre">ExpanderMessage</span></code>, a
+<code class="docutils literal notranslate"><span class="pre">ForeignMessage</span></code> or <code class="docutils literal notranslate"><span class="pre">None</span></code>; <code class="docutils literal notranslate"><span class="pre">message_flip_requested</span></code> and
+<code class="docutils literal notranslate"><span class="pre">request_message_flip()</span></code> are Rack’s flag and request.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ExpanderMessage(schema,</span> <span class="pre">size)</span></code> is a RackPy buffer of <code class="docutils literal notranslate"><span class="pre">size</span></code> float32
+values (1 to 65,536), zeroed, under a schema name (1 to 64 letters, digits,
+<code class="docutils literal notranslate"><span class="pre">_</span></code>, <code class="docutils literal notranslate"><span class="pre">.</span></code> or <code class="docutils literal notranslate"><span class="pre">-</span></code>). It has <code class="docutils literal notranslate"><span class="pre">schema</span></code>, <code class="docutils literal notranslate"><span class="pre">size</span></code>, <code class="docutils literal notranslate"><span class="pre">owner</span></code> (the RackPy module whose
+expander holds it, or <code class="docutils literal notranslate"><span class="pre">None</span></code>), <code class="docutils literal notranslate"><span class="pre">len()</span></code>, indexing, <code class="docutils literal notranslate"><span class="pre">tolist()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">write(values)</span></code>. Assigning one to a slot of a RackPy module gives it to the
+module, which keeps it alive while a slot holds it; it can be in only one
+slot at a time, and the two slots of a side need the same schema and size,
+because Rack swaps them. <code class="docutils literal notranslate"><span class="pre">allocate_messages(expander,</span> <span class="pre">schema,</span> <span class="pre">size)</span></code> gives
+a side both of its buffers.</p>
+<p>RackPy never shows Python a <code class="docutils literal notranslate"><span class="pre">void*</span></code>. It recognizes its own buffers by
+looking their address up in a registry, without reading the memory, so any
+other pointer, a foreign plugin’s, is an opaque <code class="docutils literal notranslate"><span class="pre">ForeignMessage</span></code>: it is
+true and compares equal to the same pointer, and is never read. Only a
+RackPy module takes RackPy messages; another plugin’s module allocates its
+own.</p>
+<p>Rack’s engine thread reads, writes and swaps the message pointers and the
+flip flag while it runs a module, and Rack has no public way to pause it.
+So Python reads or assigns the slots, reads or writes a message’s values,
+and reads, sets or requests the flip only while Rack’s engine does <strong>not</strong>
+run the module: a Python-owned module, or one on a
+<a class="reference internal" href="../explanation/callbacks.html#the-laboratory-bench"><span class="std std-ref">laboratory bench</span></a>, which
+swaps requested buffers at the end of each frame as Rack’s engine does.
+Otherwise these raise <code class="docutils literal notranslate"><span class="pre">OwnershipError</span></code>. Exchanging messages in production,
+one sample apart, is native code’s work: DSP graphs send and receive lanes
+of <code class="docutils literal notranslate"><span class="pre">&quot;rackpy.graph&quot;</span></code> messages (<a class="reference internal" href="../how-to/graphs.html#expanders"><span class="std std-ref">graph expanders</span></a>,
+<code class="docutils literal notranslate"><span class="pre">graph_messages(expander,</span> <span class="pre">lanes)</span></code>), checking on Rack’s engine thread,
+without locks, that the neighbour is a RackPy module whose messages fit.</p>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">expanders.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id11" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rackpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">laboratory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.engine.expanders</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExpanderMessage</span><span class="p">,</span> <span class="n">allocate_messages</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.laboratory</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bench</span>
+
+<span class="c1"># A RackPy module allocates both buffers of a side, as a Rack module does.</span>
+<span class="n">mixer</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="n">producer</span><span class="p">,</span> <span class="n">consumer</span> <span class="o">=</span> <span class="n">allocate_messages</span><span class="p">(</span><span class="n">mixer</span><span class="o">.</span><span class="n">right_expander</span><span class="p">,</span> <span class="s2">"demo.Levels"</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mixer</span><span class="o">.</span><span class="n">right_expander</span><span class="o">.</span><span class="n">producer_message</span><span class="p">,</span> <span class="n">ExpanderMessage</span><span class="p">)</span>
+<span class="n">producer</span><span class="o">.</span><span class="n">write</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>  <span class="c1"># allowed: Rack's engine does not run this module</span>
+
+<span class="n">laboratory</span><span class="o">.</span><span class="n">enable</span><span class="p">()</span>  <span class="c1"># trusted code only; a bench swaps the buffers as Rack's engine does</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">neighbour</span> <span class="o">=</span> <span class="n">Module</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">bench</span> <span class="o">=</span> <span class="n">Bench</span><span class="p">(</span><span class="mi">48000</span><span class="p">)</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mixer</span><span class="p">)</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">neighbour</span><span class="p">)</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">set_expander</span><span class="p">(</span><span class="n">mixer</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">neighbour</span><span class="p">)</span>  <span class="c1"># what Rack does for adjacent modules</span>
+    <span class="n">mixer</span><span class="o">.</span><span class="n">right_expander</span><span class="o">.</span><span class="n">request_message_flip</span><span class="p">()</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># the swap happens at the end of the frame</span>
+    <span class="k">assert</span> <span class="n">mixer</span><span class="o">.</span><span class="n">right_expander</span><span class="o">.</span><span class="n">module</span> <span class="ow">is</span> <span class="n">neighbour</span>
+    <span class="k">assert</span> <span class="n">mixer</span><span class="o">.</span><span class="n">right_expander</span><span class="o">.</span><span class="n">consumer_message</span> <span class="ow">is</span> <span class="n">producer</span>
+    <span class="k">assert</span> <span class="n">consumer</span><span class="o">.</span><span class="n">owner</span> <span class="ow">is</span> <span class="n">mixer</span>  <span class="c1"># the module keeps both buffers alive</span>
+    <span class="n">bench</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">laboratory</span><span class="o">.</span><span class="n">disable</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p><strong>Snapshots.</strong> While Rack’s engine runs a module, Python sees what native
+code receives through snapshots instead: set <code class="docutils literal notranslate"><span class="pre">expander.snapshots</span> <span class="pre">=</span> <span class="pre">True</span></code> (at
+any time, on a RackPy module) and <code class="docutils literal notranslate"><span class="pre">expander.snapshot()</span></code> returns <code class="docutils literal notranslate"><span class="pre">(frame,</span> <span class="pre">values)</span></code>, a consistent copy of the message as native code received it in
+that frame, or <code class="docutils literal notranslate"><span class="pre">None</span></code> before the first. Native code copies it at most once
+per frame, before marking anything read, and only while snapshots are on; a
+sequence lock keeps the copy whole, so Python may read it while Rack’s
+engine thread writes. Snapshots exist for RackPy messages that native code
+receives (graph nodes and kernels through <code class="docutils literal notranslate"><span class="pre">rackpy/expanders.hpp</span></code>).</p>
+<p><strong>Native code.</strong> DSP graphs exchange lanes of <code class="docutils literal notranslate"><span class="pre">&quot;rackpy.graph&quot;</span></code> messages
+(<a class="reference internal" href="../how-to/graphs.html#expanders"><span class="std std-ref">graph expanders</span></a>), and C++ kernel libraries
+exchange messages under schemas of their own through RackPy’s expander
+services (<a class="reference internal" href="../how-to/dsp.html#exchange-expander-messages-from-c"><span class="std std-ref">from C++</span></a>),
+which check the neighbour, its back link and the buffers without locks or
+reading foreign memory. That contract is how a <code class="docutils literal notranslate"><span class="pre">void*</span></code> message gets a
+meaning in RackPy: for RackPy buffers, from their schema, in Python and in
+native code alike; for another plugin’s pointer, only from native code that
+checks that plugin’s model, as Rack prescribes. Python never reinterprets a
+foreign pointer.</p>
+<p>Established: Rack’s own engine delivers each message exactly one frame
+later at 44.1, 48 and 96 kHz with 1, 2 and 4 engine threads, in both graph
+tiers and for a library’s own schema; removal, reordering and a schema
+mismatch give silence; Python reads whole snapshots while Rack’s engine
+thread runs; and a stress run of hot removal, insertion, reordering,
+foreign and mismatched neighbours, snapshot toggling and concurrent
+snapshot reads is clean under AddressSanitizer, UndefinedBehaviorSanitizer,
+LeakSanitizer and ThreadSanitizer (Rack’s engine reproduced, libRack not
+instrumented).</p>
+</section>
+<section id="remaining-proof-gates">
+<h2>Remaining proof gates<a class="headerlink" href="#remaining-proof-gates" title="Link to this heading">¶</a></h2>
+<p>The host tests construct and delete these owned native modules <strong>inside actual
+Rack</strong>, both at plugin startup and on the UI thread with a live engine. They
+exercise 1,000 construction/deletion cycles, retained views, failed and nested
+constructors, wrong-thread access, checked indices and native differential
+fixtures. Metadata tests additionally exercise 1,000 replacements, 1,000 owner
+collections, slot-specific invalidation, null slots, backreference identity and
+native-reference names/descriptions/IDs/types. Class-factory tests replay
+native <code class="docutils literal notranslate"><span class="pre">configInput&lt;CustomInfo&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">configParam/Switch/Button&lt;Custom&gt;</span></code>
+fixtures, including replacement, read slot quantities from a Rack thread
+without the GIL, and cover
+1,000 replacements and owner collections with the transferred-object count
+back to its baseline, rollback, reentrant constructors, wrong classes and
+threads, and Rack-side overrides without the GIL. The native test injects a
+preparation exception to verify replacement rollback. Quantity tests also cover
+1,000 slot replacements and 1,000 owner collections, stale getters/setters,
+thread/context rejection, validation rollback, native display/label/value
+comparisons, reset/randomize and unsafe smoothing rejection. Borrowed-helper
+and label tests add native differential helper replay and edited label lookup,
+mutable alias/snapshot behavior, 1,000 alias replacements and owner collections,
+conversion failure atomicity, degenerate scaling and indirect smoothing refusal.
+The offline bypass dispatch hook is test-only.</p>
+<p>With the test hooks playing Rack’s part, the live-UI suite also has Rack’s
+engine own modules: adoption and Rack-side deletion (1,000 times), engine
+smoothing, every lifecycle event Rack dispatches (add, remove, bypass, sample
+rate, master, save, cable port changes, and a seeded reset and randomize equal
+to a plain Rack module’s), a raising override contained inside an event,
+engine-lock refusal inside exclusive events, bypass routing through cables
+with 0, 1 and 16 channels, and Rack’s own save and reload of a configured
+module, which restores parameter values and bypass while the constructor
+rebuilds scales, labels and routes. The lifecycle adapters’ object references
+no CPython (<code class="docutils literal notranslate"><span class="pre">bin/rackpy-dev</span> <span class="pre">audio-symbols</span></code>).</p>
+<p>Not established: an audio driver thread actually dispatching sample-rate or
+master events. The tests use no audio device, so that path is known from
+Rack’s source and the Python-free object only. As in Rack, a module widget’s
+<code class="docutils literal notranslate"><span class="pre">module</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> in the module browser’s previews. Per-platform results are
+recorded by CI in <code class="docutils literal notranslate"><span class="pre">release-evidence/</span></code>, not on this page.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="engine.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">The engine</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="engine-components.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Engine components: ports, parameters and lights</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Module construction and components</a><ul>
+<li><a class="reference internal" href="#construction-transaction">Construction transaction</a></li>
+<li><a class="reference internal" href="#identity-and-bypass-state">Identity and bypass state</a></li>
+<li><a class="reference internal" href="#component-access">Component access</a></li>
+<li><a class="reference internal" href="#built-in-port-and-light-metadata">Built-in port and light metadata</a></li>
+<li><a class="reference internal" href="#metadata-class-factories">Metadata class factories</a></li>
+<li><a class="reference internal" href="#quantity-class-factories">Quantity class factories</a></li>
+<li><a class="reference internal" href="#standalone-quantities-and-weak-module-attachment">Standalone quantities and weak module attachment</a></li>
+<li><a class="reference internal" href="#built-in-parameter-quantities">Built-in parameter quantities</a><ul>
+<li><a class="reference internal" href="#borrowed-quantity-helpers-and-switch-labels">Borrowed quantity helpers and switch labels</a></li>
+<li><a class="reference internal" href="#quantity-records-that-stay-open">Quantity records that stay open</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#raw-module-vectors">Raw module vectors</a></li>
+<li><a class="reference internal" href="#ownership-and-failure">Ownership and failure</a></li>
+<li><a class="reference internal" href="#engine-ownership">Engine ownership</a></li>
+<li><a class="reference internal" href="#module-json">Module JSON</a></li>
+<li><a class="reference internal" href="#lifecycle-events">Lifecycle events</a></li>
+<li><a class="reference internal" href="#laboratory-events-and-json">Laboratory events and JSON</a></li>
+<li><a class="reference internal" href="#native-kernels">Native kernels</a></li>
+<li><a class="reference internal" href="#audio-callbacks-process-processbypass-and-step">Audio callbacks: process, processBypass and step</a></li>
+<li><a class="reference internal" href="#bypass-configuration">Bypass configuration</a></li>
+<li><a class="reference internal" href="#expanders">Expanders</a></li>
+<li><a class="reference internal" href="#remaining-proof-gates">Remaining proof gates</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

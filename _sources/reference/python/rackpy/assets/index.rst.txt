@@ -1,0 +1,43 @@
+rackpy.assets
+=============
+
+.. py:module:: rackpy.assets
+
+.. autoapi-nested-parse::
+
+   Paths to this plugin's, Rack's and the user's files, as :class:`pathlib.Path`. Available inside Rack only.
+
+   These are Rack's ``asset::plugin``, ``asset::system`` and ``asset::user``
+   (:mod:`rackpy.raw.asset`). Plugin and system files are read-only; write only
+   under :func:`user`, or in a module's patch storage.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.assets.plugin
+   rackpy.assets.system
+   rackpy.assets.user
+
+
+Module Contents
+---------------
+
+.. py:function:: plugin(filename: str = '') -> pathlib.Path
+
+   A file in this plugin's folder, e.g. ``plugin("res/table.json")``. Main thread only.
+
+
+.. py:function:: system(filename: str = '') -> pathlib.Path
+
+   A file in Rack's own read-only folder.
+
+
+.. py:function:: user(filename: str = '') -> pathlib.Path
+
+   A file in Rack's user folder, which plugins may write.
+
+

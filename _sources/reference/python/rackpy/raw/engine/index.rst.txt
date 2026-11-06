@@ -1,0 +1,1495 @@
+rackpy.raw.engine
+=================
+
+.. py:module:: rackpy.raw.engine
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.engine.PORT_MAX_CHANNELS
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.engine.Light
+   rackpy.raw.engine.Param
+   rackpy.raw.engine.Voltages
+   rackpy.raw.engine.Port
+   rackpy.raw.engine.Input
+   rackpy.raw.engine.Output
+   rackpy.raw.engine.PortInfo
+   rackpy.raw.engine.PortInfoView
+   rackpy.raw.engine.LightInfoView
+   rackpy.raw.engine.ParamQuantityView
+   rackpy.raw.engine.SwitchLabels
+   rackpy.raw.engine.SwitchQuantityView
+   rackpy.raw.engine.ParamQuantity
+   rackpy.raw.engine.SwitchQuantity
+   rackpy.raw.engine.Components
+   rackpy.raw.engine.Module
+   rackpy.raw.engine.LightInfo
+   rackpy.raw.engine.EngineModule
+   rackpy.raw.engine.ExpanderMessage
+   rackpy.raw.engine.ForeignMessage
+   rackpy.raw.engine.Cable
+   rackpy.raw.engine.ParamHandle
+   rackpy.raw.engine.Engine
+
+
+Module Contents
+---------------
+
+.. py:data:: PORT_MAX_CHANNELS
+   :type:  int
+
+.. py:class:: Light
+
+   .. py:attribute:: value
+      :type:  float
+
+
+   .. py:attribute:: brightness
+      :type:  float
+
+
+   .. py:method:: set_brightness(brightness: float) -> None
+
+
+   .. py:method:: get_brightness() -> float
+
+
+   .. py:method:: set_brightness_smooth(brightness: float, frames: int = 1) -> None
+                  set_brightness_smooth(brightness: float, delta_time: float, lambda_: float = 30.0) -> None
+
+
+   .. py:method:: set_smooth_brightness(brightness: float, delta_time: float) -> None
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+.. py:class:: Param
+
+   .. py:attribute:: value
+      :type:  float
+
+
+   .. py:method:: get_value() -> float
+
+
+   .. py:method:: set_value(value: float) -> None
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+.. py:class:: Voltages
+
+   .. py:method:: tolist() -> list[float]
+
+
+   .. py:method:: snapshot() -> array.array[float]
+
+
+.. py:class:: Port
+
+   .. py:class:: Type
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: INPUT
+         :value: 0
+
+
+
+      .. py:attribute:: OUTPUT
+         :value: 1
+
+
+
+
+   .. py:attribute:: value
+      :type:  float
+
+
+   .. py:attribute:: channels
+      :type:  int
+
+
+   .. py:attribute:: active
+      :type:  int
+
+
+   .. py:attribute:: voltage
+      :type:  float
+
+
+   .. py:attribute:: channel_count
+      :type:  int
+
+
+   .. py:method:: set_voltage(voltage: float, channel: int = 0) -> None
+
+
+   .. py:method:: get_voltage(channel: int = 0) -> float
+
+
+   .. py:method:: get_poly_voltage(channel: int) -> float
+
+
+   .. py:method:: get_normal_voltage(normal_voltage: float, channel: int = 0) -> float
+
+
+   .. py:method:: get_normal_poly_voltage(normal_voltage: float, channel: int) -> float
+
+
+   .. py:method:: get_voltage_simd(first_channel: int) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: get_poly_voltage_simd(first_channel: int) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: get_normal_voltage_simd(normal_voltage: rackpy.raw.simd.float_4 | float, first_channel: int) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: get_normal_poly_voltage_simd(normal_voltage: rackpy.raw.simd.float_4 | float, first_channel: int) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: set_voltage_simd(voltage: rackpy.raw.simd.float_4 | float, first_channel: int) -> None
+
+
+   .. py:method:: get_voltages(first_channel: int = 0) -> Voltages
+
+
+   .. py:method:: read_voltages() -> list[float]
+
+
+   .. py:method:: write_voltages(voltages: collections.abc.Sequence[float]) -> None
+
+
+   .. py:method:: clear_voltages() -> None
+
+
+   .. py:method:: get_voltage_sum() -> float
+
+
+   .. py:method:: get_voltage_rms() -> float
+
+
+   .. py:method:: set_channels(channels: int) -> None
+
+
+   .. py:method:: get_channels() -> int
+
+
+   .. py:method:: is_connected() -> bool
+
+
+   .. py:method:: is_monophonic() -> bool
+
+
+   .. py:method:: is_polyphonic() -> bool
+
+
+   .. py:method:: normalize(normal_voltage: float) -> float
+
+
+   .. py:property:: voltages
+      :type: Voltages
+
+
+
+   .. py:property:: plug_lights
+      :type: tuple[Light, Light, Light]
+
+
+
+   .. py:property:: connected
+      :type: bool
+
+
+
+   .. py:property:: monophonic
+      :type: bool
+
+
+
+   .. py:property:: polyphonic
+      :type: bool
+
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+.. py:class:: Input
+
+
+
+.. py:class:: Output
+
+
+
+.. py:class:: PortInfo
+
+   .. py:attribute:: module
+      :type:  Module | None
+
+
+   .. py:attribute:: type
+      :type:  Port
+
+
+   .. py:attribute:: port_id
+      :type:  int
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:method:: get_name() -> str
+
+
+   .. py:method:: get_full_name() -> str
+
+
+   .. py:method:: get_description() -> str
+
+
+.. py:class:: PortInfoView
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+   .. py:attribute:: type
+      :type:  Port
+
+
+   .. py:attribute:: port_id
+      :type:  int
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: module
+      :type: Module | None
+
+
+
+   .. py:method:: get_name() -> str
+
+
+   .. py:method:: get_full_name() -> str
+
+
+   .. py:method:: get_description() -> str
+
+
+.. py:class:: LightInfoView
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+   .. py:attribute:: light_id
+      :type:  int
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: module
+      :type: Module | None
+
+
+
+   .. py:method:: get_name() -> str
+
+
+   .. py:method:: get_description() -> str
+
+
+.. py:class:: ParamQuantityView
+
+   .. py:attribute:: min_value
+      :type:  float
+
+
+   .. py:attribute:: max_value
+      :type:  float
+
+
+   .. py:attribute:: default_value
+      :type:  float
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: unit
+      :type:  str
+
+
+   .. py:attribute:: display_base
+      :type:  float
+
+
+   .. py:attribute:: display_multiplier
+      :type:  float
+
+
+   .. py:attribute:: display_offset
+      :type:  float
+
+
+   .. py:attribute:: display_precision
+      :type:  int
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+   .. py:attribute:: reset_enabled
+      :type:  bool
+
+
+   .. py:attribute:: randomize_enabled
+      :type:  bool
+
+
+   .. py:attribute:: smooth_enabled
+      :type:  bool
+
+
+   .. py:attribute:: snap_enabled
+      :type:  bool
+
+
+   .. py:attribute:: param_id
+      :type:  int
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: module
+      :type: Module | None
+
+
+
+   .. py:method:: to_json() -> dict[str, Any]
+
+
+   .. py:method:: from_json(data: Any) -> None
+
+
+   .. py:method:: get_param() -> Param | None
+
+
+   .. py:method:: get_min_value() -> float
+
+
+   .. py:method:: get_max_value() -> float
+
+
+   .. py:method:: get_default_value() -> float
+
+
+   .. py:method:: get_display_precision() -> int
+
+
+   .. py:method:: get_label() -> str
+
+
+   .. py:method:: get_unit() -> str
+
+
+   .. py:method:: get_description() -> str
+
+
+   .. py:method:: get_range() -> float
+
+
+   .. py:method:: is_bounded() -> bool
+
+
+   .. py:method:: to_scaled(value: float) -> float
+
+
+   .. py:method:: from_scaled(scaled_value: float) -> float
+
+
+   .. py:method:: get_string() -> str
+
+
+   .. py:method:: is_min() -> bool
+
+
+   .. py:method:: is_max() -> bool
+
+
+   .. py:method:: set_min() -> None
+
+
+   .. py:method:: set_max() -> None
+
+
+   .. py:method:: toggle() -> None
+
+
+   .. py:method:: move_value(delta_value: float) -> None
+
+
+   .. py:method:: set_scaled_value(scaled_value: float) -> None
+
+
+   .. py:method:: get_scaled_value() -> float
+
+
+   .. py:method:: move_scaled_value(delta_scaled_value: float) -> None
+
+
+   .. py:method:: get_value() -> float
+
+
+   .. py:method:: set_value(value: float) -> None
+
+
+   .. py:method:: get_immediate_value() -> float
+
+
+   .. py:method:: set_immediate_value(value: float) -> None
+
+
+   .. py:method:: get_display_value() -> float
+
+
+   .. py:method:: set_display_value(display_value: float) -> None
+
+
+   .. py:method:: get_display_value_string() -> str
+
+
+   .. py:method:: set_display_value_string(s: str) -> None
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: randomize() -> None
+
+
+   .. py:method:: set_smooth_value(value: float) -> None
+
+
+   .. py:method:: get_smooth_value() -> float
+
+
+.. py:class:: SwitchLabels
+
+   .. py:method:: insert(index: int, label: str) -> None
+
+
+   .. py:method:: append(label: str) -> None
+
+
+   .. py:method:: extend(labels: collections.abc.Sequence[str] | SwitchLabels) -> None
+
+
+   .. py:method:: clear() -> None
+
+
+   .. py:method:: tolist() -> list[str]
+
+
+.. py:class:: SwitchQuantityView
+
+
+
+   .. py:property:: labels
+      :type: SwitchLabels
+
+
+
+.. py:class:: ParamQuantity
+
+
+
+   .. py:attribute:: param_id
+      :type:  int
+
+
+   .. py:attribute:: min_value
+      :type:  float
+
+
+   .. py:attribute:: max_value
+      :type:  float
+
+
+   .. py:attribute:: default_value
+      :type:  float
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: unit
+      :type:  str
+
+
+   .. py:attribute:: display_base
+      :type:  float
+
+
+   .. py:attribute:: display_multiplier
+      :type:  float
+
+
+   .. py:attribute:: display_offset
+      :type:  float
+
+
+   .. py:attribute:: display_precision
+      :type:  int
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+   .. py:attribute:: reset_enabled
+      :type:  bool
+
+
+   .. py:attribute:: randomize_enabled
+      :type:  bool
+
+
+   .. py:attribute:: smooth_enabled
+      :type:  bool
+
+
+   .. py:attribute:: snap_enabled
+      :type:  bool
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: module
+      :type: Module | None
+
+
+
+   .. py:method:: get_param() -> Param | None
+
+
+   .. py:method:: get_immediate_value() -> float
+
+
+   .. py:method:: set_immediate_value(value: float) -> None
+
+
+   .. py:method:: get_description() -> str
+
+
+   .. py:method:: set_smooth_value(value: float) -> None
+
+
+   .. py:method:: get_smooth_value() -> float
+
+
+   .. py:method:: to_json() -> dict[str, Any]
+
+
+   .. py:method:: from_json(data: Any) -> None
+
+
+.. py:class:: SwitchQuantity
+
+
+
+   .. py:property:: labels
+      :type: SwitchLabels
+
+
+
+.. py:class:: Components[T, V]
+
+   .. py:method:: insert(index: int, value: V) -> None
+
+
+   .. py:method:: append(value: V) -> None
+
+
+   .. py:method:: clear() -> None
+
+
+   .. py:method:: resize(size: int) -> None
+
+
+.. py:class:: Module
+
+   .. py:class:: BypassRoute
+
+      .. py:attribute:: input_id
+         :type:  int
+
+
+      .. py:attribute:: output_id
+         :type:  int
+
+
+
+   .. py:class:: AddEvent
+
+
+   .. py:class:: RemoveEvent
+
+
+   .. py:class:: BypassEvent
+
+
+   .. py:class:: UnBypassEvent
+
+
+   .. py:class:: ResetEvent
+
+
+   .. py:class:: RandomizeEvent
+
+
+   .. py:class:: SaveEvent
+
+
+   .. py:class:: SetMasterEvent
+
+
+   .. py:class:: UnsetMasterEvent
+
+
+   .. py:class:: Expander
+
+      Rack's Module::Expander: one side of a module's message channel, a view through the module.
+
+
+      .. py:property:: side
+         :type: int
+
+
+
+      .. py:attribute:: module_id
+         :type:  int
+
+
+      .. py:property:: module
+         :type: Module | EngineModule | None
+
+
+
+      .. py:property:: producer_message
+         :type: ExpanderMessage | ForeignMessage | None
+
+
+
+      .. py:property:: consumer_message
+         :type: ExpanderMessage | ForeignMessage | None
+
+
+
+      .. py:attribute:: message_flip_requested
+         :type:  bool
+
+
+      .. py:method:: request_message_flip() -> None
+
+
+      .. py:attribute:: snapshots
+         :type:  bool
+
+
+      .. py:method:: snapshot() -> tuple[int, list[float]] | None
+
+
+
+   .. py:class:: ExpanderChangeEvent(side: int = 0)
+
+      .. py:attribute:: side
+         :type:  int
+
+
+
+   .. py:class:: PortChangeEvent(connecting: bool = False, type: Port = ..., port_id: int = 0)
+
+      .. py:attribute:: connecting
+         :type:  bool
+
+
+      .. py:attribute:: type
+         :type:  Port
+
+
+      .. py:attribute:: port_id
+         :type:  int
+
+
+
+   .. py:class:: SampleRateChangeEvent(sample_rate: float = 44100.0, sample_time: float = ...)
+
+      .. py:attribute:: sample_rate
+         :type:  float
+
+
+      .. py:attribute:: sample_time
+         :type:  float
+
+
+
+   .. py:class:: ProcessArgs(sample_rate: float = 44100.0, sample_time: float = ..., frame: int = 0)
+
+      .. py:attribute:: sample_rate
+         :type:  float
+
+
+      .. py:attribute:: sample_time
+         :type:  float
+
+
+      .. py:attribute:: frame
+         :type:  int
+
+
+
+   .. py:type:: LifecycleEvent
+      :canonical: AddEvent | RemoveEvent | BypassEvent | UnBypassEvent | PortChangeEvent | ResetEvent | RandomizeEvent | SampleRateChangeEvent | SaveEvent | SetMasterEvent | UnsetMasterEvent | ExpanderChangeEvent
+
+
+
+   .. py:method:: set_event_handlers(*, on_add: collections.abc.Callable[[Any], object] | None = None, on_remove: collections.abc.Callable[[Any], object] | None = None, on_bypass: collections.abc.Callable[[Any], object] | None = None, on_un_bypass: collections.abc.Callable[[Any], object] | None = None, on_port_change: collections.abc.Callable[[Any], object] | None = None, on_reset: collections.abc.Callable[[Any], object] | None = None, on_randomize: collections.abc.Callable[[Any], object] | None = None, on_save: collections.abc.Callable[[Any], object] | None = None) -> None
+
+
+   .. py:property:: model
+      :type: rackpy.raw.plugin.Model | None
+
+
+
+   .. py:method:: get_model() -> rackpy.raw.plugin.Model | None
+
+
+   .. py:property:: left_expander
+      :type: Module
+
+
+
+   .. py:property:: right_expander
+      :type: Module
+
+
+
+   .. py:method:: get_left_expander() -> Module
+
+
+   .. py:method:: get_right_expander() -> Module
+
+
+   .. py:method:: get_expander(side: int) -> Module
+
+
+   .. py:method:: set_kernel(kernel: _rackpy_host.dsp.Kernel) -> None
+
+
+   .. py:property:: kernel
+      :type: _rackpy_host.dsp.Kernel | None
+
+
+
+   .. py:property:: kernel_failed
+      :type: bool
+
+
+
+   .. py:method:: set_bypass_kernel(kernel: _rackpy_host.dsp.Kernel) -> None
+
+
+   .. py:property:: bypass_kernel
+      :type: _rackpy_host.dsp.Kernel | None
+
+
+
+   .. py:property:: bypass_kernel_failed
+      :type: bool
+
+
+
+   .. py:method:: set_audio_port(port: rackpy.raw.audio.Port | None, inputs: int = 2, outputs: int = 2) -> None
+
+
+   .. py:method:: set_midi_input(index: int, input: rackpy.raw.midi.InputQueue | None) -> None
+
+
+   .. py:method:: midi_input_stats(index: int) -> dict[str, int] | None
+
+
+   .. py:property:: audio_port
+      :type: rackpy.raw.audio.Port | None
+
+
+
+   .. py:property:: audio_stats
+      :type: dict[str, int] | None
+
+
+
+   .. py:method:: set_data_handlers(to_json: collections.abc.Callable[[], object] | None = None, from_json: collections.abc.Callable[[Any], object] | None = None) -> None
+
+
+   .. py:method:: to_json() -> dict[str, Any]
+
+
+   .. py:method:: from_json(data: dict[str, Any]) -> None
+
+
+   .. py:method:: params_to_json() -> list[dict[str, Any]]
+
+
+   .. py:method:: params_from_json(data: list[dict[str, Any]]) -> None
+
+
+   .. py:method:: data_to_json() -> Any
+
+
+   .. py:method:: data_from_json(data: object) -> None
+
+
+   .. py:method:: get_patch_storage_directory() -> str
+
+
+   .. py:method:: create_patch_storage_directory() -> str
+
+
+   .. py:method:: patch_storage(create: bool = True) -> pathlib.Path
+
+
+   .. py:method:: lifecycle_events() -> list[tuple[int, Module]]
+
+
+   .. py:property:: dropped_lifecycle_events
+      :type: int
+
+
+
+   .. py:method:: on_add(e: AddEvent) -> None
+                  on_add() -> None
+
+
+   .. py:method:: on_remove(e: RemoveEvent) -> None
+                  on_remove() -> None
+
+
+   .. py:method:: on_bypass(e: BypassEvent) -> None
+
+
+   .. py:method:: on_un_bypass(e: UnBypassEvent) -> None
+
+
+   .. py:method:: on_port_change(e: PortChangeEvent) -> None
+
+
+   .. py:method:: on_reset(e: ResetEvent) -> None
+                  on_reset() -> None
+
+
+   .. py:method:: on_randomize(e: RandomizeEvent) -> None
+                  on_randomize() -> None
+
+
+   .. py:method:: on_sample_rate_change(e: SampleRateChangeEvent) -> None
+                  on_sample_rate_change() -> None
+
+
+   .. py:method:: on_save(e: SaveEvent) -> None
+
+
+   .. py:method:: on_set_master(e: SetMasterEvent) -> None
+
+
+   .. py:method:: on_unset_master(e: UnsetMasterEvent) -> None
+
+
+   .. py:method:: on_expander_change(e: ExpanderChangeEvent) -> None
+
+
+   .. py:method:: create(configure: collections.abc.Callable[[Module], object] | None = None) -> Module
+                  create(num_params: int, num_inputs: int, num_outputs: int, num_lights: int = 0, configure: collections.abc.Callable[[Module], object] | None = None) -> Module
+      :staticmethod:
+
+
+
+   .. py:property:: id
+      :type: int
+
+
+
+   .. py:method:: get_id() -> int
+
+
+   .. py:method:: is_bypassed() -> bool
+
+
+   .. py:method:: close() -> None
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:method:: config(num_params: int, num_inputs: int, num_outputs: int, num_lights: int = 0) -> None
+
+
+   .. py:method:: config_param(param_id: int, min_value: float, max_value: float, default_value: float, name: str = '', unit: str = '', display_base: float = 0.0, display_multiplier: float = 1.0, display_offset: float = 0.0, quantity_type: None = None) -> ParamQuantityView
+                  config_param(param_id: int, min_value: float, max_value: float, default_value: float, name: str = '', unit: str = '', display_base: float = 0.0, display_multiplier: float = 1.0, display_offset: float = 0.0, *, quantity_type: type[Q]) -> Q
+
+
+   .. py:method:: config_switch(param_id: int, min_value: float, max_value: float, default_value: float, name: str = '', labels: collections.abc.Sequence[str] = (), quantity_type: None = None) -> SwitchQuantityView
+                  config_switch(param_id: int, min_value: float, max_value: float, default_value: float, name: str = '', labels: collections.abc.Sequence[str] = (), *, quantity_type: type[Q]) -> Q
+
+
+   .. py:method:: config_button(param_id: int, name: str = '', quantity_type: None = None) -> SwitchQuantityView
+                  config_button(param_id: int, name: str = '', *, quantity_type: type[Q]) -> Q
+
+
+   .. py:method:: get_param_quantity(index: int) -> ParamQuantityView | ParamQuantity
+
+
+   .. py:property:: param_quantities
+      :type: Components[ParamQuantityView | ParamQuantity, ParamQuantity | None]
+
+
+
+   .. py:method:: config_input(port_id: int, name: str = '', info_type: None = None) -> PortInfoView
+                  config_input(port_id: int, name: str = '', *, info_type: type[P]) -> P
+
+
+   .. py:method:: config_output(port_id: int, name: str = '', info_type: None = None) -> PortInfoView
+                  config_output(port_id: int, name: str = '', *, info_type: type[P]) -> P
+
+
+   .. py:method:: config_light(light_id: int, name: str = '', info_type: None = None) -> LightInfoView
+                  config_light(light_id: int, name: str = '', *, info_type: type[L]) -> L
+
+
+   .. py:method:: get_input_info(index: int) -> PortInfoView | PortInfo
+
+
+   .. py:method:: get_output_info(index: int) -> PortInfoView | PortInfo
+
+
+   .. py:method:: get_light_info(index: int) -> LightInfoView | LightInfo | None
+
+
+   .. py:property:: input_infos
+      :type: Components[PortInfoView | PortInfo, PortInfo | None]
+
+
+
+   .. py:property:: output_infos
+      :type: Components[PortInfoView | PortInfo, PortInfo | None]
+
+
+
+   .. py:property:: light_infos
+      :type: Components[LightInfoView | LightInfo | None, LightInfo | None]
+
+
+
+   .. py:method:: config_bypass(input_id: int, output_id: int) -> None
+
+
+   .. py:method:: get_num_params() -> int
+
+
+   .. py:method:: get_num_inputs() -> int
+
+
+   .. py:method:: get_num_outputs() -> int
+
+
+   .. py:method:: get_num_lights() -> int
+
+
+   .. py:method:: get_param(index: int) -> Param
+
+
+   .. py:method:: get_input(index: int) -> Input
+
+
+   .. py:method:: get_output(index: int) -> Output
+
+
+   .. py:method:: get_light(index: int) -> Light
+
+
+   .. py:property:: params
+      :type: Components[Param, Param]
+
+
+
+   .. py:property:: inputs
+      :type: Components[Input, Input]
+
+
+
+   .. py:property:: outputs
+      :type: Components[Output, Output]
+
+
+
+   .. py:property:: lights
+      :type: Components[Light, Light]
+
+
+
+   .. py:property:: bypass_routes
+      :type: Components[Module, Module]
+
+
+
+.. py:class:: LightInfo
+
+   .. py:attribute:: module
+      :type:  Module | None
+
+
+   .. py:attribute:: light_id
+      :type:  int
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:method:: get_name() -> str
+
+
+   .. py:method:: get_description() -> str
+
+
+.. py:class:: EngineModule
+
+   A module in Rack's engine that RackPy did not create, found again by its ID at every use.
+
+
+   .. py:property:: id
+      :type: int
+
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: in_engine
+      :type: bool
+
+
+
+   .. py:property:: model
+      :type: Any
+
+
+
+   .. py:method:: is_bypassed() -> bool
+
+
+   .. py:method:: get_num_params() -> int
+
+
+   .. py:method:: get_num_inputs() -> int
+
+
+   .. py:method:: get_num_outputs() -> int
+
+
+   .. py:method:: get_num_lights() -> int
+
+
+   .. py:property:: left_expander
+      :type: Module
+
+
+
+   .. py:property:: right_expander
+      :type: Module
+
+
+
+   .. py:method:: get_left_expander() -> Module
+
+
+   .. py:method:: get_right_expander() -> Module
+
+
+   .. py:method:: get_expander(side: int) -> Module
+
+
+.. py:class:: ExpanderMessage(schema: str, size: int)
+
+   A RackPy expander message buffer: ``size`` float32 values under a schema name.
+
+
+   .. py:property:: schema
+      :type: str
+
+
+
+   .. py:property:: size
+      :type: int
+
+
+
+   .. py:property:: owner
+      :type: Module | None
+
+
+
+   .. py:method:: tolist() -> list[float]
+
+
+   .. py:method:: write(values: collections.abc.Sequence[float]) -> None
+
+
+.. py:class:: ForeignMessage
+
+   A message pointer RackPy did not allocate: opaque, compared by identity, never read.
+
+
+.. py:class:: Cable
+
+   Rack's Cable. Python's holds module handles; one in Rack's engine is found again by its ID.
+
+
+   .. py:property:: in_engine
+      :type: bool
+
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:attribute:: id
+      :type:  int
+
+
+   .. py:attribute:: input_module
+      :type:  Module | EngineModule | None
+
+
+   .. py:attribute:: input_id
+      :type:  int
+
+
+   .. py:attribute:: output_module
+      :type:  Module | EngineModule | None
+
+
+   .. py:attribute:: output_id
+      :type:  int
+
+
+   .. py:method:: to_json() -> Any
+
+
+   .. py:method:: from_json(data: Any) -> None
+
+
+.. py:class:: ParamHandle
+
+   Rack's ParamHandle: a weak link to one module's param, managed by Rack's engine.
+
+
+   .. py:property:: ours
+      :type: bool
+
+
+
+   .. py:property:: in_engine
+      :type: bool
+
+
+
+   .. py:attribute:: module_id
+      :type:  int
+
+
+   .. py:attribute:: param_id
+      :type:  int
+
+
+   .. py:property:: module
+      :type: Module | EngineModule | None
+
+
+
+   .. py:attribute:: text
+      :type:  str
+
+
+   .. py:attribute:: color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+.. py:class:: Engine
+
+   Rack's engine (Context.engine). Main thread; calls that take the engine lock release the GIL.
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:method:: clear() -> None
+
+
+   .. py:method:: get_num_modules() -> int
+
+
+   .. py:method:: get_module_ids() -> list[int]
+
+
+   .. py:method:: add_module(module: Module | EngineModule) -> None
+
+
+   .. py:method:: remove_module(module: Module | EngineModule) -> None
+
+
+   .. py:method:: has_module(module: Module | EngineModule) -> bool
+
+
+   .. py:method:: get_module(module_id: int) -> Module | EngineModule | None
+
+
+   .. py:method:: get_module_no_lock(module_id: int) -> Module | EngineModule | None
+
+
+   .. py:method:: reset_module(module: Module | EngineModule) -> None
+
+
+   .. py:method:: randomize_module(module: Module | EngineModule) -> None
+
+
+   .. py:method:: bypass_module(module: Module | EngineModule, bypassed: bool) -> None
+
+
+   .. py:method:: module_to_json(module: Module | EngineModule) -> Any
+
+
+   .. py:method:: module_from_json(module: Module | EngineModule, data: Any) -> None
+
+
+   .. py:method:: prepare_save_module(module: Module | EngineModule) -> None
+
+
+   .. py:method:: prepare_save() -> None
+
+
+   .. py:method:: set_master_module(module: Module | EngineModule | None) -> None
+
+
+   .. py:method:: set_master_module_no_lock(module: Module | EngineModule | None) -> None
+
+
+   .. py:method:: get_master_module() -> Module | EngineModule | None
+
+
+   .. py:method:: step_block(frames: int) -> None
+
+
+   .. py:method:: get_sample_rate() -> float
+
+
+   .. py:method:: get_sample_time() -> float
+
+
+   .. py:method:: set_suggested_sample_rate(suggested_sample_rate: float) -> None
+
+
+   .. py:method:: yield_workers() -> None
+
+
+   .. py:method:: get_frame() -> int
+
+
+   .. py:method:: get_block() -> int
+
+
+   .. py:method:: get_block_frame() -> int
+
+
+   .. py:method:: get_block_time() -> float
+
+
+   .. py:method:: get_block_frames() -> int
+
+
+   .. py:method:: get_block_duration() -> float
+
+
+   .. py:method:: get_meter_average() -> float
+
+
+   .. py:method:: get_meter_max() -> float
+
+
+   .. py:method:: set_param_value(module: Module | EngineModule, param_id: int, value: float) -> None
+
+
+   .. py:method:: get_param_value(module: Module | EngineModule, param_id: int) -> float
+
+
+   .. py:method:: set_param_smooth_value(module: Module | EngineModule, param_id: int, value: float) -> None
+
+
+   .. py:method:: get_param_smooth_value(module: Module | EngineModule, param_id: int) -> float
+
+
+   .. py:method:: to_json() -> Any
+
+
+   .. py:method:: from_json(data: Any) -> None
+
+
+   .. py:method:: get_num_cables() -> int
+
+
+   .. py:method:: get_cable_ids() -> list[int]
+
+
+   .. py:method:: get_cable(cable_id: int) -> Cable | None
+
+
+   .. py:method:: has_cable(cable: Cable) -> bool
+
+
+   .. py:method:: add_cable(cable: Cable) -> None
+
+
+   .. py:method:: remove_cable(cable: Cable) -> None
+
+
+   .. py:method:: add_param_handle(param_handle: ParamHandle) -> None
+
+
+   .. py:method:: remove_param_handle(param_handle: ParamHandle) -> None
+
+
+   .. py:method:: get_param_handle(module_id: int | Module | EngineModule, param_id: int) -> ParamHandle | None
+
+      A module instead of its ID is Rack's deprecated overload (DeprecationWarning).
+
+
+
+   .. py:method:: get_param_handle_no_lock(module_id: int, param_id: int) -> ParamHandle | None
+
+
+   .. py:method:: update_param_handle(param_handle: ParamHandle, module_id: int, param_id: int, overwrite: bool = True) -> None
+
+
+   .. py:method:: update_param_handle_no_lock(param_handle: ParamHandle, module_id: int, param_id: int, overwrite: bool = True) -> None
+
+

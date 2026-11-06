@@ -1,0 +1,90 @@
+rackpy.raw.logger
+=================
+
+.. py:module:: rackpy.raw.logger
+
+.. autoapi-nested-parse::
+
+   rack::logger: Rack's log.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.logger.DEBUG_LEVEL
+   rackpy.raw.logger.INFO_LEVEL
+   rackpy.raw.logger.WARN_LEVEL
+   rackpy.raw.logger.FATAL_LEVEL
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.logger.Level
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.logger.log
+   rackpy.raw.logger.get_log_path
+   rackpy.raw.logger.set_log_path
+
+
+Module Contents
+---------------
+
+.. py:class:: Level
+
+
+
+   Enum where members are also (and must be) ints
+
+   Initialize self.  See help(type(self)) for accurate signature.
+
+
+   .. py:attribute:: DEBUG_LEVEL
+      :value: 0
+
+
+
+   .. py:attribute:: INFO_LEVEL
+      :value: 1
+
+
+
+   .. py:attribute:: WARN_LEVEL
+      :value: 2
+
+
+
+   .. py:attribute:: FATAL_LEVEL
+      :value: 3
+
+
+
+.. py:data:: DEBUG_LEVEL
+   :type:  Level
+
+.. py:data:: INFO_LEVEL
+   :type:  Level
+
+.. py:data:: WARN_LEVEL
+   :type:  Level
+
+.. py:data:: FATAL_LEVEL
+   :type:  Level
+
+.. py:function:: log(level: Level, filename: str, line: int, func: str, format: str, *args: int | float | str | bytes) -> None
+
+.. py:function:: get_log_path() -> str
+
+.. py:function:: set_log_path(path: str) -> None
+

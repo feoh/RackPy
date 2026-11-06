@@ -1,0 +1,42 @@
+rackpy.dsp
+==========
+
+.. py:module:: rackpy.dsp
+
+.. autoapi-nested-parse::
+
+   DSP for RackPy modules.
+
+   Native bindings require Rack's live host. Pure-Python graph descriptions,
+   reference evaluation and code generation can also be used outside Rack.
+
+   :mod:`rackpy.dsp.kernel` has the native kernels that run a module's audio
+   path: Python chooses and configures them, and never runs per sample.
+   :mod:`rackpy.dsp.basic` has Rack's DSP helpers (conversions, windows,
+   polynomials, ODE steps), :mod:`rackpy.dsp.digital` its triggers and timers,
+   :mod:`rackpy.dsp.filters` its filters, :mod:`rackpy.dsp.midi` its VU meter
+   and MIDI generator and parser, :mod:`rackpy.dsp.fft` its FFTs and
+   convolution, :mod:`rackpy.dsp.resampling` its MinBLEP and resamplers, and
+   :mod:`rackpy.dsp.ringbuffer` its ring buffers, for design, analysis and tests.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /reference/python/rackpy/dsp/basic/index
+   /reference/python/rackpy/dsp/digital/index
+   /reference/python/rackpy/dsp/fft/index
+   /reference/python/rackpy/dsp/filters/index
+   /reference/python/rackpy/dsp/graph/index
+   /reference/python/rackpy/dsp/graph_codegen/index
+   /reference/python/rackpy/dsp/graph_reference/index
+   /reference/python/rackpy/dsp/kernel/index
+   /reference/python/rackpy/dsp/midi/index
+   /reference/python/rackpy/dsp/resampling/index
+   /reference/python/rackpy/dsp/ringbuffer/index
+
+

@@ -1,0 +1,851 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="DSP building blocks" href="dsp.html"><link rel="prev" title="Services" href="services.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>SIMD: four lanes at a time - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Reference</a><input aria-label="Toggle navigation of Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/reference/simd.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/reference/simd.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="simd-four-lanes-at-a-time">
+<h1>SIMD: four lanes at a time<a class="headerlink" href="#simd-four-lanes-at-a-time" title="Link to this heading">¶</a></h1>
+<p>Rack’s <code class="docutils literal notranslate"><span class="pre">simd</span></code> headers (<code class="docutils literal notranslate"><span class="pre">simd/Vector.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">simd/functions.hpp</span></code>, and the
+<code class="docutils literal notranslate"><span class="pre">sse_mathfun</span></code> approximations behind them), part of family 6 of the
+<a class="reference internal" href="surface/dsp.html"><span class="std std-doc">SDK surface</span></a> (<strong>RP-20</strong>). <strong>Implemented, Linux x86_64 inside
+Rack Free 2.6.6:</strong> <code class="docutils literal notranslate"><span class="pre">rackpy.raw.simd</span></code>, <code class="docutils literal notranslate"><span class="pre">rackpy.raw.sse_mathfun</span></code>, the SIMD
+methods of <code class="docutils literal notranslate"><span class="pre">rackpy.raw.engine.Port</span></code>, and the <a class="reference internal" href="python/rackpy/simd/index.html#module-rackpy.simd" title="rackpy.simd"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rackpy.simd</span></code></a> import
+for everyday use (see the <a class="reference internal" href="coverage.html"><span class="std std-doc">coverage report</span></a>).</p>
+<p>Every operator and function here runs <strong>Rack’s own C++ code</strong>, compiled with
+the SDK’s flags. <code class="docutils literal notranslate"><span class="pre">tests/simd</span></code> replays more than 20,000 cases from a compiled
+C++ reference (<code class="docutils literal notranslate"><span class="pre">native/tests/simd_reference.cpp</span></code>) through these bindings,
+inside Rack, and requires every lane to match: bit for bit for bitwise logic,
+masks and casts, and with the sign of a zero and NaN payloads ignored for
+arithmetic, as for the <a class="reference internal" href="values.html#numbers-cross-as-c-numbers"><span class="std std-ref">values</span></a>.</p>
+<p>The reference and the bindings call each Rack function through the same
+out-of-line wrapper (<code class="docutils literal notranslate"><span class="pre">native/bindings/simd/calls.hpp</span></code>), so the test shows that
+every Python call reaches the right Rack function with the right arguments. It
+does not promise the same last bits as Rack’s inline code compiled into
+another plugin: the SDK’s <code class="docutils literal notranslate"><span class="pre">-funsafe-math-optimizations</span></code> let the compiler
+reassociate composite arithmetic at each call site, and with GCC 13 the same
+<code class="docutils literal notranslate"><span class="pre">sse_mathfun_log_ps</span></code> inlined at two call sites differed by one ULP, and
+<code class="docutils literal notranslate"><span class="pre">std::abs</span></code> of a large <code class="docutils literal notranslate"><span class="pre">std::complex&lt;float&gt;</span></code> was <code class="docutils literal notranslate"><span class="pre">inf</span></code> at one of them.</p>
+<div class="note admonition">
+<p class="admonition-title">What this is for</p>
+<p>A Python call costs far more than the four lanes it computes. Use these types
+to explore and test Rack’s SIMD semantics, to compute tables, and to set up
+DSP; per-sample audio belongs in a native kernel
+(<a class="reference internal" href="../how-to/dsp.html"><span class="std std-doc">process audio</span></a>), where a C++ kernel uses <code class="docutils literal notranslate"><span class="pre">rack::simd</span></code>
+directly.</p>
+</div>
+<div class="literal-block-wrapper rackpy-example docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">simd_vectors.py · Runs inside Rack; tested against the built plugin</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="rackpy-example highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">array</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">rackpy.simd</span><span class="w"> </span><span class="kn">import</span> <span class="n">float_4</span><span class="p">,</span> <span class="n">ifelse</span><span class="p">,</span> <span class="n">movemask</span><span class="p">,</span> <span class="n">sin</span>
+
+<span class="c1"># Four lanes at once; a scalar broadcasts, as in Rack's C++.</span>
+<span class="n">phase</span> <span class="o">=</span> <span class="n">float_4</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">)</span>
+<span class="n">wave</span> <span class="o">=</span> <span class="mf">5.0</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="mf">3.14159265</span> <span class="o">*</span> <span class="n">phase</span><span class="p">)</span>
+
+<span class="c1"># A comparison gives a mask, not a bool: select lanes with it.</span>
+<span class="n">mask</span> <span class="o">=</span> <span class="n">wave</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+<span class="n">clipped</span> <span class="o">=</span> <span class="n">ifelse</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">wave</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">movemask</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">==</span> <span class="mb">0b0010</span>  <span class="c1"># only lane 1 is above zero</span>
+
+<span class="c1"># Load from and store to any float32 buffer, x[0] in lane 0.</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">"f"</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">clipped</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">clipped</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span>
+</pre></div>
+</div>
+</div>
+<section id="vectors-float-4-and-int32-4">
+<span id="simd-vectors"></span><h2>Vectors: <code class="docutils literal notranslate"><span class="pre">float_4</span></code> and <code class="docutils literal notranslate"><span class="pre">int32_4</span></code><a class="headerlink" href="#vectors-float-4-and-int32-4" title="Link to this heading">¶</a></h2>
+<p>Rack defines two vector types, the explicit specializations of its template
+<code class="docutils literal notranslate"><span class="pre">Vector&lt;TYPE,</span> <span class="pre">SIZE&gt;</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">float_4</span></code> (<code class="docutils literal notranslate"><span class="pre">Vector&lt;float,</span> <span class="pre">4&gt;</span></code>): four <code class="docutils literal notranslate"><span class="pre">float</span></code> lanes in one SSE register;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">int32_4</span></code> (<code class="docutils literal notranslate"><span class="pre">Vector&lt;int32_t,</span> <span class="pre">4&gt;</span></code>): four <code class="docutils literal notranslate"><span class="pre">int32_t</span></code> lanes.</p></li>
+</ul>
+<p>Both are mutable Python values (copied on assignment of a new vector,
+unhashable, <code class="docutils literal notranslate"><span class="pre">copy.copy</span></code> copies), with Rack’s members:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>C++</p></th>
+<th class="head"><p>Python</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Vector()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float_4()</span></code>: all lanes 0. Rack leaves them uninitialized; RackPy zeroes them, as reading them would be undefined.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Vector(float</span> <span class="pre">x)</span></code>, <code class="docutils literal notranslate"><span class="pre">Vector(int32_t</span> <span class="pre">x)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float_4(x)</span></code>, <code class="docutils literal notranslate"><span class="pre">int32_4(x)</span></code>: every lane <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Vector(x1,</span> <span class="pre">x2,</span> <span class="pre">x3,</span> <span class="pre">x4)</span></code></p></td>
+<td><p>the same, lane 0 first.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Vector(__m128)</span></code>, <code class="docutils literal notranslate"><span class="pre">Vector(__m128i)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float_4(v)</span></code>, <code class="docutils literal notranslate"><span class="pre">int32_4(v)</span></code>: a copy. In Python, <code class="docutils literal notranslate"><span class="pre">float_4</span></code> and <code class="docutils literal notranslate"><span class="pre">int32_4</span></code> stand for the compiler’s register types <code class="docutils literal notranslate"><span class="pre">__m128</span></code> and <code class="docutils literal notranslate"><span class="pre">__m128i</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">float_4(int32_4)</span></code></p></td>
+<td><p>converts each lane to the nearest float (<code class="docutils literal notranslate"><span class="pre">_mm_cvtepi32_ps</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">int32_4(float_4)</span></code></p></td>
+<td><p>converts each lane toward zero (<code class="docutils literal notranslate"><span class="pre">_mm_cvttps_epi32</span></code>); NaN and out-of-range lanes give <code class="docutils literal notranslate"><span class="pre">-2**31</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">zero()</span></code>, <code class="docutils literal notranslate"><span class="pre">mask()</span></code></p></td>
+<td><p>static: all bits 0, all bits 1 (each <code class="docutils literal notranslate"><span class="pre">float_4</span></code> lane of a mask is a NaN).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cast(a)</span></code></p></td>
+<td><p>static: reinterprets the other type’s bits, with no conversion.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">size</span></code>, <code class="docutils literal notranslate"><span class="pre">type</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4</span></code>, and the lane type as a Python class (<code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">int</span></code>).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Vector</span></code> itself is <code class="docutils literal notranslate"><span class="pre">rackpy.raw.simd.Vector</span></code>, a template object:
+<code class="docutils literal notranslate"><span class="pre">Vector[float,</span> <span class="pre">4]</span></code> is <code class="docutils literal notranslate"><span class="pre">float_4</span></code> and <code class="docutils literal notranslate"><span class="pre">Vector[int,</span> <span class="pre">4]</span></code> is <code class="docutils literal notranslate"><span class="pre">int32_4</span></code>. Rack
+declares the primary template but never defines it, so any other arguments
+raise <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>, as they would fail to compile in C++.</p>
+<p>Python numbers cross as C++ numbers: a float lane is rounded to 32 bits, an
+<code class="docutils literal notranslate"><span class="pre">int32_4</span></code> lane takes an <code class="docutils literal notranslate"><span class="pre">int</span></code> in the <code class="docutils literal notranslate"><span class="pre">int32_t</span></code> range (<code class="docutils literal notranslate"><span class="pre">OverflowError</span></code>
+otherwise) and refuses a float, as the <a class="reference internal" href="values.html#numbers-cross-as-c-numbers"><span class="std std-ref">values</span></a>
+do. Integer lanes wrap on overflow, as SSE’s additions do.</p>
+</section>
+<section id="lanes-views-and-buffers">
+<span id="simd-views"></span><h2>Lanes, views and buffers<a class="headerlink" href="#lanes-views-and-buffers" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">v[i]</span></code> reads lane <code class="docutils literal notranslate"><span class="pre">i</span></code> and <code class="docutils literal notranslate"><span class="pre">v[i]</span> <span class="pre">=</span> <span class="pre">x</span></code> writes it (<code class="docutils literal notranslate"><span class="pre">operator[]</span></code>). Indices are 0
+to 3, or -4 to -1 from the end; others raise <code class="docutils literal notranslate"><span class="pre">IndexError</span></code>, where C++ would
+read past the vector. <code class="docutils literal notranslate"><span class="pre">len(v)</span></code> is 4, <code class="docutils literal notranslate"><span class="pre">list(v)</span></code> and <code class="docutils literal notranslate"><span class="pre">v.tolist()</span></code> give the
+lanes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">v.s</span></code> is Rack’s lane array (<code class="docutils literal notranslate"><span class="pre">s</span></code>, a union with <code class="docutils literal notranslate"><span class="pre">v</span></code>) as a live, writable
+<code class="docutils literal notranslate"><span class="pre">memoryview</span></code> (format <code class="docutils literal notranslate"><span class="pre">f</span></code> or <code class="docutils literal notranslate"><span class="pre">i</span></code>) that keeps the vector alive. Rack notes that
+touching single lanes “defeats the purpose of vectorizing”; that is about
+C++ speed, and does not matter for Python, which is slower anyway.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">v.v</span></code> is the register (the union’s other member) as a vector of the same
+type: reading copies it, and assigning a vector of the same type replaces
+every lane. A scalar is refused there, as C++ cannot assign a <code class="docutils literal notranslate"><span class="pre">float</span></code> to an
+<code class="docutils literal notranslate"><span class="pre">__m128</span></code>.</p></li>
+<li><p>The vectors support the buffer protocol: <code class="docutils literal notranslate"><span class="pre">memoryview(v)</span></code> is the same view
+as <code class="docutils literal notranslate"><span class="pre">v.s</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">float_4.load(x)</span></code> and <code class="docutils literal notranslate"><span class="pre">v.store(x)</span></code> take a buffer where C++ takes a pointer:
+a contiguous, one-dimensional buffer of <code class="docutils literal notranslate"><span class="pre">float32</span></code> items (<code class="docutils literal notranslate"><span class="pre">int32</span></code> for
+<code class="docutils literal notranslate"><span class="pre">int32_4</span></code>) with at least 4 of them, of any alignment (Rack uses unaligned
+loads and stores). Lane 0 is <code class="docutils literal notranslate"><span class="pre">x[0]</span></code>. Rack’s comment that the order is
+reversed on little-endian machines is wrong: <code class="docutils literal notranslate"><span class="pre">_mm_loadu_ps</span></code> puts <code class="docutils literal notranslate"><span class="pre">x[0]</span></code> in
+lane 0, and the reference confirms it. A slice loads from an offset, like
+<code class="docutils literal notranslate"><span class="pre">&amp;x[c]</span></code> in C++: <code class="docutils literal notranslate"><span class="pre">float_4.load(memoryview(buf)[c:])</span></code>. A shorter buffer
+raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, a buffer of another item type <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>, a strided
+one <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, and storing into a read-only one <code class="docutils literal notranslate"><span class="pre">BufferError</span></code>.</p></li>
+</ul>
+</section>
+<section id="operators">
+<span id="simd-operators"></span><h2>Operators<a class="headerlink" href="#operators" title="Link to this heading">¶</a></h2>
+<p>Rack’s free operators are Python’s operators:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">float_4</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">int32_4</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Arithmetic</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">+</span> <span class="pre">-</span> <span class="pre">*</span> <span class="pre">/</span></code>, unary <code class="docutils literal notranslate"><span class="pre">+</span> <span class="pre">-</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">+</span> <span class="pre">-</span></code>, unary <code class="docutils literal notranslate"><span class="pre">+</span> <span class="pre">-</span></code> (no <code class="docutils literal notranslate"><span class="pre">*</span></code> or <code class="docutils literal notranslate"><span class="pre">/</span></code>: SSE has none)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Bitwise</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">^</span> <span class="pre">&amp;</span> <span class="pre">|</span> <span class="pre">~</span></code> on the bits</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">^</span> <span class="pre">&amp;</span> <span class="pre">|</span> <span class="pre">~</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Shifts</p></td>
+<td><p>—</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&lt;&lt;</span> <span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">&gt;&gt;</span> <span class="pre">n</span></code>: logical, and a count outside 0 to 31 gives 0 in every lane</p></td>
+</tr>
+<tr class="row-odd"><td><p>Comparisons</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">==</span> <span class="pre">!=</span> <span class="pre">&lt;</span> <span class="pre">&lt;=</span> <span class="pre">&gt;</span> <span class="pre">&gt;=</span></code>: <a class="reference internal" href="#masks">masks</a></p></td>
+<td><p>the same</p></td>
+</tr>
+<tr class="row-even"><td><p>Compound</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">+=</span> <span class="pre">-=</span> <span class="pre">*=</span> <span class="pre">/=</span> <span class="pre">^=</span> <span class="pre">&amp;=</span> <span class="pre">|=</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">+=</span> <span class="pre">-=</span> <span class="pre">^=</span> <span class="pre">&amp;=</span> <span class="pre">|=</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A compound assignment changes the vector in place and returns it, as C++
+returns a reference. Python has no <code class="docutils literal notranslate"><span class="pre">++</span></code> or <code class="docutils literal notranslate"><span class="pre">--</span></code>: <code class="docutils literal notranslate"><span class="pre">v.pre_increment()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">v.pre_decrement()</span></code> change the vector and return it (<code class="docutils literal notranslate"><span class="pre">++a</span></code>), while
+<code class="docutils literal notranslate"><span class="pre">v.post_increment()</span></code> and <code class="docutils literal notranslate"><span class="pre">v.post_decrement()</span></code> change it and return the old
+value (<code class="docutils literal notranslate"><span class="pre">a++</span></code>).</p>
+<p><strong>Scalars broadcast; the two vector types never mix.</strong> As C++’s non-explicit
+<code class="docutils literal notranslate"><span class="pre">Vector(float)</span></code> does, a Python <code class="docutils literal notranslate"><span class="pre">float</span></code> or <code class="docutils literal notranslate"><span class="pre">int</span></code> becomes a <code class="docutils literal notranslate"><span class="pre">float_4</span></code> wherever
+one is expected, on either side: <code class="docutils literal notranslate"><span class="pre">2.0</span> <span class="pre">*</span> <span class="pre">v</span></code>, <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">v</span></code>, <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">/</span> <span class="pre">4</span></code>. An <code class="docutils literal notranslate"><span class="pre">int</span></code>
+becomes an <code class="docutils literal notranslate"><span class="pre">int32_4</span></code> (a <code class="docutils literal notranslate"><span class="pre">float</span></code> does not). But <code class="docutils literal notranslate"><span class="pre">float_4</span> <span class="pre">+</span> <span class="pre">int32_4</span></code> raises
+<code class="docutils literal notranslate"><span class="pre">TypeError</span></code>, because C++ rejects it as ambiguous: convert explicitly with
+<code class="docutils literal notranslate"><span class="pre">float_4(i)</span></code> or <code class="docutils literal notranslate"><span class="pre">int32_4(f)</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">DECLARE_VECTOR_OPERATOR_INFIX</span></code> and <code class="docutils literal notranslate"><span class="pre">DECLARE_VECTOR_OPERATOR_INCREMENT</span></code> are
+the C++ macros that define these operators; see <a class="reference internal" href="#macros">macros</a>.</p>
+</section>
+<section id="masks">
+<span id="simd-masks"></span><h2>Masks<a class="headerlink" href="#masks" title="Link to this heading">¶</a></h2>
+<p>A comparison returns a vector, not a <code class="docutils literal notranslate"><span class="pre">bool</span></code>: each lane is all ones (true) or
+all zeros (false). That is Rack’s design, and RackPy keeps it: combine masks
+with <code class="docutils literal notranslate"><span class="pre">&amp;</span> <span class="pre">|</span> <span class="pre">~</span></code>, select with <code class="docutils literal notranslate"><span class="pre">ifelse(mask,</span> <span class="pre">a,</span> <span class="pre">b)</span></code>, and use them as bit masks, as
+Rack’s documentation suggests:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>x -= (x &gt;= 1.0) &amp; 1.0     # subtract 1 where x &gt;= 1
+</pre></div>
+</div>
+<p>A vector has no truth value, so <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">a</span> <span class="pre">&lt;</span> <span class="pre">b:</span></code> or <code class="docutils literal notranslate"><span class="pre">bool(v)</span></code> raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>;
+use <code class="docutils literal notranslate"><span class="pre">movemask</span></code> to get the lanes as bits. <code class="docutils literal notranslate"><span class="pre">==</span></code> against something that is not a
+vector or a number gives Python’s usual <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</section>
+<section id="functions-rackpy-raw-simd">
+<span id="simd-functions"></span><h2>Functions: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.simd</span></code><a class="headerlink" href="#functions-rackpy-raw-simd" title="Link to this heading">¶</a></h2>
+<p>Each function has Rack’s <code class="docutils literal notranslate"><span class="pre">float_4</span></code> overload and, as in C++, the scalar
+functions <code class="docutils literal notranslate"><span class="pre">functions.hpp</span></code> imports (<code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">std::sin;</span></code>, <code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">math::clamp;</span></code>),
+so a function written once works for floats and for vectors, as Rack intends
+it to in C++ templates:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>def sin_plus_cos(x):       # x is a float or a float_4
+    return simd.sin(x) + simd.cos(x)
+</pre></div>
+</div>
+<p>The scalar overloads compute in C++ <code class="docutils literal notranslate"><span class="pre">float</span></code> (as a C++ template instantiated
+with <code class="docutils literal notranslate"><span class="pre">float</span></code> would). A <code class="docutils literal notranslate"><span class="pre">float_4</span></code> argument picks the vector function, and a
+scalar mixed with a vector broadcasts.</p>
+<ul class="simple">
+<li><p><strong>From instructions.</strong> <code class="docutils literal notranslate"><span class="pre">andnot(a,</span> <span class="pre">b)</span></code> is <code class="docutils literal notranslate"><span class="pre">~a</span> <span class="pre">&amp;</span> <span class="pre">b</span></code>. <code class="docutils literal notranslate"><span class="pre">movemask(a)</span></code> is an int
+whose bit <code class="docutils literal notranslate"><span class="pre">k</span></code> is lane <code class="docutils literal notranslate"><span class="pre">k</span></code>’s sign bit (<code class="docutils literal notranslate"><span class="pre">movemask(float_4.mask())</span> <span class="pre">==</span> <span class="pre">0xf</span></code>;
+note that <code class="docutils literal notranslate"><span class="pre">-0.0</span></code> counts). <code class="docutils literal notranslate"><span class="pre">rsqrt</span></code> and <code class="docutils literal notranslate"><span class="pre">rcp</span></code> are the CPU’s fast
+approximations of <code class="docutils literal notranslate"><span class="pre">1/sqrt(x)</span></code> and <code class="docutils literal notranslate"><span class="pre">1/x</span></code> (relative error up to
+<code class="docutils literal notranslate"><span class="pre">1.5</span> <span class="pre">*</span> <span class="pre">2**-12</span></code> on x86); see <a class="reference internal" href="#platforms-and-implementations">platforms</a>.</p></li>
+<li><p><strong>Selection.</strong> <code class="docutils literal notranslate"><span class="pre">ifelse(mask,</span> <span class="pre">a,</span> <span class="pre">b)</span></code> takes <code class="docutils literal notranslate"><span class="pre">a</span></code>’s bits where the mask’s are
+set and <code class="docutils literal notranslate"><span class="pre">b</span></code>’s elsewhere; <code class="docutils literal notranslate"><span class="pre">ifelse(cond,</span> <span class="pre">a,</span> <span class="pre">b)</span></code> with a <code class="docutils literal notranslate"><span class="pre">bool</span></code> is the scalar
+overload. <code class="docutils literal notranslate"><span class="pre">movemask_inverse</span></code> is Rack’s function template, specialized by
+subscripting as in C++: <code class="docutils literal notranslate"><span class="pre">movemask_inverse[float_4](0b0101)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">movemask_inverse[int32_4](...)</span></code> give a mask whose lane <code class="docutils literal notranslate"><span class="pre">k</span></code> is set when bit
+<code class="docutils literal notranslate"><span class="pre">k</span></code> is.</p></li>
+<li><p><strong>Math.</strong> <code class="docutils literal notranslate"><span class="pre">fmax</span></code>, <code class="docutils literal notranslate"><span class="pre">fmin</span></code>, <code class="docutils literal notranslate"><span class="pre">sqrt</span></code>, <code class="docutils literal notranslate"><span class="pre">log</span></code>, <code class="docutils literal notranslate"><span class="pre">log10</span></code>, <code class="docutils literal notranslate"><span class="pre">log2</span></code>, <code class="docutils literal notranslate"><span class="pre">exp</span></code>, <code class="docutils literal notranslate"><span class="pre">sin</span></code>,
+<code class="docutils literal notranslate"><span class="pre">cos</span></code>, <code class="docutils literal notranslate"><span class="pre">tan</span></code>, <code class="docutils literal notranslate"><span class="pre">atan</span></code>, <code class="docutils literal notranslate"><span class="pre">atan2</span></code>, <code class="docutils literal notranslate"><span class="pre">trunc</span></code>, <code class="docutils literal notranslate"><span class="pre">floor</span></code>, <code class="docutils literal notranslate"><span class="pre">ceil</span></code>, <code class="docutils literal notranslate"><span class="pre">round</span></code>, <code class="docutils literal notranslate"><span class="pre">fmod</span></code>,
+<code class="docutils literal notranslate"><span class="pre">hypot</span></code>, <code class="docutils literal notranslate"><span class="pre">fabs</span></code>, <code class="docutils literal notranslate"><span class="pre">abs</span></code>, <code class="docutils literal notranslate"><span class="pre">pow</span></code>, and from <code class="docutils literal notranslate"><span class="pre">math.hpp</span></code> <code class="docutils literal notranslate"><span class="pre">clamp</span></code> (default 0 and
+1), <code class="docutils literal notranslate"><span class="pre">rescale</span></code>, <code class="docutils literal notranslate"><span class="pre">crossfade</span></code> and <code class="docutils literal notranslate"><span class="pre">sgn</span></code>. Where Rack’s vector function differs
+from the C++ standard one, RackPy keeps Rack’s:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">log</span></code>, <code class="docutils literal notranslate"><span class="pre">exp</span></code>, <code class="docutils literal notranslate"><span class="pre">sin</span></code>, <code class="docutils literal notranslate"><span class="pre">cos</span></code>, <code class="docutils literal notranslate"><span class="pre">tan</span></code>, <code class="docutils literal notranslate"><span class="pre">atan</span></code> and <code class="docutils literal notranslate"><span class="pre">atan2</span></code> use <code class="docutils literal notranslate"><span class="pre">sse_mathfun</span></code>’s
+approximations, and <code class="docutils literal notranslate"><span class="pre">log10</span></code>/<code class="docutils literal notranslate"><span class="pre">log2</span></code> divide its <code class="docutils literal notranslate"><span class="pre">log</span></code>. Their edge cases are
+not the standard ones: <code class="docutils literal notranslate"><span class="pre">log(x)</span></code> is NaN for <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code>, zero included (not
+<code class="docutils literal notranslate"><span class="pre">-inf</span></code>); <code class="docutils literal notranslate"><span class="pre">exp</span></code> saturates at about <code class="docutils literal notranslate"><span class="pre">2.406e38</span></code>, which it returns for <code class="docutils literal notranslate"><span class="pre">inf</span></code>
+and NaN too; and <code class="docutils literal notranslate"><span class="pre">sin(±inf)</span></code> depends on the compiler that built the
+plugin, because <code class="docutils literal notranslate"><span class="pre">sse_mathfun</span></code> is header code: <code class="docutils literal notranslate"><span class="pre">∓inf</span></code> with GCC on Linux,
+NaN with Clang on macOS (both CPUs), as for Rack’s own plugins there.
+Do not rely on either.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">round</span></code> rounds ties to even (<code class="docutils literal notranslate"><span class="pre">_mm_round_ps</span></code>); the scalar <code class="docutils literal notranslate"><span class="pre">std::round</span></code>
+rounds them away from zero.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fmod(a,</span> <span class="pre">b)</span></code> is <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-</span> <span class="pre">floor(a</span> <span class="pre">/</span> <span class="pre">b)</span> <span class="pre">*</span> <span class="pre">b</span></code>, a floored modulus with the sign
+of <code class="docutils literal notranslate"><span class="pre">b</span></code>; the scalar <code class="docutils literal notranslate"><span class="pre">std::fmod</span></code> truncates.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hypot</span></code> is <code class="docutils literal notranslate"><span class="pre">sqrt(a*a</span> <span class="pre">+</span> <span class="pre">b*b)</span></code>, without <code class="docutils literal notranslate"><span class="pre">std::hypot</span></code>’s overflow protection.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fmax</span></code>/<code class="docutils literal notranslate"><span class="pre">fmin</span></code> return the second argument’s lane where either lane is NaN.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">atan2(x,</span> <span class="pre">y)</span></code> is <code class="docutils literal notranslate"><span class="pre">std::atan2(x,</span> <span class="pre">y)</span></code>, the angle of the point <code class="docutils literal notranslate"><span class="pre">(y,</span> <span class="pre">x)</span></code>:
+Rack names the numerator <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p>For a <strong>vector base</strong>, <code class="docutils literal notranslate"><span class="pre">pow(a,</span> <span class="pre">b)</span></code> is <code class="docutils literal notranslate"><span class="pre">exp(b</span> <span class="pre">*</span> <span class="pre">log(a))</span></code>, so where a lane
+of <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code> it is <code class="docutils literal notranslate"><span class="pre">exp</span></code> of NaN, about <code class="docutils literal notranslate"><span class="pre">2.406e38</span></code>: <code class="docutils literal notranslate"><span class="pre">pow(float_4(0.0),</span> <span class="pre">1/3)</span></code>
+is not 0. The separate scalar-base/vector-exponent overload uses
+<code class="docutils literal notranslate"><span class="pre">std::log(a)</span></code>: for <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">==</span> <span class="pre">0</span></code> and positive <code class="docutils literal notranslate"><span class="pre">b</span></code>, it returns 0.</p></li>
+</ul>
+</li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">pow</span></code> with an <code class="docutils literal notranslate"><span class="pre">int</span></code> exponent</strong> is Rack’s template <code class="docutils literal notranslate"><span class="pre">pow&lt;T&gt;(T,</span> <span class="pre">int)</span></code> for
+<code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">float</span></code> and <code class="docutils literal notranslate"><span class="pre">float_4</span></code>: <code class="docutils literal notranslate"><span class="pre">a**b</span></code> by repeated squaring. As in Rack, an
+exponent of 0 or less gives 1. Rack’s loop doubles a C <code class="docutils literal notranslate"><span class="pre">int</span></code> past the
+exponent, which overflows (undefined, and in practice endless) for
+exponents from <code class="docutils literal notranslate"><span class="pre">2**30</span></code> on, so those raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p></li>
+<li><p><strong>Complex numbers.</strong> <code class="docutils literal notranslate"><span class="pre">abs</span></code> and <code class="docutils literal notranslate"><span class="pre">arg</span></code> of <code class="docutils literal notranslate"><span class="pre">std::complex&lt;float_4&gt;</span></code> take a
+<code class="docutils literal notranslate"><span class="pre">(real,</span> <span class="pre">imag)</span></code> tuple of vectors; a Python <code class="docutils literal notranslate"><span class="pre">complex</span></code> is the imported
+<code class="docutils literal notranslate"><span class="pre">std::complex&lt;float&gt;</span></code> overload.</p></li>
+</ul>
+</section>
+<section id="rackpy-raw-sse-mathfun">
+<span id="simd-sse-mathfun"></span><h2><code class="docutils literal notranslate"><span class="pre">rackpy.raw.sse_mathfun</span></code><a class="headerlink" href="#rackpy-raw-sse-mathfun" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">sse_mathfun.h</span></code> and <code class="docutils literal notranslate"><span class="pre">sse_mathfun_extension.h</span></code> are global-namespace C++
+functions reached through <code class="docutils literal notranslate"><span class="pre">simd/functions.hpp</span></code>: Julien Pommier’s SSE
+approximations of <code class="docutils literal notranslate"><span class="pre">sin</span></code>, <code class="docutils literal notranslate"><span class="pre">cos</span></code>, <code class="docutils literal notranslate"><span class="pre">exp</span></code> and <code class="docutils literal notranslate"><span class="pre">log</span></code> from the cephes library, with
+extensions for <code class="docutils literal notranslate"><span class="pre">tan</span></code>, <code class="docutils literal notranslate"><span class="pre">cot</span></code>, <code class="docutils literal notranslate"><span class="pre">atan</span></code> and <code class="docutils literal notranslate"><span class="pre">atan2</span></code>, as modified for Rack (zlib
+licence). Their <code class="docutils literal notranslate"><span class="pre">__m128</span></code> arguments and results are <code class="docutils literal notranslate"><span class="pre">float_4</span></code>.
+<code class="docutils literal notranslate"><span class="pre">sse_mathfun_sincos_ps(x)</span></code> returns <code class="docutils literal notranslate"><span class="pre">(sin,</span> <span class="pre">cos)</span></code>, which C++ writes through two
+pointers; <code class="docutils literal notranslate"><span class="pre">sse_mathfun_tancot_ps(x,</span> <span class="pre">cot_flag)</span></code> is the tangent, or the
+cotangent if <code class="docutils literal notranslate"><span class="pre">cot_flag</span></code> is nonzero; <code class="docutils literal notranslate"><span class="pre">sse_mathfun_atan2_ps(y,</span> <span class="pre">x)</span></code> takes <code class="docutils literal notranslate"><span class="pre">y</span></code>
+first, like <code class="docutils literal notranslate"><span class="pre">std::atan2</span></code>; <code class="docutils literal notranslate"><span class="pre">sse_mathfun_one_ps()</span></code> is 1 in every lane.</p>
+</section>
+<section id="port-voltages-as-vectors">
+<span id="simd-ports"></span><h2>Port voltages as vectors<a class="headerlink" href="#port-voltages-as-vectors" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Port</span></code>’s SIMD templates (see <a class="reference internal" href="engine-components.html#ports"><span class="std std-ref">ports</span></a>)
+are bound for <code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">float_4</span></code>, the only vector whose <code class="docutils literal notranslate"><span class="pre">load</span></code> and <code class="docutils literal notranslate"><span class="pre">store</span></code> take a
+<code class="docutils literal notranslate"><span class="pre">float*</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">get_voltage_simd(first_channel)</span></code>: channels <code class="docutils literal notranslate"><span class="pre">first_channel</span></code> to
+<code class="docutils literal notranslate"><span class="pre">first_channel</span> <span class="pre">+</span> <span class="pre">3</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_poly_voltage_simd(first_channel)</span></code>: channel 0’s voltage in every lane if
+the port is monophonic (exactly one channel), else <code class="docutils literal notranslate"><span class="pre">get_voltage_simd</span></code>. A
+disconnected port has no channels, so it is not monophonic and reads the
+lanes at <code class="docutils literal notranslate"><span class="pre">first_channel</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_normal_voltage_simd(normal_voltage,</span> <span class="pre">first_channel)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">get_normal_poly_voltage_simd(normal_voltage,</span> <span class="pre">first_channel)</span></code>: the same if
+the port is connected, else <code class="docutils literal notranslate"><span class="pre">normal_voltage</span></code> (a scalar broadcasts).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_voltage_simd(voltage,</span> <span class="pre">first_channel)</span></code>: writes 4 channels; the channel
+count does not change.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">first_channel</span></code> must be 0 to 12, so the four channels stay inside the
+16-channel array; Rack’s templates would run past it, so other values raise
+<code class="docutils literal notranslate"><span class="pre">IndexError</span></code>. Threads and ownership are those of the other port methods.</p>
+</section>
+<section id="macros">
+<span id="simd-macros"></span><h2>Macros<a class="headerlink" href="#macros" title="Link to this heading">¶</a></h2>
+<p>None of the SIMD headers’ macros has a Python counterpart:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DECLARE_VECTOR_OPERATOR_INFIX</span></code> and <code class="docutils literal notranslate"><span class="pre">DECLARE_VECTOR_OPERATOR_INCREMENT</span></code>
+generate Vector’s C++ operators; each operator they declare is its own
+record, mapped to a Python operator above.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SIMDE_ENABLE_NATIVE_ALIASES</span></code> is build configuration: on a CPU without
+SSE4.2, it tells SIMDe to provide the <code class="docutils literal notranslate"><span class="pre">_mm_*</span></code> intrinsic names.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_MM_FROUND_NO_EXC</span></code> is an intrinsic rounding flag that Rack defines from
+SIMDe’s when the compiler does not. Python has no intrinsics.</p></li>
+</ul>
+<p>The last two are absent on Linux x86_64, whose compiler provides SSE4.2.</p>
+</section>
+<section id="platforms-and-implementations">
+<span id="simd-platforms"></span><h2>Platforms and implementations<a class="headerlink" href="#platforms-and-implementations" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">simd/common.hpp</span></code> chooses Rack’s implementation at compile time: the CPU’s
+SSE4.2 instructions when the compiler targets them (Rack’s x86-64 builds,
+<code class="docutils literal notranslate"><span class="pre">-march=nehalem</span></code>), and the SIMDe library’s emulation otherwise (Rack’s arm64
+builds). <code class="docutils literal notranslate"><span class="pre">rackpy.simd.IMPLEMENTATION</span></code> says which one this plugin has:
+<code class="docutils literal notranslate"><span class="pre">&quot;sse4.2&quot;</span></code> for the only platform RackPy builds so far, Linux x86_64.</p>
+<p>RackPy’s tests also build the reference through Rack’s SIMDe branch on x86-64,
+using SIMDe’s portable C code (<code class="docutils literal notranslate"><span class="pre">tests/simd/test_simde.py</span></code>), and compare the two
+lane by lane. They agree exactly on all integer, bitwise, mask, comparison,
+conversion, load and store results. Elsewhere they differ only in these ways,
+which the test pins:</p>
+<ul class="simple">
+<li><p>the sign of zero results and NaN payloads, which are not Rack semantics;</p></li>
+<li><p>lanes where an input or the result is subnormal, because SSE’s
+flush-to-zero applies differently to SIMDe’s code;</p></li>
+<li><p>the last bits of the <code class="docutils literal notranslate"><span class="pre">sse_mathfun</span></code> functions and everything built on them
+(at most <code class="docutils literal notranslate"><span class="pre">1e-5</span></code> relative), and <code class="docutils literal notranslate"><span class="pre">sin(±inf)</span></code>, which SIMDe makes NaN;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rcp</span></code>, which SIMDe computes exactly, within the CPU’s documented error;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rsqrt</span></code>, which SIMDe’s portable code replaces with a bit-trick
+approximation that is wrong for 0, negative numbers and infinity.</p></li>
+</ul>
+<p><strong>This is not evidence about arm64.</strong> Rack’s arm64 builds use SIMDe’s NEON
+code, not its portable code, and RackPy has not been built or run on arm64,
+macOS or Windows. Each platform needs its own native run before RackPy claims
+it.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="dsp.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">DSP building blocks</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="services.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Services</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">SIMD: four lanes at a time</a><ul>
+<li><a class="reference internal" href="#vectors-float-4-and-int32-4">Vectors: <code class="docutils literal notranslate"><span class="pre">float_4</span></code> and <code class="docutils literal notranslate"><span class="pre">int32_4</span></code></a></li>
+<li><a class="reference internal" href="#lanes-views-and-buffers">Lanes, views and buffers</a></li>
+<li><a class="reference internal" href="#operators">Operators</a></li>
+<li><a class="reference internal" href="#masks">Masks</a></li>
+<li><a class="reference internal" href="#functions-rackpy-raw-simd">Functions: <code class="docutils literal notranslate"><span class="pre">rackpy.raw.simd</span></code></a></li>
+<li><a class="reference internal" href="#rackpy-raw-sse-mathfun"><code class="docutils literal notranslate"><span class="pre">rackpy.raw.sse_mathfun</span></code></a></li>
+<li><a class="reference internal" href="#port-voltages-as-vectors">Port voltages as vectors</a></li>
+<li><a class="reference internal" href="#macros">Macros</a></li>
+<li><a class="reference internal" href="#platforms-and-implementations">Platforms and implementations</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

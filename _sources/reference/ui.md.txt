@@ -1,0 +1,195 @@
+# UI widgets and menus
+
+`rackpy.raw.ui` is `rack::ui`. **Implemented (RP-26A, RP-26B), Linux x86_64
+inside Rack Free 2.6.6**, for every record in `include/ui/`, the menu helpers
+and Rack's input dispatcher (see the [coverage report](coverage.md)).
+
+(ui-boundary-constants)=
+## Input and menu constants
+
+`rackpy.raw.glfw` exposes the GLFW key, mouse-button, modifier and action
+constants used by Rack events, retaining their upstream names (for example,
+`GLFW_KEY_A`, `GLFW_MOUSE_BUTTON_LEFT`, and `GLFW_PRESS`).
+`rackpy.raw.blendish` exposes the `BND_CORNER_*` flags accepted by
+`Menu.corner_flags`. These are integers taken from the SDK headers at build
+time; bitwise combinations can be assigned to `corner_flags`. They do not
+expose the GLFW or Blendish APIs generally. Linux x86_64 is the tested target;
+macOS and Windows have not been validated.
+
+(ui-widgets)=
+## Widgets
+
+Every class is Rack's own and is a [subclassable widget](widgets.md): create
+it on Rack's main thread once the UI exists, configure its fields, add it to a
+parent (which then owns it), and override its drawing and event methods in
+Python if you need to. Calling a method such as `on_drag_start(event)` runs
+Rack's implementation for that class.
+
+- `Label`: `text`, `font_size`, `line_height`, `color` (an `NVGcolor`) and
+  `alignment` (`Label.LEFT_ALIGNMENT`, `CENTER_ALIGNMENT`,
+  `RIGHT_ALIGNMENT`).
+- `Button`, and its kinds `ChoiceButton`, `RadioButton` and `OptionButton`:
+  `text` and `quantity`. `Slider` and `ProgressBar` show a `quantity`.
+  Rack does not own these quantities, so RackPy keeps the
+  `rackpy.raw.Quantity` you assign (for example a
+  `rackpy.types.ValueQuantity`) alive for as long as the widget refers to it,
+  and releases it when the widget is deleted.
+- `Tooltip` (`text`), `TooltipOverlay`, `List`, and `SequentialLayout`, which
+  arranges its children in its own `step()`: `orientation`
+  (`HORIZONTAL_ORIENTATION`, `VERTICAL_ORIENTATION`), `alignment`
+  (`LEFT`/`CENTER`/`RIGHT`, with Rack's aliases `TOP`/`MIDDLE`/`BOTTOM`),
+  `wrap`, `margin` and `spacing`.
+
+Fields that hold a `Vec` or `Rect` return copies: assign a new value to
+change them.
+
+(ui-text-fields)=
+## Text fields
+
+`TextField` (and `PasswordField`) has Rack's raw fields (`text`,
+`placeholder`, `password`, `multiline`, `cursor`, `selection`) and editing
+methods: `get_text()`, `set_text()`, `select_all()`, `get_selected_text()`,
+`insert_text()`, the clipboard methods and the cursor movements. Rack's
+`on_button()`, `on_drag_hover()`, `on_select_key()` and `on_select_text()`
+handlers place the cursor, select text and extend selections as Rack does;
+Python subclasses may override them on the UI thread. `cursor` and
+`selection` are clamped to the text, because Rack indexes the text with them.
+The raw `text` property directly replaces Rack's string; unlike `set_text()`
+it neither moves the cursor to the end nor sends a change event. Because Rack
+indexes the text with `cursor` and `selection`, a raw write that shortens the
+text clamps both to the new end; a longer text leaves them where they were.
+`prev_field` and `next_field`, where Tab moves the focus, take a widget RackPy
+manages, or `None`; if that widget is deleted, the field becomes `None` so
+Rack never follows a dangling pointer. Python may override
+`get_text_position(mouse_pos)`. `create_context_menu()` opens Rack's
+cut/copy/paste menu.
+
+(ui-scrolling)=
+## Scrolling
+
+`ScrollWidget` creates its own `container` and scrollbars, which it owns;
+they appear as `HostWidget`s. Put content in the container with
+`scroll.container.add_child(widget)`, which hands the widget to it.
+`offset`, `container_box` and `hide_scrollbars` are Rack's fields, and
+`scroll_to()`, `get_scroll_offset()`, `get_container_offset_bound()`,
+`get_handle_offset()`, `get_handle_size()` and `is_scrolling()` its methods.
+The `horizontal_scrollbar` and `vertical_scrollbar` fields identify those
+owned views. `Scrollbar` (alias `ScrollBar`) has `vertical`.
+
+(ui-menus)=
+## Menus
+
+A menu is a `MenuOverlay` that covers the scene and holds one or more `Menu`s
+of `MenuItem`s, `MenuLabel`s and `MenuSeparator`s, all `MenuEntry` widgets.
+`MenuEntry()` constructs the shared, directly subclassable base for menu entries.
+`Menu.corner_flags` accepts Blendish corner flags. A `MenuItem` subclass
+overrides `on_action(event)`. Rack consumes the event and then closes the
+menu; call `event.unconsume()` to keep it open. `do_action()` triggers the
+item as a click does. For a submenu, override `create_child_menu()` and
+return a new `Menu`. Rack asks when the pointer enters the item and shows the
+menu beside it. Building the new menu there is allowed even though Rack is
+dispatching an event, because nothing else can be iterating a tree that
+exists only in Python. Returning something other than a `Menu` is logged and
+gives Rack no menu. `Menu.set_child_menu(menu)` does the same by hand. It
+hands the menu to Rack, which deletes the previous child menu. `child_menu`
+and `active_entry` are read-only. `parent_menu` is writable for plugin code,
+but is limited to a different `Menu` in the same parent widget (or `None`),
+so a write cannot introduce a pointer to an unowned menu. Its getter returns
+`None` once the referenced menu is detached. Rack 2.6.6 itself neither sets
+nor reads this field. Rack never clears `active_entry` or `child_menu` when those widgets go,
+so each is given only while it is still where Rack keeps it, else `None`; and
+since a menu removes its child menu when it is deleted, a child menu leaves
+only through `set_child_menu`: removing it or `request_delete()` is refused.
+`MenuItem.text` is its displayed label; `right_text` is the optional right-aligned
+text shown beside it. `disabled` defaults to false. A disabled item does not
+perform its action when activated. `MenuLabel.text` is the displayed label for a
+non-actionable heading. `ColorDotMenuItem` adds a `color`.
+
+`MenuOverlay.bg_color` is the overlay's fill color. Rack draws a filled box over
+the overlay's bounds only when its alpha is greater than zero; the default
+transparent color draws no background.
+
+Some of Rack's UI code asserts or reads a parent, and RackPy refuses those
+calls (`OwnershipError`) instead of letting Rack stop: `step()` of a `Menu` or
+`MenuOverlay` without a parent, a `MenuItem`'s `on_enter` in a menu without a
+parent (Rack opens the child menu there), and a `Scrollbar`'s `draw`,
+`on_button` and `on_drag_move` outside a `ScrollWidget`. When Rack itself draws
+such a scrollbar, the drawing is skipped and reported.
+
+(ui-menu-helpers)=
+## Menu helpers
+
+Rack's `helpers.hpp` templates are functions in `rackpy.raw`, which take
+Python callables. The template parameter becomes a keyword (`menu_type`,
+`item_type`, `label_type`), and a Python subclass is fine:
+
+- `create_menu()` opens a menu at the mouse position, in a `MenuOverlay` in
+  Rack's scene, which owns both.
+- `create_menu_label(text)` makes a label.
+- `create_menu_item(text, right_text="", action=None, disabled=False,
+  always_consume=False)` makes an item. Without `action` it is a plain item.
+  With it, choosing the item calls `action()`. `disabled=True` disables either kind.
+- `create_check_menu_item(text, right_text, checked, action, ...)` shows a
+  check mark while `checked()` is true.
+- `create_bool_menu_item(text, right_text, getter, setter, ...)` toggles a
+  bool.
+- `create_submenu_item(text, right_text, create_menu)` opens a submenu that
+  `create_menu(menu)` fills.
+- `create_index_submenu_item(text, labels, getter, setter, ...)` chooses an
+  index from `labels`.
+- `create_bool_ptr_menu_item(text, right_text, ptr)` and
+  `create_index_ptr_submenu_item(text, labels, ptr)` take a `rackpy.raw.Ref`
+  (or any object with a `value`) where C++ takes a pointer. `None` behaves
+  like a null pointer.
+
+The callables live as long as Rack's menu item. If one uses a module that was
+deleted while the menu was open, it raises `StaleHandleError`, which RackPy
+logs and contains, so Rack carries on. `Model.append_context_menu(menu)` adds
+Rack's own items for a model ([plugins and models](plugin.md#models)).
+
+(ui-input)=
+## Context and input
+
+`rackpy.raw.context_get()`, and Rack's `APP()` macro, return the Rack context
+current on this thread: RackPy's bound context on Rack's main thread, `None`
+on threads Python starts (see [the context](window.md#the-context)). Its
+`event` attribute is Rack's input dispatcher, a
+`rackpy.raw.widget.EventState`.
+
+- `handle_button`, `handle_hover`, `handle_leave`, `handle_scroll`,
+  `handle_text`, `handle_key`, `handle_drop` and `handle_dirty` do what
+  Rack's window does with GLFW's input. They dispatch through the widget
+  tree, Python widgets' handlers included. They are refused inside another
+  widget callback, where Rack may be iterating the tree. `handle_text` takes
+  any `uint32`, as Rack does, even one past U+10FFFF.
+- `set_hovered_widget`, `set_dragged_widget`, `set_drag_hovered_widget` and
+  `set_selected_widget` change the focus and send Rack's enter, leave,
+  select and drag events. Unlike general tree-mutating operations,
+  `set_selected_widget` is allowed inside a widget callback, as Rack itself
+  uses it from callbacks. The corresponding `get_hovered_widget`,
+  `get_dragged_widget`, `get_drag_hovered_widget`, `get_selected_widget` and
+  `get_root_widget` return the current targets. Rack's deprecated shorter
+  `set_hovered`, `set_dragged`, `set_drag_hovered` and `set_selected` warn.
+- `finalize_widget` makes Rack forget a widget.
+- The raw fields (`hovered_widget`, `selected_widget`, and the rest) can be
+  written with `None` or a live widget without sending events.
+  `root_widget` is the raw scene pointer: assigning `None` or a live widget
+  changes the root from which Rack dispatches input, without synthesizing
+  events. Rack normally owns this pointer. Rack clears the other widget fields
+  when a widget leaves its tree or is deleted. `held_keys` is a copy of Rack's set.
+
+`rackpy.raw.macros` has `RACK_MOD_CTRL`, `RACK_MOD_SHIFT`, `RACK_MOD_ALT`
+(Ctrl is Command on macOS), their `*_NAME`s, `RACK_MOD_MASK` and
+`RACK_HELD`. `rackpy.raw.event` keeps Rack's deprecated `rack::event`
+aliases (`event.Action` is `widget.ActionEvent`, and so on), with a
+`DeprecationWarning`.
+
+(ui-theme)=
+## Theme and symbols
+
+`set_theme(bg, fg)` sets Rack's widget colours from two `NVGcolor`s, and
+`refresh_theme()` restores the ones for the current settings.
+`CHECKMARK_STRING` ("✔"), `CHECKMARK(cond)` and `RIGHT_ARROW` ("▸") are
+Rack's macros.
+
+`set_theme()` and `refresh_theme()` need Rack's main thread (`ThreadError` elsewhere), as all UI operations do. The three symbols above are plain strings/a function and can be read or called from any Python thread.

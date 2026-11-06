@@ -1,0 +1,418 @@
+rackpy.laboratory
+=================
+
+.. py:module:: rackpy.laboratory
+
+.. autoapi-nested-parse::
+
+   The callback laboratory: Python overrides of a module's audio-thread callbacks, run offline.
+
+   Rack calls a module's ``process`` once per sample on its engine threads,
+   where RackPy never runs Python: production modules process audio with native
+   kernels (:mod:`rackpy.dsp.kernel`). The laboratory runs Python there anyway,
+   for experiments and tests. A laboratory module (a :class:`ModuleClass`) runs
+   only on a :class:`Bench`, an offline host that steps RackPy modules from
+   Python on Rack's main thread the way Rack's engine would. Rack's engine never
+   runs a laboratory module, a patch cannot create one, and nothing here is
+   real-time audio. See *Callbacks and the laboratory* in the explanations.
+
+   The laboratory's audio and MIDI drivers and devices (:class:`AudioDriver`,
+   :class:`MidiDriver`, ...) do the same for the driver virtuals that Rack calls on
+   its audio and MIDI driver threads: Rack never lists them, so only ports you
+   make and connect reach them, on the main thread.
+
+   Trusted code must call :func:`enable` first. Available inside Rack only.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.laboratory.Bench
+   rackpy.laboratory.ProcessArgs
+   rackpy.laboratory.MidiOutputDevice
+   rackpy.laboratory.AudioDriver
+   rackpy.laboratory.AudioDevice
+   rackpy.laboratory.MidiDriver
+   rackpy.laboratory.MidiInputDevice
+   rackpy.laboratory.MidiInputQueue
+   rackpy.laboratory.MidiGenerator
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.laboratory.MidiInput
+   rackpy.laboratory.ModuleClass
+   rackpy.laboratory.Quantity
+   rackpy.laboratory.ParamQuantity
+   rackpy.laboratory.SwitchQuantity
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.laboratory.enable
+   rackpy.laboratory.disable
+   rackpy.laboratory.enabled
+
+
+Module Contents
+---------------
+
+.. py:data:: Bench
+
+.. py:data:: ProcessArgs
+
+.. py:data:: MidiOutputDevice
+
+   A MIDI output device whose ``send_message`` and ``get_name`` a subclass overrides; ``device.connect(output)``
+   points a ``rackpy.raw.midi.Output`` you made at it, so Rack's ``Output::sendMessage`` reaches the override. A
+   :class:`MidiDriver` can also hold it (``add_output_device``).
+
+
+.. py:data:: AudioDriver
+
+   ``rack::audio::Driver`` whose every virtual a subclass may override, offline.
+
+   ``driver.connect(port)`` points a ``rackpy.raw.audio.Port`` you made at it,
+   repeating what Rack's ``Port::setDriverId`` does for a driver Rack lists (Rack
+   never lists a laboratory driver): the port leaves its device, takes this
+   driver, then subscribes to ``get_default_device_id()``'s device. Rack's own
+   port methods then call the driver's ``get_name``, ``get_device_ids``,
+   ``get_device_name``, ``get_device_num_inputs``, ``get_device_num_outputs``,
+   ``subscribe`` and ``unsubscribe`` synchronously, and an override's error
+   reaches the caller of the port method. ``super()`` answers from the devices
+   given to ``add_device``, which the driver keeps; ``subscribe`` must return
+   one of them or ``None``. Main thread; creating one needs :func:`enable`.
+   Its native part is destroyed on the main thread only: dropped on another
+   thread, at the next UI step.
+
+
+.. py:data:: AudioDevice
+
+   ``rack::audio::Device`` whose every virtual a subclass may override, offline.
+
+   Rack's port methods (``get_sample_rate``, ``set_block_size``, ``to_json``,
+   ...) call the device of a port connected to an :class:`AudioDriver`
+   synchronously; ``super()`` answers with the configured values (``name``,
+   ``num_inputs``, ``sample_rate``, ...), as a ``rackpy.raw.audio.PythonDevice``
+   does. Creating one needs :func:`enable`.
+
+
+.. py:data:: MidiDriver
+
+   ``rack::midi::Driver`` whose every virtual a subclass may override, offline.
+
+   ``driver.connect(port)`` points a ``rackpy.raw.midi`` port you made at it, as
+   Rack's ``Port::setDriverId`` does for a driver it lists. Rack's own port
+   methods (``set_device_id``, ``get_device_ids``, ``get_default_device_id``,
+   ``get_device_name``) and Rack's MIDI widgets then call the driver's virtuals
+   synchronously. ``super()`` answers from the :class:`MidiInputDevice` and
+   :class:`MidiOutputDevice` objects added, which the driver keeps. Main thread;
+   creating one needs :func:`enable`. Its native part is destroyed on the main
+   thread only: dropped on another thread, at the next UI step.
+
+
+.. py:data:: MidiInputDevice
+
+   ``rack::midi::InputDevice`` whose ``get_name`` a subclass may override; ``push_message`` is Rack's
+   ``InputDevice::onMessage``, which calls each subscribed input's ``on_message``. Creating one needs :func:`enable`.
+
+
+.. py:data:: MidiInputQueue
+
+   ``rack::midi::InputQueue`` whose ``on_message`` a subclass may override, offline.
+
+   Rack's ``InputDevice::onMessage`` calls it synchronously on the main thread
+   (a :class:`MidiInputDevice`'s ``push_message``, Rack's Loopback driver
+   when Python sends); ``super().on_message(message)`` queues the message for
+   ``try_pop``, as Rack's does. On Rack's threads Python never runs and Rack's
+   queue takes the message. It is a ``rackpy.raw.midi.Input``, but not a
+   ``rackpy.raw.midi.InputQueue``, which is final. Creating one needs
+   :func:`enable` and Rack's live context. As for :class:`MidiInput`, no MIDI
+   subscription may change while ``on_message`` runs.
+
+
+.. py:class:: MidiInput
+
+
+
+   ``rack::midi::Input`` whose ``on_message`` runs synchronously, offline.
+
+   An ordinary ``rackpy.raw.midi.Input`` gets its messages queued, on the UI
+   thread. A laboratory input's ``on_message`` runs where Rack's
+   ``InputDevice::onMessage`` calls it on the main thread (a
+   :class:`MidiInputDevice`'s ``push_message``, Rack's Loopback driver when
+   Python sends), and its error reaches that caller. On Rack's MIDI driver threads
+   Python never runs: the message is queued, as for an ordinary input. A
+   native mark set by this constructor, after it checks :func:`enable`,
+   gates the synchronous path. Needs Rack's live context.
+
+   Rack is iterating the device's subscribers while ``on_message`` runs, so
+   until the call that delivered the message returns, changing any MIDI
+   subscription (``set_device_id``, ``connect``, removing a device, making a
+   port, ...) raises :class:`~rackpy.errors.LaboratoryError`, and objects
+   dropped meanwhile are kept alive until then.
+
+
+   .. py:method:: on_message(message: rackpy.raw.midi.Message) -> None
+
+      Rack's ``Input::onMessage``: does nothing. A subclass receives each message here, an owned copy.
+
+
+
+.. py:function:: enable() -> None
+
+   Allow laboratory modules and benches in this process, until :func:`disable`.
+
+   Call it from trusted code: your plugin's entry module or a test. Loading a
+   patch never enables the laboratory. Rack's log records that it was enabled.
+   Main thread.
+
+
+.. py:function:: disable() -> None
+
+   Refuse new laboratory modules and benches, and stepping existing benches, again.
+
+
+.. py:function:: enabled() -> bool
+
+   Whether :func:`enable` was called (and :func:`disable` not since).
+
+
+.. py:class:: ModuleClass(module: rackpy.engine.Module)
+
+
+
+   A module class whose every ``rack::engine::Module`` callback may be Python, on a laboratory :class:`Bench`.
+
+   ``configure`` and the custom-data handlers ``to_json`` and
+   ``from_json`` work as in :class:`rackpy.plugin.ModuleClass`. The
+   other methods are true overrides of Rack's virtuals, called synchronously
+   where Rack would call them and *instead of* Rack's implementation:
+   ``super()`` runs it (Rack's, with RackPy's lifecycle snapshot and data
+   handlers), as in a C++ subclass of ``rack::engine::Module``. So an
+   :meth:`on_reset` that does not call ``super()`` resets no parameters.
+   Rack's deprecated no-argument events have separate ``on_*_legacy``
+   override slots. Rack's default modern events invoke them.
+   Create one with :meth:`create`, never through a model: Rack cannot
+   create it.
+
+
+   .. py:method:: on_add_legacy() -> None
+
+      Rack's deprecated no-argument event; the default implementation does nothing.
+
+
+
+   .. py:method:: on_remove_legacy() -> None
+
+      Rack's deprecated no-argument event; the default implementation does nothing.
+
+
+
+   .. py:method:: on_reset_legacy() -> None
+
+      Rack's deprecated no-argument event; the default implementation does nothing.
+
+
+
+   .. py:method:: on_randomize_legacy() -> None
+
+      Rack's deprecated no-argument event; the default implementation does nothing.
+
+
+
+   .. py:method:: on_sample_rate_change_legacy() -> None
+
+      Rack's deprecated no-argument event; the default implementation does nothing.
+
+
+
+   .. py:method:: process(args: ProcessArgs) -> None
+
+      Advance the module by one sample. Rack's implementation calls :meth:`step`.
+
+
+
+   .. py:method:: process_bypass(args: ProcessArgs) -> None
+
+      Called instead of :meth:`process` while the bench bypasses the module.
+
+      Rack's implementation copies each bypass route's input to its output.
+
+
+
+   .. py:method:: step() -> None
+
+      Deprecated in Rack: override :meth:`process`. Rack's implementation does nothing.
+
+
+
+   .. py:method:: on_add(event: rackpy.engine.Module.AddEvent) -> None
+
+      Rack's onAdd: a bench added the module.
+
+
+
+   .. py:method:: on_remove(event: rackpy.engine.Module.RemoveEvent) -> None
+
+      Rack's onRemove: a bench is removing the module.
+
+
+
+   .. py:method:: on_bypass(event: rackpy.engine.Module.BypassEvent) -> None
+
+      Rack's onBypass.
+
+
+
+   .. py:method:: on_un_bypass(event: rackpy.engine.Module.UnBypassEvent) -> None
+
+      Rack's onUnBypass.
+
+
+
+   .. py:method:: on_port_change(event: rackpy.engine.Module.PortChangeEvent) -> None
+
+      Rack's onPortChange: a cable connected or disconnected one of the module's ports.
+
+
+
+   .. py:method:: on_reset(event: rackpy.engine.Module.ResetEvent) -> None
+
+      Rack's onReset: resets every resettable bounded parameter.
+
+
+
+   .. py:method:: on_randomize(event: rackpy.engine.Module.RandomizeEvent) -> None
+
+      Rack's onRandomize: randomizes every randomizable bounded parameter.
+
+
+
+   .. py:method:: on_save(event: rackpy.engine.Module.SaveEvent) -> None
+
+      Rack's onSave.
+
+
+
+   .. py:method:: on_sample_rate_change(event: rackpy.engine.Module.SampleRateChangeEvent) -> None
+
+      Rack's onSampleRateChange; with an audio device Rack calls it on the audio driver thread.
+
+
+
+   .. py:method:: on_set_master(event: rackpy.engine.Module.SetMasterEvent) -> None
+
+      Rack's onSetMaster: the module became the (bench's) master module.
+
+
+
+   .. py:method:: on_unset_master(event: rackpy.engine.Module.UnsetMasterEvent) -> None
+
+      Rack's onUnsetMaster.
+
+
+
+   .. py:method:: on_expander_change(event: rackpy.engine.Module.ExpanderChangeEvent) -> None
+
+      Rack's onExpanderChange: the module on ``event.side`` (0 left, 1 right) changed. Rack's does nothing.
+
+
+
+   .. py:method:: module_to_json() -> rackpy.types.JSON
+
+      Rack's ``Module::toJson`` (``Engine::moduleToJson`` calls it); needs a model, see :meth:`create`.
+
+
+
+   .. py:method:: module_from_json(data: rackpy.types.JSON) -> None
+
+      Rack's ``Module::fromJson``: checks the model, then parameters, bypass, expanders and data.
+
+
+
+   .. py:method:: params_to_json() -> rackpy.types.JSON
+
+      Rack's ``Module::paramsToJson``.
+
+
+
+   .. py:method:: params_from_json(data: rackpy.types.JSON) -> None
+
+      Rack's ``Module::paramsFromJson``.
+
+
+
+   .. py:method:: data_to_json() -> rackpy.types.JSON
+
+      Rack's ``Module::dataToJson``: here, the ``to_json`` data handler.
+
+
+
+   .. py:method:: data_from_json(data: rackpy.types.JSON) -> None
+
+      Rack's ``Module::dataFromJson``: here, the ``from_json`` data handler.
+
+
+
+   .. py:method:: create(model: rackpy.raw.plugin.Model | None = None) -> Self
+      :classmethod:
+
+
+      A new laboratory module of this class, configured; put ``instance.module`` on a :class:`Bench`.
+
+      ``model`` only names the module in Rack's JSON (Rack's ``toJson`` and
+      ``fromJson`` need one); Rack still never creates or runs it. Raises
+      :class:`~rackpy.errors.LaboratoryError` unless the laboratory is enabled. Main thread.
+
+
+
+.. py:class:: Quantity
+
+
+
+   ``rack::Quantity`` whose value and range methods a subclass may override, offline.
+
+   Rack's own code that calls them (display values, ``reset``, ``randomize``,
+   scaled values, the display string) reaches the override synchronously.
+   Creating one needs :func:`enable`. Main thread.
+
+
+.. py:class:: ParamQuantity
+
+
+
+   ``rack::engine::ParamQuantity`` whose value and range methods a subclass may override, offline.
+
+   Only a laboratory module takes one as ``config_param(..., quantity_type=...)``
+   or in its ``param_quantities``: Rack's engine can call an ordinary
+   module's quantities on its own threads. Rack's code calling them
+   (``paramsToJson``, reset, randomize, display) reaches the override
+   synchronously. Creating one needs :func:`enable`.
+
+
+.. py:class:: SwitchQuantity
+
+
+
+   ``rack::engine::SwitchQuantity`` with laboratory value methods; see :class:`ParamQuantity`.
+
+
+.. py:data:: MidiGenerator
+
+   ``MidiGenerator[N]``: Rack's ``dsp::MidiGenerator<N>`` whose ``on_message`` a subclass overrides, offline only.
+
+   Rack calls ``MidiGenerator::onMessage`` where a module generates MIDI, on its
+   engine thread, so outside the laboratory RackPy's generator only records the
+   messages (``take_messages()``).
+
+

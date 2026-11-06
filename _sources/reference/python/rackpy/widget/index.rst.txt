@@ -1,0 +1,151 @@
+rackpy.widget
+=============
+
+.. py:module:: rackpy.widget
+
+.. autoapi-nested-parse::
+
+   Detached widget-tree groundwork, usable only in Rack's live UI context.
+
+   WidgetNode is a native-only checked adapter, not a subclassable Rack Widget.
+   Subclassable widgets, events, drawing and the typed bases are in
+   :mod:`rackpy.raw.widget` (``Widget`` and its variants); :mod:`rackpy.drawing` draws in their
+   callbacks.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.widget.WidgetNode
+
+
+Module Contents
+---------------
+
+.. py:class:: WidgetNode
+
+   Detached native-only tree adapter; not the complete Widget binding.
+
+
+   .. py:method:: create() -> WidgetNode
+      :staticmethod:
+
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: box
+      :type: WidgetBoxView
+
+
+
+   .. py:property:: visible
+      :type: bool
+
+
+
+   .. py:property:: parent
+      :type: WidgetNode | None
+
+
+
+   .. py:property:: children
+      :type: tuple[WidgetNode, ...]
+
+
+
+   .. py:method:: close() -> None
+
+
+   .. py:method:: add_child(child: WidgetNode) -> None
+
+
+   .. py:method:: add_child_bottom(child: WidgetNode) -> None
+
+
+   .. py:method:: add_child_above(child: WidgetNode, sibling: WidgetNode) -> None
+
+
+   .. py:method:: add_child_below(child: WidgetNode, sibling: WidgetNode) -> None
+
+
+   .. py:method:: remove_child(child: WidgetNode) -> None
+
+
+   .. py:method:: clear_children() -> None
+
+
+   .. py:method:: request_delete() -> None
+
+
+   .. py:property:: requested_delete
+      :type: bool
+
+
+
+   .. py:method:: step() -> None
+
+
+   .. py:method:: has_child(child: WidgetNode) -> bool
+
+
+   .. py:method:: get_box() -> rackpy.raw.math.Rect
+
+
+   .. py:method:: set_box(box: rackpy.raw.math.Rect) -> None
+
+
+   .. py:method:: is_visible() -> bool
+
+
+   .. py:method:: set_visible(visible: bool) -> None
+
+
+   .. py:method:: get_children_bounding_box() -> rackpy.raw.math.Rect
+
+
+   .. py:method:: get_visible_children_bounding_box() -> rackpy.raw.math.Rect
+
+
+   .. py:method:: get_position() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: set_position(position: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: get_size() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: set_size(size: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: hide() -> None
+
+
+   .. py:method:: show() -> None
+
+
+   .. py:method:: is_descendant_of(ancestor: WidgetNode | None) -> bool
+
+
+   .. py:method:: get_absolute_offset(position: rackpy.raw.math.Vec) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_relative_offset(position: rackpy.raw.math.Vec, ancestor: WidgetNode | None) -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_absolute_zoom() -> float
+
+
+   .. py:method:: get_relative_zoom(ancestor: WidgetNode | None) -> float
+
+
+   .. py:method:: get_viewport(rect: rackpy.raw.math.Rect = ...) -> rackpy.raw.math.Rect
+
+

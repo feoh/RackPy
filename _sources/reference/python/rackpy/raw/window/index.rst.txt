@@ -1,0 +1,243 @@
+rackpy.raw.window
+=================
+
+.. py:module:: rackpy.raw.window
+
+.. autoapi-nested-parse::
+
+   rack::window: the OS window, its NanoVG resources (Font, Image, Svg) and unit helpers.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.window.SVG_DPI
+   rackpy.raw.window.MM_PER_IN
+   rackpy.raw.window.SVG
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.window.NativeHandle
+   rackpy.raw.window.Svg
+   rackpy.raw.window.Font
+   rackpy.raw.window.Image
+   rackpy.raw.window.Window
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.window.in2px
+   rackpy.raw.window.mm2px
+   rackpy.raw.window.svg_draw
+
+
+Module Contents
+---------------
+
+.. py:data:: SVG_DPI
+   :type:  float
+
+.. py:data:: MM_PER_IN
+   :type:  float
+
+.. py:function:: in2px(inches: float) -> float
+                 in2px(inches: rackpy.raw.math.Vec) -> rackpy.raw.math.Vec
+
+.. py:function:: mm2px(mm: float) -> float
+                 mm2px(mm: rackpy.raw.math.Vec) -> rackpy.raw.math.Vec
+
+.. py:class:: NativeHandle
+
+   .. py:property:: kind
+      :type: str
+
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+.. py:class:: Svg
+
+   .. py:method:: load(filename: str) -> Svg | None
+      :staticmethod:
+
+
+
+   .. py:method:: load_file(filename: str) -> None
+
+
+   .. py:method:: load_string(data: str) -> None
+
+
+   .. py:method:: get_size() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_num_shapes() -> int
+
+
+   .. py:method:: get_num_paths() -> int
+
+
+   .. py:method:: get_num_points() -> int
+
+
+   .. py:method:: draw(graphics: rackpy.raw.widget.GraphicsContext) -> None
+
+
+   .. py:property:: handle
+      :type: NativeHandle | None
+
+
+
+.. py:data:: SVG
+
+.. py:function:: svg_draw(vg: rackpy.raw.widget.GraphicsContext, svg: NativeHandle) -> None
+
+.. py:class:: Font
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: handle
+      :type: int
+
+
+
+   .. py:property:: vg
+      :type: NativeHandle | None
+
+
+
+   .. py:method:: load_file(filename: str, vg: NativeHandle | rackpy.raw.widget.GraphicsContext) -> None
+
+
+   .. py:method:: load(filename: str) -> Font | None
+      :staticmethod:
+
+
+
+.. py:class:: Image
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: handle
+      :type: int
+
+
+
+   .. py:property:: vg
+      :type: NativeHandle | None
+
+
+
+   .. py:method:: load_file(filename: str, vg: NativeHandle | rackpy.raw.widget.GraphicsContext) -> None
+
+
+   .. py:method:: load(filename: str) -> Image | None
+      :staticmethod:
+
+
+
+.. py:class:: Window
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: win
+      :type: NativeHandle
+
+
+
+   .. py:property:: vg
+      :type: NativeHandle | None
+
+
+
+   .. py:property:: fb_vg
+      :type: NativeHandle | None
+
+
+
+   .. py:attribute:: pixel_ratio
+      :type:  float
+
+
+   .. py:attribute:: window_ratio
+      :type:  float
+
+
+   .. py:property:: ui_font
+      :type: Font | None
+
+
+
+   .. py:method:: get_size() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: set_size(size: rackpy.raw.math.Vec) -> None
+
+
+   .. py:method:: close() -> None
+
+
+   .. py:method:: cursor_lock() -> None
+
+
+   .. py:method:: cursor_unlock() -> None
+
+
+   .. py:method:: is_cursor_locked() -> bool
+
+
+   .. py:method:: get_mods() -> int
+
+
+   .. py:method:: set_full_screen(full_screen: bool) -> None
+
+
+   .. py:method:: is_full_screen() -> bool
+
+
+   .. py:method:: get_monitor_refresh_rate() -> float
+
+
+   .. py:method:: get_frame_time() -> float
+
+
+   .. py:method:: get_last_frame_duration() -> float
+
+
+   .. py:method:: get_frame_duration_remaining() -> float
+
+
+   .. py:method:: load_font(filename: str) -> Font | None
+
+
+   .. py:method:: load_font_without_fallbacks(filename: str) -> Font | None
+
+
+   .. py:method:: load_image(filename: str) -> Image | None
+
+
+   .. py:method:: load_svg(filename: str) -> Svg | None
+
+

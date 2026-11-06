@@ -1,0 +1,423 @@
+rackpy.raw.audio
+================
+
+.. py:module:: rackpy.raw.audio
+
+.. autoapi-nested-parse::
+
+   rack::audio: Rack's audio drivers and devices, and Python-owned audio ports.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.audio.Driver
+   rackpy.raw.audio.PortView
+   rackpy.raw.audio.ProcessMutexGuard
+   rackpy.raw.audio.ProcessMutex
+   rackpy.raw.audio.Device
+   rackpy.raw.audio.Port
+   rackpy.raw.audio.PythonDevice
+   rackpy.raw.audio.PythonDriver
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.audio.add_driver
+   rackpy.raw.audio.get_driver_ids
+   rackpy.raw.audio.get_driver
+
+
+Module Contents
+---------------
+
+.. py:class:: Driver
+
+   One of Rack's audio drivers, by its ID.
+
+
+   .. py:property:: id
+      :type: int
+
+
+
+   .. py:method:: get_name() -> str
+
+
+   .. py:method:: get_device_ids() -> list[int]
+
+
+   .. py:method:: get_default_device_id() -> int
+
+
+   .. py:method:: get_device_name(device_id: int) -> str
+
+
+   .. py:method:: get_device_num_inputs(device_id: int) -> int
+
+
+   .. py:method:: get_device_num_outputs(device_id: int) -> int
+
+
+   .. py:method:: subscribe(device_id: int, port: Port) -> Device | None
+
+
+   .. py:method:: unsubscribe(device_id: int, port: Port) -> None
+
+
+.. py:class:: PortView
+
+   A port Python did not make (a module's), listed by a device's subscribers; read-only.
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: driver_id
+      :type: int
+
+
+
+   .. py:property:: device_id
+      :type: int
+
+
+
+   .. py:property:: input_offset
+      :type: int
+
+
+
+   .. py:property:: output_offset
+      :type: int
+
+
+
+   .. py:property:: max_inputs
+      :type: int
+
+
+
+   .. py:property:: max_outputs
+      :type: int
+
+
+
+.. py:class:: ProcessMutexGuard
+
+   RAII guard for a device's process mutex; use and release on the acquiring UI thread.
+
+
+   .. py:property:: owns_lock
+      :type: bool
+
+
+
+   .. py:method:: release() -> None
+
+
+.. py:class:: ProcessMutex
+
+   Lifetime-checked view of Rack's audio device process mutex.
+
+
+   .. py:method:: acquire() -> ProcessMutexGuard
+
+
+   .. py:method:: try_acquire() -> ProcessMutexGuard | None
+
+
+.. py:class:: Device
+
+   An audio device, through the Python port that holds it.
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:method:: get_name() -> str
+
+
+   .. py:method:: get_num_inputs() -> int
+
+
+   .. py:method:: get_num_outputs() -> int
+
+
+   .. py:method:: get_sample_rates() -> list[float]
+
+
+   .. py:method:: get_sample_rate() -> float
+
+
+   .. py:method:: set_sample_rate(sample_rate: float) -> None
+
+
+   .. py:method:: get_block_sizes() -> list[int]
+
+
+   .. py:method:: get_block_size() -> int
+
+
+   .. py:method:: set_block_size(block_size: int) -> None
+
+
+   .. py:property:: process_mutex
+      :type: ProcessMutex
+
+
+
+   .. py:property:: subscribed
+      :type: list[Port | PortView]
+
+
+
+   .. py:method:: subscribe(port: Port) -> None
+
+
+   .. py:method:: unsubscribe(port: Port) -> None
+
+
+.. py:class:: Port
+
+   Rack's audio port. Python owns it; main thread, in Rack's live UI context.
+
+
+   .. py:attribute:: input_offset
+      :type:  int
+
+
+   .. py:attribute:: output_offset
+      :type:  int
+
+
+   .. py:attribute:: max_inputs
+      :type:  int
+
+
+   .. py:attribute:: max_outputs
+      :type:  int
+
+
+   .. py:property:: driver_id
+      :type: int
+
+
+
+   .. py:property:: device_id
+      :type: int
+
+
+
+   .. py:property:: driver
+      :type: Driver | None
+
+
+
+   .. py:property:: device
+      :type: Device | None
+
+
+
+   .. py:property:: context
+      :type: rackpy.raw.Context | None
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: get_driver() -> Driver | None
+
+
+   .. py:method:: get_driver_id() -> int
+
+
+   .. py:method:: set_driver_id(driver_id: int) -> None
+
+
+   .. py:method:: get_driver_name() -> str
+
+
+   .. py:method:: get_device() -> Device | None
+
+
+   .. py:method:: get_device_ids() -> list[int]
+
+
+   .. py:method:: get_device_id() -> int
+
+
+   .. py:method:: set_device_id(device_id: int) -> None
+
+
+   .. py:method:: get_device_num_inputs(device_id: int) -> int
+
+
+   .. py:method:: get_device_num_outputs(device_id: int) -> int
+
+
+   .. py:method:: get_device_name(device_id: int) -> str
+
+
+   .. py:method:: get_sample_rates() -> list[float]
+
+
+   .. py:method:: get_sample_rate() -> float
+
+
+   .. py:method:: set_sample_rate(sample_rate: float) -> None
+
+
+   .. py:method:: get_block_sizes() -> list[int]
+
+
+   .. py:method:: get_block_size() -> int
+
+
+   .. py:method:: set_block_size(block_size: int) -> None
+
+
+   .. py:method:: get_num_inputs() -> int
+
+
+   .. py:method:: get_num_outputs() -> int
+
+
+   .. py:method:: to_json() -> Any
+
+
+   .. py:method:: from_json(data: Any) -> None
+
+
+   .. py:method:: process_buffer(input: Any, input_stride: int, output: Any, output_stride: int, frames: int) -> None
+
+
+   .. py:method:: process_input(input: Any, input_stride: int, frames: int) -> None
+
+
+   .. py:method:: process_output(output: Any, output_stride: int, frames: int) -> None
+
+
+   .. py:method:: on_start_stream() -> None
+
+
+   .. py:method:: on_stop_stream() -> None
+
+
+   .. py:property:: stream_stats
+      :type: dict[str, int]
+
+
+
+.. py:class:: PythonDevice
+
+   An audio device of a PythonDriver: Rack's ports subscribe to it, and Python drives its stream.
+
+
+   .. py:property:: id
+      :type: int
+
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: removed
+      :type: bool
+
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: num_inputs
+      :type:  int
+
+
+   .. py:attribute:: num_outputs
+      :type:  int
+
+
+   .. py:attribute:: sample_rates
+      :type:  list[float]
+
+
+   .. py:attribute:: sample_rate
+      :type:  float
+
+
+   .. py:attribute:: block_sizes
+      :type:  list[int]
+
+
+   .. py:attribute:: block_size
+      :type:  int
+
+
+   .. py:property:: subscribed
+      :type: list[Port | PortView]
+
+
+
+   .. py:method:: take_requests() -> list[tuple[str, float]]
+
+
+   .. py:method:: start_stream() -> None
+
+
+   .. py:method:: stop_stream() -> None
+
+
+   .. py:method:: process_buffer(input: Any, input_stride: int, output: Any, output_stride: int, frames: int) -> None
+
+
+.. py:class:: PythonDriver(name: str)
+
+   An audio driver Python configures; add_driver gives it to Rack.
+
+
+   .. py:property:: registered_id
+      :type: int
+
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: default_device_id
+      :type:  int
+
+
+   .. py:method:: add_device(name: str, num_inputs: int = 2, num_outputs: int = 2, sample_rates: list[float] = ..., sample_rate: float = 48000.0, block_sizes: list[int] = ..., block_size: int = 256) -> PythonDevice
+
+
+   .. py:method:: remove_device(device: PythonDevice) -> None
+
+
+   .. py:method:: get_device_ids() -> list[int]
+
+
+   .. py:method:: get_device(device_id: int) -> PythonDevice | None
+
+
+.. py:function:: add_driver(driver_id: int, driver: PythonDriver) -> None
+
+.. py:function:: get_driver_ids() -> list[int]
+
+.. py:function:: get_driver(driver_id: int) -> Driver | None
+

@@ -1,0 +1,71 @@
+rackpy.services.system
+======================
+
+.. py:module:: rackpy.services.system
+
+.. autoapi-nested-parse::
+
+   Files, directories and archives with ``pathlib`` paths, over :mod:`rackpy.raw.system`.
+
+   Everything here blocks the calling thread (with the GIL released while Rack works) and raises
+   Rack's ``Exception`` where Rack does. :func:`unarchive` checks an archive's entries before Rack
+   unpacks it, because Rack 2.6.6 follows ``../`` entries out of the target directory.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.services.system.read_bytes
+   rackpy.services.system.write_bytes
+   rackpy.services.system.entries
+   rackpy.services.system.temp_directory
+   rackpy.services.system.archive
+   rackpy.services.system.unarchive
+   rackpy.services.system.open_url
+
+
+Module Contents
+---------------
+
+.. py:function:: read_bytes(path: str | os.PathLike[str]) -> bytes
+
+   The file's bytes (Rack's readFile).
+
+
+.. py:function:: write_bytes(path: str | os.PathLike[str], data: bytes) -> None
+
+   Writes the bytes, replacing the file (Rack's writeFile).
+
+
+.. py:function:: entries(directory: str | os.PathLike[str], *, depth: int = 0) -> list[pathlib.Path]
+
+   The directory's entries as paths (depth -1: all the way down).
+
+
+.. py:function:: temp_directory() -> pathlib.Path
+
+   The system's temporary directory.
+
+
+.. py:function:: archive(directory: str | os.PathLike[str], to: str | os.PathLike[str] | None = None, *, level: int = 1) -> bytes | None
+
+   The directory's contents as a .tar.zst: written to ``to``, or returned as bytes.
+
+
+.. py:function:: unarchive(source: str | os.PathLike[str] | bytes, directory: str | os.PathLike[str], *, trust: bool = False) -> None
+
+   Unpacks a .tar.zst (a path or bytes) into the directory, with Rack's unarchiver.
+
+   Unless ``trust`` is set, the entries are checked first: an absolute or ``../`` path, or a link
+   pointing out of the directory, raises ``ValueError`` before anything is written. As in Rack, a
+   zero-byte file in the archive deletes the existing file.
+
+
+.. py:function:: open_url(url: str) -> None
+
+   Opens the URL with the desktop's handler, without blocking (Rack's openBrowser).
+
+

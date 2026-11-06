@@ -1,0 +1,48 @@
+rackpy.raw.asset
+================
+
+.. py:module:: rackpy.raw.asset
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.asset.systemDir
+   rackpy.raw.asset.userDir
+   rackpy.raw.asset.oldUserDir
+   rackpy.raw.asset.bundlePath
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.asset.system
+   rackpy.raw.asset.user
+   rackpy.raw.asset.plugin
+
+
+Module Contents
+---------------
+
+.. py:data:: systemDir
+   :type:  str
+
+.. py:data:: userDir
+   :type:  str
+
+.. py:data:: oldUserDir
+   :type:  str
+
+.. py:data:: bundlePath
+   :type:  str
+
+.. py:function:: system(filename: str = '') -> str
+
+.. py:function:: user(filename: str = '') -> str
+
+.. py:function:: plugin(plugin: rackpy.raw.plugin.Plugin, filename: str = '') -> str
+

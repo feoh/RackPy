@@ -1,0 +1,1158 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Plugins and models" href="plugin.html"><link rel="prev" title="SIMD: four lanes at a time" href="simd.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>DSP building blocks - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Reference</a><input aria-label="Toggle navigation of Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="python/rackpy/index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/laboratory/index.html">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="python/rackpy/services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="python/rackpy/services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python/rackpy/widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/reference/dsp.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/reference/dsp.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="dsp-building-blocks">
+<h1>DSP building blocks<a class="headerlink" href="#dsp-building-blocks" title="Link to this heading">¶</a></h1>
+<p>Rack’s <code class="docutils literal notranslate"><span class="pre">dsp</span></code> headers, family 6 of the <a class="reference internal" href="surface/dsp.html"><span class="std std-doc">SDK surface</span></a>
+(<strong>RP-18</strong>, in slices). <strong>Implemented, Linux x86_64 inside Rack Free 2.6.6:</strong>
+<code class="docutils literal notranslate"><span class="pre">dsp/common.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">approx.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">convert.hpp</span></code>, <code class="docutils literal notranslate"><span class="pre">window.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">ode.hpp</span></code>
+(RP-18A), <code class="docutils literal notranslate"><span class="pre">dsp/digital.hpp</span></code> (RP-18B), <code class="docutils literal notranslate"><span class="pre">dsp/filter.hpp</span></code> (RP-18C), and
+<code class="docutils literal notranslate"><span class="pre">dsp/vumeter.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">dsp/midi.hpp</span></code> (RP-18D), <code class="docutils literal notranslate"><span class="pre">dsp/fft.hpp</span></code> and
+<code class="docutils literal notranslate"><span class="pre">dsp/fir.hpp</span></code> (RP-19A), <code class="docutils literal notranslate"><span class="pre">dsp/minblep.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">dsp/resampler.hpp</span></code>
+(RP-19B), and <code class="docutils literal notranslate"><span class="pre">dsp/ringbuffer.hpp</span></code> (RP-19C), as <code class="docutils literal notranslate"><span class="pre">rackpy.raw.dsp</span></code> and the
+<a class="reference internal" href="python/rackpy/dsp/basic/index.html#module-rackpy.dsp.basic" title="rackpy.dsp.basic"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rackpy.dsp.basic</span></code></a>, <a class="reference internal" href="python/rackpy/dsp/digital/index.html#module-rackpy.dsp.digital" title="rackpy.dsp.digital"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rackpy.dsp.digital</span></code></a>,
+<a class="reference internal" href="python/rackpy/dsp/filters/index.html#module-rackpy.dsp.filters" title="rackpy.dsp.filters"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rackpy.dsp.filters</span></code></a>, <a class="reference internal" href="python/rackpy/dsp/midi/index.html#module-rackpy.dsp.midi" title="rackpy.dsp.midi"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rackpy.dsp.midi</span></code></a>,
+<a class="reference internal" href="python/rackpy/dsp/fft/index.html#module-rackpy.dsp.fft" title="rackpy.dsp.fft"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rackpy.dsp.fft</span></code></a>, <a class="reference internal" href="python/rackpy/dsp/resampling/index.html#module-rackpy.dsp.resampling" title="rackpy.dsp.resampling"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rackpy.dsp.resampling</span></code></a> and
+<a class="reference internal" href="python/rackpy/dsp/ringbuffer/index.html#module-rackpy.dsp.ringbuffer" title="rackpy.dsp.ringbuffer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rackpy.dsp.ringbuffer</span></code></a> imports (see the
+<a class="reference internal" href="coverage.html"><span class="std std-doc">coverage report</span></a>).</p>
+<p>Every function runs <strong>Rack’s own C++ code</strong>, compiled with the SDK’s flags.
+<code class="docutils literal notranslate"><span class="pre">tests/dsp</span></code> replays more than 4,000 cases from a compiled C++ reference
+(<code class="docutils literal notranslate"><span class="pre">native/tests/dsp_reference.cpp</span></code>) through these bindings, inside Rack, and
+requires identical results, with the sign of a zero and NaN payloads ignored,
+as for the <a class="reference internal" href="values.html#numbers-cross-as-c-numbers"><span class="std std-ref">values</span></a>. As for
+<a class="reference internal" href="simd.html"><span class="std std-doc">SIMD</span></a>, the reference and the bindings call Rack’s functions through
+the same out-of-line wrappers (<code class="docutils literal notranslate"><span class="pre">native/bindings/dsp/calls.hpp</span></code>), because the
+SDK’s <code class="docutils literal notranslate"><span class="pre">-funsafe-math-optimizations</span></code> let the compiler round Rack’s inline code
+differently at each call site.</p>
+<div class="note admonition">
+<p class="admonition-title">Design and analysis, not audio</p>
+<p>A Python call costs far more than the sample it computes. Use these to design
+and test DSP, to fill tables and to analyse signals; per-sample audio belongs
+in a native kernel (<a class="reference internal" href="../how-to/dsp.html"><span class="std std-doc">process audio</span></a>), where C++ uses
+<code class="docutils literal notranslate"><span class="pre">rack::dsp</span></code> directly.</p>
+</div>
+<section id="templates">
+<span id="dsp-templates"></span><h2>Templates<a class="headerlink" href="#templates" title="Link to this heading">¶</a></h2>
+<p>Most of these are C++ templates over an element type <code class="docutils literal notranslate"><span class="pre">T</span></code>. RackPy instantiates
+them for <strong><code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">float</span></code> and <code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">simd::float_4</span></code></strong>, Rack’s two sample types: a
+Python float picks the <code class="docutils literal notranslate"><span class="pre">float</span></code> instantiation, a
+<a class="reference internal" href="simd.html#vectors-float-4-and-int32-4"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">float_4</span></code></span></a> the vector one, and a
+scalar mixed with a vector broadcasts, as in <code class="docutils literal notranslate"><span class="pre">rackpy.raw.simd</span></code>.</p>
+<p>Templates over a <strong>compile-time integer</strong> cannot follow Python’s values
+freely, because C++ instantiates one function per value. RackPy’s contract:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">poly_direct</span></code>, <code class="docutils literal notranslate"><span class="pre">poly_horner</span></code> and <code class="docutils literal notranslate"><span class="pre">poly_estrin</span></code> (<code class="docutils literal notranslate"><span class="pre">&lt;T,</span> <span class="pre">N&gt;</span></code>, with <code class="docutils literal notranslate"><span class="pre">N</span></code> the
+number of coefficients) are instantiated for <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">=</span> <span class="pre">1</span></code> to <code class="docutils literal notranslate"><span class="pre">32</span></code>. More
+coefficients raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>; none raises too, as C++ has no
+zero-length arrays.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IIRFilter&lt;B_ORDER,</span> <span class="pre">A_ORDER,</span> <span class="pre">T&gt;</span></code> is instantiated for both orders from 2 to
+8 (<a class="reference internal" href="#iir-filters">below</a>). Below 2, Rack’s <code class="docutils literal notranslate"><span class="pre">process()</span></code> writes past a
+zero-length array, so those orders are refused rather than offered.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MidiGenerator&lt;CHANNELS&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">MidiParser&lt;MAX_CHANNELS&gt;</span></code> are instantiated
+for 1 to 16 channels, Rack’s limit for ports and MIDI channels
+(<a class="reference internal" href="#midi-generator">below</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MinBlepGenerator&lt;Z,</span> <span class="pre">O,</span> <span class="pre">T&gt;</span></code> for <code class="docutils literal notranslate"><span class="pre">Z</span></code> and <code class="docutils literal notranslate"><span class="pre">O</span></code> = 4, 8, 16, 32, 64;
+<code class="docutils literal notranslate"><span class="pre">Decimator&lt;OVERSAMPLE,</span> <span class="pre">QUALITY,</span> <span class="pre">T&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">Upsampler&lt;OVERSAMPLE,</span> <span class="pre">QUALITY&gt;</span></code>
+for 2, 4, 8, 16, 32; <code class="docutils literal notranslate"><span class="pre">SampleRateConverter&lt;MAX_CHANNELS&gt;</span></code> for 1 to 16
+(<a class="reference internal" href="#minblep">below</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RingBuffer&lt;T,</span> <span class="pre">S&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">DoubleRingBuffer&lt;T,</span> <span class="pre">S&gt;</span></code> for <code class="docutils literal notranslate"><span class="pre">S</span></code> = 16 to 32768 and
+<code class="docutils literal notranslate"><span class="pre">AppleRingBuffer&lt;T,</span> <span class="pre">S,</span> <span class="pre">N&gt;</span></code> for <code class="docutils literal notranslate"><span class="pre">S</span></code> = 16 to 4096 with <code class="docutils literal notranslate"><span class="pre">N</span></code> = 16 <code class="docutils literal notranslate"><span class="pre">S</span></code> (powers
+of 2), each for <code class="docutils literal notranslate"><span class="pre">T</span></code> = float, float_4, <code class="docutils literal notranslate"><span class="pre">Frame&lt;2&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">Frame&lt;8&gt;</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Frame&lt;16&gt;</span></code>: the generic contract coverage policy 10 asks for
+(<a class="reference internal" href="#ring-buffers">below</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Frame&lt;CHANNELS,</span> <span class="pre">T&gt;</span></code> is plain data, so it is written in Python and takes any
+<code class="docutils literal notranslate"><span class="pre">CHANNELS</span></code> from 1 (<a class="reference internal" href="#frames">below</a>).</p></li>
+</ul>
+<p><strong>Approved by the owner (2026-10-26):</strong> the sample-rate converter’s 1 to 16
+channels, the MinBLEP, decimator and upsampler sizes, and the ring buffers’
+element types and sizes.</p>
+<p><strong>Approved by the owner (2026-10-27):</strong> the <code class="docutils literal notranslate"><span class="pre">poly*</span></code> bound of 1 to 32
+coefficients for <code class="docutils literal notranslate"><span class="pre">float</span></code> and <code class="docutils literal notranslate"><span class="pre">float_4</span></code>, the <code class="docutils literal notranslate"><span class="pre">IIRFilter</span></code> orders 2 to 8 for
+<code class="docutils literal notranslate"><span class="pre">float</span></code> and <code class="docutils literal notranslate"><span class="pre">float_4</span></code>, and the MIDI processors’ 1 to 16 channels. These
+instantiation sets are the contracts for coverage policy 10
+(<a class="reference internal" href="../coverage.html#release-bar"><span class="std std-ref">release bar</span></a>).</p>
+</section>
+<section id="constants-conversions-and-scalings">
+<span id="dsp-common"></span><h2>Constants, conversions and scalings<a class="headerlink" href="#constants-conversions-and-scalings" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">FREQ_C4</span></code> (261.6256 Hz), <code class="docutils literal notranslate"><span class="pre">FREQ_A4</span></code> (440 Hz) and <code class="docutils literal notranslate"><span class="pre">FREQ_SEMITONE</span></code> (the ratio
+of a semitone), as C++ floats.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sinc(x)</span></code>: the normalized sinc, <code class="docutils literal notranslate"><span class="pre">sin(πx)/(πx)</span></code> with <code class="docutils literal notranslate"><span class="pre">sinc(0)</span> <span class="pre">=</span> <span class="pre">1</span></code>. For a
+float, C++ calls its <code class="docutils literal notranslate"><span class="pre">sinc(float)</span></code> overload; for a <code class="docutils literal notranslate"><span class="pre">float_4</span></code>, the template.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amplitude_to_db(amp)</span></code> is <code class="docutils literal notranslate"><span class="pre">20</span> <span class="pre">log10(amp)</span></code> and <code class="docutils literal notranslate"><span class="pre">db_to_amplitude(db)</span></code> is
+<code class="docutils literal notranslate"><span class="pre">10**(db/20)</span></code>.</p></li>
+<li><p>Parameter scalings: <code class="docutils literal notranslate"><span class="pre">quadratic_bipolar(x)</span></code> (<code class="docutils literal notranslate"><span class="pre">sgn(x)</span> <span class="pre">x²</span></code>), <code class="docutils literal notranslate"><span class="pre">cubic</span></code>,
+<code class="docutils literal notranslate"><span class="pre">quartic_bipolar</span></code>, <code class="docutils literal notranslate"><span class="pre">quintic</span></code>, <code class="docutils literal notranslate"><span class="pre">sqrt_bipolar(x)</span></code> (<code class="docutils literal notranslate"><span class="pre">sgn(x)</span> <span class="pre">√x</span></code>; Rack takes
+the root of the signed value, so it is NaN for <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;</span> <span class="pre">0</span></code>) and
+<code class="docutils literal notranslate"><span class="pre">exponential_bipolar(b,</span> <span class="pre">x)</span></code> (<code class="docutils literal notranslate"><span class="pre">(bˣ</span> <span class="pre">-</span> <span class="pre">b⁻ˣ)/(b</span> <span class="pre">-</span> <span class="pre">1/b)</span></code>, which Rack calls slow).</p></li>
+</ul>
+</section>
+<section id="polynomials-and-fast-powers-of-two">
+<span id="dsp-approx"></span><h2>Polynomials and fast powers of two<a class="headerlink" href="#polynomials-and-fast-powers-of-two" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">poly_direct(a,</span> <span class="pre">x)</span></code>, <code class="docutils literal notranslate"><span class="pre">poly_horner(a,</span> <span class="pre">x)</span></code> and <code class="docutils literal notranslate"><span class="pre">poly_estrin(a,</span> <span class="pre">x)</span></code> evaluate
+<code class="docutils literal notranslate"><span class="pre">Σ</span> <span class="pre">a[n]</span> <span class="pre">xⁿ</span></code>, directly, by Horner’s method and by Estrin’s scheme. <code class="docutils literal notranslate"><span class="pre">a</span></code> is a
+sequence of coefficients (floats, or float_4s for the vector form; floats
+broadcast). The three can round differently from each other, and
+<code class="docutils literal notranslate"><span class="pre">poly_direct</span></code> and <code class="docutils literal notranslate"><span class="pre">poly_estrin</span></code> also from the same call in your own C++,
+because the compiler may reassociate their sums at each call site: in
+RackPy’s tests, by several ULPs where terms cancel, and once <code class="docutils literal notranslate"><span class="pre">-inf</span></code> against
+NaN.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exp2_floor(x)</span></code> returns <code class="docutils literal notranslate"><span class="pre">(2**floor(x),</span> <span class="pre">the</span> <span class="pre">fraction</span> <span class="pre">of</span> <span class="pre">x)</span></code>; C++ returns the
+fraction through a pointer. <code class="docutils literal notranslate"><span class="pre">exp2_taylor5(x)</span></code> is <code class="docutils literal notranslate"><span class="pre">2**x</span></code> with at most <code class="docutils literal notranslate"><span class="pre">6e-6</span></code>
+relative error. <code class="docutils literal notranslate"><span class="pre">approx_exp2_floor</span></code> and <code class="docutils literal notranslate"><span class="pre">approx_exp2_taylor5</span></code> are Rack’s
+deprecated aliases and emit <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code>.</p></li>
+<li><p><strong>Refused inputs.</strong> For a float, Rack’s <code class="docutils literal notranslate"><span class="pre">exp2Floor</span></code> converts <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">+</span> <span class="pre">127</span></code> to
+an <code class="docutils literal notranslate"><span class="pre">int32_t</span></code> and shifts it left by 23 bits, which is undefined unless the
+sum (in float) is above -1 and below 256. RackPy raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> outside
+that, for <code class="docutils literal notranslate"><span class="pre">exp2_floor</span></code>, <code class="docutils literal notranslate"><span class="pre">exp2_taylor5</span></code> and their aliases. The <code class="docutils literal notranslate"><span class="pre">float_4</span></code>
+forms use SSE conversions and shifts, which are defined for every lane.
+Rack’s comment that the conversion “always truncates towards -inf” holds
+only for <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">-127</span></code>.</p></li>
+</ul>
+</section>
+<section id="sample-conversion">
+<span id="dsp-convert"></span><h2>Sample conversion<a class="headerlink" href="#sample-conversion" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Int24</span></code> is Rack’s packed 3-byte integer: <code class="docutils literal notranslate"><span class="pre">Int24(i)</span></code> keeps the low 24 bits of
+an <code class="docutils literal notranslate"><span class="pre">int32_t</span></code>, sign-extended, as GCC stores Rack’s bit-field (<code class="docutils literal notranslate"><span class="pre">Int24(2**23).i</span></code>
+is <code class="docutils literal notranslate"><span class="pre">-2**23</span></code>). <code class="docutils literal notranslate"><span class="pre">i</span></code> is the field, and <code class="docutils literal notranslate"><span class="pre">int(x)</span></code> is its <code class="docutils literal notranslate"><span class="pre">int32_t</span></code> conversion.
+<code class="docutils literal notranslate"><span class="pre">Int24()</span></code> is 0; Rack leaves it uninitialized.</p>
+<p><code class="docutils literal notranslate"><span class="pre">convert</span></code> is Rack’s function template <code class="docutils literal notranslate"><span class="pre">convert&lt;To,</span> <span class="pre">From&gt;</span></code>, specialized by
+subscripting with Python’s names for the C types: <code class="docutils literal notranslate"><span class="pre">float</span></code> (or
+<code class="docutils literal notranslate"><span class="pre">ctypes.c_float</span></code>), <code class="docutils literal notranslate"><span class="pre">ctypes.c_int8</span></code>, <code class="docutils literal notranslate"><span class="pre">c_int16</span></code>, <code class="docutils literal notranslate"><span class="pre">c_int32</span></code>, <code class="docutils literal notranslate"><span class="pre">c_int64</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Int24</span></code>. Rack deletes the primary template and defines eleven
+specializations, float to and from each integer type and float to float;
+any other pair raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>convert[float, ctypes.c_int16](16384)                 # 0.5
+convert[ctypes.c_int16, float](0.5)                   # 16384
+convert[ctypes.c_int16, float](src, out, len)         # buffers
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>One sample: integers take a Python int in their range (<code class="docutils literal notranslate"><span class="pre">OverflowError</span></code>
+otherwise), floats a float.</p></li>
+<li><p>Buffers: <code class="docutils literal notranslate"><span class="pre">convert[To,</span> <span class="pre">From](in_,</span> <span class="pre">out,</span> <span class="pre">len)</span></code> converts <code class="docutils literal notranslate"><span class="pre">len</span></code> samples, where
+<code class="docutils literal notranslate"><span class="pre">in_</span></code> and <code class="docutils literal notranslate"><span class="pre">out</span></code> are contiguous buffers of the matching item types (an
+<code class="docutils literal notranslate"><span class="pre">Int24</span></code> buffer is single bytes, 3 per sample) and <code class="docutils literal notranslate"><span class="pre">out</span></code> is writable. A short
+buffer raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>. Rack’s loop reads and writes through two pointer
+types, so overlapping buffers of different types raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> (that
+would be undefined); the same type may overlap.</p></li>
+<li><p><strong>Rack’s float-to-integer conversions clamp only above.</strong> They round with
+<code class="docutils literal notranslate"><span class="pre">llround</span></code> and limit the result to the type’s maximum, but a value below the
+type’s minimum is then narrowed by C++, which wraps: <code class="docutils literal notranslate"><span class="pre">convert[c_int8,</span> <span class="pre">float](-1000.0)</span></code> is 0, not -128. NaN gives the narrowing of <code class="docutils literal notranslate"><span class="pre">llround</span></code>’s
+unspecified result. RackPy keeps Rack’s results.</p></li>
+</ul>
+</section>
+<section id="window-functions">
+<span id="dsp-window"></span><h2>Window functions<a class="headerlink" href="#window-functions" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">hann(p)</span></code>, <code class="docutils literal notranslate"><span class="pre">blackman(alpha,</span> <span class="pre">p)</span></code> (Rack suggests <code class="docutils literal notranslate"><span class="pre">alpha</span> <span class="pre">=</span> <span class="pre">0.16</span></code>),
+<code class="docutils literal notranslate"><span class="pre">blackman_nuttall(p)</span></code> and <code class="docutils literal notranslate"><span class="pre">blackman_harris(p)</span></code> are the windows at
+<code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">∈</span> <span class="pre">[0,</span> <span class="pre">1]</span></code>. <code class="docutils literal notranslate"><span class="pre">hann_window(x,</span> <span class="pre">len)</span></code>, <code class="docutils literal notranslate"><span class="pre">blackman_window(alpha,</span> <span class="pre">x,</span> <span class="pre">len)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">blackman_nuttall_window(x,</span> <span class="pre">len)</span></code> and <code class="docutils literal notranslate"><span class="pre">blackman_harris_window(x,</span> <span class="pre">len)</span></code>
+multiply the first <code class="docutils literal notranslate"><span class="pre">len</span></code> items of a writable float32 buffer by the window, in
+place, at <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">i</span> <span class="pre">/</span> <span class="pre">(len</span> <span class="pre">-</span> <span class="pre">1)</span></code>. A <code class="docutils literal notranslate"><span class="pre">len</span></code> larger than the buffer raises
+<code class="docutils literal notranslate"><span class="pre">ValueError</span></code>; as in Rack, <code class="docutils literal notranslate"><span class="pre">len</span> <span class="pre">=</span> <span class="pre">1</span></code> divides by zero and multiplies by NaN.</p>
+</section>
+<section id="ode-steps">
+<span id="dsp-ode"></span><h2>ODE steps<a class="headerlink" href="#ode-steps" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">step_euler</span></code>, <code class="docutils literal notranslate"><span class="pre">step_rk2</span></code> and <code class="docutils literal notranslate"><span class="pre">step_rk4</span></code> advance <code class="docutils literal notranslate"><span class="pre">dx/dt</span> <span class="pre">=</span> <span class="pre">f(t,</span> <span class="pre">x)</span></code> by one step
+of <code class="docutils literal notranslate"><span class="pre">dt</span></code>, updating <code class="docutils literal notranslate"><span class="pre">x</span></code> in place, with Rack’s code:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>step_rk4(t, dt, x, len, f)        # f(t, x, dxdt) fills dxdt
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>For <code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">x</span></code> is a writable float32 buffer with at least <code class="docutils literal notranslate"><span class="pre">len</span></code>
+values; <code class="docutils literal notranslate"><span class="pre">t</span></code> and <code class="docutils literal notranslate"><span class="pre">dt</span></code> are floats. For <code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">float_4</span></code>, <code class="docutils literal notranslate"><span class="pre">x</span></code> is a list of
+<code class="docutils literal notranslate"><span class="pre">float_4</span></code>, updated in place (the same vector objects change), and <code class="docutils literal notranslate"><span class="pre">t</span></code> and
+<code class="docutils literal notranslate"><span class="pre">dt</span></code> broadcast.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">f</span></code> is called synchronously, 1, 2 or 4 times per step. It gets <strong>copies</strong>:
+<code class="docutils literal notranslate"><span class="pre">x</span></code> as a read-only <code class="docutils literal notranslate"><span class="pre">memoryview</span></code> (a <code class="docutils literal notranslate"><span class="pre">tuple</span></code> of vectors for <code class="docutils literal notranslate"><span class="pre">float_4</span></code>) and
+<code class="docutils literal notranslate"><span class="pre">dxdt</span></code> as a zeroed <code class="docutils literal notranslate"><span class="pre">array('f')</span></code> (a <code class="docutils literal notranslate"><span class="pre">list</span></code> of zero vectors) for it to fill;
+RackPy copies <code class="docutils literal notranslate"><span class="pre">dxdt</span></code> back into Rack’s arrays when <code class="docutils literal notranslate"><span class="pre">f</span></code> returns. Rack’s stack
+arrays therefore never reach Python, and what <code class="docutils literal notranslate"><span class="pre">f</span></code> keeps stays valid. Rack
+leaves <code class="docutils literal notranslate"><span class="pre">dxdt</span></code> uninitialized; RackPy zeroes it.</p></li>
+<li><p>An exception from <code class="docutils literal notranslate"><span class="pre">f</span></code> propagates to the caller. The steppers update <code class="docutils literal notranslate"><span class="pre">x</span></code>
+only after their last call to <code class="docutils literal notranslate"><span class="pre">f</span></code>, so <code class="docutils literal notranslate"><span class="pre">x</span></code> is unchanged then.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">len</span></code> must be 1 to 4096: Rack’s steppers put <code class="docutils literal notranslate"><span class="pre">len</span></code> values per stage on the
+stack, so a <code class="docutils literal notranslate"><span class="pre">len</span></code> below 1 is undefined and a large one would overflow the
+stack.</p></li>
+</ul>
+</section>
+<section id="frames">
+<span id="dsp-frame"></span><h2>Frames<a class="headerlink" href="#frames" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Frame</span></code> is Rack’s <code class="docutils literal notranslate"><span class="pre">Frame&lt;CHANNELS,</span> <span class="pre">T&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">samples[CHANNELS]</span></code>, which Rack’s
+ring buffers and sample-rate converter use for interleaved samples.
+<code class="docutils literal notranslate"><span class="pre">Frame[16]</span></code> is <code class="docutils literal notranslate"><span class="pre">Frame&lt;16&gt;</span></code> (<code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">float</span></code>), and <code class="docutils literal notranslate"><span class="pre">Frame[4,</span> <span class="pre">float_4]</span></code> is
+<code class="docutils literal notranslate"><span class="pre">Frame&lt;4,</span> <span class="pre">simd::float_4&gt;</span></code>. A specialization is a cached class; instantiate it
+to get a frame whose samples start at zero (C++ leaves them uninitialized).</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">frame.samples</span></code> is a live view: a writable float32 <code class="docutils literal notranslate"><span class="pre">memoryview</span></code> for
+<code class="docutils literal notranslate"><span class="pre">float</span></code>, and for <code class="docutils literal notranslate"><span class="pre">float_4</span></code> a view whose items are vectors, read out and
+written in.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">memoryview(frame)</span></code> is the frame’s float32 storage in Rack’s layout
+(<code class="docutils literal notranslate"><span class="pre">CHANNELS</span> <span class="pre">×</span> <span class="pre">4</span></code> floats for <code class="docutils literal notranslate"><span class="pre">float_4</span></code>, lane by lane).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Frame</span></code> itself is not instantiable; <code class="docutils literal notranslate"><span class="pre">CHANNELS</span></code> must be at least 1 and <code class="docutils literal notranslate"><span class="pre">T</span></code>
+must be <code class="docutils literal notranslate"><span class="pre">float</span></code> or <code class="docutils literal notranslate"><span class="pre">float_4</span></code>. A specialization’s <code class="docutils literal notranslate"><span class="pre">CHANNELS</span></code> and <code class="docutils literal notranslate"><span class="pre">type</span></code> are
+its template arguments.</p></li>
+</ul>
+</section>
+<section id="triggers">
+<span id="dsp-triggers"></span><h2>Triggers<a class="headerlink" href="#triggers" title="Link to this heading">¶</a></h2>
+<p>These are Rack’s stateful objects. Each Python object holds Rack’s C++ struct,
+and its methods run Rack’s code; like any Python value, use one from one
+thread at a time. <code class="docutils literal notranslate"><span class="pre">copy.copy</span></code> copies the state; the objects are unhashable.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">BooleanTrigger</span></code> detects a bool turning true. <code class="docutils literal notranslate"><span class="pre">process(in_)</span></code> returns
+whether it did; <code class="docutils literal notranslate"><span class="pre">process_event(in_)</span></code> returns a <code class="docutils literal notranslate"><span class="pre">BooleanTrigger.Event</span></code>:
+<code class="docutils literal notranslate"><span class="pre">TRIGGERED</span></code>, <code class="docutils literal notranslate"><span class="pre">UNTRIGGERED</span></code> (when it turns false) or <code class="docutils literal notranslate"><span class="pre">NONE</span></code>. <code class="docutils literal notranslate"><span class="pre">s</span></code> is the
+<code class="docutils literal notranslate"><span class="pre">BooleanTrigger.State</span></code> (<code class="docutils literal notranslate"><span class="pre">LOW</span></code>, <code class="docutils literal notranslate"><span class="pre">HIGH</span></code>, <code class="docutils literal notranslate"><span class="pre">UNINITIALIZED</span></code>), <code class="docutils literal notranslate"><span class="pre">is_high()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">reset()</span></code> are Rack’s. A new or reset trigger is <code class="docutils literal notranslate"><span class="pre">UNINITIALIZED</span></code>, so a first
+true input does not trigger.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SchmittTrigger</span></code> is Rack’s <code class="docutils literal notranslate"><span class="pre">TSchmittTrigger&lt;float&gt;</span></code> specialization:
+<code class="docutils literal notranslate"><span class="pre">process(in_,</span> <span class="pre">low_threshold=0,</span> <span class="pre">high_threshold=1)</span></code> returns true when the
+input rises from <code class="docutils literal notranslate"><span class="pre">LOW</span></code> to at least the high threshold, and the state falls
+at or below the low one. <code class="docutils literal notranslate"><span class="pre">process_event</span></code> and <code class="docutils literal notranslate"><span class="pre">s</span></code> are as for
+<code class="docutils literal notranslate"><span class="pre">BooleanTrigger</span></code>, with its own <code class="docutils literal notranslate"><span class="pre">State</span></code> and <code class="docutils literal notranslate"><span class="pre">Event</span></code> enums. NaN reaches
+neither threshold, so it changes nothing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TSchmittTrigger[float_4]</span></code> (also named <code class="docutils literal notranslate"><span class="pre">TSchmittTrigger_float_4</span></code>) is Rack’s
+generic template for vectors: <code class="docutils literal notranslate"><span class="pre">process</span></code> returns a mask of the lanes that
+rose, and <code class="docutils literal notranslate"><span class="pre">state</span></code> is the state mask, a live view. Rack resets it to a full
+mask (every lane <code class="docutils literal notranslate"><span class="pre">HIGH</span></code>), unlike the float specialization.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TSchmittTrigger</span></code> is the template itself: <code class="docutils literal notranslate"><span class="pre">TSchmittTrigger[float]</span></code> and
+<code class="docutils literal notranslate"><span class="pre">TSchmittTrigger[()]</span></code> are <code class="docutils literal notranslate"><span class="pre">SchmittTrigger</span></code> (Rack’s alias for
+<code class="docutils literal notranslate"><span class="pre">TSchmittTrigger&lt;&gt;</span></code>); other arguments raise <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>.</p></li>
+<li><p><strong>Deprecated.</strong> Rack’s <code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">state</span></code> member of both float triggers is a union
+with <code class="docutils literal notranslate"><span class="pre">s</span></code>. <code class="docutils literal notranslate"><span class="pre">state</span></code> emits <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code>; it reads true unless <code class="docutils literal notranslate"><span class="pre">s</span></code> is
+<code class="docutils literal notranslate"><span class="pre">LOW</span></code>, which is what the union’s byte means (reading the C++ bool while <code class="docutils literal notranslate"><span class="pre">s</span></code>
+is <code class="docutils literal notranslate"><span class="pre">UNINITIALIZED</span></code> would be undefined), and assigning it sets <code class="docutils literal notranslate"><span class="pre">HIGH</span></code> or
+<code class="docutils literal notranslate"><span class="pre">LOW</span></code>.</p></li>
+</ul>
+</section>
+<section id="pulse-generator">
+<span id="dsp-pulse"></span><h2>Pulse generator<a class="headerlink" href="#pulse-generator" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">PulseGenerator</span></code> holds <code class="docutils literal notranslate"><span class="pre">HIGH</span></code> for a duration: <code class="docutils literal notranslate"><span class="pre">trigger(duration=1e-3)</span></code>
+starts a pulse unless the current one lasts longer, <code class="docutils literal notranslate"><span class="pre">process(delta_time)</span></code>
+advances it and returns whether it was <code class="docutils literal notranslate"><span class="pre">HIGH</span></code> before the step, <code class="docutils literal notranslate"><span class="pre">is_high()</span></code>
+reads it, <code class="docutils literal notranslate"><span class="pre">reset()</span></code> ends it, and <code class="docutils literal notranslate"><span class="pre">remaining</span></code> is the time left.</p>
+</section>
+<section id="timers-and-the-clock-divider">
+<span id="dsp-timers"></span><h2>Timers and the clock divider<a class="headerlink" href="#timers-and-the-clock-divider" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Timer</span></code> (<code class="docutils literal notranslate"><span class="pre">TTimer&lt;float&gt;</span></code>) accumulates <code class="docutils literal notranslate"><span class="pre">process(delta_time)</span></code> and returns the
+time since <code class="docutils literal notranslate"><span class="pre">reset()</span></code>; <code class="docutils literal notranslate"><span class="pre">get_time()</span></code> and <code class="docutils literal notranslate"><span class="pre">time</span></code> read it. <code class="docutils literal notranslate"><span class="pre">TTimer[float_4]</span></code>
+(<code class="docutils literal notranslate"><span class="pre">TTimer_float_4</span></code>) keeps four, with <code class="docutils literal notranslate"><span class="pre">time</span></code> a live view. <code class="docutils literal notranslate"><span class="pre">TTimer</span></code> is the
+template, as for <code class="docutils literal notranslate"><span class="pre">TSchmittTrigger</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ClockDivider.process()</span></code> counts calls and returns true, resetting the count,
+every <code class="docutils literal notranslate"><span class="pre">division</span></code> calls (<code class="docutils literal notranslate"><span class="pre">set_division</span></code>, <code class="docutils literal notranslate"><span class="pre">get_division</span></code>, <code class="docutils literal notranslate"><span class="pre">get_clock</span></code>,
+<code class="docutils literal notranslate"><span class="pre">reset</span></code>, and the <code class="docutils literal notranslate"><span class="pre">clock</span></code> and <code class="docutils literal notranslate"><span class="pre">division</span></code> fields). Both are <code class="docutils literal notranslate"><span class="pre">uint32_t</span></code>: values
+outside raise <code class="docutils literal notranslate"><span class="pre">OverflowError</span></code>, and the count wraps as unsigned arithmetic
+does. A division of 0 or 1 returns true every call.</p></li>
+</ul>
+</section>
+<section id="filters">
+<span id="dsp-filters"></span><h2>Filters<a class="headerlink" href="#filters" title="Link to this heading">¶</a></h2>
+<p>Rack’s filters are stateful objects like the <a class="reference internal" href="#triggers">triggers</a>, each
+instantiated for <code class="docutils literal notranslate"><span class="pre">float</span></code>, named by Rack’s alias, and for <code class="docutils literal notranslate"><span class="pre">float_4</span></code>, named
+<code class="docutils literal notranslate"><span class="pre">T&lt;Name&gt;_float_4</span></code>: <code class="docutils literal notranslate"><span class="pre">RCFilter</span></code> and <code class="docutils literal notranslate"><span class="pre">TRCFilter_float_4</span></code>. The templates
+themselves are subscriptable, as <code class="docutils literal notranslate"><span class="pre">TRCFilter[float_4]</span></code>. Vector fields are live
+views, and every method calls Rack’s code out of line
+(<code class="docutils literal notranslate"><span class="pre">native/bindings/dsp/calls.hpp</span></code>).</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RCFilter</span></code>: an RC circuit by Euler’s method. <code class="docutils literal notranslate"><span class="pre">set_cutoff(r)</span></code> takes the
+angular cutoff in radians (<code class="docutils literal notranslate"><span class="pre">c</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">/</span> <span class="pre">r</span></code>), <code class="docutils literal notranslate"><span class="pre">set_cutoff_freq(f)</span></code> the cutoff as a
+ratio of the sample rate; <code class="docutils literal notranslate"><span class="pre">process(x)</span></code> steps it, and <code class="docutils literal notranslate"><span class="pre">lowpass()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">highpass()</span></code> read the outputs. <code class="docutils literal notranslate"><span class="pre">xstate</span></code> and <code class="docutils literal notranslate"><span class="pre">ystate</span></code> are Rack’s one-element
+arrays, as live views; <code class="docutils literal notranslate"><span class="pre">reset()</span></code> zeroes both.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ExponentialFilter</span></code>: exponential smoothing. <code class="docutils literal notranslate"><span class="pre">set_lambda</span></code>, <code class="docutils literal notranslate"><span class="pre">set_tau</span></code>
+(<code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">/</span> <span class="pre">tau</span></code>) and <code class="docutils literal notranslate"><span class="pre">process(delta_time,</span> <span class="pre">in_)</span></code>, which returns the new
+output and snaps to the input once a step no longer changes the output.
+Python’s <code class="docutils literal notranslate"><span class="pre">lambda_</span></code> field maps to Rack’s <code class="docutils literal notranslate"><span class="pre">lambda</span></code>, as <code class="docutils literal notranslate"><span class="pre">lambda</span></code> is a Python
+keyword. Its readable and writable <code class="docutils literal notranslate"><span class="pre">out</span></code> field holds the current output;
+<code class="docutils literal notranslate"><span class="pre">reset()</span></code> sets it to zero.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PeakFilter</span></code>: jumps to higher values at once and decays toward lower ones.
+Its readable and writable <code class="docutils literal notranslate"><span class="pre">out</span></code> field holds the output and Python’s
+<code class="docutils literal notranslate"><span class="pre">lambda_</span></code> field maps to Rack’s <code class="docutils literal notranslate"><span class="pre">lambda</span></code>; <code class="docutils literal notranslate"><span class="pre">set_lambda</span></code> and <code class="docutils literal notranslate"><span class="pre">set_tau</span></code> set
+that coefficient, with <code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">/</span> <span class="pre">tau</span></code>. <code class="docutils literal notranslate"><span class="pre">reset()</span></code> zeroes <code class="docutils literal notranslate"><span class="pre">out</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SlewLimiter</span></code>: <code class="docutils literal notranslate"><span class="pre">set_rise_fall(rise,</span> <span class="pre">fall)</span></code> in units per second;
+<code class="docutils literal notranslate"><span class="pre">process(delta_time,</span> <span class="pre">in_)</span></code> moves toward the input by at most that much. Its
+readable and writable <code class="docutils literal notranslate"><span class="pre">rise</span></code>, <code class="docutils literal notranslate"><span class="pre">fall</span></code> and <code class="docutils literal notranslate"><span class="pre">out</span></code> fields are Rack’s values;
+<code class="docutils literal notranslate"><span class="pre">reset()</span></code> zeroes <code class="docutils literal notranslate"><span class="pre">out</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ExponentialSlewLimiter</span></code>: exponential smoothing with separate rise and fall
+rates, <code class="docutils literal notranslate"><span class="pre">set_rise_fall(rise,</span> <span class="pre">fall)</span></code> and <code class="docutils literal notranslate"><span class="pre">set_rise_fall_tau(rise,</span> <span class="pre">fall)</span></code>
+(<code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">/</span> <span class="pre">tau</span></code>). They set Rack’s fields <code class="docutils literal notranslate"><span class="pre">rise_lambda</span></code> and
+<code class="docutils literal notranslate"><span class="pre">fall_lambda</span></code>, which <code class="docutils literal notranslate"><span class="pre">process</span></code> reads and which can also be assigned. Its
+readable and writable <code class="docutils literal notranslate"><span class="pre">out</span></code> field holds the output; <code class="docutils literal notranslate"><span class="pre">reset()</span></code> zeroes it.</p></li>
+<li><p><strong>Deprecated.</strong> <code class="docutils literal notranslate"><span class="pre">process(in_)</span></code> with one argument (Rack’s <code class="docutils literal notranslate"><span class="pre">process(1,</span> <span class="pre">in)</span></code>)
+on the four smoothers, and <code class="docutils literal notranslate"><span class="pre">PeakFilter.peak()</span></code> and <code class="docutils literal notranslate"><span class="pre">set_rate(r)</span></code>
+(<code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">-</span> <span class="pre">r</span></code>), emit <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code>.</p></li>
+</ul>
+</section>
+<section id="iir-filters">
+<span id="dsp-iir"></span><h2>IIR filters<a class="headerlink" href="#iir-filters" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">IIRFilter[b_order,</span> <span class="pre">a_order]</span></code> (or <code class="docutils literal notranslate"><span class="pre">[b_order,</span> <span class="pre">a_order,</span> <span class="pre">float_4]</span></code>) is Rack’s
+<code class="docutils literal notranslate"><span class="pre">IIRFilter&lt;B_ORDER,</span> <span class="pre">A_ORDER,</span> <span class="pre">T&gt;</span></code>, with <code class="docutils literal notranslate"><span class="pre">B_ORDER</span></code> numerator coefficients and
+<code class="docutils literal notranslate"><span class="pre">A_ORDER</span></code> denominator ones, <code class="docutils literal notranslate"><span class="pre">a_0</span> <span class="pre">=</span> <span class="pre">1</span></code> omitted:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">b</span></code>, <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> are Rack’s coefficient and state arrays, as live
+views (<code class="docutils literal notranslate"><span class="pre">b[0]</span></code> of a vector filter is itself a live <code class="docutils literal notranslate"><span class="pre">float_4</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_coefficients(b,</span> <span class="pre">a)</span></code> takes <code class="docutils literal notranslate"><span class="pre">B_ORDER</span></code> b and <code class="docutils literal notranslate"><span class="pre">A_ORDER</span> <span class="pre">-</span> <span class="pre">1</span></code> a coefficients
+(Rack reads exactly that many from two arrays), <code class="docutils literal notranslate"><span class="pre">reset()</span></code> zeroes the state
+but not the coefficients, and <code class="docutils literal notranslate"><span class="pre">process(in_)</span></code> returns the next output.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_transfer_function(s)</span></code> is <code class="docutils literal notranslate"><span class="pre">H</span></code> at the normalized angular frequency
+<code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">=</span> <span class="pre">2πf/f_s</span></code>: a Python complex, or a <code class="docutils literal notranslate"><span class="pre">(real,</span> <span class="pre">imag)</span></code> pair of <code class="docutils literal notranslate"><span class="pre">float_4</span></code> for
+vectors. <code class="docutils literal notranslate"><span class="pre">get_frequency_response(f)</span></code> and <code class="docutils literal notranslate"><span class="pre">get_frequency_phase(f)</span></code> take
+<code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">=</span> <span class="pre">f_c/f_s</span></code>.</p></li>
+</ul>
+<p>Each instantiation is a class (<code class="docutils literal notranslate"><span class="pre">IIRFilter[3,</span> <span class="pre">3]</span></code> is <code class="docutils literal notranslate"><span class="pre">IIRFilter_3_3_float</span></code>,
+the biquads’ base); a class’s <code class="docutils literal notranslate"><span class="pre">B_ORDER</span></code> and <code class="docutils literal notranslate"><span class="pre">A_ORDER</span></code> say which.</p>
+</section>
+<section id="biquad-filters">
+<span id="dsp-biquad"></span><h2>Biquad filters<a class="headerlink" href="#biquad-filters" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">BiquadFilter</span></code> (and <code class="docutils literal notranslate"><span class="pre">TBiquadFilter[float_4]</span></code>) is an <code class="docutils literal notranslate"><span class="pre">IIRFilter[3,</span> <span class="pre">3]</span></code> with
+Rack’s designs: <code class="docutils literal notranslate"><span class="pre">set_parameters(type,</span> <span class="pre">f,</span> <span class="pre">q,</span> <span class="pre">v)</span></code> sets the coefficients for a
+<code class="docutils literal notranslate"><span class="pre">BiquadFilter.Type</span></code> (<code class="docutils literal notranslate"><span class="pre">LOWPASS_1POLE</span></code>, <code class="docutils literal notranslate"><span class="pre">HIGHPASS_1POLE</span></code>, <code class="docutils literal notranslate"><span class="pre">LOWPASS</span></code>,
+<code class="docutils literal notranslate"><span class="pre">HIGHPASS</span></code>, <code class="docutils literal notranslate"><span class="pre">LOWSHELF</span></code>, <code class="docutils literal notranslate"><span class="pre">HIGHSHELF</span></code>, <code class="docutils literal notranslate"><span class="pre">BANDPASS</span></code>, <code class="docutils literal notranslate"><span class="pre">PEAK</span></code>, <code class="docutils literal notranslate"><span class="pre">NOTCH</span></code>, with
+Rack’s values 0 to 8), at <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">=</span> <span class="pre">f_c/f_s</span></code> (below 0.5), quality factor <code class="docutils literal notranslate"><span class="pre">q</span></code> and
+gain <code class="docutils literal notranslate"><span class="pre">v</span></code>. <code class="docutils literal notranslate"><span class="pre">NUM_TYPES</span></code> (9) sets nothing. Both instantiations take <code class="docutils literal notranslate"><span class="pre">BiquadFilter.Type</span></code>; in C++ each has its own
+<code class="docutils literal notranslate"><span class="pre">Type</span></code> with the same values.</p>
+<p><strong>A new biquad’s coefficients are NaN.</strong> Rack’s constructor calls
+<code class="docutils literal notranslate"><span class="pre">setParameters(LOWPASS,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1)</span></code>, which computes <code class="docutils literal notranslate"><span class="pre">K</span> <span class="pre">/</span> <span class="pre">Q</span> <span class="pre">=</span> <span class="pre">0</span> <span class="pre">/</span> <span class="pre">0</span></code>, so a
+<code class="docutils literal notranslate"><span class="pre">BiquadFilter</span></code> outputs NaN until <code class="docutils literal notranslate"><span class="pre">set_parameters</span></code> gives it real values.</p>
+</section>
+<section id="whole-buffers">
+<span id="dsp-bulk"></span><h2>Whole buffers<a class="headerlink" href="#whole-buffers" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">rackpy.dsp.filters.process_block(filter,</span> <span class="pre">in_,</span> <span class="pre">out,</span> <span class="pre">delta_time=None)</span></code> runs
+a float filter over a float32 buffer natively, writing <code class="docutils literal notranslate"><span class="pre">out</span></code> (which may be
+<code class="docutils literal notranslate"><span class="pre">in_</span></code>). It is RackPy’s convenience, not Rack API: each sample goes through
+the same Rack call as <code class="docutils literal notranslate"><span class="pre">filter.process</span></code>, in order, so the outputs and the
+filter’s final state are exactly those of a loop of <code class="docutils literal notranslate"><span class="pre">process</span></code> calls. The
+exponential, peak and slew filters need <code class="docutils literal notranslate"><span class="pre">delta_time</span></code>; the IIR and biquad
+filters take none; RC filters have no single output and are refused. The
+buffers are read and written in place, with no copies. <a class="reference internal" href="#what-the-calls-cost">What it
+costs</a> compares it with a Python loop.</p>
+</section>
+<section id="what-the-calls-cost">
+<span id="dsp-cost"></span><h2>What the calls cost<a class="headerlink" href="#what-the-calls-cost" title="Link to this heading">¶</a></h2>
+<p>Measured inside Rack Free 2.6.6 on the planning machine (an i9-14900K desktop
+under load, with the <code class="docutils literal notranslate"><span class="pre">powersave</span></code> governor: diagnostic numbers, not a
+performance claim; raw data in
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/benchmarks/rp18-dsp-call-cost.json">benchmarks/rp18-dsp-call-cost.json</a>),
+median nanoseconds per sample over 20,000 samples:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Workload</p></th>
+<th class="head"><p>ns per sample</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">BiquadFilter.process</span></code>, a Python loop of calls</p></td>
+<td><p>72</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">BiquadFilter</span></code>, <code class="docutils literal notranslate"><span class="pre">process_block</span></code></p></td>
+<td><p>2.7</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SlewLimiter.process(delta_time,</span> <span class="pre">x)</span></code>, a Python loop</p></td>
+<td><p>67</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SlewLimiter</span></code>, <code class="docutils literal notranslate"><span class="pre">process_block</span></code></p></td>
+<td><p>3.3</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SchmittTrigger.process</span></code>, a Python loop</p></td>
+<td><p>71</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cubic(x)</span></code>, a Python loop</p></td>
+<td><p>32</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TBiquadFilter[float_4].process</span></code>, a loop (4 samples per call)</p></td>
+<td><p>45</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A Python call costs tens of nanoseconds whatever it computes, so
+<code class="docutils literal notranslate"><span class="pre">process_block</span></code> is 20 to 27 times faster for these filters; it copies
+nothing, reading and writing the caller’s buffers. Neither is a way to run
+audio: at 48 kHz Rack calls a module’s <code class="docutils literal notranslate"><span class="pre">process()</span></code> every 21 microseconds, on
+its engine thread, where Python never runs (<a class="reference internal" href="../how-to/dsp.html"><span class="std std-doc">process audio</span></a>).</p>
+</section>
+<section id="vu-meters">
+<span id="dsp-vumeter"></span><h2>VU meters<a class="headerlink" href="#vu-meters" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">VuMeter2</span></code> smooths a level for meter lights: <code class="docutils literal notranslate"><span class="pre">process(delta_time,</span> <span class="pre">value)</span></code>
+tracks the peak (<code class="docutils literal notranslate"><span class="pre">Mode.PEAK</span></code>, jumping up and decaying) or the mean square
+(<code class="docutils literal notranslate"><span class="pre">Mode.RMS</span></code>) at the inverse time constant <code class="docutils literal notranslate"><span class="pre">lambda_</span></code> (30 per second), in <code class="docutils literal notranslate"><span class="pre">v</span></code>;
+<code class="docutils literal notranslate"><span class="pre">get_brightness(db_min,</span> <span class="pre">db_max)</span></code> is 0 at <code class="docutils literal notranslate"><span class="pre">db_min</span></code> and below, 1 at <code class="docutils literal notranslate"><span class="pre">db_max</span></code>
+and above, and linear in dB between; <code class="docutils literal notranslate"><span class="pre">reset()</span></code> zeroes it. Rack suggests
+calling <code class="docutils literal notranslate"><span class="pre">get_brightness</span></code> every few hundred frames, not every frame.</p>
+<p><code class="docutils literal notranslate"><span class="pre">VuMeter</span></code> is Rack’s deprecated meter (<code class="docutils literal notranslate"><span class="pre">set_value(v)</span></code>, then
+<code class="docutils literal notranslate"><span class="pre">get_brightness(i)</span></code> for light <code class="docutils literal notranslate"><span class="pre">i</span></code>, with <code class="docutils literal notranslate"><span class="pre">db_interval</span></code> decibels between
+lights), and <code class="docutils literal notranslate"><span class="pre">VUMeter</span></code> its deprecated typedef: both emit <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code>.
+Its <code class="docutils literal notranslate"><span class="pre">db_scaled</span></code> starts at 0, where Rack leaves it uninitialized until
+<code class="docutils literal notranslate"><span class="pre">set_value</span></code>.</p>
+</section>
+<section id="midi-generator">
+<span id="dsp-midi-generator"></span><h2>MIDI generator<a class="headerlink" href="#midi-generator" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">MidiGenerator[channels]</span></code> (<code class="docutils literal notranslate"><span class="pre">MidiGenerator[16]</span></code> is <code class="docutils literal notranslate"><span class="pre">MidiGenerator_16</span></code>) turns
+gates and CV into MIDI messages, as Rack’s CV to MIDI does:
+<code class="docutils literal notranslate"><span class="pre">set_note_gate(note,</span> <span class="pre">gate,</span> <span class="pre">c)</span></code> after <code class="docutils literal notranslate"><span class="pre">set_velocity(vel,</span> <span class="pre">c)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">set_key_pressure</span></code>, <code class="docutils literal notranslate"><span class="pre">set_channel_pressure</span></code>, <code class="docutils literal notranslate"><span class="pre">set_cc(cc,</span> <span class="pre">id)</span></code> and its
+shortcuts (<code class="docutils literal notranslate"><span class="pre">set_mod_wheel</span></code>, <code class="docutils literal notranslate"><span class="pre">set_volume</span></code>, <code class="docutils literal notranslate"><span class="pre">set_balance</span></code>, <code class="docutils literal notranslate"><span class="pre">set_pan</span></code>,
+<code class="docutils literal notranslate"><span class="pre">set_sustain_pedal</span></code>), <code class="docutils literal notranslate"><span class="pre">set_pitch_wheel</span></code>, the transport (<code class="docutils literal notranslate"><span class="pre">set_clock</span></code>,
+<code class="docutils literal notranslate"><span class="pre">set_start</span></code>, <code class="docutils literal notranslate"><span class="pre">set_continue</span></code>, <code class="docutils literal notranslate"><span class="pre">set_stop</span></code>), <code class="docutils literal notranslate"><span class="pre">set_frame</span></code>, <code class="docutils literal notranslate"><span class="pre">set_channels</span></code>,
+<code class="docutils literal notranslate"><span class="pre">reset</span></code> and <code class="docutils literal notranslate"><span class="pre">panic</span></code>. The setters send a message only when their value
+changes from the field they compare against; <code class="docutils literal notranslate"><span class="pre">panic()</span></code> resets and sends a
+note off for every note. The fields (<code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">vels</span></code>, <code class="docutils literal notranslate"><span class="pre">gates</span></code>,
+<code class="docutils literal notranslate"><span class="pre">key_pressures</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_pressure</span></code>, <code class="docutils literal notranslate"><span class="pre">ccs</span></code>, <code class="docutils literal notranslate"><span class="pre">pw</span></code>, <code class="docutils literal notranslate"><span class="pre">clk</span></code>, <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">stop</span></code>,
+<code class="docutils literal notranslate"><span class="pre">cont</span></code>, <code class="docutils literal notranslate"><span class="pre">frame</span></code>, <code class="docutils literal notranslate"><span class="pre">channels</span></code>) are Rack’s, the arrays as live views, so
+assigning one changes what the next setter call compares with.</p>
+<p>Rack hands each message to the virtual <code class="docutils literal notranslate"><span class="pre">onMessage</span></code>, which a C++ subclass
+overrides. It is an engine-thread callback (ADR 003), so Python cannot
+override it: RackPy’s generator implements it by keeping the messages, and
+<code class="docutils literal notranslate"><span class="pre">take_messages()</span></code> returns those generated since the last call, as
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw.midi.Message</span></code> objects, oldest first. A subclass that defines
+<code class="docutils literal notranslate"><span class="pre">on_message</span></code> raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>, as it would never be called. A Python
+override for non-real-time use is RP-22’s laboratory.</p>
+<p>Indices are checked: a channel <code class="docutils literal notranslate"><span class="pre">c</span></code> must be below <code class="docutils literal notranslate"><span class="pre">CHANNELS</span></code>, a controller
+<code class="docutils literal notranslate"><span class="pre">id</span></code> below 128, and <code class="docutils literal notranslate"><span class="pre">set_channels</span></code> at most <code class="docutils literal notranslate"><span class="pre">CHANNELS</span></code>, where Rack would
+index past its arrays. Values must fit their C++ types (<code class="docutils literal notranslate"><span class="pre">OverflowError</span></code>).</p>
+</section>
+<section id="midi-parser">
+<span id="dsp-midi-parser"></span><h2>MIDI parser<a class="headerlink" href="#midi-parser" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">MidiParser[channels]</span></code> (<code class="docutils literal notranslate"><span class="pre">MidiParser_16</span></code>, as Rack’s MIDI to CV uses) turns
+MIDI messages into gates, CV and pulses: <code class="docutils literal notranslate"><span class="pre">process_message(msg)</span></code> (or
+<code class="docutils literal notranslate"><span class="pre">process_cc</span></code>, <code class="docutils literal notranslate"><span class="pre">process_system</span></code>), then <code class="docutils literal notranslate"><span class="pre">process_filters(delta_time)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">process_pulses(delta_time)</span></code> every frame, and <code class="docutils literal notranslate"><span class="pre">get_pitch_voltage(c)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_pw(c)</span></code>, <code class="docutils literal notranslate"><span class="pre">get_mod(c)</span></code>, <code class="docutils literal notranslate"><span class="pre">gates</span></code>, <code class="docutils literal notranslate"><span class="pre">velocities</span></code>, <code class="docutils literal notranslate"><span class="pre">aftertouches</span></code> and the
+pulses (<code class="docutils literal notranslate"><span class="pre">clock_pulse</span></code>, <code class="docutils literal notranslate"><span class="pre">retrigger_pulses</span></code>, …) to read the result;
+<code class="docutils literal notranslate"><span class="pre">get_wheel_channels()</span></code> says how many channels have their own wheels (all of
+them in polyphonic MPE mode, otherwise 1). The modes are <code class="docutils literal notranslate"><span class="pre">MonoMode</span></code>
+(<code class="docutils literal notranslate"><span class="pre">LAST_PRIORITY_MODE</span></code>, <code class="docutils literal notranslate"><span class="pre">FIRST_PRIORITY_MODE</span></code>, <code class="docutils literal notranslate"><span class="pre">LOWEST_PRIORITY_MODE</span></code>,
+<code class="docutils literal notranslate"><span class="pre">HIGHEST_PRIORITY_MODE</span></code>, then <code class="docutils literal notranslate"><span class="pre">NUM_MONO_MODES</span></code>) and <code class="docutils literal notranslate"><span class="pre">PolyMode</span></code>
+(<code class="docutils literal notranslate"><span class="pre">ROTATE_MODE</span></code>, <code class="docutils literal notranslate"><span class="pre">REUSE_MODE</span></code>, <code class="docutils literal notranslate"><span class="pre">RESET_MODE</span></code>, <code class="docutils literal notranslate"><span class="pre">MPE_MODE</span></code>, then
+<code class="docutils literal notranslate"><span class="pre">NUM_POLY_MODES</span></code>), with Rack’s values from 0, one pair of enums shared by
+every instantiation; <code class="docutils literal notranslate"><span class="pre">set_mono_mode(mode)</span></code> and <code class="docutils literal notranslate"><span class="pre">set_poly_mode(mode)</span></code> change
+one and, as in Rack, reset the performance state when it changes.
+<code class="docutils literal notranslate"><span class="pre">to_json()</span></code> and <code class="docutils literal notranslate"><span class="pre">from_json(json)</span></code> save and restore the settings with Rack’s
+keys, as Python values.</p>
+<p>The methods <code class="docutils literal notranslate"><span class="pre">process_message</span></code> calls are bound too, for a parser driven
+directly: <code class="docutils literal notranslate"><span class="pre">press_note(note,</span> <span class="pre">channel,</span> <span class="pre">velocity)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">release_note(note,</span> <span class="pre">channel,</span> <span class="pre">velocity)</span></code> (velocity -1 for none),
+<code class="docutils literal notranslate"><span class="pre">assign_channel(note)</span></code>, which returns the channel the poly mode picks (and
+advances <code class="docutils literal notranslate"><span class="pre">rotate_index</span></code>), <code class="docutils literal notranslate"><span class="pre">refresh_held()</span></code>, which reconciles the gates with
+<code class="docutils literal notranslate"><span class="pre">held_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">press_pedal()</span></code> and <code class="docutils literal notranslate"><span class="pre">release_pedal()</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">set_filter_lambda(lambda_)</span></code>, which sets every wheel smoothing filter.</p>
+<p>Its fields are Rack’s, the arrays as live views: the settings
+(<code class="docutils literal notranslate"><span class="pre">channels</span></code>, <code class="docutils literal notranslate"><span class="pre">mono_mode</span></code>, <code class="docutils literal notranslate"><span class="pre">poly_mode</span></code>, <code class="docutils literal notranslate"><span class="pre">retrigger_on_resume</span></code>,
+<code class="docutils literal notranslate"><span class="pre">release_velocity_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">pw_range</span></code> in semitones, <code class="docutils literal notranslate"><span class="pre">smooth</span></code>,
+<code class="docutils literal notranslate"><span class="pre">clock_division</span></code>) and the state (<code class="docutils literal notranslate"><span class="pre">clock</span></code>, <code class="docutils literal notranslate"><span class="pre">pedal</span></code>, <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">gates</span></code>,
+<code class="docutils literal notranslate"><span class="pre">velocities</span></code>, <code class="docutils literal notranslate"><span class="pre">aftertouches</span></code>, <code class="docutils literal notranslate"><span class="pre">rotate_index</span></code>, the wheels <code class="docutils literal notranslate"><span class="pre">pws</span></code> and <code class="docutils literal notranslate"><span class="pre">mods</span></code>, and
+their smoothing filters <code class="docutils literal notranslate"><span class="pre">pw_filters</span></code> and <code class="docutils literal notranslate"><span class="pre">mod_filters</span></code>, which are
+<code class="docutils literal notranslate"><span class="pre">ExponentialFilter</span></code> objects). <code class="docutils literal notranslate"><span class="pre">held_notes</span></code> is a copy, as a list of ints;
+assigning it replaces Rack’s. <code class="docutils literal notranslate"><span class="pre">panic()</span></code> clears performance state (notes, gates,
+velocities, wheels and timing state) and the held-note list while preserving
+settings. <code class="docutils literal notranslate"><span class="pre">reset()</span></code> restores the default settings and then clears performance
+state; unlike <code class="docutils literal notranslate"><span class="pre">panic()</span></code>, it resets the configured channel count, modes, pitch
+range, smoothing, clock division and filter rates too.</p>
+<p>Rack trusts its inputs here; RackPy refuses what it would get wrong:</p>
+<ul class="simple">
+<li><p>channel indices of <code class="docutils literal notranslate"><span class="pre">MAX_CHANNELS</span></code> or more (<code class="docutils literal notranslate"><span class="pre">IndexError</span></code>), and more channels
+than <code class="docutils literal notranslate"><span class="pre">MAX_CHANNELS</span></code> (<code class="docutils literal notranslate"><span class="pre">ValueError</span></code>);</p></li>
+<li><p>in polyphonic MPE mode, Rack indexes its arrays by a message’s MIDI
+channel, so with fewer than 16 channels a message on a higher channel
+raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>;</p></li>
+<li><p>a timing clock message while <code class="docutils literal notranslate"><span class="pre">clock_division</span></code> is 0, which Rack would
+divide by (<code class="docutils literal notranslate"><span class="pre">clock_division</span></code> itself may be 0). Each check follows Rack’s own
+dispatch: <code class="docutils literal notranslate"><span class="pre">process_cc</span></code> reads only the note byte (CC 1 is the mod wheel,
+stored by MIDI channel in MPE) and <code class="docutils literal notranslate"><span class="pre">process_system</span></code> only the channel nibble
+(0x8 is the clock), whatever the status byte;</p></li>
+<li><p>a <code class="docutils literal notranslate"><span class="pre">rotate_index</span></code> other than -1 (Rack’s value after <code class="docutils literal notranslate"><span class="pre">panic()</span></code>) or a channel
+below <code class="docutils literal notranslate"><span class="pre">MAX_CHANNELS</span></code>, which Rack indexes its arrays with;</p></li>
+<li><p>in <code class="docutils literal notranslate"><span class="pre">from_json</span></code>, a <code class="docutils literal notranslate"><span class="pre">channels</span></code> above <code class="docutils literal notranslate"><span class="pre">MAX_CHANNELS</span></code>, or a <code class="docutils literal notranslate"><span class="pre">monoMode</span></code> or
+<code class="docutils literal notranslate"><span class="pre">polyMode</span></code> outside its enum, which would make Rack index past its arrays or
+build an invalid enum value. Patch JSON is untrusted.</p></li>
+</ul>
+</section>
+<section id="ffts">
+<span id="dsp-fft"></span><h2>FFTs<a class="headerlink" href="#ffts" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">RealFFT(length)</span></code> and <code class="docutils literal notranslate"><span class="pre">ComplexFFT(length)</span></code> are Rack’s wrappers of PFFFT.
+Each owns a PFFFT setup (<code class="docutils literal notranslate"><span class="pre">setup</span></code>, an opaque handle with identity, read-only
+because the FFT frees it; it keeps its FFT alive), and a copy is refused, as
+copying the C++ object would free the setup twice.</p>
+<ul class="simple">
+<li><p><strong>Lengths.</strong> PFFFT takes <code class="docutils literal notranslate"><span class="pre">2^a</span> <span class="pre">3^b</span> <span class="pre">5^c</span></code> points, a multiple of 32 for a real
+FFT and of 16 for a complex one. It checks most of that only with <code class="docutils literal notranslate"><span class="pre">assert</span></code>,
+which a release build skips, and it returns no setup for other lengths,
+which Rack’s destructor would then dereference: RackPy raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>
+first. Rack gives PFFFT no work buffer, so PFFFT puts its scratch (4 bytes
+per point real, 8 complex) on the stack; RackPy allows lengths up to 65536.</p></li>
+<li><p><strong>Buffers.</strong> Contiguous float32 buffers, 16-byte aligned (PFFFT’s SSE code
+needs it; an <code class="docutils literal notranslate"><span class="pre">array.array</span></code> or numpy array is aligned, a slice of one may
+not be), of the transform’s size: <code class="docutils literal notranslate"><span class="pre">length</span></code> floats in and out for a real
+FFT, <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">length</span></code> (interleaved complex numbers) for a complex one. Rack’s
+real FFT contract permits input and output buffers to overlap, including
+partial overlap; complex transforms permit exact in-place use, while RackPy
+refuses partial overlap for them. Rack’s comments say a real FFT’s output is
+<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">length</span></code> floats; PFFFT writes <code class="docutils literal notranslate"><span class="pre">length</span></code>.</p></li>
+<li><p><strong>Transforms.</strong> <code class="docutils literal notranslate"><span class="pre">rfft(input,</span> <span class="pre">output)</span></code> and <code class="docutils literal notranslate"><span class="pre">irfft(input,</span> <span class="pre">output)</span></code> on a
+<code class="docutils literal notranslate"><span class="pre">RealFFT</span></code>, <code class="docutils literal notranslate"><span class="pre">fft</span></code> and <code class="docutils literal notranslate"><span class="pre">ifft</span></code> on a <code class="docutils literal notranslate"><span class="pre">ComplexFFT</span></code>, are the forward and inverse
+transforms; each has an <code class="docutils literal notranslate"><span class="pre">_unordered</span></code> form (<code class="docutils literal notranslate"><span class="pre">rfft_unordered</span></code>,
+<code class="docutils literal notranslate"><span class="pre">irfft_unordered</span></code>, <code class="docutils literal notranslate"><span class="pre">fft_unordered</span></code>, <code class="docutils literal notranslate"><span class="pre">ifft_unordered</span></code>).</p></li>
+<li><p><strong>Order.</strong> <code class="docutils literal notranslate"><span class="pre">rfft</span></code>/<code class="docutils literal notranslate"><span class="pre">fft</span></code> give the canonical order: for a real FFT <code class="docutils literal notranslate"><span class="pre">F(0)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">F(n/2)</span></code>, then the real and imaginary parts of <code class="docutils literal notranslate"><span class="pre">F(1)</span></code> to <code class="docutils literal notranslate"><span class="pre">F(n/2</span> <span class="pre">-</span> <span class="pre">1)</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">irfft</span></code>/<code class="docutils literal notranslate"><span class="pre">ifft</span></code> take a spectrum in that order;
+<code class="docutils literal notranslate"><span class="pre">rfft_unordered</span></code>/<code class="docutils literal notranslate"><span class="pre">fft_unordered</span></code> give PFFFT’s internal order, faster and
+consistent between transforms, for convolution or inverting, and
+<code class="docutils literal notranslate"><span class="pre">irfft_unordered</span></code>/<code class="docutils literal notranslate"><span class="pre">ifft_unordered</span></code> take a spectrum in that order.</p></li>
+<li><p><strong>Scale.</strong> Nothing is normalized: the inverse of a forward transform is
+<code class="docutils literal notranslate"><span class="pre">length</span></code> times the input. <code class="docutils literal notranslate"><span class="pre">scale(x)</span></code> multiplies <code class="docutils literal notranslate"><span class="pre">length</span></code> floats (<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">length</span></code> complex) by <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">/</span> <span class="pre">length</span></code>, none if <code class="docutils literal notranslate"><span class="pre">length</span></code> is 0 or less. It reads
+the writable <code class="docutils literal notranslate"><span class="pre">length</span></code> field; the transforms always use the setup’s size.</p></li>
+</ul>
+</section>
+<section id="fir-helpers-and-the-real-time-convolver">
+<span id="dsp-fir"></span><h2>FIR helpers and the real-time convolver<a class="headerlink" href="#fir-helpers-and-the-real-time-convolver" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">convolve_naive(in_,</span> <span class="pre">kernel,</span> <span class="pre">len)</span></code> is one output of a direct convolution,
+<code class="docutils literal notranslate"><span class="pre">sum(in_[len</span> <span class="pre">-</span> <span class="pre">1</span> <span class="pre">-</span> <span class="pre">i]</span> <span class="pre">*</span> <span class="pre">kernel[i])</span></code>; <code class="docutils literal notranslate"><span class="pre">boxcar_lowpass_ir(out,</span> <span class="pre">len,</span> <span class="pre">cutoff=0.5)</span></code> writes <code class="docutils literal notranslate"><span class="pre">len</span></code> taps of an unwindowed sinc lowpass at <code class="docutils literal notranslate"><span class="pre">cutoff</span></code>
+(a ratio of the sample rate). Buffers are float32 with at least <code class="docutils literal notranslate"><span class="pre">len</span></code>
+items; alignment does not matter.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RealTimeConvolver(block_size)</span></code> convolves a block at a time with a long
+impulse response, by partitioned FFTs. <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">block_size</span></code> must be a PFFFT
+real length (16, 32, 48, 64, …; Rack recommends a power of 2 from 32),
+and <code class="docutils literal notranslate"><span class="pre">block_size</span></code> at most 32768. <code class="docutils literal notranslate"><span class="pre">set_kernel(kernel,</span> <span class="pre">length)</span></code> takes the impulse response
+(<code class="docutils literal notranslate"><span class="pre">None</span></code> or a length of 0 clears it, up to 4,194,304 samples) and allocates
+its FFTs; <code class="docutils literal notranslate"><span class="pre">process_block(input,</span> <span class="pre">output)</span></code> convolves <code class="docutils literal notranslate"><span class="pre">block_size</span></code> floats,
+with no latency, and the output may be the input.</p></li>
+<li><p>Its arrays (<code class="docutils literal notranslate"><span class="pre">kernel_ffts</span></code>, <code class="docutils literal notranslate"><span class="pre">input_ffts</span></code>, <code class="docutils literal notranslate"><span class="pre">output_tail</span></code>, <code class="docutils literal notranslate"><span class="pre">tmp_block</span></code>) are
+views that find the array again at every access, as <code class="docutils literal notranslate"><span class="pre">set_kernel</span></code>
+reallocates them, so a view never dangles. <code class="docutils literal notranslate"><span class="pre">block_size</span></code>, <code class="docutils literal notranslate"><span class="pre">kernel_blocks</span></code>
+and the <code class="docutils literal notranslate"><span class="pre">pffft</span></code> handle are read-only: Rack sizes the arrays by them, and
+changing them in C++ would make it read and write past its allocations.
+<code class="docutils literal notranslate"><span class="pre">input_pos</span></code> is writable; Rack reduces it modulo <code class="docutils literal notranslate"><span class="pre">kernel_blocks</span></code>.</p></li>
+<li><p>RackPy’s tests also run every case of the reference under AddressSanitizer
+and UndefinedBehaviorSanitizer (<code class="docutils literal notranslate"><span class="pre">tests/dsp/test_advanced.py</span></code>), with Rack’s
+inline code instrumented.</p></li>
+</ul>
+</section>
+<section id="minblep">
+<span id="dsp-minblep"></span><h2>MinBLEP<a class="headerlink" href="#minblep" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">min_blep_impulse(z,</span> <span class="pre">o,</span> <span class="pre">output)</span></code> writes Rack’s minimum-phase band-limited
+step, <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">z</span> <span class="pre">o</span></code> floats rising from 0 to 1. Rack computes it with a <code class="docutils literal notranslate"><span class="pre">RealFFT</span></code> of
+<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">z</span> <span class="pre">o</span></code> points, so that must be a PFFFT real length of at most 65536
+(<code class="docutils literal notranslate"><span class="pre">ValueError</span></code> otherwise; Rack would crash).</p>
+<p><code class="docutils literal notranslate"><span class="pre">MinBlepGenerator[z,</span> <span class="pre">o]</span></code> (or <code class="docutils literal notranslate"><span class="pre">[z,</span> <span class="pre">o,</span> <span class="pre">float_4]</span></code>; <code class="docutils literal notranslate"><span class="pre">MinBlepGenerator[16,</span> <span class="pre">32]</span></code>
+is named <code class="docutils literal notranslate"><span class="pre">MinBlepGenerator_16_32_float</span></code>) corrects a naive oscillator’s
+discontinuities: <code class="docutils literal notranslate"><span class="pre">insert_discontinuity(p,</span> <span class="pre">x)</span></code> adds a step of <code class="docutils literal notranslate"><span class="pre">x</span></code> at
+<code class="docutils literal notranslate"><span class="pre">-1</span> <span class="pre">&lt;</span> <span class="pre">p</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code> frames relative to the current frame (other <code class="docutils literal notranslate"><span class="pre">p</span></code> are ignored,
+as in Rack), and <code class="docutils literal notranslate"><span class="pre">process()</span></code> returns the next correction to add. <code class="docutils literal notranslate"><span class="pre">buf</span></code>
+(the pending output) and <code class="docutils literal notranslate"><span class="pre">impulse</span></code> are live views; <code class="docutils literal notranslate"><span class="pre">pos</span></code> must stay below
+<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">z</span></code>, as Rack indexes <code class="docutils literal notranslate"><span class="pre">buf</span></code> with it.</p>
+</section>
+<section id="resampling">
+<span id="dsp-resampling"></span><h2>Resampling<a class="headerlink" href="#resampling" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SampleRateConverter[channels]</span></code> (the 16-channel one is also named
+<code class="docutils literal notranslate"><span class="pre">SampleRateConverter_16</span></code>) converts interleaved audio between two rates with speexdsp:
+<code class="docutils literal notranslate"><span class="pre">set_rates(in_rate,</span> <span class="pre">out_rate)</span></code>, <code class="docutils literal notranslate"><span class="pre">set_quality(0</span> <span class="pre">to</span> <span class="pre">10)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">set_channels(0</span> <span class="pre">to</span> <span class="pre">MAX_CHANNELS)</span></code>, each rebuilding speexdsp’s state (<code class="docutils literal notranslate"><span class="pre">st</span></code>,
+an opaque handle, false when the rates are equal and Rack only copies).
+<code class="docutils literal notranslate"><span class="pre">process(in_,</span> <span class="pre">in_stride,</span> <span class="pre">in_frames,</span> <span class="pre">out,</span> <span class="pre">out_stride,</span> <span class="pre">out_frames)</span></code> reads up
+to <code class="docutils literal notranslate"><span class="pre">in_frames</span></code> frames and writes up to <code class="docutils literal notranslate"><span class="pre">out_frames</span></code>, with channel <code class="docutils literal notranslate"><span class="pre">c</span></code> of
+frame <code class="docutils literal notranslate"><span class="pre">i</span></code> at <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">*</span> <span class="pre">stride</span> <span class="pre">+</span> <span class="pre">c</span></code>, and returns <code class="docutils literal notranslate"><span class="pre">(frames</span> <span class="pre">read,</span> <span class="pre">frames</span> <span class="pre">written)</span></code>,
+which C++ returns through two <code class="docutils literal notranslate"><span class="pre">int</span></code> pointers. Buffers are float32 and must
+hold the frames (<code class="docutils literal notranslate"><span class="pre">ValueError</span></code>); strides are not negative. A stride below
+<code class="docutils literal notranslate"><span class="pre">channels</span></code> is allowed, as in Rack: channels then share samples.
+<code class="docutils literal notranslate"><span class="pre">process(frames,</span> <span class="pre">in_frames,</span> <span class="pre">out_frames_list,</span> <span class="pre">out_frames)</span></code> takes lists of
+<code class="docutils literal notranslate"><span class="pre">Frame[MAX_CHANNELS]</span></code> objects instead, copied into and out of Rack’s
+contiguous frames.</p></li>
+<li><p><strong>Fields.</strong> <code class="docutils literal notranslate"><span class="pre">channels</span></code> is read-only: speexdsp indexes its state by channel
+without bounds checks, so changing it without rebuilding the state would
+make Rack read and write past its allocation, and <code class="docutils literal notranslate"><span class="pre">set_channels</span></code> above
+<code class="docutils literal notranslate"><span class="pre">MAX_CHANNELS</span></code> is refused where Rack only asserts. <code class="docutils literal notranslate"><span class="pre">quality</span></code>, <code class="docutils literal notranslate"><span class="pre">in_rate</span></code> and
+<code class="docutils literal notranslate"><span class="pre">out_rate</span></code> can be assigned, as in C++, without rebuilding the state
+(<code class="docutils literal notranslate"><span class="pre">refresh_state()</span></code> does); rates must be 1 to 3,072,000.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Decimator[oversample,</span> <span class="pre">quality]</span></code> (or <code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">float_4]</span></code>) downsamples by
+<code class="docutils literal notranslate"><span class="pre">oversample</span></code> with an <code class="docutils literal notranslate"><span class="pre">oversample</span> <span class="pre">*</span> <span class="pre">quality</span></code>-tap windowed-sinc filter:
+<code class="docutils literal notranslate"><span class="pre">process(in_)</span></code> takes <code class="docutils literal notranslate"><span class="pre">oversample</span></code> inputs (a float32 buffer, or a list of
+float_4) and returns one output. <code class="docutils literal notranslate"><span class="pre">Upsampler[oversample,</span> <span class="pre">quality]</span></code> upsamples:
+<code class="docutils literal notranslate"><span class="pre">process(in_,</span> <span class="pre">out)</span></code> writes <code class="docutils literal notranslate"><span class="pre">oversample</span></code> outputs for one input. Both take a
+<code class="docutils literal notranslate"><span class="pre">cutoff</span></code>, as a ratio of the lower rate’s Nyquist frequency (0.9 by default), and keep
+<code class="docutils literal notranslate"><span class="pre">in_index</span></code> within the range Rack’s code keeps it in, as it copies or
+indexes from there (a decimator’s at a multiple of <code class="docutils literal notranslate"><span class="pre">oversample</span></code>, where Rack
+leaves it). <code class="docutils literal notranslate"><span class="pre">in_buffer</span></code> is Rack’s input history (<code class="docutils literal notranslate"><span class="pre">oversample</span> <span class="pre">*</span> <span class="pre">quality</span></code> inputs for a decimator, <code class="docutils literal notranslate"><span class="pre">quality</span></code> zero-stuffed ones for an
+upsampler) and <code class="docutils literal notranslate"><span class="pre">kernel</span></code> the filter’s taps, as live views.</p></li>
+</ul>
+</section>
+<section id="ring-buffers">
+<span id="dsp-ring-buffers"></span><h2>Ring buffers<a class="headerlink" href="#ring-buffers" title="Link to this heading">¶</a></h2>
+<p>Rack’s ring buffers are templates over an element type and compile-time
+sizes, so no binding can take every <code class="docutils literal notranslate"><span class="pre">T</span></code> and <code class="docutils literal notranslate"><span class="pre">S</span></code>. RackPy’s generic contract
+(coverage policy 10; approved by the owner on 2026-10-26) instantiates:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">T</span></code>: float, <code class="docutils literal notranslate"><span class="pre">float_4</span></code>, and <code class="docutils literal notranslate"><span class="pre">Frame[2]</span></code>, <code class="docutils literal notranslate"><span class="pre">Frame[8]</span></code> and <code class="docutils literal notranslate"><span class="pre">Frame[16]</span></code>, the
+frame sizes of Rack’s audio interfaces.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RingBuffer[T,</span> <span class="pre">S]</span></code> and <code class="docutils literal notranslate"><span class="pre">DoubleRingBuffer[T,</span> <span class="pre">S]</span></code>: <code class="docutils literal notranslate"><span class="pre">S</span></code> = 16, 32, …, 32768.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AppleRingBuffer[T,</span> <span class="pre">S,</span> <span class="pre">N]</span></code>: <code class="docutils literal notranslate"><span class="pre">S</span></code> = 16, 32, …, 4096 and <code class="docutils literal notranslate"><span class="pre">N</span></code> = 16 <code class="docutils literal notranslate"><span class="pre">S</span></code>, the
+ratio of Rack’s own example (64 in 1024).</p></li>
+</ul>
+<p>Subscripting with anything else raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> and lists the set.
+<code class="docutils literal notranslate"><span class="pre">RingBuffer[float,</span> <span class="pre">1024]</span></code>, <code class="docutils literal notranslate"><span class="pre">DoubleRingBuffer[float,</span> <span class="pre">1024]</span></code> and
+<code class="docutils literal notranslate"><span class="pre">AppleRingBuffer[float,</span> <span class="pre">64,</span> <span class="pre">1024]</span></code> are also named
+(<code class="docutils literal notranslate"><span class="pre">RingBuffer_float_1024</span></code>, …).</p>
+<p>Elements cross as Python values: <code class="docutils literal notranslate"><span class="pre">push(t)</span></code> takes a float, a <code class="docutils literal notranslate"><span class="pre">float_4</span></code> or a
+<code class="docutils literal notranslate"><span class="pre">Frame[C]</span></code>, and <code class="docutils literal notranslate"><span class="pre">shift()</span></code> returns a new one. Bulk copies (<code class="docutils literal notranslate"><span class="pre">push_buffer</span></code>,
+<code class="docutils literal notranslate"><span class="pre">shift_buffer</span></code>) take float32 buffers holding the elements’ lanes (one float
+per float element, four per <code class="docutils literal notranslate"><span class="pre">float_4</span></code>, <code class="docutils literal notranslate"><span class="pre">C</span></code> per <code class="docutils literal notranslate"><span class="pre">Frame[C]</span></code>). <code class="docutils literal notranslate"><span class="pre">data</span></code> and the
+pointers Rack returns are live views of the inline data, which never moves,
+so a view stays valid, if stale, as long as it keeps the buffer alive. The
+<code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">T*</span></code> results (<code class="docutils literal notranslate"><span class="pre">start_data</span></code>) are read-only views. <code class="docutils literal notranslate"><span class="pre">Frame</span></code> elements
+appear in views as their floats. New buffers are empty with zeroed data
+(C++’s default initialization leaves the data indeterminate).</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">RingBuffer</span></code></strong>, Rack’s single-producer, single-consumer lock-free queue.
+Its <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> only grow (wrapping at 2^64) and are taken modulo <code class="docutils literal notranslate"><span class="pre">S</span></code>.
+As in Rack, <code class="docutils literal notranslate"><span class="pre">push</span></code> to a full buffer overwrites the oldest element and
+<code class="docutils literal notranslate"><span class="pre">shift</span></code> from an empty one returns a stale element; <code class="docutils literal notranslate"><span class="pre">size()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">capacity()</span></code> then wrap. <code class="docutils literal notranslate"><span class="pre">push_buffer</span></code> and <code class="docutils literal notranslate"><span class="pre">shift_buffer</span></code> refuse <code class="docutils literal notranslate"><span class="pre">n</span></code> above
+<code class="docutils literal notranslate"><span class="pre">S</span></code>, which would copy past the data. C++ cannot copy it (its indices are
+atomics), so neither can Python.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">DoubleRingBuffer</span></code></strong> keeps a copy after the data (<code class="docutils literal notranslate"><span class="pre">data</span></code> has <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">S</span></code>
+elements), so <code class="docutils literal notranslate"><span class="pre">end_data()</span></code> gives <code class="docutils literal notranslate"><span class="pre">S</span></code> writable elements to append (then
+<code class="docutils literal notranslate"><span class="pre">end_incr(n)</span></code>, <code class="docutils literal notranslate"><span class="pre">n</span></code> at most <code class="docutils literal notranslate"><span class="pre">S</span></code>) and <code class="docutils literal notranslate"><span class="pre">start_data()</span></code> <code class="docutils literal notranslate"><span class="pre">S</span></code> to read (then
+<code class="docutils literal notranslate"><span class="pre">start_incr(n)</span></code>). Otherwise it behaves as <code class="docutils literal notranslate"><span class="pre">RingBuffer</span></code>. Not thread-safe.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">AppleRingBuffer</span></code></strong> slides a window along a block of <code class="docutils literal notranslate"><span class="pre">N</span></code> and moves it
+back with <code class="docutils literal notranslate"><span class="pre">return_buffer()</span></code>. Its indices are used unreduced, so RackPy keeps
+<code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">start</span> <span class="pre">&lt;=</span> <span class="pre">end</span> <span class="pre">&lt;=</span> <span class="pre">N</span></code>: it refuses field writes outside that, <code class="docutils literal notranslate"><span class="pre">push</span></code> when
+the block is full, <code class="docutils literal notranslate"><span class="pre">shift</span></code> when empty, <code class="docutils literal notranslate"><span class="pre">end_data(n)</span></code> above <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">-</span> <span class="pre">size()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">end_incr</span></code> past <code class="docutils literal notranslate"><span class="pre">N</span></code> and <code class="docutils literal notranslate"><span class="pre">start_incr</span></code> past <code class="docutils literal notranslate"><span class="pre">end</span></code>. As in Rack, up to <code class="docutils literal notranslate"><span class="pre">N</span></code>
+elements may be held, past <code class="docutils literal notranslate"><span class="pre">S</span></code>; <code class="docutils literal notranslate"><span class="pre">full()</span></code> (<code class="docutils literal notranslate"><span class="pre">size()</span> <span class="pre">==</span> <span class="pre">S</span></code>) and <code class="docutils literal notranslate"><span class="pre">capacity()</span></code>
+follow its arithmetic. <code class="docutils literal notranslate"><span class="pre">start_data()</span></code> views the <code class="docutils literal notranslate"><span class="pre">size()</span></code> elements held.
+It copies as plain data.</p></li>
+</ul>
+<p>The buffers hold the GIL during every call; <code class="docutils literal notranslate"><span class="pre">RingBuffer</span></code>’s lock-free
+guarantee is between one producer and one consumer.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="plugin.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Plugins and models</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="simd.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">SIMD: four lanes at a time</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">DSP building blocks</a><ul>
+<li><a class="reference internal" href="#templates">Templates</a></li>
+<li><a class="reference internal" href="#constants-conversions-and-scalings">Constants, conversions and scalings</a></li>
+<li><a class="reference internal" href="#polynomials-and-fast-powers-of-two">Polynomials and fast powers of two</a></li>
+<li><a class="reference internal" href="#sample-conversion">Sample conversion</a></li>
+<li><a class="reference internal" href="#window-functions">Window functions</a></li>
+<li><a class="reference internal" href="#ode-steps">ODE steps</a></li>
+<li><a class="reference internal" href="#frames">Frames</a></li>
+<li><a class="reference internal" href="#triggers">Triggers</a></li>
+<li><a class="reference internal" href="#pulse-generator">Pulse generator</a></li>
+<li><a class="reference internal" href="#timers-and-the-clock-divider">Timers and the clock divider</a></li>
+<li><a class="reference internal" href="#filters">Filters</a></li>
+<li><a class="reference internal" href="#iir-filters">IIR filters</a></li>
+<li><a class="reference internal" href="#biquad-filters">Biquad filters</a></li>
+<li><a class="reference internal" href="#whole-buffers">Whole buffers</a></li>
+<li><a class="reference internal" href="#what-the-calls-cost">What the calls cost</a></li>
+<li><a class="reference internal" href="#vu-meters">VU meters</a></li>
+<li><a class="reference internal" href="#midi-generator">MIDI generator</a></li>
+<li><a class="reference internal" href="#midi-parser">MIDI parser</a></li>
+<li><a class="reference internal" href="#ffts">FFTs</a></li>
+<li><a class="reference internal" href="#fir-helpers-and-the-real-time-convolver">FIR helpers and the real-time convolver</a></li>
+<li><a class="reference internal" href="#minblep">MinBLEP</a></li>
+<li><a class="reference internal" href="#resampling">Resampling</a></li>
+<li><a class="reference internal" href="#ring-buffers">Ring buffers</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

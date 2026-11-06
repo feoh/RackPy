@@ -1,0 +1,523 @@
+rackpy.raw.ui
+=============
+
+.. py:module:: rackpy.raw.ui
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.ui.CHECKMARK_STRING
+   rackpy.raw.ui.RIGHT_ARROW
+   rackpy.raw.ui.ScrollBar
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.ui.Label
+   rackpy.raw.ui.Button
+   rackpy.raw.ui.ChoiceButton
+   rackpy.raw.ui.RadioButton
+   rackpy.raw.ui.OptionButton
+   rackpy.raw.ui.Slider
+   rackpy.raw.ui.ProgressBar
+   rackpy.raw.ui.Tooltip
+   rackpy.raw.ui.TooltipOverlay
+   rackpy.raw.ui.List
+   rackpy.raw.ui.SequentialLayout
+   rackpy.raw.ui.Scrollbar
+   rackpy.raw.ui.ScrollWidget
+   rackpy.raw.ui.TextField
+   rackpy.raw.ui.PasswordField
+   rackpy.raw.ui.MenuOverlay
+   rackpy.raw.ui.Menu
+   rackpy.raw.ui.MenuEntry
+   rackpy.raw.ui.MenuItem
+   rackpy.raw.ui.ColorDotMenuItem
+   rackpy.raw.ui.MenuLabel
+   rackpy.raw.ui.MenuSeparator
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.ui.CHECKMARK
+   rackpy.raw.ui.set_theme
+   rackpy.raw.ui.refresh_theme
+
+
+Module Contents
+---------------
+
+.. py:data:: CHECKMARK_STRING
+   :type:  str
+
+.. py:data:: RIGHT_ARROW
+   :type:  str
+
+.. py:function:: CHECKMARK(cond: bool) -> str
+
+.. py:function:: set_theme(bg: rackpy.raw.nanovg.NVGcolor, fg: rackpy.raw.nanovg.NVGcolor) -> None
+
+.. py:function:: refresh_theme() -> None
+
+.. py:class:: Label
+
+
+
+   .. py:class:: Alignment
+
+
+
+      Enum where members are also (and must be) ints
+
+      Initialize self.  See help(type(self)) for accurate signature.
+
+
+      .. py:attribute:: LEFT_ALIGNMENT
+         :value: 0
+
+
+
+      .. py:attribute:: CENTER_ALIGNMENT
+         :value: 1
+
+
+
+      .. py:attribute:: RIGHT_ALIGNMENT
+         :value: 2
+
+
+
+
+   .. py:attribute:: LEFT_ALIGNMENT
+      :type:  ClassVar[Label.Alignment]
+
+
+   .. py:attribute:: CENTER_ALIGNMENT
+      :type:  ClassVar[Label.Alignment]
+
+
+   .. py:attribute:: RIGHT_ALIGNMENT
+      :type:  ClassVar[Label.Alignment]
+
+
+   .. py:attribute:: text
+      :type:  str
+
+
+   .. py:attribute:: font_size
+      :type:  float
+
+
+   .. py:attribute:: line_height
+      :type:  float
+
+
+   .. py:attribute:: color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+   .. py:attribute:: alignment
+      :type:  Label.Alignment
+
+
+.. py:class:: Button
+
+
+
+   .. py:attribute:: text
+      :type:  str
+
+
+   .. py:attribute:: quantity
+      :type:  rackpy.raw.Quantity | None
+
+
+.. py:class:: ChoiceButton
+
+
+
+.. py:class:: RadioButton
+
+
+
+.. py:class:: OptionButton
+
+
+
+.. py:class:: Slider
+
+
+
+   .. py:attribute:: quantity
+      :type:  rackpy.raw.Quantity | None
+
+
+.. py:class:: ProgressBar
+
+
+
+   .. py:attribute:: quantity
+      :type:  rackpy.raw.Quantity | None
+
+
+.. py:class:: Tooltip
+
+
+
+   .. py:attribute:: text
+      :type:  str
+
+
+.. py:class:: TooltipOverlay
+
+
+
+.. py:class:: List
+
+
+
+.. py:class:: SequentialLayout
+
+
+
+   .. py:class:: Orientation
+
+
+
+      Enum where members are also (and must be) ints
+
+      Initialize self.  See help(type(self)) for accurate signature.
+
+
+      .. py:attribute:: HORIZONTAL_ORIENTATION
+         :value: 0
+
+
+
+      .. py:attribute:: VERTICAL_ORIENTATION
+         :value: 1
+
+
+
+
+   .. py:class:: Alignment
+
+
+
+      Enum where members are also (and must be) ints
+
+      Initialize self.  See help(type(self)) for accurate signature.
+
+
+      .. py:attribute:: LEFT_ALIGNMENT
+         :value: 0
+
+
+
+      .. py:attribute:: CENTER_ALIGNMENT
+         :value: 1
+
+
+
+      .. py:attribute:: RIGHT_ALIGNMENT
+         :value: 2
+
+
+
+      .. py:attribute:: TOP_ALIGNMENT
+         :value: 0
+
+
+
+      .. py:attribute:: MIDDLE_ALIGNMENT
+         :value: 1
+
+
+
+      .. py:attribute:: BOTTOM_ALIGNMENT
+         :value: 2
+
+
+
+
+   .. py:attribute:: HORIZONTAL_ORIENTATION
+      :type:  ClassVar[SequentialLayout.Orientation]
+
+
+   .. py:attribute:: VERTICAL_ORIENTATION
+      :type:  ClassVar[SequentialLayout.Orientation]
+
+
+   .. py:attribute:: LEFT_ALIGNMENT
+      :type:  ClassVar[SequentialLayout.Alignment]
+
+
+   .. py:attribute:: CENTER_ALIGNMENT
+      :type:  ClassVar[SequentialLayout.Alignment]
+
+
+   .. py:attribute:: RIGHT_ALIGNMENT
+      :type:  ClassVar[SequentialLayout.Alignment]
+
+
+   .. py:attribute:: TOP_ALIGNMENT
+      :type:  ClassVar[SequentialLayout.Alignment]
+
+
+   .. py:attribute:: MIDDLE_ALIGNMENT
+      :type:  ClassVar[SequentialLayout.Alignment]
+
+
+   .. py:attribute:: BOTTOM_ALIGNMENT
+      :type:  ClassVar[SequentialLayout.Alignment]
+
+
+   .. py:attribute:: orientation
+      :type:  SequentialLayout.Orientation
+
+
+   .. py:attribute:: alignment
+      :type:  SequentialLayout.Alignment
+
+
+   .. py:attribute:: wrap
+      :type:  bool
+
+
+   .. py:attribute:: margin
+      :type:  rackpy.raw.math.Vec
+
+
+   .. py:attribute:: spacing
+      :type:  rackpy.raw.math.Vec
+
+
+.. py:class:: Scrollbar
+
+
+
+   .. py:attribute:: vertical
+      :type:  bool
+
+
+.. py:data:: ScrollBar
+
+.. py:class:: ScrollWidget
+
+
+
+   .. py:property:: container
+      :type: rackpy.raw.widget.HostWidget
+
+
+
+   .. py:property:: horizontal_scrollbar
+      :type: rackpy.raw.widget.Widget | rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:property:: vertical_scrollbar
+      :type: rackpy.raw.widget.Widget | rackpy.raw.widget.HostWidget | None
+
+
+
+   .. py:attribute:: offset
+      :type:  rackpy.raw.math.Vec
+
+
+   .. py:attribute:: container_box
+      :type:  rackpy.raw.math.Rect
+
+
+   .. py:attribute:: hide_scrollbars
+      :type:  bool
+
+
+   .. py:method:: get_scroll_offset() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: scroll_to(r: rackpy.raw.math.Rect) -> None
+
+
+   .. py:method:: get_container_offset_bound() -> rackpy.raw.math.Rect
+
+
+   .. py:method:: get_handle_offset() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: get_handle_size() -> rackpy.raw.math.Vec
+
+
+   .. py:method:: is_scrolling() -> bool
+
+
+.. py:class:: TextField
+
+
+
+   .. py:attribute:: text
+      :type:  str
+
+
+   .. py:attribute:: placeholder
+      :type:  str
+
+
+   .. py:attribute:: password
+      :type:  bool
+
+
+   .. py:attribute:: multiline
+      :type:  bool
+
+
+   .. py:attribute:: cursor
+      :type:  int
+
+
+   .. py:attribute:: selection
+      :type:  int
+
+
+   .. py:attribute:: prev_field
+      :type:  rackpy.raw.widget.Widget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:attribute:: next_field
+      :type:  rackpy.raw.widget.Widget | rackpy.raw.widget.HostWidget | None
+
+
+   .. py:method:: get_text_position(mouse_pos: rackpy.raw.math.Vec) -> int
+
+
+   .. py:method:: get_text() -> str
+
+
+   .. py:method:: set_text(text: str) -> None
+
+
+   .. py:method:: select_all() -> None
+
+
+   .. py:method:: get_selected_text() -> str
+
+
+   .. py:method:: insert_text(text: str) -> None
+
+
+   .. py:method:: copy_clipboard() -> None
+
+
+   .. py:method:: cut_clipboard() -> None
+
+
+   .. py:method:: paste_clipboard() -> None
+
+
+   .. py:method:: cursor_to_prev_word() -> None
+
+
+   .. py:method:: cursor_to_next_word() -> None
+
+
+   .. py:method:: cursor_to_line_start() -> None
+
+
+   .. py:method:: cursor_to_line_end() -> None
+
+
+   .. py:method:: create_context_menu() -> None
+
+
+.. py:class:: PasswordField
+
+
+
+.. py:class:: MenuOverlay
+
+
+
+   .. py:attribute:: bg_color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+.. py:class:: Menu
+
+
+
+   .. py:attribute:: parent_menu
+      :type:  Menu | None
+
+
+   .. py:property:: child_menu
+      :type: Menu | None
+
+
+
+   .. py:property:: active_entry
+      :type: MenuEntry | None
+
+
+
+   .. py:attribute:: corner_flags
+      :type:  int
+
+
+   .. py:method:: set_child_menu(menu: Menu | None) -> None
+
+
+.. py:class:: MenuEntry
+
+
+
+.. py:class:: MenuItem
+
+
+
+   .. py:attribute:: text
+      :type:  str
+
+
+   .. py:attribute:: right_text
+      :type:  str
+
+
+   .. py:attribute:: disabled
+      :type:  bool
+
+
+   .. py:method:: do_action(consume: bool = True) -> None
+
+
+   .. py:method:: create_child_menu() -> Menu | None
+
+
+.. py:class:: ColorDotMenuItem
+
+
+
+   .. py:attribute:: color
+      :type:  rackpy.raw.nanovg.NVGcolor
+
+
+.. py:class:: MenuLabel
+
+
+
+   .. py:attribute:: text
+      :type:  str
+
+
+.. py:class:: MenuSeparator
+
+
+

@@ -1,0 +1,453 @@
+rackpy.raw.midi
+===============
+
+.. py:module:: rackpy.raw.midi
+
+.. autoapi-nested-parse::
+
+   rack::midi: MIDI messages, Rack's MIDI drivers and devices, and Python-owned ports.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.midi.Message
+   rackpy.raw.midi.Driver
+   rackpy.raw.midi.Device
+   rackpy.raw.midi.PortView
+   rackpy.raw.midi.InputDevice
+   rackpy.raw.midi.OutputDevice
+   rackpy.raw.midi.Port
+   rackpy.raw.midi.Input
+   rackpy.raw.midi.InputQueue
+   rackpy.raw.midi.Output
+   rackpy.raw.midi.PythonInputDevice
+   rackpy.raw.midi.PythonOutputDevice
+   rackpy.raw.midi.PythonDriver
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.midi.add_driver
+   rackpy.raw.midi.get_driver_ids
+   rackpy.raw.midi.get_driver
+
+
+Module Contents
+---------------
+
+.. py:class:: Message
+
+   Rack's MIDI message: bytes (three zeros at first) and the engine frame it belongs to (-1: now).
+
+
+   .. py:attribute:: bytes
+      :type:  list[int]
+
+
+   .. py:attribute:: frame
+      :type:  int
+
+
+   .. py:method:: get_size() -> int
+
+
+   .. py:method:: set_size(size: int) -> None
+
+
+   .. py:method:: get_channel() -> int
+
+
+   .. py:method:: set_channel(channel: int) -> None
+
+
+   .. py:method:: get_status() -> int
+
+
+   .. py:method:: set_status(status: int) -> None
+
+
+   .. py:method:: get_note() -> int
+
+
+   .. py:method:: set_note(note: int) -> None
+
+
+   .. py:method:: get_value() -> int
+
+
+   .. py:method:: set_value(value: int) -> None
+
+
+   .. py:method:: to_string() -> str
+
+
+   .. py:method:: get_frame() -> int
+
+
+   .. py:method:: set_frame(frame: int) -> None
+
+
+.. py:class:: Driver
+
+   One of Rack's MIDI drivers, by its ID.
+
+
+   .. py:property:: id
+      :type: int
+
+
+
+   .. py:method:: get_name() -> str
+
+
+   .. py:method:: get_input_device_ids() -> list[int]
+
+
+   .. py:method:: get_default_input_device_id() -> int
+
+
+   .. py:method:: get_input_device_name(device_id: int) -> str
+
+
+   .. py:method:: get_output_device_ids() -> list[int]
+
+
+   .. py:method:: get_default_output_device_id() -> int
+
+
+   .. py:method:: get_output_device_name(device_id: int) -> str
+
+
+   .. py:method:: subscribe_input(device_id: int, input: Input) -> InputDevice | None
+
+
+   .. py:method:: unsubscribe_input(device_id: int, input: Input) -> None
+
+
+   .. py:method:: subscribe_output(device_id: int, output: Output) -> OutputDevice | None
+
+
+   .. py:method:: unsubscribe_output(device_id: int, output: Output) -> None
+
+
+.. py:class:: Device
+
+   A MIDI device, through the Python port that holds it.
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:method:: get_name() -> str
+
+
+.. py:class:: PortView
+
+   A port Python did not make (a module's), listed by a device's subscribers; read-only.
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: driver_id
+      :type: int
+
+
+
+   .. py:property:: device_id
+      :type: int
+
+
+
+   .. py:property:: channel
+      :type: int
+
+
+
+.. py:class:: InputDevice
+
+
+
+   A MIDI device, through the Python port that holds it.
+
+
+   .. py:property:: subscribed
+      :type: list[Input | PortView]
+
+
+
+   .. py:method:: subscribe(input: Input) -> None
+
+
+   .. py:method:: unsubscribe(input: Input) -> None
+
+
+   .. py:method:: on_message(message: Message) -> None
+
+
+.. py:class:: OutputDevice
+
+
+
+   A MIDI device, through the Python port that holds it.
+
+
+   .. py:property:: subscribed
+      :type: list[Output | PortView]
+
+
+
+   .. py:method:: subscribe(output: Output) -> None
+
+
+   .. py:method:: unsubscribe(output: Output) -> None
+
+
+   .. py:method:: send_message(message: Message) -> None
+
+
+.. py:class:: Port
+
+   Rack's MIDI port: make an Input, InputQueue or Output.
+
+
+   .. py:attribute:: channel
+      :type:  int
+
+
+   .. py:property:: driver_id
+      :type: int
+
+
+
+   .. py:property:: device_id
+      :type: int
+
+
+
+   .. py:property:: driver
+      :type: Driver | None
+
+
+
+   .. py:property:: device
+      :type: Device | None
+
+
+
+   .. py:property:: context
+      :type: rackpy.raw.Context | None
+
+
+
+   .. py:method:: get_driver() -> Driver | None
+
+
+   .. py:method:: get_driver_id() -> int
+
+
+   .. py:method:: set_driver_id(driver_id: int) -> None
+
+
+   .. py:method:: get_device() -> Device | None
+
+
+   .. py:method:: get_device_id() -> int
+
+
+   .. py:method:: set_device_id(device_id: int) -> None
+
+
+   .. py:method:: get_device_ids() -> list[int]
+
+
+   .. py:method:: get_default_device_id() -> int
+
+
+   .. py:method:: get_device_name(device_id: int) -> str
+
+
+   .. py:method:: get_channels() -> list[int]
+
+
+   .. py:method:: get_channel() -> int
+
+
+   .. py:method:: set_channel(channel: int) -> None
+
+
+   .. py:method:: get_channel_name(channel: int) -> str
+
+
+   .. py:method:: to_json() -> Any
+
+
+   .. py:method:: from_json(data: Any) -> None
+
+
+.. py:class:: Input
+
+
+
+   Rack's MIDI input. Override on_message: RackPy calls it on the UI thread (queued).
+
+
+   .. py:property:: input_device
+      :type: InputDevice | None
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: on_message(message: Message) -> None
+
+
+   .. py:property:: dropped
+      :type: int
+
+
+
+.. py:class:: InputQueue
+
+
+
+   Rack's MIDI input. Override on_message: RackPy calls it on the UI thread (queued).
+
+
+   .. py:method:: try_pop(max_frame: int) -> Message | None
+
+
+   .. py:method:: size() -> int
+
+
+.. py:class:: Output
+
+
+
+   Rack's MIDI port: make an Input, InputQueue or Output.
+
+
+   .. py:property:: output_device
+      :type: OutputDevice | None
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: send_message(message: Message) -> None
+
+
+.. py:class:: PythonInputDevice
+
+   An input device of a PythonDriver: Python pushes messages into it.
+
+
+   .. py:property:: id
+      :type: int
+
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: removed
+      :type: bool
+
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:property:: subscribed
+      :type: list[Input | PortView]
+
+
+
+   .. py:method:: push_message(message: Message) -> None
+
+
+.. py:class:: PythonOutputDevice
+
+   An output device of a PythonDriver: what Rack's ports send is queued for Python.
+
+
+   .. py:property:: id
+      :type: int
+
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:property:: removed
+      :type: bool
+
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:property:: subscribed
+      :type: list[Output | PortView]
+
+
+
+   .. py:method:: take_sent() -> list[Message]
+
+
+   .. py:property:: dropped
+      :type: int
+
+
+
+.. py:class:: PythonDriver(name: str)
+
+   A MIDI driver Python configures; add_driver gives it to Rack.
+
+
+   .. py:property:: registered_id
+      :type: int
+
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:method:: add_input_device(name: str) -> PythonInputDevice
+
+
+   .. py:method:: add_output_device(name: str) -> PythonOutputDevice
+
+
+   .. py:method:: remove_input_device(device: PythonInputDevice) -> None
+
+
+   .. py:method:: remove_output_device(device: PythonOutputDevice) -> None
+
+
+.. py:function:: add_driver(driver_id: int, driver: PythonDriver) -> None
+
+.. py:function:: get_driver_ids() -> list[int]
+
+.. py:function:: get_driver(driver_id: int) -> Driver | None
+

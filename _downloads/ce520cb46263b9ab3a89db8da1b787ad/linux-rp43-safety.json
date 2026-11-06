@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "status": "partial-safety-evidence-not-a-performance-claim",
+  "recorded_at_utc": "2026-11-04T09:15:46Z",
+  "source_commit": "7444cc40f3fcacc6ca0d97fab5ad36b74513205b",
+  "platform": {
+    "os": "Linux x86_64, CachyOS",
+    "kernel": "7.3.1-1-cachyos",
+    "cpu": "Intel Core i9-14900K",
+    "logical_cpus": 32,
+    "governor": "powersave",
+    "audio_devices_detected": [
+      "HDA Intel PCH ALC1220 Analog capture",
+      "HDA Intel PCH ALC1220 Alt Analog capture",
+      "Logitech BRIO USB Audio capture"
+    ],
+    "controlled_hardware": false,
+    "limitations": [
+      "CPU frequency policy was not fixed; this run is not controlled-hardware performance evidence.",
+      "No physical audio output loopback or 30-minute device deadline-miss run was performed.",
+      "No macOS or Windows dynamic audio-path instrumentation was run locally."
+    ]
+  },
+  "commands": [
+    {
+      "command": "uv run --frozen pytest -m native tests/integration/test_perf_guard.py tests/io/test_io_native.py tests/engine/test_expander_stress.py -v",
+      "result": "passed",
+      "passed": 16,
+      "elapsed_seconds": 238.94,
+      "evidence": [
+        "Production-shaped audio paths had zero observed malloc/free/calloc/realloc/aligned allocation, mutex-lock, write, or GIL-ensure events.",
+        "Injected malloc, new, mutex, and write violations were detected; absence of LD_PRELOAD was rejected.",
+        "Native audio/MIDI behavior matched Rack; audio-path checks and ASan/TSan audio/expander stress cases passed.",
+        "DSP output matched native references, with graph-chain difference constrained to at most one ULP."
+      ]
+    },
+    {
+      "command": "uv run --frozen pytest -m stress tests/hardening/test_stress.py -v -s --basetemp=build/rp43-live-stress",
+      "result": "passed",
+      "passed": 1,
+      "elapsed_seconds": 206.23,
+      "evidence": {
+        "engine_frames_per_second": {
+          "idle": 47989,
+          "python_callbacks_outside_exclusive_lock": 48288,
+          "slow_exclusive_callbacks": 35997,
+          "raised_callbacks": 49310
+        },
+        "audio_guard_events_inside_process": {
+          "malloc": 0,
+          "free": 0,
+          "calloc": 0,
+          "realloc": 0,
+          "aligned": 0,
+          "mutex_lock": 0,
+          "write": 0,
+          "gil_ensure": 0
+        },
+        "create_delete_cycles": 1000,
+        "create_delete_counters_and_rss_stable_at_cycle_1000": true,
+        "save_reload_cycles": 1000,
+        "save_reload_counters_stable_at_cycle_1000": true,
+        "save_reload_rss_bytes_cycle_300": 228405248,
+        "save_reload_rss_bytes_cycle_1000": 232251392,
+        "slow_exclusive_callback_diagnostics": 30
+      }
+    }
+  ],
+  "cross_platform_candidate_ci": {
+    "run_url": "https://github.com/feoh/RackPy/actions/runs/41763149030",
+    "tested_commit": "16ecf405932b857197406673bec1d16ff09115c5",
+    "result": "release-candidate install/run and in-candidate manifest checks passed on Linux x86_64, macOS x86_64/arm64, and Windows x86_64; Rack-host and platform native test jobs passed",
+    "scope_note": "The tested commit is the code ancestor of source_commit; 7444cc4 changes only project-priority documentation. This CI run is not a performance benchmark."
+  },
+  "performance_claim": "None. The recorded rates and RSS are diagnostics from an uncontrolled machine, not evidence that a performance budget or physical audio deadline requirement passed.",
+  "remaining_gates": [
+    "Fixed-governor controlled-hardware A/B benchmark against equivalent native modules.",
+    "Thirty-minute physical audio-device deadline-miss test and UI latency measurements.",
+    "Independent reproduction and platform-specific dynamic audio-path evidence where required."
+  ]
+}

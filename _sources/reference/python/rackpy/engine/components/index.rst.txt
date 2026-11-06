@@ -1,0 +1,334 @@
+rackpy.engine.components
+========================
+
+.. py:module:: rackpy.engine.components
+
+.. autoapi-nested-parse::
+
+   Ports, parameters and lights (RP-13). Available inside Rack only.
+
+   These are Rack's ``rack::engine`` component types (also :mod:`rackpy.raw.engine`):
+   each call runs Rack's code. Beyond Rack's methods they offer properties for
+   everyday use (``port.voltage``, ``port.channel_count``, ``port.connected``,
+   ``light.brightness``). Components a Rack module owns are valid while the module
+   exists and are used on Rack's main thread; components you create are yours.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.engine.components.PORT_MAX_CHANNELS
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.engine.components.Input
+   rackpy.engine.components.Light
+   rackpy.engine.components.LightInfo
+   rackpy.engine.components.Output
+   rackpy.engine.components.Param
+   rackpy.engine.components.Port
+   rackpy.engine.components.PortInfo
+
+
+Module Contents
+---------------
+
+.. py:data:: PORT_MAX_CHANNELS
+   :type:  int
+
+.. py:class:: Input
+
+
+
+.. py:class:: Light
+
+   .. py:attribute:: value
+      :type:  float
+
+
+   .. py:attribute:: brightness
+      :type:  float
+
+
+   .. py:method:: set_brightness(brightness: float) -> None
+
+
+   .. py:method:: get_brightness() -> float
+
+
+   .. py:method:: set_brightness_smooth(brightness: float, frames: int = 1) -> None
+                  set_brightness_smooth(brightness: float, delta_time: float, lambda_: float = 30.0) -> None
+
+
+   .. py:method:: set_smooth_brightness(brightness: float, delta_time: float) -> None
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+.. py:class:: LightInfo
+
+   .. py:attribute:: module
+      :type:  Module | None
+
+
+   .. py:attribute:: light_id
+      :type:  int
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:method:: get_name() -> str
+
+
+   .. py:method:: get_description() -> str
+
+
+.. py:class:: Output
+
+
+
+.. py:class:: Param
+
+   .. py:attribute:: value
+      :type:  float
+
+
+   .. py:method:: get_value() -> float
+
+
+   .. py:method:: set_value(value: float) -> None
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+.. py:class:: Port
+
+   .. py:class:: Type
+
+
+
+      Create a collection of name/value pairs.
+
+      Example enumeration:
+
+      >>> class Color(Enum):
+      ...     RED = 1
+      ...     BLUE = 2
+      ...     GREEN = 3
+
+      Access them by:
+
+      - attribute access:
+
+        >>> Color.RED
+        <Color.RED: 1>
+
+      - value lookup:
+
+        >>> Color(1)
+        <Color.RED: 1>
+
+      - name lookup:
+
+        >>> Color['RED']
+        <Color.RED: 1>
+
+      Enumerations can be iterated over, and know how many members they have:
+
+      >>> len(Color)
+      3
+
+      >>> list(Color)
+      [<Color.RED: 1>, <Color.BLUE: 2>, <Color.GREEN: 3>]
+
+      Methods can be added to enumerations, and members can have their own
+      attributes -- see the documentation for details.
+
+
+      .. py:attribute:: INPUT
+         :value: 0
+
+
+
+      .. py:attribute:: OUTPUT
+         :value: 1
+
+
+
+
+   .. py:attribute:: value
+      :type:  float
+
+
+   .. py:attribute:: channels
+      :type:  int
+
+
+   .. py:attribute:: active
+      :type:  int
+
+
+   .. py:attribute:: voltage
+      :type:  float
+
+
+   .. py:attribute:: channel_count
+      :type:  int
+
+
+   .. py:method:: set_voltage(voltage: float, channel: int = 0) -> None
+
+
+   .. py:method:: get_voltage(channel: int = 0) -> float
+
+
+   .. py:method:: get_poly_voltage(channel: int) -> float
+
+
+   .. py:method:: get_normal_voltage(normal_voltage: float, channel: int = 0) -> float
+
+
+   .. py:method:: get_normal_poly_voltage(normal_voltage: float, channel: int) -> float
+
+
+   .. py:method:: get_voltage_simd(first_channel: int) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: get_poly_voltage_simd(first_channel: int) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: get_normal_voltage_simd(normal_voltage: rackpy.raw.simd.float_4 | float, first_channel: int) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: get_normal_poly_voltage_simd(normal_voltage: rackpy.raw.simd.float_4 | float, first_channel: int) -> rackpy.raw.simd.float_4
+
+
+   .. py:method:: set_voltage_simd(voltage: rackpy.raw.simd.float_4 | float, first_channel: int) -> None
+
+
+   .. py:method:: get_voltages(first_channel: int = 0) -> Voltages
+
+
+   .. py:method:: read_voltages() -> list[float]
+
+
+   .. py:method:: write_voltages(voltages: collections.abc.Sequence[float]) -> None
+
+
+   .. py:method:: clear_voltages() -> None
+
+
+   .. py:method:: get_voltage_sum() -> float
+
+
+   .. py:method:: get_voltage_rms() -> float
+
+
+   .. py:method:: set_channels(channels: int) -> None
+
+
+   .. py:method:: get_channels() -> int
+
+
+   .. py:method:: is_connected() -> bool
+
+
+   .. py:method:: is_monophonic() -> bool
+
+
+   .. py:method:: is_polyphonic() -> bool
+
+
+   .. py:method:: normalize(normal_voltage: float) -> float
+
+
+   .. py:property:: voltages
+      :type: Voltages
+
+
+
+   .. py:property:: plug_lights
+      :type: tuple[Light, Light, Light]
+
+
+
+   .. py:property:: connected
+      :type: bool
+
+
+
+   .. py:property:: monophonic
+      :type: bool
+
+
+
+   .. py:property:: polyphonic
+      :type: bool
+
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+.. py:class:: PortInfo
+
+   .. py:attribute:: module
+      :type:  Module | None
+
+
+   .. py:attribute:: type
+      :type:  Port
+
+
+   .. py:attribute:: port_id
+      :type:  int
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+   .. py:property:: alive
+      :type: bool
+
+
+
+   .. py:method:: get_name() -> str
+
+
+   .. py:method:: get_full_name() -> str
+
+
+   .. py:method:: get_description() -> str
+
+

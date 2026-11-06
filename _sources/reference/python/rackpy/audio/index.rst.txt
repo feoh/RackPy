@@ -1,0 +1,88 @@
+rackpy.audio
+============
+
+.. py:module:: rackpy.audio
+
+.. autoapi-nested-parse::
+
+   Audio, Pythonically, over :mod:`rackpy.raw.audio`. Inside Rack's live UI only.
+
+   Everything here is synchronous and runs on the calling thread. Rack's audio
+   thread never runs Python: a :class:`~rackpy.raw.audio.Port` subclass's
+   ``on_start_stream``/``on_stop_stream`` arrive queued on the UI thread, and its
+   process callbacks run only for a device that Python drives (:class:`Stream`).
+   The raw layer's rules apply unchanged (see the audio reference page).
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.audio.Stream
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.audio.drivers
+   rackpy.audio.find_driver
+   rackpy.audio.open_port
+   rackpy.audio.virtual_driver
+
+
+Module Contents
+---------------
+
+.. py:function:: drivers() -> dict[str, rackpy.raw.audio.Driver]
+
+   Rack's audio drivers by name; raise LookupError on duplicate names.
+
+
+.. py:function:: find_driver(driver: str | int) -> rackpy.raw.audio.Driver
+
+   A driver by name or ID. LookupError if absent or the name is ambiguous.
+
+
+.. py:function:: open_port[P: rackpy.raw.audio.Port](driver: str | int, device: str | int | None = None, *, kind: type[P]) -> P
+                 open_port(driver: str | int, device: str | int | None = None) -> rackpy.raw.audio.Port
+
+   A new audio port (``kind``, a Port subclass) on a driver's device, by name or ID (None: the driver's default).
+
+
+.. py:function:: virtual_driver(driver_id: int, name: str, *, devices: tuple[str, ...] = ('Virtual 1', )) -> rackpy.raw.audio.PythonDriver
+
+   A Python audio driver with these devices (2 in, 2 out, 48 kHz, 256 frames), given to Rack until it quits.
+
+
+.. py:class:: Stream(device: rackpy.raw.audio.PythonDevice)
+
+   Drives a PythonDevice deterministically: each ``process()`` call is one block, as an audio driver's callback.
+
+   Rack's ports run on this thread: Core's Audio module, as master, steps Rack's engine by the block; a Python
+   port's overrides run synchronously. Buffers are interleaved float32 frames.
+
+
+   .. py:attribute:: device
+
+
+   .. py:attribute:: running
+      :value: False
+
+
+
+   .. py:method:: start() -> None
+
+
+   .. py:method:: stop() -> None
+
+
+   .. py:method:: process(frames: int | None = None, input: array.array[float] | None = None) -> array.array[float]
+
+      One block of ``frames`` (default: the device's block size); returns the output frames.
+
+
+

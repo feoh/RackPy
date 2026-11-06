@@ -1,0 +1,324 @@
+rackpy.simd
+===========
+
+.. py:module:: rackpy.simd
+
+.. autoapi-nested-parse::
+
+   Rack's 4-lane SIMD vectors and the math on them, as one tidy import.
+
+   ``float_4`` and ``int32_4`` hold Rack's own C++ vectors (``rack::simd``, also
+   available as :mod:`rackpy.raw.simd`), and every operator and function runs
+   Rack's C++ code, so results match Rack's lane for lane. Comparisons return
+   masks, not bools. Each function also takes plain floats, as Rack's do, so
+   code written once works for a float and for a float_4. Available inside Rack
+   only.
+
+   Python calls cost far more than the four lanes they compute: use these to
+   configure, test and explore Rack's SIMD semantics, not for per-sample audio,
+   which belongs in a native kernel (see the DSP how-to).
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.simd.Vector
+   rackpy.simd.movemask_inverse
+   rackpy.simd.IMPLEMENTATION
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.simd.Template
+   rackpy.simd.float_4
+   rackpy.simd.int32_4
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.simd.abs
+   rackpy.simd.andnot
+   rackpy.simd.arg
+   rackpy.simd.atan
+   rackpy.simd.atan2
+   rackpy.simd.ceil
+   rackpy.simd.clamp
+   rackpy.simd.cos
+   rackpy.simd.crossfade
+   rackpy.simd.exp
+   rackpy.simd.fabs
+   rackpy.simd.floor
+   rackpy.simd.fmax
+   rackpy.simd.fmin
+   rackpy.simd.fmod
+   rackpy.simd.hypot
+   rackpy.simd.ifelse
+   rackpy.simd.log
+   rackpy.simd.log2
+   rackpy.simd.log10
+   rackpy.simd.movemask
+   rackpy.simd.pow
+   rackpy.simd.rcp
+   rackpy.simd.rescale
+   rackpy.simd.round
+   rackpy.simd.rsqrt
+   rackpy.simd.sgn
+   rackpy.simd.sin
+   rackpy.simd.sqrt
+   rackpy.simd.tan
+   rackpy.simd.trunc
+
+
+Module Contents
+---------------
+
+.. py:class:: Template
+
+   A C++ template: ``Vector[float, 4]``, ``movemask_inverse[float_4]``.
+
+
+   .. py:property:: specializations
+      :type: dict[tuple[Any, ...], Any]
+
+
+
+.. py:data:: Vector
+   :type:  Template
+
+.. py:function:: abs(x: float) -> float
+                 abs(z: complex) -> float
+                 abs(a: float_4) -> float_4
+                 abs(a: tuple[float_4 | float, float_4 | float]) -> float_4
+
+.. py:function:: andnot(a: float_4 | float, b: float_4 | float) -> float_4
+
+.. py:function:: arg(z: complex) -> float
+                 arg(a: tuple[float_4 | float, float_4 | float]) -> float_4
+
+.. py:function:: atan(x: float) -> float
+                 atan(x: float_4) -> float_4
+
+.. py:function:: atan2(x: float, y: float) -> float
+                 atan2(x: float_4 | float, y: float_4 | float) -> float_4
+
+.. py:function:: ceil(x: float) -> float
+                 ceil(x: float_4) -> float_4
+
+.. py:function:: clamp(x: float, a: float = 0.0, b: float = 1.0) -> float
+                 clamp(x: float_4 | float, a: float_4 | float = ..., b: float_4 | float = ...) -> float_4
+
+.. py:function:: cos(x: float) -> float
+                 cos(x: float_4) -> float_4
+
+.. py:function:: crossfade(a: float, b: float, p: float) -> float
+                 crossfade(a: float_4 | float, b: float_4 | float, p: float_4 | float) -> float_4
+
+.. py:function:: exp(x: float) -> float
+                 exp(x: float_4) -> float_4
+
+.. py:function:: fabs(x: float) -> float
+                 fabs(x: float_4) -> float_4
+
+.. py:class:: float_4
+              float_4(x: float)
+              float_4(x1: float, x2: float, x3: float, x4: float)
+              float_4(v: float_4)
+              float_4(a: int32_4)
+
+   .. py:attribute:: size
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: type
+      :type:  ClassVar[float_4.type[float]]
+
+
+   .. py:method:: zero() -> float_4
+      :staticmethod:
+
+
+
+   .. py:method:: mask() -> float_4
+      :staticmethod:
+
+
+
+   .. py:method:: load(x: collections.abc.Buffer) -> float_4
+      :staticmethod:
+
+
+
+   .. py:method:: store(x: collections.abc.Buffer) -> None
+
+
+   .. py:method:: cast(a: int32_4) -> float_4
+      :staticmethod:
+
+
+
+   .. py:property:: s
+      :type: memoryview
+
+
+
+   .. py:property:: v
+      :type: float_4
+
+
+
+   .. py:method:: tolist() -> list[float]
+
+
+   .. py:method:: pre_increment() -> float_4
+
+
+   .. py:method:: pre_decrement() -> float_4
+
+
+   .. py:method:: post_increment() -> float_4
+
+
+   .. py:method:: post_decrement() -> float_4
+
+
+.. py:function:: floor(x: float) -> float
+                 floor(x: float_4) -> float_4
+
+.. py:function:: fmax(x: float, b: float) -> float
+                 fmax(x: float_4 | float, b: float_4 | float) -> float_4
+
+.. py:function:: fmin(x: float, b: float) -> float
+                 fmin(x: float_4 | float, b: float_4 | float) -> float_4
+
+.. py:function:: fmod(a: float, b: float) -> float
+                 fmod(a: float_4 | float, b: float_4 | float) -> float_4
+
+.. py:function:: hypot(a: float, b: float) -> float
+                 hypot(a: float_4 | float, b: float_4 | float) -> float_4
+
+.. py:function:: ifelse(cond: bool, a: float, b: float) -> float
+                 ifelse(mask: float_4 | float, a: float_4 | float, b: float_4 | float) -> float_4
+
+.. py:class:: int32_4
+              int32_4(x: int)
+              int32_4(x1: int, x2: int, x3: int, x4: int)
+              int32_4(v: int32_4)
+              int32_4(a: float_4)
+
+   .. py:attribute:: size
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: type
+      :type:  ClassVar[int32_4.type[int]]
+
+
+   .. py:method:: zero() -> int32_4
+      :staticmethod:
+
+
+
+   .. py:method:: mask() -> int32_4
+      :staticmethod:
+
+
+
+   .. py:method:: load(x: collections.abc.Buffer) -> int32_4
+      :staticmethod:
+
+
+
+   .. py:method:: store(x: collections.abc.Buffer) -> None
+
+
+   .. py:method:: cast(a: float_4) -> int32_4
+      :staticmethod:
+
+
+
+   .. py:property:: s
+      :type: memoryview
+
+
+
+   .. py:property:: v
+      :type: int32_4
+
+
+
+   .. py:method:: tolist() -> list[int]
+
+
+   .. py:method:: pre_increment() -> int32_4
+
+
+   .. py:method:: pre_decrement() -> int32_4
+
+
+   .. py:method:: post_increment() -> int32_4
+
+
+   .. py:method:: post_decrement() -> int32_4
+
+
+.. py:function:: log(x: float) -> float
+                 log(x: float_4) -> float_4
+
+.. py:function:: log2(x: float) -> float
+                 log2(x: float_4) -> float_4
+
+.. py:function:: log10(x: float) -> float
+                 log10(x: float_4) -> float_4
+
+.. py:function:: movemask(a: float_4) -> int
+                 movemask(a: int32_4) -> int
+
+.. py:data:: movemask_inverse
+   :type:  Template
+
+.. py:function:: pow(a: float, b: int) -> float
+                 pow(a: float, b: float) -> float
+                 pow(a: float_4, b: int) -> float_4
+                 pow(a: float, b: float_4) -> float_4
+                 pow(a: float_4 | float, b: float_4 | float) -> float_4
+
+.. py:function:: rcp(x: float_4 | float) -> float_4
+
+.. py:function:: rescale(x: float, x_min: float, x_max: float, y_min: float, y_max: float) -> float
+                 rescale(x: float_4 | float, x_min: float_4 | float, x_max: float_4 | float, y_min: float_4 | float, y_max: float_4 | float) -> float_4
+
+.. py:function:: round(x: float) -> float
+                 round(x: float_4) -> float_4
+
+.. py:function:: rsqrt(x: float_4 | float) -> float_4
+
+.. py:function:: sgn(x: float) -> float
+                 sgn(x: float_4) -> float_4
+
+.. py:function:: sin(x: float) -> float
+                 sin(x: float_4) -> float_4
+
+.. py:function:: sqrt(x: float) -> float
+                 sqrt(x: float_4) -> float_4
+
+.. py:function:: tan(x: float) -> float
+                 tan(x: float_4) -> float_4
+
+.. py:function:: trunc(x: float) -> float
+                 trunc(x: float_4) -> float_4
+
+.. py:data:: IMPLEMENTATION
+   :type:  str
+
+   Rack's SIMD implementation this plugin was built with: "sse4.2" on x86-64, "simde" elsewhere.
+
+

@@ -1,0 +1,117 @@
+rackpy.engine.host
+==================
+
+.. py:module:: rackpy.engine.host
+
+.. autoapi-nested-parse::
+
+   Rack's running engine and undo history, Pythonically, over :mod:`rackpy.raw.engine` and
+   :mod:`rackpy.raw.history`. Inside Rack's live UI only.
+
+   Everything here is synchronous: each call runs Rack's own code on Rack's main
+   thread before it returns, and nothing is queued. Calls that take Rack's
+   engine lock release the GIL while they wait. The raw layer's checks and
+   ownership rules apply unchanged (see the engine and history reference pages).
+   :func:`map_param` attempts to remove its new handle when mapping fails;
+   :func:`undo_step` attempts to undo recorded actions if its block raises.
+   Neither helper guarantees rollback of arbitrary side effects or of errors while
+   committing a history step.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.engine.host.AnyModule
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.engine.host.engine
+   rackpy.engine.host.history
+   rackpy.engine.host.modules
+   rackpy.engine.host.module
+   rackpy.engine.host.cables
+   rackpy.engine.host.connect
+   rackpy.engine.host.disconnect
+   rackpy.engine.host.map_param
+   rackpy.engine.host.unmap_param
+   rackpy.engine.host.undo_step
+
+
+Module Contents
+---------------
+
+.. py:data:: AnyModule
+
+   A RackPy module's handle, or another plugin's module.
+
+
+.. py:function:: engine() -> rackpy.raw.engine.Engine
+
+   Rack's engine (``Context.engine``). ContextError outside Rack's live UI.
+
+
+.. py:function:: history() -> rackpy.raw.history.State
+
+   Rack's undo history (``Context.history``). ContextError outside Rack's live UI.
+
+
+.. py:function:: modules() -> list[AnyModule]
+
+   The engine's modules, in Rack's order. A module Rack deletes meanwhile is left out.
+
+
+.. py:function:: module(module_id: int) -> AnyModule | None
+
+   The engine's module with this ID, or None.
+
+
+.. py:function:: cables() -> list[rackpy.raw.engine.Cable]
+
+   The engine's cables (cable widgets' and Python's), each found again by its ID at every use.
+
+
+.. py:function:: connect(output: tuple[rackpy.raw.engine.Module, int], input: tuple[rackpy.raw.engine.Module, int]) -> rackpy.raw.engine.Cable
+
+   Connect ``(module, output_id)`` to ``(module, input_id)`` with a cable in Rack's engine.
+
+   As :meth:`Engine.add_cable <rackpy.raw.engine.Engine.add_cable>`: both modules must be RackPy modules
+   that Python put into the engine and that no module widget owns, since a cable added here has no cable
+   widget. Returns the cable, which Rack's engine then owns.
+
+
+.. py:function:: disconnect(cable: rackpy.raw.engine.Cable) -> None
+
+   Remove a cable Python connected (no cable widget owns it) from Rack's engine.
+
+
+.. py:function:: map_param(target: AnyModule, param_id: int, *, text: str = '', color: rackpy.raw.nanovg.NVGcolor | None = None, overwrite: bool = True) -> rackpy.raw.engine.ParamHandle
+
+   Map a new parameter handle to one module's param, as Core's MIDI-Map does, and return it.
+
+   With ``overwrite``, a handle already on that param is unmapped; without, this one ends up unmapped
+   (Rack's rule), and the returned handle's ``module_id`` is -1. If mapping fails, the handle leaves the
+   engine again before the error propagates.
+
+
+.. py:function:: unmap_param(handle: rackpy.raw.engine.ParamHandle) -> None
+
+   Remove a handle :func:`map_param` made from Rack's engine (refused once Rack's clear removed it).
+
+
+.. py:function:: undo_step(name: str) -> collections.abc.Iterator[rackpy.raw.history.ComplexAction]
+
+   Collect actions into one undo step: push each change's action to the yielded ComplexAction.
+
+   On a normal exit the step goes to Rack's history, unless it is empty. If the block raises, the
+   collected actions are undone by Rack, newest first, and the step is dropped. Only recorded actions
+   can be undone; unrecorded changes, errors in undo, or errors while pushing to history are not
+   covered by a transactional guarantee. Make each change, then push its action, as Rack does.
+
+

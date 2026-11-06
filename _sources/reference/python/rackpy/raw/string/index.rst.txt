@@ -1,0 +1,153 @@
+rackpy.raw.string
+=================
+
+.. py:module:: rackpy.raw.string
+
+.. autoapi-nested-parse::
+
+   rack::string: text, UTF-8, Base64, versions and translations.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.raw.string.Location
+   rackpy.raw.string.CaseInsensitiveCompare
+   rackpy.raw.string.Version
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.string.f
+   rackpy.raw.string.fv
+   rackpy.raw.string.lowercase
+   rackpy.raw.string.uppercase
+   rackpy.raw.string.trim
+   rackpy.raw.string.truncate
+   rackpy.raw.string.truncate_prefix
+   rackpy.raw.string.ellipsize
+   rackpy.raw.string.ellipsize_prefix
+   rackpy.raw.string.starts_with
+   rackpy.raw.string.ends_with
+   rackpy.raw.string.position_to_location
+   rackpy.raw.string.location_to_position
+   rackpy.raw.string.to_base64
+   rackpy.raw.string.from_base64
+   rackpy.raw.string.strcasecmp
+   rackpy.raw.string.join
+   rackpy.raw.string.split
+   rackpy.raw.string.format_time
+   rackpy.raw.string.format_time_iso
+   rackpy.raw.string.utf32_to_utf8
+   rackpy.raw.string.utf8_to_utf32
+   rackpy.raw.string.utf16_to_utf8
+   rackpy.raw.string.utf8_next_codepoint
+   rackpy.raw.string.utf8_prev_codepoint
+   rackpy.raw.string.utf8_length
+   rackpy.raw.string.utf8_codepoint_index
+   rackpy.raw.string.utf8_codepoint_pos
+   rackpy.raw.string.translate
+   rackpy.raw.string.get_languages
+   rackpy.raw.string.init
+
+
+Module Contents
+---------------
+
+.. py:function:: f(format: str, *args: int | float | str | bytes) -> str
+
+.. py:function:: fv(format: str, args: collections.abc.Sequence[int | float | str | bytes]) -> str
+
+.. py:function:: lowercase(s: str) -> str
+
+.. py:function:: uppercase(s: str) -> str
+
+.. py:function:: trim(s: str) -> str
+
+.. py:function:: truncate(s: str, max_codepoints: int) -> str
+
+.. py:function:: truncate_prefix(s: str, max_codepoints: int) -> str
+
+.. py:function:: ellipsize(s: str, max_codepoints: int) -> str
+
+.. py:function:: ellipsize_prefix(s: str, max_codepoints: int) -> str
+
+.. py:function:: starts_with(s: str, prefix: str) -> bool
+
+.. py:function:: ends_with(s: str, suffix: str) -> bool
+
+.. py:class:: Location(line: int = 0, column: int = 0)
+
+   .. py:attribute:: line
+      :type:  int
+
+
+   .. py:attribute:: column
+      :type:  int
+
+
+.. py:function:: position_to_location(s: str | bytes, pos: int) -> Location
+
+.. py:function:: location_to_position(s: str | bytes, location: Location) -> int
+
+.. py:function:: to_base64(data: bytes | bytearray | memoryview) -> str
+
+.. py:function:: from_base64(s: str) -> bytes
+
+.. py:function:: strcasecmp(s1: str, s2: str) -> int
+
+.. py:class:: CaseInsensitiveCompare
+
+.. py:function:: join(container: collections.abc.Iterable[str], seperator: str = '') -> str
+
+.. py:function:: split(s: str, seperator: str, max_tokens: int = 0) -> list[str]
+
+.. py:function:: format_time(format: str, timestamp: float) -> str
+
+.. py:function:: format_time_iso(timestamp: float) -> str
+
+.. py:function:: utf32_to_utf8(s32: collections.abc.Sequence[int]) -> bytes
+
+.. py:function:: utf8_to_utf32(s8: str | bytes) -> list[int]
+
+.. py:function:: utf16_to_utf8(w: collections.abc.Sequence[int]) -> bytes
+
+.. py:function:: utf8_next_codepoint(s8: str | bytes, pos: int) -> int
+
+.. py:function:: utf8_prev_codepoint(s8: str | bytes, pos: int) -> int
+
+.. py:function:: utf8_length(s8: str | bytes) -> int
+
+.. py:function:: utf8_codepoint_index(s8: str | bytes, pos: int) -> int
+
+.. py:function:: utf8_codepoint_pos(s8: str | bytes, index: int) -> int
+
+.. py:class:: Version
+              Version(s: str)
+
+   .. py:attribute:: parts
+      :type:  list[str]
+
+
+   .. py:method:: get_major() -> str
+
+
+   .. py:method:: get_minor() -> str
+
+
+   .. py:method:: get_revision() -> str
+
+
+.. py:function:: translate(id: str) -> str
+                 translate(id: str, language: str) -> str
+
+.. py:function:: get_languages() -> list[str]
+
+.. py:function:: init() -> None
+

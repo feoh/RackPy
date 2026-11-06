@@ -1,0 +1,144 @@
+rackpy.raw.system
+=================
+
+.. py:module:: rackpy.raw.system
+
+.. autoapi-nested-parse::
+
+   rack::system: files, paths, archives, time and processes.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.system.join
+   rackpy.raw.system.get_entries
+   rackpy.raw.system.exists
+   rackpy.raw.system.is_file
+   rackpy.raw.system.is_directory
+   rackpy.raw.system.get_file_size
+   rackpy.raw.system.rename
+   rackpy.raw.system.copy
+   rackpy.raw.system.create_directory
+   rackpy.raw.system.create_directories
+   rackpy.raw.system.create_symbolic_link
+   rackpy.raw.system.remove
+   rackpy.raw.system.remove_recursively
+   rackpy.raw.system.get_working_directory
+   rackpy.raw.system.set_working_directory
+   rackpy.raw.system.get_temp_directory
+   rackpy.raw.system.get_absolute
+   rackpy.raw.system.get_canonical
+   rackpy.raw.system.get_directory
+   rackpy.raw.system.get_filename
+   rackpy.raw.system.get_stem
+   rackpy.raw.system.get_extension
+   rackpy.raw.system.read_file
+   rackpy.raw.system.write_file
+   rackpy.raw.system.archive_directory
+   rackpy.raw.system.archive_directory_to_bytes
+   rackpy.raw.system.unarchive_to_directory
+   rackpy.raw.system.get_logical_core_count
+   rackpy.raw.system.set_thread_name
+   rackpy.raw.system.get_stack_trace
+   rackpy.raw.system.get_time
+   rackpy.raw.system.get_unix_time
+   rackpy.raw.system.get_thread_time
+   rackpy.raw.system.sleep
+   rackpy.raw.system.get_operating_system_info
+   rackpy.raw.system.open_browser
+   rackpy.raw.system.open_directory
+   rackpy.raw.system.run_process_detached
+   rackpy.raw.system.get_fpu_flags
+   rackpy.raw.system.set_fpu_flags
+   rackpy.raw.system.reset_fpu_flags
+
+
+Module Contents
+---------------
+
+.. py:function:: join(path1: str | os.PathLike[str], path2: str | os.PathLike[str] | None = None, *paths: str | os.PathLike[str]) -> str
+
+.. py:function:: get_entries(dir_path: str | os.PathLike[str], depth: int = 0) -> list[str]
+
+.. py:function:: exists(path: str | os.PathLike[str]) -> bool
+
+.. py:function:: is_file(path: str | os.PathLike[str]) -> bool
+
+.. py:function:: is_directory(path: str | os.PathLike[str]) -> bool
+
+.. py:function:: get_file_size(path: str | os.PathLike[str]) -> int
+
+.. py:function:: rename(src_path: str | os.PathLike[str], dest_path: str | os.PathLike[str]) -> bool
+
+.. py:function:: copy(src_path: str | os.PathLike[str], dest_path: str | os.PathLike[str]) -> bool
+
+.. py:function:: create_directory(path: str | os.PathLike[str]) -> bool
+
+.. py:function:: create_directories(path: str | os.PathLike[str]) -> bool
+
+.. py:function:: create_symbolic_link(target: str | os.PathLike[str], link: str | os.PathLike[str]) -> bool
+
+.. py:function:: remove(path: str | os.PathLike[str]) -> bool
+
+.. py:function:: remove_recursively(path: str | os.PathLike[str]) -> int
+
+.. py:function:: get_working_directory() -> str
+
+.. py:function:: set_working_directory(path: str | os.PathLike[str]) -> None
+
+.. py:function:: get_temp_directory() -> str
+
+.. py:function:: get_absolute(path: str | os.PathLike[str]) -> str
+
+.. py:function:: get_canonical(path: str | os.PathLike[str]) -> str
+
+.. py:function:: get_directory(path: str | os.PathLike[str]) -> str
+
+.. py:function:: get_filename(path: str | os.PathLike[str]) -> str
+
+.. py:function:: get_stem(path: str | os.PathLike[str]) -> str
+
+.. py:function:: get_extension(path: str | os.PathLike[str]) -> str
+
+.. py:function:: read_file(path: str | os.PathLike[str]) -> bytes
+
+.. py:function:: write_file(path: str | os.PathLike[str], data: bytes | bytearray | memoryview) -> None
+
+.. py:function:: archive_directory(archive_path: str | os.PathLike[str], dir_path: str | os.PathLike[str], compression_level: int = 1) -> None
+
+.. py:function:: archive_directory_to_bytes(dir_path: str | os.PathLike[str], compression_level: int = 1) -> bytes
+
+.. py:function:: unarchive_to_directory(archive: str | os.PathLike[str] | bytes, dir_path: str | os.PathLike[str]) -> None
+
+.. py:function:: get_logical_core_count() -> int
+
+.. py:function:: set_thread_name(name: str) -> None
+
+.. py:function:: get_stack_trace() -> str
+
+.. py:function:: get_time() -> float
+
+.. py:function:: get_unix_time() -> float
+
+.. py:function:: get_thread_time() -> float
+
+.. py:function:: sleep(time: float) -> None
+
+.. py:function:: get_operating_system_info() -> str
+
+.. py:function:: open_browser(url: str) -> None
+
+.. py:function:: open_directory(path: str | os.PathLike[str]) -> None
+
+.. py:function:: run_process_detached(path: str | os.PathLike[str]) -> None
+
+.. py:function:: get_fpu_flags() -> int
+
+.. py:function:: set_fpu_flags(flags: int) -> None
+
+.. py:function:: reset_fpu_flags() -> None
+

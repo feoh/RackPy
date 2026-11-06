@@ -1,0 +1,145 @@
+rackpy.raw.macros
+=================
+
+.. py:module:: rackpy.raw.macros
+
+.. autoapi-nested-parse::
+
+   Rack's macros that have a meaning at run time (common.hpp, arch.hpp, math.hpp, logger.hpp).
+
+   Constants come from the plugin as built (``ARCH_*`` exist only on their own
+   platform). Function-like macros map to functions or context managers with the
+   same effect. Macros that only exist for the C preprocessor or linker
+   (``CONCAT``, ``TOSTRING``, ``BINARY*``) have no Python counterpart; the
+   [values reference](https://github.com/feoh/RackPy/blob/main/docs/reference/values.md)
+   explains each one.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.raw.macros.RACK_MOD_SHIFT
+   rackpy.raw.macros.RACK_MOD_SHIFT_NAME
+   rackpy.raw.macros.RACK_MOD_ALT
+   rackpy.raw.macros.RACK_MOD_ALT_NAME
+   rackpy.raw.macros.RACK_MOD_CTRL
+   rackpy.raw.macros.RACK_MOD_CTRL_NAME
+   rackpy.raw.macros.RACK_MOD_MASK
+   rackpy.raw.macros.RACK_HELD
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.raw.macros.DEFER
+   rackpy.raw.macros.DEPRECATED
+   rackpy.raw.macros.ENUMS
+   rackpy.raw.macros.LENGTHOF
+   rackpy.raw.macros.VEC_ARGS
+   rackpy.raw.macros.RECT_ARGS
+   rackpy.raw.macros.DEBUG
+   rackpy.raw.macros.INFO
+   rackpy.raw.macros.WARN
+   rackpy.raw.macros.FATAL
+
+
+Module Contents
+---------------
+
+.. py:data:: RACK_MOD_SHIFT
+   :value: 1
+
+
+.. py:data:: RACK_MOD_SHIFT_NAME
+   :value: 'Shift'
+
+
+.. py:data:: RACK_MOD_ALT
+   :value: 4
+
+
+.. py:data:: RACK_MOD_ALT_NAME
+   :value: 'Alt'
+
+
+.. py:data:: RACK_MOD_CTRL
+   :value: 8
+
+
+.. py:data:: RACK_MOD_CTRL_NAME
+   :value: '⌘'
+
+
+.. py:data:: RACK_MOD_MASK
+   :value: 15
+
+
+   Filters the real modifier keys out of a mods value (no Caps Lock or Num Lock).
+
+
+.. py:data:: RACK_HELD
+   :value: 3
+
+
+   A key action meaning the key is (still) held, next to GLFW's PRESS 1, RELEASE 0 and REPEAT 2.
+
+
+.. py:function:: DEFER(f: collections.abc.Callable[[], object]) -> rackpy.raw._common.DeferWrapper
+
+   ``DEFER({ ... })``: run ``f`` when the ``with`` block exits.
+
+
+.. py:function:: DEPRECATED[F: collections.abc.Callable[..., object]](obj: F) -> F
+
+   ``DEPRECATED``: mark a function or class deprecated; using it emits DeprecationWarning.
+
+
+.. py:function:: ENUMS(name: str, count: int, start: int = 0) -> dict[str, int]
+
+   ``ENUMS(name, count)``: reserve ``count`` consecutive IDs from ``start``.
+
+   In C++, ``enum { A, ENUMS(B, 3), C }`` gives A = 0, B = 1, B_LAST = 3 and
+   C = 4. Here ``ENUMS("B", 3, start=1)`` returns ``{"B": 1, "B_LAST": 3}``;
+   the next free ID is ``start + count``.
+
+
+.. py:function:: LENGTHOF(arr: collections.abc.Sized) -> int
+
+   ``LENGTHOF(arr)``: the number of elements, ``len(arr)``.
+
+
+.. py:function:: VEC_ARGS(v: rackpy.raw.math.Vec) -> tuple[float, float]
+
+   ``VEC_ARGS(v)``: ``(v.x, v.y)``.
+
+
+.. py:function:: RECT_ARGS(r: rackpy.raw.math.Rect) -> tuple[float, float, float, float]
+
+   ``RECT_ARGS(r)``: ``(r.pos.x, r.pos.y, r.size.x, r.size.y)``.
+
+
+.. py:function:: DEBUG(format: str, *args: int | float | str | bytes) -> None
+
+   Rack's DEBUG: logs at debug level with the caller's file, line and function; ``format`` is printf's.
+
+
+.. py:function:: INFO(format: str, *args: int | float | str | bytes) -> None
+
+   Rack's INFO.
+
+
+.. py:function:: WARN(format: str, *args: int | float | str | bytes) -> None
+
+   Rack's WARN.
+
+
+.. py:function:: FATAL(format: str, *args: int | float | str | bytes) -> None
+
+   Rack's FATAL: logs at fatal level (Rack's macro does not stop Rack either).
+
+

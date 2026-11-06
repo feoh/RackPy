@@ -1,0 +1,177 @@
+rackpy.dsp.basic
+================
+
+.. py:module:: rackpy.dsp.basic
+
+.. autoapi-nested-parse::
+
+   Rack's DSP helpers: conversions, scalings, polynomials, windows and ODE steps (RP-18A).
+
+   These are Rack's own implementations (``rack::dsp``, also available as
+   :mod:`rackpy.raw.dsp`); every call runs Rack's C++ code. Each function takes a
+   float or a :class:`rackpy.simd.float_4`, for Rack's two instantiations. Use
+   them to design and test, to fill tables and to analyse; per-sample audio
+   belongs in a native kernel. Available inside Rack only.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rackpy.dsp.basic.FREQ_A4
+   rackpy.dsp.basic.FREQ_C4
+   rackpy.dsp.basic.FREQ_SEMITONE
+   rackpy.dsp.basic.convert
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rackpy.dsp.basic.Frame
+   rackpy.dsp.basic.Int24
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rackpy.dsp.basic.amplitude_to_db
+   rackpy.dsp.basic.blackman
+   rackpy.dsp.basic.blackman_harris
+   rackpy.dsp.basic.blackman_harris_window
+   rackpy.dsp.basic.blackman_nuttall
+   rackpy.dsp.basic.blackman_nuttall_window
+   rackpy.dsp.basic.blackman_window
+   rackpy.dsp.basic.cubic
+   rackpy.dsp.basic.db_to_amplitude
+   rackpy.dsp.basic.exp2_floor
+   rackpy.dsp.basic.exp2_taylor5
+   rackpy.dsp.basic.exponential_bipolar
+   rackpy.dsp.basic.hann
+   rackpy.dsp.basic.hann_window
+   rackpy.dsp.basic.poly_direct
+   rackpy.dsp.basic.poly_estrin
+   rackpy.dsp.basic.poly_horner
+   rackpy.dsp.basic.quadratic_bipolar
+   rackpy.dsp.basic.quartic_bipolar
+   rackpy.dsp.basic.quintic
+   rackpy.dsp.basic.sinc
+   rackpy.dsp.basic.sqrt_bipolar
+   rackpy.dsp.basic.step_euler
+   rackpy.dsp.basic.step_rk2
+   rackpy.dsp.basic.step_rk4
+
+
+Module Contents
+---------------
+
+.. py:data:: FREQ_A4
+   :type:  float
+
+.. py:data:: FREQ_C4
+   :type:  float
+
+.. py:data:: FREQ_SEMITONE
+   :type:  float
+
+.. py:class:: Frame
+
+   .. py:attribute:: CHANNELS
+      :type:  ClassVar[int]
+
+
+   .. py:attribute:: type
+      :type:  ClassVar[Frame.type[float] | Frame.type[rackpy.raw.simd.float_4]]
+
+
+   .. py:property:: samples
+      :type: Any
+
+
+
+.. py:class:: Int24
+              Int24(i: int)
+
+   .. py:attribute:: i
+      :type:  int
+
+
+.. py:function:: amplitude_to_db(amp: float) -> float
+                 amplitude_to_db(amp: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: blackman(alpha: float, p: float) -> float
+                 blackman(alpha: rackpy.raw.simd.float_4 | float, p: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: blackman_harris(p: float) -> float
+                 blackman_harris(p: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: blackman_harris_window(x: collections.abc.Buffer, len: int) -> None
+
+.. py:function:: blackman_nuttall(p: float) -> float
+                 blackman_nuttall(p: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: blackman_nuttall_window(x: collections.abc.Buffer, len: int) -> None
+
+.. py:function:: blackman_window(alpha: float, x: collections.abc.Buffer, len: int) -> None
+
+.. py:data:: convert
+   :type:  rackpy.raw.simd.Template
+
+.. py:function:: cubic(x: float) -> float
+                 cubic(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: db_to_amplitude(db: float) -> float
+                 db_to_amplitude(db: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: exp2_floor(x: float) -> tuple[float, float]
+                 exp2_floor(x: rackpy.raw.simd.float_4) -> tuple[rackpy.raw.simd.float_4, rackpy.raw.simd.float_4]
+
+.. py:function:: exp2_taylor5(x: float) -> float
+                 exp2_taylor5(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: exponential_bipolar(b: float, x: float) -> float
+                 exponential_bipolar(b: rackpy.raw.simd.float_4 | float, x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: hann(p: float) -> float
+                 hann(p: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: hann_window(x: collections.abc.Buffer, len: int) -> None
+
+.. py:function:: poly_direct(a: collections.abc.Sequence[float], x: float) -> float
+                 poly_direct(a: collections.abc.Sequence[rackpy.raw.simd.float_4 | float], x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: poly_estrin(a: collections.abc.Sequence[float], x: float) -> float
+                 poly_estrin(a: collections.abc.Sequence[rackpy.raw.simd.float_4 | float], x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: poly_horner(a: collections.abc.Sequence[float], x: float) -> float
+                 poly_horner(a: collections.abc.Sequence[rackpy.raw.simd.float_4 | float], x: rackpy.raw.simd.float_4 | float) -> rackpy.raw.simd.float_4
+
+.. py:function:: quadratic_bipolar(x: float) -> float
+                 quadratic_bipolar(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: quartic_bipolar(x: float) -> float
+                 quartic_bipolar(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: quintic(x: float) -> float
+                 quintic(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: sinc(x: float) -> float
+                 sinc(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: sqrt_bipolar(x: float) -> float
+                 sqrt_bipolar(x: rackpy.raw.simd.float_4) -> rackpy.raw.simd.float_4
+
+.. py:function:: step_euler(t: float, dt: float, x: collections.abc.Buffer, len: int, f: collections.abc.Callable[[float, memoryview, Any], object]) -> None
+                 step_euler(t: rackpy.raw.simd.float_4 | float, dt: rackpy.raw.simd.float_4 | float, x: list[rackpy.raw.simd.float_4], len: int, f: collections.abc.Callable[[rackpy.raw.simd.float_4, Any, Any], object]) -> None
+
+.. py:function:: step_rk2(t: float, dt: float, x: collections.abc.Buffer, len: int, f: collections.abc.Callable[[float, memoryview, Any], object]) -> None
+                 step_rk2(t: rackpy.raw.simd.float_4 | float, dt: rackpy.raw.simd.float_4 | float, x: list[rackpy.raw.simd.float_4], len: int, f: collections.abc.Callable[[rackpy.raw.simd.float_4, Any, Any], object]) -> None
+
+.. py:function:: step_rk4(t: float, dt: float, x: collections.abc.Buffer, len: int, f: collections.abc.Callable[[float, memoryview, Any], object]) -> None
+                 step_rk4(t: rackpy.raw.simd.float_4 | float, dt: rackpy.raw.simd.float_4 | float, x: list[rackpy.raw.simd.float_4], len: int, f: collections.abc.Callable[[rackpy.raw.simd.float_4, Any, Any], object]) -> None
+

@@ -1,0 +1,1003 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="rackpy.math" href="../math/index.html"><link rel="prev" title="rackpy.errors" href="../errors/index.html">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>rackpy.laboratory - RackPy 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">RackPy 1.0.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
+  
+  <span class="sidebar-brand-text">RackPy 1.0.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../installation.html">Installation</a><input aria-label="Toggle navigation of Installation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/linux.html">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/macos.html">Install on macOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/windows.html">Install on Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart.html">Quickstart: your first RackPy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/oscillator.html">Tutorial: a sine oscillator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../explanation/execution.html">How Rack runs a module, and where Python fits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../runtime.html">The embedded runtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../explanation/callbacks.html">Callbacks and the laboratory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../explanation/security.html">Security and trust</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How-to guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/plugins.html">Register models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/state.html">Save and restore a module’s state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/dsp.html">Process audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/graphs.html">Describe DSP as a graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/polyphony.html">Make a module polyphonic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/menus.html">Add items to a module’s menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/choose-files.html">Let the user choose a file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/draw-panels.html">Draw a module’s panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/expanders.html">Pass signals to the module beside yours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/audio-midi.html">Use audio and MIDI devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/buffers.html">Read and write a port’s voltages in bulk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/testing.html">Test a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/profiling.html">Find out what a plugin costs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/packaging.html">Package a plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/migrate-from-cpp.html">Coming from Rack’s C++ API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../scope.html">Scope and upstream research</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../architecture.html">Proposed architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../compatibility.html">Compatibility baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../coverage.html">API coverage contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../performance.html">Performance and safety contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../performance-results.html">Performance and real-time safety results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../licensing.html">Licensing, provenance and identity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../documentation.html">Documentation specification</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../decisions/index.html">Decision records</a><input aria-label="Toggle navigation of Decision records" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../decisions/001-licensing-and-identity.html">ADR 001: Licensing, sample provenance and identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../decisions/002-embedding-and-bindings.html">ADR 002: Embedding CPython and choosing a binding library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../decisions/003-lifetimes-and-threads.html">ADR 003: Thread affinity, lifetimes and callback semantics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../decisions/004-performance-budgets.html">ADR 004: Performance and real-time budgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../decisions/005-build-and-ci.html">ADR 005: Build system, pins, test policy and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../decisions/006-documentation-toolchain.html">ADR 006: Documentation toolchain and executable snippets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../decisions/007-runtime.html">ADR 007: The embedded runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../decisions/008-binding-manifest.html">ADR 008: The binding manifest and coverage enforcement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../decisions/009-values-and-raw-conventions.html">ADR 009: Raw naming, values and views, and tests inside Rack</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../../../index.html">Reference</a><input aria-label="Toggle navigation of Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../coverage.html">Binding coverage</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../crosswalk.html">C++ to Python crosswalk</a><input aria-label="Toggle navigation of C++ to Python crosswalk" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../crosswalk/entry-point.html">Entry point: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../crosswalk/common.html">Common/value: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../crosswalk/engine.html">Engine: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../crosswalk/plugin.html">Plugin/model/assets/helpers: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../crosswalk/widgets.html">Widgets/ui/app/componentlibrary: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../crosswalk/window.html">Window/rendering/context: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../crosswalk/dsp.html">Dsp/simd: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../crosswalk/audio-midi.html">Audio/midi: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../crosswalk/services.html">Services: C++ to Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../crosswalk/history.html">History: C++ to Python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../mapping.html">Raw bindings and the Python facade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api-stability.html">Facade contract and versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../values.html">Values: math, colours, quantities and common helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../engine-components.html">Engine components: ports, parameters and lights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../engine-module.html">Module construction and components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../engine.html">The engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../history.html">Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../midi.html">MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../audio.html">Audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../services.html">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../simd.html">SIMD: four lanes at a time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dsp.html">DSP building blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../plugin.html">Plugins and models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../widgets.html">Subclassable widgets and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../ui.html">UI widgets and menus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../window.html">Drawing and the window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../app.html">App controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../componentlibrary.html">Component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../widget-trees.html">Detached widget trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../surface/entry-point.html">0. Entry point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../surface/common.html">1. Common values and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../surface/engine.html">2. Engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../surface/plugin.html">3. Plugins, models, assets and helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../surface/widgets.html">4. Widgets, UI, app and component library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../surface/window.html">5. Window, rendering and context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../surface/dsp.html">6. DSP and SIMD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../surface/audio-midi.html">7. Audio and MIDI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../surface/services.html">8. Settings, system and network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../surface/history.html">9. Undo history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../surface-summary.html">Rack SDK surface summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../surface-schema.html">SDK surface inventory schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../callback-matrix.html">Callback thread and lock matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../callback-paths.html">Public virtual execution paths</a></li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">rackpy</a><input aria-label="Toggle navigation of rackpy" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../assets/index.html">rackpy.assets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../audio/index.html">rackpy.audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dialog/index.html">rackpy.dialog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../drawing/index.html">rackpy.drawing</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../dsp/index.html">rackpy.dsp</a><input aria-label="Toggle navigation of rackpy.dsp" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../dsp/basic/index.html">rackpy.dsp.basic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dsp/digital/index.html">rackpy.dsp.digital</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dsp/fft/index.html">rackpy.dsp.fft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dsp/filters/index.html">rackpy.dsp.filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dsp/graph/index.html">rackpy.dsp.graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dsp/graph_codegen/index.html">rackpy.dsp.graph_codegen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dsp/graph_reference/index.html">rackpy.dsp.graph_reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dsp/kernel/index.html">rackpy.dsp.kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dsp/midi/index.html">rackpy.dsp.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dsp/resampling/index.html">rackpy.dsp.resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dsp/ringbuffer/index.html">rackpy.dsp.ringbuffer</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../engine/index.html">rackpy.engine</a><input aria-label="Toggle navigation of rackpy.engine" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../engine/components/index.html">rackpy.engine.components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../engine/expanders/index.html">rackpy.engine.expanders</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../engine/host/index.html">rackpy.engine.host</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../engine/module/index.html">rackpy.engine.module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../errors/index.html">rackpy.errors</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">rackpy.laboratory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../math/index.html">rackpy.math</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../midi/index.html">rackpy.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin/index.html">rackpy.plugin</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../raw/index.html">rackpy.raw</a><input aria-label="Toggle navigation of rackpy.raw" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../raw/app/index.html">rackpy.raw.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/asset/index.html">rackpy.raw.asset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/audio/index.html">rackpy.raw.audio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/blendish/index.html">rackpy.raw.blendish</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/color/index.html">rackpy.raw.color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/componentlibrary/index.html">rackpy.raw.componentlibrary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/dsp/index.html">rackpy.raw.dsp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/engine/index.html">rackpy.raw.engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/event/index.html">rackpy.raw.event</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/glfw/index.html">rackpy.raw.glfw</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/history/index.html">rackpy.raw.history</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/literals/index.html">rackpy.raw.literals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/logger/index.html">rackpy.raw.logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/macros/index.html">rackpy.raw.macros</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/math/index.html">rackpy.raw.math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/midi/index.html">rackpy.raw.midi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/nanovg/index.html">rackpy.raw.nanovg</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/network/index.html">rackpy.raw.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/plugin/index.html">rackpy.raw.plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/random/index.html">rackpy.raw.random</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/settings/index.html">rackpy.raw.settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/simd/index.html">rackpy.raw.simd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/sse_mathfun/index.html">rackpy.raw.sse_mathfun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/string/index.html">rackpy.raw.string</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/system/index.html">rackpy.raw.system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/ui/index.html">rackpy.raw.ui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/widget/index.html">rackpy.raw.widget</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../raw/window/index.html">rackpy.raw.window</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../runtime/index.html">rackpy.runtime</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../services/index.html">rackpy.services</a><input aria-label="Toggle navigation of rackpy.services" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../services/network/index.html">rackpy.services.network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../services/system/index.html">rackpy.services.system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../simd/index.html">rackpy.simd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../types/index.html">rackpy.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../widget/index.html">rackpy.widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing-bindings.html">Adding bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing-docs.html">Documentation conventions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/reference/python/rackpy/laboratory/index.rst?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/reference/python/rackpy/laboratory/index.rst" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-rackpy.laboratory">
+<span id="rackpy-laboratory"></span><h1>rackpy.laboratory<a class="headerlink" href="#module-rackpy.laboratory" title="Link to this heading">¶</a></h1>
+<p>The callback laboratory: Python overrides of a module’s audio-thread callbacks, run offline.</p>
+<p>Rack calls a module’s <code class="docutils literal notranslate"><span class="pre">process</span></code> once per sample on its engine threads,
+where RackPy never runs Python: production modules process audio with native
+kernels (<a class="reference internal" href="../dsp/kernel/index.html#module-rackpy.dsp.kernel" title="rackpy.dsp.kernel"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rackpy.dsp.kernel</span></code></a>). The laboratory runs Python there anyway,
+for experiments and tests. A laboratory module (a <a class="reference internal" href="#rackpy.laboratory.ModuleClass" title="rackpy.laboratory.ModuleClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleClass</span></code></a>) runs
+only on a <a class="reference internal" href="#rackpy.laboratory.Bench" title="rackpy.laboratory.Bench"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bench</span></code></a>, an offline host that steps RackPy modules from
+Python on Rack’s main thread the way Rack’s engine would. Rack’s engine never
+runs a laboratory module, a patch cannot create one, and nothing here is
+real-time audio. See <em>Callbacks and the laboratory</em> in the explanations.</p>
+<p>The laboratory’s audio and MIDI drivers and devices (<a class="reference internal" href="#rackpy.laboratory.AudioDriver" title="rackpy.laboratory.AudioDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">AudioDriver</span></code></a>,
+<a class="reference internal" href="#rackpy.laboratory.MidiDriver" title="rackpy.laboratory.MidiDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiDriver</span></code></a>, …) do the same for the driver virtuals that Rack calls on
+its audio and MIDI driver threads: Rack never lists them, so only ports you
+make and connect reach them, on the main thread.</p>
+<p>Trusted code must call <a class="reference internal" href="#rackpy.laboratory.enable" title="rackpy.laboratory.enable"><code class="xref py py-func docutils literal notranslate"><span class="pre">enable()</span></code></a> first. Available inside Rack only.</p>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rackpy.laboratory.Bench" title="rackpy.laboratory.Bench"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Bench</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rackpy.laboratory.ProcessArgs" title="rackpy.laboratory.ProcessArgs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessArgs</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rackpy.laboratory.MidiOutputDevice" title="rackpy.laboratory.MidiOutputDevice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputDevice</span></code></a></p></td>
+<td><p>A MIDI output device whose <code class="docutils literal notranslate"><span class="pre">send_message</span></code> and <code class="docutils literal notranslate"><span class="pre">get_name</span></code> a subclass overrides; <code class="docutils literal notranslate"><span class="pre">device.connect(output)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rackpy.laboratory.AudioDriver" title="rackpy.laboratory.AudioDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AudioDriver</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Driver</span></code> whose every virtual a subclass may override, offline.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rackpy.laboratory.AudioDevice" title="rackpy.laboratory.AudioDevice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AudioDevice</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device</span></code> whose every virtual a subclass may override, offline.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rackpy.laboratory.MidiDriver" title="rackpy.laboratory.MidiDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiDriver</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver</span></code> whose every virtual a subclass may override, offline.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rackpy.laboratory.MidiInputDevice" title="rackpy.laboratory.MidiInputDevice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiInputDevice</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputDevice</span></code> whose <code class="docutils literal notranslate"><span class="pre">get_name</span></code> a subclass may override; <code class="docutils literal notranslate"><span class="pre">push_message</span></code> is Rack's</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rackpy.laboratory.MidiInputQueue" title="rackpy.laboratory.MidiInputQueue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiInputQueue</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputQueue</span></code> whose <code class="docutils literal notranslate"><span class="pre">on_message</span></code> a subclass may override, offline.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rackpy.laboratory.MidiGenerator" title="rackpy.laboratory.MidiGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiGenerator</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MidiGenerator[N]</span></code>: Rack's <code class="docutils literal notranslate"><span class="pre">dsp::MidiGenerator&lt;N&gt;</span></code> whose <code class="docutils literal notranslate"><span class="pre">on_message</span></code> a subclass overrides, offline only.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rackpy.laboratory.MidiInput" title="rackpy.laboratory.MidiInput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiInput</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Input</span></code> whose <code class="docutils literal notranslate"><span class="pre">on_message</span></code> runs synchronously, offline.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rackpy.laboratory.ModuleClass" title="rackpy.laboratory.ModuleClass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModuleClass</span></code></a></p></td>
+<td><p>A module class whose every <code class="docutils literal notranslate"><span class="pre">rack::engine::Module</span></code> callback may be Python, on a laboratory <a class="reference internal" href="#rackpy.laboratory.Bench" title="rackpy.laboratory.Bench"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bench</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rackpy.laboratory.Quantity" title="rackpy.laboratory.Quantity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity</span></code> whose value and range methods a subclass may override, offline.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rackpy.laboratory.ParamQuantity" title="rackpy.laboratory.ParamQuantity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ParamQuantity</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rack::engine::ParamQuantity</span></code> whose value and range methods a subclass may override, offline.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rackpy.laboratory.SwitchQuantity" title="rackpy.laboratory.SwitchQuantity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SwitchQuantity</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rack::engine::SwitchQuantity</span></code> with laboratory value methods; see <a class="reference internal" href="#rackpy.laboratory.ParamQuantity" title="rackpy.laboratory.ParamQuantity"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParamQuantity</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rackpy.laboratory.enable" title="rackpy.laboratory.enable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enable</span></code></a>(→ None)</p></td>
+<td><p>Allow laboratory modules and benches in this process, until <a class="reference internal" href="#rackpy.laboratory.disable" title="rackpy.laboratory.disable"><code class="xref py py-func docutils literal notranslate"><span class="pre">disable()</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rackpy.laboratory.disable" title="rackpy.laboratory.disable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">disable</span></code></a>(→ None)</p></td>
+<td><p>Refuse new laboratory modules and benches, and stepping existing benches, again.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rackpy.laboratory.enabled" title="rackpy.laboratory.enabled"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enabled</span></code></a>(→ bool)</p></td>
+<td><p>Whether <a class="reference internal" href="#rackpy.laboratory.enable" title="rackpy.laboratory.enable"><code class="xref py py-func docutils literal notranslate"><span class="pre">enable()</span></code></a> was called (and <a class="reference internal" href="#rackpy.laboratory.disable" title="rackpy.laboratory.disable"><code class="xref py py-func docutils literal notranslate"><span class="pre">disable()</span></code></a> not since).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="rackpy.laboratory.Bench">
+<span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">Bench</span></span><a class="headerlink" href="#rackpy.laboratory.Bench" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rackpy.laboratory.ProcessArgs">
+<span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">ProcessArgs</span></span><a class="headerlink" href="#rackpy.laboratory.ProcessArgs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rackpy.laboratory.MidiOutputDevice">
+<span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">MidiOutputDevice</span></span><a class="headerlink" href="#rackpy.laboratory.MidiOutputDevice" title="Link to this definition">¶</a></dt>
+<dd><p>A MIDI output device whose <code class="docutils literal notranslate"><span class="pre">send_message</span></code> and <code class="docutils literal notranslate"><span class="pre">get_name</span></code> a subclass overrides; <code class="docutils literal notranslate"><span class="pre">device.connect(output)</span></code>
+points a <code class="docutils literal notranslate"><span class="pre">rackpy.raw.midi.Output</span></code> you made at it, so Rack’s <code class="docutils literal notranslate"><span class="pre">Output::sendMessage</span></code> reaches the override. A
+<a class="reference internal" href="#rackpy.laboratory.MidiDriver" title="rackpy.laboratory.MidiDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiDriver</span></code></a> can also hold it (<code class="docutils literal notranslate"><span class="pre">add_output_device</span></code>).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rackpy.laboratory.AudioDriver">
+<span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">AudioDriver</span></span><a class="headerlink" href="#rackpy.laboratory.AudioDriver" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Driver</span></code> whose every virtual a subclass may override, offline.</p>
+<p><code class="docutils literal notranslate"><span class="pre">driver.connect(port)</span></code> points a <code class="docutils literal notranslate"><span class="pre">rackpy.raw.audio.Port</span></code> you made at it,
+repeating what Rack’s <code class="docutils literal notranslate"><span class="pre">Port::setDriverId</span></code> does for a driver Rack lists (Rack
+never lists a laboratory driver): the port leaves its device, takes this
+driver, then subscribes to <code class="docutils literal notranslate"><span class="pre">get_default_device_id()</span></code>’s device. Rack’s own
+port methods then call the driver’s <code class="docutils literal notranslate"><span class="pre">get_name</span></code>, <code class="docutils literal notranslate"><span class="pre">get_device_ids</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_device_name</span></code>, <code class="docutils literal notranslate"><span class="pre">get_device_num_inputs</span></code>, <code class="docutils literal notranslate"><span class="pre">get_device_num_outputs</span></code>,
+<code class="docutils literal notranslate"><span class="pre">subscribe</span></code> and <code class="docutils literal notranslate"><span class="pre">unsubscribe</span></code> synchronously, and an override’s error
+reaches the caller of the port method. <code class="docutils literal notranslate"><span class="pre">super()</span></code> answers from the devices
+given to <code class="docutils literal notranslate"><span class="pre">add_device</span></code>, which the driver keeps; <code class="docutils literal notranslate"><span class="pre">subscribe</span></code> must return
+one of them or <code class="docutils literal notranslate"><span class="pre">None</span></code>. Main thread; creating one needs <a class="reference internal" href="#rackpy.laboratory.enable" title="rackpy.laboratory.enable"><code class="xref py py-func docutils literal notranslate"><span class="pre">enable()</span></code></a>.
+Its native part is destroyed on the main thread only: dropped on another
+thread, at the next UI step.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rackpy.laboratory.AudioDevice">
+<span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">AudioDevice</span></span><a class="headerlink" href="#rackpy.laboratory.AudioDevice" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">rack::audio::Device</span></code> whose every virtual a subclass may override, offline.</p>
+<p>Rack’s port methods (<code class="docutils literal notranslate"><span class="pre">get_sample_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">set_block_size</span></code>, <code class="docutils literal notranslate"><span class="pre">to_json</span></code>,
+…) call the device of a port connected to an <a class="reference internal" href="#rackpy.laboratory.AudioDriver" title="rackpy.laboratory.AudioDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">AudioDriver</span></code></a>
+synchronously; <code class="docutils literal notranslate"><span class="pre">super()</span></code> answers with the configured values (<code class="docutils literal notranslate"><span class="pre">name</span></code>,
+<code class="docutils literal notranslate"><span class="pre">num_inputs</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>, …), as a <code class="docutils literal notranslate"><span class="pre">rackpy.raw.audio.PythonDevice</span></code>
+does. Creating one needs <a class="reference internal" href="#rackpy.laboratory.enable" title="rackpy.laboratory.enable"><code class="xref py py-func docutils literal notranslate"><span class="pre">enable()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rackpy.laboratory.MidiDriver">
+<span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">MidiDriver</span></span><a class="headerlink" href="#rackpy.laboratory.MidiDriver" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Driver</span></code> whose every virtual a subclass may override, offline.</p>
+<p><code class="docutils literal notranslate"><span class="pre">driver.connect(port)</span></code> points a <code class="docutils literal notranslate"><span class="pre">rackpy.raw.midi</span></code> port you made at it, as
+Rack’s <code class="docutils literal notranslate"><span class="pre">Port::setDriverId</span></code> does for a driver it lists. Rack’s own port
+methods (<code class="docutils literal notranslate"><span class="pre">set_device_id</span></code>, <code class="docutils literal notranslate"><span class="pre">get_device_ids</span></code>, <code class="docutils literal notranslate"><span class="pre">get_default_device_id</span></code>,
+<code class="docutils literal notranslate"><span class="pre">get_device_name</span></code>) and Rack’s MIDI widgets then call the driver’s virtuals
+synchronously. <code class="docutils literal notranslate"><span class="pre">super()</span></code> answers from the <a class="reference internal" href="#rackpy.laboratory.MidiInputDevice" title="rackpy.laboratory.MidiInputDevice"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiInputDevice</span></code></a> and
+<a class="reference internal" href="#rackpy.laboratory.MidiOutputDevice" title="rackpy.laboratory.MidiOutputDevice"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiOutputDevice</span></code></a> objects added, which the driver keeps. Main thread;
+creating one needs <a class="reference internal" href="#rackpy.laboratory.enable" title="rackpy.laboratory.enable"><code class="xref py py-func docutils literal notranslate"><span class="pre">enable()</span></code></a>. Its native part is destroyed on the main
+thread only: dropped on another thread, at the next UI step.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rackpy.laboratory.MidiInputDevice">
+<span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">MidiInputDevice</span></span><a class="headerlink" href="#rackpy.laboratory.MidiInputDevice" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputDevice</span></code> whose <code class="docutils literal notranslate"><span class="pre">get_name</span></code> a subclass may override; <code class="docutils literal notranslate"><span class="pre">push_message</span></code> is Rack’s
+<code class="docutils literal notranslate"><span class="pre">InputDevice::onMessage</span></code>, which calls each subscribed input’s <code class="docutils literal notranslate"><span class="pre">on_message</span></code>. Creating one needs <a class="reference internal" href="#rackpy.laboratory.enable" title="rackpy.laboratory.enable"><code class="xref py py-func docutils literal notranslate"><span class="pre">enable()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rackpy.laboratory.MidiInputQueue">
+<span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">MidiInputQueue</span></span><a class="headerlink" href="#rackpy.laboratory.MidiInputQueue" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">rack::midi::InputQueue</span></code> whose <code class="docutils literal notranslate"><span class="pre">on_message</span></code> a subclass may override, offline.</p>
+<p>Rack’s <code class="docutils literal notranslate"><span class="pre">InputDevice::onMessage</span></code> calls it synchronously on the main thread
+(a <a class="reference internal" href="#rackpy.laboratory.MidiInputDevice" title="rackpy.laboratory.MidiInputDevice"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiInputDevice</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">push_message</span></code>, Rack’s Loopback driver
+when Python sends); <code class="docutils literal notranslate"><span class="pre">super().on_message(message)</span></code> queues the message for
+<code class="docutils literal notranslate"><span class="pre">try_pop</span></code>, as Rack’s does. On Rack’s threads Python never runs and Rack’s
+queue takes the message. It is a <code class="docutils literal notranslate"><span class="pre">rackpy.raw.midi.Input</span></code>, but not a
+<code class="docutils literal notranslate"><span class="pre">rackpy.raw.midi.InputQueue</span></code>, which is final. Creating one needs
+<a class="reference internal" href="#rackpy.laboratory.enable" title="rackpy.laboratory.enable"><code class="xref py py-func docutils literal notranslate"><span class="pre">enable()</span></code></a> and Rack’s live context. As for <a class="reference internal" href="#rackpy.laboratory.MidiInput" title="rackpy.laboratory.MidiInput"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiInput</span></code></a>, no MIDI
+subscription may change while <code class="docutils literal notranslate"><span class="pre">on_message</span></code> runs.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rackpy.laboratory.MidiInput">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">MidiInput</span></span><a class="headerlink" href="#rackpy.laboratory.MidiInput" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">rack::midi::Input</span></code> whose <code class="docutils literal notranslate"><span class="pre">on_message</span></code> runs synchronously, offline.</p>
+<p>An ordinary <code class="docutils literal notranslate"><span class="pre">rackpy.raw.midi.Input</span></code> gets its messages queued, on the UI
+thread. A laboratory input’s <code class="docutils literal notranslate"><span class="pre">on_message</span></code> runs where Rack’s
+<code class="docutils literal notranslate"><span class="pre">InputDevice::onMessage</span></code> calls it on the main thread (a
+<a class="reference internal" href="#rackpy.laboratory.MidiInputDevice" title="rackpy.laboratory.MidiInputDevice"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiInputDevice</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">push_message</span></code>, Rack’s Loopback driver when
+Python sends), and its error reaches that caller. On Rack’s MIDI driver threads
+Python never runs: the message is queued, as for an ordinary input. A
+native mark set by this constructor, after it checks <a class="reference internal" href="#rackpy.laboratory.enable" title="rackpy.laboratory.enable"><code class="xref py py-func docutils literal notranslate"><span class="pre">enable()</span></code></a>,
+gates the synchronous path. Needs Rack’s live context.</p>
+<p>Rack is iterating the device’s subscribers while <code class="docutils literal notranslate"><span class="pre">on_message</span></code> runs, so
+until the call that delivered the message returns, changing any MIDI
+subscription (<code class="docutils literal notranslate"><span class="pre">set_device_id</span></code>, <code class="docutils literal notranslate"><span class="pre">connect</span></code>, removing a device, making a
+port, …) raises <a class="reference internal" href="../errors/index.html#rackpy.errors.LaboratoryError" title="rackpy.errors.LaboratoryError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LaboratoryError</span></code></a>, and objects
+dropped meanwhile are kept alive until then.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.MidiInput.on_message">
+<span class="sig-name descname"><span class="pre">on_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../raw/midi/index.html#rackpy.raw.midi.Message" title="rackpy.raw.midi.Message"><span class="pre">rackpy.raw.midi.Message</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.MidiInput.on_message" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s <code class="docutils literal notranslate"><span class="pre">Input::onMessage</span></code>: does nothing. A subclass receives each message here, an owned copy.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rackpy.laboratory.enable">
+<span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">enable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.enable" title="Link to this definition">¶</a></dt>
+<dd><p>Allow laboratory modules and benches in this process, until <a class="reference internal" href="#rackpy.laboratory.disable" title="rackpy.laboratory.disable"><code class="xref py py-func docutils literal notranslate"><span class="pre">disable()</span></code></a>.</p>
+<p>Call it from trusted code: your plugin’s entry module or a test. Loading a
+patch never enables the laboratory. Rack’s log records that it was enabled.
+Main thread.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rackpy.laboratory.disable">
+<span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">disable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.disable" title="Link to this definition">¶</a></dt>
+<dd><p>Refuse new laboratory modules and benches, and stepping existing benches, again.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rackpy.laboratory.enabled">
+<span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">enabled</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#rackpy.laboratory.enabled" title="Link to this definition">¶</a></dt>
+<dd><p>Whether <a class="reference internal" href="#rackpy.laboratory.enable" title="rackpy.laboratory.enable"><code class="xref py py-func docutils literal notranslate"><span class="pre">enable()</span></code></a> was called (and <a class="reference internal" href="#rackpy.laboratory.disable" title="rackpy.laboratory.disable"><code class="xref py py-func docutils literal notranslate"><span class="pre">disable()</span></code></a> not since).</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">ModuleClass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../engine/index.html#rackpy.engine.Module" title="rackpy.engine.Module"><span class="pre">rackpy.engine.Module</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rackpy.laboratory.ModuleClass" title="Link to this definition">¶</a></dt>
+<dd><p>A module class whose every <code class="docutils literal notranslate"><span class="pre">rack::engine::Module</span></code> callback may be Python, on a laboratory <a class="reference internal" href="#rackpy.laboratory.Bench" title="rackpy.laboratory.Bench"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bench</span></code></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">configure</span></code> and the custom-data handlers <code class="docutils literal notranslate"><span class="pre">to_json</span></code> and
+<code class="docutils literal notranslate"><span class="pre">from_json</span></code> work as in <a class="reference internal" href="../plugin/index.html#rackpy.plugin.ModuleClass" title="rackpy.plugin.ModuleClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">rackpy.plugin.ModuleClass</span></code></a>. The
+other methods are true overrides of Rack’s virtuals, called synchronously
+where Rack would call them and <em>instead of</em> Rack’s implementation:
+<code class="docutils literal notranslate"><span class="pre">super()</span></code> runs it (Rack’s, with RackPy’s lifecycle snapshot and data
+handlers), as in a C++ subclass of <code class="docutils literal notranslate"><span class="pre">rack::engine::Module</span></code>. So an
+<a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_reset" title="rackpy.laboratory.ModuleClass.on_reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">on_reset()</span></code></a> that does not call <code class="docutils literal notranslate"><span class="pre">super()</span></code> resets no parameters.
+Rack’s deprecated no-argument events have separate <code class="docutils literal notranslate"><span class="pre">on_*_legacy</span></code>
+override slots. Rack’s default modern events invoke them.
+Create one with <a class="reference internal" href="#rackpy.laboratory.ModuleClass.create" title="rackpy.laboratory.ModuleClass.create"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create()</span></code></a>, never through a model: Rack cannot
+create it.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_add_legacy">
+<span class="sig-name descname"><span class="pre">on_add_legacy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_add_legacy" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s deprecated no-argument event; the default implementation does nothing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_remove_legacy">
+<span class="sig-name descname"><span class="pre">on_remove_legacy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_remove_legacy" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s deprecated no-argument event; the default implementation does nothing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_reset_legacy">
+<span class="sig-name descname"><span class="pre">on_reset_legacy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_reset_legacy" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s deprecated no-argument event; the default implementation does nothing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_randomize_legacy">
+<span class="sig-name descname"><span class="pre">on_randomize_legacy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_randomize_legacy" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s deprecated no-argument event; the default implementation does nothing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_sample_rate_change_legacy">
+<span class="sig-name descname"><span class="pre">on_sample_rate_change_legacy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_sample_rate_change_legacy" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s deprecated no-argument event; the default implementation does nothing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../raw/engine/index.html#rackpy.raw.engine.Module.ProcessArgs" title="rackpy.raw.engine.Module.ProcessArgs"><span class="pre">ProcessArgs</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.process" title="Link to this definition">¶</a></dt>
+<dd><p>Advance the module by one sample. Rack’s implementation calls <a class="reference internal" href="#rackpy.laboratory.ModuleClass.step" title="rackpy.laboratory.ModuleClass.step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">step()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.process_bypass">
+<span class="sig-name descname"><span class="pre">process_bypass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../raw/engine/index.html#rackpy.raw.engine.Module.ProcessArgs" title="rackpy.raw.engine.Module.ProcessArgs"><span class="pre">ProcessArgs</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.process_bypass" title="Link to this definition">¶</a></dt>
+<dd><p>Called instead of <a class="reference internal" href="#rackpy.laboratory.ModuleClass.process" title="rackpy.laboratory.ModuleClass.process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code></a> while the bench bypasses the module.</p>
+<p>Rack’s implementation copies each bypass route’s input to its output.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.step" title="Link to this definition">¶</a></dt>
+<dd><p>Deprecated in Rack: override <a class="reference internal" href="#rackpy.laboratory.ModuleClass.process" title="rackpy.laboratory.ModuleClass.process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code></a>. Rack’s implementation does nothing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_add">
+<span class="sig-name descname"><span class="pre">on_add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rackpy.engine.Module.AddEvent</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_add" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s onAdd: a bench added the module.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_remove">
+<span class="sig-name descname"><span class="pre">on_remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rackpy.engine.Module.RemoveEvent</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_remove" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s onRemove: a bench is removing the module.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_bypass">
+<span class="sig-name descname"><span class="pre">on_bypass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rackpy.engine.Module.BypassEvent</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_bypass" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s onBypass.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_un_bypass">
+<span class="sig-name descname"><span class="pre">on_un_bypass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rackpy.engine.Module.UnBypassEvent</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_un_bypass" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s onUnBypass.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_port_change">
+<span class="sig-name descname"><span class="pre">on_port_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rackpy.engine.Module.PortChangeEvent</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_port_change" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s onPortChange: a cable connected or disconnected one of the module’s ports.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_reset">
+<span class="sig-name descname"><span class="pre">on_reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rackpy.engine.Module.ResetEvent</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_reset" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s onReset: resets every resettable bounded parameter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_randomize">
+<span class="sig-name descname"><span class="pre">on_randomize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rackpy.engine.Module.RandomizeEvent</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_randomize" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s onRandomize: randomizes every randomizable bounded parameter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_save">
+<span class="sig-name descname"><span class="pre">on_save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rackpy.engine.Module.SaveEvent</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_save" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s onSave.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_sample_rate_change">
+<span class="sig-name descname"><span class="pre">on_sample_rate_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rackpy.engine.Module.SampleRateChangeEvent</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_sample_rate_change" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s onSampleRateChange; with an audio device Rack calls it on the audio driver thread.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_set_master">
+<span class="sig-name descname"><span class="pre">on_set_master</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rackpy.engine.Module.SetMasterEvent</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_set_master" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s onSetMaster: the module became the (bench’s) master module.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_unset_master">
+<span class="sig-name descname"><span class="pre">on_unset_master</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rackpy.engine.Module.UnsetMasterEvent</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_unset_master" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s onUnsetMaster.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.on_expander_change">
+<span class="sig-name descname"><span class="pre">on_expander_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rackpy.engine.Module.ExpanderChangeEvent</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.on_expander_change" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s onExpanderChange: the module on <code class="docutils literal notranslate"><span class="pre">event.side</span></code> (0 left, 1 right) changed. Rack’s does nothing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.module_to_json">
+<span class="sig-name descname"><span class="pre">module_to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../types/index.html#rackpy.types.JSON" title="rackpy.types.JSON"><span class="pre">rackpy.types.JSON</span></a></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.module_to_json" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s <code class="docutils literal notranslate"><span class="pre">Module::toJson</span></code> (<code class="docutils literal notranslate"><span class="pre">Engine::moduleToJson</span></code> calls it); needs a model, see <a class="reference internal" href="#rackpy.laboratory.ModuleClass.create" title="rackpy.laboratory.ModuleClass.create"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.module_from_json">
+<span class="sig-name descname"><span class="pre">module_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../types/index.html#rackpy.types.JSON" title="rackpy.types.JSON"><span class="pre">rackpy.types.JSON</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.module_from_json" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s <code class="docutils literal notranslate"><span class="pre">Module::fromJson</span></code>: checks the model, then parameters, bypass, expanders and data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.params_to_json">
+<span class="sig-name descname"><span class="pre">params_to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../types/index.html#rackpy.types.JSON" title="rackpy.types.JSON"><span class="pre">rackpy.types.JSON</span></a></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.params_to_json" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s <code class="docutils literal notranslate"><span class="pre">Module::paramsToJson</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.params_from_json">
+<span class="sig-name descname"><span class="pre">params_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../types/index.html#rackpy.types.JSON" title="rackpy.types.JSON"><span class="pre">rackpy.types.JSON</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.params_from_json" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s <code class="docutils literal notranslate"><span class="pre">Module::paramsFromJson</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.data_to_json">
+<span class="sig-name descname"><span class="pre">data_to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../types/index.html#rackpy.types.JSON" title="rackpy.types.JSON"><span class="pre">rackpy.types.JSON</span></a></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.data_to_json" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s <code class="docutils literal notranslate"><span class="pre">Module::dataToJson</span></code>: here, the <code class="docutils literal notranslate"><span class="pre">to_json</span></code> data handler.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.data_from_json">
+<span class="sig-name descname"><span class="pre">data_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../types/index.html#rackpy.types.JSON" title="rackpy.types.JSON"><span class="pre">rackpy.types.JSON</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.data_from_json" title="Link to this definition">¶</a></dt>
+<dd><p>Rack’s <code class="docutils literal notranslate"><span class="pre">Module::dataFromJson</span></code>: here, the <code class="docutils literal notranslate"><span class="pre">from_json</span></code> data handler.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rackpy.laboratory.ModuleClass.create">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../raw/plugin/index.html#rackpy.raw.plugin.Model" title="rackpy.raw.plugin.Model"><span class="pre">rackpy.raw.plugin.Model</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#rackpy.laboratory.ModuleClass.create" title="Link to this definition">¶</a></dt>
+<dd><p>A new laboratory module of this class, configured; put <code class="docutils literal notranslate"><span class="pre">instance.module</span></code> on a <a class="reference internal" href="#rackpy.laboratory.Bench" title="rackpy.laboratory.Bench"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bench</span></code></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">model</span></code> only names the module in Rack’s JSON (Rack’s <code class="docutils literal notranslate"><span class="pre">toJson</span></code> and
+<code class="docutils literal notranslate"><span class="pre">fromJson</span></code> need one); Rack still never creates or runs it. Raises
+<a class="reference internal" href="../errors/index.html#rackpy.errors.LaboratoryError" title="rackpy.errors.LaboratoryError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LaboratoryError</span></code></a> unless the laboratory is enabled. Main thread.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rackpy.laboratory.Quantity">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">Quantity</span></span><a class="headerlink" href="#rackpy.laboratory.Quantity" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">rack::Quantity</span></code> whose value and range methods a subclass may override, offline.</p>
+<p>Rack’s own code that calls them (display values, <code class="docutils literal notranslate"><span class="pre">reset</span></code>, <code class="docutils literal notranslate"><span class="pre">randomize</span></code>,
+scaled values, the display string) reaches the override synchronously.
+Creating one needs <a class="reference internal" href="#rackpy.laboratory.enable" title="rackpy.laboratory.enable"><code class="xref py py-func docutils literal notranslate"><span class="pre">enable()</span></code></a>. Main thread.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rackpy.laboratory.ParamQuantity">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">ParamQuantity</span></span><a class="headerlink" href="#rackpy.laboratory.ParamQuantity" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">rack::engine::ParamQuantity</span></code> whose value and range methods a subclass may override, offline.</p>
+<p>Only a laboratory module takes one as <code class="docutils literal notranslate"><span class="pre">config_param(...,</span> <span class="pre">quantity_type=...)</span></code>
+or in its <code class="docutils literal notranslate"><span class="pre">param_quantities</span></code>: Rack’s engine can call an ordinary
+module’s quantities on its own threads. Rack’s code calling them
+(<code class="docutils literal notranslate"><span class="pre">paramsToJson</span></code>, reset, randomize, display) reaches the override
+synchronously. Creating one needs <a class="reference internal" href="#rackpy.laboratory.enable" title="rackpy.laboratory.enable"><code class="xref py py-func docutils literal notranslate"><span class="pre">enable()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rackpy.laboratory.SwitchQuantity">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">SwitchQuantity</span></span><a class="headerlink" href="#rackpy.laboratory.SwitchQuantity" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">rack::engine::SwitchQuantity</span></code> with laboratory value methods; see <a class="reference internal" href="#rackpy.laboratory.ParamQuantity" title="rackpy.laboratory.ParamQuantity"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParamQuantity</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rackpy.laboratory.MidiGenerator">
+<span class="sig-prename descclassname"><span class="pre">rackpy.laboratory.</span></span><span class="sig-name descname"><span class="pre">MidiGenerator</span></span><a class="headerlink" href="#rackpy.laboratory.MidiGenerator" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">MidiGenerator[N]</span></code>: Rack’s <code class="docutils literal notranslate"><span class="pre">dsp::MidiGenerator&lt;N&gt;</span></code> whose <code class="docutils literal notranslate"><span class="pre">on_message</span></code> a subclass overrides, offline only.</p>
+<p>Rack calls <code class="docutils literal notranslate"><span class="pre">MidiGenerator::onMessage</span></code> where a module generates MIDI, on its
+engine thread, so outside the laboratory RackPy’s generator only records the
+messages (<code class="docutils literal notranslate"><span class="pre">take_messages()</span></code>).</p>
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../math/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">rackpy.math</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../errors/index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">rackpy.errors</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; RackPy contributors; GPL-3.0-or-later
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">rackpy.laboratory</a><ul>
+<li><a class="reference internal" href="#attributes">Attributes</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#rackpy.laboratory.Bench"><code class="docutils literal notranslate"><span class="pre">Bench</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ProcessArgs"><code class="docutils literal notranslate"><span class="pre">ProcessArgs</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.MidiOutputDevice"><code class="docutils literal notranslate"><span class="pre">MidiOutputDevice</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.AudioDriver"><code class="docutils literal notranslate"><span class="pre">AudioDriver</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.AudioDevice"><code class="docutils literal notranslate"><span class="pre">AudioDevice</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.MidiDriver"><code class="docutils literal notranslate"><span class="pre">MidiDriver</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.MidiInputDevice"><code class="docutils literal notranslate"><span class="pre">MidiInputDevice</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.MidiInputQueue"><code class="docutils literal notranslate"><span class="pre">MidiInputQueue</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.MidiInput"><code class="docutils literal notranslate"><span class="pre">MidiInput</span></code></a><ul>
+<li><a class="reference internal" href="#rackpy.laboratory.MidiInput.on_message"><code class="docutils literal notranslate"><span class="pre">MidiInput.on_message()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rackpy.laboratory.enable"><code class="docutils literal notranslate"><span class="pre">enable()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.disable"><code class="docutils literal notranslate"><span class="pre">disable()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.enabled"><code class="docutils literal notranslate"><span class="pre">enabled()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass"><code class="docutils literal notranslate"><span class="pre">ModuleClass</span></code></a><ul>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_add_legacy"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_add_legacy()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_remove_legacy"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_remove_legacy()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_reset_legacy"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_reset_legacy()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_randomize_legacy"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_randomize_legacy()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_sample_rate_change_legacy"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_sample_rate_change_legacy()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.process"><code class="docutils literal notranslate"><span class="pre">ModuleClass.process()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.process_bypass"><code class="docutils literal notranslate"><span class="pre">ModuleClass.process_bypass()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.step"><code class="docutils literal notranslate"><span class="pre">ModuleClass.step()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_add"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_add()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_remove"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_remove()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_bypass"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_bypass()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_un_bypass"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_un_bypass()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_port_change"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_port_change()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_reset"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_reset()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_randomize"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_randomize()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_save"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_save()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_sample_rate_change"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_sample_rate_change()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_set_master"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_set_master()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_unset_master"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_unset_master()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.on_expander_change"><code class="docutils literal notranslate"><span class="pre">ModuleClass.on_expander_change()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.module_to_json"><code class="docutils literal notranslate"><span class="pre">ModuleClass.module_to_json()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.module_from_json"><code class="docutils literal notranslate"><span class="pre">ModuleClass.module_from_json()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.params_to_json"><code class="docutils literal notranslate"><span class="pre">ModuleClass.params_to_json()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.params_from_json"><code class="docutils literal notranslate"><span class="pre">ModuleClass.params_from_json()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.data_to_json"><code class="docutils literal notranslate"><span class="pre">ModuleClass.data_to_json()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.data_from_json"><code class="docutils literal notranslate"><span class="pre">ModuleClass.data_from_json()</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ModuleClass.create"><code class="docutils literal notranslate"><span class="pre">ModuleClass.create()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rackpy.laboratory.Quantity"><code class="docutils literal notranslate"><span class="pre">Quantity</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.ParamQuantity"><code class="docutils literal notranslate"><span class="pre">ParamQuantity</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.SwitchQuantity"><code class="docutils literal notranslate"><span class="pre">SwitchQuantity</span></code></a></li>
+<li><a class="reference internal" href="#rackpy.laboratory.MidiGenerator"><code class="docutils literal notranslate"><span class="pre">MidiGenerator</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
