@@ -1335,7 +1335,7 @@ tasks inherit the shared execution contract in tasks.json and AGENTS.md.
 
 ## RP-42 — Prove complete API coverage and sample parity on all advertised targets
 
-**Priority:** p2 · **Depends on:** RP-31, RP-32, RP-37, RP-38, RP-40, RP-41
+**Priority:** p2 · **Depends on:** RP-31, RP-32, RP-37, RP-38, RP-40, RP-41, RP-46, RP-47
 
 ### Deliverables
 
@@ -1363,6 +1363,8 @@ tasks inherit the shared execution contract in tasks.json and AGENTS.md.
 - Full-surface claim has reproducible declaration, semantic and usability evidence.
 - If exact complete coverage is impossible, obtain owner-approved revised scope and call the artifact partial rather than full.
 - Review evidence links to immutable candidate refs.
+
+**Notes:** 2026-11-06 restructuring: RP-42's scope is the coverage proof on the advertised targets using the frozen-candidate incremental review protocol (RP-46). Platform releases (RP-49, RP-50), controlled performance (RP-48) and the audio-guard port (RP-51) were split out so each claim has its own gate. The 14 owner-approved known release gaps and the Linux-only audio-guard proof (owner decisions 2026-11-06) apply.
 
 ## RP-43 — Verify performance, real-time invariants and long-run stability
 
@@ -1426,3 +1428,256 @@ tasks inherit the shared execution contract in tasks.json and AGENTS.md.
 - Release publication has explicit owner approval.
 - Full API claim is made only if RP-42 actually passed.
 - Witan outcome and human-facing release docs accurately distinguish verified from inferred support.
+
+## RP-45 — Publish the authorized 1.0.0 Linux x86_64 release from the verified candidate
+
+**Priority:** p1 · **Depends on:** RP-44
+
+### Deliverables
+
+- `GitHub release v1.0.0 (Linux x86_64 assets)`
+- `release-evidence/candidate-linux-x64-e329b10/`
+- `release-evidence/release-handoff.md`
+
+### Implementation steps
+
+1. Re-verify live state before acting: branch rp42-release-audit head e329b109a595d881527aebd8aee5a86a4fd96a33, clean tree, exact-SHA CI run 42284808506 success, and the local build exit code and Ubuntu 16.04/20.04 verify summaries under ~/.cache/rackpy/release-v1.0.0-e329b10.
+2. Retain the candidate manifest and SHA256SUMS under release-evidence/candidate-linux-x64-e329b10/ and record the 1.0.0 candidate in release-handoff.md and candidate-audit.md. Docs-only commits after the candidate do not move the tag target.
+3. Tag v1.0.0 at the exact source commit and create the GitHub release using the CHANGELOG 1.0.0 scope: Linux x86_64, Rack Free 2.6.6, incomplete API coverage, no performance claim, no macOS or Windows support, GitHub-only distribution.
+4. Upload the 13 artifacts plus manifest and SHA256SUMS; download the public assets, verify SHA256SUMS, and run bin/rackpy-release verify from the downloaded bytes in a clean Ubuntu 20.04 container.
+5. Refresh the gh-pages static site so the documentation stops labelling 1.0.0 as in preparation; record the publication in Witan and the handoff.
+6. Fast-forward or merge main to the release source so main stops pointing at RP-41, or record why it stays separate.
+
+### Validation
+
+- The tag resolves to the verified source commit; downloaded assets match SHA256SUMS; verify passes from the public bytes.
+- Release notes carry the scope limits; the documentation site shows 1.0.0 as released.
+
+### Acceptance criteria
+
+- The owner authorization of 2026-11-06 is cited; no PyPI upload or VCV contact is made.
+- Published bytes were verified after upload, not inferred from the local build.
+
+**Notes:** Owner authorized publishing the latest candidate as 1.0.0 on 2026-11-06 (epic comment). Build and exact-SHA CI are green; this task is the publication step, not new validation.
+
+## RP-46 — Implement the frozen-candidate incremental review protocol and verdict carry-forward
+
+**Priority:** p1 · **Depends on:** RP-41
+
+### Deliverables
+
+- `bin/release-evidence (carry, promote with carried verdicts, collect --allow-promoted)`
+- `release-evidence/review/ (verdicts with carry provenance)`
+- `docs/contributing-bindings.md (review protocol)`
+- `tests/coverage/test_release_evidence.py`
+
+### Implementation steps
+
+1. Encode the owner decision of 2026-11-06: a verdict from an earlier reviewed commit carries forward to the candidate when the record's manifest entry, its cited test files and the sources named by its mapping are byte-identical between the two commits; everything else is re-reviewed. Carried verdicts keep the original reviewer run and commit and record the carry commit.
+2. Add `bin/release-evidence carry OLD NEW` that computes the carried set from git blobs and emits the redo list, and extend `promote` so carried provenance satisfies the exact-SHA guard only for byte-identical records.
+3. Add `collect --allow-promoted` so promote, generate and collect run on one finished CI run when the only diffs are the manifest and generated outputs.
+4. Make review requests mechanical: chunks of at most 25 records, structural validation of each reviewer output against its exact record list, retry only failed chunks, never accept placeholders; store the chunk plan beside the verdicts.
+5. Write the protocol into docs/contributing-bindings.md: freeze the candidate SHA before a round; batch all fixes; re-review only the redo set; a round with zero verified findings promotes; CI is required only for the promoting run.
+6. Mutation tests: a changed cited test, manifest note or source file drops the carry; a forged carry commit is refused.
+
+### Validation
+
+- Unit tests for carry, promote and collect pass with prek; existing exact-SHA regression tests still pass.
+- A dry run from 4fba8b9 to the current candidate reproduces roughly 1,900 carried of 3,107 records and lists the redo set.
+
+### Acceptance criteria
+
+- The protocol is documented and enforced by the tools; no verdict can be promoted for a record whose inputs changed.
+- RP-42 can proceed without a full 3,107-record re-review per fix batch.
+
+**Notes:** Owner decision 2026-11-06 (RP-42 comment): incremental review is the method of record. The prototype prepare.py and carried.json live in /tmp/rp42-review-4fba8b9 on the build machine; /tmp is tmpfs, so copy anything worth keeping first.
+
+## RP-47 — Windows evidence for rack::system::runProcessDetached, or a listed Windows known gap
+
+**Priority:** p2 · **Depends on:** RP-41
+
+### Deliverables
+
+- `tests/services/in_rack_system/ (Windows interception test) or docs/coverage.md known-gap row`
+- `bindings/manifest.json record note`
+
+### Implementation steps
+
+1. Decide with the owner: a test-only interception of ShellExecuteExW inside the pinned Rack host on Windows (the only route that proves the call without UAC), or list the record as a Windows-only known release gap with the UAC reason.
+2. If testing: add the hook to the Windows test-hooks build only, record the request instead of elevating, run it in the Windows CI host job and cite it from the record.
+3. If listing: add the known-gap marker to the record's notes for win-x64 and the row to docs/coverage.md.
+4. Re-collect Windows evidence from one finished CI run and confirm `bin/check_coverage.py evidence win-x64` reports zero no-evidence items.
+
+### Validation
+
+- The Windows CI host job passes with the new test, or the checker accepts the listed gap; no other platform's evidence changes.
+
+### Acceptance criteria
+
+- Windows has no unexplained no-evidence record; the chosen route is recorded as an owner decision.
+
+**Notes:** Found in RP-42 exact-candidate evidence (run 42123571855): the test skips on Windows because the real call asks UAC to elevate and blocks Rack's UI thread.
+
+## RP-48 — Certify performance and real-time invariants on controlled hardware
+
+**Priority:** p2 · **Depends on:** RP-43, RP-45
+
+### Deliverables
+
+- `benchmarks/results/`
+- `release-evidence/benchmarks/`
+- `docs/performance-results.md`
+
+### Implementation steps
+
+1. Schedule one hardware session on a fixed machine: CPU governor performance, turbo and SMT policy recorded, an audio interface with a loopback cable, no other load; record kernel, drivers, Rack version and the exact 1.0.0 artifact hashes.
+2. Run `bin/perf-baseline run` on the frozen A/B suite with equivalent native modules; collect median, p99 and absolute cost per kernel, rate, channel and module count, feedback and expander case; at least three repetitions each.
+3. Run the 30-minute physical audio-device deadline-miss workload and the repeated lifecycle tests; measure UI p95 latency with a deliberately slow Python UI versus clean.
+4. Rerun on a second day or second machine for the independent reproduction and compare within the documented uncertainty.
+5. Publish raw datasets, environment, repetitions, uncertainty and exact refs against ADR 004. A failed budget is an explicit failure with a time-boxed investigation; any budget change needs measured justification and owner approval.
+
+### Validation
+
+- Zero forbidden Python, GIL or heap events on the production path; deadline misses attributable; budgets pass or are explicit failures.
+- The independent rerun reproduces the conclusions within uncertainty.
+
+### Acceptance criteria
+
+- The performance claim rests on controlled measurements and native baselines with published conditions.
+- No timing claim comes from shared CI averages.
+
+**Notes:** RP-43 closed on the partial-use safety path (Linux, powersave governor, no audio device). This task completes RP-43's original acceptance and is bounded by owner hardware time: one session plus one rerun.
+
+## RP-49 — Validate and release the macOS arm64 and x86_64 candidates on real Apple hardware
+
+**Priority:** p2 · **Depends on:** RP-40, RP-45
+
+### Deliverables
+
+- `release-evidence/candidate-macos-*/`
+- `docs/installation/macos.md`
+- `GitHub release assets for macOS`
+
+### Implementation steps
+
+1. Build the macOS candidates from the release source commit with the existing CI release-candidate jobs; retain manifests and SHA256SUMS.
+2. On a real Mac of each architecture run `bin/rackpy-release verify` with Rack Free 2.6.6 and a real GPU: the windowed checks CI cannot run, Gatekeeper quarantine on the downloaded package, SIP on, install, upgrade and uninstall.
+3. Decide signing and notarization with the owner (Apple Developer account, or documented unsigned-install steps) and record it.
+4. Fix verified defects from the hardware run; rebuild from the new commit and rerun the hardware checks on the final bytes.
+5. Publish the macOS assets to the GitHub release after owner approval; verify the downloaded bytes; update the support tables and installation guide.
+
+### Validation
+
+- Hardware verify passes on both architectures from the exact published bytes; windowed and Gatekeeper results are recorded; no cross-compilation substitution.
+
+### Acceptance criteria
+
+- macOS support is claimed only for the versions and architectures exercised, with limitations listed.
+
+**Notes:** Open gates from RP-40 and the RP-42 candidate audit: no real GPU on CI runners, SIP-on behavior not established, signing undecided.
+
+## RP-50 — Validate and release the Windows x86_64 candidate on real Windows hardware
+
+**Priority:** p2 · **Depends on:** RP-41, RP-45
+
+### Deliverables
+
+- `release-evidence/candidate-windows-x64-*/`
+- `docs/installation/windows.md`
+- `GitHub release assets for Windows`
+
+### Implementation steps
+
+1. Build the Windows candidate from the release source commit in CI; retain manifest and SHA256SUMS.
+2. On a real Windows 10 or 11 PC with a GPU run packaging/windows/verify.ps1 through `bin/rackpy-release verify`: the windowed checks, Mark of the Web and SmartScreen on the downloaded package, a non-ASCII user folder, install, upgrade and uninstall.
+3. Decide Authenticode signing with the owner or document the unsigned-install steps.
+4. Fix verified defects; rebuild and rerun on the final bytes.
+5. Publish after owner approval; verify downloaded bytes; update support tables and the installation guide.
+
+### Validation
+
+- Verify passes from the exact published bytes on real hardware; SmartScreen and windowed results are recorded.
+
+### Acceptance criteria
+
+- Windows support is claimed only for what was exercised, with limitations listed.
+
+**Notes:** Open gates from RP-41: no real GPU on CI; runProcessDetached has no unattended test (RP-47).
+
+## RP-51 — Port the dynamic audio-path guard to macOS and Windows (optional)
+
+**Priority:** p3 · **Depends on:** RP-43
+
+### Deliverables
+
+- `native/testing/audio_guard.* (platform variants)`
+- `CMakeLists.txt`
+- `upstream/examples.json instrument_tests`
+
+### Implementation steps
+
+1. macOS: implement the malloc, lock, write and GIL interposer with DYLD_INSERT_LIBRARIES and __interpose for RackPy's own test programs (SIP does not strip it from unprotected binaries); verify injected violations are detected.
+2. Windows: implement the same with an import-table or Detours-style hook in the test-hooks build; verify detection.
+3. Remove the platform lists from the four guard dispositions so guide-07, guide-13, guide-25 and guide-30 are proven on every platform; update the docs that call the proof Linux-only.
+
+### Validation
+
+- Guard tests pass natively on each platform in CI and detect injected violations; sample reports show no instrument skips.
+
+### Acceptance criteria
+
+- The audio-safety proof is no longer Linux-only, or the task records why a platform cannot host it.
+
+**Notes:** Owner decision 2026-11-06: the Linux-only guard is accepted for release; this port is optional follow-on work, not a release gate.
+
+## RP-52 — Original examples adapted from permissively licensed plugins (optional)
+
+**Priority:** p3 · **Depends on:** RP-45
+
+### Deliverables
+
+- `examples/ (two new plugins)`
+- `docs/examples.md`
+- `tests/examples/`
+
+### Implementation steps
+
+1. Start from the research report on branch research-permissive-vcv-plugins: Collapse EG first, Feedback Governor second, from Amplified Futures at commit 06794bca8ccbc3b413b929713017a252783dce51 under MIT; keep the attribution obligations; use original artwork and layouts.
+2. Write each as a RackPy example on the public facade with a native kernel for the DSP; tests load it in Rack, save and reopen a patch, and compare output against a reference.
+3. Add to the release example set only after the clean-container verify passes.
+
+### Validation
+
+- Example tests pass in Rack on Linux; attribution and license files are present; no copied artwork.
+
+### Acceptance criteria
+
+- Two more realistic examples ship with correct attribution; nothing from the CC BY insect-audio exclusion is used.
+
+**Notes:** Research closed 2026-11-05 as tk-find-permissively-licensed-vcv-rack-plugins-to-a-30a9ca.
+
+## RP-53 — PyPI upload and VCV Library submission, after owner approval (optional)
+
+**Priority:** p3 · **Depends on:** RP-45
+
+### Deliverables
+
+- `PyPI project rackpy`
+- `VCV Library submission record`
+- `docs/installation.md`
+
+### Implementation steps
+
+1. Confirm with the owner the destinations, the version and the account holders; PyPI forbids placeholder packages, so upload only the functional 1.0.0 wheel or later.
+2. Configure trusted publishing from protected CI; upload; verify `pip install rackpy` in a clean environment matches the GitHub checksums.
+3. For the VCV Library, review the submission requirements and the one-RackPy-plugin-at-a-time constraint with the owner before any contact; document the decision.
+
+### Validation
+
+- The downloaded PyPI artifact checksum matches; the docs say which channel is authoritative.
+
+### Acceptance criteria
+
+- Explicit owner approval is recorded before each publication; no VCV contact without approval.
+
+**Notes:** Owner approved reserving the PyPI name on 2026-10-30, but PyPI's name-retention policy forbids empty packages; this waits for a functional release.

@@ -138,8 +138,21 @@
     "RP-41": "tk-rackpy-41-package-and-validate-windows-artifacts-a352b0",
     "RP-42": "tk-rackpy-42-prove-complete-api-coverage-and-sample-2d39fe",
     "RP-43": "tk-rackpy-43-verify-performance-real-time-invariant-712411",
-    "RP-44": "tk-rackpy-44-prepare-the-audited-release-and-obtain-30293c"
+    "RP-44": "tk-rackpy-44-prepare-the-audited-release-and-obtain-30293c",
+    "RP-45": "tk-rackpy-45-publish-the-authorized-1-0-0-linux-x86-51e49c",
+    "RP-46": "tk-rackpy-46-implement-the-frozen-candidate-increme-3c7578",
+    "RP-47": "tk-rackpy-47-windows-evidence-for-rack-system-runpr-3747c4",
+    "RP-48": "tk-rackpy-48-certify-performance-and-real-time-inva-688915",
+    "RP-49": "tk-rackpy-49-validate-and-release-the-macos-arm64-a-950d54",
+    "RP-50": "tk-rackpy-50-validate-and-release-the-windows-x86-6-705f1d",
+    "RP-51": "tk-rackpy-51-port-the-dynamic-audio-path-guard-to-m-2a64cc",
+    "RP-52": "tk-rackpy-52-original-examples-adapted-from-permiss-91e86a",
+    "RP-53": "tk-rackpy-53-pypi-upload-and-vcv-library-submission-295fc3"
   },
   "project_history": "Initial write/search failed: WorkflowProject missing preauthorized. Owner-requested retry succeeded after repository/task graph publication; attached existing epic and 45 children without duplication.",
-  "session_slug": "ws-wp-rackpy-pythonic-full-surface-bindings-for-vcv-7ac5f9"
+  "session_slug": "ws-wp-rackpy-pythonic-full-surface-bindings-for-vcv-7ac5f9",
+  "closure_restructuring": {
+    "date": "2026-11-06",
+    "note": "RP-45 to RP-53 created as children of the epic; RP-42 now blocked by RP-46 and RP-47; the epic is blocked by RP-42, RP-45, RP-48, RP-49 and RP-50. RP-51 to RP-53 are optional and do not block the epic."
+  }
 }

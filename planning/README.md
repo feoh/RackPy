@@ -24,10 +24,12 @@ The owner amendments below take precedence over historical delivery gates.
 - [RP-26 bounded implementation slices](rp-26-slices.md) (supplements the original graph)
 - [RP-27 bounded implementation slices](rp-27-slices.md) (supplements the original graph)
 - [RP-28 bounded implementation slices](rp-28-slices.md) (supplements the original graph)
+- [Practical path to a first public release](practical-release.md) (RP-44 working plan)
+- [Closure plan](closure-plan.md) (2026-11-06 restructuring of the remaining work into RP-45–RP-53)
 
 Witan is authoritative for live task status, ownership, comments and blockers.
 Git holds a durable copy of task scope; status is deliberately not frozen into
-tasks.json. Read both before working. Stable IDs RP-00 through RP-44 map to real
+tasks.json. Read both before working. Stable IDs RP-00 through RP-53 map to real
 Witan task slugs. The epic and RP-00 retain vcvpy-prefixed historical slugs;
 their titles/repository scope were changed to RackPy.
 
@@ -44,6 +46,7 @@ their titles/repository scope were changed to RackPy.
 | Samples and manual | RP-33–RP-37 | All official source blocks accounted for; working ports and tested prose |
 | Hardening and packaging | RP-38–RP-41 | Safe behavior and actual Linux/macOS/Windows candidate validation |
 | Proof and release | RP-42–RP-44 | Exact surface/sample parity, measured budgets, owner-approved publication |
+| Closure | RP-45–RP-53 | Published Linux 1.0.0; coverage proof with carried review; controlled performance; macOS and Windows on real hardware; optional follow-ons ([closure plan](closure-plan.md)) |
 
 RP-01 is independent metadata recovery; it does not block SDK discovery.
 RP-02 is the first implementation-planning prerequisite. RP-05 inventory work can
@@ -147,6 +150,20 @@ where it is available; its `reviewer` field names the review run
 from each family. The same day the owner approved the facade's
 [release policy](../docs/reference/api-stability.md#release-policy), which was
 proposed in RP-32.
+
+**2026-11-06: closure restructuring.** The owner asked for the remaining work
+to be reshaped so it no longer costs days of wall-clock time per iteration, and
+for a ballpark completion date. The [closure plan](closure-plan.md) splits it
+into independent streams with their own gates: RP-45 publishes the authorized
+Linux 1.0.0; RP-46 implements the frozen-candidate incremental review protocol
+and verdict carry-forward that the owner approved the same day; RP-47 settles
+the Windows `runProcessDetached` evidence; RP-42 then proves coverage with that
+protocol; RP-48 completes RP-43's controlled performance certification; RP-49
+and RP-50 validate and release macOS and Windows on real hardware; RP-51 to
+RP-53 are optional and do not block the epic. The same day the owner decided
+the fourteen [known release gaps](../docs/coverage.md#known-release-gaps) and
+accepted the Linux-only audio-guard proof for the four guard-instrumented
+samples. No acceptance criterion, coverage denominator or safety gate changed.
 
 ## Witan project and recovery history
 
