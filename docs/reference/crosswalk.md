@@ -7,7 +7,7 @@ Every public declaration of Rack's SDK that RackPy accounts for, with its Python
 | Family | Declarations | Bound | Excluded (Rack-internal) | Not reviewed |
 | --- | --- | --- | --- | --- |
 | [0 entry point](crosswalk/entry-point.md) | 2 | 1 | 0 | 1 |
-| [1 common/value](crosswalk/common.md) | 356 | 339 | 3 | 10 |
+| [1 common/value](crosswalk/common.md) | 356 | 336 | 3 | 10 |
 | [2 engine](crosswalk/engine.md) | 298 | 276 | 22 | 0 |
 | [3 plugin/model/assets/helpers](crosswalk/plugin.md) | 94 | 90 | 4 | 0 |
 | [4 widgets/ui/app/componentlibrary](crosswalk/widgets.md) | 1433 | 1378 | 50 | 4 |

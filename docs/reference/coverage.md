@@ -13,21 +13,24 @@ platform's own extraction parsed: the semantic entry it names is counted instead
 
 | Platform | unreviewed | planned | implemented | verified | unrepresentable | excluded_internal | unknown | absent | superseded | not inventoried |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lin-x64 | 0 | 5 | 3089 | 0 | 4 | 111 | 0 | 22 | 4 | 0 |
-| mac-arm64 | 0 | 5 | 3091 | 0 | 4 | 111 | 0 | 18 | 6 | 0 |
-| mac-x64 | 0 | 5 | 3089 | 0 | 4 | 111 | 0 | 22 | 4 | 0 |
-| win-x64 | 0 | 5 | 3093 | 0 | 4 | 111 | 0 | 14 | 8 | 0 |
+| lin-x64 | 0 | 5 | 3086 | 0 | 7 | 111 | 0 | 22 | 4 | 0 |
+| mac-arm64 | 0 | 5 | 3088 | 0 | 7 | 111 | 0 | 18 | 6 | 0 |
+| mac-x64 | 0 | 5 | 3086 | 0 | 7 | 111 | 0 | 22 | 4 | 0 |
+| win-x64 | 0 | 5 | 3090 | 0 | 7 | 111 | 0 | 14 | 8 | 0 |
 
 ## Needs attention
 
 - **Unknown** (in the inventory, not in the manifest): 0
-- **Unrepresentable** (awaiting an owner decision): 4
+- **Unrepresentable** (awaiting an owner decision): 7
 - **Unresolved callback strategy** (ADR 003): 0
-- **Open owner review items** (each blocks a release until the owner decides): 4
+- **Open owner review items** (each blocks a release until the owner decides): 7
 
 ### Unrepresentable
 
 - `class_template:rack::DeferWrapper<type>`
+- `constructor:rack::DeferWrapper::DeferWrapper<F>($c0)`
+- `destructor:rack::DeferWrapper::~DeferWrapper<F>()`
+- `function_template:rack::deferWrapper<type>($0)`
 - `macro:BINARY_END`
 - `macro:BINARY_SIZE`
 - `macro:BINARY_START`
@@ -35,6 +38,9 @@ platform's own extraction parsed: the semantic entry it names is counted instead
 ### Open owner review items
 
 - `class_template:rack::DeferWrapper<type>`: decide whether the deterministic context-manager adaptation is sufficient for Rack's destructor-triggered call semantics or whether a separate raw equivalent is required
+- `constructor:rack::DeferWrapper::DeferWrapper<F>($c0)`: decide whether to accept this as unrepresentable or require a safe raw-equivalent
+- `destructor:rack::DeferWrapper::~DeferWrapper<F>()`: decide whether to accept this as unrepresentable or require a safe raw-equivalent
+- `function_template:rack::deferWrapper<type>($0)`: decide whether to accept this as unrepresentable or require a safe raw-equivalent
 - `macro:BINARY_END`: decide whether to expose the embedded byte range through a safe owned/view API
 - `macro:BINARY_SIZE`: decide whether to expose the embedded byte length through a safe bytes API
 - `macro:BINARY_START`: decide whether to expose the embedded data through a safe owned/view API
@@ -44,7 +50,7 @@ platform's own extraction parsed: the semantic entry it names is counted instead
 | Family | unreviewed | planned | implemented | verified | unrepresentable | excluded_internal | unknown | absent | superseded | not inventoried |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 0 entry point | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
-| 1 common/value | 0 | 0 | 332 | 0 | 4 | 3 | 0 | 15 | 2 | 0 |
+| 1 common/value | 0 | 0 | 329 | 0 | 7 | 3 | 0 | 15 | 2 | 0 |
 | 2 engine | 0 | 0 | 276 | 0 | 0 | 22 | 0 | 0 | 0 | 0 |
 | 3 plugin/model/assets/helpers | 0 | 0 | 90 | 0 | 0 | 4 | 0 | 0 | 0 | 0 |
 | 4 widgets/ui/app/componentlibrary | 0 | 1 | 1378 | 0 | 0 | 50 | 0 | 2 | 2 | 0 |

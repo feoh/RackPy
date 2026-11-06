@@ -208,9 +208,13 @@ py::object bindConverter(py::module_ scope, py::dict& specs) {
 				runtime::frameBuffer(info, N, "process");
 				dstBuffers.push_back(std::move(info));
 			}
+			// Rack asserts both pointers even when the corresponding frame count is zero.
+			d::Frame<N> unused{};
+			const d::Frame<N>* srcData = src.empty() ? &unused : src.data();
+			d::Frame<N>* dstData = dst.empty() ? &unused : dst.data();
 			int inUsed = inFrames, outUsed = outFrames;
 			c::member<static_cast<void (S::*)(const d::Frame<N>*, int*, d::Frame<N>*, int*)>(&S::process)>(s,
-				(const d::Frame<N>*) src.data(), &inUsed, dst.data(), &outUsed);
+				srcData, &inUsed, dstData, &outUsed);
 			for (int k = 0; k < outUsed; k++)
 				std::memcpy(dstBuffers[(size_t) k].ptr, dst[(size_t) k].samples, sizeof(float) * N);
 			return py::make_tuple(inUsed, outUsed);

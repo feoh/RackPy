@@ -59,7 +59,7 @@ def test_every_record_is_accounted_for() -> None:
     inputs = bm.load_inputs()
     manifest = bm.load_json(bm.MANIFEST)
     statuses = {r["status"] for r in manifest["entries"]}
-    assert statuses <= {"unreviewed", "planned", "implemented", "verified", "excluded_internal"}
+    assert statuses <= {"unreviewed", "planned", "implemented", "verified", "excluded_internal", "unrepresentable"}
     assert "planned" not in bm.BOUND | bm.FINAL  # tracking a gap never completes it
     bound = [r for r in manifest["entries"] if r["status"] in bm.BOUND]
     families = {bm.family_of(inputs.inventory, inputs.index[r["id"]]) for r in bound}

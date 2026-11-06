@@ -297,7 +297,21 @@ def test_light_sliders_and_buttons(module: Module) -> None:
         light = button.get_light()
         assert light.module is module and light.first_light_id == 2 and button.module is module
         assert light.box.pos.plus(light.box.size.div(2)) == button.box.size.div(2)  # centred
-        assert cl.VCVLightLatch[cl.RedLight]().latch and cl.MomentarySwitch[cl.CKSS]().momentary
+        latch_template: Any = cl.VCVLightLatch
+        button_template: Any = cl.LightButton
+        light_template: Any = cl.MediumSimpleLight
+        latch_light_type = light_template[cl.RedLight]
+        latch_type = latch_template[latch_light_type]
+        assert issubclass(latch_type, button_template[cl.VCVButton, latch_light_type])
+        latch = latch_type()
+        try:
+            latch_light = latch.get_light()
+            assert latch.latch and not latch.momentary and isinstance(latch_light, latch_light_type)
+            assert latch_light in latch.children
+            assert latch_light.box.pos.plus(latch_light.box.size.div(2)) == latch.box.size.div(2)
+        finally:
+            latch.close()
+        assert cl.MomentarySwitch[cl.CKSS]().momentary
         bezel = cl.VCVLightBezel.default()()
         assert isinstance(bezel.get_light(), cl.VCVBezelLight[cl.WhiteLight]) and isinstance(bezel, cl.VCVBezel)
         latch = cl.VCVLightBezelLatch[cl.BlueLight]()

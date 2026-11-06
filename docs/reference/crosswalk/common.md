@@ -20,7 +20,7 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `include/common.hpp:31:macro PRIVATE` | conditional | not reviewed (another platform) | — | [surface-schema#conditional-branch-accountability](../surface-schema.md#conditional-branch-accountability) |
 | `include/string.hpp:142:function UTF16toUTF8` | conditional | not reviewed (another platform) | — | [surface-schema#conditional-branch-accountability](../surface-schema.md#conditional-branch-accountability) |
 | `include/string.hpp:142:function UTF8toUTF16` | conditional | not reviewed (another platform) | — | [surface-schema#conditional-branch-accountability](../surface-schema.md#conditional-branch-accountability) |
-| `rack::DeferWrapper::DeferWrapper<F>($c0)` | constructor | bound | `rackpy.raw.DeferWrapper` | {ref}`values#values-common <values-common>` |
+| `rack::DeferWrapper::DeferWrapper<F>($c0)` | constructor | unrepresentable | — | {ref}`values#values-common <values-common>` |
 | `rack::Exception::Exception(const char *, ...)` | constructor | bound | `rackpy.raw.Exception.printf` | {ref}`values#values-exception <values-exception>` |
 | `rack::Exception::Exception(const std::string &)` | constructor | bound | `rackpy.raw.Exception` | {ref}`values#values-exception <values-exception>` |
 | `rack::SharedLock::SharedLock<TMutex>($c0 &)` | constructor | bound | `rackpy.raw.SharedLock` | {ref}`services#services-mutex <services-mutex>`, {ref}`services#services-shared-lock <services-shared-lock>` |
@@ -43,7 +43,7 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::WeakPtr::operator bool() const` | conversion | bound | `rackpy.raw.WeakPtr.__bool__` | {ref}`services#services-weakptr <services-weakptr>` |
 | `rack::WeakPtr::operator type-parameter-0-0 *() const` | conversion | bound | `rackpy.raw.WeakPtr.get` | {ref}`services#services-weakptr <services-weakptr>` |
 | `rack::string::Version::operator basic_string() const` | conversion | bound | `rackpy.raw.string.Version.__str__` | {ref}`services#services-string <services-string>` |
-| `rack::DeferWrapper::~DeferWrapper<F>()` | destructor | bound | `rackpy.raw.DeferWrapper.__exit__` | {ref}`values#values-common <values-common>` |
+| `rack::DeferWrapper::~DeferWrapper<F>()` | destructor | unrepresentable | — | {ref}`values#values-common <values-common>` |
 | `rack::Quantity::~Quantity()` | destructor | bound | `rackpy.raw.Quantity` | {ref}`values#values-quantity <values-quantity>` |
 | `rack::SharedLock::~SharedLock<TMutex>()` | destructor | bound | `rackpy.raw.SharedLock.release` | {ref}`services#services-mutex <services-mutex>`, {ref}`services#services-shared-lock <services-shared-lock>` |
 | `rack::SharedMutex::~SharedMutex()` | destructor | bound | `rackpy.raw.SharedMutex` | {ref}`services#services-mutex <services-mutex>` |
@@ -184,7 +184,7 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::bitCast<type, type>($1)` | function_template | bound | `rackpy.raw.bit_cast` | {ref}`values#values-common <values-common>` |
 | `rack::construct<type, type, type, type...>($1, $2, $3...)` | function_template | bound | `rackpy.raw.construct` | {ref}`values#values-common <values-common>` |
 | `rack::construct<type>()` | function_template | bound | `rackpy.raw.construct` | {ref}`values#values-common <values-common>` |
-| `rack::deferWrapper<type>($0)` | function_template | bound | `rackpy.raw.defer_wrapper` | {ref}`values#values-common <values-common>` |
+| `rack::deferWrapper<type>($0)` | function_template | unrepresentable | — | {ref}`values#values-common <values-common>` |
 | `rack::get<type>(const $0 &, const typename $0::key_type &, const typename $0::mapped_type &)` | function_template | bound | `rackpy.raw.get` | {ref}`values#values-common <values-common>` |
 | `rack::get<type>(const $0 &, typename $0::size_type, const typename $0::value_type &)` | function_template | bound | `rackpy.raw.get` | {ref}`values#values-common <values-common>` |
 | `rack::math::isEven<type>($0)` | function_template | bound | `rackpy.raw.math.is_even` / `rackpy.math.is_even` | {ref}`values#values-scalars <values-scalars>` |

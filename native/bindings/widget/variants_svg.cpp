@@ -2,24 +2,63 @@
 #include "variants.hpp"
 #include "../drawing/drawing.hpp"
 
+#include <cstdint>
+#include <unordered_map>
+
 namespace rackpy { namespace widgets {
+namespace {
+using S = rack::window::Svg;
+
+struct SvgGeneration {
+	std::weak_ptr<S> owner;
+	std::uint64_t value = 0;
+};
+
+std::unordered_map<S*, std::shared_ptr<SvgGeneration>>& svgGenerations() {
+	static std::unordered_map<S*, std::shared_ptr<SvgGeneration>> states;
+	return states;
+}
+
+std::shared_ptr<SvgGeneration> svgGeneration(const std::shared_ptr<S>& svg) {
+	auto& states = svgGenerations();
+	for (auto it = states.begin(); it != states.end();) {
+		if (it->second->owner.expired())
+			it = states.erase(it);
+		else
+			++it;
+	}
+	auto it = states.find(svg.get());
+	if (it != states.end() && it->second->owner.lock() == svg)
+		return it->second;
+	auto state = std::make_shared<SvgGeneration>();
+	state->owner = svg;
+	states[svg.get()] = state;
+	return state;
+}
+}  // namespace
+
 void bindSvgVariant(py::module_ raw, py::module_ mod) {
 	// SvgWidget needs Svg, so rack::window starts here; bind_window() binds the
 	// rest (drawing/resources.cpp).
-	using S = rack::window::Svg;
 	auto window = raw.def_submodule("window", "rack::window (bind_window() completes it).");
 	drawing::bindNativeHandle(window);
 	py::class_<S, std::shared_ptr<S>>(window, "Svg")
 		.def(py::init([] { runtime::requireMainThread("constructing an SVG"); return std::make_shared<S>(); }))
 		.def_static("load", [](const std::string& filename) { runtime::requireMainThread("loading an SVG"); return S::load(filename); }, py::arg("filename"))
-		.def("load_file", [](S& svg, const std::string& filename) {
+		.def("load_file", [](std::shared_ptr<S> svg, const std::string& filename) {
 			runtime::requireMainThread("loading an SVG");
-			svg.loadFile(filename);  // preserve Rack's in-place failure semantics
-		}, py::arg("filename"), "Rack's Svg::loadFile; on failure it leaves no parsed image, as in Rack.")
-		.def("load_string", [](S& svg, const std::string& data) {
+			S next;
+			next.loadFile(filename);  // failed loads leave the existing image intact
+			std::swap(svg->handle, next.handle);
+			++svgGeneration(svg)->value;
+		}, py::arg("filename"), "Transactional: on failure the previous image stays (Rack's leaves none).")
+		.def("load_string", [](std::shared_ptr<S> svg, const std::string& data) {
 			runtime::requireMainThread("parsing an SVG");
-			svg.loadString(data);
-		}, py::arg("data"), "Rack's Svg::loadString; on failure it leaves no parsed image, as in Rack.")
+			S next;
+			next.loadString(data);
+			std::swap(svg->handle, next.handle);
+			++svgGeneration(svg)->value;
+		}, py::arg("data"), "Transactional: on failure the previous image stays (Rack's leaves none).")
 		.def("get_size", [](S& svg) { runtime::requireMainThread("reading an SVG"); return svg.getSize(); })
 		.def("get_num_shapes", [](S& svg) { runtime::requireMainThread("reading an SVG"); return svg.getNumShapes(); })
 		.def("get_num_paths", [](S& svg) { runtime::requireMainThread("reading an SVG"); return svg.getNumPaths(); })
@@ -30,10 +69,12 @@ void bindSvgVariant(py::module_ raw, py::module_ mod) {
 			NSVGimage* image = svg->handle;
 			if (!image) return py::none();
 			std::weak_ptr<S> weak = svg;
-			// Holds the Svg, so the parsed image lives until the Svg replaces it (load_file, load_string).
-			return py::cast(drawing::NativeHandle{"NSVGimage", image, [weak, image] {
+			auto generation = svgGeneration(svg);
+			const auto version = generation->value;
+			// Holds the Svg, so the parsed image lives until the Svg replaces it.
+			return py::cast(drawing::NativeHandle{"NSVGimage", image, [weak, generation, version, image] {
 				auto held = weak.lock();
-				return held && held->handle == image;
+				return held && generation->value == version && held->handle == image;
 			}, svg});
 		}, "The parsed NanoSVG image, as an opaque NativeHandle for svg_draw(); None if nothing is loaded.");
 	window.def("svg_draw", [](const Graphics& graphics, const drawing::NativeHandle& image) {

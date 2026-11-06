@@ -246,6 +246,7 @@ def test_sample_rate_converter() -> None:
     flat = array.array("f", [x for frame in frames for x in frame.samples.tolist()])
     outs = [dsp.Frame[2]() for _ in range(30)]
     used, written = t.process(frames, 20, outs, 30)
+    assert t.process([], 0, [], 0) == (0, 0)  # Rack asserts non-null pointers even with zero frames
     s2 = dsp.SampleRateConverter[2]()
     s2.set_rates(44100, 48000)
     buffer_out = floats(60)
