@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.0.0 — Linux x86_64 release candidate
+
+This candidate targets Rack Free 2.6.6 on Linux x86_64. The 1.0.0 version
+starts the [facade compatibility policy](docs/reference/api-stability.md); it
+is **not** a claim of complete Rack API coverage, physical audio deadlines,
+performance certification or macOS/Windows support. Known API gaps remain
+listed in [coverage](docs/coverage.md#known-release-gaps).
+
+- Includes the runtime bundle, ten original example plugins, developer wheel,
+  source archive, manifest and checksums. Each plugin carries its own Python;
+  install only one RackPy plugin at a time.
+- Native DSP runs without Python callbacks on the production audio path;
+  [safety evidence and limitations](docs/performance-results.md) distinguish
+  RackPy's path from host-owned synchronization.
+- GitHub distribution only; no PyPI upload, VCV Library submission, signed
+  artifacts or published documentation site is implied.
+
 ## 0.1.0.dev1 — early Linux x86_64 preview
 
 This pre-release targets Linux x86_64 with Rack Free 2.6.6 only. The runtime and

@@ -1,13 +1,13 @@
 [project]
 name = "rackpy"
-version = "0.1.0.dev1"
-description = "Python for VCV Rack plugins (development version; API coverage incomplete)"
+version = "1.0.0"
+description = "Python for VCV Rack plugins (API coverage incomplete)"
 readme = "README.md"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.14"
 authors = [{ name = "RackPy contributors" }]
-classifiers = ["Development Status :: 2 - Pre-Alpha", "Private :: Do Not Upload"]
+classifiers = ["Development Status :: 3 - Alpha", "Private :: Do Not Upload"]
 dependencies = []
 
 [project.urls]

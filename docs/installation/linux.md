@@ -1,12 +1,11 @@
 # Install on Linux
 
-:::{admonition} Early preview release: Linux x86_64 only
+:::{admonition} Linux x86_64 only
 :class: warning
 
-RackPy `0.1.0.dev1` is a GitHub-only pre-release for VCV Rack Free 2.6.6 on
-Linux x86_64. Download its runtime, example plugins, wheel, source, manifest
-and checksums from [GitHub Releases](https://github.com/feoh/RackPy/releases).
-It is not a complete API-coverage, performance, or broad platform-support
+RackPy `1.0.0` targets VCV Rack Free 2.6.6 on Linux x86_64. Releases and
+available artifacts are listed on [GitHub Releases](https://github.com/feoh/RackPy/releases).
+The version is not a complete API-coverage, performance, or broad platform-support
 claim. No PyPI upload, VCV Library submission or documentation-site publication
 is part of this release.
 :::
@@ -15,8 +14,8 @@ is part of this release.
 
 - **Linux x86_64** with glibc 2.23 (Ubuntu 16.04's) or newer. The candidate
   is built with VCV's own Rack plugin toolchain, the one Rack's own plugins use,
-  and its binaries are checked against the glibc 2.23 floor. This exact preview
-  was install/run-verified in Ubuntu 20.04 and Ubuntu 16.04 containers; see the
+  and its binaries are checked against the glibc 2.23 floor. Prior candidates
+  were install/run-verified in Ubuntu 20.04 and Ubuntu 16.04 containers; see the
   [candidate audit](../../release-evidence/candidate-audit.md) for limitations.
 - **VCV Rack Free {{rack_version}}**. Other Rack 2 versions are untested.
 - **Nothing else at run time.** Each plugin brings its own CPython {{python_version}},
@@ -28,17 +27,17 @@ is part of this release.
 
 ## Build and verify from source
 
-The selected Python package version is `0.1.0.dev1`. The release builder adds
+The selected Python package version is `1.0.0`. The release builder adds
 `+g<commit>` to identify the source commit; the example `.vcvplugin` names and
 Rack log continue to use `2.0.0`, Rack's plugin version field. Build from a
-clean checkout of the exact preview commit (replace `<preview-commit>` with the
-40-character hash listed in the candidate audit):
+clean checkout of the desired release commit (the release tag identifies its
+source):
 
 ```bash
 git clone https://github.com/feoh/RackPy.git RackPy-preview
 cd RackPy-preview
-git fetch origin rp42
-git checkout <preview-commit>
+git fetch origin --tags
+git checkout v1.0.0
 uv sync --frozen
 bin/rack-toolchain build  # one-time toolchain build; may take about an hour
 PREVIEW_DIR=/tmp/rackpy-preview
@@ -57,7 +56,7 @@ logs and screenshots in the `--logs` directory. Do not use `--allow-dirty` for
 this preview. A successful container test does not prove physical audio-device
 deadlines or audio-interface behavior; the optional host install below is for
 manual Rack use. The exact commit and results for the candidate built for this
-preview are recorded in the [candidate audit](https://github.com/feoh/RackPy/blob/rp42/release-evidence/candidate-audit.md).
+candidate are recorded in the [candidate audit](../../release-evidence/candidate-audit.md).
 
 ## What the files are
 
