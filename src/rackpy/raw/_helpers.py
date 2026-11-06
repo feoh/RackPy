@@ -96,7 +96,7 @@ def create_menu_item(
                     event.consume(self)
 
         item = ActionItem()
-        item.disabled = disabled
+    item.disabled = disabled
     item.text, item.right_text = text, right_text
     return item
 

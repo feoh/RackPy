@@ -236,13 +236,19 @@ void bindParamHandles(py::module_ engine, py::class_<EngineHandle>& cls) {
 		})
 		.def_property("module_id", [](const ParamHandleRef& ref) { return ref.get().moduleId; },
 			[](ParamHandleRef& ref, int64_t id) {
-				if (!ref.ours() || registered(*ref.slot))
+				if (!ref.ours())
+					throw runtime::Ownership("Rack: set a handle's IDs with Engine.update_param_handle");
+				runtime::requireMainThread("setting a parameter handle's module ID");
+				if (registered(*ref.slot))
 					throw runtime::Ownership("Rack: set a handle's IDs with Engine.update_param_handle");
 				ref.slot->handle.moduleId = id;
 			}, "Rack's: the module's ID, or -1. Rack's engine sets it (update_param_handle).")
 		.def_property("param_id", [](const ParamHandleRef& ref) { return ref.get().paramId; },
 			[](ParamHandleRef& ref, int id) {
-				if (!ref.ours() || registered(*ref.slot))
+				if (!ref.ours())
+					throw runtime::Ownership("Rack: set a handle's IDs with Engine.update_param_handle");
+				runtime::requireMainThread("setting a parameter handle's param ID");
+				if (registered(*ref.slot))
 					throw runtime::Ownership("Rack: set a handle's IDs with Engine.update_param_handle");
 				ref.slot->handle.paramId = id;
 			})

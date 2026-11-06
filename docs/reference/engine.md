@@ -170,7 +170,9 @@ widget shows the mapping's `color` and `text`.
   param is unmapped; without, this one is. Rack 2.6.6 also unmaps a handle
   that is mapped again to the param it is on, because it finds the handle
   itself there. RackPy checks the param ID when the module exists. While the
-  engine has the handle, its IDs change only this way.
+  engine has the handle, its IDs change only this way. Before registration,
+  Python-owned handles' `module_id` and `param_id` may be set on the main
+  thread; after registration, use `update_param_handle` instead.
 - `get_param_handle(module_id, param_id)` returns the handle on a param:
   Python's own, a read-only view of another owner's (a module's), found
   again by its IDs, or `None`. Passing the module itself is Rack's deprecated

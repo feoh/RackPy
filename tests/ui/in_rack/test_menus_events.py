@@ -291,6 +291,7 @@ def test_menu_helpers_build_working_menus() -> None:
     try:
         label: ui.MenuLabel = raw.create_menu_label("Header", label_type=CustomLabel)
         plain = raw.create_menu_item("Plain", "R", item_type=Tinted)
+        disabled_plain = raw.create_menu_item("Disabled", "", disabled=True, item_type=Tinted)
         act = raw.create_menu_item("Act", "", lambda: calls.append("act"))
         check = raw.create_check_menu_item("Check", "x", lambda: True, lambda: calls.append("check"), item_type=Tinted)
 
@@ -306,11 +307,11 @@ def test_menu_helpers_build_working_menus() -> None:
             "Mode", ["A", "B", "C"], lambda: int(state["index"]), lambda i: state.update(index=i), item_type=Tinted
         )
         index_ptr = raw.create_index_ptr_submenu_item("Ptr", ["X", "Y"], mode)
-        for item in (label, plain, act, check, toggle, pointer, submenu, index, index_ptr):
+        for item in (label, plain, disabled_plain, act, check, toggle, pointer, submenu, index, index_ptr):
             menu.add_child(item)
         assert isinstance(label, CustomLabel) and label.text == "Header"
         assert all(isinstance(item, Tinted) for item in (plain, check, toggle, submenu, index))
-        assert plain.right_text == "R"
+        assert plain.right_text == "R" and disabled_plain.disabled
         menu.step()  # Rack's step: check marks and index labels update
         assert check.right_text == "x  " + ui.CHECKMARK_STRING and index.right_text == "A  " + ui.RIGHT_ARROW
         assert submenu.right_text == ui.RIGHT_ARROW

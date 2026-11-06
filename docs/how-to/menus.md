@@ -23,7 +23,7 @@ The helpers live in `rackpy.raw` and match Rack's C++ `createMenuItem` family:
 | --- | --- |
 | `ui.MenuSeparator()` | a line between groups |
 | `create_menu_label(text)` | a heading that does nothing |
-| `create_menu_item(text, right_text, action, disabled)` | an item that calls `action()` when chosen |
+| `create_menu_item(text, right_text="", action=None, disabled=False)` | a plain or action item; `disabled=True` disables either kind |
 | `create_check_menu_item(text, right_text, checked, action)` | an item with a check mark while `checked()` is true |
 | `create_bool_menu_item(text, right_text, getter, setter)` | a checkable setting through a getter and a setter |
 | `create_bool_ptr_menu_item(text, right_text, ptr)` | the same, through `ptr`: any object with a `value` attribute |

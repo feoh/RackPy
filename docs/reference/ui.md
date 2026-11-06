@@ -128,7 +128,7 @@ Python callables. The template parameter becomes a keyword (`menu_type`,
 - `create_menu_label(text)` makes a label.
 - `create_menu_item(text, right_text="", action=None, disabled=False,
   always_consume=False)` makes an item. Without `action` it is a plain item.
-  With it, choosing the item calls `action()`.
+  With it, choosing the item calls `action()`. `disabled=True` disables either kind.
 - `create_check_menu_item(text, right_text, checked, action, ...)` shows a
   check mark while `checked()` is true.
 - `create_bool_menu_item(text, right_text, getter, setter, ...)` toggles a

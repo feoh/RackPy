@@ -85,6 +85,25 @@ def test_a_param_handle_python_makes(probe: EngineModule) -> None:
     e = engine()
     h = ParamHandle()
     assert h.ours and not registered(h) and h.module_id == -1 and h.param_id == 0 and h.text == "" and h.module is None
+    id_thread_errors: list[ThreadError] = []
+
+    def write_module_id() -> None:
+        h.module_id = 4
+
+    def write_param_id() -> None:
+        h.param_id = 1
+
+    def write_ids_on_worker() -> None:
+        for write in (write_module_id, write_param_id):
+            try:
+                write()
+            except ThreadError as error:
+                id_thread_errors.append(error)
+
+    id_worker = threading.Thread(target=write_ids_on_worker)
+    id_worker.start()
+    id_worker.join()
+    assert len(id_thread_errors) == 2 and h.module_id == -1 and h.param_id == 0
     h.text = "Cutoff"
     assert h.color == raw.nanovg.rgbf(0, 0, 0)  # RackPy starts a handle opaque black
     h.color = raw.nanovg.rgb(255, 128, 0)
