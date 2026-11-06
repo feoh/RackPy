@@ -22,7 +22,7 @@ from _rackpy_host import _testing as HOOKS
 
 import rackpy._bootstrap
 from rackpy import raw
-from rackpy.errors import ContextError, OwnershipError, StaleHandleError
+from rackpy.errors import ContextError, OwnershipError, StaleHandleError, ThreadError
 from rackpy.raw import asset
 from rackpy.raw import nanovg as nvg
 from rackpy.raw import widget as w
@@ -492,6 +492,18 @@ def test_context_window_and_native_handles() -> None:
     assert window.vg is not None and window.fb_vg is not None and window.vg is not window.fb_vg
     assert window.vg is window.vg and window.vg.kind == "NVGcontext" and window.vg.alive
     assert window.win.kind == "GLFWwindow" and window.win.alive
+    errors: list[BaseException] = []
+
+    def read_window_alive() -> None:
+        try:
+            _ = window.alive
+        except BaseException as exc:
+            errors.append(exc)
+
+    worker = threading.Thread(target=read_window_alive)
+    worker.start()
+    worker.join()
+    assert len(errors) == 1 and isinstance(errors[0], ThreadError)
     patch, loopback = context.patch, context.midi_loopback_context
     assert patch is not None and patch.kind == "patch::Manager" and patch.alive
     assert loopback is not None and loopback.kind == "midiloopback::Context"

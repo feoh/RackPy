@@ -34,7 +34,7 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::window::Window::windowRatio` | field | bound | `rackpy.raw.window.Window.window_ratio` | {ref}`window#window-window <window-window>` |
 | `rack::appGet()` | function | bound | `rackpy.raw.app_get` | {ref}`window#window-context <window-context>` |
 | `rack::contextGet()` | function | bound | `rackpy.raw.context_get` | {ref}`ui#ui-input <ui-input>` |
-| `rack::contextSet(rack::Context *)` | function | bound | `rackpy.raw.context_set` | {ref}`window#window-context <window-context>` |
+| `rack::contextSet(rack::Context *)` | function | planned | — | {ref}`window#window-context <window-context>` |
 | `rack::window::destroy()` | function | excluded: Rack-internal | — | — |
 | `rack::window::in2px(float)` | function | bound | `rackpy.raw.window.in2px` | {ref}`window#window-units <window-units>` |
 | `rack::window::in2px(rack::math::Vec)` | function | bound | `rackpy.raw.window.in2px` | {ref}`window#window-units <window-units>` |

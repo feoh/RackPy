@@ -70,9 +70,8 @@ std::string vecRepr(const Vec& v) {
 }
 
 int vecIndex(int i) {
-	if (i != 0 && i != 1)
-		throw py::index_error("Vec index must be 0 (x) or 1 (y)");
-	return i;
+	// Rack's Vec::operator[] returns x only at 0 and y for every other int.
+	return i == 0 ? 0 : 1;
 }
 
 }  // namespace

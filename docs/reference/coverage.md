@@ -13,29 +13,43 @@ platform's own extraction parsed: the semantic entry it names is counted instead
 
 | Platform | unreviewed | planned | implemented | verified | unrepresentable | excluded_internal | unknown | absent | superseded | not inventoried |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lin-x64 | 0 | 0 | 3098 | 0 | 0 | 111 | 0 | 22 | 4 | 0 |
-| mac-arm64 | 0 | 0 | 3100 | 0 | 0 | 111 | 0 | 18 | 6 | 0 |
-| mac-x64 | 0 | 0 | 3098 | 0 | 0 | 111 | 0 | 22 | 4 | 0 |
-| win-x64 | 0 | 0 | 3102 | 0 | 0 | 111 | 0 | 14 | 8 | 0 |
+| lin-x64 | 0 | 5 | 3089 | 0 | 4 | 111 | 0 | 22 | 4 | 0 |
+| mac-arm64 | 0 | 5 | 3091 | 0 | 4 | 111 | 0 | 18 | 6 | 0 |
+| mac-x64 | 0 | 5 | 3089 | 0 | 4 | 111 | 0 | 22 | 4 | 0 |
+| win-x64 | 0 | 5 | 3093 | 0 | 4 | 111 | 0 | 14 | 8 | 0 |
 
 ## Needs attention
 
 - **Unknown** (in the inventory, not in the manifest): 0
-- **Unrepresentable** (awaiting an owner decision): 0
+- **Unrepresentable** (awaiting an owner decision): 4
 - **Unresolved callback strategy** (ADR 003): 0
-- **Open owner review items** (each blocks a release until the owner decides): 0
+- **Open owner review items** (each blocks a release until the owner decides): 4
+
+### Unrepresentable
+
+- `class_template:rack::DeferWrapper<type>`
+- `macro:BINARY_END`
+- `macro:BINARY_SIZE`
+- `macro:BINARY_START`
+
+### Open owner review items
+
+- `class_template:rack::DeferWrapper<type>`: decide whether the deterministic context-manager adaptation is sufficient for Rack's destructor-triggered call semantics or whether a separate raw equivalent is required
+- `macro:BINARY_END`: decide whether to expose the embedded byte range through a safe owned/view API
+- `macro:BINARY_SIZE`: decide whether to expose the embedded byte length through a safe bytes API
+- `macro:BINARY_START`: decide whether to expose the embedded data through a safe owned/view API
 
 ## By family (lin-x64)
 
 | Family | unreviewed | planned | implemented | verified | unrepresentable | excluded_internal | unknown | absent | superseded | not inventoried |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 0 entry point | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
-| 1 common/value | 0 | 0 | 336 | 0 | 0 | 3 | 0 | 15 | 2 | 0 |
+| 1 common/value | 0 | 0 | 332 | 0 | 4 | 3 | 0 | 15 | 2 | 0 |
 | 2 engine | 0 | 0 | 276 | 0 | 0 | 22 | 0 | 0 | 0 | 0 |
 | 3 plugin/model/assets/helpers | 0 | 0 | 90 | 0 | 0 | 4 | 0 | 0 | 0 | 0 |
-| 4 widgets/ui/app/componentlibrary | 0 | 0 | 1379 | 0 | 0 | 50 | 0 | 2 | 2 | 0 |
-| 5 window/rendering/context | 0 | 0 | 73 | 0 | 0 | 12 | 0 | 0 | 0 | 0 |
+| 4 widgets/ui/app/componentlibrary | 0 | 1 | 1378 | 0 | 0 | 50 | 0 | 2 | 2 | 0 |
+| 5 window/rendering/context | 0 | 1 | 72 | 0 | 0 | 12 | 0 | 0 | 0 | 0 |
 | 6 dsp/simd | 0 | 0 | 558 | 0 | 0 | 0 | 0 | 4 | 0 | 0 |
-| 7 audio/midi | 0 | 0 | 169 | 0 | 0 | 6 | 0 | 0 | 0 | 0 |
+| 7 audio/midi | 0 | 3 | 166 | 0 | 0 | 6 | 0 | 0 | 0 | 0 |
 | 8 services | 0 | 0 | 128 | 0 | 0 | 9 | 0 | 0 | 0 | 0 |
 | 9 history | 0 | 0 | 88 | 0 | 0 | 5 | 0 | 0 | 0 | 0 |

@@ -219,6 +219,7 @@ def test_real_time_convolver() -> None:
     conv = dsp.RealTimeConvolver(32)
     assert conv.block_size == 32 and conv.kernel_blocks == 0 and conv.pffft
     assert len(conv.kernel_ffts) == 0 and len(conv.output_tail) == 32 and len(conv.tmp_block) == 64
+    assert conv.kernel_ffts.tolist() == [] and conv.input_ffts.tolist() == []
     view = conv.kernel_ffts
     kernel = array.array("f", [1.0] + [0.0] * 63)  # an identity, two blocks long
     conv.set_kernel(kernel, 64)
@@ -238,6 +239,7 @@ def test_real_time_convolver() -> None:
     with pytest.raises(ValueError):
         conv.set_kernel(kernel, 65)  # longer than the buffer
     conv.set_kernel(None, 0)
+    assert conv.kernel_ffts.tolist() == [] and conv.input_ffts.tolist() == []
     out = floats(32)
     conv.process_block(block, out)
     assert out.tolist() == [0.0] * 32 and len(view) == 0

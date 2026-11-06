@@ -125,9 +125,11 @@ plugin calls it either.
 A device belongs to its driver (RtAudio deletes one when its last port
 leaves). Python reaches it only through the port that holds it, and the view
 goes stale once the port lets go. It has Rack's queries and setters for
-name, channels, sample rate and block size. `subscribed` lists the device's
-subscribers, Python's own ports and read-only `PortView`s of the others,
-under Rack's `processMutex`. The `process_mutex` property returns a
+name, channels, sample rate and block size. `subscribed` currently returns a
+Python list snapshot of the device's subscribers (Python's own ports and
+read-only `PortView`s of the others) under Rack's `processMutex`; mutating that
+list does not mutate Rack's `std::set`, so this is not a complete raw field
+mapping. The `process_mutex` property returns a
 lifetime-checked `ProcessMutex` view: `acquire()` returns an RAII guard, and
 `try_acquire()` returns a guard or `None`. Use the guard as a context manager
 briefly on the UI thread; waiting releases the GIL, and the guard must be used

@@ -645,6 +645,11 @@ def test_waiting_releases_the_gil() -> None:
     t.join()
 
 
+def assert_empty_weak_pointer() -> None:
+    empty = raw.WeakPtr()
+    assert empty.get() is None and not empty and empty.weak_handle is None
+
+
 def test_weak_pointers() -> None:
     widget = w.Widget()
     assert widget.get_weak_count() == 0 and widget.weak_handle is None
@@ -655,9 +660,8 @@ def test_weak_pointers() -> None:
     q = p.__copy__()
     assert q.get() is widget
     widget.close()
-    assert p.get() is None and not p and q.get() is None and handle.ptr is None
-    empty = raw.WeakPtr()
-    assert empty.get() is None and not empty and empty.weak_handle is None
+    assert all((p.get() is None, not p, q.get() is None, handle.ptr is None))
+    assert_empty_weak_pointer()
     host = raw.context_get()
     assert host is not None and host.scene is not None
     scene_ptr = raw.WeakPtr(host.scene)  # Rack's own widgets too
@@ -711,6 +715,6 @@ def test_weak_handle_is_made_by_weak_ptr() -> None:
     with pytest.raises(TypeError):
         raw.WeakHandle(widget)  # type: ignore[call-arg]
     with pytest.raises(TypeError, match="Widget"):  # a failed cast is a TypeError (RP-38)
-        raw.WeakPtr(object())  # WeakPtr<T> needs a WeakBase, and Widget is Rack's only one
+        raw.WeakPtr(object())  # type: ignore[arg-type]  # runtime cast must still reject non-WeakBase objects
     widget.close()
     assert again.get() is None

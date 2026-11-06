@@ -87,8 +87,7 @@ Out-parameters become return values: `euc_div_mod(-7, 3)` is `(-3, 2)` and
 `rotate`, …; `mult` and `div` take a `Vec` or a float, as their two C++
 overloads do) and Rack's operators: `+`, `-`, `*` and `/` with a `Vec` or a
 float, unary `+` and `-`, `==` and `!=`, and the in-place forms, which change
-the `Vec` itself. `v[0]` and `v[1]` are `x` and `y`; any other index raises
-`IndexError` (C++ would quietly return `y`).
+the `Vec` itself. `v[0]` is `x`; every other integer index reads or writes `y`, matching Rack's `operator[]` (including negative and out-of-range indices).
 
 A `Vec` is a **mutable value**: assigning it or passing it to a function copies
 it, as in C++, and `copy.copy` makes an independent copy. Being mutable, it is
@@ -132,10 +131,11 @@ C++ returns a reference: when a later family binds a widget's `box`, writing
 
 `NVGcolor(r, g, b, a=1.0)` (also `rackpy.types.Color`) is nanovg's colour, which
 Rack passes by value everywhere. It is therefore an **immutable** value: its
-components are read-only, it is hashable, and the constants in
-`rackpy.raw.color` (`RED`, `WHITE_TRANSPARENT`, …) cannot be changed by
-accident. The `rackpy.raw.color` functions are Rack's: `lerp`, `screen`,
-`alpha`, `mult` (by a colour or a float), and so on.
+components are read-only and it is hashable. Names such as
+`rackpy.raw.color.RED` and `WHITE_TRANSPARENT` are conventional module-level
+constants; Python allows rebinding a module attribute, but that does not mutate
+the original value or Rack's C++ constant. The `rackpy.raw.color` functions
+are Rack's: `lerp`, `screen`, `alpha`, `mult` (by a colour or a float), and so on.
 
 `from_hex_string` behaves as Rack's implementation does, which is not what its
 header says. `color.hpp` documents "returns WHITE on error", but the code reads
@@ -200,7 +200,10 @@ the format itself is a C string and ends at its first NUL.
 | `DeferWrapper`, `deferWrapper(f)`, `DEFER({...})` | `with rackpy.raw.defer_wrapper(f):` or `with rackpy.raw.macros.DEFER(f):` runs `f` when the block exits; `DeferWrapper.f` is the stored callable |
 
 C++ value-initializes `get`'s default (`0`, `""`); Python cannot know the
-container's element type, so its default is `None`.
+container's element type, so its default is `None`. `DeferWrapper` is currently
+a Pythonic context-manager adaptation: its callable runs on `with` exit, but
+unlike Rack's destructor, dropping a wrapper that was never entered does not
+run it. This does not count as complete raw coverage.
 
 (values-macros)=
 ## Macros
@@ -218,8 +221,9 @@ Each of Rack's macros has a reviewed disposition (coverage policy 9):
 | `DEFER(code)` | `macros.DEFER(f)`, a context manager |
 | `DEPRECATED` | `macros.DEPRECATED`, a decorator whose target emits `DeprecationWarning` |
 | `CONCAT`, `CONCAT_LITERAL`, `TOSTRING`, `TOSTRING_LITERAL` | **no runtime meaning**: they paste and quote tokens for the preprocessor; Python builds strings directly |
-| `BINARY`, `BINARY_START`, `BINARY_END`, `BINARY_SIZE` | **no runtime meaning**: they name data the linker embeds in a C++ plugin; a Python plugin reads its files through asset paths (RP-30) |
-| `PRIVATE` | **no runtime meaning**: an attribute that marks Rack's internal declarations (a deprecation warning under clang, an error otherwise); RackPy never calls them, and the manifest excludes them (`excluded_internal`) |
+| `BINARY` | **no runtime meaning**: this is a linker directive for data embedded in a C++ plugin; a Python plugin reads its files through asset paths (RP-30) |
+| `BINARY_START`, `BINARY_END`, `BINARY_SIZE` | Runtime pointer/length expressions for linker-embedded C++ plugin data. RackPy does not expose raw addresses; a safe byte-view equivalent is an open coverage decision, so these declarations remain a release blocker rather than being counted as implemented. |
+| `PRIVATE` | **no runtime meaning**: an attribute that marks Rack's internal declarations (a deprecation warning under clang, an error otherwise); RackPy never calls them. The manifest records it as `implemented` with `python.kind = "no_runtime_meaning"`, not as `excluded_internal`. |
 
 (values-fopen)=
 ## Files by UTF-8 name: `fopen_u8` (Windows only)

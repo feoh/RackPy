@@ -236,6 +236,8 @@ void bindAdvanced(py::module_ m) {
 		.def("__setitem__", [](const ConvolverArray& v, int i, float x) { v.at(i) = x; }, py::arg("i"), py::arg("x"))
 		.def("tolist", [](const ConvolverArray& v) {
 			auto [data, n] = v.resolve();
+			if (n == 0)
+				return std::vector<float>{};
 			return std::vector<float>(data, data + n);
 		});
 

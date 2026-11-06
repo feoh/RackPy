@@ -8,6 +8,7 @@ from typing import Any
 import pytest
 
 from rackpy.errors import StaleHandleError
+from rackpy.raw import Exception as RackException
 from rackpy.raw import widget as w
 from rackpy.raw.math import Rect, Vec
 from rackpy.raw.window import Svg
@@ -256,6 +257,9 @@ def test_svg_file_cache_and_geometry_counts(tmp_path: Path) -> None:
     own.load_file(str(path))
     assert own.get_size() == Vec(17, 23)
     assert (own.get_num_shapes(), own.get_num_paths(), own.get_num_points()) == (2, 2, 7)
+    with pytest.raises(RackException):
+        own.load_file(str(tmp_path / "missing.svg"))
+    assert own.handle is None
     cached = Svg.load(str(path))
     assert cached is not None and cached is Svg.load(str(path))
     assert cached.get_size() == Vec(17, 23) and cached.get_num_points() == 7

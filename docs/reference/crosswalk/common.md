@@ -7,7 +7,7 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | C++ declaration | Kind | Status | Python | Documented in |
 | --- | --- | --- | --- | --- |
 | `rack::random::Xoroshiro128Plus::result_type` | alias | bound | `rackpy.raw.random.Xoroshiro128Plus.result_type` | {ref}`services#services-random <services-random>`, [services#random-numbers-rackpyrawrandom](../services.md#random-numbers-rackpyrawrandom) |
-| `rack::DeferWrapper<type>` | class_template | bound | `rackpy.raw.DeferWrapper` | {ref}`values#values-common <values-common>` |
+| `rack::DeferWrapper<type>` | class_template | unrepresentable | — | {ref}`values#values-common <values-common>` |
 | `rack::SharedLock<type>` | class_template | bound | `rackpy.raw.SharedLock` | {ref}`services#services-mutex <services-mutex>`, {ref}`services#services-shared-lock <services-shared-lock>` |
 | `rack::WeakPtr<type>` | class_template | bound | `rackpy.raw.WeakPtr` | {ref}`services#services-weakptr <services-weakptr>`, {ref}`services#services-weakptr-contract <services-weakptr-contract>` |
 | `include/arch.hpp:12:macro ARCH_WIN` | conditional | not reviewed (another platform) | — | [surface-schema#conditional-branch-accountability](../surface-schema.md#conditional-branch-accountability) |
@@ -201,9 +201,9 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `ARCH_WIN` | macro | bound | `rackpy.raw.macros.ARCH_WIN` | {ref}`values#values-macros <values-macros>` |
 | `ARCH_X64` | macro | bound | `rackpy.raw.macros.ARCH_X64` | {ref}`values#values-macros <values-macros>` |
 | `BINARY` | macro | no runtime meaning | — | {ref}`values#values-macros <values-macros>` |
-| `BINARY_END` | macro | no runtime meaning | — | {ref}`values#values-macros <values-macros>` |
-| `BINARY_SIZE` | macro | no runtime meaning | — | {ref}`values#values-macros <values-macros>` |
-| `BINARY_START` | macro | no runtime meaning | — | {ref}`values#values-macros <values-macros>` |
+| `BINARY_END` | macro | unrepresentable | — | {ref}`values#values-macros <values-macros>` |
+| `BINARY_SIZE` | macro | unrepresentable | — | {ref}`values#values-macros <values-macros>` |
+| `BINARY_START` | macro | unrepresentable | — | {ref}`values#values-macros <values-macros>` |
 | `CONCAT` | macro | no runtime meaning | — | {ref}`values#values-macros <values-macros>` |
 | `CONCAT_LITERAL` | macro | no runtime meaning | — | {ref}`values#values-macros <values-macros>` |
 | `DEBUG` | macro | bound | `rackpy.raw.macros.DEBUG` | {ref}`services#services-logger <services-logger>` |

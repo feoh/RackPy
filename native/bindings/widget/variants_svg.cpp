@@ -14,16 +14,12 @@ void bindSvgVariant(py::module_ raw, py::module_ mod) {
 		.def_static("load", [](const std::string& filename) { runtime::requireMainThread("loading an SVG"); return S::load(filename); }, py::arg("filename"))
 		.def("load_file", [](S& svg, const std::string& filename) {
 			runtime::requireMainThread("loading an SVG");
-			S next;
-			next.loadFile(filename);  // raises rackpy.raw.Exception, leaving this Svg unchanged
-			std::swap(svg.handle, next.handle);
-		}, py::arg("filename"), "Rack's Svg::loadFile, transactional: on failure the previous image stays (Rack's leaves none).")
+			svg.loadFile(filename);  // preserve Rack's in-place failure semantics
+		}, py::arg("filename"), "Rack's Svg::loadFile; on failure it leaves no parsed image, as in Rack.")
 		.def("load_string", [](S& svg, const std::string& data) {
 			runtime::requireMainThread("parsing an SVG");
-			S next;
-			next.loadString(data);
-			std::swap(svg.handle, next.handle);
-		}, py::arg("data"), "Rack's Svg::loadString, transactional: on failure the previous image stays (Rack's leaves none).")
+			svg.loadString(data);
+		}, py::arg("data"), "Rack's Svg::loadString; on failure it leaves no parsed image, as in Rack.")
 		.def("get_size", [](S& svg) { runtime::requireMainThread("reading an SVG"); return svg.getSize(); })
 		.def("get_num_shapes", [](S& svg) { runtime::requireMainThread("reading an SVG"); return svg.getNumShapes(); })
 		.def("get_num_paths", [](S& svg) { runtime::requireMainThread("reading an SVG"); return svg.getNumPaths(); })

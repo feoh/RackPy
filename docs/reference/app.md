@@ -235,8 +235,9 @@ spellings, and using them warns.
 
 An SVG handed to any of them must be `None` or loaded: Rack draws these
 widgets itself, and its `svgDraw` would crash on an `Svg` without an image.
-For the same reason, `Svg.load_file()` keeps the previous image when it fails
-([SVGs](window.md#svgs)).
+For the same reason, do not pass an unloaded `Svg` to these controls: failed
+`load_file()` and `load_string()` calls leave the SVG without a parsed image,
+matching Rack ([SVGs](window.md#svgs)).
 
 `CircularShadow` (`blur_radius`, `opacity`), `PanelBorder` and `RailWidget`
 are Rack's too. The constants `RACK_GRID_WIDTH` (15), `RACK_GRID_HEIGHT`

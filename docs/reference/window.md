@@ -116,13 +116,14 @@ thread ([input](ui.md#context-and-input)). Its `window` is the `Window` below, o
 scene and history come with their own families.
 
 `Context.engine` is read-only and returns Rack's engine in the live context; it
-returns `None` when the context no longer has an engine. `context_set(context)`
-is Rack's `contextSet()`. A thread Python starts has no context, so
-`context_get()` returns `None` there. After `context_set(context)` it returns
-the context, as in a C++ plugin thread
-that calls `contextSet(APP)`. Main-thread-only APIs still refuse to run on
-such a thread. On Rack's main thread, `context_set` accepts only the context
-that is already current. `app_get()` is Rack's deprecated `appGet()`.
+returns `None` when the context no longer has an engine. The current
+`context_set(context)` adapter supports setting an already-current, non-null
+context on a Python worker thread, as in a C++ plugin thread that calls
+`contextSet(APP)`. Main-thread-only APIs still refuse to run on such a thread.
+On Rack's main thread, it accepts only the context that is already current and
+cannot clear or switch contexts; Rack's public function accepts any `Context*`
+or `nullptr`, so this remains a coverage gap. `app_get()` is Rack's deprecated
+`appGet()`.
 
 A `NativeHandle` stands for a native object Rack owns: an `NVGcontext`, the
 `GLFWwindow`, an `NSVGimage`, the patch manager. It has a `kind` and an
@@ -177,9 +178,9 @@ dropped it. `Image.load()` is deprecated, as `Font.load()` is.
 ## SVGs
 
 `Svg` loads with `load_file`, `load_string` or the cached `Svg.load()`
-([widgets](widgets.md#typed-bases)). Unlike Rack's, a failed `load_file`
-keeps the previous image: Rack draws SVGs it was given without checking that
-they have one ([app controls](app.md#svg-controls-screws-and-panels)).
+([widgets](widgets.md#typed-bases)). A failed `load_file` or `load_string`
+leaves no parsed image, matching Rack. Rack draws SVGs it was given without
+checking that they have one ([app controls](app.md#svg-controls-screws-and-panels)).
 NanoSVG parses any string, so `load_string` gives an empty image rather than
 failing. `get_size()`, `get_num_shapes()`, `get_num_paths()` and
 `get_num_points()` report the parsed image's dimensions and geometry counts.

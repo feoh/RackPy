@@ -302,6 +302,7 @@ void bindWindowResources(py::module_ raw) {
 
 	py::class_<WindowHandle>(m, "Window", py::is_final(), "Rack's OS window (Context.window). Main thread only.")
 		.def_property_readonly("alive", [](const WindowHandle& h) {
+			runtime::requireMainThread("using Rack's window");
 			return h.token->alive() && h.token->context->window == h.window;
 		})
 		.def_property_readonly("win", [](const WindowHandle& h) {

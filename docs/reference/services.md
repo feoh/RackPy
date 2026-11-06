@@ -363,6 +363,14 @@ Other risks remain:
 (services-weakptr)=
 ## Weak pointers: `rackpy.raw.WeakPtr`
 
+```{eval-rst}
+.. py:class:: rackpy.raw.WeakHandle
+
+   Rack's shared weak-handle view, exposing ``ptr`` (a widget or ``None``) and
+   ``count``. Python cannot construct a usable handle; Rack creates it for a
+   ``WeakPtr`` and the view keeps it alive.
+```
+
 In the `rack.hpp` closure, Rack's `WeakBase` is a base of `Widget`. So a
 `WeakPtr` points at a widget, RackPy's or Rack's own, and `get()` returns
 `None` once Rack deletes it. Weak pointers work on the main thread only,

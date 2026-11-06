@@ -105,10 +105,9 @@ def test_vec_construction_fields_and_indexing() -> None:
     v.x = 4
     v[1] = 5
     assert (v[0], v[1]) == (4.0, 5.0) and tuple(v) == (4.0, 5.0) and len(v) == 2
-    with pytest.raises(IndexError):
-        v[2]
-    with pytest.raises(IndexError):
-        v[-1] = 0.0
+    assert v[2] == 5.0 and v[-1] == 5.0  # Rack indexes y for every index other than 0.
+    v[-1] = 7.0
+    assert v.y == 7.0
     assert repr(Vec(0.1, -2)) == "Vec(0.10000000149011612, -2.0)"
 
 

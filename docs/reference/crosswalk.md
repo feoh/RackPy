@@ -7,13 +7,13 @@ Every public declaration of Rack's SDK that RackPy accounts for, with its Python
 | Family | Declarations | Bound | Excluded (Rack-internal) | Not reviewed |
 | --- | --- | --- | --- | --- |
 | [0 entry point](crosswalk/entry-point.md) | 2 | 1 | 0 | 1 |
-| [1 common/value](crosswalk/common.md) | 356 | 343 | 3 | 10 |
+| [1 common/value](crosswalk/common.md) | 356 | 339 | 3 | 10 |
 | [2 engine](crosswalk/engine.md) | 298 | 276 | 22 | 0 |
 | [3 plugin/model/assets/helpers](crosswalk/plugin.md) | 94 | 90 | 4 | 0 |
-| [4 widgets/ui/app/componentlibrary](crosswalk/widgets.md) | 1433 | 1379 | 50 | 4 |
-| [5 window/rendering/context](crosswalk/window.md) | 85 | 73 | 12 | 0 |
+| [4 widgets/ui/app/componentlibrary](crosswalk/widgets.md) | 1433 | 1378 | 50 | 4 |
+| [5 window/rendering/context](crosswalk/window.md) | 85 | 72 | 12 | 0 |
 | [6 dsp/simd](crosswalk/dsp.md) | 562 | 560 | 0 | 2 |
-| [7 audio/midi](crosswalk/audio-midi.md) | 175 | 169 | 6 | 0 |
+| [7 audio/midi](crosswalk/audio-midi.md) | 175 | 166 | 6 | 0 |
 | [8 services](crosswalk/services.md) | 137 | 128 | 9 | 0 |
 | [9 history](crosswalk/history.md) | 93 | 88 | 5 | 0 |
 

@@ -263,7 +263,7 @@ Each public declaration of this family in Rack's SDK, the Python name or names i
 | `rack::app::ModuleWidget::ModuleWidget()` | constructor | bound | `rackpy.raw.app.ModuleWidget` | {ref}`app#app-module-widgets <app-module-widgets>` |
 | `rack::app::ModuleWidget::ModuleWidget(rack::engine::Module *)` | constructor | bound | `rackpy.raw.app.ModuleWidget` | {ref}`app#app-module-widgets <app-module-widgets>` |
 | `rack::app::ParamWidget::ParamWidget()` | constructor | bound | `rackpy.raw.app.ParamWidget` | [app#app-controls](../app.md#app-controls) |
-| `rack::app::PlugWidget::PlugWidget()` | constructor | bound | `rackpy.raw.app.CableWidget` | {ref}`app#app-cable-widgets <app-cable-widgets>` |
+| `rack::app::PlugWidget::PlugWidget()` | constructor | planned | — | {ref}`app#app-cable-widgets <app-cable-widgets>` |
 | `rack::app::PortWidget::PortWidget()` | constructor | bound | `rackpy.raw.app.PortWidget` | {ref}`app#app-ports <app-ports>` |
 | `rack::app::RackScrollWidget::RackScrollWidget()` | constructor | excluded: Rack-internal | — | — |
 | `rack::app::RackWidget::RackWidget()` | constructor | excluded: Rack-internal | — | — |
