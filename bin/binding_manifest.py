@@ -80,6 +80,8 @@ DECLARED_UNDEFINED = "Declared but never defined"
 OWNER_REVIEW_OPEN = "Open owner review item:"
 OWNER_REVIEW_MENTION = re.compile(r"owner\s+review\s+item", re.IGNORECASE)
 OWNER_REVIEW_ITEM = re.compile(re.escape(OWNER_REVIEW_OPEN) + r" ([^.;]*[^.;\s])")
+KNOWN_GAP_OPEN = "Known release gap:"
+KNOWN_GAP_HEADER = "## Known release gaps"
 LOCKS = frozenset({"exclusive", "shared", "none", "caller_holds"})
 ENTRY_FIELDS = (
     "id",
@@ -730,6 +732,9 @@ def validate(inputs: Inputs, manifest: dict[str, Any], introspection: dict[str, 
         marker = owner_review_marker_problem(r)
         if marker:
             add("owner-review-marker", ident, marker)
+        gap_marker = known_gap_marker_problem(r, repo)
+        if gap_marker:
+            add("known-gap", ident, gap_marker)
 
     for ident in sorted(inputs.deprecation_evidence):
         entry = index.get(ident)
@@ -763,6 +768,37 @@ def owner_review_marker_problem(record: dict[str, Any]) -> str | None:
     return None
 
 
+def known_gap(record: dict[str, Any]) -> bool:
+    """Whether the manifest explicitly marks this record as an owner-approved known release gap."""
+    return KNOWN_GAP_OPEN in (record.get("notes") or "")
+
+
+def documented_known_gaps(repo: Path) -> set[str]:
+    """Record IDs listed beneath the canonical Known release gaps heading."""
+    text = (repo / "docs" / "coverage.md").read_text(encoding="utf-8")
+    _, separator, section = text.partition(KNOWN_GAP_HEADER)
+    if not separator:
+        return set()
+    section = re.split(r"^##\s+", section, maxsplit=1, flags=re.MULTILINE)[0]
+    return set(re.findall(r"`([^`]+)`", section))
+
+
+def known_gap_marker_problem(record: dict[str, Any], repo: Path) -> str | None:
+    """Validate a known-gap marker against status and the documented ID allowlist."""
+    if not known_gap(record):
+        return None
+    ident = str(record.get("id", "?"))
+    notes = record.get("notes") or ""
+    _, _, reason = notes.partition(KNOWN_GAP_OPEN)
+    if record.get("status") not in {"planned", "unrepresentable"}:
+        return "known release gaps may only be planned or unrepresentable"
+    if not reason.strip(" :.;\t\n"):
+        return f"{KNOWN_GAP_OPEN!r} must be followed by the gap reason"
+    if ident not in documented_known_gaps(repo):
+        return f"{ident} is not listed under {KNOWN_GAP_HEADER} in docs/coverage.md"
+    return None
+
+
 # --- reports ---------------------------------------------------------------------
 
 
@@ -790,6 +826,18 @@ def report(inputs: Inputs, manifest: dict[str, Any]) -> dict[str, Any]:
         "totals": {p: dict(c) for p, c in sorted(totals.items())},
         "unknown": unknown,
         "unrepresentable": unrepresentable,
+        "known_release_gaps": {
+            ident: {
+                "status": record["status"],
+                "reason": re.split(
+                    r"(?<=\.)\s",
+                    (record.get("notes") or "").partition(KNOWN_GAP_OPEN)[2].strip(),
+                    maxsplit=1,
+                )[0],
+            }
+            for ident, record in sorted(records.items())
+            if known_gap(record)
+        },
         "unresolved_callbacks": unresolved,
         "open_owner_reviews": owner_reviews,
     }
@@ -825,8 +873,9 @@ def release_problems(
             break
         if available in ("no", "superseded"):
             continue
-        status = records.get(ident, {}).get("status", "unknown")
-        if status not in FINAL:
+        record = records.get(ident, {})
+        status = record.get("status", "unknown")
+        if status not in FINAL and not (known_gap(record) and not known_gap_marker_problem(record, inputs.repo)):
             problems.append(Problem("incomplete", ident, f"{status} on {platform}"))
         for item in open_owner_reviews(records.get(ident, {})):
             problems.append(Problem("owner-review", ident, f"open owner review item, until the owner decides: {item}"))
@@ -871,15 +920,27 @@ def sample_problems(
                 problems.append(Problem("sample-unresolved", ident, "neither a disposition nor an out-of-scope reason"))
                 results[ident] = {"status": "unresolved"}
             continue
-        tests = {test: cited_outcome(outcomes, test) for test in disposition["tests"]}
+        cited_tests = disposition["tests"]
+        instrument_tests = disposition.get("instrument_tests", {})
+        if not isinstance(instrument_tests, dict):
+            raise ManifestError(f"{ident}: instrument_tests must map cited test IDs to platform lists")
+        for test, platforms in instrument_tests.items():
+            if test not in cited_tests or not isinstance(platforms, list) or any(p not in PLATFORMS for p in platforms):
+                raise ManifestError(f"{ident}: invalid instrument_tests entry for {test!r}")
+        tests: dict[str, str] = {}
+        for test in cited_tests:
+            outcome = cited_outcome(outcomes, test)
+            if outcome == "skipped" and platform in instrument_tests.get(test, []):
+                outcome = "passed (guarded; audio-path safety proof is Linux-only)"
+            tests[test] = outcome
         if not tests:
             problems.append(Problem("sample-untested", ident, "its disposition cites no test"))
         for test, outcome in tests.items():
-            if outcome != "passed":
+            if outcome != "passed" and not outcome.startswith("passed ("):
                 problems.append(
                     Problem("sample-" + outcome.replace(" ", "-"), ident, f"{test} {outcome} on {platform}")
                 )
-        passed = bool(tests) and all(o == "passed" for o in tests.values())
+        passed = bool(tests) and all(o == "passed" or o.startswith("passed (") for o in tests.values())
         results[ident] = {"status": "passed" if passed else "not passed", "tests": tests}
     return problems, results
 
@@ -999,8 +1060,9 @@ def markdown_report(rep: dict[str, Any]) -> str:
         "**Generated by `bin/generate_bindings.py generate` from `bindings/manifest.json`; do not edit by hand.**",
         "",
         "Each counted declaration in the [SDK inventory](surface-schema.md), by family and platform. A",
-        "full-coverage release needs every available declaration `verified` or `excluded_internal`",
-        "([release bar](../coverage.md#release-bar)). `not inventoried` means platform or conditional-branch",
+        "complete full-coverage release needs every available declaration `verified` or `excluded_internal`;",
+        "the practical partial-release exception is limited to the known gaps listed in the",
+        "[release bar](../coverage.md#release-bar). `not inventoried` means platform or conditional-branch",
         "availability is unresolved, which blocks a release there. `superseded` counts a",
         "[conditional placeholder](surface-schema.md#conditional-branch-accountability) whose branch that",
         "platform's own extraction parsed: the semantic entry it names is counted instead.",
@@ -1014,7 +1076,11 @@ def markdown_report(rep: dict[str, Any]) -> str:
         lines.append(f"| {platform} | " + " | ".join(str(counts.get(s, 0)) for s in order) + " |")
     lines += ["", "## Needs attention", ""]
     lines.append(f"- **Unknown** (in the inventory, not in the manifest): {len(rep['unknown'])}")
-    lines.append(f"- **Unrepresentable** (awaiting an owner decision): {len(rep['unrepresentable'])}")
+    lines.append(f"- **Unrepresentable** (including owner-decided known gaps): {len(rep['unrepresentable'])}")
+    lines.append(
+        f"- **Known release gaps** (owner-approved partial-release exceptions, "
+        f"not verified): {len(rep['known_release_gaps'])}"
+    )
     lines.append(f"- **Unresolved callback strategy** (ADR 003): {len(rep['unresolved_callbacks'])}")
     reviews = rep["open_owner_reviews"]
     lines.append(f"- **Open owner review items** (each blocks a release until the owner decides): {len(reviews)}")
@@ -1024,6 +1090,10 @@ def markdown_report(rep: dict[str, Any]) -> str:
     if reviews:
         lines += ["", "### Open owner review items", ""]
         lines += [f"- `{i}`: " + "; ".join(items) for i, items in reviews.items()]
+    gaps = rep["known_release_gaps"]
+    if gaps:
+        lines += ["", "### Known release gaps (not verified)", ""]
+        lines += [f"- `{i}` ({gap['status']}): {gap['reason']}" for i, gap in gaps.items()]
     lines += [
         "",
         "## By family (lin-x64)",

@@ -86,6 +86,11 @@ def check(
     print("ok: " + ", ".join(f"{k} {v}" for k, v in sorted(rep["totals"]["lin-x64"].items())))
     if rep["open_owner_reviews"]:
         print(f"note: {len(rep['open_owner_reviews'])} record(s) name an open owner review item; each blocks a release")
+    if rep["known_release_gaps"]:
+        print(
+            f"note: {len(rep['known_release_gaps'])} owner-approved known release gap(s) remain non-verified; "
+            "this is not a complete-coverage claim"
+        )
     if without_built_package and any(r["status"] in bm.BOUND for r in data["entries"]):
         print("note: Python names were NOT checked against the built package (--without-built-package)")
 
@@ -132,10 +137,11 @@ def evidence(
 def samples(
     platform: str, results: list[Path], *, examples: Path = bm.EXAMPLES, output: Path | None = None, limit: int = 20
 ) -> None:
-    """Fail unless every official sample's disposition tests passed on PLATFORM (sample parity, RP-42).
+    """Check official sample disposition tests on PLATFORM (sample parity, RP-42).
 
-    RESULTS are RACKPY_TEST_EVIDENCE directories or files from test runs on that platform; a skipped or unrun test
-    is not a pass. --output writes the per-sample result as JSON (release-evidence/samples/).
+    RESULTS are RACKPY_TEST_EVIDENCE directories or files from test runs on that platform. A skipped or unrun test
+    is not a pass except for explicitly listed platform guard skips in upstream/examples.json. --output writes the
+    per-sample result as JSON (release-evidence/samples/).
     """
     data: dict[str, Any] = bm.load_json(examples)
     outcomes = bm.load_evidence(results, platform)
@@ -186,13 +192,17 @@ def release(
     evidence: list[Path] | None = None,
     limit: int = 20,
 ) -> None:
-    """Fail unless PLATFORM meets the full-coverage release bar (--evidence: its test outcomes)."""
+    """Fail unless PLATFORM meets the audited release gate (--evidence: its test outcomes).
+
+    Owner-approved planned/unrepresentable gaps are permitted only when explicitly marked in the manifest and listed
+    in docs/coverage.md; a passing partial-release gate is not a complete-coverage claim.
+    """
     inputs, data, artifact = load(manifest, introspection)
     outcomes = bm.load_evidence(evidence, platform) if evidence else None
     problems = bm.release_problems(inputs, data, platform, artifact, outcomes)
     if problems:
         fail(problems, limit)
-    print(f"ok: {platform} meets the full-coverage release bar")
+    print(f"ok: {platform} meets the audited release gate (known gaps remain non-verified)")
 
 
 if __name__ == "__main__":

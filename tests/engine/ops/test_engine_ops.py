@@ -73,7 +73,7 @@ def test_python_modules_cables_and_param_handles_in_racks_engine(
     assert result["cable_removed"] == [False, True, True, False, True]
     assert result["cable_readded"] == [True, True]
     assert result["mapped"] == [True, True]
-    assert result["no_lock"] == [True, True, True, True, True]  # inside a ResetEvent, under Rack's exclusive lock
+    assert result["no_lock"] == [True, True, True, True, True, True]  # inside a ResetEvent, under Rack's exclusive lock
     # Rack's rack, then its engine, cleared
     assert result["rack_cleared"] == [True, True, True, True, True, False]  # Rack-owned module was deleted
     assert result["engine_loaded"] == [True, True, "PyTone", 6]

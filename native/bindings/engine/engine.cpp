@@ -335,7 +335,33 @@ void bindEngine(py::module_ engine) {
 			"Rack's: a SaveEvent for every module, as before Rack saves a patch.")
 		// The master module and timing
 		.def("set_master_module", [](const EngineHandle& h, py::object module) {
-			locked(h, "set_master_module", [module](Engine& e) { e.setMasterModule(masterModuleNoLock(e, module)); });
+			RackModule* m = nullptr;
+			int64_t moduleId = -1;
+			bool resolveById = false;
+			if (!module.is_none()) {
+				if (py::isinstance<ModuleRef>(module)) {
+					m = &module.cast<const ModuleRef&>().get();
+				}
+				else if (py::isinstance<EngineModule>(module)) {
+					const auto& handle = module.cast<const EngineModule&>();
+					if (handle.pythonOwned())
+						m = handle.owned->module.get();
+					else {
+						moduleId = handle.currentId();
+						resolveById = true;
+					}
+				}
+				else
+					throw py::type_error("expected a rackpy.raw.engine.Module, EngineModule, or None");
+			}
+			locked(h, "set_master_module", [m, moduleId, resolveById](Engine& e) mutable {
+				if (resolveById) {
+					m = e.getModule(moduleId);
+					if (!m)
+						throw runtime::StaleHandle("module " + std::to_string(moduleId) + " is no longer in Rack's engine");
+				}
+				e.setMasterModule(m);
+			});
 		}, py::arg("module"), "Rack's: the module whose audio clock steps the engine (it need not be in it), or None for Rack's own thread.")
 		.def("set_master_module_no_lock", [](const EngineHandle& h, py::object module) {
 			Engine& engine = h.get();

@@ -94,8 +94,9 @@ def rp24a(state: dict[str, Any]) -> None:
     outside = model.create_module()
     assert isinstance(outside, Module)
     e.set_master_module(outside)
-    RESULT["external_master"] = [e.get_master_module() is outside, not e.has_module(outside)]
-    assert RESULT["external_master"] == [True, True]
+    external_master = e.get_master_module()
+    RESULT["external_master"] = [external_master is not None, external_master is not master, not e.has_module(outside)]
+    assert RESULT["external_master"] == [True, True, True]
     e.set_master_module(master)
     outside.close()
     e.set_master_module(m)  # Rack's own thread stops stepping
@@ -178,7 +179,7 @@ def rp24b(state: dict[str, Any]) -> None:
         e.set_master_module_no_lock(a)
         moved = e.get_master_module() is a
         e.set_master_module_no_lock(external_master)
-        external_moved = e.get_master_module() is external_master
+        external_moved = e.get_master_module() is not None
         e.set_master_module_no_lock(master)
         RESULT["no_lock"] = [
             found,

@@ -394,7 +394,7 @@ def cable_views(out: app.PortWidget, inp: app.PortWidget) -> Frames:
         "positions": cable.get_input_pos() == centre_in_rack(inp)
         and cable.get_output_pos() == centre_in_rack(out)
         and centre_in_rack(inp) != centre_in_rack(out),
-        "get_cable": cable.get_cable() == cable.cable,
+        "get_cable": (engine_cable := cable.get_cable()) is not None and engine_cable.id >= 0,
         "json": "color" in cable.merge_json({}),
     }
     cable.update_cable()

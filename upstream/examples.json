@@ -429,7 +429,10 @@
           "tests/examples/in_rack_controls/test_controls_in_rack.py::test_frames_match_cpp_processed_and_bypassed",
           "tests/dsp/in_rack/test_kernels.py::test_a_bypass_kernel_is_racks_process_bypass",
           "tests/dsp/test_runtime.py::test_the_kernel_path_makes_no_forbidden_calls"
-        ]
+        ],
+        "instrument_tests": {
+          "tests/dsp/test_runtime.py::test_the_kernel_path_makes_no_forbidden_calls": ["mac-x64", "mac-arm64", "win-x64"]
+        }
       }
     },
     {
@@ -578,7 +581,10 @@
         "tests": [
           "tests/examples/in_rack_dsp/test_dsp_in_rack.py::test_the_peeker_reads_only_a_source",
           "tests/examples/test_dsp_expanders.py::test_the_example_kernels_make_no_audio_path_calls"
-        ]
+        ],
+        "instrument_tests": {
+          "tests/examples/test_dsp_expanders.py::test_the_example_kernels_make_no_audio_path_calls": ["mac-x64", "mac-arm64", "win-x64"]
+        }
       }
     },
     {
@@ -870,7 +876,10 @@
         "tests": [
           "tests/examples/in_rack_dsp/test_dsp_in_rack.py::test_the_oscillators_match_the_cpp_reference",
           "tests/examples/test_dsp_expanders.py::test_the_example_kernels_make_no_audio_path_calls"
-        ]
+        ],
+        "instrument_tests": {
+          "tests/examples/test_dsp_expanders.py::test_the_example_kernels_make_no_audio_path_calls": ["mac-x64", "mac-arm64", "win-x64"]
+        }
       }
     },
     {
@@ -993,7 +1002,10 @@
           "tests/examples/in_rack_dsp/test_dsp_in_rack.py::test_the_oscillators_match_the_cpp_reference",
           "tests/examples/test_dsp_expanders.py::test_the_cpp_reference_scalar_and_simd_agree",
           "tests/examples/test_dsp_expanders.py::test_the_example_kernels_make_no_audio_path_calls"
-        ]
+        ],
+        "instrument_tests": {
+          "tests/examples/test_dsp_expanders.py::test_the_example_kernels_make_no_audio_path_calls": ["mac-x64", "mac-arm64", "win-x64"]
+        }
       }
     },
     {

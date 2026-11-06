@@ -274,6 +274,33 @@ raises NotImplementedError is not implemented. Aliases do not compensate for
 missing overloads. Safety-restricted calls must document where their semantics
 can actually be exercised.
 
+## Known release gaps
+
+Owner decision (2026-11-06): the practical partial-release gate may accept only the
+records listed below as known gaps. This is a bounded exception for the audited
+partial candidate, **not** complete API coverage; all limitations must remain
+visible in release notes and coverage reports. A manifest record opts into this
+exception with `Known release gap:` in its notes, and the checker requires its
+ID to appear in this list. No unlisted `planned` or `unrepresentable` record is
+exempt.
+
+| Manifest ID | Status | Known limitation |
+| --- | --- | --- |
+| `class_template:rack::DeferWrapper<type>` | unrepresentable | Python context-manager adaptation does not preserve destructor-timed raw callback semantics. |
+| `constructor:rack::DeferWrapper::DeferWrapper<F>($c0)` | unrepresentable | No safe raw-equivalent for a destructor callback that may run on arbitrary threads. |
+| `destructor:rack::DeferWrapper::~DeferWrapper<F>()` | unrepresentable | No safe raw-equivalent for destructor-triggered callback execution. |
+| `function_template:rack::deferWrapper<type>($0)` | unrepresentable | The Pythonic context manager is not the raw destructor-triggered function. |
+| `macro:BINARY_END` | unrepresentable | Embedded binary end/range is not exposed through a safe owned/view API. |
+| `macro:BINARY_SIZE` | unrepresentable | Embedded binary size is not exposed as a safe bytes value. |
+| `macro:BINARY_START` | unrepresentable | Embedded binary data is not exposed through a safe owned/view API. |
+| `field:rack::widget::Widget::children` | unrepresentable | Safe read-only children view does not provide Rack's mutable public-field semantics. |
+| `field:rack::widget::Widget::parent` | unrepresentable | Safe read-only parent view does not provide Rack's mutable public-field semantics. |
+| `constructor:rack::app::PlugWidget::PlugWidget()` | planned | Rack's public constructor is not exposed as a separately callable raw PlugWidget constructor. |
+| `field:rack::audio::Device::subscribed` | planned | Mutable set-like field writes are not mapped with Rack's synchronization semantics. |
+| `field:rack::audio::Port::maxInputs` | planned | Writes while bridged are not supported. |
+| `field:rack::audio::Port::maxOutputs` | planned | Writes while bridged are not supported. |
+| `function:rack::contextSet(rack::Context *)` | planned | Cannot clear or select another live context through the current safe adapter. |
+
 ## Three independent checks
 
 1. **Declaration completeness:** inventory diff catches new, removed, changed or
@@ -289,11 +316,19 @@ are useful navigation, never evidence of complete bindings.
 
 ## Release bar
 
-A full-surface release requires zero public unreviewed/planned/unimplemented/
-unrepresentable entries on each advertised platform, no unexplained exclusions,
-and verified callback, macro and template mappings. Purely internal declarations
-may be excluded only with source evidence and review. Public deprecated APIs
-remain mapped and warned about until the compatibility policy explicitly changes.
+A **complete full-surface** release requires zero public unreviewed/planned/
+unimplemented/unrepresentable entries on each advertised platform, no unexplained
+exclusions, and verified callback, macro and template mappings. Purely internal
+declarations may be excluded only with source evidence and review. Public
+deprecated APIs remain mapped and warned about until the compatibility policy
+explicitly changes.
+
+For the owner-approved practical partial release, the checker may accept a
+`planned` or `unrepresentable` record only when its manifest notes contain
+`Known release gap:` and its exact ID is listed in [Known release gaps](#known-release-gaps).
+That exception does not turn the record into a binding, does not promote it to
+`verified`, and must never be used to claim complete coverage. All other incomplete
+records continue to fail the release gate.
 
 If an infinite C++ template space cannot have a faithful Python generic/extension
 mapping, propose a precise contract to the owner; do not silently trim scope.
@@ -304,7 +339,10 @@ a test that passed there (`bin/check_coverage.py evidence`, from each test's out
 that the CI jobs keep), every official sample's tests passed there (`samples`), and
 the manifest matches what that platform's release candidate exports inside Rack
 (`bin/rackpy-release introspect`, then `check --introspection`). A skipped test is
-not a pass. `bin/release-evidence collect` records all of it from one CI run in
+not a pass except for the four explicitly listed `instrument_tests` guard cases
+in `upstream/examples.json` on macOS and Windows: those platform-specific skips
+are accepted only because the audio-path guard itself is Linux-only, and the
+reports must state that this safety proof is Linux-only. `bin/release-evidence collect` records all of it from one CI run in
 `release-evidence/`, with the run's commit, and says which gates are still closed.
 
 Early **preview** releases may be partial only if they say so and link to all gaps.

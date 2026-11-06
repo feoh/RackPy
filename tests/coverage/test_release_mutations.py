@@ -47,15 +47,41 @@ def first_bound(manifest: dict[str, Any]) -> dict[str, Any]:
     return next(r for r in manifest["entries"] if r["status"] in bm.BOUND and (r.get("python") or {}).get("raw"))
 
 
-def test_unrepresentable_records_keep_the_release_gate_closed(
+def test_owner_approved_known_gaps_pass_only_when_documented(
     ready: tuple[bm.Inputs, dict[str, Any], dict[str, Any], dict[str, str]],
 ) -> None:
     inputs, manifest, artifact, outcomes = ready
-    # The synthetic fixture verifies all bound records, but it cannot resolve public declarations
-    # explicitly classified as unrepresentable or the owner decisions attached to them.
-    assert {"incomplete", "owner-review"} <= problems(inputs, manifest, artifact, outcomes)
+    # The approved listed gaps are accepted for the partial-release gate, but do not become bindings.
+    assert not ({"incomplete", "owner-review", "known-gap"} & problems(inputs, manifest, artifact, outcomes))
+    gap = next(r for r in manifest["entries"] if r["status"] == "unrepresentable")
+    notes = gap["notes"]
+    gap["notes"] = notes.replace(bm.KNOWN_GAP_OPEN, "")
+    assert "incomplete" in problems(inputs, manifest, artifact, outcomes)
+    gap["notes"] = notes
+    assert bm.known_gap_marker_problem({**gap, "id": "unlisted-test-gap"}, inputs.repo)
     assert "missing-runtime-artifact" in problems(inputs, manifest, None, outcomes)
     assert "missing-test-evidence" in problems(inputs, manifest, artifact, None)
+
+
+def test_guard_only_sample_skip_is_scoped_to_named_non_linux_platforms() -> None:
+    examples = bm.load_json(bm.EXAMPLES)["samples"]
+    sample = next(s for s in examples if s["id"] == "guide-07")
+    disposition = sample["disposition"]
+    guard = disposition["instrument_tests"]
+    guard_test = next(iter(guard))
+    outcomes = {test: "passed" for test in disposition["tests"]}
+    outcomes[guard_test] = "skipped"
+
+    problems, results = bm.sample_problems([sample], "mac-arm64", outcomes)
+    assert problems == []
+    assert results[sample["id"]]["status"] == "passed"
+    assert results[sample["id"]]["tests"][guard_test].startswith("passed (guarded;")
+
+    problems, _ = bm.sample_problems([sample], "lin-x64", outcomes)
+    assert any(p.code == "sample-skipped" for p in problems)
+    outcomes[guard_test] = "failed"
+    problems, _ = bm.sample_problems([sample], "mac-x64", outcomes)
+    assert any(p.code == "sample-failed" for p in problems)
 
 
 @pytest.mark.parametrize(
