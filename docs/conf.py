@@ -72,9 +72,9 @@ html_last_updated_fmt = None
 html_show_sourcelink = False
 html_theme_options = {
     "source_repository": "https://github.com/feoh/RackPy/",
-    "source_branch": "main",
+    "source_branch": "docs-pages",
     "source_directory": "docs/",
-    "announcement": "RackPy is in early development. Bindings are partial, and there is no release.",
+    "announcement": "RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation.",
 }
 
 # --- External link check (sphinx-build -b linkcheck), bounded ---

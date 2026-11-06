@@ -3,8 +3,9 @@
 :::{admonition} Linux x86_64 only
 :class: warning
 
-RackPy `1.0.0` targets VCV Rack Free 2.6.6 on Linux x86_64. Releases and
-available artifacts are listed on [GitHub Releases](https://github.com/feoh/RackPy/releases).
+RackPy `1.0.0` is in preparation and targets VCV Rack Free 2.6.6 on Linux
+x86_64. The currently available preview and its artifacts are listed on
+[GitHub Releases](https://github.com/feoh/RackPy/releases).
 The version is not a complete API-coverage, performance, or broad platform-support
 claim. No PyPI upload, VCV Library submission or documentation-site publication
 is part of this release.
@@ -30,14 +31,13 @@ is part of this release.
 The selected Python package version is `1.0.0`. The release builder adds
 `+g<commit>` to identify the source commit; the example `.vcvplugin` names and
 Rack log continue to use `2.0.0`, Rack's plugin version field. Build from a
-clean checkout of the desired release commit (the release tag identifies its
-source):
+clean checkout of the `1.0.0` release candidate branch:
 
 ```bash
 git clone https://github.com/feoh/RackPy.git RackPy-preview
 cd RackPy-preview
-git fetch origin --tags
-git checkout v1.0.0
+git fetch origin rp42-release-audit
+git checkout e329b109a595d881527aebd8aee5a86a4fd96a33
 uv sync --frozen
 bin/rack-toolchain build  # one-time toolchain build; may take about an hour
 PREVIEW_DIR=/tmp/rackpy-preview
