@@ -791,9 +791,6 @@ Module Contents
 
 
 
-   Checked nonowning host identity; not a transferable Widget.
-
-
    .. py:property:: zoom_widget
       :type: rackpy.raw.widget.HostWidget
 
@@ -1104,9 +1101,6 @@ Module Contents
 
 .. py:class:: HostPlugWidget
 
-
-
-   Checked nonowning host identity; not a transferable Widget.
 
 
    .. py:method:: get_cable() -> HostCableWidget | CableWidget | None

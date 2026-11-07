@@ -186,7 +186,7 @@ evidence on a real host.
 
 | Target | SDK | Status |
 | --- | --- | --- |
-| Linux x86_64 | yes | **Validated natively.** Builds, native and host tests (headless and in Xvfb); release candidates built with the official toolchain (glibc 2.23) and verified on clean Ubuntu 16.04 and 20.04 containers (RP-39). Not published. |
+| Linux x86_64 | yes | **Published as RackPy 1.0.0.** Built with the official toolchain; the exact release artifacts passed clean Ubuntu 16.04 and 20.04 verification. Partial API coverage; see the [candidate audit](../release-evidence/candidate-audit.md). |
 | macOS arm64 | yes | **Validated natively** on GitHub's `macos-15` runners: builds, native and host tests (headless), release candidates installed in fresh user folders (RP-40, [validation](../planning/rp-40-validation.md)). Windowed drawing, Gatekeeper with SIP on and a clean Mac remain open. Not published. |
 | macOS x86_64 | yes | **Validated natively** on GitHub's `macos-15-intel` runners, as arm64 (RP-40). The same gates remain open. Not published. |
 | Windows x86_64 | yes | **Validated natively** on GitHub's `windows-2025` runners: builds (MSYS2 MinGW-w64), native and host tests (headless), release candidates installed in fresh user folders (RP-41, [validation](../planning/rp-41-validation.md)). The C runtimes are kept apart (finding 2). Windowed drawing, a clean PC and Authenticode signing remain open. Not published. |

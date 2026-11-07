@@ -154,7 +154,7 @@
 
 <div class="announcement">
   <aside class="announcement-content">
-     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+     RackPy 1.0.0 Linux-only release. Partial API; no performance or cross-platform support claims. 
   </aside>
 </div>
 
@@ -406,12 +406,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/coverage.md?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/main/docs/coverage.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/coverage.md" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/main/docs/coverage.md" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -433,7 +433,7 @@
 <p>This document defines the evidence needed to claim <strong>complete</strong> coverage, not a
 prerequisite for an honestly labeled early or partial release. The owner has
 prioritized practical plugin development and incremental improvements over
-exhaustive proof; see the <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/planning/README.md#owner-amendments">planning amendment</a>.
+exhaustive proof; see the <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/planning/README.md#owner-amendments">planning amendment</a>.
 The inventory and existing checks remain useful for identifying gaps and must not
 be altered to imply completeness that has not been verified.</p>
 <section id="establish-a-denominator-before-writing-bindings">
@@ -475,7 +475,7 @@ conditional.</p></li>
 </ul>
 <p>The Linux x64 closure reaches <strong>112 Rack headers</strong> and <strong>13 dependency headers</strong>.
 Each is listed with its SHA-256 in
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/tests/fixtures/sdk-provenance.json">tests/fixtures/sdk-provenance.json</a> and
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/tests/fixtures/sdk-provenance.json">tests/fixtures/sdk-provenance.json</a> and
 checked by <code class="docutils literal notranslate"><span class="pre">bin/rack-sdk</span> <span class="pre">closure</span></code>. Every reached header maps to a family in
 <a class="reference internal" href="scope.html#coverage-families"><span class="std std-ref">scope</span></a>:</p>
 <div class="table-wrapper colwidths-auto docutils container">
@@ -730,7 +730,7 @@ checked against libRack’s exports (owner decision 2026-10-26, first for
 <section id="the-binding-manifest-rp-11">
 <h2>The binding manifest (RP-11)<a class="headerlink" href="#the-binding-manifest-rp-11" title="Link to this heading">¶</a></h2>
 <p>The per-symbol records below live in
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/bindings/manifest.json">bindings/manifest.json</a>, one per counted inventory
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/bindings/manifest.json">bindings/manifest.json</a>, one per counted inventory
 entry. <code class="docutils literal notranslate"><span class="pre">bin/check_coverage.py</span> <span class="pre">check</span></code> enforces this page’s policies against the
 inventory, the reviewed exclusion allowlist, the callback and engine-lock
 tables, the cited tests and docs, and an introspection of the built package;

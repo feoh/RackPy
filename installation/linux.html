@@ -154,7 +154,7 @@
 
 <div class="announcement">
   <aside class="announcement-content">
-     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+     RackPy 1.0.0 Linux-only release. Partial API; no performance or cross-platform support claims. 
   </aside>
 </div>
 
@@ -406,12 +406,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/installation/linux.md?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/main/docs/installation/linux.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/installation/linux.md" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/main/docs/installation/linux.md" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -432,21 +432,19 @@
 <h1>Install on Linux<a class="headerlink" href="#install-on-linux" title="Link to this heading">¶</a></h1>
 <div class="warning admonition">
 <p class="admonition-title">Linux x86_64 only</p>
-<p>RackPy <code class="docutils literal notranslate"><span class="pre">1.0.0</span></code> is in preparation and targets VCV Rack Free 2.6.6 on Linux
-x86_64. The currently available preview and its artifacts are listed on
-<a class="reference external" href="https://github.com/feoh/RackPy/releases">GitHub Releases</a>.
-The version is not a complete API-coverage, performance, or broad platform-support
-claim. No PyPI upload, VCV Library submission or documentation-site publication
-is part of this release.</p>
+<p>RackPy <code class="docutils literal notranslate"><span class="pre">1.0.0</span></code> is published for VCV Rack Free 2.6.6 on Linux x86_64. Download
+the release assets from <a class="reference external" href="https://github.com/feoh/RackPy/releases/tag/v1.0.0">GitHub Releases</a>.
+This is not a complete API-coverage, performance, real-time deadline or broad
+platform-support claim. There is no PyPI upload or VCV Library submission.</p>
 </div>
 <section id="what-you-need">
 <h2>What you need<a class="headerlink" href="#what-you-need" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p><strong>Linux x86_64</strong> with glibc 2.23 (Ubuntu 16.04’s) or newer. The candidate
-is built with VCV’s own Rack plugin toolchain, the one Rack’s own plugins use,
-and its binaries are checked against the glibc 2.23 floor. Prior candidates
-were install/run-verified in Ubuntu 20.04 and Ubuntu 16.04 containers; see the
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/release-evidence/candidate-audit.md">candidate audit</a> for limitations.</p></li>
+<li><p><strong>Linux x86_64</strong> with glibc 2.23 (Ubuntu 16.04’s) or newer. The release
+was built with VCV’s own Rack plugin toolchain, the one Rack’s own plugins use,
+and its binaries are checked against the glibc 2.23 floor. The exact v1.0.0
+artifacts passed install/run verification in clean Ubuntu 20.04 and 16.04
+containers; see the <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/release-evidence/candidate-audit.md">candidate audit</a>.</p></li>
 <li><p><strong>VCV Rack Free 2.6.6</strong>. Other Rack 2 versions are untested.</p></li>
 <li><p><strong>Nothing else at run time.</strong> Each plugin brings its own CPython 3.14.9,
 and never uses a Python installed on the computer or the network.</p></li>
@@ -461,34 +459,35 @@ plugin in Rack.</p></li>
 <p>The selected Python package version is <code class="docutils literal notranslate"><span class="pre">1.0.0</span></code>. The release builder adds
 <code class="docutils literal notranslate"><span class="pre">+g&lt;commit&gt;</span></code> to identify the source commit; the example <code class="docutils literal notranslate"><span class="pre">.vcvplugin</span></code> names and
 Rack log continue to use <code class="docutils literal notranslate"><span class="pre">2.0.0</span></code>, Rack’s plugin version field. Build from a
-clean checkout of the <code class="docutils literal notranslate"><span class="pre">1.0.0</span></code> release candidate branch:</p>
+clean checkout of the desired release commit (the release tag identifies its
+source):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/feoh/RackPy.git<span class="w"> </span>RackPy-preview
 <span class="nb">cd</span><span class="w"> </span>RackPy-preview
-git<span class="w"> </span>fetch<span class="w"> </span>origin<span class="w"> </span>rp42-release-audit
-git<span class="w"> </span>checkout<span class="w"> </span>e329b109a595d881527aebd8aee5a86a4fd96a33
+git<span class="w"> </span>fetch<span class="w"> </span>origin<span class="w"> </span>--tags
+git<span class="w"> </span>checkout<span class="w"> </span>v1.0.0
 uv<span class="w"> </span>sync<span class="w"> </span>--frozen
 bin/rack-toolchain<span class="w"> </span>build<span class="w">  </span><span class="c1"># one-time toolchain build; may take about an hour</span>
-<span class="nv">PREVIEW_DIR</span><span class="o">=</span>/tmp/rackpy-preview
-bin/rackpy-release<span class="w"> </span>build<span class="w"> </span>--dest<span class="w"> </span><span class="s2">"</span><span class="nv">$PREVIEW_DIR</span><span class="s2">"</span>
-<span class="o">(</span><span class="nb">cd</span><span class="w"> </span><span class="s2">"</span><span class="nv">$PREVIEW_DIR</span><span class="s2">/artifacts"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>SHA256SUMS<span class="o">)</span>
+<span class="nv">RELEASE_DIR</span><span class="o">=</span>/tmp/rackpy-release
+bin/rackpy-release<span class="w"> </span>build<span class="w"> </span>--dest<span class="w"> </span><span class="s2">"</span><span class="nv">$RELEASE_DIR</span><span class="s2">"</span>
+<span class="o">(</span><span class="nb">cd</span><span class="w"> </span><span class="s2">"</span><span class="nv">$RELEASE_DIR</span><span class="s2">/artifacts"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>SHA256SUMS<span class="o">)</span>
 <span class="nv">RACK_FREE</span><span class="o">=</span>/path/to/unzipped/Rack2Free
 bin/rackpy-release<span class="w"> </span>verify<span class="w"> </span><span class="s2">"</span><span class="nv">$PREVIEW_DIR</span><span class="s2">/artifacts"</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--rack<span class="w"> </span><span class="s2">"</span><span class="nv">$RACK_FREE</span><span class="s2">"</span><span class="w"> </span>--logs<span class="w"> </span><span class="s2">"</span><span class="nv">$PREVIEW_DIR</span><span class="s2">/verify-ubuntu-20.04"</span>
+<span class="w">  </span>--rack<span class="w"> </span><span class="s2">"</span><span class="nv">$RACK_FREE</span><span class="s2">"</span><span class="w"> </span>--logs<span class="w"> </span><span class="s2">"</span><span class="nv">$RELEASE_DIR</span><span class="s2">/verify-ubuntu-20.04"</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">build</span></code> empties the destination first, so choose a disposable directory outside
-the checkout. It writes the candidate under <code class="docutils literal notranslate"><span class="pre">artifacts/</span></code>, plus its manifest and
+the checkout. It writes the artifacts under <code class="docutils literal notranslate"><span class="pre">artifacts/</span></code>, plus their manifest and
 checksums. <code class="docutils literal notranslate"><span class="pre">verify</span></code> runs the packages in a clean Ubuntu 20.04 container with no
 system Python and no network, exercises all ten example plugins, and saves its
-logs and screenshots in the <code class="docutils literal notranslate"><span class="pre">--logs</span></code> directory. Do not use <code class="docutils literal notranslate"><span class="pre">--allow-dirty</span></code> for
-this preview. A successful container test does not prove physical audio-device
+logs and screenshots in the <code class="docutils literal notranslate"><span class="pre">--logs</span></code> directory. Do not use <code class="docutils literal notranslate"><span class="pre">--allow-dirty</span></code> when producing
+release artifacts. A successful container test does not prove physical audio-device
 deadlines or audio-interface behavior; the optional host install below is for
-manual Rack use. The exact commit and results for the candidate built for this
-candidate are recorded in the <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/release-evidence/candidate-audit.md">candidate audit</a>.</p>
+manual Rack use. The exact source commit and verification results for v1.0.0 are recorded in
+the <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/release-evidence/candidate-audit.md">candidate audit</a>.</p>
 </section>
 <section id="what-the-files-are">
 <h2>What the files are<a class="headerlink" href="#what-the-files-are" title="Link to this heading">¶</a></h2>
-<p>A release candidate is a folder of files, with <code class="docutils literal notranslate"><span class="pre">manifest.json</span></code> and <code class="docutils literal notranslate"><span class="pre">SHA256SUMS</span></code>:</p>
+<p>A GitHub release download contains these files, with <code class="docutils literal notranslate"><span class="pre">manifest.json</span></code> and <code class="docutils literal notranslate"><span class="pre">SHA256SUMS</span></code>:</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
@@ -524,7 +523,7 @@ own Python, and Rack can run only one of them
 </section>
 <section id="verify-the-download">
 <h2>Verify the download<a class="headerlink" href="#verify-the-download" title="Link to this heading">¶</a></h2>
-<p>In the folder of the release candidate:</p>
+<p>In the folder containing the downloaded release assets:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sha256sum<span class="w"> </span>-c<span class="w"> </span>SHA256SUMS
 </pre></div>
 </div>
@@ -645,7 +644,7 @@ plugin it checks that Rack extracts and loads it, that all of its modules run,
 are saved and come back when the patch is reopened, that the module browser
 draws their previews, and that Rack quits with the interpreter finalized. It
 also checks each failure in the table above. Its logs and screenshots are kept
-with the build; <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/planning/rp-39-validation.md">RP-39’s validation record</a>
+with the build; <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/planning/rp-39-validation.md">RP-39’s validation record</a>
 has the results. A computer’s sound card and MIDI devices are not part of it.</p>
 </section>
 </section>

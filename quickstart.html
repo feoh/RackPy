@@ -154,7 +154,7 @@
 
 <div class="announcement">
   <aside class="announcement-content">
-     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+     RackPy 1.0.0 Linux-only release. Partial API; no performance or cross-platform support claims. 
   </aside>
 </div>
 
@@ -406,12 +406,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/quickstart.md?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/main/docs/quickstart.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/quickstart.md" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/main/docs/quickstart.md" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -431,13 +431,12 @@
           <section id="quickstart-your-first-rackpy-plugin">
 <h1>Quickstart: your first RackPy plugin<a class="headerlink" href="#quickstart-your-first-rackpy-plugin" title="Link to this heading">¶</a></h1>
 <div class="important admonition">
-<p class="admonition-title">Pre-release: build from source</p>
-<p>RackPy has no public release. These steps build a development bundle from the
-repository on Linux x86_64 or macOS; they are not a substitute for a versioned
-release artifact. Candidate install/run checks have also passed in CI on Linux,
-macOS x86_64/arm64, and Windows x86_64, but those artifacts are not distributed.
-See the <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/release-evidence/candidate-audit.md">candidate audit</a> for exact
-commits, platforms and remaining release gates.</p>
+<p class="admonition-title">This quickstart builds from source</p>
+<p>RackPy 1.0.0 is published for Linux x86_64, but this guide builds a development
+bundle from the repository on Linux or macOS. CI candidate checks on macOS and
+Windows are not published platform releases. See the
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/release-evidence/candidate-audit.md">candidate audit</a> for exact commits,
+supported scope and remaining gates.</p>
 </div>
 <p>By the end you will have a plugin of your own in Rack, with one module whose
 panel you drew, and you will know where to look when something goes wrong.
@@ -498,7 +497,7 @@ bin/rackpy-plugin<span class="w"> </span>add-module<span class="w"> </span>MyMod
 shape marks a control: red for a knob, green for an input, blue for an output,
 magenta for a light. It writes <code class="docutils literal notranslate"><span class="pre">MyPlugin/pythonpath/myplugin/mymodule.py</span></code>, a
 module with those controls and a widget that places them on the panel, and adds
-the module to <code class="docutils literal notranslate"><span class="pre">plugin.json</span></code>. <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/template/README.md">The template</a>
+the module to <code class="docutils literal notranslate"><span class="pre">plugin.json</span></code>. <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/template/README.md">The template</a>
 describes the colours and labels in full.</p>
 </section>
 <section id="build-the-plugin-into-rack">

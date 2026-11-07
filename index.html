@@ -154,7 +154,7 @@
 
 <div class="announcement">
   <aside class="announcement-content">
-     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+     RackPy 1.0.0 Linux-only release. Partial API; no performance or cross-platform support claims. 
   </aside>
 </div>
 
@@ -406,12 +406,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/index.md?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/main/docs/index.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/index.md" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/main/docs/index.md" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -433,12 +433,13 @@
 <p><strong>Python for VCV Rack plugins: expressive at the surface, native where timing matters.</strong></p>
 <div class="important admonition">
 <p class="admonition-title">Development status</p>
-<p>RackPy is in <strong>early development</strong>. There is no public release; the owner has
-approved an unpublished Linux x86_64 preview for local testing. It builds from
-source and loads into Rack Free 2.6.6, while public API coverage remains partial
-(<a class="reference internal" href="reference/coverage.html"><span class="std std-doc">coverage report</span></a>). CI has built and run candidate
-install checks on Linux x86_64, macOS x86_64/arm64, and Windows x86_64, but that
-is not a support or completeness claim. See the <a class="reference internal" href="installation/linux.html"><span class="std std-doc">Linux preview instructions</span></a>.</p>
+<p>RackPy <a class="reference external" href="https://github.com/feoh/RackPy/releases/tag/v1.0.0"><strong>1.0.0</strong></a> is
+available as a GitHub release for Linux x86_64 and Rack Free 2.6.6. It is an
+early, partial release: API coverage remains partial
+(<a class="reference internal" href="reference/coverage.html"><span class="std std-doc">coverage report</span></a>), and no performance or real-time
+deadline claim is made. There is no PyPI package, VCV Library submission, or
+macOS/Windows release. CI candidates on other platforms are not support claims.
+See <a class="reference internal" href="installation/linux.html"><span class="std std-doc">Linux installation</span></a> and the <a class="reference external" href="https://github.com/feoh/RackPy/blob/main/release-evidence/candidate-audit.md">candidate audit</a>.</p>
 </div>
 <p>RackPy lets you write Rack plugins in idiomatic Python, running inside Rack,
 while the audio path stays native. The goal is the complete supported public
@@ -454,7 +455,7 @@ plugin API, proved symbol by symbol; see the <a class="reference internal" href=
 </thead>
 <tbody>
 <tr class="row-even"><td><p>RackPy</p></td>
-<td><p>1.0.0 (local Linux preview; unpublished)</p></td>
+<td><p>1.0.0 (Linux x86_64 GitHub release; partial)</p></td>
 </tr>
 <tr class="row-odd"><td><p>Rack SDK</p></td>
 <td><p>2.6.6, commit 061ccf63c1758599396ac1bb10d47345d9d34076</p></td>
@@ -466,7 +467,7 @@ plugin API, proved symbol by symbol; see the <a class="reference internal" href=
 <td><p>pybind11 3.1.0</p></td>
 </tr>
 <tr class="row-even"><td><p>Platforms</p></td>
-<td><p>Linux x86_64 from source; install candidates verified in CI on Linux x86_64, macOS x86_64/arm64, Windows x86_64; no published artifacts</p></td>
+<td><p>Published: Linux x86_64. macOS and Windows remain CI candidates, not releases.</p></td>
 </tr>
 </tbody>
 </table>

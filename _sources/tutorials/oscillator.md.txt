@@ -10,7 +10,7 @@ module processes audio without running Python sample by sample.
 | --- | --- |
 | Time | About 30 minutes, after the [quickstart](../quickstart.md) |
 | You need | The quickstart's checkout, RackPy built and bundled, and its `MyPlugin` project |
-| Versions | RackPy {{rackpy_version}} (unreleased), Rack Free {{rack_version}}, Linux x86_64 |
+| Versions | RackPy {{rackpy_version}} (Linux x86_64 release), Rack Free {{rack_version}} |
 | Finished code | `examples/oscillator`, tested in Rack |
 
 The finished plugin is [examples/oscillator](../../examples/oscillator/README.md).

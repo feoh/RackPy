@@ -154,7 +154,7 @@
 
 <div class="announcement">
   <aside class="announcement-content">
-     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+     RackPy 1.0.0 Linux-only release. Partial API; no performance or cross-platform support claims. 
   </aside>
 </div>
 
@@ -406,12 +406,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/examples.md?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/main/docs/examples.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/examples.md" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/main/docs/examples.md" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -436,38 +436,38 @@ demonstrate; none of them copies the VCV manual
 (<a class="reference internal" href="decisions/001-licensing-and-identity.html"><span class="std std-doc">ADR 001</span></a>). Ten exist so far, all
 Linux x86_64 in Rack Free 2.6.6:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/template/README.md">Plugin template</a>:
+<li><p><a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/template/README.md">Plugin template</a>:
 <code class="docutils literal notranslate"><span class="pre">bin/rackpy-plugin</span></code>, RackPy’s counterpart of Rack’s <code class="docutils literal notranslate"><span class="pre">helper.py</span></code>, creates a
 plugin project, generates a module from an SVG panel’s components layer, and
 builds a plugin Rack loads under its own slug.</p></li>
-<li><p><a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/oscillator/README.md">Oscillator</a>:
+<li><p><a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/oscillator/README.md">Oscillator</a>:
 the tutorial’s sine oscillator with a 1 Hz blink, running as a native kernel
 compiled from a graph, compared in Rack with a C++ reference at 44.1, 48 and
 96 kHz.</p></li>
-<li><p><a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/configuration/README.md">Configuration</a>:
+<li><p><a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/configuration/README.md">Configuration</a>:
 parameter displays (plain, volts, percent, hertz on a base-2 scale,
 decibels), a labelled switch, a button, descriptions, port and light names,
 bypass routes, a custom bypass that runs a second native kernel
 (<a class="reference internal" href="how-to/dsp.html#reset-sample-rate-bypass-and-failures"><span class="std std-ref">processing audio</span></a>),
 and factory presets. In Rack, every tooltip and frame matches the same
 modules written in C++.</p></li>
-<li><p><a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/state-and-events/README.md">State and events</a>:
+<li><p><a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/state-and-events/README.md">State and events</a>:
 a sequencer whose range is saved in the patch, whose pattern is a file in
 its patch storage and whose default length is a plugin setting
 (<a class="reference internal" href="how-to/state.html"><span class="std std-doc">state</span></a>); Initialize and Randomize handlers; and a
 laboratory script that handles every module event, the sample rate’s
 included, in Python, offline.</p></li>
-<li><p><a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/menus/README.md">Menus</a>: a pitch
+<li><p><a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/menus/README.md">Menus</a>: a pitch
 source set entirely from its context menu, with one of each of Rack’s menu
 helpers (<a class="reference internal" href="reference/ui.html#menu-helpers"><span class="std std-ref">menus</span></a>).</p></li>
-<li><p><a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/dark-panels/README.md">Dark panels</a>
-and <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/drawing/README.md">Drawing</a>: a
+<li><p><a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/dark-panels/README.md">Dark panels</a>
+and <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/drawing/README.md">Drawing</a>: a
 light and a dark panel; NanoVG shapes, text, a self-lit layer and a cached
 framebuffer. The <a class="reference internal" href="how-to/draw-panels.html"><span class="std std-doc">walkthrough</span></a> shows them in
 screenshots of Rack’s own frames.</p></li>
-<li><p><a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/polyphony/README.md">Polyphony</a>,
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/dsp/README.md">DSP</a> and
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/expanders/README.md">Expanders</a>:
+<li><p><a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/polyphony/README.md">Polyphony</a>,
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/dsp/README.md">DSP</a> and
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/expanders/README.md">Expanders</a>:
 plugins that ship their own <a class="reference internal" href="how-to/dsp.html#write-a-kernel-in-c"><span class="std std-ref">C++ kernel libraries</span></a>:
 a polyphonic oscillator one channel at a time and with <code class="docutils literal notranslate"><span class="pre">float_4</span></code>, a biquad
 filter from Rack’s <code class="docutils literal notranslate"><span class="pre">rack::dsp</span></code>, and modules that exchange expander messages
@@ -477,24 +477,24 @@ or read the module beside them.</p></li>
 tested example; the rest are shell commands and notes that the guides
 document (RP-37).</p>
 <p>The plan, the required layout of each example and the list of features are in
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/README.md">examples/README.md</a>. The 77 official samples, with
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/README.md">examples/README.md</a>. The 77 official samples, with
 their source sections and the RackPy task that covers each, are in
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/upstream/examples.json">upstream/examples.json</a>.</p>
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/upstream/examples.json">upstream/examples.json</a>.</p>
 <section id="provenance-and-licences">
 <h2>Provenance and licences<a class="headerlink" href="#provenance-and-licences" title="Link to this heading">¶</a></h2>
 <p>Each example is original work under GPL-3.0-or-later. Its <code class="docutils literal notranslate"><span class="pre">PROVENANCE.md</span></code>
 says which official samples it covers, how it differs from them, and which
 SVG, font and code sources it uses:
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/template/PROVENANCE.md">template</a>,
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/oscillator/PROVENANCE.md">oscillator</a>,
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/configuration/PROVENANCE.md">configuration</a>,
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/state-and-events/PROVENANCE.md">state and events</a>,
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/menus/PROVENANCE.md">menus</a>,
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/dark-panels/PROVENANCE.md">dark panels</a>,
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/drawing/PROVENANCE.md">drawing</a>,
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/polyphony/PROVENANCE.md">polyphony</a>,
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/dsp/PROVENANCE.md">DSP</a> and
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/expanders/PROVENANCE.md">expanders</a>.
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/template/PROVENANCE.md">template</a>,
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/oscillator/PROVENANCE.md">oscillator</a>,
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/configuration/PROVENANCE.md">configuration</a>,
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/state-and-events/PROVENANCE.md">state and events</a>,
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/menus/PROVENANCE.md">menus</a>,
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/dark-panels/PROVENANCE.md">dark panels</a>,
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/drawing/PROVENANCE.md">drawing</a>,
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/polyphony/PROVENANCE.md">polyphony</a>,
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/dsp/PROVENANCE.md">DSP</a> and
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/expanders/PROVENANCE.md">expanders</a>.
 <a class="reference internal" href="licensing.html"><span class="std std-doc">Licensing</span></a> covers RackPy’s own licence, the bundled Python’s
 and the VCV manual’s.</p>
 </section>

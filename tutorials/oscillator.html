@@ -154,7 +154,7 @@
 
 <div class="announcement">
   <aside class="announcement-content">
-     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+     RackPy 1.0.0 Linux-only release. Partial API; no performance or cross-platform support claims. 
   </aside>
 </div>
 
@@ -406,12 +406,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/tutorials/oscillator.md?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/main/docs/tutorials/oscillator.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/tutorials/oscillator.md" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/main/docs/tutorials/oscillator.md" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -450,7 +450,7 @@ module processes audio without running Python sample by sample.</p>
 <td><p>The quickstart’s checkout, RackPy built and bundled, and its <code class="docutils literal notranslate"><span class="pre">MyPlugin</span></code> project</p></td>
 </tr>
 <tr class="row-even"><td><p>Versions</p></td>
-<td><p>RackPy 1.0.0 (unreleased), Rack Free 2.6.6, Linux x86_64</p></td>
+<td><p>RackPy 1.0.0 (Linux x86_64 release), Rack Free 2.6.6</p></td>
 </tr>
 <tr class="row-odd"><td><p>Finished code</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">examples/oscillator</span></code>, tested in Rack</p></td>
@@ -458,7 +458,7 @@ module processes audio without running Python sample by sample.</p>
 </tbody>
 </table>
 </div>
-<p>The finished plugin is <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/oscillator/README.md">examples/oscillator</a>.</p>
+<p>The finished plugin is <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/oscillator/README.md">examples/oscillator</a>.</p>
 <section id="signals-are-voltages">
 <h2>Signals are voltages<a class="headerlink" href="#signals-are-voltages" title="Link to this heading">¶</a></h2>
 <p>Rack imitates a hardware modular synthesizer, where modules exchange electrical
@@ -629,11 +629,11 @@ hear middle C. Turn the knob: its tooltip shows the frequency in hertz. Patch
 another oscillator’s output into the pitch input, and the second one’s ±5 V
 sine sweeps the first one’s pitch five octaves up and down.</p>
 <p>The finished example is tested exactly like this in Rack:
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/tests/examples/test_oscillator.py">tests/examples/test_oscillator.py</a>
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/tests/examples/test_oscillator.py">tests/examples/test_oscillator.py</a>
 checks, at 44.1, 48 and 96 kHz, that it follows 1 V per octave from middle C
 within 0.02%, peaks at 5 V and blinks at 1 Hz, and that it matches the same
 oscillator written in C++ against Rack’s own classes to within 0.05 V. The
-example’s README lists the <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/oscillator/README.md#numerical-differences-from-the-c-module">numerical differences</a>.</p>
+example’s README lists the <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/oscillator/README.md#numerical-differences-from-the-c-module">numerical differences</a>.</p>
 </section>
 <section id="what-you-learned">
 <h2>What you learned<a class="headerlink" href="#what-you-learned" title="Link to this heading">¶</a></h2>
@@ -646,7 +646,7 @@ a graph, once. Rack runs the compiled kernel every sample.</p></li>
 </ul>
 <p>Next: <a class="reference internal" href="../how-to/dsp.html"><span class="std std-doc">processing audio</span></a> and <a class="reference internal" href="../how-to/graphs.html"><span class="std std-doc">graphs</span></a>
 cover every node type, polyphony and kernels written in C++, and
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/configuration/README.md">the configuration example</a> adds more
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/configuration/README.md">the configuration example</a> adds more
 controls, menus and presets. If the module does not appear, see
 <a class="reference internal" href="../troubleshooting.html"><span class="std std-doc">troubleshooting</span></a>.</p>
 </section>

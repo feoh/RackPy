@@ -1,23 +1,23 @@
 # Installation
 
-**There is nothing to download yet.** RackPy has no release, no plugin in the
-VCV Library and no package on PyPI. Do not install anything that claims to be
-a RackPy release. On Linux, a Mac or a Windows PC you can build the release
-candidates yourself and install them ([Linux](installation/linux.md),
-[macOS](installation/macos.md), [Windows](installation/windows.md)).
+RackPy **1.0.0** is available from [GitHub Releases](https://github.com/feoh/RackPy/releases)
+for Linux x86_64 and Rack Free 2.6.6. Coverage remains partial; no PyPI package
+or VCV Library listing exists. macOS and Windows artifacts are CI-tested
+candidates only, not supported releases. See [Linux installation](installation/linux.md),
+[macOS](installation/macos.md), and [Windows](installation/windows.md).
 
 ## What exists today
 
 | Platform | Status |
 | --- | --- |
-| Linux x86_64 | Builds from source, for Rack Free {{rack_version}}. Plugins written in Python load into Rack, add modules and process audio natively; the [examples](examples.md) run in Rack under test. Development builds work only on the computer that built them; [release candidates](installation/linux.md) (`bin/rackpy-release build`) install on any Linux with glibc 2.23 or newer, and are tested on a clean machine. |
+| Linux x86_64 | **Published: RackPy 1.0.0** for Rack Free {{rack_version}}. The GitHub artifacts install on glibc 2.23 or newer and passed clean Ubuntu 16.04/20.04 verification; see [scope and evidence](installation/linux.md). Development builds remain local to their build machine. |
 | macOS (arm64, x86_64) | Builds from source on each architecture with Xcode's command line tools, for Rack Free {{rack_version}}; the native and host tests pass on both, headless. [Release candidates](installation/macos.md) (`bin/rackpy-release build` on a Mac, one package per architecture, macOS 11.0 or newer on Apple silicon, 10.15 or newer on Intel) are signed ad hoc, not with a Developer ID, and not notarized. Not yet checked: drawing in a window (the CI Macs have no OpenGL window), a Mac with SIP on, and a truly clean Mac. |
 | Windows x86_64 | Builds from source with MSYS2's MinGW-w64 GCC, as Rack itself is built, for Rack Free {{rack_version}}; the native and host tests pass, headless. [Release candidates](installation/windows.md) (`bin/rackpy-release build` on Windows; Windows 10 or newer) are not Authenticode-signed. Not yet checked: drawing in a window (the CI runners have no OpenGL 2.0), a clean PC, and the sanitizer and audio-path guard programs, which are Linux-only. |
 | Linux arm64, Windows arm64 | Not planned: VCV publishes no SDK for them. |
 
 | Component | Version |
 | --- | --- |
-| RackPy | {{rackpy_version}} (unreleased) |
+| RackPy | {{rackpy_version}} (Linux x86_64 GitHub release) |
 | Rack | Rack Free {{rack_version}}, commit {{rack_commit}} |
 | Python inside the plugin | CPython {{python_version}}, bundled; the computer's own Python is never used |
 

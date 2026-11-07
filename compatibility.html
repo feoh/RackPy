@@ -154,7 +154,7 @@
 
 <div class="announcement">
   <aside class="announcement-content">
-     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+     RackPy 1.0.0 Linux-only release. Partial API; no performance or cross-platform support claims. 
   </aside>
 </div>
 
@@ -406,12 +406,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/compatibility.md?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/main/docs/compatibility.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/compatibility.md" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/main/docs/compatibility.md" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -433,9 +433,9 @@
 <p><strong>RP-02 record, verified 2026-10-21.</strong> This page pins what RackPy targets and
 records what has been checked so far. Compatibility with a running Rack host
 has <strong>not</strong> been tested. Nothing here says a RackPy runtime exists.</p>
-<p>Machine-readable pins are in <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/upstream/versions.json">upstream/versions.json</a>.
+<p>Machine-readable pins are in <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/upstream/versions.json">upstream/versions.json</a>.
 Recorded digests, the include closure and a preliminary declaration survey are
-in <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/tests/fixtures/sdk-provenance.json">tests/fixtures/sdk-provenance.json</a>.
+in <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/tests/fixtures/sdk-provenance.json">tests/fixtures/sdk-provenance.json</a>.
 Both are checked by <a class="reference download internal" download="" href="_downloads/3cae4e28a5f666d619e642f43906075f/rack-sdk"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">bin/rack-sdk</span></code></span></a>.</p>
 <section id="rack-baseline-keep-2-6-6">
 <h2>Rack baseline: keep 2.6.6<a class="headerlink" href="#rack-baseline-keep-2-6-6" title="Link to this heading">¶</a></h2>
@@ -765,11 +765,11 @@ evidence on a real host.</p>
 <tbody>
 <tr class="row-even"><td><p>Linux x86_64</p></td>
 <td><p>yes</p></td>
-<td><p><strong>Validated natively.</strong> Builds, native and host tests (headless and in Xvfb); release candidates built with the official toolchain (glibc 2.23) and verified on clean Ubuntu 16.04 and 20.04 containers (RP-39). Not published.</p></td>
+<td><p><strong>Published as RackPy 1.0.0.</strong> Built with the official toolchain; the exact release artifacts passed clean Ubuntu 16.04 and 20.04 verification. Partial API coverage; see the <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/release-evidence/candidate-audit.md">candidate audit</a>.</p></td>
 </tr>
 <tr class="row-odd"><td><p>macOS arm64</p></td>
 <td><p>yes</p></td>
-<td><p><strong>Validated natively</strong> on GitHub’s <code class="docutils literal notranslate"><span class="pre">macos-15</span></code> runners: builds, native and host tests (headless), release candidates installed in fresh user folders (RP-40, <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/planning/rp-40-validation.md">validation</a>). Windowed drawing, Gatekeeper with SIP on and a clean Mac remain open. Not published.</p></td>
+<td><p><strong>Validated natively</strong> on GitHub’s <code class="docutils literal notranslate"><span class="pre">macos-15</span></code> runners: builds, native and host tests (headless), release candidates installed in fresh user folders (RP-40, <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/planning/rp-40-validation.md">validation</a>). Windowed drawing, Gatekeeper with SIP on and a clean Mac remain open. Not published.</p></td>
 </tr>
 <tr class="row-even"><td><p>macOS x86_64</p></td>
 <td><p>yes</p></td>
@@ -777,7 +777,7 @@ evidence on a real host.</p>
 </tr>
 <tr class="row-odd"><td><p>Windows x86_64</p></td>
 <td><p>yes</p></td>
-<td><p><strong>Validated natively</strong> on GitHub’s <code class="docutils literal notranslate"><span class="pre">windows-2025</span></code> runners: builds (MSYS2 MinGW-w64), native and host tests (headless), release candidates installed in fresh user folders (RP-41, <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/planning/rp-41-validation.md">validation</a>). The C runtimes are kept apart (finding 2). Windowed drawing, a clean PC and Authenticode signing remain open. Not published.</p></td>
+<td><p><strong>Validated natively</strong> on GitHub’s <code class="docutils literal notranslate"><span class="pre">windows-2025</span></code> runners: builds (MSYS2 MinGW-w64), native and host tests (headless), release candidates installed in fresh user folders (RP-41, <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/planning/rp-41-validation.md">validation</a>). The C runtimes are kept apart (finding 2). Windowed drawing, a clean PC and Authenticode signing remain open. Not published.</p></td>
 </tr>
 <tr class="row-even"><td><p>Linux arm64</p></td>
 <td><p><strong>no</strong></p></td>

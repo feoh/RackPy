@@ -154,7 +154,7 @@
 
 <div class="announcement">
   <aside class="announcement-content">
-     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+     RackPy 1.0.0 Linux-only release. Partial API; no performance or cross-platform support claims. 
   </aside>
 </div>
 
@@ -406,12 +406,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/reference/python/rackpy/raw/app/index.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/main/docs/reference/python/rackpy/raw/app/index.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/reference/python/rackpy/raw/app/index.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/main/docs/reference/python/rackpy/raw/app/index.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -551,7 +551,7 @@
 <td><p>Rack's Scene (Context.scene), a borrowed view.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rackpy.raw.app.HostRackScrollWidget" title="rackpy.raw.app.HostRackScrollWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HostRackScrollWidget</span></code></a></p></td>
-<td><p>Checked nonowning host identity; not a transferable Widget.</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#rackpy.raw.app.HostRackWidget" title="rackpy.raw.app.HostRackWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HostRackWidget</span></code></a></p></td>
 <td><p>Rack's RackWidget: modules, cables and selection.</p></td>
@@ -560,7 +560,7 @@
 <td><p>A cable widget Rack made, a borrowed view.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#rackpy.raw.app.HostPlugWidget" title="rackpy.raw.app.HostPlugWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HostPlugWidget</span></code></a></p></td>
-<td><p>Checked nonowning host identity; not a transferable Widget.</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rackpy.raw.app.CableWidget" title="rackpy.raw.app.CableWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CableWidget</span></code></a></p></td>
 <td><p>Rack's cable widget, made by Python: set its ports, RackWidget.add_cable it, then update_cable or set_cable.</p></td>
@@ -1597,8 +1597,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="rackpy.raw.app.HostRackScrollWidget">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rackpy.raw.app.</span></span><span class="sig-name descname"><span class="pre">HostRackScrollWidget</span></span><a class="headerlink" href="#rackpy.raw.app.HostRackScrollWidget" title="Link to this definition">¶</a></dt>
-<dd><p>Checked nonowning host identity; not a transferable Widget.</p>
-<dl class="py property">
+<dd><dl class="py property">
 <dt class="sig sig-object py" id="rackpy.raw.app.HostRackScrollWidget.zoom_widget">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">zoom_widget</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../widget/index.html#rackpy.raw.widget.HostWidget" title="rackpy.raw.widget.HostWidget"><span class="pre">rackpy.raw.widget.HostWidget</span></a></span><a class="headerlink" href="#rackpy.raw.app.HostRackScrollWidget.zoom_widget" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -2074,8 +2073,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="rackpy.raw.app.HostPlugWidget">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rackpy.raw.app.</span></span><span class="sig-name descname"><span class="pre">HostPlugWidget</span></span><a class="headerlink" href="#rackpy.raw.app.HostPlugWidget" title="Link to this definition">¶</a></dt>
-<dd><p>Checked nonowning host identity; not a transferable Widget.</p>
-<dl class="py method">
+<dd><dl class="py method">
 <dt class="sig sig-object py" id="rackpy.raw.app.HostPlugWidget.get_cable">
 <span class="sig-name descname"><span class="pre">get_cable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#rackpy.raw.app.HostCableWidget" title="rackpy.raw.app.HostCableWidget"><span class="pre">HostCableWidget</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#rackpy.raw.app.CableWidget" title="rackpy.raw.app.CableWidget"><span class="pre">CableWidget</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#rackpy.raw.app.HostPlugWidget.get_cable" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>

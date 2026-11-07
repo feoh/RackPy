@@ -154,7 +154,7 @@
 
 <div class="announcement">
   <aside class="announcement-content">
-     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+     RackPy 1.0.0 Linux-only release. Partial API; no performance or cross-platform support claims. 
   </aside>
 </div>
 
@@ -406,12 +406,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/decisions/004-performance-budgets.md?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/main/docs/decisions/004-performance-budgets.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/decisions/004-performance-budgets.md" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/main/docs/decisions/004-performance-budgets.md" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -439,9 +439,9 @@ machine, which is <strong>not</strong> controlled hardware; RP-43 repeats them o
 controlled hardware with an audio interface before any performance claim.</p></li>
 <li><p><strong>Date:</strong> 2026-10-21</p></li>
 <li><p><strong>Task:</strong> RP-07</p></li>
-<li><p><strong>Evidence:</strong> <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/benchmarks/baseline.json">benchmarks/baseline.json</a>
-(raw data and environment), <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/benchmarks/spike/README.md">benchmarks/spike</a>,
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/tests/integration/test_perf_guard.py">tests/integration/test_perf_guard.py</a></p></li>
+<li><p><strong>Evidence:</strong> <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/benchmarks/baseline.json">benchmarks/baseline.json</a>
+(raw data and environment), <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/benchmarks/spike/README.md">benchmarks/spike</a>,
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/tests/integration/test_perf_guard.py">tests/integration/test_perf_guard.py</a></p></li>
 </ul>
 <section id="method">
 <h2>Method<a class="headerlink" href="#method" title="Link to this heading">¶</a></h2>
@@ -672,7 +672,7 @@ violations must be impossible to optimize away.</p>
 <tr class="row-even"><td><p>Graph plans (RP-21) vs. hand-fused native</p></td>
 <td><p><strong>≤ 1.5 ns per frame per plan</strong>, ≤ 1 ULP output difference</p></td>
 <td><p>Virtual nodes +3.0 ns; static composition +1.15 ns</p></td>
-<td><p><strong>Approved by the owner, 2026-10-26.</strong> Replaces “≤10%” for plans: the remaining 12% is stores between nodes, not RackPy dispatch. RP-21’s compiled tier measured +1.46 to 1.67 ns (<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/benchmarks/rp21-graph-cost.json">rp21-graph-cost.json</a>); the owner also approved keeping it bit-identical to the interpreter at about 0.25 ns on sine→gain, the excess. The interpreter is not held to this budget.</p></td>
+<td><p><strong>Approved by the owner, 2026-10-26.</strong> Replaces “≤10%” for plans: the remaining 12% is stores between nodes, not RackPy dispatch. RP-21’s compiled tier measured +1.46 to 1.67 ns (<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/benchmarks/rp21-graph-cost.json">rp21-graph-cost.json</a>); the owner also approved keeping it bit-identical to the interpreter at about 0.25 ns on sine→gain, the excess. The interpreter is not held to this budget.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Python inside a <code class="docutils literal notranslate"><span class="pre">ui-exclusive</span></code> callback</p></td>
 <td><p><strong>≤ 1 ms p99 per call</strong>, with a UI-thread diagnostic when exceeded</p></td>
@@ -696,7 +696,7 @@ violations must be impossible to optimize away.</p>
 </tr>
 <tr class="row-odd"><td><p>Lifetime stability</p></td>
 <td><p>No live-object growth over 1,000 create/delete cycles</p></td>
-<td><p>RP-38, in Rack with the engine running: 1,000 create/delete and 1,000 save/reload cycles returned every RackPy counter exactly, with resident memory unchanged (<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/planning/rp-38-validation.md">validation</a>)</p></td>
+<td><p>RP-38, in Rack with the engine running: 1,000 create/delete and 1,000 save/reload cycles returned every RackPy counter exactly, with resident memory unchanged (<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/planning/rp-38-validation.md">validation</a>)</p></td>
 <td><p>Met on Linux x86_64 (<code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">stress</span></code>)</p></td>
 </tr>
 <tr class="row-even"><td><p>Plugin start-up before user scripts</p></td>

@@ -154,7 +154,7 @@
 
 <div class="announcement">
   <aside class="announcement-content">
-     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+     RackPy 1.0.0 Linux-only release. Partial API; no performance or cross-platform support claims. 
   </aside>
 </div>
 
@@ -406,12 +406,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/installation.md?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/main/docs/installation.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/installation.md" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/main/docs/installation.md" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -430,11 +430,11 @@
         <article role="main" id="furo-main-content">
           <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h1>
-<p><strong>There is nothing to download yet.</strong> RackPy has no release, no plugin in the
-VCV Library and no package on PyPI. Do not install anything that claims to be
-a RackPy release. On Linux, a Mac or a Windows PC you can build the release
-candidates yourself and install them (<a class="reference internal" href="installation/linux.html"><span class="std std-doc">Linux</span></a>,
-<a class="reference internal" href="installation/macos.html"><span class="std std-doc">macOS</span></a>, <a class="reference internal" href="installation/windows.html"><span class="std std-doc">Windows</span></a>).</p>
+<p>RackPy <strong>1.0.0</strong> is available from <a class="reference external" href="https://github.com/feoh/RackPy/releases">GitHub Releases</a>
+for Linux x86_64 and Rack Free 2.6.6. Coverage remains partial; no PyPI package
+or VCV Library listing exists. macOS and Windows artifacts are CI-tested
+candidates only, not supported releases. See <a class="reference internal" href="installation/linux.html"><span class="std std-doc">Linux installation</span></a>,
+<a class="reference internal" href="installation/macos.html"><span class="std std-doc">macOS</span></a>, and <a class="reference internal" href="installation/windows.html"><span class="std std-doc">Windows</span></a>.</p>
 <section id="what-exists-today">
 <h2>What exists today<a class="headerlink" href="#what-exists-today" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper colwidths-auto docutils container">
@@ -446,7 +446,7 @@ candidates yourself and install them (<a class="reference internal" href="instal
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Linux x86_64</p></td>
-<td><p>Builds from source, for Rack Free 2.6.6. Plugins written in Python load into Rack, add modules and process audio natively; the <a class="reference internal" href="examples.html"><span class="std std-doc">examples</span></a> run in Rack under test. Development builds work only on the computer that built them; <a class="reference internal" href="installation/linux.html"><span class="std std-doc">release candidates</span></a> (<code class="docutils literal notranslate"><span class="pre">bin/rackpy-release</span> <span class="pre">build</span></code>) install on any Linux with glibc 2.23 or newer, and are tested on a clean machine.</p></td>
+<td><p><strong>Published: RackPy 1.0.0</strong> for Rack Free 2.6.6. The GitHub artifacts install on glibc 2.23 or newer and passed clean Ubuntu 16.04/20.04 verification; see <a class="reference internal" href="installation/linux.html"><span class="std std-doc">scope and evidence</span></a>. Development builds remain local to their build machine.</p></td>
 </tr>
 <tr class="row-odd"><td><p>macOS (arm64, x86_64)</p></td>
 <td><p>Builds from source on each architecture with Xcode’s command line tools, for Rack Free 2.6.6; the native and host tests pass on both, headless. <a class="reference internal" href="installation/macos.html"><span class="std std-doc">Release candidates</span></a> (<code class="docutils literal notranslate"><span class="pre">bin/rackpy-release</span> <span class="pre">build</span></code> on a Mac, one package per architecture, macOS 11.0 or newer on Apple silicon, 10.15 or newer on Intel) are signed ad hoc, not with a Developer ID, and not notarized. Not yet checked: drawing in a window (the CI Macs have no OpenGL window), a Mac with SIP on, and a truly clean Mac.</p></td>
@@ -469,7 +469,7 @@ candidates yourself and install them (<a class="reference internal" href="instal
 </thead>
 <tbody>
 <tr class="row-even"><td><p>RackPy</p></td>
-<td><p>1.0.0 (unreleased)</p></td>
+<td><p>1.0.0 (Linux x86_64 GitHub release)</p></td>
 </tr>
 <tr class="row-odd"><td><p>Rack</p></td>
 <td><p>Rack Free 2.6.6, commit 061ccf63c1758599396ac1bb10d47345d9d34076</p></td>
@@ -492,7 +492,7 @@ bin/rackpy-dev<span class="w"> </span>bundle<span class="w"> </span>/tmp/rackpy-
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">/tmp/rackpy-bundle/RackPy</span></code> is RackPy itself, which <code class="docutils literal notranslate"><span class="pre">bin/rackpy-plugin</span> <span class="pre">build</span></code>
 combines with your plugin project. The developer setup, the test categories and
-the other commands are in <a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/CONTRIBUTING.md">CONTRIBUTING.md</a>.</p>
+the other commands are in <a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/CONTRIBUTING.md">CONTRIBUTING.md</a>.</p>
 <p>A development build needs the glibc of the machine that built it, and links to
 RackPy’s download cache for its Python runtime, so it is not for distribution
 (<a class="reference internal" href="decisions/005-build-and-ci.html"><span class="std std-doc">ADR 005</span></a>, <a class="reference internal" href="how-to/packaging.html"><span class="std std-doc">packaging</span></a>).

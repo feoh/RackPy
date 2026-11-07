@@ -1,13 +1,12 @@
 # Package a plugin
 
-:::{admonition} Pre-release: nothing here is for distribution yet
+:::{admonition} Distribution scope
 :class: warning
 
-RackPy has no public release. On Linux, `bin/rackpy-release build` makes
-release candidates (RP-39) that install on other computers, and
-`bin/rackpy-plugin pack` makes a `.vcvplugin` of your own plugin from one. macOS
-and Windows are RP-40 and RP-41. Until the owner separately approves a public
-release (RP-44), do not distribute any of them.
+RackPy 1.0.0 is published on GitHub for Linux x86_64 and Rack Free 2.6.6.
+macOS and Windows builds remain candidates, not releases. `bin/rackpy-plugin
+pack` can package your own plugin from the Linux runtime bundle; the release is
+not on PyPI or the VCV Library.
 :::
 
 ## What a RackPy plugin contains
@@ -29,7 +28,7 @@ built ([process audio](dsp.md#write-a-kernel-in-c)).
 
 ## Make a package to install elsewhere
 
-A plugin that other Linux computers can load needs RackPy's release-candidate
+A plugin that other Linux computers can load needs RackPy's release
 runtime bundle, not a development bundle. Build the release candidate (it needs
 VCV's toolchain, `bin/rack-toolchain build`, once), then combine and pack:
 

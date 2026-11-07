@@ -154,7 +154,7 @@
 
 <div class="announcement">
   <aside class="announcement-content">
-     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+     RackPy 1.0.0 Linux-only release. Partial API; no performance or cross-platform support claims. 
   </aside>
 </div>
 
@@ -406,12 +406,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/how-to/polyphony.md?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/main/docs/how-to/polyphony.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/how-to/polyphony.md" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/main/docs/how-to/polyphony.md" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -435,8 +435,8 @@ cable from a MIDI-CV module carries one pitch per held note. A polyphonic
 module processes every channel of its inputs and gives its outputs as many.
 This guide shows the two ways a RackPy module does it.</p>
 <p><strong>Status:</strong> Linux x86_64, Rack Free 2.6.6. Both ways are tested in
-Rack against C++ modules (<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/polyphony/README.md">examples/polyphony</a>,
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/oscillator/README.md">examples/oscillator</a>).</p>
+Rack against C++ modules (<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/polyphony/README.md">examples/polyphony</a>,
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/oscillator/README.md">examples/oscillator</a>).</p>
 <section id="with-a-graph-nothing-to-do">
 <h2>With a graph: nothing to do<a class="headerlink" href="#with-a-graph-nothing-to-do" title="Link to this heading">¶</a></h2>
 <p>A <a class="reference internal" href="graphs.html"><span class="std std-doc">graph</span></a> is polyphonic already. Every signal in it has 0 to 16
@@ -467,7 +467,7 @@ nothing patched, the input has 0 channels and the output 1.</p>
 <p>A kernel written in C++ (<a class="reference internal" href="dsp.html#write-a-kernel-in-c"><span class="std std-ref">process audio</span></a>) does
 what a C++ module’s <code class="docutils literal notranslate"><span class="pre">process()</span></code> does: it reads the input’s channel count, sets
 the output’s, and loops. The polyphony example has two such kernels in
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/examples/polyphony/kernels/polyphony.cpp">kernels/polyphony.cpp</a>:</p>
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/examples/polyphony/kernels/polyphony.cpp">kernels/polyphony.cpp</a>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">polyphony.Scalar</span></code> keeps one phase per channel and processes the channels
 one after another.</p></li>

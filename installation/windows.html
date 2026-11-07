@@ -154,7 +154,7 @@
 
 <div class="announcement">
   <aside class="announcement-content">
-     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+     RackPy 1.0.0 Linux-only release. Partial API; no performance or cross-platform support claims. 
   </aside>
 </div>
 
@@ -406,12 +406,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/installation/windows.md?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/main/docs/installation/windows.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/installation/windows.md" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/main/docs/installation/windows.md" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -431,13 +431,11 @@
           <section id="install-on-windows">
 <h1>Install on Windows<a class="headerlink" href="#install-on-windows" title="Link to this heading">¶</a></h1>
 <div class="warning admonition">
-<p class="admonition-title">Release candidates only: nothing is published</p>
-<p>RackPy has no release. The files this page describes are release candidates
-that <code class="docutils literal notranslate"><span class="pre">bin/rackpy-release</span> <span class="pre">build</span></code> makes from a commit on a Windows PC, and the
-CI Windows release-candidate job makes from <code class="docutils literal notranslate"><span class="pre">main</span></code>. They are not on GitHub
-Releases, PyPI or the VCV Library, and must not be redistributed until the
-owner approves a release (RP-44). Do not install a file that claims to be a
-RackPy release from anywhere else.</p>
+<p class="admonition-title">No Windows release is published</p>
+<p>The only published release is Linux x86_64 for Rack Free 2.6.6. This page
+covers local and CI Windows candidate builds, not a downloadable or supported
+Windows release. They are not on GitHub Releases, PyPI or the VCV Library; do
+not redistribute or claim Windows support based on these candidates.</p>
 </div>
 <section id="what-you-need">
 <h2>What you need<a class="headerlink" href="#what-you-need" title="Link to this heading">¶</a></h2>
@@ -450,7 +448,7 @@ Rack 2 versions are untested.</p></li>
 never uses a Python installed on the PC (python.org’s, the Microsoft Store’s
 or a conda one), anything on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>, or the network.</p></li>
 </ul>
-<p><a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/planning/rp-41-validation.md">RP-41’s validation record</a> says what the
+<p><a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/planning/rp-41-validation.md">RP-41’s validation record</a> says what the
 release candidates have actually been run on.</p>
 </section>
 <section id="what-the-files-are">
@@ -688,7 +686,7 @@ lists the DLLs Rack has loaded from Windows’ own record of them.</p>
 <p>It runs on GitHub’s <code class="docutils literal notranslate"><span class="pre">windows-2025</span></code> runners. Those are not clean PCs, and they
 have no GPU, so the windowed checks (Rack drawing each module) are reported as
 open there rather than passed.
-<a class="reference external" href="https://github.com/feoh/RackPy/blob/cb4983419f708e9a559eb1b3a7c722c24b4e78c9/planning/rp-41-validation.md">RP-41’s validation record</a> has the results
+<a class="reference external" href="https://github.com/feoh/RackPy/blob/73bb565ba0b263483ae79cbfd94fe5b60add7224/planning/rp-41-validation.md">RP-41’s validation record</a> has the results
 and the open gates. A PC’s sound card and MIDI devices are not part of it.</p>
 </section>
 </section>

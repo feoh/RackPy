@@ -1,14 +1,12 @@
 # Install on macOS
 
-:::{admonition} Release candidates only: nothing is published
+:::{admonition} No macOS release is published
 :class: warning
 
-RackPy has no release. The files this page describes are release candidates
-that `bin/rackpy-release build` makes from a commit on a Mac, and the CI
-macOS release-candidate jobs make from `main`. They are not on GitHub
-Releases, PyPI or the VCV Library, and must not be redistributed until the
-owner approves a release (RP-44). Do not install a file that claims to be a
-RackPy release from anywhere else.
+The only published release is Linux x86_64 for Rack Free 2.6.6. This page
+covers local and CI macOS candidate builds, not a downloadable or supported
+macOS release. They are not on GitHub Releases, PyPI or the VCV Library; do
+not redistribute or claim macOS support based on these candidates.
 :::
 
 ## What you need

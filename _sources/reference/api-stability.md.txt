@@ -1,8 +1,9 @@
 # Facade contract and versioning
 
-RackPy's `1.0.0` release candidate retains partial API coverage; the version
-number is not a completeness, real-time performance or platform-parity claim.
-The package remains marked `Private :: Do Not Upload` to prevent PyPI uploads.
+RackPy's `1.0.0` release retains partial API coverage; the version number is
+not a completeness, real-time performance or platform-parity claim. The package
+remains marked `Private :: Do Not Upload`; this release is GitHub-only and is
+not uploaded to PyPI.
 This page defines the Pythonic facade and its compatibility policy.
 
 ## What is public

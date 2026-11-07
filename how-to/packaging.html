@@ -154,7 +154,7 @@
 
 <div class="announcement">
   <aside class="announcement-content">
-     RackPy bindings are partial. These 1.0.0 documentation pages describe a release in preparation. 
+     RackPy 1.0.0 Linux-only release. Partial API; no performance or cross-platform support claims. 
   </aside>
 </div>
 
@@ -406,12 +406,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/docs-pages/docs/how-to/packaging.md?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/blob/main/docs/how-to/packaging.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/docs-pages/docs/how-to/packaging.md" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/feoh/RackPy/edit/main/docs/how-to/packaging.md" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -431,12 +431,10 @@
           <section id="package-a-plugin">
 <h1>Package a plugin<a class="headerlink" href="#package-a-plugin" title="Link to this heading">¶</a></h1>
 <div class="warning admonition">
-<p class="admonition-title">Pre-release: nothing here is for distribution yet</p>
-<p>RackPy has no public release. On Linux, <code class="docutils literal notranslate"><span class="pre">bin/rackpy-release</span> <span class="pre">build</span></code> makes
-release candidates (RP-39) that install on other computers, and
-<code class="docutils literal notranslate"><span class="pre">bin/rackpy-plugin</span> <span class="pre">pack</span></code> makes a <code class="docutils literal notranslate"><span class="pre">.vcvplugin</span></code> of your own plugin from one. macOS
-and Windows are RP-40 and RP-41. Until the owner separately approves a public
-release (RP-44), do not distribute any of them.</p>
+<p class="admonition-title">Distribution scope</p>
+<p>RackPy 1.0.0 is published on GitHub for Linux x86_64 and Rack Free 2.6.6.
+macOS and Windows builds remain candidates, not releases. <code class="docutils literal notranslate"><span class="pre">bin/rackpy-plugin</span> <span class="pre">pack</span></code> can package your own plugin from the Linux runtime bundle; the release is
+not on PyPI or the VCV Library.</p>
 </div>
 <section id="what-a-rackpy-plugin-contains">
 <h2>What a RackPy plugin contains<a class="headerlink" href="#what-a-rackpy-plugin-contains" title="Link to this heading">¶</a></h2>
@@ -470,7 +468,7 @@ built (<a class="reference internal" href="dsp.html#write-a-kernel-in-c"><span c
 </section>
 <section id="make-a-package-to-install-elsewhere">
 <h2>Make a package to install elsewhere<a class="headerlink" href="#make-a-package-to-install-elsewhere" title="Link to this heading">¶</a></h2>
-<p>A plugin that other Linux computers can load needs RackPy’s release-candidate
+<p>A plugin that other Linux computers can load needs RackPy’s release
 runtime bundle, not a development bundle. Build the release candidate (it needs
 VCV’s toolchain, <code class="docutils literal notranslate"><span class="pre">bin/rack-toolchain</span> <span class="pre">build</span></code>, once), then combine and pack:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bin/rackpy-release<span class="w"> </span>build<span class="w"> </span>--dest<span class="w"> </span>/tmp/rackpy-release
