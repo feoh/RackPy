@@ -26,6 +26,29 @@ owner-requested retry succeeded. All tasks are attached to the real project in
 planning/witan.json. Join that project at session start; do not recreate it or
 duplicate the task graph. RP-01 records the completed metadata recovery.
 
+## Wall-clock time is paramount
+
+Owner instruction, 2026-11-07. Minimizing elapsed time to a finished, honest
+result matters more than minimizing tokens, sessions or agent count. Use
+subagents and every other parallelization tool wherever it will finish the
+work sooner:
+
+- Split independent work (review chunks, per-platform checks, separate files,
+  separate tasks with no shared blocker) across parallel subagents by default.
+  Serialize only where a real dependency or a shared resource (one Rack host
+  lock, one CI run, one branch head) forces it.
+- Never wait synchronously on CI, builds or long tests. Start them, work on
+  something independent, and have an async subagent report completion.
+- Make independent tool calls in one batch instead of one at a time.
+- When a task is too large for one session, split it into claimable child
+  tasks that different agents can run at once, rather than running it alone
+  for days.
+- Parallelism does not change the evidence bar: every claim still needs its
+  own verified result, and the merge of parallel work still runs the hooks.
+
+See the global instructions for subagent mechanics (claude-bridge children run
+with `async: true`).
+
 ## Engineering guardrails
 
 - Include only <rack.hpp> in plugin translation units. No PRIVATE calls.
