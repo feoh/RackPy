@@ -79,6 +79,25 @@ collection is not a substitute for SDK coverage and is not required by this plan
 Its source is GPLv3+; its panel visual designs have separate restrictive terms.
 Do not clone its panels, layout, logos or branding.
 
+## RP-52 optional independent DSP examples
+
+These are additional RackPy-created plugins inspired only by the feature sets of
+permissively licensed Rack plugins. They are not official-manual sample parity
+and do not affect the 77-sample denominator. The source code, parameter
+presentation, and artwork are independent; no upstream art or insect audio is
+used. See each example's provenance record for its pinned behavioral reference:
+
+- [Envelope](envelope/README.md): exponential attack/decay, optional looping,
+inverted output and end-of-cycle pulse; production signal processing is native.
+- [Feedback Governor](feedback-governor/README.md): a mono, capped feedback
+return with low-pass filtering, DC removal, decay and kill control; processing
+is native.
+
+Both native kernels build and Rack host tests pass on Linux x86_64, including
+reference comparisons and module patch reopen. The examples remain outside the
+release example set until clean-container verification passes; see each
+per-example README for platform limits.
+
 ## Required layout for each completed example
 
 Each example is a plugin project as `bin/rackpy-plugin create` makes it, so

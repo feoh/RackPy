@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Original RackPy artwork (GPL-3.0-or-later); inspired by the envelope workflow, not copied from an upstream panel. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="30.48mm" height="128.5mm" viewBox="0 0 30.48 128.5">
+  <rect width="30.48" height="128.5" fill="#202c31"/>
+  <rect width="30.48" height="18" fill="#314148"/>
+  <path d="M4 13 L9 13 L14 5 L19 13 L26 13" fill="none" stroke="#77e3c5" stroke-width="1.2"/>
+  <text x="15.24" y="25" text-anchor="middle" font-family="sans-serif" font-size="3.4" fill="#d7e9e4">ATTACK / DECAY</text>
+  <g fill="none" stroke="#45615b" stroke-width="0.45"><circle cx="15.24" cy="42" r="7.2"/><circle cx="15.24" cy="63" r="7.2"/></g>
+  <path d="M6 82 C8 82, 8 84, 10 84 L10 87 C10 88, 12 88, 13 88 L13 91 C13 92, 16 92, 17 92 L17 95 C17 96, 20 96, 21 96 L21 99" fill="none" stroke="#77e3c5" stroke-width="0.7"/>
+  <text x="15.24" y="108" text-anchor="middle" font-family="sans-serif" font-size="3" fill="#9bb5ae">LINEAR • 0–10 V</text>
+  <g inkscape:label="components" inkscape:groupmode="layer" style="display:none">
+    <circle inkscape:label="attack" cx="15.24" cy="42" r="6" fill="#ff0000"/>
+    <circle inkscape:label="decay" cx="15.24" cy="63" r="6" fill="#ff0000"/>
+    <rect inkscape:label="loop" x="11" y="78" width="8" height="8" fill="#ff0000"/>
+    <circle inkscape:label="trigger" cx="8" cy="105" r="3" fill="#00ff00"/>
+    <circle inkscape:label="envelope" cx="22.48" cy="105" r="3" fill="#0000ff"/>
+    <circle inkscape:label="inverted" cx="8" cy="116" r="3" fill="#0000ff"/>
+    <circle inkscape:label="eoc" cx="22.48" cy="116" r="3" fill="#0000ff"/>
+  </g>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="45.72mm" height="128.5mm" viewBox="0 0 180 506">
+  <rect width="180" height="506" fill="#18242b"/>
+  <rect x="7" y="7" width="166" height="492" rx="4" fill="#24363e" stroke="#86c5b7" stroke-width="2"/>
+  <text x="90" y="31" text-anchor="middle" fill="#f0d98a" font-family="sans-serif" font-size="17" font-weight="bold">FEEDBACK</text>
+  <text x="90" y="51" text-anchor="middle" fill="#f0d98a" font-family="sans-serif" font-size="17" font-weight="bold">GOVERNOR</text>
+  <g fill="#d5e4df" font-family="sans-serif" font-size="10" text-anchor="middle">
+    <text x="90" y="94">FEEDBACK</text><text x="90" y="172">OUTPUT CAP</text>
+    <text x="90" y="247">RETURN TONE</text><text x="90" y="322">PER-PASS DECAY</text>
+    <text x="90" y="392">KILL / RESET</text>
+    <text x="28" y="440">SEND</text><text x="90" y="440">RETURN</text><text x="152" y="440">CV</text>
+    <text x="28" y="484">OUT</text><text x="152" y="484">KILL</text>
+  </g>
+  <path d="M35 420 C55 400 70 400 90 420 S125 440 145 420" fill="none" stroke="#86c5b7" stroke-width="3"/>
+</svg>

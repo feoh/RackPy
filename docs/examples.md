@@ -3,8 +3,9 @@
 RackPy has, or will have, an original, runnable example for every feature
 that the official VCV Rack tutorial, plugin API guide and plugin template
 demonstrate; none of them copies the VCV manual
-([ADR 001](decisions/001-licensing-and-identity.md)). Ten exist so far, all
-Linux x86_64 in Rack Free {{rack_version}}:
+([ADR 001](decisions/001-licensing-and-identity.md)). Ten examples cover the official sample features on Linux x86_64 in Rack Free
+{{rack_version}}. Two optional original DSP examples have been added in RP-52;
+their separate validation and release status is recorded below.
 
 - [Plugin template](../examples/template/README.md):
   `bin/rackpy-plugin`, RackPy's counterpart of Rack's `helper.py`, creates a
@@ -47,7 +48,8 @@ Linux x86_64 in Rack Free {{rack_version}}:
 
 Every sample of the tutorial, the API guide and the plugin template has a
 tested example; the rest are shell commands and notes that the guides
-document (RP-37).
+document (RP-37). This does not describe the optional examples below, which are
+not official-manual sample coverage.
 
 The plan, the required layout of each example and the list of features are in
 [examples/README.md](../examples/README.md). The 77 official samples, with
@@ -71,6 +73,22 @@ SVG, font and code sources it uses:
 [expanders](../examples/expanders/PROVENANCE.md).
 [Licensing](licensing.md) covers RackPy's own licence, the bundled Python's
 and the VCV manual's.
+
+## Optional DSP workflows (RP-52)
+
+These original examples use independent implementations inspired by
+permissively licensed Rack plugins. They are not part of official-manual sample
+parity. Their native kernels build and their reference comparisons, plugin
+loading and patch reopen tests pass in Rack on Linux x86_64; they remain outside
+the release example set pending clean-container verification.
+
+- [Envelope](../examples/envelope/README.md): an exponential attack/decay
+  envelope with loop, inverted and end-of-cycle outputs. Its original native
+  kernel is checked against an independent Python reference. See its
+  [provenance](../examples/envelope/PROVENANCE.md).
+- [Feedback Governor](../examples/feedback-governor/README.md): a mono feedback
+  return with filtering, DC removal, decay and an output cap. See its
+  [provenance](../examples/feedback-governor/PROVENANCE.md).
 
 ## Runnable snippets
 

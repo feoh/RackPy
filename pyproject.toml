@@ -75,6 +75,8 @@ mypy_path = [
     "examples/polyphony/pythonpath",
     "examples/expanders/pythonpath",
     "examples/dsp/pythonpath",
+    "examples/envelope/pythonpath",
+    "examples/feedback-governor/pythonpath",
     "tests/hardening/in_rack_stress",
 ]
 explicit_package_bases = true
@@ -110,6 +112,8 @@ pythonpath = [
     "examples/state-and-events/pythonpath",
     "examples/polyphony/pythonpath",
     "examples/expanders/pythonpath",
+    "examples/envelope/pythonpath",
+    "examples/feedback-governor/pythonpath",
 ]
 # The sanitizer and stress suites (RP-38) take many minutes each: run them with -m sanitizer or -m stress.
 addopts = ["--strict-markers", "--strict-config", "-ra", "-m", "not sanitizer and not stress"]

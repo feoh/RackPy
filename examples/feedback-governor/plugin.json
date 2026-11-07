@@ -1,0 +1,23 @@
+{
+  "slug": "RackPyFeedbackGovernor",
+  "name": "RackPy Feedback Governor",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "RackPy",
+  "author": "RackPy contributors",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "https://github.com/feoh/RackPy",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "FeedbackGovernor",
+      "name": "Feedback Governor",
+      "description": "A mono feedback-loop utility with a bounded, filtered return",
+      "tags": ["Utility", "Effect"]
+    }
+  ]
+}
