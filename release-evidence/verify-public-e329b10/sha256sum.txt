@@ -1,0 +1,14 @@
+RackPyConfiguration-2.0.0-lin-x64.vcvplugin: OK
+RackPyDarkPanels-2.0.0-lin-x64.vcvplugin: OK
+RackPyDrawing-2.0.0-lin-x64.vcvplugin: OK
+RackPyDsp-2.0.0-lin-x64.vcvplugin: OK
+RackPyExpanders-2.0.0-lin-x64.vcvplugin: OK
+RackPyMenus-2.0.0-lin-x64.vcvplugin: OK
+RackPyOscillator-2.0.0-lin-x64.vcvplugin: OK
+RackPyPolyphony-2.0.0-lin-x64.vcvplugin: OK
+RackPyStateEvents-2.0.0-lin-x64.vcvplugin: OK
+RackPyTemplate-2.0.0-lin-x64.vcvplugin: OK
+manifest.json: OK
+rackpy-1.0.0+ge329b109a-source.tar.gz: OK
+rackpy-1.0.0-py3-none-any.whl: OK
+rackpy-runtime-1.0.0+ge329b109a-lin-x64.tar.zst: OK

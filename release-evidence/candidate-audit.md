@@ -197,8 +197,21 @@ audio-path guard does not establish equivalent macOS/Windows instrumentation.
 This evidence does not extend the published Linux-only support statement or
 prove physical-device performance, full API coverage, or official-sample parity.
 
-A new publication needs explicit owner approval and fresh, obtainable artifacts
-from an approved source; the retained CI evidence is not an artifact download.
+## Published GitHub release v1.0.0 (2026-11-07)
+
+The owner authorized publication on 2026-11-06. The published Linux x86_64
+release targets Rack Free 2.6.6, glibc 2.23 or newer, and intentionally does
+not claim complete API coverage, measured performance, physical audio deadlines,
+macOS/Windows support, signing, PyPI or VCV Library distribution. Its exact
+source tag is `v1.0.0` at
+`e329b109a595d881527aebd8aee5a86a4fd96a33`. Exact-SHA CI run
+[42284808506](https://github.com/feoh/RackPy/actions/runs/42284808506) completed
+successfully. Local build exit code was 0; the pre-upload bytes passed
+`SHA256SUMS` and verification in clean Ubuntu 16.04.7 and 20.04.6. Candidate
+manifest and checksums are committed in
+[`candidate-linux-x64-e329b10/`](candidate-linux-x64-e329b10/); binaries stay
+outside git. Post-upload public-download checks are recorded in
+[`release-handoff.md`](release-handoff.md).
 
 ## Scope and remaining gates
 
@@ -215,8 +228,9 @@ from an approved source; the retained CI evidence is not an artifact download.
 - The owner approved the proposed facade policy in
   [`docs/reference/api-stability.md`](../docs/reference/api-stability.md); it
   applies from the first public release.
-- Artifacts are unsigned. No signing/notarization, external legal review,
-  physical audio/MIDI hardware test, or published documentation site is claimed.
+- Artifacts are unsigned. No signing/notarization, external legal review, or
+  physical audio/MIDI hardware test is claimed. The hosted docs describe the
+  Linux-only release; no broader platform or distribution channel is implied.
 - Post-upload verification is complete: all 15 public files were downloaded,
   all listed checksums matched, and the ten example plugins passed the release
   verification suite from the downloaded public assets on Ubuntu 20.04.6.

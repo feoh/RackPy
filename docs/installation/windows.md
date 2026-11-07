@@ -1,14 +1,12 @@
 # Install on Windows
 
-:::{admonition} Release candidates only: nothing is published
+:::{admonition} No Windows release is published
 :class: warning
 
-RackPy has no release. The files this page describes are release candidates
-that `bin/rackpy-release build` makes from a commit on a Windows PC, and the
-CI Windows release-candidate job makes from `main`. They are not on GitHub
-Releases, PyPI or the VCV Library, and must not be redistributed until the
-owner approves a release (RP-44). Do not install a file that claims to be a
-RackPy release from anywhere else.
+The only published release is Linux x86_64 for Rack Free 2.6.6. This page
+covers local and CI Windows candidate builds, not a downloadable or supported
+Windows release. They are not on GitHub Releases, PyPI or the VCV Library; do
+not redistribute or claim Windows support based on these candidates.
 :::
 
 ## What you need

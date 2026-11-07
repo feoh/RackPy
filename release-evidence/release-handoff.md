@@ -1,13 +1,49 @@
-# RackPy early Linux release: publication record
+# RackPy Linux releases: publication record
 
-**Status: published and post-upload verified.** On 2026-11-05 the owner
-authorized a GitHub-only pre-release. [`v0.1.0.dev1`](https://github.com/feoh/RackPy/releases/tag/v0.1.0.dev1)
-is live with all 15 authorized assets; hashes and the downloaded example plugins
-were verified. No PyPI upload, VCV contact/submission or documentation-site
-publication was made. This handoff is step 4 of
-[the practical release plan](../planning/practical-release.md).
+**Current release: v1.0.0, published and post-upload verified on 2026-11-07.**
+The GitHub-only release targets Linux x86_64 and Rack Free 2.6.6. Its exact
+source, assets, hashes, limitations and post-upload checks are recorded below.
+The earlier [`v0.1.0.dev1`](https://github.com/feoh/RackPy/releases/tag/v0.1.0.dev1)
+remains a separate preview; its handoff is retained here as history.
 
-## Released scope
+## v1.0.0 — Linux x86_64 (2026-11-07)
+
+| Item | Value |
+| --- | --- |
+| Source commit | `e329b109a595d881527aebd8aee5a86a4fd96a33` (tag `v1.0.0`) |
+| Package version | `1.0.0` (runtime/source identify `+ge329b109a`) |
+| Platform | Linux x86_64 (`lin-x64`), glibc 2.23 floor, Rack Free 2.6.6 |
+| Release | [GitHub release v1.0.0](https://github.com/feoh/RackPy/releases/tag/v1.0.0) |
+| Assets | 13 build artifacts, `manifest.json`, `SHA256SUMS` (15 files) |
+| Retained metadata | [`candidate-linux-x64-e329b10/`](candidate-linux-x64-e329b10/) |
+
+The owner authorized this GitHub-only release on 2026-11-06 (epic decision in
+Witan). The candidate build exited 0; exact-SHA CI run
+[42284808506](https://github.com/feoh/RackPy/actions/runs/42284808506) completed
+successfully. The local artifacts passed `SHA256SUMS` and clean Ubuntu 16.04.7
+and 20.04.6 `bin/rackpy-release verify` runs before publication. The public
+assets were downloaded after publication, checksum-verified and tested again
+on clean Ubuntu 20.04.6; details are recorded below.
+
+The release is intentionally partial: it does not claim complete API coverage,
+controlled performance, physical audio-device deadlines, macOS or Windows
+support, or signed binaries. It is GitHub-only; there is no PyPI upload or VCV
+Library submission/contact.
+
+### Post-upload public-byte verification
+
+`gh release download v1.0.0 -R feoh/RackPy` downloaded all 15 public files.
+`sha256sum -c SHA256SUMS` passed for all 13 build artifacts and the manifest.
+The public download then passed
+`bin/rackpy-release verify` in a clean Ubuntu 20.04.6 container with no system
+Python and no network: ten example plugin loads, patch save/reopen, windowed
+Rack rendering, refusal/error cases, upgrade and uninstall. The complete
+summary and hash-check report are retained in
+[`verify-public-e329b10/`](verify-public-e329b10/). The published SHA-256 of
+`manifest.json` is `51e228fdd90abc7f286643da7b1c44e03b71176c8ec7008d27a12b47ba78440d`;
+`SHA256SUMS` is `ee7d4e7facd9137f54daafbd2e5b27598c0f348470238c6720e974b759c6e636`.
+
+## v0.1.0.dev1 — early Linux x86_64 preview (2026-11-05)
 
 An **early, partial, Linux x86_64 release for Rack 2.6.6**, labelled a preview
 (a pre-release, not a stable one). It lets a Python developer build a Rack plugin

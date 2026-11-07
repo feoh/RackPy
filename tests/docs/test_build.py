@@ -24,8 +24,8 @@ def test_site_builds_with_zero_warnings(site: Build) -> None:
 def test_front_page_states_status_and_pinned_versions(site: Build) -> None:
     facts = rackpy_docs.repo_facts()
     html = (site.html / "index.html").read_text()
-    assert "early development" in html
-    assert "no public release" in html
+    assert "available as a GitHub release for Linux x86_64" in html
+    assert "API coverage remains partial" in html
     for key in ("rackpy_version", "rack_version", "rack_commit", "python_version", "pybind11_version"):
         assert facts[key] in html, key
     assert facts["python_version"] == "3.14.9" and facts["pybind11_version"] == "3.1.0"

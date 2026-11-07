@@ -74,7 +74,7 @@ html_theme_options = {
     "source_repository": "https://github.com/feoh/RackPy/",
     "source_branch": "main",
     "source_directory": "docs/",
-    "announcement": "RackPy is in early development. Bindings are partial, and there is no release.",
+    "announcement": "RackPy 1.0.0 Linux-only release. Partial API; no performance or cross-platform support claims.",
 }
 
 # --- External link check (sphinx-build -b linkcheck), bounded ---

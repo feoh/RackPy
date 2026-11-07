@@ -1,0 +1,14 @@
+ad671ae55324f2f7a833a16adc96a2082b88580e144b8be5ddd61376194d77e1  RackPyConfiguration-2.0.0-lin-x64.vcvplugin
+f6202fdede40aea144c666af50cc6da969d21ae22ee1e71cc542232b81b1d775  RackPyDarkPanels-2.0.0-lin-x64.vcvplugin
+7db2173f524d06ce3d13411791da90249f8c243ac79a9331adbe6c164e126b80  RackPyDrawing-2.0.0-lin-x64.vcvplugin
+cefce5a86a4a465678527cbb22c99b21cee88782692a96de9e3c1aeda576d0a0  RackPyDsp-2.0.0-lin-x64.vcvplugin
+608bbfd0e956e307967c7c2edbed189d351c236bfe308d4ff720c0709ef9da49  RackPyExpanders-2.0.0-lin-x64.vcvplugin
+67811b30669ba6892521f6dee4b49f5d71f9c3fa53a087bf3adeb2a44cba034a  RackPyMenus-2.0.0-lin-x64.vcvplugin
+2a53c04d92e0c43fe11cb3c34f575483c3ce4a880121e7cd571478041fcf1a17  RackPyOscillator-2.0.0-lin-x64.vcvplugin
+5d2833289db2415eaf735ecbf06ef88eb12ee0e876ea386b8131d9cb164fe49c  RackPyPolyphony-2.0.0-lin-x64.vcvplugin
+b8441f02ac210af2315092b520c63904acfe15fd5dca104b82b4c807a640b7cb  RackPyStateEvents-2.0.0-lin-x64.vcvplugin
+2bf922ba452206ea1bea0b9c9f24504c8dd0ffc35744034d05848ed0725a8501  RackPyTemplate-2.0.0-lin-x64.vcvplugin
+51e228fdd90abc7f286643da7b1c44e03b71176c8ec7008d27a12b47ba78440d  manifest.json
+8e270a0bfea3bb820339e6476f9e4fc6b2495bbde9ff7f1c94c9b417f11ec157  rackpy-1.0.0+ge329b109a-source.tar.gz
+6f6ab058f15be701df4dac3674d99b27dc6d96ecf669f4eb26203c0ca6f03ac4  rackpy-1.0.0-py3-none-any.whl
+76587fdfe17b928992e92f56d2f4fce3c8d8029b68aa2967ea0c5fcc2e5a03d7  rackpy-runtime-1.0.0+ge329b109a-lin-x64.tar.zst
