@@ -115,3 +115,77 @@ edit). Then run `bin/generate_bindings.py seed --update`: it adds new
 declarations as `unreviewed`, drops removed ones and lists them, and puts every
 reviewed record whose declaration changed back to `unreviewed`, noting what it
 was. Review each reset record before promoting it again.
+
+## Frozen-candidate independent review
+
+The full-surface review uses `bin/release-evidence`; it is separate from the
+per-family implementation checks above. Freeze one candidate commit before
+starting a round. Do not amend it while reviewers work. Every verdict names the
+full candidate SHA and exact record IDs it judges.
+
+Compare the previous reviewed commit and the frozen candidate:
+
+```bash
+bin/release-evidence carry OLD_SHA CANDIDATE_SHA
+bin/release-evidence slices --carry-plan release-evidence/review/carry-OLD-NEW.json
+```
+
+`carry` compares each manifest entry's exact JSON bytes and the Git blobs for
+every cited test file and every implementation/source path named by its
+mapping. Only `accept` verdicts whose inputs are byte-identical carry forward.
+The plan retains the original reviewer, reviewed commit and verdict-file hash,
+plus the candidate carry commit. New, changed, missing or previously unresolved
+records are placed in the redo list. `slices --carry-plan` writes deterministic
+review slices of at most 25 records; the original reviewer output path remains
+available for the audit trail. Retry only failed chunks, never completed ones.
+
+The existing `verdicts` command checks each answer against `slices.json` and
+writes `release-evidence/review/<slice>.verdicts.json`. Its JSON block uses the
+RackPy review schema:
+
+```json
+{
+  "slice": "redo-001",
+  "reviewer": "agent-review:<run-id>",
+  "commit": "<full frozen candidate SHA>",
+  "records": {
+    "<record ID>": {"verdict": "accept"},
+    "<another ID>": {"verdict": "finding", "finding": "Describe the defect."}
+  }
+}
+```
+
+The record keys must exactly match one planned chunk. The validator rejects
+missing or extra IDs, duplicate chunks, placeholders, findings without text,
+outputs over 25 records and outputs for another commit. Adjudicate all findings
+together. Batch verified fixes, freeze the next candidate SHA and carry forward
+only unchanged accepted records. Changed manifest entry, test or mapped-source
+bytes always return the record to redo.
+
+Promotion consumes all fresh chunk files and a carry plan, rechecking every
+source verdict hash and recomputing byte identity against Git:
+
+```bash
+bin/release-evidence promote 42284808506 release-evidence/review/redo-001.verdicts.json \
+  --carry-plan release-evidence/review/carry-OLD-NEW.json
+```
+
+The CI run must be finished and match the candidate commit. A round with any
+unadjudicated finding cannot be promoted. Carried records retain their original
+reviewer attribution; editing the carry commit or source hash cannot make a
+changed record pass. Only the promoting candidate requires exact-SHA green CI;
+intermediate review rounds do not wait for CI.
+
+After promotion, regenerate manifest-derived outputs and collect evidence from
+the same finished CI run:
+
+```bash
+bin/generate_bindings.py generate
+bin/release-evidence collect 42284808506 --allow-promoted
+```
+
+`--allow-promoted` permits local differences only in the binding manifest and
+its generated mapping/coverage outputs. It does not waive the exact candidate
+CI requirement, review findings, the coverage denominator or platform-specific
+evidence. Keep chunk plans, reviewer outputs, carry plans and collected CI
+reports in the release-evidence audit trail.
