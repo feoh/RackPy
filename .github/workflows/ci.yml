@@ -536,7 +536,8 @@ jobs:
     # (bin/rackpy-release build: Mach-O architecture, install names, rpaths, deployment target and signature
     # checked), then installs and runs them in Rack Free 2.6.6 with an empty environment, including the
     # wrong-architecture, unsigned and quarantine cases (bin/rackpy-release verify). A runner is not a clean
-    # Mac: the logs record every library Rack mapped. Keeps evidence, not the artifacts.
+    # Mac: the logs record every library Rack mapped. Keeps evidence and a downloadable candidate artifact;
+    # this is not a published or supported release.
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.fast != true)
     strategy:
       fail-fast: false
@@ -586,6 +587,12 @@ jobs:
           for f in "$RUNNER_TEMP"/release/artifacts/*.vcvplugin "$RUNNER_TEMP"/release/artifacts/*.tar.zst; do
             tar -tvf "$f" > "reports/listings/$(basename "$f").txt" || true
           done
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: macos-${{ matrix.platform }}-release-candidate
+          path: ${{ runner.temp }}/release/artifacts/
+          retention-days: 30
+          if-no-files-found: error
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -601,7 +608,7 @@ jobs:
     # installs and runs them in Rack Free 2.6.6 with Windows PowerShell and PATH limited to Windows' folders,
     # including the missing-DLL, damaged-runtime, decoy-DLL, permission, Unicode and long-path cases
     # (bin/rackpy-release verify). A runner is not a clean PC: the logs record every DLL Rack loaded.
-    # Keeps evidence, not the artifacts.
+    # Keeps evidence and a downloadable candidate artifact; this is not a published or supported release.
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.fast != true)
     runs-on: windows-2025
     timeout-minutes: 150
@@ -652,6 +659,12 @@ jobs:
           for d in "$RUNNER_TEMP"/release/work/RackPy "$RUNNER_TEMP"/release/work/plugins/*; do
             cp "$d/licenses/FILES.json" "reports/files/$(basename "$d").json" || true
           done
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-win-x64-release-candidate
+          path: ${{ runner.temp }}/release/artifacts/
+          retention-days: 30
+          if-no-files-found: error
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

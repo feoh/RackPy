@@ -3,10 +3,14 @@
 :::{admonition} No macOS release is published
 :class: warning
 
-The only published release is Linux x86_64 for Rack Free 2.6.6. This page
-covers local and CI macOS candidate builds, not a downloadable or supported
-macOS release. They are not on GitHub Releases, PyPI or the VCV Library; do
-not redistribute or claim macOS support based on these candidates.
+The only published release is Linux x86_64 for Rack Free 2.6.6. A successful
+macOS release-candidate workflow uploads downloadable CI artifacts named
+`macos-mac-arm64-release-candidate` and `macos-mac-x64-release-candidate`;
+open the matching workflow run under **Actions → CI** and download its artifact.
+Artifacts are retained for 30 days. These are test candidates, not a published
+or supported macOS release: they are not on GitHub Releases, PyPI or the VCV
+Library. Do not redistribute or claim macOS support based on them before the
+owner's hardware check.
 :::
 
 ## What you need

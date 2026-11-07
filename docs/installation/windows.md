@@ -3,10 +3,13 @@
 :::{admonition} No Windows release is published
 :class: warning
 
-The only published release is Linux x86_64 for Rack Free 2.6.6. This page
-covers local and CI Windows candidate builds, not a downloadable or supported
-Windows release. They are not on GitHub Releases, PyPI or the VCV Library; do
-not redistribute or claim Windows support based on these candidates.
+The only published release is Linux x86_64 for Rack Free 2.6.6. A successful
+Windows release-candidate workflow uploads a downloadable CI artifact named
+`windows-win-x64-release-candidate`; open the matching workflow run under
+**Actions → CI** and download its artifact. Artifacts are retained for 30 days.
+This is a test candidate, not a published or supported Windows release: it is
+not on GitHub Releases, PyPI or the VCV Library. Do not redistribute or claim
+Windows support based on it before the owner's hardware check.
 :::
 
 ## What you need
