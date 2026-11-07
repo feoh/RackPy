@@ -1626,7 +1626,12 @@
       "title": "Certify performance and real-time invariants on controlled hardware",
       "depends_on": [
         "RP-43",
-        "RP-45"
+        "RP-45",
+        "RP-42",
+        "RP-46",
+        "RP-47",
+        "RP-54",
+        "RP-55"
       ],
       "outputs": [
         "benchmarks/results/",
@@ -1648,7 +1653,7 @@
         "The performance claim rests on controlled measurements and native baselines with published conditions.",
         "No timing claim comes from shared CI averages."
       ],
-      "notes": "RP-43 closed on the partial-use safety path (Linux, powersave governor, no audio device). This task completes RP-43's original acceptance and is bounded by owner hardware time: one session plus one rerun.",
+      "notes": "RP-43 closed on the partial-use safety path (Linux, powersave governor, no audio device). This task completes RP-43's original acceptance and is bounded by owner hardware time: one session plus one rerun. Ordering (owner request 2026-11-07): blocked behind every agent-only task (RP-42, RP-46, RP-47, RP-54, RP-55) so the owner's hardware step comes last; see the owner's checklist and the task comments.",
       "priority": "p2"
     },
     {
@@ -1656,7 +1661,12 @@
       "title": "Validate and release the macOS arm64 and x86_64 candidates on real Apple hardware",
       "depends_on": [
         "RP-40",
-        "RP-45"
+        "RP-45",
+        "RP-42",
+        "RP-46",
+        "RP-47",
+        "RP-54",
+        "RP-55"
       ],
       "outputs": [
         "release-evidence/candidate-macos-*/",
@@ -1676,7 +1686,7 @@
       "acceptance": [
         "macOS support is claimed only for the versions and architectures exercised, with limitations listed."
       ],
-      "notes": "Open gates from RP-40 and the RP-42 candidate audit: no real GPU on CI runners, SIP-on behavior not established, signing undecided.",
+      "notes": "Open gates from RP-40 and the RP-42 candidate audit: no real GPU on CI runners, SIP-on behavior not established, signing undecided. Ordering (owner request 2026-11-07): blocked behind every agent-only task (RP-42, RP-46, RP-47, RP-54, RP-55) so the owner's hardware step comes last; see the owner's checklist and the task comments.",
       "priority": "p2"
     },
     {
@@ -1684,7 +1694,12 @@
       "title": "Validate and release the Windows x86_64 candidate on real Windows hardware",
       "depends_on": [
         "RP-41",
-        "RP-45"
+        "RP-45",
+        "RP-42",
+        "RP-46",
+        "RP-47",
+        "RP-54",
+        "RP-55"
       ],
       "outputs": [
         "release-evidence/candidate-windows-x64-*/",
@@ -1704,7 +1719,7 @@
       "acceptance": [
         "Windows support is claimed only for what was exercised, with limitations listed."
       ],
-      "notes": "Open gates from RP-41: no real GPU on CI; runProcessDetached has no unattended test (RP-47).",
+      "notes": "Open gates from RP-41: no real GPU on CI; runProcessDetached has no unattended test (RP-47). Ordering (owner request 2026-11-07): blocked behind every agent-only task (RP-42, RP-46, RP-47, RP-54, RP-55) so the owner's hardware step comes last; see the owner's checklist and the task comments.",
       "priority": "p2"
     },
     {
@@ -1781,6 +1796,59 @@
       ],
       "notes": "Owner approved reserving the PyPI name on 2026-10-30, but PyPI's name-retention policy forbids empty packages; this waits for a functional release.",
       "priority": "p3"
+    },
+    {
+      "id": "RP-54",
+      "title": "Keep the macOS and Windows release-candidate packages as CI artifacts and hand the owner download links",
+      "depends_on": [
+        "RP-40",
+        "RP-41"
+      ],
+      "outputs": [
+        ".github/workflows (release-candidate jobs upload <platform>-release-candidate artifacts)",
+        "docs/installation/macos.md, docs/installation/windows.md",
+        "RP-49 and RP-50 comments with one download link per platform"
+      ],
+      "steps": [
+        "Make the macos-mac-arm64, macos-mac-x64 and windows-win-x64 release-candidate jobs upload the built candidate folder (every RackPy*.vcvplugin, the runtime tarball, the wheel, the source archive, manifest.json, SHA256SUMS) as an artifact, retention 30 days or longer; keep the evidence artifacts.",
+        "Run CI once on the current release source commit with all three candidates built and verified.",
+        "Comment on RP-49 and RP-50 with the run id, source commit, one direct link per platform and the SHA256 of RackPyOscillator-2.0.0-<platform>.vcvplugin.",
+        "Update the two installation guides: say where the CI candidate is and that it stays unsupported until the owner's hardware check."
+      ],
+      "validation": [
+        "The owner can click one link per platform and get a zip containing the .vcvplugin files; nothing else is asked of them."
+      ],
+      "acceptance": [
+        "Downloadable macOS and Windows candidates exist for the owner's smoke tests; nothing is published to the GitHub release by this task."
+      ],
+      "notes": "Agent-only. Created 2026-11-07 at the owner's request so that the owner's hardware tasks come last. CI run 42284808506 uploaded only *-evidence artifacts for these jobs.",
+      "priority": "p1"
+    },
+    {
+      "id": "RP-55",
+      "title": "Write the unattended performance-session runner (one command) for RP-48",
+      "depends_on": [
+        "RP-43"
+      ],
+      "outputs": [
+        "bin/perf-session (run, report)",
+        "docs/performance.md",
+        "the owner's checklist names the exact command"
+      ],
+      "steps": [
+        "bin/perf-session run: record the environment; set the CPU governor to performance with one sudo prompt and restore it on exit, including on error; build or fetch the pinned candidate; run bin/perf-baseline run with at least three repetitions; run a 30-minute workload on the real audio device through Rack with the loopback cable and record deadline misses, xruns and RackPy's attribution; run the 1,000-cycle lifecycle loop; run the slow-UI versus clean-UI p95 measurement; write everything raw into one timestamped output directory and print its path.",
+        "A device self-check at the start that fails fast with a plain message when no interface or no loopback signal is found.",
+        "bin/perf-session report <dir-a> <dir-b>: compare two sessions against ADR 004 budgets and emit the docs/performance-results.md tables; a budget failure is reported as a failure.",
+        "Run it end to end on a development machine with whatever interface is available (diagnostic only); document it in docs/performance.md; name the command in the owner's checklist and comment on RP-48."
+      ],
+      "validation": [
+        "An owner with no knowledge of the repository can run the one command; the agent can produce the RP-48 report from the two output directories alone."
+      ],
+      "acceptance": [
+        "The owner's part of RP-48 is: plug in, run one command, walk away, send one directory; twice."
+      ],
+      "notes": "Agent-only. Created 2026-11-07 at the owner's request. No 30-minute physical-device deadline-miss workload existed before this task (docs/performance-results.md).",
+      "priority": "p1"
     }
   ]
 }

@@ -1520,7 +1520,7 @@ tasks inherit the shared execution contract in tasks.json and AGENTS.md.
 
 ## RP-48 — Certify performance and real-time invariants on controlled hardware
 
-**Priority:** p2 · **Depends on:** RP-43, RP-45
+**Priority:** p2 · **Depends on:** RP-43, RP-45, RP-42, RP-46, RP-47, RP-54, RP-55
 
 ### Deliverables
 
@@ -1550,7 +1550,7 @@ tasks inherit the shared execution contract in tasks.json and AGENTS.md.
 
 ## RP-49 — Validate and release the macOS arm64 and x86_64 candidates on real Apple hardware
 
-**Priority:** p2 · **Depends on:** RP-40, RP-45
+**Priority:** p2 · **Depends on:** RP-40, RP-45, RP-42, RP-46, RP-47, RP-54, RP-55
 
 ### Deliverables
 
@@ -1578,7 +1578,7 @@ tasks inherit the shared execution contract in tasks.json and AGENTS.md.
 
 ## RP-50 — Validate and release the Windows x86_64 candidate on real Windows hardware
 
-**Priority:** p2 · **Depends on:** RP-41, RP-45
+**Priority:** p2 · **Depends on:** RP-41, RP-45, RP-42, RP-46, RP-47, RP-54, RP-55
 
 ### Deliverables
 
@@ -1680,4 +1680,44 @@ tasks inherit the shared execution contract in tasks.json and AGENTS.md.
 
 - Explicit owner approval is recorded before each publication; no VCV contact without approval.
 
-**Notes:** Owner approved reserving the PyPI name on 2026-10-30, but PyPI's name-retention policy forbids empty packages; this waits for a functional release.
+**Notes:** Owner approved reserving the PyPI name on 2026-10-30, but PyPI's name-retention policy forbids empty packages; this waits for a functional release. Owner decision 2026-11-07: PyPI no for now; VCV Library deferred until the one-RackPy-plugin-at-a-time conflict has a design answer; no VCV contact.
+
+## RP-54 — Keep the macOS and Windows release-candidate packages as CI artifacts and hand the owner download links
+
+**Priority:** p1 · **Depends on:** RP-40, RP-41
+
+Agent-only. Created 2026-11-07 at the owner's request so that the owner's hardware tasks (RP-48, RP-49, RP-50) come last in the ready list. CI run 42284808506's three release-candidate jobs uploaded only `*-evidence` artifacts; no downloadable macOS or Windows candidate existed.
+
+### Deliverables
+
+- The release-candidate CI jobs upload the built candidate folder per platform (every `RackPy*.vcvplugin`, the runtime tarball, the wheel, the source archive, `manifest.json`, `SHA256SUMS`) as a `<platform>-release-candidate` artifact, retention 30 days or longer; the evidence artifacts stay.
+- `docs/installation/macos.md`, `docs/installation/windows.md`
+- Comments on RP-49 and RP-50 with the run id, the source commit, one direct link per platform and the SHA256 of `RackPyOscillator-2.0.0-<platform>.vcvplugin`.
+
+### Validation
+
+- The owner can click one link per platform and get a zip containing the `.vcvplugin` files; nothing else is asked of them.
+
+### Acceptance criteria
+
+- Downloadable macOS and Windows candidates exist for the owner's smoke tests. Nothing is published to the GitHub release by this task; that is RP-49/RP-50 after the owner's smoke test, approved 2026-11-07.
+
+## RP-55 — Write the unattended performance-session runner (one command) for RP-48
+
+**Priority:** p1 · **Depends on:** RP-43
+
+Agent-only. Created 2026-11-07 at the owner's request. The owner's part of RP-48 must be: plug in an audio interface with a loopback cable, run one command, walk away, send one output directory; twice. No 30-minute physical-device deadline-miss workload existed before this task.
+
+### Deliverables
+
+- `bin/perf-session` (cyclopts): `run` records the environment; sets the CPU governor to `performance` with one sudo prompt and restores it on exit, including on error; builds or fetches the pinned candidate; runs `bin/perf-baseline run` with at least three repetitions; runs a 30-minute workload on the real audio device through Rack with the loopback cable and records deadline misses, xruns and RackPy's attribution; runs the 1,000-cycle lifecycle loop; runs the slow-UI versus clean-UI p95 measurement; writes everything raw into one timestamped output directory. A device self-check at the start fails fast with a plain message when no interface or loopback signal is found. `report <dir-a> <dir-b>` compares two sessions against ADR 004 budgets and emits the `docs/performance-results.md` tables; a budget failure is reported as a failure.
+- `docs/performance.md`
+- The owner's checklist names the exact command; a comment on RP-48 says it is ready.
+
+### Validation
+
+- Run end to end on a development machine with whatever interface is available (diagnostic only). An owner with no knowledge of the repository can run the one command; the agent can produce the RP-48 report from the two output directories alone.
+
+### Acceptance criteria
+
+- The owner's part of RP-48 is one command per session and nothing else.
