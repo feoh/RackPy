@@ -47,6 +47,23 @@ def first_bound(manifest: dict[str, Any]) -> dict[str, Any]:
     return next(r for r in manifest["entries"] if r["status"] in bm.BOUND and (r.get("python") or {}).get("raw"))
 
 
+def test_platform_scoped_known_gap_keeps_other_platform_mapping_intact(
+    ready: tuple[bm.Inputs, dict[str, Any], dict[str, Any], dict[str, str]],
+) -> None:
+    inputs, base_manifest, _, _ = ready
+    manifest = copy.deepcopy(base_manifest)
+    record = next(r for r in manifest["entries"] if r["id"].startswith("function:rack::system::runProcessDetached"))
+    record.update(
+        status="implemented",
+        notes="Known release gap [win-x64]: UAC elevation would block the UI thread.",
+    )
+    assert bm.known_gap(record, "win-x64")
+    assert not bm.known_gap(record, "lin-x64")
+    assert bm.known_gap_marker_problem(record, inputs.repo, "win-x64") is None
+    assert bm.known_gap_marker_problem(record, inputs.repo, "lin-x64") is None
+    assert bm.known_gap_marker_problem({**record, "id": "unlisted-gap"}, inputs.repo, "win-x64")
+
+
 def test_owner_approved_known_gaps_pass_only_when_documented(
     ready: tuple[bm.Inputs, dict[str, Any], dict[str, Any], dict[str, str]],
 ) -> None:

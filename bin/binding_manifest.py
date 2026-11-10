@@ -768,9 +768,10 @@ def owner_review_marker_problem(record: dict[str, Any]) -> str | None:
     return None
 
 
-def known_gap(record: dict[str, Any]) -> bool:
-    """Whether the manifest explicitly marks this record as an owner-approved known release gap."""
-    return KNOWN_GAP_OPEN in (record.get("notes") or "")
+def known_gap(record: dict[str, Any], platform: str | None = None) -> bool:
+    """Whether the manifest marks a global or platform-scoped owner-approved release gap."""
+    notes = record.get("notes") or ""
+    return KNOWN_GAP_OPEN in notes or (platform is not None and f"Known release gap [{platform}]:" in notes)
 
 
 def documented_known_gaps(repo: Path) -> set[str]:
@@ -783,17 +784,27 @@ def documented_known_gaps(repo: Path) -> set[str]:
     return set(re.findall(r"`([^`]+)`", section))
 
 
-def known_gap_marker_problem(record: dict[str, Any], repo: Path) -> str | None:
-    """Validate a known-gap marker against status and the documented ID allowlist."""
-    if not known_gap(record):
-        return None
-    ident = str(record.get("id", "?"))
+def known_gap_marker_problem(record: dict[str, Any], repo: Path, platform: str | None = None) -> str | None:
+    """Validate global and platform-scoped known-gap markers against status and docs."""
     notes = record.get("notes") or ""
-    _, _, reason = notes.partition(KNOWN_GAP_OPEN)
-    if record.get("status") not in {"planned", "unrepresentable"}:
-        return "known release gaps may only be planned or unrepresentable"
-    if not reason.strip(" :.;\t\n"):
-        return f"{KNOWN_GAP_OPEN!r} must be followed by the gap reason"
+    ident = str(record.get("id", "?"))
+    global_gap = KNOWN_GAP_OPEN in notes
+    scoped_markers = re.findall(r"Known release gap \[([^]]+)\]:", notes)
+    if global_gap:
+        _, _, reason = notes.partition(KNOWN_GAP_OPEN)
+        if record.get("status") not in {"planned", "unrepresentable"}:
+            return "global known release gaps may only be planned or unrepresentable"
+    elif platform is not None and platform in scoped_markers:
+        marker = f"Known release gap [{platform}]:"
+        _, _, reason = notes.partition(marker)
+        if record.get("status") not in BOUND:
+            return "platform-scoped known release gaps require an implemented or verified mapping"
+    elif platform is None and scoped_markers:
+        reason = "scoped gap marker"
+    else:
+        return None
+    if not reason.strip(" :.;\t\\n"):
+        return "known release gap marker must be followed by the gap reason"
     if ident not in documented_known_gaps(repo):
         return f"{ident} is not listed under {KNOWN_GAP_HEADER} in docs/coverage.md"
     return None
@@ -875,7 +886,9 @@ def release_problems(
             continue
         record = records.get(ident, {})
         status = record.get("status", "unknown")
-        if status not in FINAL and not (known_gap(record) and not known_gap_marker_problem(record, inputs.repo)):
+        if status not in FINAL and not (
+            known_gap(record, platform) and not known_gap_marker_problem(record, inputs.repo, platform)
+        ):
             problems.append(Problem("incomplete", ident, f"{status} on {platform}"))
         for item in open_owner_reviews(records.get(ident, {})):
             problems.append(Problem("owner-review", ident, f"open owner review item, until the owner decides: {item}"))
