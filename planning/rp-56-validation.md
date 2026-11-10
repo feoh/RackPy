@@ -101,14 +101,70 @@ The tests dispatch on the branch was cancelled before it finished, so it measure
 the six candidates jobs are skipped on a plain dispatch, that the cache job runs after a cancellation, and
 RP-61's failure (two jobs lost to one HTTP 500).
 
-### Still to measure
+### The second push to `main`: every job, warm compiler caches
 
-A tests run and a candidates run with warm compiler caches, not overlapping another run.
+[Run 42868485668](https://github.com/feoh/RackPy/actions/runs/42868485668), the push of `251054a`, with no
+other run in progress: 41 jobs succeeded, none failed, the external link check skipped. It took 41.0 minutes,
+and the last test job ended at 15.2 minutes.
+
+| Measure | This run | Before: warm run 42834516722 | Before: 31 full runs, median (shortest) |
+| --- | --- | --- | --- |
+| Whole run | 41.0 min | 50.7 min | 59.4 min (44.0) |
+| Until the last test job ended | 15.2 min | 21.4 min | 31.5 min (17.9) |
+
+| Job | Started | Ended | Ran |
+| --- | --- | --- | --- |
+| Official Rack toolchain | 0.1 min | 0.3 min | 0.2 min |
+| Distributable build | 2.2 min | 26.5 min | 24.3 min |
+| Linux release candidate | 2.2 min | 32.1 min | 29.9 min |
+| macOS mac-x64 release candidate | 6.0 min | 32.9 min | 26.9 min |
+| Windows x64 release candidate | 0.4 min | 38.9 min | 38.5 min |
+| macOS mac-arm64 release candidate | 11.3 min | 41.0 min | 29.7 min |
+
+The platform test suites took 2 to 10 minutes each. What sets the length of a full run now is the
+candidates themselves: the Windows one runs for 38 minutes, most of it compiling with no compiler cache by
+design, and the mac-arm64 one waits 11 minutes for one of the five macOS runners and then runs for 30.
+
+One run is one run: the 9.7 minutes against the earlier warm run is a single comparison, not a distribution.
+
+### A tests dispatch on `main`, warm compiler caches
+
+[Run 42875698756](https://github.com/feoh/RackPy/actions/runs/42875698756), `gh workflow run ci.yml --ref main`
+at `251054a`, with no other run in progress: 33 jobs succeeded, none failed, and the six candidates jobs
+(toolchain, distributable build, the release candidates, per-platform SDK inventory) were skipped. It took
+20.0 minutes. The last job to end was the mac-x64 services suite, which started at 6.6 minutes and ran for
+13.2; the same suite ran for 9.9 minutes in the push above, where the last test job ended at 15.2 minutes.
+
+So the question "do the tests pass on four platforms" was answered in 20 minutes here, against a median of
+59.4 for the run that used to answer it. That is one run.
+
+`bin/release-evidence collect 42875698756`, written to a scratch directory, judged the tests, records and
+samples of all four platforms and reported the release bar as "not judged" for each, with the skipped
+candidates jobs listed as not successful. A tests run cannot be mistaken for release evidence.
+
+### A candidates dispatch on `main`, warm compiler caches
+
+[Run 42879734745](https://github.com/feoh/RackPy/actions/runs/42879734745), `gh workflow run ci.yml --ref main
+-f candidates=true` at `251054a`, with no other run in progress: all 42 jobs succeeded (the 41 of a push, and
+the external link check, which a dispatch runs and a push does not). It took 43.4 minutes; the last test job
+ended at 24.5 minutes. The last job was the mac-x64 release candidate, 5.3 to 43.4 minutes; the Windows one
+ran from 0.1 to 40.6. The distributable build (2.0 to 22.4) and the Linux release candidate (2.0 to 31.6)
+started together.
+
+### Summary
+
+| Run, warm compiler caches, nothing else running | Jobs | Time | Before |
+| --- | --- | --- | --- |
+| Tests dispatch (42875698756) | 33 | 20.0 min | no such run; the full one, median 59.4 min |
+| Push to `main` (42868485668) | 41 | 41.0 min | median 59.4 min, shortest 44.0, of 31 full runs |
+| Candidates dispatch (42879734745) | 42 | 43.4 min | the same |
+
+Three runs, one of each kind. A run with cold compiler caches took 95.0 minutes (42851605565).
 
 ### CPython on the Linux jobs (RP-61)
 
 In run 42851605565, 18 of the 19 Linux jobs that set up uv downloaded CPython 3.14.2 (33.7 MiB) from a GitHub
-release; the other, the toolchain lookup, never ran uv. With `cache-python: true` on those jobs (`20ede70`), two fast dispatches on
+release; the other, the toolchain lookup, never ran uv. With `cache-python: true` on those jobs (`f652632`), two fast dispatches on
 the branch:
 
 | Run | Python cache | Linux jobs | Downloads of CPython |
@@ -116,6 +172,11 @@ the branch:
 | [42860073165](https://github.com/feoh/RackPy/actions/runs/42860073165) | none yet | 3 finished before the next dispatch cancelled it | 3; one job saved the cache (36 MB) |
 | [42860483645](https://github.com/feoh/RackPy/actions/runs/42860483645) | saved by the run above | 16 started (12 succeeded, 4 cancelled by hand after their uv steps) | 0; all 16 restored it, and Python is still 3.14.2 |
 
-Not shown yet: the candidates jobs and the external link check, which a fast dispatch skips, and any run on
-`main`. The key includes `pyproject.toml` and `uv.lock`, so the first run after either changes downloads
-again.
+On `main`: in the push of `251054a` (42868485668) 14 Linux jobs missed, downloaded and saved, and the 4 that
+started after the save restored it. In the tests dispatch after it (42875698756) all 17 Linux jobs, the
+external link check among them, restored it, and no log has a CPython download.
+
+In the candidates dispatch (42879734745) all 20 Linux jobs restored it, the toolchain lookup, the
+distributable build and the Linux release candidate among them; again no log has a CPython download.
+
+The key includes `pyproject.toml` and `uv.lock`, so the first run after either changes downloads again.
