@@ -281,11 +281,14 @@ records listed below as known gaps. This is a bounded exception for the audited
 partial candidate, **not** complete API coverage; all limitations must remain
 visible in release notes and coverage reports. A manifest record opts into this
 exception with `Known release gap:` in its notes, and the checker requires its
-ID to appear in this list. No unlisted `planned` or `unrepresentable` record is
-exempt.
+ID to appear in this list. A platform-only exception uses
+`Known release gap [<platform>]:` (for example `Known release gap [win-x64]:`);
+the implementation remains mapped and is still checked normally on every other
+platform. No unlisted incomplete record is exempt.
 
 | Manifest ID | Status | Known limitation |
 | --- | --- | --- |
+| `function:rack::system::runProcessDetached(const std::string &)` | implemented; Windows gap | Windows invokes ShellExecuteExW with the `runas` verb and can block Rack's UI thread on a UAC prompt or error dialog; no unattended non-elevating test is available. |
 | `class_template:rack::DeferWrapper<type>` | unrepresentable | Python context-manager adaptation does not preserve destructor-timed raw callback semantics. |
 | `constructor:rack::DeferWrapper::DeferWrapper<F>($c0)` | unrepresentable | No safe raw-equivalent for a destructor callback that may run on arbitrary threads. |
 | `destructor:rack::DeferWrapper::~DeferWrapper<F>()` | unrepresentable | No safe raw-equivalent for destructor-triggered callback execution. |
