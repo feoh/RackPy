@@ -150,7 +150,12 @@
     "RP-53": "tk-rackpy-53-pypi-upload-and-vcv-library-submission-295fc3",
     "RP-54": "tk-rackpy-54-keep-the-macos-and-windows-release-can-f06c7b",
     "RP-55": "tk-rackpy-55-write-the-unattended-performance-sessi-b2cc0a",
-    "RP-56": "tk-rackpy-56-cut-ci-wall-clock-and-stop-determinist-2c78b5"
+    "RP-56": "tk-rackpy-56-cut-ci-wall-clock-and-stop-determinist-2c78b5",
+    "RP-57": "tk-rackpy-57-macos-release-candidate-check-rack-abo-cdeb18",
+    "RP-58": "tk-rackpy-58-expander-snapshot-raises-when-rack-s-e-2017fb",
+    "RP-59": "tk-rackpy-59-a-failed-kernel-publishes-its-flag-bef-e4bc12",
+    "RP-60": "tk-rackpy-60-shutdown-order-test-show-the-stale-han-873739",
+    "RP-61": "tk-rackpy-61-ci-jobs-fail-when-one-download-from-gi-f4c08d"
   },
   "project_history": "Initial write/search failed: WorkflowProject missing preauthorized. Owner-requested retry succeeded after repository/task graph publication; attached existing epic and 45 children without duplication.",
   "session_slug": "ws-wp-rackpy-pythonic-full-surface-bindings-for-vcv-7ac5f9",

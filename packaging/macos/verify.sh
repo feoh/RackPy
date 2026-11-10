@@ -75,7 +75,9 @@ headless() {  # $1: user folder, $2: name for the logs. Quits through stdin once
     done
     sleep 3
     images $rack "$LOGS/$name.images"
-    echo >&9; exec 9>&-
+    # In a subshell: if Rack has already died nothing reads the fifo, and the write's SIGPIPE would end this
+    # script before the case is reported and before any later case runs.
+    ( echo >&9 ) 2>/dev/null; exec 9>&-
     wait $rack; echo $? > "$LOGS/$name.rc"
     kill "$dog" 2>/dev/null
     rm -f "$fifo"

@@ -1745,3 +1745,146 @@ Agent-only. Created 2026-11-10 at the owner's request. Of the 40 CI runs before 
 ### Acceptance criteria
 
 - A branch iteration no longer waits for release candidates; `main` is green; a push to `main` still runs every job it ran before.
+
+## RP-57 — macOS release-candidate check: Rack aborts in CoreMIDI at start-up
+
+**Priority:** p2 · **Depends on:** none
+
+Created 2026-11-10 by RP-56. Not known: why `MIDIClientCreate` returned -50 (`paramErr`) on those two launches. Does not block the epic.
+
+Intermittent, and still happening: the mac-x64 release-candidate job failed this way in runs 42068116544 (2026-11-05, case `quarantined-package`) and 42834516722 (2026-11-10, case `RackPyTemplate-2`), where it was the run's only failure. Rack's own output for both launches is `MidiInCore::initialize: error creating OS-X MIDI client object (-50)` followed by an uncaught `RtMidiError`. Rack initialises MIDI before it loads plugins, so no RackPy code had run. RP-56 fixed the second half: `packaging/macos/verify.sh` wrote the quit line to the fifo of the dead Rack and died of SIGPIPE (exit status -13), so the case was never named and the later cases never ran; it now records Rack's exit status, reports the case as failed and carries on. The abort itself still fails the job.
+
+### Deliverables
+
+- packaging/macos/verify.sh (what the check does when Rack aborts in MIDI start-up)
+- bin/rackpy-release (summary line for it, if the owner allows a relaunch)
+- CONTRIBUTING.md (the failure and its response)
+
+### Implementation steps
+
+- Owner decision: may the check relaunch Rack when, and only when, Rack died by a signal and its output contains `MidiInCore::initialize: error creating OS-X MIDI client object`? The owner's rule is no retries; this one would be of Rack's start-up on the runner, before any project code runs. The alternative is to leave the job failing and rerun it by hand.
+- If allowed: at most two relaunches, each attempt's output kept, and a line in the summary naming the case and the attempt, so that every occurrence is counted. Any other abort stays a failure.
+- If not allowed: make the failed case's message say that Rack aborted in its MIDI start-up before loading a plugin, so the reader does not look for a RackPy cause.
+- Find out whether the pytest Rack launcher on macOS can meet the same abort, and whether mac-arm64 has ever shown it.
+
+### Validation
+
+- The control flow, run against a stub that prints the message and aborts, in place of Rack.
+- A candidates run on macOS. The abort cannot be provoked on demand: it was seen twice in 32 mac-x64 candidate jobs.
+
+### Acceptance criteria
+
+- A Rack start-up abort in CoreMIDI is either absorbed and counted in the summary, or reported by name as Rack's; in neither case is it mistaken for a RackPy failure.
+
+## RP-58 — Expander.snapshot() raises when Rack's engine thread is paused mid-write
+
+**Priority:** p2 · **Depends on:** none
+
+Created 2026-11-10 by RP-56. Nothing is added to the audio path. Does not block the epic.
+
+`tests/engine/expanders/in_rack/test_exchange.py::test_python_reads_snapshots_while_racks_engine_runs` failed three times on 2026-11-05 (mac-arm64 in runs 42101882241 and 42105233104, Windows in 42105233104) with `RuntimeError: snapshot(): Rack's engine thread kept writing the snapshot; try again`. `Snapshot::read` in `native/engine/expanders.hpp` gives up after 1000 attempts with no pause between them, which is a count of spins (about a microsecond), not a time, so it fails whenever the engine thread is descheduled between its two sequence stores for longer than that. That the read gave up is verified; that the engine thread was descheduled is inferred. Commit `db07fee` made the test catch the message and try again, which is a retry in a test, and it hides a defect users can meet: `docs/reference/engine-module.md` and the method's docstring both say a snapshot may be read while the engine runs, and neither mentions an exception.
+
+### Deliverables
+
+- native/engine/expanders.hpp (`Snapshot::read`)
+- native/tests (a check that holds a write open)
+- tests/engine/expanders/in_rack/test_exchange.py (retry removed)
+- docs/reference/engine-module.md and the `snapshot()` docstring, if raising stays part of the contract
+
+### Implementation steps
+
+- In `Snapshot::read`, yield after an attempt that found a write in progress or a changed sequence, and bound the loop by elapsed time instead of by 1000 spins. `read` runs on the main thread with the GIL released; `write`, on the engine thread, does not change.
+- Add a native check: a second thread holds the sequence odd for a few milliseconds and then completes the write; `read` returns true.
+- Remove the `try`/`except` that `db07fee` added to the test, so it again shows that `snapshot()` does not raise while the engine runs.
+- If raising is to stay possible after the time bound, document the exception in `docs/reference/engine-module.md` and in the docstring.
+
+### Validation
+
+- The native check and the in-Rack test on Linux.
+- A tests run on all four platforms. The original failure cannot be provoked on demand.
+
+### Acceptance criteria
+
+- `snapshot()` does what its documentation says while the engine runs, and the test has no retry.
+
+## RP-59 — A failed kernel publishes its flag before its diagnostic record
+
+**Priority:** p3 · **Depends on:** none
+
+Created 2026-11-10 by RP-56. Seen once. Does not block the epic.
+
+`tests/dsp/in_rack/test_kernels.py::test_reset_rate_bypass_and_failure_are_native` failed once (mac-arm64, run 42068116544, 2026-11-05): `kernel_failed` was true and the outputs were silent, but `diagnostics(sequence)` held no `kernel_failed` record. No `until(...)` budget ran out. `KernelSlot::fail` in `native/dsp/runtime/runtime.cpp` stores the failure flag, silences the module, and only then builds the message and records the diagnostic, so a reader that has seen the flag can find no record yet. That this ordering is what happened is inferred: the assertion did not print the records it saw. Commit `cd94971` made the test poll for the flag and the record together. Its comment gives a different reason, that later records overwrote this one in the 256-entry ring; nothing in that session writes 256 diagnostics in the 5 ms between polls.
+
+### Deliverables
+
+- native/dsp/runtime/runtime.cpp (`KernelSlot::fail`)
+- tests/dsp/in_rack/test_kernels.py (comment corrected; records printed when the assertion fails)
+
+### Implementation steps
+
+- In `KernelSlot::fail`, record the diagnostic before storing the failure flag, so that a true `kernel_failed` implies a readable record. This reorders work the engine thread already does on the failure path and adds none.
+- Correct the comment in the test, and assert the record directly once `kernel_failed` is true.
+- Put the records the test saw into the assertion message, so a recurrence tells the two explanations apart.
+
+### Validation
+
+- The in-Rack kernel tests and the native suite on Linux; a tests run on all four platforms.
+
+### Acceptance criteria
+
+- A reader that sees `kernel_failed` finds its diagnostic, and the test says so without polling for the pair.
+
+## RP-60 — Shutdown-order test: show the stale handle without depending on a daemon thread's scheduling
+
+**Priority:** p3 · **Depends on:** none
+
+Created 2026-11-10 by RP-56. The proposed change has not been run. Does not block the epic.
+
+`tests/runtime/test_runtime_host.py::test_shutdown_runs_in_the_documented_order` failed once (mac-x64, run 42061405852, 2026-11-05). Nothing was out of order: the marker `WORKER careless saw StaleHandleError` was missing. It is logged by an unjoined daemon thread, which in that run had about 5 ms between `RackPy context closed` and the destruction of the plugin, and whose loop was taking about 5.3 ms on that runner; Python was finalised before it ran again. Verified from that run's Rack log. Commit `8596f98` made the marker optional. That is right about the race, but when the thread does not run, the test no longer shows that a Python thread gets `StaleHandleError` after the context closes in real Rack.
+
+### Deliverables
+
+- tests/runtime/scenarios/runtime_checks.py (the `careless` worker)
+- tests/runtime/test_runtime_host.py (marker required again)
+
+### Implementation steps
+
+- Make `careless` a non-daemon thread. Python joins non-daemon threads when it finalises, and the thread returns on its first `StaleHandleError`, so the line is written before `Py_FinalizeEx returned 0` on every run.
+- Require the marker again, between `RackPy context closed` and `Py_FinalizeEx returned 0`.
+- Check what happens if staleness is never raised: the run should end in the launcher's timeout with a message that names the worker, not hang without one.
+
+### Validation
+
+- The windowed host tests on Linux under Xvfb; a tests run on macOS and Windows.
+
+### Acceptance criteria
+
+- Every run of the test shows the stale-handle error after the context closes, with no dependence on thread scheduling.
+
+## RP-61 — CI jobs fail when one download from GitHub fails
+
+**Priority:** p2 · **Depends on:** none
+
+Created 2026-11-10 by RP-56. Does not block the epic.
+
+In the first tests run of RP-56's workflow (42849726853, 2026-11-10) two Linux jobs, `Documentation site (broken-repository-file)` and `SDK pins, native build and audio-path guard`, failed at `uv sync --frozen`: github.com answered HTTP 500 for the managed CPython 3.14.2 archive and uv gave up after its three attempts. Every Linux job downloads that 33.7 MiB archive from a GitHub release each time it runs, because `setup-uv` runs with `cache-python: false`; the macOS and Windows jobs use the runner's own Python. Two earlier failures were also somebody else's server: `upload-artifact` could not resolve a host (job 127563968851, run 42118378141) and the external link check was rate limited (run 41937530408). The link check runs on every tests dispatch.
+
+### Deliverables
+
+- .github/workflows/ci.yml (managed Python restored from a cache; where the external link check runs)
+- CONTRIBUTING.md
+
+### Implementation steps
+
+- Keep the managed CPython in the Actions cache on the Linux jobs (`setup-uv` has a `cache-python` input, false today), and show from a job log that a warm run no longer downloads it. Stay within the 10 GB limit that RP-56's compiler-cache pruning protects.
+- List what else a job downloads that no cache covers, and cache it or say why it cannot be.
+- Decide whether the external link check belongs in every tests dispatch or only in the weekly run: its result depends on other people's servers, not on the branch.
+- Do not add retries around tests. A download is not a test; where one cannot be cached, say so.
+
+### Validation
+
+- A tests run in which no job downloads CPython, shown from the job logs; cache use after it.
+
+### Acceptance criteria
+
+- A failed download of an input that has not changed cannot fail a run.

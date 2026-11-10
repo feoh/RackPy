@@ -44,6 +44,29 @@ The 22 failed runs whose logs were read, sorted by `bin/ci-failures`' rule:
 | Tests failed on one of macOS or Windows only | 4 | 42061405852, 42068116544, 42101882241, 42118378141 |
 | Outside the tests | 2 | external link check rate limited (41937530408); mac-x64 release candidate, `Abort trap: 6` (42834516722) |
 
+### The intermittent ones, by cause
+
+Read from the failed jobs' logs, the artifacts of four of the runs and the source at `1fc30a9`. "Verified"
+means the log or artifact shows it; "inferred" means the source allows it and nothing contradicts it.
+
+| Failure | Seen | Cause | Task |
+| --- | --- | --- | --- |
+| mac-x64 release candidate: `Abort trap: 6`, then exit status -13 | 2 of 32 mac-x64 candidate jobs (42068116544, 42834516722) | Verified. Rack aborts in its own MIDI start-up (`MidiInCore::initialize: error creating OS-X MIDI client object (-50)`, an uncaught `RtMidiError`) before it loads a plugin. `verify.sh` then wrote the quit line to the fifo of the dead Rack and died of SIGPIPE, so the case was not named and the later cases did not run | The SIGPIPE is fixed here; the abort is RP-57 |
+| `test_python_reads_snapshots_while_racks_engine_runs`: `snapshot()` raised | 3 jobs (mac-arm64 in 42101882241 and 42105233104, Windows in 42105233104) | The read gave up after 1000 spins with no pause: verified. That the engine thread was descheduled in mid-write: inferred. `db07fee` put a retry in the test, and the exception is not in the documentation | RP-58 |
+| `test_reset_rate_bypass_and_failure_are_native`: no `kernel_failed` diagnostic | 1 job (mac-arm64, 42068116544) | Inferred. `KernelSlot::fail` publishes the flag before the diagnostic record. Not an `until(...)` budget. `cd94971` made the test poll for both | RP-59 |
+| `test_shutdown_runs_in_the_documented_order`: a marker missing | 1 job (mac-x64, 42061405852) | Verified. The marker is logged by an unjoined daemon thread that had about 5 ms before Python was finalised. `8596f98` made the marker optional | RP-60 |
+| CTest `test_runtime.cpp:141: CHECK failed: waited >= 40` | 3 jobs (42105233104, 42118378141) | A lock test that assumed a 40 ms wait. Fixed at the source by `06122b8`; not seen since | none needed |
+| A download or a request to someone else's server failed | `upload-artifact` could not resolve a host (42118378141); external link check rate limited (41937530408); HTTP 500 for the managed CPython archive (42849726853, below) | Every Linux job downloads CPython from a GitHub release (`cache-python: false`); the link check runs on every tests dispatch | RP-61 |
+
+No test's own time budget ran out in any of these. What the four test failures share is an assumption that
+another thread finishes a step inside a short real-time window: about a microsecond of spinning, the gap
+between two stores, 5 ms, 40 ms.
+
+The fix to `verify.sh` was checked by running the script's own `headless` function against a stub that prints
+Rack's message and aborts: at `70d3e65` the script dies with status -13, as in CI; with the change it writes
+134 to the case's `.rc` file, copies the log and goes on. With a stub that waits for the quit line, both
+versions record 0. Run on Linux with bash 5; macOS's bash 3.2 was not tried.
+
 ## After
 
 Not yet measured: this file is updated with the first tests run and the first candidates run of the changed

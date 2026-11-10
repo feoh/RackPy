@@ -1,5 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# RackPy CI (RP-08). Linux x86_64 only; macOS and Windows jobs arrive with RP-40 and RP-41.
+# RackPy CI (RP-08): Linux x86_64, macOS arm64 and x86_64, Windows x86_64 (RP-40, RP-41).
+#
+# How much runs depends on what started it (RP-56; CONTRIBUTING.md has the table):
+#   pull request                 Linux checks and a fast host smoke
+#   dispatch, fast=true          the same, plus that smoke on macOS and Windows
+#   dispatch                     every test suite on the four platforms
+#   dispatch, candidates=true    the tests, the distributable build, the release candidates and the
+#   and every push to main       per-platform SDK inventory
 #
 # Every input is pinned and checksum-verified by the bin/ tools, so the caches
 # below only save downloads. CI keeps logs and test reports, never binaries:

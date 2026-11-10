@@ -50,7 +50,9 @@ headless() {  # $1: user folder, $2: name for the logs. Quits through stdin once
         kill -0 $rack 2>/dev/null || break
         sleep 0.1
     done
-    sleep 3; echo >&9; exec 9>&-
+    # In a subshell: if Rack has already died nothing reads the fifo, and the write's SIGPIPE would end this
+    # script before the case is reported and before any later case runs.
+    sleep 3; ( echo >&9 ) 2>/dev/null; exec 9>&-
     wait $rack; echo $? > "/logs/$name.rc"
     rm -f "$fifo"
     cp "$user/log.txt" "/logs/$name.log" 2>/dev/null || touch "/logs/$name.log"
