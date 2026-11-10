@@ -1,6 +1,6 @@
 machine: Ubuntu 20.04.6 LTS, glibc 2.31
 python on the system: none
-network:       1 unknown 
+network:       1 unknown
 ok    every artifact matches SHA256SUMS
 ok    no artifact fails SHA256SUMS
 example plugins: 10
