@@ -185,6 +185,12 @@ compiles for 40 to 70 minutes. `macos_tests` and `windows_tests` narrow a
 tests or candidates run; do not combine them with `fast=true`. Runtime depends
 on runner and build cache state; no completion time is promised.
 
+The Ubuntu runner has no Python 3.14, so uv installs its own in every Linux
+job. Those jobs keep it in the Actions cache (`cache-python` on `setup-uv`),
+keyed on `pyproject.toml` and `uv.lock`: a run downloads it from GitHub only
+after one of those files changes, or on a branch whose changed lock `main` has
+not seen ([RP-61](planning/TASKS.md)).
+
 ### When a run fails
 
 Of the 40 runs before RP-56, 23 failed
