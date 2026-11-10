@@ -70,6 +70,10 @@ Linux or on several platforms. A full run took a median of 59 minutes
   it locally and fix it before another run. A test that failed on one of macOS
   or Windows only may be intermittent: `gh run rerun RUN --failed` once, and
   record the run and job on a Witan task either way. Do not add retries to tests.
+- One repeat exists, by owner decision (2026-11-10, RP-57): the macOS release
+  check runs Rack once more when Rack died in its own MIDI start-up before
+  loading a plugin, and counts it in the summary. Do not widen it to other
+  failures or copy it elsewhere without the owner.
 
 ## Engineering guardrails
 

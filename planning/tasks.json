@@ -1889,12 +1889,12 @@
       "depends_on": [],
       "outputs": [
         "packaging/macos/verify.sh (what the check does when Rack aborts in MIDI start-up)",
-        "bin/rackpy-release (summary line for it, if the owner allows a relaunch)",
+        "planning/rp-57-validation.md",
         "CONTRIBUTING.md (the failure and its response)"
       ],
       "steps": [
         "Owner decision: may the check relaunch Rack when, and only when, Rack died by a signal and its output contains `MidiInCore::initialize: error creating OS-X MIDI client object`? The owner's rule is no retries; this one would be of Rack's start-up on the runner, before any project code runs. The alternative is to leave the job failing and rerun it by hand.",
-        "If allowed: at most two relaunches, each attempt's output kept, and a line in the summary naming the case and the attempt, so that every occurrence is counted. Any other abort stays a failure.",
+        "Allowed: one more run of Rack, the first run's output kept, and a line in the summary naming the case, so that every occurrence is counted. A second abort of the same kind, and any other abort, stays a failure.",
         "If not allowed: make the failed case's message say that Rack aborted in its MIDI start-up before loading a plugin, so the reader does not look for a RackPy cause.",
         "Find out whether the pytest Rack launcher on macOS can meet the same abort, and whether mac-arm64 has ever shown it."
       ],
@@ -1905,7 +1905,7 @@
       "acceptance": [
         "A Rack start-up abort in CoreMIDI is either absorbed and counted in the summary, or reported by name as Rack's; in neither case is it mistaken for a RackPy failure."
       ],
-      "notes": "Created 2026-11-10 by RP-56. Not known: why `MIDIClientCreate` returned -50 (`paramErr`) on those two launches. Does not block the epic.",
+      "notes": "Created 2026-11-10 by RP-56. Owner decision, 2026-11-10: the check may run Rack once more, once, after this abort; done in `packaging/macos/verify.sh` (planning/rp-57-validation.md). Not known: why `MIDIClientCreate` returned -50 (`paramErr`) on those two launches. Does not block the epic.",
       "priority": "p2"
     },
     {

@@ -1750,20 +1750,20 @@ Agent-only. Created 2026-11-10 at the owner's request. Of the 40 CI runs before 
 
 **Priority:** p2 · **Depends on:** none
 
-Created 2026-11-10 by RP-56. Not known: why `MIDIClientCreate` returned -50 (`paramErr`) on those two launches. Does not block the epic.
+Created 2026-11-10 by RP-56. Owner decision, 2026-11-10: the check may run Rack once more, once, after this abort; done in `packaging/macos/verify.sh` (planning/rp-57-validation.md). Not known: why `MIDIClientCreate` returned -50 (`paramErr`) on those two launches. Does not block the epic.
 
 Intermittent, and still happening: the mac-x64 release-candidate job failed this way in runs 42068116544 (2026-11-05, case `quarantined-package`) and 42834516722 (2026-11-10, case `RackPyTemplate-2`), where it was the run's only failure. Rack's own output for both launches is `MidiInCore::initialize: error creating OS-X MIDI client object (-50)` followed by an uncaught `RtMidiError`. Rack initialises MIDI before it loads plugins, so no RackPy code had run. RP-56 fixed the second half: `packaging/macos/verify.sh` wrote the quit line to the fifo of the dead Rack and died of SIGPIPE (exit status -13), so the case was never named and the later cases never ran; it now records Rack's exit status, reports the case as failed and carries on. The abort itself still fails the job.
 
 ### Deliverables
 
 - packaging/macos/verify.sh (what the check does when Rack aborts in MIDI start-up)
-- bin/rackpy-release (summary line for it, if the owner allows a relaunch)
+- planning/rp-57-validation.md
 - CONTRIBUTING.md (the failure and its response)
 
 ### Implementation steps
 
 - Owner decision: may the check relaunch Rack when, and only when, Rack died by a signal and its output contains `MidiInCore::initialize: error creating OS-X MIDI client object`? The owner's rule is no retries; this one would be of Rack's start-up on the runner, before any project code runs. The alternative is to leave the job failing and rerun it by hand.
-- If allowed: at most two relaunches, each attempt's output kept, and a line in the summary naming the case and the attempt, so that every occurrence is counted. Any other abort stays a failure.
+- Allowed: one more run of Rack, the first run's output kept, and a line in the summary naming the case, so that every occurrence is counted. A second abort of the same kind, and any other abort, stays a failure.
 - If not allowed: make the failed case's message say that Rack aborted in its MIDI start-up before loading a plugin, so the reader does not look for a RackPy cause.
 - Find out whether the pytest Rack launcher on macOS can meet the same abort, and whether mac-arm64 has ever shown it.
 

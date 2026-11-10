@@ -216,6 +216,14 @@ two outside the tests. So:
    waits on real time or on Rack's engine thread with a fixed budget. Record it
    on a Witan task with the run and job, and fix the wait. Do not add a retry
    and do not rerun until it passes without recording it.
+
+   One failure is repeated, because it is Rack's and not ours
+   ([RP-57](planning/rp-57-validation.md)): on macOS, Rack Free 2.6.6
+   sometimes dies while starting its MIDI driver, before it loads any plugin
+   (`MidiInCore::initialize: error creating OS-X MIDI client object (-50)`).
+   The macOS release check runs that Rack once more, keeps the first run's
+   output, and writes an `AGAIN` line in its summary and a warning on the run's
+   page, so each occurrence is counted. A second death in a row fails the job.
 5. Narrow a platform-specific investigation with `-f macos_tests=EXPR` or
    `-f windows_tests=EXPR` on a tests run: one suite job, a few minutes.
 

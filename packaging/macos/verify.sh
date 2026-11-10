@@ -60,7 +60,42 @@ watchdog() {  # $1: pid, $2: seconds; kills the process if it is still running t
 images() {  # $1: pid, $2: file: the executable images (txt) the process has mapped
     lsof -a -p "$1" -d txt -Fn 2>/dev/null | sed -n 's/^n//p' | sort -u > "$2"
 }
-headless() {  # $1: user folder, $2: name for the logs. Quits through stdin once the patch has run for 3 s.
+# RP-57: Rack Free 2.6.6 sometimes dies while it starts its own MIDI driver, before it loads any plugin:
+# CoreMIDI refuses it a client ("MidiInCore::initialize: error creating OS-X MIDI client object (-50)") and
+# Rack does not catch RtMidi's exception. Seen on GitHub's mac-x64 runners in 2 of 32 candidate jobs. Owner
+# decision, 2026-11-10: such a run is repeated once. Only this: Rack ended by a signal, with that message,
+# and its log stops between "Initializing MIDI" and "Initializing plugins", so no RackPy code had run. The
+# first run's files are kept as <name>.midi-abort-N.*, and every occurrence is a line in the summary and a
+# warning on GitHub Actions. If the second run dies the same way, that fails. No other failure is repeated.
+MIDI_ABORT="MidiInCore::initialize: error creating OS-X MIDI client object"
+midi_aborts=0
+midi_abort() {  # $1: name for the logs of a run of Rack that has ended
+    local rc
+    rc=$(cat "$LOGS/$1.rc" 2>/dev/null) || return 1
+    [ "$rc" -gt 128 ] 2>/dev/null || return 1
+    grep -qF -- "$MIDI_ABORT" "$LOGS/$1.out" 2>/dev/null || return 1
+    grep -qF "Initializing MIDI" "$LOGS/$1.log" 2>/dev/null || return 1
+    ! grep -qF "Initializing plugins" "$LOGS/$1.log"
+}
+relaunching() {  # $1: a function that runs Rack once, $2: user folder, $3: name for the logs
+    local kept ext line
+    "$1" "$2" "$3"
+    midi_abort "$3" || return 0
+    midi_aborts=$((midi_aborts + 1))
+    kept=$3.midi-abort-$midi_aborts
+    for ext in out log rc images; do
+        if [ -e "$LOGS/$3.$ext" ]; then mv "$LOGS/$3.$ext" "$LOGS/$kept.$ext"; fi
+    done
+    line="$3: Rack died in its own MIDI start-up (exit status $(cat "$LOGS/$kept.rc")) before loading any plugin"
+    note "AGAIN $line; run once more, the first run is in $kept.*"
+    if [ -n "${GITHUB_ACTIONS:-}" ]; then echo "::warning title=RP-57 Rack died in its MIDI start-up::$line; run once more"; fi
+    "$1" "$2" "$3"
+    midi_abort "$3" || return 0
+    note "FAIL  $3: Rack died in its own MIDI start-up twice, before loading any plugin; not run a third time"
+    failed=1
+}
+headless() { relaunching headless_once "$@"; }
+headless_once() {  # $1: user folder, $2: name for the logs. Quits through stdin once the patch has run for 3 s.
     local user=$1 name=$2 fifo dog
     fifo=$(mktemp -u /tmp/rackpy-fifo.XXXXXX); mkfifo "$fifo"
     rm -f "$user/log.txt"
@@ -114,27 +149,37 @@ gate() {
     open_gates=$((open_gates + 1))
     if [ -n "${GITHUB_ACTIONS:-}" ]; then echo "::warning title=RP-40 open gate::$*"; fi
 }
-gl_windows() {  # whether this Mac gives Rack an OpenGL window: Rack windowed on an empty user folder, then killed
-    local user=$USERS/gl-probe result=unknown
+gl_probe() {  # $1: user folder, $2: name for the logs. Whether this Mac gives Rack an OpenGL window, in GL:
+    # Rack windowed on an empty user folder, then killed
+    local user=$1 name=$2
+    GL=unknown
     rm -rf "$user"; mkdir -p "$user"; echo '{"showTipsOnLaunch": false}' > "$user/settings.json"
-    "$RACK" -u "$user" > "$LOGS/gl-probe.out" 2>&1 &
+    "$RACK" -u "$user" > "$LOGS/$name.out" 2>&1 &
     local rack=$!
     for _ in $(seq 150); do
-        if grep -qF "Renderer: " "$user/log.txt" 2>/dev/null; then result=yes; break; fi
+        if grep -qF "Renderer: " "$user/log.txt" 2>/dev/null; then GL=yes; break; fi
         if grep -qE "NSGL: Failed to find a suitable pixel format|Could not create Window" "$user/log.txt" 2>/dev/null; then
-            result=no; break
+            GL=no; break
         fi
         kill -0 $rack 2>/dev/null || break
         sleep 0.2
     done
-    kill -9 $rack 2>/dev/null; wait $rack 2>/dev/null
-    cp "$user/log.txt" "$LOGS/gl-probe.log" 2>/dev/null
-    [ "$result" = yes ]
+    kill -9 $rack 2>/dev/null; wait $rack 2>/dev/null; echo $? > "$LOGS/$name.rc"
+    cp "$user/log.txt" "$LOGS/$name.log" 2>/dev/null
+}
+windowed() {  # $1: user folder, $2: name for the logs. Rack's screenshot mode, which quits by itself.
+    local user=$1 name=$2 rack dog
+    rm -f "$user/log.txt"; rm -rf "$user/screenshots"
+    "$RACK" -u "$user" -t 1 > "$LOGS/$name.out" 2>&1 &
+    rack=$!; dog=$(watchdog $rack 300)
+    wait $rack; echo $? > "$LOGS/$name.rc"; kill "$dog" 2>/dev/null
+    cp "$user/log.txt" "$LOGS/$name.log" 2>/dev/null || touch "$LOGS/$name.log"
 }
 # Without an OpenGL window Rack shows a modal "Could not open GLFW window" dialog and waits: GitHub-hosted
 # macOS runners offer no pixel format its GLFW accepts (GLFW 65545).
-if gl_windows; then GL=yes; note "windowed: Rack opens OpenGL windows here ($(grep -oE 'Renderer: .*' "$LOGS/gl-probe.log" | head -1 | cut -c1-80))"
-else GL=no; note "windowed: Rack gets no OpenGL window here: $(grep -oE 'GLFW error .*' "$LOGS/gl-probe.log" | head -1 | cut -c1-100)"; fi
+relaunching gl_probe "$USERS/gl-probe" gl-probe
+if [ "$GL" = yes ]; then note "windowed: Rack opens OpenGL windows here ($(grep -oE 'Renderer: .*' "$LOGS/gl-probe.log" | head -1 | cut -c1-80))"
+else GL=no; note "windowed: Rack gets no OpenGL window here: $(grep -oE 'GLFW error .*' "$LOGS/gl-probe.log" 2>/dev/null | head -1 | cut -c1-100)"; fi
 
 manifest=$ARTIFACTS/manifest.json
 plugins=()
@@ -165,11 +210,7 @@ for file in "${plugins[@]}"; do
         gate "$slug-window: windowed rendering of ${#models[@]} model(s) not run: this Mac gives Rack no OpenGL window"
         continue
     fi
-    rm -f "$user/log.txt"; rm -rf "$user/screenshots"
-    "$RACK" -u "$user" -t 1 > "$LOGS/$slug-window.out" 2>&1 &
-    rack=$!; dog=$(watchdog $rack 300)
-    wait $rack; echo $? > "$LOGS/$slug-window.rc"; kill "$dog" 2>/dev/null
-    cp "$user/log.txt" "$LOGS/$slug-window.log" 2>/dev/null || touch "$LOGS/$slug-window.log"
+    relaunching windowed "$user" "$slug-window"
     mkdir -p "$LOGS/screenshots"
     cp -R "$user/screenshots/$slug" "$LOGS/screenshots/" 2>/dev/null
     check "$slug-window: Rack drew its window and quit cleanly" test "$(cat "$LOGS/$slug-window.rc")" = 0
@@ -290,6 +331,7 @@ check "uninstall: RackPy is gone" lacks "$LOGS/uninstall.log" "RackPy"
 
 rm -rf "$USERS"
 note ""
+if [ "$midi_aborts" != 0 ]; then note "Rack died in its own MIDI start-up $midi_aborts time(s) (AGAIN, above); each was run once more"; fi
 if [ "$failed" != 0 ]; then note "RESULT: some checks FAILED"
 elif [ "$open_gates" != 0 ]; then note "RESULT: every check run here passed; $open_gates OPEN (not run on this machine, not passed)"
 else note "RESULT: all checks passed"; fi
