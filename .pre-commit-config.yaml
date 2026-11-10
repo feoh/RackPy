@@ -1,3 +1,6 @@
+# `prek install` installs both: a commit or a push that fails these fails CI's first job, and the rest of
+# that CI run still takes up to an hour (RP-56).
+default_install_hook_types: [pre-commit, pre-push]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0

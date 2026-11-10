@@ -149,7 +149,8 @@
     "RP-52": "tk-rackpy-52-original-examples-adapted-from-permiss-91e86a",
     "RP-53": "tk-rackpy-53-pypi-upload-and-vcv-library-submission-295fc3",
     "RP-54": "tk-rackpy-54-keep-the-macos-and-windows-release-can-f06c7b",
-    "RP-55": "tk-rackpy-55-write-the-unattended-performance-sessi-b2cc0a"
+    "RP-55": "tk-rackpy-55-write-the-unattended-performance-sessi-b2cc0a",
+    "RP-56": "tk-rackpy-56-cut-ci-wall-clock-and-stop-determinist-2c78b5"
   },
   "project_history": "Initial write/search failed: WorkflowProject missing preauthorized. Owner-requested retry succeeded after repository/task graph publication; attached existing epic and 45 children without duplication.",
   "session_slug": "ws-wp-rackpy-pythonic-full-surface-bindings-for-vcv-7ac5f9",

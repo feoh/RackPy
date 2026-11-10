@@ -49,6 +49,28 @@ work sooner:
 See the global instructions for subagent mechanics (claude-bridge children run
 with `async: true`).
 
+## CI is the last check, not the first
+
+Owner request, 2026-11-10 (RP-56). Of the 40 CI runs before it, 23 failed: seven
+only on one line of trailing whitespace on `main`, nine with a test that failed on
+Linux or on several platforms. A full run took a median of 59 minutes
+(planning/rp-56-validation.md).
+
+- Before every push, run the hooks (`prek run --all-files`; a clone with
+  `prek install` does it on commit and push) and the affected tests in a local
+  Rack. Never push with `--no-verify`. A red `main` fails every branch cut from it.
+- Dispatch the smallest run that answers the question (CONTRIBUTING.md, CI):
+  `-f fast=true` for a cross-platform smoke; a plain dispatch for every test
+  suite; `-f candidates=true` only when the tests already pass and you need
+  release evidence or candidate packages. Narrow one platform with
+  `macos_tests` or `windows_tests`.
+- Never wait for a run's conclusion. Run `bin/ci-failures --wait failure` in an
+  async subagent and act on the first failed job.
+- A test that failed on Linux, or on two or more platforms, is a bug: reproduce
+  it locally and fix it before another run. A test that failed on one of macOS
+  or Windows only may be intermittent: `gh run rerun RUN --failed` once, and
+  record the run and job on a Witan task either way. Do not add retries to tests.
+
 ## Engineering guardrails
 
 - Include only <rack.hpp> in plugin translation units. No PRIVATE calls.

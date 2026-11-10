@@ -17,6 +17,11 @@ on:
         required: false
         type: boolean
         default: false
+      candidates:
+        description: "Also build the distributable and every release candidate (30 to 50 more minutes; release evidence needs it)"
+        required: false
+        type: boolean
+        default: false
       macos_tests:
         description: "Optional pytest -k expression for the macOS host-test jobs (empty: all of them)"
         required: false
@@ -31,10 +36,14 @@ on:
 permissions:
   contents: read
 
-# A newer push to a pull request cancels its older run. Every commit on main
-# keeps its own complete run, so main always has evidence for each commit.
+# A newer push to a pull request cancels its older run, and so does a newer dispatch on the same branch with
+# the same inputs: a superseded run otherwise holds macOS runners (five at a time) that the new one waits for.
+# Every commit on main, and every dispatch with candidates, keeps its own complete run, so evidence for a
+# commit is never cancelled by a later one.
 concurrency:
-  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  group: >-
+    ci-${{ (github.event_name == 'push' || inputs.candidates == true) && github.sha
+    || format('{0}-{1}-{2}-{3}', github.ref, inputs.fast, inputs.macos_tests, inputs.windows_tests) }}
   cancel-in-progress: true
 
 # A -m on the command line replaces pyproject's addopts -m, so every selection below repeats
@@ -199,7 +208,8 @@ jobs:
       - name: Install compiler cache
         run: sudo apt-get $APT_OPTS install -y --no-install-recommends ccache
       - name: Restore compiler cache (native test builds)
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: ccache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/rackpy-native-ccache
           key: rackpy-ccache-fast-native-lin-x64-v1-${{ github.sha }}
@@ -235,6 +245,13 @@ jobs:
           CCACHE_DIR: ${{ runner.temp }}/rackpy-native-ccache
           CCACHE_MAXSIZE: 800M
         run: ccache --show-stats
+      # Saved when a test fails too: a failing branch's next run should not compile the same files again.
+      - name: Save compiler cache
+        if: always() && steps.ccache.outputs.cache-primary-key != '' && steps.ccache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rackpy-native-ccache
+          key: ${{ steps.ccache.outputs.cache-primary-key }}
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -286,7 +303,7 @@ jobs:
     # RP-42. The committed inventory's macOS and Windows variants are extracted on Linux with each target's own
     # library headers. This extracts each one again on the platform itself, with that machine's compiler headers
     # (Xcode's SDK; MSYS2's MinGW) and that platform's SDK archive, and fails on any difference.
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.fast != true)
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.candidates == true && inputs.fast != true)
     strategy:
       fail-fast: false
       matrix:
@@ -368,7 +385,8 @@ jobs:
       - name: Install compiler cache
         run: sudo apt-get $APT_OPTS install -y --no-install-recommends ccache
       - name: Restore compiler cache (Linux host test builds)
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: ccache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/rackpy-ccache
           key: rackpy-ccache-fast-lin-x64-v1-${{ github.sha }}
@@ -403,6 +421,13 @@ jobs:
         env:
           CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
         run: ccache --show-stats
+      # Saved when a test fails too: a failing branch's next run should not compile the same files again.
+      - name: Save compiler cache
+        if: always() && steps.ccache.outputs.cache-primary-key != '' && steps.ccache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rackpy-ccache
+          key: ${{ steps.ccache.outputs.cache-primary-key }}
       - if: always()
         name: Collect Rack logs
         run: |
@@ -416,13 +441,38 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
-  dist:
-    name: Distributable build with the official Rack toolchain
-    # Building the toolchain takes about an hour on a cache miss, so this runs
-    # on main and on demand, not on every pull request.
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.fast != true)
+  toolchain:
+    name: Official Rack toolchain (cached, or built)
+    # Building the toolchain takes about an hour on a cache miss, so the jobs that use it run on main and on
+    # demand (candidates), not on every pull request or dispatch. This job only makes sure the cache entry
+    # exists (seconds on a hit, without downloading it), so the distributable build and the Linux release
+    # candidate can both restore it and run side by side instead of one after the other.
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.candidates == true && inputs.fast != true)
     runs-on: ubuntu-24.04
     timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+      - name: Look for the toolchain (a miss saves what the next steps build)
+        id: toolchain
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/rackpy/toolchain/*/local
+          key: rack-toolchain-lin-x64-${{ hashFiles('upstream/versions.json', 'packaging/toolchain/lin-x64.Dockerfile') }}
+          lookup-only: true
+      - if: steps.toolchain.outputs.cache-hit != 'true'
+        run: bin/rack-toolchain build --jobs "$(nproc)"
+      - if: steps.toolchain.outputs.cache-hit != 'true'
+        run: bin/rack-toolchain check
+
+  dist:
+    name: Distributable build with the official Rack toolchain
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.candidates == true && inputs.fast != true)
+    needs: toolchain
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
@@ -432,13 +482,11 @@ jobs:
           sudo apt-get $APT_OPTS update && sudo apt-get $APT_OPTS install -y --no-install-recommends ninja-build jq
           libgl1 libx11-6 libasound2t64 libjack-jackd2-0 libpulse0
       - name: Restore the toolchain
-        id: toolchain
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/rackpy/toolchain/*/local
           key: rack-toolchain-lin-x64-${{ hashFiles('upstream/versions.json', 'packaging/toolchain/lin-x64.Dockerfile') }}
-      - if: steps.toolchain.outputs.cache-hit != 'true'
-        run: bin/rack-toolchain build --jobs "$(nproc)"
+          fail-on-cache-miss: true
       - run: bin/rack-toolchain check
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -467,8 +515,8 @@ jobs:
     # then installs and runs them in clean Ubuntu 20.04 and 16.04 containers with no Python and no network
     # (bin/rackpy-release verify). Keeps the manifest, checksums, logs and screenshots, not the artifacts:
     # nothing is distributed without owner approval.
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.fast != true)
-    needs: dist  # shares its toolchain cache
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.candidates == true && inputs.fast != true)
+    needs: toolchain
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     steps:
@@ -537,7 +585,7 @@ jobs:
     # checked), then installs and runs them in Rack Free 2.6.6 with an empty environment, including the
     # wrong-architecture, unsigned and quarantine cases (bin/rackpy-release verify). A runner is not a clean
     # Mac: the logs record every library Rack mapped. Keeps evidence, not the artifacts.
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.fast != true)
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.candidates == true && inputs.fast != true)
     strategy:
       fail-fast: false
       matrix:
@@ -602,7 +650,7 @@ jobs:
     # including the missing-DLL, damaged-runtime, decoy-DLL, permission, Unicode and long-path cases
     # (bin/rackpy-release verify). A runner is not a clean PC: the logs record every DLL Rack loaded.
     # Keeps evidence, not the artifacts.
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.fast != true)
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.candidates == true && inputs.fast != true)
     runs-on: windows-2025
     timeout-minutes: 150
     defaults:
@@ -730,7 +778,8 @@ jobs:
       # tests/coverage/test_shared_checks.py prevents their accidental use as per-platform manifest/sample evidence.
       # The compiler cache covers only the tests' own builds, never a release candidate; fast and full runs share it.
       - name: Restore compiler cache (Windows host test builds)
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: ccache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/rackpy-ccache
           key: rackpy-ccache-fast-win-x64-v1-${{ github.sha }}
@@ -779,6 +828,13 @@ jobs:
         env:
           CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
         run: ccache --show-stats
+      # Saved when a test fails too: a failing branch's next run should not compile the same files again.
+      - name: Save compiler cache
+        if: always() && steps.ccache.outputs.cache-primary-key != '' && steps.ccache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rackpy-ccache
+          key: ${{ steps.ccache.outputs.cache-primary-key }}
       - if: always()
         name: Collect Rack logs
         run: |
@@ -852,7 +908,8 @@ jobs:
       # The synthetic checker mutation suites run once in the Linux unit job; real Rack tests stay on each target.
       # The compiler cache covers only the tests' own builds, never a release candidate; fast and full runs share it.
       - name: Restore compiler cache (macOS host test builds)
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: ccache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/rackpy-ccache
           key: rackpy-ccache-fast-${{ matrix.platform }}-v1-${{ github.sha }}
@@ -900,6 +957,13 @@ jobs:
         env:
           CCACHE_DIR: ${{ runner.temp }}/rackpy-ccache
         run: ccache --show-stats
+      # Saved when a test fails too: a failing branch's next run should not compile the same files again.
+      - name: Save compiler cache
+        if: always() && steps.ccache.outputs.cache-primary-key != '' && steps.ccache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rackpy-ccache
+          key: ${{ steps.ccache.outputs.cache-primary-key }}
       - if: always()
         name: Collect Rack logs
         run: |
@@ -912,3 +976,28 @@ jobs:
           path: reports/
           retention-days: 14
           if-no-files-found: ignore
+
+  compiler-caches:
+    name: Keep one compiler cache per platform on this branch
+    # Every run saves its compiler caches under its commit, about 2.5 GB a commit. Left alone they pass the
+    # repository's 10 GB limit within four commits and GitHub evicts the least recently used, which were main's:
+    # the ones a new branch's first run starts from (a cold run compiles for 40 to 70 minutes). This deletes
+    # all but the newest per platform on the run's own branch; other branches and main are not touched.
+    # A fork's token cannot delete caches.
+    if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    needs: [native, host, windows, macos]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    continue-on-error: true  # housekeeping: a failure here says nothing about the commit
+    permissions:
+      actions: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh cache list -R "$GITHUB_REPOSITORY" --ref "$GITHUB_REF" --key rackpy-ccache- --limit 100 --json id,key,createdAt \
+            --jq 'group_by(.key | sub("-[0-9a-f]{40}$"; "")) | map(sort_by(.createdAt) | .[:-1][]) | .[] | "\(.id) \(.key)"' |
+          while read -r id key; do
+            echo "deleting $key"
+            gh cache delete "$id" -R "$GITHUB_REPOSITORY"
+          done

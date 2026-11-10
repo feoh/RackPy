@@ -62,11 +62,12 @@ Reported, not waived:
 ## Reproduce
 
 ```console
-gh workflow run ci.yml -R feoh/rackpy --ref <branch>      # every platform's jobs, including the candidates
+gh workflow run ci.yml -R feoh/rackpy --ref <branch> -f candidates=true   # every platform's jobs and the candidates
 bin/release-evidence collect <run id>                       # once the run has finished
 ```
 
-For faster diagnostic runs, `workflow_dispatch` accepts `macos_tests` and `windows_tests` pytest `-k`
+Without `candidates=true` a dispatch runs the test suites only (RP-56): quicker for iterating, but collection
+records each platform as having no candidate. For faster diagnostic runs, `workflow_dispatch` also accepts `macos_tests` and `windows_tests` pytest `-k`
 expressions. Such runs may omit required platform evidence and are not substitutes for a full exact-candidate run
 with both selectors empty. Each target job records its selection in its reports; collection blocks the release bar
 and promotion refuses to proceed when an attestation is missing or nonempty. Runs created before these attestations

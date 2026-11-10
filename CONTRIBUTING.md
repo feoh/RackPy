@@ -50,7 +50,14 @@ uv sync --frozen                 # project environment from uv.lock; fails if th
 bin/rackpy-dev build             # fetch pinned inputs, configure, build, run CTest
 uv run pytest -m unit            # fast checks, no SDK needed
 prek run --all-files             # hooks: ruff, strict mypy, JSON/YAML, planning data, callback matrix
+prek install                     # once per clone: the same hooks before every commit and every push
 ```
+
+`prek install` matters: CI's first job runs the same hooks and fails in under a
+minute, but the rest of the run carries on for up to an hour. One line of
+trailing whitespace pushed to `main` on 2026-11-07 failed seven runs in a row
+that way, on `main` and on every branch cut from it. Worktrees share the
+clone's hooks, so one install covers them all.
 
 The first `bin/rackpy-dev build` downloads the Rack SDK (`bin/rack-sdk`) and
 the bundled CPython 3.14 runtime (`packaging/inputs.json`), checks their
@@ -90,6 +97,7 @@ seconds warm. It is a smoke test, not release evidence.
 | `bin/rackpy-release build\|verify\|introspect\|compare` | Release candidates for this computer's platform (Linux, the Mac's own architecture, or Windows x64) from a clean commit; install and run them on a clean container (Linux) or in fresh Rack user folders (a Mac, Windows); write what a candidate's RackPy exports inside Rack, for `bin/check_coverage.py check --introspection`; explain the differences between two builds ([Linux](docs/installation/linux.md), [macOS](docs/installation/macos.md), [Windows](docs/installation/windows.md)) |
 | `bin/rackpy-plugin pack DIR` | A plugin directory as a reproducible `.vcvplugin` package |
 | `bin/planning-check` | `planning/` files agree with each other and form a DAG |
+| `bin/ci-failures [RUN] [--wait failure\|done]` | What has failed so far in a CI run, by platform, without waiting for the run to finish ([below](#when-a-run-fails)) |
 | `uv run sphinx-build -W --keep-going -n -b html docs build/docs/html` | The documentation site; conventions in [docs/contributing-docs.md](docs/contributing-docs.md) |
 
 `bin/rackpy-dev --help` and each command's `--help` list every option.
@@ -143,28 +151,67 @@ Neither proves anything about loading in Rack; `tests/integration` does that.
 
 ## CI
 
-Pull requests use a **fast Linux host smoke**, not the full Rack-host suite. It
-builds the production host (not the separate test-hooks build), runs the
-security suite and the oscillator plugin's real-Rack load/patch-reopen test.
-Native and audio-path checks still run in their own job. This is early feedback,
-not release evidence. Pushes to `main` and an ordinary workflow dispatch retain
-the full host, native-platform and candidate suites below.
+CI has four sizes. Use the smallest that answers the question.
 
-For cross-platform early feedback, dispatch CI with `fast=true`: Linux,
-macOS arm64/x64 and Windows run the same production-host smoke; platform
-inventory and all release-candidate jobs are omitted. The fast host steps do
-not write per-test coverage evidence and cannot establish full coverage, parity
-or release readiness. The host and native test jobs, in fast and full runs
-alike, build through per-platform ccache stores; the fast and full suites of a
-platform share one store. Compiler contents and build flags are part of the
-cache key, and each job prints cache statistics. The cache covers only the
-tests' own builds (the development, test-hooks and sanitizer trees). Release
-candidates and the distributable build never use it, so candidate bytes are
-always compiled from scratch. A cold cache still needs a full build.
-`macos_tests` and
-`windows_tests` apply only to a full dispatch; do not combine them with
-`fast=true`. Runtime depends on runner and build cache state; no 15–20 minute
-completion time is promised.
+| Run | Start it with | What runs | Measured time, creation to last job |
+| --- | --- | --- | --- |
+| Pull request | opening or updating a pull request | Linux only: hooks, unit, native, docs, and a **fast host smoke** (the security suite and the oscillator plugin's load and patch-reopen test in a production build) | not measured |
+| Fast dispatch | `gh workflow run ci.yml --ref BRANCH -f fast=true` | the pull-request checks, plus the same host smoke on macOS arm64/x64 and Windows | 4 to 11 minutes warm ([2026-11-05](planning/practical-release.md)) |
+| Tests | `gh workflow run ci.yml --ref BRANCH` | every test suite on Linux, macOS arm64/x64 and Windows. No distributable build, no release candidates, no per-platform SDK inventory | not yet measured ([RP-56 validation](planning/rp-56-validation.md)) |
+| Candidates | `gh workflow run ci.yml --ref BRANCH -f candidates=true`, and every push to `main` | the tests, plus the distributable build, the four release candidates and the per-platform SDK inventory | median 59 minutes before RP-56; not yet measured after |
+
+Only a candidates run is release evidence ([release-evidence](release-evidence/README.md)):
+`bin/release-evidence collect` records a tests run's platforms as having no
+candidate, and the fast host steps write no per-test evidence at all. Until
+RP-56 an ordinary dispatch always built the candidates, so every test
+iteration on a branch waited for them; a branch needs them once, when its
+tests already pass.
+
+A newer dispatch on the same branch with the same inputs cancels the older
+one, as a newer push to a pull request does. Candidates runs and pushes to
+`main` are never cancelled by a later commit.
+
+The host and native test jobs, in every size of run, build through
+per-platform ccache stores; the fast and full suites of a platform share one
+store. Compiler contents and build flags are part of the cache key, and each
+job prints cache statistics. The cache covers only the tests' own builds (the
+development, test-hooks and sanitizer trees). Release candidates and the
+distributable build never use it, so candidate bytes are always compiled from
+scratch. A job saves its store even when its tests fail, and the run's last
+job deletes the branch's older stores, so the repository keeps one store per
+platform per branch (about 2.5 GB a branch against GitHub's 10 GB limit). A
+branch's first run starts from `main`'s store; with no store at all a platform
+compiles for 40 to 70 minutes. `macos_tests` and `windows_tests` narrow a
+tests or candidates run; do not combine them with `fast=true`. Runtime depends
+on runner and build cache state; no completion time is promised.
+
+### When a run fails
+
+Of the 40 runs before RP-56, 23 failed
+([measurements](planning/rp-56-validation.md)): seven only on one line of
+trailing whitespace, nine with a test that failed on Linux or on several
+platforms, four with tests failing on a single macOS or Windows platform, and
+two outside the tests. So:
+
+1. **Before pushing**, run what CI's first jobs run: the hooks (`prek install`
+   does this for you) and, for a change to bindings or tests, the affected
+   tests in a local Rack: `uv run pytest tests/<directory>`. A failure that
+   reproduces on Linux costs seconds here and an hour in CI.
+2. **Do not wait for a run to finish.** `bin/ci-failures --wait failure`
+   returns at the first failed job, with the failed tests and the lines that
+   look like the cause. Start it in the background (agents: an async subagent)
+   and keep working.
+3. **Read which platforms failed.** A test that failed on Linux, or on two or
+   more platforms, is a bug in the code or the test: reproduce it locally
+   before starting another run. A test that failed on one of macOS or Windows
+   only is specific to that platform or intermittent. Rerun only the failed
+   jobs with `gh run rerun RUN --failed`, not the whole workflow.
+4. **An intermittent failure is a bug with a cause**, usually a test that
+   waits on real time or on Rack's engine thread with a fixed budget. Record it
+   on a Witan task with the run and job, and fix the wait. Do not add a retry
+   and do not rerun until it passes without recording it.
+5. Narrow a platform-specific investigation with `-f macos_tests=EXPR` or
+   `-f windows_tests=EXPR` on a tests run: one suite job, a few minutes.
 
 [.github/workflows/ci.yml](.github/workflows/ci.yml) runs on pushes to `main`
 and on pull requests, on `ubuntu-24.04`:
@@ -176,15 +223,16 @@ and on pull requests, on `ubuntu-24.04`:
 | SDK pins, native build and audio-path guard | `bin/rack-sdk verify`, `closure`, `probe`; `pytest -m "native and not host"` |
 | SDK inventory | `pytest -m inventory` with LLVM 21 from apt.llvm.org; see below |
 | Documentation site | `sphinx-build -W` and `pytest -m "docs and not host"`, split across ten jobs (a build that keeps the HTML, the ordinary tests, and one job per deliberately broken site); a unit test checks that every docs test runs in exactly one |
-| Documentation external links (weekly and ordinary dispatch, not fast dispatch) | `sphinx-build -b linkcheck` |
-| Rack host smoke tests | Pull requests and fast dispatch: production-host security and oscillator load/patch smoke. Full dispatch/main: `pytest -m "host and not dist"`, including docs snippets, the RP-04 spike and the RP-06 probe |
-| Distributable build (pushes to `main` and on demand) | builds or restores the official toolchain, then `pytest -m dist` |
-| SDK inventory on mac-arm64, mac-x64 and win-x64 (pushes to `main` and on demand) | `bin/inventory_sdk.py platform-check`: each platform's SDK extracted natively and compared with the committed inventory |
-| macOS arm64 and x86_64 (pushes to `main` and on demand) | `macos-15` and `macos-15-intel`: the native build, CTest and `pytest -m "(unit or native or host) and not dist ..."`. The runners have no GPU, so a test-only plugin (`tests/fixtures/macos-software-gl`) gives Rack's window Apple's software OpenGL. `macos_tests` (a dispatch input) narrows the selection |
-| Windows x64 (pushes to `main` and on demand) | `windows-2025` with MSYS2's MINGW64 toolchain: the native build, CTest and `pytest -m "(unit or native or host) and not dist ..."`. Rack's window renders with the pinned Mesa llvmpipe (`bin/rack-sdk mesa`). `windows_tests` (a dispatch input) narrows the selection |
-| macOS release candidates (pushes to `main` and on demand) | `bin/rackpy-release build` and `verify` on each architecture: Mach-O, signature and deployment-target checks, then every example installed into fresh Rack user folders with an empty environment; then `introspect` and `check_coverage.py check --introspection` against the candidate; keeps the manifest, checksums, introspection and logs |
-| Windows x64 release candidate (pushes to `main` and on demand) | `bin/rackpy-release build` and `verify`: PE and DLL checks, then every example installed into fresh Rack user folders with Windows' own `PATH`; then `introspect` and `check_coverage.py check --introspection` against the candidate; keeps the manifest, checksums, introspection and logs |
-| Linux release candidate (pushes to `main` and on demand) | `bin/rackpy-release build`, then `bin/rackpy-release verify` installs it on clean Ubuntu 20.04 and 16.04 containers with no Python and no network; then `introspect` and `check_coverage.py check --introspection` against the candidate; keeps the manifest, checksums, introspection, logs and screenshots |
+| Documentation external links (weekly, and tests and candidates dispatches) | `sphinx-build -b linkcheck` |
+| Rack host smoke tests | Pull requests and fast dispatch: production-host security and oscillator load/patch smoke. Tests and candidates runs: `pytest -m "host and not dist"`, including docs snippets, the RP-04 spike and the RP-06 probe |
+| Official Rack toolchain (candidates runs) | finds the toolchain in the cache, or builds and saves it (about an hour, once per toolchain pin), so the two jobs below can restore it and run side by side |
+| Distributable build (candidates runs) | restores the official toolchain, then `pytest -m dist` |
+| SDK inventory on mac-arm64, mac-x64 and win-x64 (candidates runs) | `bin/inventory_sdk.py platform-check`: each platform's SDK extracted natively and compared with the committed inventory |
+| macOS arm64 and x86_64 (tests and candidates runs) | `macos-15` and `macos-15-intel`: the native build, CTest and `pytest -m "(unit or native or host) and not dist ..."`. The runners have no GPU, so a test-only plugin (`tests/fixtures/macos-software-gl`) gives Rack's window Apple's software OpenGL. `macos_tests` (a dispatch input) narrows the selection |
+| Windows x64 (tests and candidates runs) | `windows-2025` with MSYS2's MINGW64 toolchain: the native build, CTest and `pytest -m "(unit or native or host) and not dist ..."`. Rack's window renders with the pinned Mesa llvmpipe (`bin/rack-sdk mesa`). `windows_tests` (a dispatch input) narrows the selection |
+| macOS release candidates (candidates runs) | `bin/rackpy-release build` and `verify` on each architecture: Mach-O, signature and deployment-target checks, then every example installed into fresh Rack user folders with an empty environment; then `introspect` and `check_coverage.py check --introspection` against the candidate; keeps the manifest, checksums, introspection and logs |
+| Windows x64 release candidate (candidates runs) | `bin/rackpy-release build` and `verify`: PE and DLL checks, then every example installed into fresh Rack user folders with Windows' own `PATH`; then `introspect` and `check_coverage.py check --introspection` against the candidate; keeps the manifest, checksums, introspection and logs |
+| Linux release candidate (candidates runs) | `bin/rackpy-release build`, then `bin/rackpy-release verify` installs it on clean Ubuntu 20.04 and 16.04 containers with no Python and no network; then `introspect` and `check_coverage.py check --introspection` against the candidate; keeps the manifest, checksums, introspection, logs and screenshots |
 
 Each job keeps its JUnit report, the host jobs keep every Rack `log.txt`, and
 the docs job keeps the built site, for 14 days. The full test jobs also keep each

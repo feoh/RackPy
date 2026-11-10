@@ -1849,6 +1849,39 @@
       ],
       "notes": "Agent-only. Created 2026-11-07 at the owner's request. No 30-minute physical-device deadline-miss workload existed before this task (docs/performance-results.md).",
       "priority": "p1"
+    },
+    {
+      "id": "RP-56",
+      "title": "Cut CI wall-clock and stop deterministic failures reaching CI",
+      "depends_on": [],
+      "outputs": [
+        ".github/workflows/ci.yml (candidates dispatch input; toolchain job; compiler-cache save and pruning)",
+        "bin/ci-failures",
+        "tests/unit/test_ci_failures.py",
+        "CONTRIBUTING.md (CI sizes; when a run fails)",
+        "AGENTS.md (CI loop)",
+        "planning/rp-56-validation.md"
+      ],
+      "steps": [
+        "Measure the last 40 CI runs: which jobs set the run's length and what each failed run failed on.",
+        "Make an ordinary workflow dispatch run the test suites only; build the distributable, the release candidates and the per-platform SDK inventory on pushes to main and on dispatch with candidates=true.",
+        "Run the distributable build and the Linux release candidate side by side behind one job that finds or builds the official toolchain.",
+        "Save each compiler cache even when tests fail, and keep one per platform per branch so main's caches are not evicted.",
+        "Cancel a superseded dispatch on the same branch with the same inputs; never cancel a push to main or a candidates run.",
+        "bin/ci-failures: report a run's failed tests by platform as soon as a job fails, separating failures on Linux or several platforms from single-platform ones.",
+        "Run the hooks before every commit and push (prek install); document the loop in CONTRIBUTING.md and AGENTS.md.",
+        "Find the cause of each intermittent failure seen in those runs and file a task per cause; do not add retries."
+      ],
+      "validation": [
+        "A tests dispatch and a candidates dispatch of the changed workflow, with wall-clock from creation to last job against the measured baseline, in planning/rp-56-validation.md.",
+        "bin/release-evidence collect still refuses to judge the release bar from a run without candidates.",
+        "prek run --all-files and pytest -m unit pass."
+      ],
+      "acceptance": [
+        "A branch iteration no longer waits for release candidates; main is green; a push to main still runs every job it ran before."
+      ],
+      "notes": "Agent-only. Created 2026-11-10 at the owner's request: 23 of the 40 runs before it failed, and a full run took a median of 59 minutes (planning/rp-56-validation.md). Does not block the epic.",
+      "priority": "p1"
     }
   ]
 }

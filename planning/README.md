@@ -25,11 +25,11 @@ The owner amendments below take precedence over historical delivery gates.
 - [RP-27 bounded implementation slices](rp-27-slices.md) (supplements the original graph)
 - [RP-28 bounded implementation slices](rp-28-slices.md) (supplements the original graph)
 - [Practical path to a first public release](practical-release.md) (RP-44 working plan)
-- [Closure plan](closure-plan.md) (2026-11-06 restructuring of the remaining work into RP-45–RP-53; RP-54 and RP-55 added 2026-11-07 as agent-only prerequisites so the owner's hardware tasks come last)
+- [Closure plan](closure-plan.md) (2026-11-06 restructuring of the remaining work into RP-45–RP-53; RP-54 and RP-55 added 2026-11-07 as agent-only prerequisites so the owner's hardware tasks come last; RP-56 added 2026-11-10 to shorten CI)
 
 Witan is authoritative for live task status, ownership, comments and blockers.
 Git holds a durable copy of task scope; status is deliberately not frozen into
-tasks.json. Read both before working. Stable IDs RP-00 through RP-55 map to real
+tasks.json. Read both before working. Stable IDs RP-00 through RP-56 map to real
 Witan task slugs. The epic and RP-00 retain vcvpy-prefixed historical slugs;
 their titles/repository scope were changed to RackPy.
 
@@ -46,7 +46,7 @@ their titles/repository scope were changed to RackPy.
 | Samples and manual | RP-33–RP-37 | All official source blocks accounted for; working ports and tested prose |
 | Hardening and packaging | RP-38–RP-41 | Safe behavior and actual Linux/macOS/Windows candidate validation |
 | Proof and release | RP-42–RP-44 | Exact surface/sample parity, measured budgets, owner-approved publication |
-| Closure | RP-45–RP-55 | Published Linux 1.0.0; coverage proof with carried review; controlled performance; macOS and Windows on real hardware; optional follow-ons ([closure plan](closure-plan.md)). Owner hardware tasks RP-48–RP-50 are ordered after every agent-only task (2026-11-07) |
+| Closure | RP-45–RP-56 | Published Linux 1.0.0; coverage proof with carried review; controlled performance; macOS and Windows on real hardware; optional follow-ons ([closure plan](closure-plan.md)). Owner hardware tasks RP-48–RP-50 are ordered after every agent-only task (2026-11-07) |
 
 RP-01 is independent metadata recovery; it does not block SDK discovery.
 RP-02 is the first implementation-planning prerequisite. RP-05 inventory work can

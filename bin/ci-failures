@@ -1,0 +1,224 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["cyclopts>=5.2,<6"]
+#
+# [tool.uv]
+# exclude-newer = "2026-10-21T00:00:00Z"
+# ///
+"""Say what has failed in a CI run so far, without waiting for the run to finish (RP-56).
+
+A run takes 15 to 60 minutes, but a failed job's log is available as soon as that job ends. This reads the
+logs of the jobs that have already failed (gh), lists the failed tests by the platforms they failed on, and
+separates two cases that need different responses:
+
+- a test that failed on Linux or on several platforms: a bug in the code or the test. Reproduce it locally;
+  another CI run will say the same thing an hour later.
+- a test that failed on one of macOS or Windows only: specific to that platform, or intermittent. The other
+  platforms' columns say whether they finished without it or are still running.
+
+Exit status: 0 the run finished with no failure, 1 something failed, 2 nothing has failed but the run (or
+--wait) has not finished.
+"""
+
+import json
+import re
+import subprocess
+import sys
+import time
+from collections import Counter
+from collections.abc import Iterable
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
+from typing import Any, Literal
+
+import cyclopts
+
+app = cyclopts.App(help=__doc__)
+REPO_SLUG = "feoh/rackpy"
+WORKFLOW = "ci.yml"
+PLATFORMS = ("lin-x64", "mac-arm64", "mac-x64", "win-x64")
+
+PREFIX = re.compile(r"^\ufeff?\S+Z ")  # each log line starts with its timestamp
+ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+SUMMARY = re.compile(r"^(?:FAILED|ERROR) (tests/\S+)(?: - (.*))?$")  # pytest's short test summary
+CAUSE = re.compile(r"##\[error\]|\.{3,}Failed$|\berror:|Abort trap|Segmentation fault|Timeout >")
+ASSERTION = re.compile(r"^E  +\S")  # pytest's explanation of a failure: shown when nothing better is found
+MANY = 8  # more failed tests than this in one job usually share one cause, such as a failed build
+
+
+@dataclass
+class Failure:
+    """One failed job: the tests pytest listed, or else the lines that look like the cause."""
+
+    job: str
+    job_id: int
+    platform: str
+    steps: list[str]
+    tests: dict[str, str] = field(default_factory=dict)
+    lines: list[str] = field(default_factory=list)
+
+
+def gh(*args: str) -> str:
+    return subprocess.run(["gh", *args], check=True, capture_output=True, text=True, encoding="utf-8").stdout
+
+
+def platform_of(job: str) -> str:
+    """The platform a job runs on, from its name in .github/workflows/ci.yml; Linux unless it says otherwise."""
+    if job.startswith("Windows x64") or job.endswith("on win-x64"):
+        return "win-x64"
+    if match := re.search(r"\bmac-(arm64|x64)\b", job):
+        return f"mac-{match[1]}"
+    return "lin-x64"
+
+
+def clean(log: str) -> list[str]:
+    return [ANSI.sub("", PREFIX.sub("", line)).rstrip() for line in log.splitlines()]
+
+
+def read_log(lines: Iterable[str], limit: int = 8) -> tuple[dict[str, str], list[str]]:
+    """A job log's failed tests (id to pytest's one-line reason) and its other error lines, first LIMIT."""
+    tests: dict[str, str] = {}
+    causes: list[str] = []
+    assertions: list[str] = []
+    for line in lines:
+        if match := SUMMARY.match(line):
+            tests.setdefault(match[1], (match[2] or "")[:200])
+            continue
+        kind = causes if CAUSE.search(line) else assertions if ASSERTION.match(line) else None
+        text = line.replace("##[error]", "").strip()[:240]
+        if kind is not None and text not in kind and len(kind) < limit and not text.startswith("Process completed"):
+            kind.append(text)
+    return tests, causes + assertions[: limit - len(causes)]
+
+
+def failure_of(job: dict[str, Any]) -> Failure:
+    log = gh("api", "--allow-escape-sequences", f"repos/{REPO_SLUG}/actions/jobs/{job['id']}/logs")
+    tests, lines = read_log(clean(log))
+    steps = [s["name"] for s in job.get("steps", []) if s.get("conclusion") == "failure"]
+    return Failure(job["name"], job["id"], platform_of(job["name"]), steps, tests, lines)
+
+
+def classify(failures: list[Failure]) -> dict[str, dict[str, set[str]]]:
+    """Failed tests by kind: "several" (Linux, or two or more platforms) and "single" (one of the others).
+
+    Each test maps to the platforms it failed on. While jobs are still running, a "single" test may yet
+    become "several".
+    """
+    by_test: dict[str, set[str]] = {}
+    for failure in failures:
+        for test in failure.tests:
+            by_test.setdefault(test, set()).add(failure.platform)
+    kinds: dict[str, dict[str, set[str]]] = {"several": {}, "single": {}}
+    for test, platforms in sorted(by_test.items()):
+        kinds["several" if len(platforms) > 1 or "lin-x64" in platforms else "single"][test] = platforms
+    return kinds
+
+
+def latest_run(branch: str) -> int:
+    runs = json.loads(
+        gh(
+            "run",
+            "list",
+            "-R",
+            REPO_SLUG,
+            "--workflow",
+            WORKFLOW,
+            "--branch",
+            branch,
+            "--limit",
+            "1",
+            "--json",
+            "databaseId",
+        )
+    )
+    if not runs:
+        raise SystemExit(f"no {WORKFLOW} run on branch {branch}")
+    return int(runs[0]["databaseId"])
+
+
+def snapshot(run: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    info: dict[str, Any] = json.loads(gh("api", f"repos/{REPO_SLUG}/actions/runs/{run}"))
+    pages = gh("api", "--paginate", "--slurp", f"repos/{REPO_SLUG}/actions/runs/{run}/jobs?per_page=100")
+    jobs = [job for page in json.loads(pages) for job in page["jobs"]]
+    return info, jobs
+
+
+def report(run: int, info: dict[str, Any], jobs: list[dict[str, Any]], failures: list[Failure]) -> str:
+    ran = [j for j in jobs if j["conclusion"] != "skipped"]
+    done = [j for j in ran if j["status"] == "completed"]
+    unfinished = {platform_of(j["name"]) for j in ran if j["status"] != "completed"}
+    out = [
+        f"run {run} on {info['head_branch']} at {info['head_sha'][:7]}: {info['status']}"
+        + (f" ({info['conclusion']})" if info.get("conclusion") else "")
+        + f"; {len(done)} of {len(ran)} jobs finished, {len(failures)} failed",
+        info["html_url"],
+    ]
+    if unfinished:
+        out.append(f"still running on: {', '.join(sorted(unfinished))}")
+    kinds = classify(failures)
+    if kinds["several"]:
+        out += ["", "Failed on Linux or on several platforms. Reproduce locally before another CI run:"]
+        out += [f"  {test}  ({', '.join(sorted(where))})" for test, where in kinds["several"].items()]
+    if kinds["single"]:
+        out += ["", "Failed on one of macOS or Windows only. Specific to that platform, or intermittent:"]
+        for platform in PLATFORMS:
+            tests = [test for test, where in kinds["single"].items() if where == {platform}]
+            if len(tests) > MANY:
+                out.append(f"  {platform}: {len(tests)} tests; so many usually share one cause, see its job below")
+            else:
+                out += [f"  {test}  ({platform})" for test in tests]
+    for failure in failures:
+        out += ["", f"{failure.job} (job {failure.job_id})"]
+        out += [f"  failed step: {step}" for step in failure.steps]
+        reasons = Counter(reason for reason in failure.tests.values() if reason)
+        if len(failure.tests) > MANY:
+            out += [f"  {count} tests: {reason}" for reason, count in reasons.most_common(3)]
+        else:
+            out += [f"  {test}: {reason}" for test, reason in failure.tests.items() if reason]
+        out += [f"  | {line}" for line in failure.lines]
+    return "\n".join(out)
+
+
+@app.default
+def failures(
+    run: int | None = None,
+    *,
+    branch: str | None = None,
+    wait: Literal["no", "failure", "done"] = "no",
+    timeout: int = 60,
+    interval: int = 30,
+) -> None:
+    """Report the failures of RUN, or of the newest CI run on BRANCH (default: the checked-out branch).
+
+    --wait failure returns at the first failed job or when the run ends; --wait done returns when the run
+    ends. Both give up after TIMEOUT minutes. Start one in the background (an async subagent, or a shell job)
+    and work on something else: do not hold a session on it.
+    """
+    if run is None:
+        run = latest_run(branch or current_branch())
+    deadline = time.monotonic() + timeout * 60
+    while True:
+        info, jobs = snapshot(run)
+        failed = [j for j in jobs if j["status"] == "completed" and j["conclusion"] in {"failure", "timed_out"}]
+        finished = info["status"] == "completed"
+        if finished or wait == "no" or (wait == "failure" and failed) or time.monotonic() >= deadline:
+            break
+        time.sleep(interval)
+    with ThreadPoolExecutor(8) as pool:
+        found = list(pool.map(failure_of, failed))
+    print(report(run, info, jobs, found))
+    if found or (finished and info.get("conclusion") != "success"):
+        sys.exit(1)
+    if not finished:
+        sys.exit(2)
+
+
+def current_branch() -> str:
+    return subprocess.run(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"], check=True, capture_output=True, text=True
+    ).stdout.strip()
+
+
+if __name__ == "__main__":
+    app()

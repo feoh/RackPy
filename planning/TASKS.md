@@ -1721,3 +1721,27 @@ Agent-only. Created 2026-11-07 at the owner's request. The owner's part of RP-48
 ### Acceptance criteria
 
 - The owner's part of RP-48 is one command per session and nothing else.
+
+## RP-56 — Cut CI wall-clock and stop deterministic failures reaching CI
+
+**Priority:** p1 · **Depends on:** none
+
+Agent-only. Created 2026-11-10 at the owner's request. Of the 40 CI runs before it, 23 failed, and a full run took a median of 59 minutes: seven failed only on one line of trailing whitespace pushed to `main`, nine with a test that failed on Linux or on several platforms, four with tests failing on a single macOS or Windows platform, and two outside the tests. Every dispatch on a branch built the distributable and four release candidates, which set the run's length. Does not block the epic.
+
+### Deliverables
+
+- `.github/workflows/ci.yml`: an ordinary dispatch runs the test suites only; `candidates=true` and pushes to `main` add the distributable build, the release candidates and the per-platform SDK inventory. The distributable build and the Linux release candidate run side by side behind one job that finds or builds the official toolchain. Compiler caches are saved when tests fail too, and one is kept per platform per branch. A superseded dispatch on the same branch with the same inputs is cancelled; pushes to `main` and candidates runs never are.
+- `bin/ci-failures` (cyclopts) and `tests/unit/test_ci_failures.py`: a run's failed tests by platform as soon as a job fails, with failures on Linux or several platforms separated from single-platform ones.
+- `CONTRIBUTING.md` and `AGENTS.md`: the sizes of run, the hooks before every commit and push (`prek install`), and what to do when a run fails.
+- A Witan task per cause of the intermittent failures seen in those runs. No retries.
+- `planning/rp-56-validation.md`
+
+### Validation
+
+- A tests dispatch and a candidates dispatch of the changed workflow, with wall-clock from creation to last job against the measured baseline.
+- `bin/release-evidence collect` still refuses to judge the release bar from a run without candidates.
+- `prek run --all-files` and `pytest -m unit` pass.
+
+### Acceptance criteria
+
+- A branch iteration no longer waits for release candidates; `main` is green; a push to `main` still runs every job it ran before.
