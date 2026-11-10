@@ -69,5 +69,53 @@ versions record 0. Run on Linux with bash 5; macOS's bash 3.2 was not tried.
 
 ## After
 
-Not yet measured: this file is updated with the first tests run and the first candidates run of the changed
-workflow.
+### The first push to `main`: every job, cold compiler caches
+
+[Run 42851605565](https://github.com/feoh/RackPy/actions/runs/42851605565), the push of `5ad90f3`: 41 jobs
+succeeded, none failed, and only the external link check was skipped, as on every push before. It took 95.0
+minutes; the last test job ended at 76.6 minutes. That is not the workflow's ordinary time, for two reasons
+that were known before it started: `main` had no compiler cache for lin-x64, win-x64 or mac-arm64 (above),
+and for its first 14 minutes a tests dispatch on the branch (42849726853, cancelled at 16:22 UTC) was using
+macOS runners too, four of the five when it was cancelled.
+
+| Job | Started | Ended | Note |
+| --- | --- | --- | --- |
+| Official Rack toolchain | 0.1 min | 0.2 min | cache found; nothing downloaded or built |
+| Distributable build | 7.5 min | 32.2 min | queued for 7 minutes |
+| Linux release candidate | 6.2 min | 44.0 min | queued for 6 minutes; ran beside the distributable build, not after it |
+| Windows x64 release candidate | 2.7 min | 41.0 min | |
+| macOS mac-arm64 release candidate | 53.5 min | 81.0 min | queued behind the macOS test jobs |
+| macOS mac-x64 release candidate | 62.5 min | 95.0 min | queued behind the macOS test jobs |
+| Keep one compiler cache per platform | 76.7 min | 76.8 min | after the last test job |
+
+With cold caches the test jobs took 39 to 48 minutes each on mac-arm64, 50 to 71 on Windows and 51 for the
+Linux host suite (3 to 10 on mac-x64, which had a cache). Each mac-arm64 job held one of the five macOS
+runners that long, so the two macOS candidates started 53 and 62 minutes in.
+
+After the run `main` held exactly one compiler cache per platform, all saved by this run (lin-x64 690 MB,
+win-x64 584 MB, mac-arm64 471 MB, mac-x64 467 MB, native lin-x64 342 MB); the two it had from `1fc30a9` were
+gone. The repository held 10.06 GB in 37 caches, 4.66 GB of it on another branch (mostly two older sets of
+compiler caches). The cache job leaves those alone: it removes only caches of the branch it runs on.
+
+The tests dispatch on the branch was cancelled before it finished, so it measures nothing. It did show that
+the six candidates jobs are skipped on a plain dispatch, that the cache job runs after a cancellation, and
+RP-61's failure (two jobs lost to one HTTP 500).
+
+### Still to measure
+
+A tests run and a candidates run with warm compiler caches, not overlapping another run.
+
+### CPython on the Linux jobs (RP-61)
+
+In run 42851605565, 18 of the 19 Linux jobs that set up uv downloaded CPython 3.14.2 (33.7 MiB) from a GitHub
+release; the other, the toolchain lookup, never ran uv. With `cache-python: true` on those jobs (`20ede70`), two fast dispatches on
+the branch:
+
+| Run | Python cache | Linux jobs | Downloads of CPython |
+| --- | --- | --- | --- |
+| [42860073165](https://github.com/feoh/RackPy/actions/runs/42860073165) | none yet | 3 finished before the next dispatch cancelled it | 3; one job saved the cache (36 MB) |
+| [42860483645](https://github.com/feoh/RackPy/actions/runs/42860483645) | saved by the run above | 16 started (12 succeeded, 4 cancelled by hand after their uv steps) | 0; all 16 restored it, and Python is still 3.14.2 |
+
+Not shown yet: the candidates jobs and the external link check, which a fast dispatch skips, and any run on
+`main`. The key includes `pyproject.toml` and `uv.lock`, so the first run after either changes downloads
+again.

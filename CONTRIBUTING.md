@@ -158,7 +158,7 @@ CI has four sizes. Use the smallest that answers the question.
 | Pull request | opening or updating a pull request | Linux only: hooks, unit, native, docs, and a **fast host smoke** (the security suite and the oscillator plugin's load and patch-reopen test in a production build) | not measured |
 | Fast dispatch | `gh workflow run ci.yml --ref BRANCH -f fast=true` | the pull-request checks, plus the same host smoke on macOS arm64/x64 and Windows | 4 to 11 minutes warm ([2026-11-05](planning/practical-release.md)) |
 | Tests | `gh workflow run ci.yml --ref BRANCH` | every test suite on Linux, macOS arm64/x64 and Windows. No distributable build, no release candidates, no per-platform SDK inventory | not yet measured ([RP-56 validation](planning/rp-56-validation.md)) |
-| Candidates | `gh workflow run ci.yml --ref BRANCH -f candidates=true`, and every push to `main` | the tests, plus the distributable build, the four release candidates and the per-platform SDK inventory | median 59 minutes before RP-56; not yet measured after |
+| Candidates | `gh workflow run ci.yml --ref BRANCH -f candidates=true`, and every push to `main` | the tests, plus the distributable build, the four release candidates and the per-platform SDK inventory | median 59 minutes before RP-56. After: 95 minutes with cold compiler caches (one run, [RP-56 validation](planning/rp-56-validation.md)); not yet measured warm |
 
 Only a candidates run is release evidence ([release-evidence](release-evidence/README.md)):
 `bin/release-evidence collect` records a tests run's platforms as having no
