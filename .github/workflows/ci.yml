@@ -79,6 +79,9 @@ jobs:
           # release in every Linux job, and one HTTP 500 there failed two jobs of a run (RP-61). The Linux
           # jobs keep it in the Actions cache instead. macOS and Windows use the runner's own Python.
           cache-python: true
+          # This job only runs tools with inline dependencies; don't let its tiny cache win the shared key
+          # before jobs that run `uv sync --frozen` have saved the project wheels.
+          cache-suffix: planning
       - run: bin/planning-check
       - run: bin/callback-matrix check
 
@@ -91,7 +94,8 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
-          cache-python: true  # RP-61, as in the planning job
+          cache-python: true  # RP-61
+          cache-suffix: packages-v1
       - run: uv sync --frozen
       - name: prek (ruff, strict mypy, JSON/YAML, planning, callback matrix)
         run: uvx prek@0.5.3 run --all-files --show-diff-on-failure
@@ -144,7 +148,8 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
-          cache-python: true  # RP-61, as in the planning job
+          cache-python: true  # RP-61
+          cache-suffix: packages-v1
       - run: uv sync --frozen
       - name: Build with warnings as errors (pages, anchors, repository links, labelled code, alt text)
         if: matrix.shard == 'site-build'
@@ -171,8 +176,8 @@ jobs:
 
   docs-links:
     name: Documentation external links
-    # External sites must not block fast feedback; run weekly and on ordinary dispatch.
-    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.fast != true)
+    # External sites are flaky and don't describe this commit; check them weekly, not in test dispatches.
+    if: github.event_name == 'schedule'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -180,7 +185,8 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
-          cache-python: true  # RP-61, as in the planning job
+          cache-python: true  # RP-61
+          cache-suffix: packages-v1
       - run: uv sync --frozen
       - run: uv run --frozen sphinx-build -b linkcheck docs build/docs/linkcheck
       - if: always()
@@ -200,7 +206,8 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
-          cache-python: true  # RP-61, as in the planning job
+          cache-python: true  # RP-61
+          cache-suffix: packages-v1
       - name: Libraries libRack links (native tests run outside Rack)
         run: sudo apt-get $APT_OPTS update && sudo apt-get $APT_OPTS install -y --no-install-recommends ninja-build jq libgl1 libx11-6 libasound2t64 libjack-jackd2-0 libpulse0
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -289,7 +296,8 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
-          cache-python: true  # RP-61, as in the planning job
+          cache-python: true  # RP-61
+          cache-suffix: packages-v1
       # The pinned clang==21.1.7 Python bindings need libclang 21 or newer
       # (clang_getOffsetOfBase); Ubuntu 24.04 ships LLVM 18. apt.llvm.org's
       # LLVM 21 branch moves with point releases, so the job prints the version.
@@ -384,7 +392,8 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
-          cache-python: true  # RP-61, as in the planning job
+          cache-python: true  # RP-61
+          cache-suffix: packages-v1
       - name: Rack's runtime libraries, Mesa for the Xvfb window, and Xvfb
         run: >
           sudo apt-get $APT_OPTS update && sudo apt-get $APT_OPTS install -y --no-install-recommends ninja-build jq
@@ -472,7 +481,8 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
-          cache-python: true  # RP-61, as in the planning job
+          cache-python: true  # RP-61
+          cache-suffix: packages-v1
       - name: Look for the toolchain (a miss saves what the next steps build)
         id: toolchain
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -496,7 +506,8 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
-          cache-python: true  # RP-61, as in the planning job
+          cache-python: true  # RP-61
+          cache-suffix: packages-v1
       - run: >
           sudo apt-get $APT_OPTS update && sudo apt-get $APT_OPTS install -y --no-install-recommends ninja-build jq
           libgl1 libx11-6 libasound2t64 libjack-jackd2-0 libpulse0
@@ -543,7 +554,8 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
-          cache-python: true  # RP-61, as in the planning job
+          cache-python: true  # RP-61
+          cache-suffix: packages-v1
       - name: Ninja, jq, and Rack's runtime libraries (for the candidate's introspection, run on this runner)
         run: >
           sudo apt-get $APT_OPTS update && sudo apt-get $APT_OPTS install -y --no-install-recommends ninja-build jq

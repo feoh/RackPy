@@ -185,11 +185,38 @@ compiles for 40 to 70 minutes. `macos_tests` and `windows_tests` narrow a
 tests or candidates run; do not combine them with `fast=true`. Runtime depends
 on runner and build cache state; no completion time is promised.
 
-The Ubuntu runner has no Python 3.14, so uv installs its own in every Linux
-job. Those jobs keep it in the Actions cache (`cache-python` on `setup-uv`),
-keyed on `pyproject.toml` and `uv.lock`: a run downloads it from GitHub only
-after one of those files changes, or on a branch whose changed lock `main` has
-not seen ([RP-61](planning/TASKS.md)).
+The Ubuntu runner has no Python 3.14, so uv installs its own in Linux jobs.
+Those jobs keep it in the Actions cache (`cache-python` on `setup-uv`), keyed on
+`pyproject.toml` and `uv.lock`. The planning job has a separate cache suffix:
+it runs inline tools but does not sync the project dependencies, and must not
+populate the shared key with a small cache before the jobs that run
+`uv sync --frozen` save their wheels. A cache miss (including after eviction or
+a lockfile change) still needs the network; a warm cache removes the repeated
+CPython download from ordinary runs ([RP-61](planning/TASKS.md)).
+
+Other downloads are handled as follows:
+
+- `setup-uv` installs the pinned uv executable (`0.9.18`) from Astral's
+  release; it is a small, versioned tool bootstrap managed by the pinned action,
+  not a project dependency. The workflow does not mirror it.
+- Project wheels come from PyPI on a cache miss. `setup-uv` persists uv's
+  package cache under the `packages-v1` suffix and lockfile key; dependencies
+  are pinned by `uv.lock`.
+  GitHub may evict Actions caches, so the first run after eviction can still
+  download them.
+- Linux system packages and LLVM are installed from Ubuntu/LLVM apt repositories.
+  They are platform tooling rather than Python lockfile inputs; apt uses bounded
+  retries/timeouts (`APT_OPTS`). Caching an OS package repository in Actions
+  would duplicate runner images and is not configured.
+- Rack SDK archives and build inputs use RackPy's checksum-verified SDK cache.
+  If that cache misses, the pinned upstream download is still required.
+- Artifact uploads are outputs sent to GitHub Actions' artifact service, not
+  reusable inputs; they cannot be made reliable by a download cache. The
+  workflow keeps them best-effort for evidence and does not retry tests.
+
+The external documentation link check depends on third-party servers, not the
+checkout. It runs on the weekly schedule only, so a rate limit or outage cannot
+turn a push or tests dispatch red.
 
 ### When a run fails
 
@@ -237,7 +264,7 @@ and on pull requests, on `ubuntu-24.04`:
 | SDK pins, native build and audio-path guard | `bin/rack-sdk verify`, `closure`, `probe`; `pytest -m "native and not host"` |
 | SDK inventory | `pytest -m inventory` with LLVM 21 from apt.llvm.org; see below |
 | Documentation site | `sphinx-build -W` and `pytest -m "docs and not host"`, split across ten jobs (a build that keeps the HTML, the ordinary tests, and one job per deliberately broken site); a unit test checks that every docs test runs in exactly one |
-| Documentation external links (weekly, and tests and candidates dispatches) | `sphinx-build -b linkcheck` |
+| Documentation external links (weekly schedule only) | `sphinx-build -b linkcheck` |
 | Rack host smoke tests | Pull requests and fast dispatch: production-host security and oscillator load/patch smoke. Tests and candidates runs: `pytest -m "host and not dist"`, including docs snippets, the RP-04 spike and the RP-06 probe |
 | Official Rack toolchain (candidates runs) | finds the toolchain in the cache, or builds and saves it (about an hour, once per toolchain pin), so the two jobs below can restore it and run side by side |
 | Distributable build (candidates runs) | restores the official toolchain, then `pytest -m dist` |

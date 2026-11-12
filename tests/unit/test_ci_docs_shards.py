@@ -32,6 +32,24 @@ def shard_selections() -> dict[str, str]:
     return dict(re.findall(r'- shard: (\S+)\n\s+selection: "([^"\n]*)"', job))
 
 
+def test_unreliable_external_link_check_runs_only_weekly() -> None:
+    text = (REPO / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    job = text.split("\n  docs-links:\n", 1)[1].split("\n  native:\n", 1)[0]
+    assert "if: github.event_name == 'schedule'" in job
+    assert "workflow_dispatch" not in job
+
+
+def test_planning_job_does_not_poison_the_shared_uv_dependency_cache() -> None:
+    text = (REPO / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    planning = text.split("\n  planning:\n", 1)[1].split("\n  python:\n", 1)[0]
+    assert "cache-python: true" in planning
+    assert "cache-suffix: planning" in planning
+
+    python = text.split("\n  python:\n", 1)[1].split("\n  docs:\n", 1)[0]
+    assert "cache-python: true" in python
+    assert "cache-suffix: packages-v1" in python
+
+
 def test_every_docs_test_runs_in_exactly_one_ci_shard() -> None:
     selections = shard_selections()
     assert len(selections) >= 2, selections
