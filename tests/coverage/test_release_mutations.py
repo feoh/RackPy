@@ -64,6 +64,25 @@ def test_platform_scoped_known_gap_keeps_other_platform_mapping_intact(
     assert bm.known_gap_marker_problem({**record, "id": "unlisted-gap"}, inputs.repo, "win-x64")
 
 
+def test_platform_scoped_known_gap_is_not_unexplained_missing_evidence(
+    ready: tuple[bm.Inputs, dict[str, Any], dict[str, Any], dict[str, str]],
+) -> None:
+    inputs, manifest, _, outcomes = ready
+    record = next(r for r in manifest["entries"] if r["id"].startswith("function:rack::system::runProcessDetached"))
+    outcomes[record["tests"][0]] = "skipped"
+
+    problems, counts = bm.evidence_problems(inputs, manifest, "win-x64", outcomes)
+    assert not any(p.id == record["id"] for p in problems)
+    assert counts["known gap"] == 1
+    assert counts["no evidence"] == 0
+
+    record["notes"] = record["notes"].replace("Known release gap [win-x64]:", "")
+    problems, counts = bm.evidence_problems(inputs, manifest, "win-x64", outcomes)
+    assert any(p.id == record["id"] and p.code == "no-evidence" for p in problems)
+    assert counts["known gap"] == 0
+    assert counts["no evidence"] == 1
+
+
 def test_owner_approved_known_gaps_pass_only_when_documented(
     ready: tuple[bm.Inputs, dict[str, Any], dict[str, Any], dict[str, str]],
 ) -> None:

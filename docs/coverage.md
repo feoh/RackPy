@@ -284,7 +284,11 @@ exception with `Known release gap:` in its notes, and the checker requires its
 ID to appear in this list. A platform-only exception uses
 `Known release gap [<platform>]:` (for example `Known release gap [win-x64]:`);
 the implementation remains mapped and is still checked normally on every other
-platform. No unlisted incomplete record is exempt.
+platform. No unlisted incomplete record is exempt. When a valid platform-scoped
+known gap has no passing test on that platform, `check_coverage.py evidence`
+reports it separately as `known gap`, not as passed evidence and not as an
+unexplained `no-evidence` failure. The limitation remains visible in release
+reports; a failed cited test is still a failure.
 
 | Manifest ID | Status | Known limitation |
 | --- | --- | --- |

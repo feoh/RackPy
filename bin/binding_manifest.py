@@ -1017,6 +1017,9 @@ def evidence_problems(
             problems.append(Problem("evidence-failed", ident, f"failed on {platform}: {', '.join(failed)}"))
         elif "passed" in results.values():
             counts["passed"] += 1
+        elif known_gap(r, platform) and known_gap_marker_problem(r, inputs.repo, platform) is None:
+            # Report an owner-approved platform gap distinctly; do not call it a pass or an unexplained absence.
+            counts["known gap"] += 1
         else:
             counts["no evidence"] += 1
             detail = ", ".join(f"{t} {o}" for t, o in sorted(results.items())) or "no tests cited"
