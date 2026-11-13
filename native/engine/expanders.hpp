@@ -21,10 +21,12 @@
 #include <rack.hpp>
 
 #include <atomic>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "rackpy/expanders.hpp"
@@ -119,19 +121,25 @@ struct Snapshot {
 		frame.store(at, std::memory_order_release);
 		sequence.store(s + 2, std::memory_order_release);
 	}
-	/** Main thread: a consistent copy, or false if the engine thread kept writing through `attempts` tries.
-	Acquire loads keep the second sequence load after the values. */
-	bool read(int64_t& at, std::vector<float>& out, int attempts = 1000) const {
+	/** Main thread: a consistent copy, or false if the engine cannot finish writing within the deadline.
+	Acquire loads keep the second sequence load after the values. Yield after a concurrent write so the writer is not
+	starved by this reader; the bounded wait avoids hanging the UI if the writer cannot make progress. */
+	bool read(int64_t& at, std::vector<float>& out) const {
+		constexpr auto timeout = std::chrono::milliseconds(50);
+		const auto deadline = std::chrono::steady_clock::now() + timeout;
 		out.resize(size);
-		for (int k = 0; k < attempts; k++) {
+		while (std::chrono::steady_clock::now() < deadline) {
 			uint32_t before = sequence.load(std::memory_order_acquire);
-			if (before & 1u)
+			if (before & 1u) {
+				std::this_thread::yield();
 				continue;
+			}
 			for (size_t i = 0; i < size; i++)
 				out[i] = values[i].load(std::memory_order_acquire);
 			at = frame.load(std::memory_order_acquire);
 			if (sequence.load(std::memory_order_relaxed) == before)
 				return true;
+			std::this_thread::yield();
 		}
 		return false;
 	}

@@ -333,16 +333,17 @@ void bindExpanders(py::module_ engine, py::class_<ModuleRef>& module) {
 				return py::none();
 			bool consistent;
 			{
-				py::gil_scoped_release release;  // a few retries at most, while the engine thread writes
+				py::gil_scoped_release release;  // yield while the engine writes, with a bounded UI-thread wait
 				consistent = snapshot->read(frame, values);
 			}
 			if (!consistent)
-				throw std::runtime_error("snapshot(): Rack's engine thread kept writing the snapshot; try again");
+				throw std::runtime_error("snapshot(): timed out waiting for a consistent snapshot");
 			if (frame < 0)
 				return py::none();
 			return py::make_tuple(frame, values);
 		}, "The last message native code received on this side while snapshots were on, as (frame, values): a "
-			"consistent copy, safe to take while Rack's engine runs the module. None before the first one.")
+			"consistent copy, safe to take while Rack's engine runs the module. None before the first one; raises "
+			"RuntimeError if the engine cannot finish its write within 50 ms.")
 		.def("__repr__", [](const ExpanderView& v) { return std::string("<Module.Expander ") + sideName(v.side) + ">"; });
 
 	bindAccessors(module, [](py::object self, uint8_t side) {

@@ -216,13 +216,7 @@ def test_python_reads_snapshots_while_racks_engine_runs() -> None:
         message_seen = False
         deadline = time.monotonic() + 10
         while len(frames) < 200 and time.monotonic() < deadline:
-            try:
-                snapshot = b.left_expander.snapshot()  # while the engine thread may be writing it
-            except RuntimeError as exc:
-                if str(exc) != "snapshot(): Rack's engine thread kept writing the snapshot; try again":
-                    raise
-                time.sleep(0.001)
-                continue
+            snapshot = b.left_expander.snapshot()  # while the engine thread may be writing it
             if snapshot is not None:
                 frame, values = snapshot
                 assert len(values) == 17

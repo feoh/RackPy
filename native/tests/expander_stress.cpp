@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <condition_variable>
 #include <cstdio>
 #include <memory>
@@ -203,9 +204,33 @@ void checkRow(const Engine& engine) {
 	}
 }
 
+/** A reader that observes a descheduled engine writer yields until its consistent snapshot is available. */
+void checkSnapshotWaitsForWriter() {
+	engine::Snapshot snapshot(1);
+	std::atomic<bool> writing{false};
+	std::thread writer([&] {
+		snapshot.sequence.store(1, std::memory_order_relaxed);
+		writing.store(true, std::memory_order_release);
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
+		snapshot.values[0].store(42.f, std::memory_order_release);
+		snapshot.frame.store(17, std::memory_order_release);
+		snapshot.sequence.store(2, std::memory_order_release);
+	});
+	while (!writing.load(std::memory_order_acquire))
+		std::this_thread::yield();
+	int64_t frame = -1;
+	std::vector<float> values;
+	bool consistent = snapshot.read(frame, values);
+	writer.join();
+	CHECK(consistent);
+	CHECK(frame == 17);
+	CHECK(values == std::vector<float>{42.f});
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
+	checkSnapshotWaitsForWriter();
 	runtime::markMainThread();
 	const int workers = argc > 1 ? std::atoi(argv[1]) : 4;
 	const int blocks = argc > 2 ? std::atoi(argv[2]) : 400;

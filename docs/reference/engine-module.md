@@ -784,8 +784,11 @@ values)`, a consistent copy of the message as native code received it in
 that frame, or `None` before the first. Native code copies it at most once
 per frame, before marking anything read, and only while snapshots are on; a
 sequence lock keeps the copy whole, so Python may read it while Rack's
-engine thread writes. Snapshots exist for RackPy messages that native code
-receives (graph nodes and kernels through `rackpy/expanders.hpp`).
+engine thread writes. `snapshot()` yields when it encounters a concurrent
+write and waits for at most 50 ms; if the writer cannot finish in that bound,
+it raises `RuntimeError` rather than returning a torn copy. Snapshots exist for
+RackPy messages that native code receives (graph nodes and kernels through
+`rackpy/expanders.hpp`).
 
 **Native code.** DSP graphs exchange lanes of `"rackpy.graph"` messages
 ([graph expanders](../how-to/graphs.md#expanders)), and C++ kernel libraries
