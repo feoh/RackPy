@@ -287,7 +287,8 @@ def scenario() -> Iterator[None]:
                 return
             time.sleep(0.001)
 
-    workers = [threading.Thread(target=polite), threading.Thread(target=careless, daemon=True)]
+    workers = [threading.Thread(target=polite, name="polite"), threading.Thread(target=careless, name="careless")]
+    host.log_info("WORKER careless started; non-daemon shutdown must observe a stale handle")
     for w in workers:
         w.start()
 

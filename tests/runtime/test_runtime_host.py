@@ -89,7 +89,9 @@ EXPECTED = [
 
 
 def test_windowed_scenario_completes_and_exits_cleanly(windowed: RackRun) -> None:
-    assert windowed.returncode == 0, windowed.tail()
+    assert windowed.returncode == 0, (
+        f"Rack windowed run timed out or failed while waiting for worker 'careless':\n{windowed.tail()}"
+    )
     assert windowed.lines("RackPy: SCENARIO DONE"), windowed.tail()
     assert not windowed.lines("Fatal signal"), windowed.tail()
 
@@ -110,24 +112,22 @@ def test_every_check_is_expected(windowed: RackRun) -> None:
 def test_shutdown_runs_in_the_documented_order(windowed: RackRun) -> None:
     log = windowed.log
     order = [
+        "WORKER careless started; non-daemon shutdown must observe a stale handle",
         "Saving autosave",  # Rack saves the patch, with its Python module widgets, first
         "RackPy context shutdown begins (scene deletion)",
         "deliberate failure in a closing hook",
         "WORKER polite joined after",
         "RackPy context closed; handles to it are now stale",
         "Deleting engine",
+        "WORKER careless saw StaleHandleError",
         "RackPy interpreter finalized: Py_FinalizeEx returned 0",
     ]
     positions = [log.find(marker) for marker in order]
     assert all(p >= 0 for p in positions), dict(zip(order, positions, strict=True))
-    # The careless worker is an unjoined daemon, so Rack may finalize Python before it runs again.
-    # If it logs its stale-handle observation, it must be after the context closed; no log is
-    # required if teardown wins the scheduling race. Every other step is strictly ordered.
-    careless = log.find("WORKER careless saw StaleHandleError")
-    if careless >= 0:
-        assert careless > positions[4]
+    # The non-daemon worker returns on StaleHandleError before Python finalizes. If it did not,
+    # the launcher timeout above reports the worker name and log tail rather than hanging silently.
     assert positions == sorted(positions)
-    assert positions[4] > positions[3]
+    assert positions[5] > positions[4]
 
 
 def test_rss_growth_is_reported(windowed: RackRun) -> None:
