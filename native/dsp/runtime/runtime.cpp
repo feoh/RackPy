@@ -73,8 +73,6 @@ void KernelSlot::slow(rack::engine::Module& module, const rack::engine::Module::
 
 void KernelSlot::fail(rack::engine::Module& module) noexcept {
 	run = Run::FAILED;
-	failure.store(true, std::memory_order_release);
-	silence(module);
 	// The type's name is fixed after registration: copy it without allocating.
 	char message[runtime::DIAGNOSTIC_MESSAGE_BYTES] = "kernel failed; module silenced: ";
 	size_t at = std::char_traits<char>::length(message);
@@ -82,6 +80,9 @@ void KernelSlot::fail(rack::engine::Module& module) noexcept {
 		message[at++] = *c;
 	message[at] = '\0';
 	runtime::diagnose(runtime::DiagnosticCode::KernelFailed, message);
+	silence(module);
+	// Publish failure only after readers can observe its diagnostic and silent outputs.
+	failure.store(true, std::memory_order_release);
 }
 
 void KernelSlot::reset() noexcept {
