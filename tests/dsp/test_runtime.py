@@ -19,6 +19,7 @@ from tests.support import (
     MACOS,
     MODULE,
     OBJECT,
+    WINDOWS,
     audio_guard_env,
     audio_guard_supported,
     bin_command,
@@ -100,7 +101,7 @@ def test_the_overhead_benchmark_runs(dev_build: Path) -> None:
 @audio_guard_supported()
 def test_the_guard_run_needs_the_preload(dev_build: Path) -> None:
     proc = subprocess.run([str(dev_build / "rackpy_kernel_guard")], capture_output=True, text=True, check=False)
-    expected = "DYLD_INSERT_LIBRARIES" if MACOS else "LD_PRELOAD"
+    expected = "RACKPY_AUDIO_GUARD_DLL" if WINDOWS else "DYLD_INSERT_LIBRARIES" if MACOS else "LD_PRELOAD"
     assert proc.returncode == 2 and expected in proc.stderr
 
 

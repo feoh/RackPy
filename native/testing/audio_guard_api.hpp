@@ -35,12 +35,11 @@ struct AudioGuardApi {
 		module = LoadLibraryA(path);
 		if (!module)
 			return false;
-		auto symbol = [this](const char* name) { return reinterpret_cast<void*>(GetProcAddress(module, name)); };
-		enter = reinterpret_cast<GuardAction>(symbol("audio_guard_enter"));
-		leave = reinterpret_cast<GuardAction>(symbol("audio_guard_leave"));
-		reset = reinterpret_cast<GuardAction>(symbol("audio_guard_reset"));
-		report = reinterpret_cast<GuardReport>(symbol("audio_guard_report"));
-		auto install = reinterpret_cast<GuardInstall>(symbol("audio_guard_install"));
+		enter = reinterpret_cast<GuardAction>(GetProcAddress(module, "audio_guard_enter"));
+		leave = reinterpret_cast<GuardAction>(GetProcAddress(module, "audio_guard_leave"));
+		reset = reinterpret_cast<GuardAction>(GetProcAddress(module, "audio_guard_reset"));
+		report = reinterpret_cast<GuardReport>(GetProcAddress(module, "audio_guard_report"));
+		auto install = reinterpret_cast<GuardInstall>(GetProcAddress(module, "audio_guard_install"));
 		return enter && leave && reset && report && install && install() != 0;
 #else
 		enter = reinterpret_cast<GuardAction>(dlsym(RTLD_DEFAULT, "audio_guard_enter"));

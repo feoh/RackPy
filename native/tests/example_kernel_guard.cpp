@@ -29,13 +29,15 @@ ReportFn report;
 
 #if defined(_WIN32)
 using DynamicLibrary = HMODULE;
+using DynamicSymbol = FARPROC;
 DynamicLibrary openLibrary(const char* path) { return LoadLibraryA(path); }
-void* findSymbol(DynamicLibrary library, const char* name) { return reinterpret_cast<void*>(GetProcAddress(library, name)); }
+DynamicSymbol findSymbol(DynamicLibrary library, const char* name) { return GetProcAddress(library, name); }
 const char* dynamicError() { return "LoadLibrary/GetProcAddress failed"; }
 #else
 using DynamicLibrary = void*;
+using DynamicSymbol = void*;
 DynamicLibrary openLibrary(const char* path) { return dlopen(path, RTLD_NOW | RTLD_LOCAL); }
-void* findSymbol(DynamicLibrary library, const char* name) { return dlsym(library, name); }
+DynamicSymbol findSymbol(DynamicLibrary library, const char* name) { return dlsym(library, name); }
 const char* dynamicError() { return dlerror(); }
 #endif
 
@@ -125,8 +127,8 @@ int main(int argc, char** argv) {
 			return 2;
 		}
 #endif
-		auto registerKernels = library ? (void (*)(rackpy::KernelRegistrar&)) findSymbol(library, "rackpy_register_kernels") : nullptr;
-		auto ns = library ? (const char* (*) ()) findSymbol(library, "rackpy_kernel_namespace") : nullptr;
+		auto registerKernels = library ? reinterpret_cast<void (*)(rackpy::KernelRegistrar&)>(findSymbol(library, "rackpy_register_kernels")) : nullptr;
+		auto ns = library ? reinterpret_cast<const char* (*)()>(findSymbol(library, "rackpy_kernel_namespace")) : nullptr;
 		if (!registerKernels || !ns) {
 			std::fprintf(stderr, "cannot load %s: %s\n", argv[i], dynamicError());
 			return 2;
