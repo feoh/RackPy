@@ -1351,12 +1351,14 @@ tasks inherit the shared execution contract in tasks.json and AGENTS.md.
 4. Run differential binding tests and actual-host integration against the exact candidate artifacts, not source-tree imports.
 5. Reconcile every official tutorial/guide/template source block and sample expected-output test.
 6. Collect independent review from a human or an explicitly authorized agent workflow; resolve findings or keep the full-release gate closed.
+7. Establish a new reproducible frozen-candidate review baseline, carry verdicts to a subsequent candidate with the RP-46 protocol, and record the baseline/candidate SHAs, actual carried/redo counts and redo list. The waived historical count from 4fba8b9 to e329b10 is not evidence and must not be claimed.
 
 ### Validation
 
 - Strict coverage checker reports zero unreviewed/planned/unrepresentable public IDs on each advertised target.
 - Deliberately removed mappings/tests/docs cause the release check to fail.
 - All official sample ports run from clean candidate installs; no hidden skips.
+- Incremental review evidence records actual carry/redo counts and both immutable SHAs from a reproducible baseline; carry provenance and changed-record re-review safeguards pass.
 
 ### Acceptance criteria
 
@@ -1484,14 +1486,13 @@ tasks inherit the shared execution contract in tasks.json and AGENTS.md.
 
 - Unit tests for carry, promote and collect pass with prek; existing exact-SHA regression tests still pass.
 - The historical dry run from 4fba8b9 to e329b10 (~1,900 carried of 3,107) is waived as unreproducible: the original review bundle was lost. Do not report that count as reproduced.
-- RP-42 must establish a new reproducible review baseline, carry to a subsequent candidate, and record the actual carried/redo counts and both commit SHAs. The per-record equality, provenance, and exact-SHA checks remain mandatory.
 
 ### Acceptance criteria
 
 - The protocol is documented and enforced by the tools; no verdict can be promoted for a record whose inputs changed.
 - RP-42 can proceed without a full 3,107-record re-review per fix batch.
 
-**Notes:** Owner decision 2026-11-06 (RP-42 comment): incremental review is the method of record. Owner decision 2026-11-16: waive only the lost historical carry-count dry run; see the validation requirement above and the Witan RP-46/RP-42 comments. Do not weaken provenance, mutation-test, or exact-SHA safeguards.
+**Notes:** Owner decision 2026-11-06 (RP-42 comment): incremental review is the method of record. Owner decision 2026-11-16: waive only the lost historical carry-count dry run; see the Witan RP-46/RP-42 comments. RP-42's validation contract requires actual carry/redo counts from a new reproducible baseline. Do not weaken provenance, mutation-test, or exact-SHA safeguards.
 
 ## RP-47 — Windows evidence for rack::system::runProcessDetached, or a listed Windows known gap
 

@@ -1447,12 +1447,14 @@
         "Review template generic/extension policies, macros, deprecated methods, virtual overrides, platform branches and external-type adapters specifically for scope cheating.",
         "Run differential binding tests and actual-host integration against the exact candidate artifacts, not source-tree imports.",
         "Reconcile every official tutorial/guide/template source block and sample expected-output test.",
-        "Collect independent review from a human or an explicitly authorized agent workflow; resolve findings or keep the full-release gate closed."
+        "Collect independent review from a human or an explicitly authorized agent workflow; resolve findings or keep the full-release gate closed.",
+        "Establish a new reproducible frozen-candidate review baseline, carry verdicts to a subsequent candidate with the RP-46 protocol, and record the baseline/candidate SHAs, actual carried/redo counts and redo list. The waived historical count from 4fba8b9 to e329b10 is not evidence and must not be claimed."
       ],
       "validation": [
         "Strict coverage checker reports zero unreviewed/planned/unrepresentable public IDs on each advertised target.",
         "Deliberately removed mappings/tests/docs cause the release check to fail.",
-        "All official sample ports run from clean candidate installs; no hidden skips."
+        "All official sample ports run from clean candidate installs; no hidden skips.",
+        "Incremental review evidence records actual carry/redo counts and both immutable SHAs from a reproducible baseline; carry provenance and changed-record re-review safeguards pass."
       ],
       "acceptance": [
         "Full-surface claim has reproducible declaration, semantic and usability evidence.",
@@ -1587,14 +1589,13 @@
       ],
       "validation": [
         "Unit tests for carry, promote and collect pass with prek; existing exact-SHA regression tests still pass.",
-        "The historical dry run from 4fba8b9 to e329b10 (~1,900 carried of 3,107) is waived as unreproducible because the original review bundle was lost; do not report that count as reproduced.",
-        "RP-42 must establish a new reproducible review baseline, carry to a subsequent candidate, and record actual carried/redo counts and both commit SHAs. Per-record equality, provenance, and exact-SHA checks remain mandatory."
+        "The historical dry run from 4fba8b9 to e329b10 (~1,900 carried of 3,107) is waived as unreproducible because the original review bundle was lost; do not report that count as reproduced."
       ],
       "acceptance": [
         "The protocol is documented and enforced by the tools; no verdict can be promoted for a record whose inputs changed.",
         "RP-42 can proceed without a full 3,107-record re-review per fix batch."
       ],
-      "notes": "Owner decision 2026-11-06 (RP-42 comment): incremental review is the method of record. Owner decision 2026-11-16: waive only the lost historical carry-count dry run; see the validation requirement and Witan RP-46/RP-42 comments. Do not weaken provenance, mutation-test, or exact-SHA safeguards.",
+      "notes": "Owner decision 2026-11-06 (RP-42 comment): incremental review is the method of record. Owner decision 2026-11-16: waive only the lost historical carry-count dry run; see the Witan RP-46/RP-42 comments. RP-42's validation contract requires actual carry/redo counts from a new reproducible baseline. Do not weaken provenance, mutation-test, or exact-SHA safeguards.",
       "priority": "p1"
     },
     {
