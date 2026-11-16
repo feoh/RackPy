@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::widget::Widget::onPathDrop(const rack::widget::Widget::PathDropEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::onRemove(const rack::widget::Widget::RemoveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::onReposition(const rack::widget::Widget::RepositionEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::onResize(const rack::widget::Widget::ResizeEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::onSelect(const rack::widget::Widget::SelectEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::onSelectKey(const rack::widget::Widget::SelectKeyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::onSelectText(const rack::widget::Widget::SelectTextEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::onShow(const rack::widget::Widget::ShowEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::removeChild(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::requestDelete()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::setBox(rack::math::Rect)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::setPosition(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::setSize(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::setVisible(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::show()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::getRelativeOffset(rack::math::Vec, rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::getRelativeZoom(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::getViewport(rack::math::Rect)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::getZoom()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:3a717505-0bc4-47ff-84a6-0c782459ce26",
+  "slice": "redo-085"
+}

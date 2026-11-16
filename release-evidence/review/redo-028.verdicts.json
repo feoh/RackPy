@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::dsp::MidiParser::rotateIndex": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::smooth": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::startPulse": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::stopPulse": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::velocities": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MinBlepGenerator::buf": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MinBlepGenerator::impulse": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MinBlepGenerator::pos": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RealFFT::length": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RealFFT::setup": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RealTimeConvolver::blockSize": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RealTimeConvolver::inputFfts": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RealTimeConvolver::inputPos": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RealTimeConvolver::kernelBlocks": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RealTimeConvolver::kernelFfts": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RealTimeConvolver::outputTail": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RealTimeConvolver::pffft": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::RealTimeConvolver::tmpBlock": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::SampleRateConverter::channels": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::SampleRateConverter::inRate": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::SampleRateConverter::outRate": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::SampleRateConverter::quality": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::SampleRateConverter::st": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::Upsampler::inBuffer": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::Upsampler::inIndex": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:9550a2c6-880c-467a-9dba-d883b5594ea1",
+  "slice": "redo-028"
+}

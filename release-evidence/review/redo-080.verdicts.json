@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::ui::TextField::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::onDragHover(const rack::widget::Widget::DragHoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::onSelectKey(const rack::widget::Widget::SelectKeyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::onSelectText(const rack::widget::Widget::SelectTextEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::pasteClipboard()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::selectAll()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::setText(std::string)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Tooltip::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Tooltip::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::BaseEvent::consume(rack::widget::Widget *) const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::BaseEvent::getTarget() const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::BaseEvent::isConsumed() const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::BaseEvent::isPropagating() const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::BaseEvent::setTarget(rack::widget::Widget *) const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::BaseEvent::stopPropagating() const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::BaseEvent::unconsume() const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::finalizeWidget(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::getDragHoveredWidget()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::getDraggedWidget()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::getHoveredWidget()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::getRootWidget()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::getSelectedWidget()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleButton(rack::math::Vec, int, int, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleDirty()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleDrop(rack::math::Vec, const std::vector<std::string> &)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:61f5a6e5-919b-4af4-9fcd-a55b8356b8d5",
+  "slice": "redo-080"
+}

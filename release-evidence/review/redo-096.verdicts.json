@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "record:rack::widget::Widget::AddEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::ButtonEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::ChangeEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::ContextCreateEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::ContextDestroyEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DeselectEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DirtyEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DoubleClickEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragBaseEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragDropEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragEndEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragEnterEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragHoverEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragLeaveEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragMoveEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DragStartEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::DrawArgs": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::EnterEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::HideEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::HoverEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::HoverKeyEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::HoverScrollEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::HoverTextEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::KeyBaseEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::LeaveEvent": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:e2db4e98-cdca-4e06-ae28-273147b647b2",
+  "slice": "redo-096"
+}

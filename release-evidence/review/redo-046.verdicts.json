@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "function_template:rack::createBoolPtrMenuItem<type>(std::string, std::string, $0 *)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createCheckMenuItem<type>(std::string, std::string, std::function<bool ()>, std::function<void ()>, bool, bool)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createIndexPtrSubmenuItem<type>(std::string, std::vector<std::string>, $0 *)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createIndexSubmenuItem<type>(std::string, std::vector<std::string>, std::function<size_t ()>, std::function<void (size_t)>, bool, bool)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createInput<type>(rack::math::Vec, rack::engine::Module *, int)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createInputCentered<type>(rack::math::Vec, rack::engine::Module *, int)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createLight<type>(rack::math::Vec, rack::engine::Module *, int)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createLightCentered<type>(rack::math::Vec, rack::engine::Module *, int)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createLightParam<type>(rack::math::Vec, rack::engine::Module *, int, int)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createLightParamCentered<type>(rack::math::Vec, rack::engine::Module *, int, int)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createMenu<type>()": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createMenuItem<type>(std::string, std::string)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createMenuItem<type>(std::string, std::string, std::function<void ()>, bool, bool)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createMenuLabel<type>(std::string)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createModel<type, type>(std::string)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createOutput<type>(rack::math::Vec, rack::engine::Module *, int)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createOutputCentered<type>(rack::math::Vec, rack::engine::Module *, int)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createPanel<type>(std::string)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createPanel<type>(std::string, std::string)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createParam<type>(rack::math::Vec, rack::engine::Module *, int)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createParamCentered<type>(rack::math::Vec, rack::engine::Module *, int)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createSubmenuItem<type>(std::string, std::string, std::function<void (ui::Menu *)>, bool)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createWidget<type>(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createWidgetCentered<type>(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::amplitudeToDb<type>($0)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:6bb68939-3050-44b5-8a94-d7b33da1dc14",
+  "slice": "redo-046"
+}

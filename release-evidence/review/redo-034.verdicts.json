@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::ui::ScrollWidget::horizontalScrollbar": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::ScrollWidget::offset": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::ScrollWidget::verticalScrollbar": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::Scrollbar::vertical": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::SequentialLayout::alignment": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::SequentialLayout::margin": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::SequentialLayout::orientation": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::SequentialLayout::spacing": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::SequentialLayout::wrap": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::Slider::quantity": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::TextField::cursor": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::TextField::multiline": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::TextField::nextField": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::TextField::password": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::TextField::placeholder": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::TextField::prevField": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::TextField::selection": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::TextField::text": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::Tooltip::text": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::BaseEvent::context": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventContext::consumed": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventContext::propagating": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventContext::target": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::dragButton": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::dragHoveredWidget": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:30cc951a-021b-4ea2-80b2-dd8274018b0a",
+  "slice": "redo-034"
+}

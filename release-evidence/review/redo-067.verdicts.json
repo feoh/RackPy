@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::engine::Engine::getParamSmoothValue(rack::engine::Module *, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getParamValue(rack::engine::Module *, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getSampleRate()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getSampleTime()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::hasCable(rack::engine::Cable *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::hasModule(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::moduleFromJson(rack::engine::Module *, json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::moduleToJson(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::prepareSave()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::prepareSaveModule(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::randomizeModule(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::removeCable(rack::engine::Cable *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::removeModule(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::removeParamHandle(rack::engine::ParamHandle *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::resetModule(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::setMasterModule(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::setMasterModule_NoLock(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::setParamSmoothValue(rack::engine::Module *, int, float)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::setParamValue(rack::engine::Module *, int, float)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::setSuggestedSampleRate(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::stepBlock(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::toJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::updateParamHandle(rack::engine::ParamHandle *, int64_t, int, bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::updateParamHandle_NoLock(rack::engine::ParamHandle *, int64_t, int, bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::yieldWorkers()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:6f6a19b5-3f98-4fe5-be56-4664d60f8bef",
+  "slice": "redo-067"
+}

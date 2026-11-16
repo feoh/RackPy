@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::engine::PortInfo::portId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::PortInfo::type": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::SwitchQuantity::labels": {
+      "verdict": "accept"
+    },
+    "field:rack::math::Rect::pos": {
+      "verdict": "accept"
+    },
+    "field:rack::math::Rect::size": {
+      "verdict": "accept"
+    },
+    "field:rack::math::Vec::x": {
+      "verdict": "accept"
+    },
+    "field:rack::math::Vec::y": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Input::inputDevice": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::InputDevice::subscribed": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Message::bytes": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Message::frame": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Output::outputDevice": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::OutputDevice::subscribed": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Port::channel": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Port::context": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Port::device": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Port::deviceId": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Port::driver": {
+      "verdict": "accept"
+    },
+    "field:rack::midi::Port::driverId": {
+      "verdict": "accept"
+    },
+    "field:rack::random::Xoroshiro128Plus::state": {
+      "verdict": "accept"
+    },
+    "field:rack::settings::ModuleInfo::added": {
+      "verdict": "accept"
+    },
+    "field:rack::settings::ModuleInfo::enabled": {
+      "verdict": "accept"
+    },
+    "field:rack::settings::ModuleInfo::favorite": {
+      "verdict": "accept"
+    },
+    "field:rack::settings::ModuleInfo::lastAdded": {
+      "verdict": "accept"
+    },
+    "field:rack::settings::PluginWhitelist::moduleSlugs": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:089d2cd3-f791-4fd6-b89a-17b65be3a59d",
+  "slice": "redo-032"
+}

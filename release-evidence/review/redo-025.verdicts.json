@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::app::SvgSwitch::latch": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgSwitch::shadow": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgSwitch::sw": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Switch::momentary": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ThemedSvgPanel::darkSvg": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ThemedSvgPanel::lightSvg": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ThemedSvgPort::darkSvg": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ThemedSvgPort::lightSvg": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ThemedSvgScrew::darkSvg": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ThemedSvgScrew::lightSvg": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Device::processMutex": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Port::context": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Port::device": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Port::deviceId": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Port::driver": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Port::driverId": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Port::inputOffset": {
+      "verdict": "accept"
+    },
+    "field:rack::audio::Port::outputOffset": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::BefacoBigKnob::bg": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::BefacoTinyKnob::bg": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::Davies1900hKnob::bg": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::LightButton::light": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::LightSlider::light": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::Rogan::bg": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::Rogan::fg": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:a0b17d1c-3d44-4bb2-9251-d12157582299",
+  "slice": "redo-025"
+}

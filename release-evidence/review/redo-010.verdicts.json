@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "class_template:rack::componentlibrary::MediumLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::MediumSimpleLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::MomentarySwitch<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::PB61303Light<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::RectangleLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::SmallLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::SmallSimpleLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TBlueLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TGrayModuleLightWidget<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TGreenLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TGreenRedLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TRedGreenBlueLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TRedLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TSvgLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TWhiteLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TYellowLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TinyLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::TinySimpleLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::VCVBezelLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::VCVLightBezel<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::VCVLightBezelLatch<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::VCVLightLatch<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::VCVLightSlider<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::VCVSliderLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::Decimator<value, value, type>": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:5a81b7ec-276d-420d-99a0-c66100ee1e5b",
+  "slice": "redo-010"
+}

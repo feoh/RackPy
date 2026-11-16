@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::widget::Widget::DragMoveEvent::mouseDelta": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::DrawArgs::clipBox": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::DrawArgs::fb": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::DrawArgs::vg": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::HoverEvent::mouseDelta": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::HoverScrollEvent::scrollDelta": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::KeyBaseEvent::action": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::KeyBaseEvent::key": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::KeyBaseEvent::keyName": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::KeyBaseEvent::mods": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::KeyBaseEvent::scancode": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::PathDropEvent::paths": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::PositionBaseEvent::pos": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::TextBaseEvent::codepoint": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::box": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::requestedDelete": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::visible": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::ZoomWidget::zoom": {
+      "verdict": "accept"
+    },
+    "field:rack::window::Font::handle": {
+      "verdict": "accept"
+    },
+    "field:rack::window::Font::vg": {
+      "verdict": "accept"
+    },
+    "field:rack::window::Image::handle": {
+      "verdict": "accept"
+    },
+    "field:rack::window::Image::vg": {
+      "verdict": "accept"
+    },
+    "field:rack::window::Svg::handle": {
+      "verdict": "accept"
+    },
+    "field:rack::window::Window::fbVg": {
+      "verdict": "accept"
+    },
+    "field:rack::window::Window::pixelRatio": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:271e2478-244e-474f-82f8-2a44a458ad14",
+  "slice": "redo-036"
+}

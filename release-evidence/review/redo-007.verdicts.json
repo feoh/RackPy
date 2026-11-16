@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "boundary_constant:GLFW_KEY_KP_EQUAL": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_MULTIPLY": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_SUBTRACT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_L": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_LAST": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_LEFT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_LEFT_ALT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_LEFT_BRACKET": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_LEFT_CONTROL": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_LEFT_SHIFT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_LEFT_SUPER": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_M": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_MENU": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_MINUS": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_N": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_NUM_LOCK": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_O": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_P": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_PAGE_DOWN": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_PAGE_UP": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_PAUSE": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_PERIOD": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_PRINT_SCREEN": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_Q": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_R": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:4f295e99-1fb2-4601-96ee-879e0fabe32b",
+  "slice": "redo-007"
+}

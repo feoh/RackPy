@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "enumerator:rack::settings::BrowserSort::BROWSER_SORT_MOST_USED": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::BrowserSort::BROWSER_SORT_NAME": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::BrowserSort::BROWSER_SORT_RANDOM": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::BrowserSort::BROWSER_SORT_UPDATED": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::KnobMode::KNOB_MODE_LINEAR": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::KnobMode::KNOB_MODE_ROTARY_ABSOLUTE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::KnobMode::KNOB_MODE_ROTARY_RELATIVE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::KnobMode::KNOB_MODE_SCALED_LINEAR": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::ui::Label::Alignment::CENTER_ALIGNMENT": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::ui::Label::Alignment::LEFT_ALIGNMENT": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::ui::Label::Alignment::RIGHT_ALIGNMENT": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::ui::SequentialLayout::Alignment::BOTTOM_ALIGNMENT": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::ui::SequentialLayout::Alignment::CENTER_ALIGNMENT": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::ui::SequentialLayout::Alignment::LEFT_ALIGNMENT": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::ui::SequentialLayout::Alignment::MIDDLE_ALIGNMENT": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::ui::SequentialLayout::Alignment::RIGHT_ALIGNMENT": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::ui::SequentialLayout::Alignment::TOP_ALIGNMENT": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::ui::SequentialLayout::Orientation::HORIZONTAL_ORIENTATION": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::ui::SequentialLayout::Orientation::VERTICAL_ORIENTATION": {
+      "verdict": "accept"
+    },
+    "field:rack::Context::engine": {
+      "verdict": "accept"
+    },
+    "field:rack::Context::event": {
+      "verdict": "accept"
+    },
+    "field:rack::Context::midiLoopbackContext": {
+      "verdict": "accept"
+    },
+    "field:rack::Context::patch": {
+      "verdict": "accept"
+    },
+    "field:rack::Context::window": {
+      "verdict": "accept"
+    },
+    "field:rack::SharedLock::m": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:fbcb58b1-006a-4e9e-90af-29a4c0337d07",
+  "slice": "redo-021"
+}

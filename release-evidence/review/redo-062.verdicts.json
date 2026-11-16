@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::audio::Port::getNumOutputs()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getSampleRate()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getSampleRates()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::onStartStream()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::onStopStream()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::processBuffer(const float *, int, float *, int, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::processInput(const float *, int, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::processOutput(float *, int, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::setBlockSize(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::setDeviceId(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::setDriverId(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::setSampleRate(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::toJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::componentlibrary::LightButton::getLight()": {
+      "verdict": "accept"
+    },
+    "method:rack::componentlibrary::LightSlider::getLight()": {
+      "verdict": "accept"
+    },
+    "method:rack::componentlibrary::LightSlider::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::componentlibrary::RectangleLight::drawBackground(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::componentlibrary::RectangleLight::drawLight(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::componentlibrary::SegmentDisplay::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::componentlibrary::TSvgLight::setSvg(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::componentlibrary::VCVLightBezel::getLight()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::ComplexFFT::fft(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::ComplexFFT::fftUnordered(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::ComplexFFT::ifft(const float *, float *)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:2adeb4f3-b1ae-4955-b4b4-bf5fbd118d40",
+  "slice": "redo-062"
+}

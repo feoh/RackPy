@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "record:rack::app::Scene": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SliderKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SvgButton": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SvgKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SvgPanel": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SvgPort": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SvgScrew": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SvgSlider": {
+      "verdict": "accept"
+    },
+    "record:rack::app::SvgSwitch": {
+      "verdict": "accept"
+    },
+    "record:rack::app::Switch": {
+      "verdict": "accept"
+    },
+    "record:rack::app::ThemedSvgPanel": {
+      "verdict": "accept"
+    },
+    "record:rack::app::ThemedSvgPort": {
+      "verdict": "accept"
+    },
+    "record:rack::app::ThemedSvgScrew": {
+      "verdict": "accept"
+    },
+    "record:rack::audio::Device": {
+      "verdict": "accept"
+    },
+    "record:rack::audio::Driver": {
+      "verdict": "accept"
+    },
+    "record:rack::audio::Port": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::BefacoBigKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::BefacoPush": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::BefacoSlidePot": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::BefacoSwitch": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::BefacoTinyKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::CKD6": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::CKSS": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::CKSSThree": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::CKSSThreeHorizontal": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:bf066858-0d20-440c-96d3-0215ebc42a58",
+  "slice": "redo-089"
+}

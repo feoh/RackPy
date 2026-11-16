@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "constructor:rack::app::SvgKnob::SvgKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::SvgPanel::SvgPanel()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::SvgPort::SvgPort()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::SvgScrew::SvgScrew()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::SvgSlider::SvgSlider()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::SvgSwitch::SvgSwitch()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::Switch::Switch()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::audio::Port::Port()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::BefacoBigKnob::BefacoBigKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::BefacoPush::BefacoPush()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::BefacoSlidePot::BefacoSlidePot()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::BefacoSwitch::BefacoSwitch()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::BefacoTinyKnob::BefacoTinyKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::CKD6::CKD6()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::CKSS::CKSS()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::CKSSThree::CKSSThree()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::CKSSThreeHorizontal::CKSSThreeHorizontal()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::CL1362Port::CL1362Port()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::DarkPJ301MPort::DarkPJ301MPort()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Davies1900hBlackKnob::Davies1900hBlackKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Davies1900hKnob::Davies1900hKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Davies1900hLargeBlackKnob::Davies1900hLargeBlackKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Davies1900hLargeRedKnob::Davies1900hLargeRedKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Davies1900hLargeWhiteKnob::Davies1900hLargeWhiteKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Davies1900hRedKnob::Davies1900hRedKnob()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:e8b4772b-26e8-46a9-bf54-2714cfe4e423",
+  "slice": "redo-012"
+}

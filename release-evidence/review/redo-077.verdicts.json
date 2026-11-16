@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::string::Version::getMajor() const": {
+      "verdict": "accept"
+    },
+    "method:rack::string::Version::getMinor() const": {
+      "verdict": "accept"
+    },
+    "method:rack::string::Version::getRevision() const": {
+      "verdict": "accept"
+    },
+    "method:rack::string::Version::operator<(const rack::string::Version &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Button::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Button::onDragDrop(const rack::widget::Widget::DragDropEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Button::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Button::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ChoiceButton::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ColorDotMenuItem::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ColorDotMenuItem::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Label::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::List::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Menu::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Menu::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Menu::setChildMenu(rack::ui::Menu *)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Menu::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::MenuItem::createChildMenu()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::MenuItem::doAction(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::MenuItem::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::MenuItem::onAction(const rack::widget::Widget::ActionEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::MenuItem::onDragDrop(const rack::widget::Widget::DragDropEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::MenuItem::onEnter(const rack::widget::Widget::EnterEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::MenuItem::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::MenuLabel::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:3caaff44-5709-4dfb-9f74-b6a6fdb023b8",
+  "slice": "redo-077"
+}

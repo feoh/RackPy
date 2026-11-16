@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "enum:rack::ui::SequentialLayout::Orientation": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::MidiParser::MonoMode::FIRST_PRIORITY_MODE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::MidiParser::MonoMode::HIGHEST_PRIORITY_MODE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::MidiParser::MonoMode::LAST_PRIORITY_MODE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::MidiParser::MonoMode::LOWEST_PRIORITY_MODE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::MidiParser::MonoMode::NUM_MONO_MODES": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::MidiParser::PolyMode::MPE_MODE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::MidiParser::PolyMode::NUM_POLY_MODES": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::MidiParser::PolyMode::RESET_MODE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::MidiParser::PolyMode::REUSE_MODE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::MidiParser::PolyMode::ROTATE_MODE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::VuMeter2::Mode::PEAK": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::dsp::VuMeter2::Mode::RMS": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::engine::Port::Type::INPUT": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::engine::Port::Type::OUTPUT": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::logger::Level::DEBUG_LEVEL": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::logger::Level::FATAL_LEVEL": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::logger::Level::INFO_LEVEL": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::logger::Level::WARN_LEVEL": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::network::Method::METHOD_DELETE": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::network::Method::METHOD_GET": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::network::Method::METHOD_POST": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::network::Method::METHOD_PUT": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::BrowserSort::BROWSER_SORT_BRAND": {
+      "verdict": "accept"
+    },
+    "enumerator:rack::settings::BrowserSort::BROWSER_SORT_LAST_USED": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:d1a326f1-dfdb-4656-b88e-b3b053ed3f41",
+  "slice": "redo-020"
+}

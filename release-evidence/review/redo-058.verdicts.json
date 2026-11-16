@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::app::RackWidget::removeModule(rack::app::ModuleWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::requestModulePos(rack::app::ModuleWidget *, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::requestSelectionPos(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::resetSelectionAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::saveSelection(std::string)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::saveSelectionDialog()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::select(rack::app::ModuleWidget *, bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::selectAll()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::selectionToJson(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::setModulePosForce(rack::app::ModuleWidget *, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::setModulePosNearest(rack::app::ModuleWidget *, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::setModulePosSqueeze(rack::app::ModuleWidget *, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::setNextCableColorId(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::setSelectionPosNearest(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::setTouchedParam(rack::app::ParamWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::updateModuleOldPositions()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::updateSelectionFromRect()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RailWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RailWidget::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Scene::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Scene::getMousePos()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Scene::onDragHover(const rack::widget::Widget::DragHoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Scene::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Scene::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:23cfeee9-4da6-40ed-92f3-aff767413c59",
+  "slice": "redo-058"
+}

@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "conversion:rack::WeakPtr::operator type-parameter-0-0 *() const": {
+      "verdict": "accept"
+    },
+    "conversion:rack::dsp::Int24::operator int()": {
+      "verdict": "accept"
+    },
+    "conversion:rack::string::Version::operator basic_string() const": {
+      "verdict": "accept"
+    },
+    "destructor:rack::Context::~Context()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::SharedLock::~SharedLock<TMutex>()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::SharedMutex::~SharedMutex()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::WeakBase::~WeakBase()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::WeakPtr::~WeakPtr<T>()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::Knob::~Knob()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::ModuleLightWidget::~ModuleLightWidget()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::ModuleWidget::~ModuleWidget()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::ParamWidget::~ParamWidget()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::PortWidget::~PortWidget()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::RailWidget::~RailWidget()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::SvgSwitch::~SvgSwitch()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::app::Switch::~Switch()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::audio::Device::~Device()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::audio::Driver::~Driver()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::audio::Port::~Port()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::dsp::ComplexFFT::~ComplexFFT()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::dsp::RealFFT::~RealFFT()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::dsp::RealTimeConvolver::~RealTimeConvolver()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::dsp::SampleRateConverter::~SampleRateConverter<MAX_CHANNELS>()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::engine::LightInfo::~LightInfo()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::engine::Module::~Module()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:f8068c63-4c67-4e54-a87f-94fcdb69ec49",
+  "slice": "redo-018"
+}

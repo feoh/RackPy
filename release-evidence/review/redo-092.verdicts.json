@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "record:rack::componentlibrary::RoundKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::RoundLargeBlackKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::RoundSmallBlackKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::ScrewBlack": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::ScrewSilver": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::SegmentDisplay": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::SynthTechAlco": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::TL1105": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::ThemedPJ301MPort": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::ThemedScrew": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Trimpot": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::VCVBezel": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::VCVBezelLatch": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::VCVButton": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::VCVLatch": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::VCVSlider": {
+      "verdict": "accept"
+    },
+    "record:rack::dsp::ComplexFFT": {
+      "verdict": "accept"
+    },
+    "record:rack::dsp::Int24": {
+      "verdict": "accept"
+    },
+    "record:rack::dsp::RealFFT": {
+      "verdict": "accept"
+    },
+    "record:rack::dsp::RealTimeConvolver": {
+      "verdict": "accept"
+    },
+    "record:rack::dsp::VuMeter": {
+      "verdict": "accept"
+    },
+    "record:rack::dsp::VuMeter2": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Cable": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Engine": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Input": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:4a7a6345-458e-400b-be3d-2c90107d5608",
+  "slice": "redo-092"
+}

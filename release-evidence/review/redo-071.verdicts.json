@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::engine::Port::getPolyVoltage(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::getVoltage(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::getVoltageRMS()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::getVoltageSum()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::getVoltages(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::isConnected()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::isMonophonic()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::isPolyphonic()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::normalize(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::readVoltages(float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::setChannels(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::setVoltage(float, uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::writeVoltages(const float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::PortInfo::getDescription()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::PortInfo::getFullName()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::PortInfo::getName()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::SwitchQuantity::getDisplayValueString()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::SwitchQuantity::setDisplayValueString(std::string)": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::clamp(rack::math::Rect) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::contains(rack::math::Rect) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::contains(rack::math::Vec) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::equals(rack::math::Rect) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::expand(rack::math::Rect) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::fromCorners(rack::math::Vec, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::fromMinMax(rack::math::Vec, rack::math::Vec)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:0d7d17f2-3786-470e-a175-b8a96c1f9d2d",
+  "slice": "redo-071"
+}

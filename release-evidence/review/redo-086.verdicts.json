@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::widget::ZoomWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::onHoverText(const rack::widget::Widget::HoverTextEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::onPathDrop(const rack::widget::Widget::PathDropEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::ZoomWidget::setZoom(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Font::load(const std::string &)": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Font::loadFile(const std::string &, NVGcontext *)": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Image::load(const std::string &)": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Image::loadFile(const std::string &, NVGcontext *)": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Svg::draw(NVGcontext *)": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Svg::getNumPaths()": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Svg::getNumPoints()": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Svg::getNumShapes()": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Svg::getSize()": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Svg::load(const std::string &)": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Svg::loadFile(const std::string &)": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Svg::loadString(const std::string &)": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::close()": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::cursorLock()": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::cursorUnlock()": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::getFrameDurationRemaining()": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::getFrameTime()": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::getLastFrameDuration()": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::getMods()": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::getMonitorRefreshRate()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:03f61618-2f7d-42a8-8394-d60e8527c518",
+  "slice": "redo-086"
+}

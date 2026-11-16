@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "boundary_constant:BND_CORNER_TOP_RIGHT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_0": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_1": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_2": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_3": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_4": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_5": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_6": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_7": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_8": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_9": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_A": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_APOSTROPHE": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_B": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_BACKSLASH": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_BACKSPACE": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_C": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_CAPS_LOCK": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_COMMA": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_D": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_DELETE": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_DOWN": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_E": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_END": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_ENTER": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:01194847-1f18-4dcd-a4a8-2ba23c2d513c",
+  "slice": "redo-004"
+}

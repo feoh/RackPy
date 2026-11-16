@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "boundary_constant:GLFW_KEY_EQUAL": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_ESCAPE": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F1": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F10": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F11": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F12": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F13": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F14": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F15": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F16": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F17": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F18": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F19": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F2": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F20": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F21": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F22": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F23": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F24": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F25": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F3": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F4": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F5": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F6": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:b6531f99-3e35-4a68-869c-4440b3606f87",
+  "slice": "redo-005"
+}

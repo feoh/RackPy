@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::app::ModuleWidget::disconnectAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::fromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getGridBox()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getGridPosition()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getGridSize()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getInput(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getInputs()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getModel()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getModule()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getOutput(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getOutputs()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getPanel()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getParam(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getParams()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::getPorts()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::hasTemplate()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::load(std::string)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::loadAction(std::string)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::loadDialog()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::loadTemplate()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:d1dd114a-8486-451b-9630-bf4a0602dba2",
+  "slice": "redo-052"
+}

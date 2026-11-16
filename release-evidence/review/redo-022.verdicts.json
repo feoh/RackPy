@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::SharedMutex::rwlock": {
+      "verdict": "accept"
+    },
+    "field:rack::WeakBase::weakHandle": {
+      "verdict": "accept"
+    },
+    "field:rack::WeakHandle::count": {
+      "verdict": "accept"
+    },
+    "field:rack::WeakHandle::ptr": {
+      "verdict": "accept"
+    },
+    "field:rack::WeakPtr::weakHandle": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CableWidget::color": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CableWidget::hoveredInputPort": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CableWidget::hoveredOutputPort": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CableWidget::inputPlug": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CableWidget::inputPort": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CableWidget::outputPlug": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CableWidget::outputPort": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CircularShadow::blurRadius": {
+      "verdict": "accept"
+    },
+    "field:rack::app::CircularShadow::opacity": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Knob::forceLinear": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Knob::horizontal": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Knob::maxAngle": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Knob::minAngle": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Knob::smooth": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Knob::snap": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Knob::speed": {
+      "verdict": "accept"
+    },
+    "field:rack::app::LedDisplayChoice::bgColor": {
+      "verdict": "accept"
+    },
+    "field:rack::app::LedDisplayChoice::color": {
+      "verdict": "accept"
+    },
+    "field:rack::app::LedDisplayChoice::fontPath": {
+      "verdict": "accept"
+    },
+    "field:rack::app::LedDisplayChoice::text": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:428d08d1-505a-4209-b7bf-952082717eb7",
+  "slice": "redo-022"
+}

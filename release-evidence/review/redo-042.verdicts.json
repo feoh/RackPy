@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "function:rack::simd::tan(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::trunc(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::UTF16toUTF8(const std::wstring &)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::UTF32toUTF8(const std::u32string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::UTF8CodepointIndex(const std::string &, size_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::UTF8CodepointPos(const std::string &, size_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::UTF8Length(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::UTF8NextCodepoint(const std::string &, size_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::UTF8PrevCodepoint(const std::string &, size_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::UTF8toUTF16(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::UTF8toUTF32(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::convertFArg(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::ellipsize(const std::string &, size_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::ellipsizePrefix(const std::string &, size_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::endsWith(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::f(const char *, ...)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::fV(const char *, va_list)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::formatTime(const char *, double)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::formatTimeISO(double)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::fromBase64(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::getLanguages()": {
+      "verdict": "accept"
+    },
+    "function:rack::string::init()": {
+      "verdict": "accept"
+    },
+    "function:rack::string::locationToPosition(const std::string &, rack::string::Location)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::lowercase(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::positionToLocation(const std::string &, size_t)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:0f7a9b21-69b4-4a35-92a1-b97b73bda5ab",
+  "slice": "redo-042"
+}

@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "boundary_constant:GLFW_KEY_RIGHT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_RIGHT_ALT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_RIGHT_BRACKET": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_RIGHT_CONTROL": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_RIGHT_SHIFT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_RIGHT_SUPER": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_S": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_SCROLL_LOCK": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_SEMICOLON": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_SLASH": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_SPACE": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_T": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_TAB": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_U": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_UNKNOWN": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_UP": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_V": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_W": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_WORLD_1": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_WORLD_2": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_X": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_Y": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_Z": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOD_ALT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOD_CAPS_LOCK": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:21486ce4-67e8-4952-a289-be3ad0850939",
+  "slice": "redo-008"
+}

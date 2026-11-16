@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::engine::Module::PortChangeEvent::portId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::PortChangeEvent::type": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::ProcessArgs::frame": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::ProcessArgs::sampleRate": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::ProcessArgs::sampleTime": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::SampleRateChangeEvent::sampleRate": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::SampleRateChangeEvent::sampleTime": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::bypassRoutes": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::id": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::inputInfos": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::inputs": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::leftExpander": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::lightInfos": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::lights": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::model": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::outputInfos": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::outputs": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::paramQuantities": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::params": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::rightExpander": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Param::value": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamHandle::color": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamHandle::module": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamHandle::moduleId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamHandle::paramId": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:4f3bbbc6-caf8-49c5-be37-abf32ef33ef5",
+  "slice": "redo-030"
+}

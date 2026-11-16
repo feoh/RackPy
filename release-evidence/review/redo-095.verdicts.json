@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "record:rack::ui::MenuLabel": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::MenuOverlay": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::MenuSeparator": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::OptionButton": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::PasswordField": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::ProgressBar": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::RadioButton": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::ScrollWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::Scrollbar": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::SequentialLayout": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::Slider": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::TextField": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::Tooltip": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::TooltipOverlay": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::BaseEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::EventContext": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::EventState": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::FramebufferWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::OpaqueWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::OpenGlWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::SvgWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::TransformWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::TransparentWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::ActionEvent": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:c64feedf-bc45-485a-8fda-9916b1d38e53",
+  "slice": "redo-095"
+}

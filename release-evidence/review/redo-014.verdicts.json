@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "constructor:rack::componentlibrary::Rogan2PSGreen::Rogan2PSGreen()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PSRed::Rogan2PSRed()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PSWhite::Rogan2PSWhite()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PWhite::Rogan2PWhite()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2SGray::Rogan2SGray()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PBlue::Rogan3PBlue()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PGreen::Rogan3PGreen()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PRed::Rogan3PRed()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PSBlue::Rogan3PSBlue()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PSGreen::Rogan3PSGreen()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PSRed::Rogan3PSRed()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PSWhite::Rogan3PSWhite()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan3PWhite::Rogan3PWhite()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan5PSGray::Rogan5PSGray()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan6PSWhite::Rogan6PSWhite()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan::Rogan()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::RoundBigBlackKnob::RoundBigBlackKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::RoundBlackKnob::RoundBlackKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::RoundBlackSnapKnob::RoundBlackSnapKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::RoundHugeBlackKnob::RoundHugeBlackKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::RoundKnob::RoundKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::RoundLargeBlackKnob::RoundLargeBlackKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::RoundSmallBlackKnob::RoundSmallBlackKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::ScrewBlack::ScrewBlack()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::ScrewSilver::ScrewSilver()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:c677f3e8-0b6a-435d-8678-f9e26079259a",
+  "slice": "redo-014"
+}

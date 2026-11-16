@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::ui::MenuLabel::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::MenuOverlay::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::MenuOverlay::onAction(const rack::widget::Widget::ActionEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::MenuOverlay::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::MenuOverlay::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::MenuOverlay::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::MenuSeparator::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::OptionButton::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ProgressBar::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::RadioButton::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::RadioButton::onDragDrop(const rack::widget::Widget::DragDropEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::RadioButton::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::RadioButton::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ScrollWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ScrollWidget::getContainerOffsetBound()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ScrollWidget::getHandleOffset()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ScrollWidget::getHandleSize()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ScrollWidget::getScrollOffset()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ScrollWidget::isScrolling()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ScrollWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ScrollWidget::onDragMove(const rack::widget::Widget::DragMoveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ScrollWidget::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ScrollWidget::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ScrollWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ScrollWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:0d867c4b-14b6-43d6-b3ab-30eb26577178",
+  "slice": "redo-078"
+}

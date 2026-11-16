@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "function:rack::math::operator*(const rack::math::Vec &, const rack::math::Vec &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator*=(rack::math::Vec &, const float &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator*=(rack::math::Vec &, const rack::math::Vec &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator+(const rack::math::Vec &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator+(const rack::math::Vec &, const rack::math::Vec &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator+=(rack::math::Vec &, const rack::math::Vec &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator-(const rack::math::Vec &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator-(const rack::math::Vec &, const rack::math::Vec &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator-=(rack::math::Vec &, const rack::math::Vec &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator/(const rack::math::Vec &, const float &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator/(const rack::math::Vec &, const rack::math::Vec &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator/=(rack::math::Vec &, const float &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator/=(rack::math::Vec &, const rack::math::Vec &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator==(const rack::math::Rect &, const rack::math::Rect &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator==(const rack::math::Vec &, const rack::math::Vec &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::rescale(float, float, float, float, float)": {
+      "verdict": "accept"
+    },
+    "function:rack::midi::addDriver(int, rack::midi::Driver *)": {
+      "verdict": "accept"
+    },
+    "function:rack::midi::getDriver(int)": {
+      "verdict": "accept"
+    },
+    "function:rack::midi::getDriverIds()": {
+      "verdict": "accept"
+    },
+    "function:rack::network::encodeUrl(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::network::requestDownload(const std::string &, const std::string &, float *, const rack::network::CookieMap &)": {
+      "verdict": "accept"
+    },
+    "function:rack::network::requestJson(rack::network::Method, const std::string &, json_t *, const rack::network::CookieMap &)": {
+      "verdict": "accept"
+    },
+    "function:rack::network::urlPath(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::random::buffer(uint8_t *, size_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::random::get<bool>()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:e2cda28c-a817-4a82-87e3-c4ed10bddbfa",
+  "slice": "redo-039"
+}

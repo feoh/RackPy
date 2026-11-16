@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "record:rack::widget::Widget::PathDropEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::PositionBaseEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::RemoveEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::RepositionEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::ResizeEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::SelectEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::SelectKeyEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::SelectTextEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::ShowEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::Widget::TextBaseEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::widget::ZoomWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::window::Font": {
+      "verdict": "accept"
+    },
+    "record:rack::window::Image": {
+      "verdict": "accept"
+    },
+    "record:rack::window::Svg": {
+      "verdict": "accept"
+    },
+    "record:rack::window::Window": {
+      "verdict": "accept"
+    },
+    "variable:rack::app::RACK_GRID_HEIGHT": {
+      "verdict": "accept"
+    },
+    "variable:rack::app::RACK_GRID_SIZE": {
+      "verdict": "accept"
+    },
+    "variable:rack::app::RACK_GRID_WIDTH": {
+      "verdict": "accept"
+    },
+    "variable:rack::app::RACK_OFFSET": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_BLACK": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_BLACK_TRANSPARENT": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_BLUE": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_CYAN": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_DARK_GRAY": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_GREEN": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:3f3d1d95-82b2-4719-8539-623e199a07b3",
+  "slice": "redo-097"
+}

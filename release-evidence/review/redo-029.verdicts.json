@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::dsp::Upsampler::kernel": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::VuMeter2::lambda": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::VuMeter2::mode": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::VuMeter2::v": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::VuMeter::dBInterval": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::VuMeter::dBScaled": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Cable::id": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Cable::inputId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Cable::inputModule": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Cable::outputId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Cable::outputModule": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Light::value": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::LightInfo::description": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::LightInfo::lightId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::LightInfo::module": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::LightInfo::name": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::BypassRoute::inputId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::BypassRoute::outputId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::Expander::consumerMessage": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::Expander::messageFlipRequested": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::Expander::module": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::Expander::moduleId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::Expander::producerMessage": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::ExpanderChangeEvent::side": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Module::PortChangeEvent::connecting": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:cbafa99b-06e4-4c1b-83d9-1711878b1716",
+  "slice": "redo-029"
+}

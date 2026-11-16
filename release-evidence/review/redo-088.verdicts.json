@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method_template:rack::widget::Widget::recursePositionEvent<type, type>($0, const $1 &)": {
+      "verdict": "accept"
+    },
+    "opaque_record:rack::midiloopback::Context": {
+      "verdict": "accept"
+    },
+    "opaque_record:rack::patch::Manager": {
+      "verdict": "accept"
+    },
+    "record:rack::Context": {
+      "verdict": "accept"
+    },
+    "record:rack::SharedMutex": {
+      "verdict": "accept"
+    },
+    "record:rack::WeakBase": {
+      "verdict": "accept"
+    },
+    "record:rack::WeakHandle": {
+      "verdict": "accept"
+    },
+    "record:rack::app::CableWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::CircularShadow": {
+      "verdict": "accept"
+    },
+    "record:rack::app::Knob": {
+      "verdict": "accept"
+    },
+    "record:rack::app::LedDisplay": {
+      "verdict": "accept"
+    },
+    "record:rack::app::LedDisplayChoice": {
+      "verdict": "accept"
+    },
+    "record:rack::app::LedDisplaySeparator": {
+      "verdict": "accept"
+    },
+    "record:rack::app::LedDisplayTextField": {
+      "verdict": "accept"
+    },
+    "record:rack::app::LightWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::ModuleLightWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::ModuleWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::MultiLightWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::PanelBorder": {
+      "verdict": "accept"
+    },
+    "record:rack::app::ParamWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::PlugWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::PortWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::RackScrollWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::RackWidget": {
+      "verdict": "accept"
+    },
+    "record:rack::app::RailWidget": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:de46b0e9-b436-4574-bb0c-eb88dbc76c90",
+  "slice": "redo-088"
+}

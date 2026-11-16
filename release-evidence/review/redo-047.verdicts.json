@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "function_template:rack::dsp::approxExp2Floor<type>($0, $0 *)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::approxExp2_taylor5<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::blackman<type>($0, $0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::blackmanHarris<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::blackmanNuttall<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::convert<type, type>($1)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::convert<type, type>(const $1 *, $0 *, size_t)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::cubic<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::dbToAmplitude<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::exp2Floor<type>($0, $0 *)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::exp2_taylor5<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::exponentialBipolar<type>($0, $0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::hann<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::polyDirect<type, value>(const $0 (&)[$1], $0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::polyEstrin<type, value>(const $0 (&)[$1], $0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::polyHorner<type, value>(const $0 (&)[$1], $0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::quadraticBipolar<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::quarticBipolar<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::quintic<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::sinc<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::sqrtBipolar<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::stepEuler<type, type>($0, $0, $0[], int, $1)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::stepRK2<type, type>($0, $0, $0[], int, $1)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::dsp::stepRK4<type, type>($0, $0, $0[], int, $1)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::math::isEven<type>($0)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:f40bb02c-b457-44d8-9309-1bcbed637aa1",
+  "slice": "redo-047"
+}

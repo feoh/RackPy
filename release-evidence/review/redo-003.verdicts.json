@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "alias:rack::event::SelectKey": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::SelectText": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Show": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::TextBase": {
+      "verdict": "accept"
+    },
+    "alias:rack::network::CookieMap": {
+      "verdict": "accept"
+    },
+    "alias:rack::random::Xoroshiro128Plus::result_type": {
+      "verdict": "accept"
+    },
+    "alias:rack::ui::ScrollBar": {
+      "verdict": "accept"
+    },
+    "alias:rack::widget::SVGWidget": {
+      "verdict": "accept"
+    },
+    "alias:rack::widget::Widget::BaseEvent": {
+      "verdict": "accept"
+    },
+    "alias:rack::window::SVG": {
+      "verdict": "accept"
+    },
+    "alias_template:rack::componentlibrary::LEDBezelLight<type>": {
+      "verdict": "accept"
+    },
+    "alias_template:rack::componentlibrary::LEDLightBezel<type>": {
+      "verdict": "accept"
+    },
+    "alias_template:rack::componentlibrary::LEDLightButton<type>": {
+      "verdict": "accept"
+    },
+    "alias_template:rack::componentlibrary::LEDLightSlider<type>": {
+      "verdict": "accept"
+    },
+    "alias_template:rack::componentlibrary::LEDSliderLight<type>": {
+      "verdict": "accept"
+    },
+    "alias_template:rack::componentlibrary::VCVLightButton<type>": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_ALL": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_DOWN": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_DOWN_LEFT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_DOWN_RIGHT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_LEFT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_NONE": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_RIGHT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_TOP": {
+      "verdict": "accept"
+    },
+    "boundary_constant:BND_CORNER_TOP_LEFT": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:fe341bae-edb8-45bf-8105-01450021d9eb",
+  "slice": "redo-003"
+}

@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::app::RackWidget::getNextCableColor()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getNextCableColorId()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getPlugContainer()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getSelected()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getTopCable(rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getTopPlug(rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getTouchedParam()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::hasModules()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::hasSelection()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::isSelected(rack::app::ModuleWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::isSelectionBypassed()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::loadSelection(std::string)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::loadSelectionDialog()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::mergeJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::pasteClipboardAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::pasteJsonAction(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::pasteModuleJsonAction(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::randomizeSelectionAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::removeCable(rack::app::CableWidget *)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:253fcc90-5476-4747-b1be-45036f903991",
+  "slice": "redo-057"
+}

@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::app::SvgSwitch::addFrame(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgSwitch::onChange(const rack::widget::Widget::ChangeEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgSwitch::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::SvgSwitch::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Switch::initParamQuantity()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Switch::onDoubleClick(const rack::widget::Widget::DoubleClickEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Switch::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Switch::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Switch::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ThemedSvgPanel::setBackground(std::shared_ptr<rack::window::Svg>, std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ThemedSvgPanel::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ThemedSvgPort::setSvg(std::shared_ptr<rack::window::Svg>, std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ThemedSvgPort::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ThemedSvgScrew::setSvg(std::shared_ptr<rack::window::Svg>, std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ThemedSvgScrew::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::getBlockSize()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::getBlockSizes()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::getName()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::getNumInputs()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::getNumOutputs()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::getSampleRate()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::getSampleRates()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::onStartStream()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::onStopStream()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::processBuffer(const float *, int, float *, int, int)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:cd1a827f-3e4c-4944-92df-cec428b7198b",
+  "slice": "redo-060"
+}

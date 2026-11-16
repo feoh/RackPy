@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::ui::ScrollWidget::scrollTo(rack::math::Rect)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::ScrollWidget::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Scrollbar::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Scrollbar::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Scrollbar::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Scrollbar::onDragMove(const rack::widget::Widget::DragMoveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Scrollbar::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::SequentialLayout::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Slider::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Slider::onDoubleClick(const rack::widget::Widget::DoubleClickEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Slider::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Slider::onDragMove(const rack::widget::Widget::DragMoveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::Slider::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::copyClipboard()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::createContextMenu()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::cursorToLineEnd()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::cursorToLineStart()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::cursorToNextWord()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::cursorToPrevWord()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::cutClipboard()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::getSelectedText()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::getText()": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::getTextPosition(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::ui::TextField::insertText(std::string)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:7bb577e1-cc41-49e9-aef9-201b11be1b35",
+  "slice": "redo-079"
+}

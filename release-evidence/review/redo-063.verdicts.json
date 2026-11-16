@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::dsp::ComplexFFT::ifftUnordered(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::ComplexFFT::scale(float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::Decimator::process($c2 *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::Decimator::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::DoubleRingBuffer::startData() const": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::onMessage(const rack::midi::Message &)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::panic()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setBalance(int8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setCc(int8_t, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setChannelPressure(int8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setChannels(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setClock(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setContinue(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setFrame(int64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setKeyPressure(int8_t, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setModWheel(int8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setNoteGate(int8_t, bool, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setPan(int8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setPitchWheel(int16_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setStart(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setStop(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setSustainPedal(int8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setVelocity(int8_t, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiGenerator::setVolume(int8_t)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:a8709221-1278-4159-a58a-7672364b3c25",
+  "slice": "redo-063"
+}

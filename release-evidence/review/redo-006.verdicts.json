@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "boundary_constant:GLFW_KEY_F7": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F8": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_F9": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_G": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_GRAVE_ACCENT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_H": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_HOME": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_I": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_INSERT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_J": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_K": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_0": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_1": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_2": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_3": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_4": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_5": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_6": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_7": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_8": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_9": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_ADD": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_DECIMAL": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_DIVIDE": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_KEY_KP_ENTER": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:d5116c53-119a-4d06-b6d7-67a28fb88946",
+  "slice": "redo-006"
+}

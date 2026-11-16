@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::engine::Engine::addParamHandle(rack::engine::ParamHandle *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::bypassModule(rack::engine::Module *, bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::clear()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::fromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getBlock()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getBlockDuration()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getBlockFrame()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getBlockFrames()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getBlockTime()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getCable(int64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getCableIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getCableIds(int64_t *, size_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getFrame()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getMasterModule()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getMeterAverage()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getMeterMax()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getModule(int64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getModuleIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getModuleIds(int64_t *, size_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getModule_NoLock(int64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getNumCables()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getNumModules()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getParamHandle(int64_t, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getParamHandle(rack::engine::Module *, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::getParamHandle_NoLock(int64_t, int)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:73262aa6-9c28-4d09-925b-f146169bf927",
+  "slice": "redo-066"
+}

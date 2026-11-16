@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "function_template:rack::math::isOdd<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::math::isPow2<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::math::sgn<type>($0)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::random::get<type>()": {
+      "verdict": "accept"
+    },
+    "function_template:rack::simd::movemaskInverse<type>(int)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::simd::pow<type>($0, int)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::string::convertFArg<type>(const $0 &)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::string::f<type...>($0...)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::string::join<type>(const $0 &, std::string)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::system::join<type...>(const std::string &, const std::string &, $0...)": {
+      "verdict": "accept"
+    },
+    "macro:APP": {
+      "verdict": "accept"
+    },
+    "macro:CHECKMARK": {
+      "verdict": "accept"
+    },
+    "macro:CHECKMARK_STRING": {
+      "verdict": "accept"
+    },
+    "macro:DEBUG": {
+      "verdict": "accept"
+    },
+    "macro:FATAL": {
+      "verdict": "accept"
+    },
+    "macro:INFO": {
+      "verdict": "accept"
+    },
+    "macro:RACK_HELD": {
+      "verdict": "accept"
+    },
+    "macro:RACK_MOD_ALT": {
+      "verdict": "accept"
+    },
+    "macro:RACK_MOD_ALT_NAME": {
+      "verdict": "accept"
+    },
+    "macro:RACK_MOD_CTRL": {
+      "verdict": "accept"
+    },
+    "macro:RACK_MOD_CTRL_NAME": {
+      "verdict": "accept"
+    },
+    "macro:RACK_MOD_MASK": {
+      "verdict": "accept"
+    },
+    "macro:RACK_MOD_SHIFT": {
+      "verdict": "accept"
+    },
+    "macro:RACK_MOD_SHIFT_NAME": {
+      "verdict": "accept"
+    },
+    "macro:RIGHT_ARROW": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:6843b107-295a-4a4e-ab1c-bc70de5dc421",
+  "slice": "redo-048"
+}

@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::math::Rect::getBottom() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::getBottomLeft() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::getBottomRight() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::getCenter() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::getHeight() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::getLeft() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::getRight() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::getTop() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::getTopLeft() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::getTopRight() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::getWidth() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::grow(rack::math::Vec) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::inf()": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::interpolate(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::intersect(rack::math::Rect) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::intersects(rack::math::Rect) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::isContaining(rack::math::Vec) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::isEqual(rack::math::Rect) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::isIntersecting(rack::math::Rect) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::nudge(rack::math::Rect) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::shrink(rack::math::Vec) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Rect::zeroPos() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::abs() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::area() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::arg() const": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:4f2c19cd-3027-4f57-b637-b188bf8d8e25",
+  "slice": "redo-072"
+}

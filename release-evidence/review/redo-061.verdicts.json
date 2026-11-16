@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::audio::Device::setBlockSize(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::setSampleRate(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::subscribe(rack::audio::Port *)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Device::unsubscribe(rack::audio::Port *)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::getDefaultDeviceId()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::getDeviceIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::getDeviceName(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::getDeviceNumInputs(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::getDeviceNumOutputs(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::getName()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::subscribe(int, rack::audio::Port *)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Driver::unsubscribe(int, rack::audio::Port *)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::fromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getBlockSize()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getBlockSizes()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDevice()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDeviceId()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDeviceIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDeviceName(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDeviceNumInputs(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDeviceNumOutputs(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDriver()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDriverId()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getDriverName()": {
+      "verdict": "accept"
+    },
+    "method:rack::audio::Port::getNumInputs()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:77669516-ac68-459c-823c-aaad402918ff",
+  "slice": "redo-061"
+}

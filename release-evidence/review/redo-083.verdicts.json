@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::widget::TransparentWidget::onHoverText(const rack::widget::Widget::HoverTextEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::TransparentWidget::onPathDrop(const rack::widget::Widget::PathDropEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::KeyBaseEvent::isKeyCommand(int, int) const": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::addChild(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::addChildAbove(rack::widget::Widget *, rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::addChildBelow(rack::widget::Widget *, rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::addChildBottom(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::clearChildren()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::draw(NVGcontext *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::drawChild(rack::widget::Widget *, const rack::widget::Widget::DrawArgs &, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::getAbsoluteOffset(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::getAbsoluteZoom()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::getBox()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::getChildrenBoundingBox()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::getParent()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::getPosition()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::getRelativeOffset(rack::math::Vec, rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::getRelativeZoom(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::getSize()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::getViewport(rack::math::Rect)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::getVisibleChildrenBoundingBox()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::hasChild(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::Widget::hide()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:00225ccb-4397-4fbc-b746-64666634096c",
+  "slice": "redo-083"
+}

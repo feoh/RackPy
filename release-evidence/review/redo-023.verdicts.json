@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::app::LedDisplayChoice::textOffset": {
+      "verdict": "accept"
+    },
+    "field:rack::app::LedDisplayTextField::bgColor": {
+      "verdict": "accept"
+    },
+    "field:rack::app::LedDisplayTextField::color": {
+      "verdict": "accept"
+    },
+    "field:rack::app::LedDisplayTextField::fontPath": {
+      "verdict": "accept"
+    },
+    "field:rack::app::LedDisplayTextField::textOffset": {
+      "verdict": "accept"
+    },
+    "field:rack::app::LightWidget::bgColor": {
+      "verdict": "accept"
+    },
+    "field:rack::app::LightWidget::borderColor": {
+      "verdict": "accept"
+    },
+    "field:rack::app::LightWidget::color": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ModuleLightWidget::firstLightId": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ModuleLightWidget::module": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ModuleWidget::model": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ModuleWidget::module": {
+      "verdict": "accept"
+    },
+    "field:rack::app::MultiLightWidget::baseColors": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ParamWidget::module": {
+      "verdict": "accept"
+    },
+    "field:rack::app::ParamWidget::paramId": {
+      "verdict": "accept"
+    },
+    "field:rack::app::PortWidget::module": {
+      "verdict": "accept"
+    },
+    "field:rack::app::PortWidget::portId": {
+      "verdict": "accept"
+    },
+    "field:rack::app::PortWidget::type": {
+      "verdict": "accept"
+    },
+    "field:rack::app::RackScrollWidget::rackWidget": {
+      "verdict": "accept"
+    },
+    "field:rack::app::RackScrollWidget::zoomWidget": {
+      "verdict": "accept"
+    },
+    "field:rack::app::RackWidget::touchedParam": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Scene::browser": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Scene::menuBar": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Scene::mousePos": {
+      "verdict": "accept"
+    },
+    "field:rack::app::Scene::rack": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:1f4f9f0e-c6a3-4ceb-bcc1-3aac1e6a07f0",
+  "slice": "redo-023"
+}

@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "constructor:rack::componentlibrary::SmallLight::SmallLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::SmallSimpleLight::SmallSimpleLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::SynthTechAlco::SynthTechAlco()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TBlueLight::TBlueLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TGrayModuleLightWidget::TGrayModuleLightWidget<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TGreenLight::TGreenLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TGreenRedLight::TGreenRedLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TL1105::TL1105()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TRedGreenBlueLight::TRedGreenBlueLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TRedLight::TRedLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TSvgLight::TSvgLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TWhiteLight::TWhiteLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TYellowLight::TYellowLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::ThemedPJ301MPort::ThemedPJ301MPort()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::ThemedScrew::ThemedScrew()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TinyLight::TinyLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::TinySimpleLight::TinySimpleLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Trimpot::Trimpot()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVBezel::VCVBezel()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVBezelLatch::VCVBezelLatch()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVBezelLight::VCVBezelLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVButton::VCVButton()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVLatch::VCVLatch()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVLightBezel::VCVLightBezel<TLightBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVLightBezelLatch::VCVLightBezelLatch<TLightBase>()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:6543d4f3-348d-42ef-8c71-65ecd4db865d",
+  "slice": "redo-015"
+}

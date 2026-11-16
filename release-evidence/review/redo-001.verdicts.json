@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "alias:rack::app::SVGButton": {
+      "verdict": "accept"
+    },
+    "alias:rack::app::SVGKnob": {
+      "verdict": "accept"
+    },
+    "alias:rack::app::SVGPanel": {
+      "verdict": "accept"
+    },
+    "alias:rack::app::SVGPort": {
+      "verdict": "accept"
+    },
+    "alias:rack::app::SVGScrew": {
+      "verdict": "accept"
+    },
+    "alias:rack::app::SVGSlider": {
+      "verdict": "accept"
+    },
+    "alias:rack::app::SVGSwitch": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::BlueLight": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::GrayModuleLightWidget": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::GreenLight": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::GreenRedLight": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::LEDBezel": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::LEDButton": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::LEDSlider": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::RedGreenBlueLight": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::RedLight": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::SvgLight": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::WhiteLight": {
+      "verdict": "accept"
+    },
+    "alias:rack::componentlibrary::YellowLight": {
+      "verdict": "accept"
+    },
+    "alias:rack::dsp::VUMeter": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Action": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Add": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Base": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Button": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Change": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:86ad21af-4daa-4bbd-8b28-7e4e22aad635",
+  "slice": "redo-001"
+}

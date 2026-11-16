@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "record:rack::engine::Light": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::LightInfo": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::AddEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::BypassEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::BypassRoute": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::Expander": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::ExpanderChangeEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::PortChangeEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::ProcessArgs": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::RandomizeEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::RemoveEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::ResetEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::SampleRateChangeEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::SaveEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::SetMasterEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::UnBypassEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Module::UnsetMasterEvent": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Output": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Param": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::ParamHandle": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::ParamQuantity": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::Port": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::PortInfo": {
+      "verdict": "accept"
+    },
+    "record:rack::engine::SwitchQuantity": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:07017330-c0b9-4c8f-bf42-8f659fa2da86",
+  "slice": "redo-093"
+}

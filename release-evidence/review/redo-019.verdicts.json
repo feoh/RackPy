@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "destructor:rack::engine::PortInfo::~PortInfo()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::midi::Device::~Device()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::midi::Driver::~Driver()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::midi::Input::~Input()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::midi::InputQueue::~InputQueue()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::midi::Output::~Output()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::midi::Port::~Port()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::ui::Menu::~Menu()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::ui::ScrollWidget::~ScrollWidget()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::ui::Scrollbar::~Scrollbar()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::widget::FramebufferWidget::~FramebufferWidget()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::widget::Widget::~Widget()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::window::Font::~Font()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::window::Image::~Image()": {
+      "verdict": "accept"
+    },
+    "destructor:rack::window::Svg::~Svg()": {
+      "verdict": "accept"
+    },
+    "enum:rack::dsp::MidiParser::MonoMode": {
+      "verdict": "accept"
+    },
+    "enum:rack::dsp::MidiParser::PolyMode": {
+      "verdict": "accept"
+    },
+    "enum:rack::dsp::VuMeter2::Mode": {
+      "verdict": "accept"
+    },
+    "enum:rack::engine::Port::Type": {
+      "verdict": "accept"
+    },
+    "enum:rack::logger::Level": {
+      "verdict": "accept"
+    },
+    "enum:rack::network::Method": {
+      "verdict": "accept"
+    },
+    "enum:rack::settings::BrowserSort": {
+      "verdict": "accept"
+    },
+    "enum:rack::settings::KnobMode": {
+      "verdict": "accept"
+    },
+    "enum:rack::ui::Label::Alignment": {
+      "verdict": "accept"
+    },
+    "enum:rack::ui::SequentialLayout::Alignment": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:69cad2ab-ae31-4bbd-94f4-d0a4d80c2fee",
+  "slice": "redo-019"
+}

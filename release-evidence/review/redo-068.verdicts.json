@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::engine::Light::getBrightness()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Light::setBrightness(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Light::setBrightnessSmooth(float, float, float)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Light::setBrightnessSmooth(float, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Light::setSmoothBrightness(float, float)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::LightInfo::getDescription()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::LightInfo::getName()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::Expander::requestMessageFlip()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::config(int, int, int, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::configBypass(int, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::createPatchStorageDirectory()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::dataFromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::dataToJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::fromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getExpander(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getId()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getInput(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getInputInfo(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getLeftExpander()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getLight(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getLightInfo(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getModel()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getNumInputs()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getNumLights()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getNumOutputs()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:4fe9577b-6abd-4cf6-9c06-b80285512de6",
+  "slice": "redo-068"
+}

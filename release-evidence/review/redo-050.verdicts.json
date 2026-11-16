@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::app::CableWidget::getPlug(rack::engine::Port::Type)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::getPort(rack::engine::Port::Type)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::isComplete()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::mergeJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::updateCable()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CircularShadow::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::initParamQuantity()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onAction(const rack::widget::Widget::ActionEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onDragLeave(const rack::widget::Widget::DragLeaveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onDragMove(const rack::widget::Widget::DragMoveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::Knob::onLeave(const rack::widget::Widget::LeaveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::LedDisplay::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::LedDisplay::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::LedDisplayChoice::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::LedDisplayChoice::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::LedDisplayChoice::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::LedDisplaySeparator::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::LedDisplayTextField::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::LedDisplayTextField::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:750399ef-46bf-4149-95a1-2df2c1ff0aea",
+  "slice": "redo-050"
+}

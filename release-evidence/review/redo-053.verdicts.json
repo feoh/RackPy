@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::app::ModuleWidget::onDragMove(const rack::widget::Widget::DragMoveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::pasteClipboardAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::pasteJsonAction(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::randomizeAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::removeAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::resetAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::save(std::string)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::saveDialog()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::saveTemplate()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::saveTemplateDialog()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::setGridPosition(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::setModel(rack::plugin::Model *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::setModule(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::setPanel(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::setPanel(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::toJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::MultiLightWidget::addBaseColor(NVGcolor)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::MultiLightWidget::getNumColors()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::MultiLightWidget::setBrightnesses(const std::vector<float> &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PanelBorder::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::appendContextMenu(rack::ui::Menu *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::createContextMenu()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:12f605bb-c560-484e-997a-36d5d9e24131",
+  "slice": "redo-053"
+}

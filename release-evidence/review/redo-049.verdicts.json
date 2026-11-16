@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "macro:WARN": {
+      "verdict": "accept"
+    },
+    "macro:_MM_FROUND_NO_EXC": {
+      "verdict": "accept"
+    },
+    "method:rack::Quantity::getDefaultValue()": {
+      "verdict": "accept"
+    },
+    "method:rack::Quantity::getMaxValue()": {
+      "verdict": "accept"
+    },
+    "method:rack::Quantity::getMinValue()": {
+      "verdict": "accept"
+    },
+    "method:rack::Quantity::getValue()": {
+      "verdict": "accept"
+    },
+    "method:rack::Quantity::setValue(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::SharedMutex::lock()": {
+      "verdict": "accept"
+    },
+    "method:rack::SharedMutex::lock_shared()": {
+      "verdict": "accept"
+    },
+    "method:rack::SharedMutex::try_lock()": {
+      "verdict": "accept"
+    },
+    "method:rack::SharedMutex::try_lock_shared()": {
+      "verdict": "accept"
+    },
+    "method:rack::SharedMutex::unlock()": {
+      "verdict": "accept"
+    },
+    "method:rack::SharedMutex::unlock_shared()": {
+      "verdict": "accept"
+    },
+    "method:rack::WeakBase::getWeakCount()": {
+      "verdict": "accept"
+    },
+    "method:rack::WeakPtr::get() const": {
+      "verdict": "accept"
+    },
+    "method:rack::WeakPtr::operator*() const": {
+      "verdict": "accept"
+    },
+    "method:rack::WeakPtr::operator->() const": {
+      "verdict": "accept"
+    },
+    "method:rack::WeakPtr::operator=(const rack::WeakPtr<$c0> &)": {
+      "verdict": "accept"
+    },
+    "method:rack::WeakPtr::set($c0 *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::fromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::getHoveredPort(rack::engine::Port::Type)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::getInputPos()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::CableWidget::getOutputPos()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:10eb027b-7474-4ef4-b2a3-67f6fcc664ba",
+  "slice": "redo-049"
+}

@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::app::LedDisplayTextField::getTextPosition(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::LightWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::LightWidget::drawBackground(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::LightWidget::drawHalo(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::LightWidget::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::LightWidget::drawLight(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleLightWidget::createTooltip()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleLightWidget::destroyTooltip()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleLightWidget::getLight(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleLightWidget::getLightInfo()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleLightWidget::onEnter(const rack::widget::Widget::EnterEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleLightWidget::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleLightWidget::onLeave(const rack::widget::Widget::LeaveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleLightWidget::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::addInput(rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::addOutput(rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::addParam(rack::app::ParamWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::appendContextMenu(rack::ui::Menu *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::bypassAction(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::clearTemplate()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::clearTemplateDialog()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::cloneAction(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::copyClipboard()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::createContextMenu()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ModuleWidget::disconnect()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:b2da7c02-a6cc-40ca-a119-5f1e84a6840b",
+  "slice": "redo-051"
+}

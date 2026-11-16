@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "variable:rack::settings::headless": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::invertZoom": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::isPlugin": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::knobLinearSensitivity": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::knobMode": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::knobScroll": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::knobScrollSensitivity": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::language": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::lastPatchDirectory": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::lastSelectionDirectory": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::lockModules": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::moduleInfos": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::moduleWhitelist": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::mouseWheelZoom": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::pixelRatio": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::pluginSettingsJ": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::preferDarkPanels": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::rackBrightness": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::recentPatchPaths": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::restart": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::safeMode": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::sampleRate": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::settingsPath": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::showTipsOnLaunch": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::skipLoadOnLaunch": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:eb759b10-90f0-41c1-bb45-143549690b63",
+  "slice": "redo-099"
+}

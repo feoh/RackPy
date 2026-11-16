@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::math::Vec::round() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::square() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Device::getName()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::getDefaultInputDeviceId()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::getDefaultOutputDeviceId()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::getInputDeviceIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::getInputDeviceName(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::getName()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::getOutputDeviceIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::getOutputDeviceName(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::subscribeInput(int, rack::midi::Input *)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::subscribeOutput(int, rack::midi::Output *)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::unsubscribeInput(int, rack::midi::Input *)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Driver::unsubscribeOutput(int, rack::midi::Output *)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Input::getChannels()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Input::getDefaultDeviceId()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Input::getDeviceIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Input::getDeviceName(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Input::onMessage(const rack::midi::Message &)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Input::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Input::setDeviceId(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::InputDevice::onMessage(const rack::midi::Message &)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::InputDevice::subscribe(rack::midi::Input *)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::InputDevice::unsubscribe(rack::midi::Input *)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::InputQueue::onMessage(const rack::midi::Message &)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:4d260b23-588b-45ca-ac01-ed1430b8a3d9",
+  "slice": "redo-074"
+}

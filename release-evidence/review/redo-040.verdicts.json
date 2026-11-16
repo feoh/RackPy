@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "function:rack::random::get<double>()": {
+      "verdict": "accept"
+    },
+    "function:rack::random::get<float>()": {
+      "verdict": "accept"
+    },
+    "function:rack::random::get<uint16_t>()": {
+      "verdict": "accept"
+    },
+    "function:rack::random::get<uint32_t>()": {
+      "verdict": "accept"
+    },
+    "function:rack::random::get<uint8_t>()": {
+      "verdict": "accept"
+    },
+    "function:rack::random::init()": {
+      "verdict": "accept"
+    },
+    "function:rack::random::local()": {
+      "verdict": "accept"
+    },
+    "function:rack::random::normal()": {
+      "verdict": "accept"
+    },
+    "function:rack::random::u32()": {
+      "verdict": "accept"
+    },
+    "function:rack::random::u64()": {
+      "verdict": "accept"
+    },
+    "function:rack::random::uniform()": {
+      "verdict": "accept"
+    },
+    "function:rack::random::vector(size_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::settings::getModuleInfo(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::settings::isModuleWhitelisted(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::settings::resetCables()": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::abs(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::abs(std::complex<rack::simd::float_4>)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::andnot(rack::simd::float_4, rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::arg(std::complex<rack::simd::float_4>)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::atan(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::atan2(rack::simd::float_4, rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::ceil(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::clamp(rack::simd::float_4, rack::simd::float_4, rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::cos(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::crossfade(rack::simd::float_4, rack::simd::float_4, rack::simd::float_4)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:e81783cb-ea08-4ed4-a3f3-f2716ca19189",
+  "slice": "redo-040"
+}

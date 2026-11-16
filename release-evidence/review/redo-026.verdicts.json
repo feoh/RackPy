@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::componentlibrary::RoundKnob::bg": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::SegmentDisplay::lightsLen": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::SegmentDisplay::margin": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::SegmentDisplay::vertical": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::SynthTechAlco::bg": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::TSvgLight::fb": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::TSvgLight::sw": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::Trimpot::bg": {
+      "verdict": "accept"
+    },
+    "field:rack::componentlibrary::VCVLightBezel::light": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::ComplexFFT::length": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::ComplexFFT::setup": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::Decimator::inBuffer": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::Decimator::inIndex": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::Decimator::kernel": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::Frame::samples": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::Int24::i": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiGenerator::ccs": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiGenerator::channelPressure": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiGenerator::channels": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiGenerator::clk": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiGenerator::cont": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiGenerator::frame": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiGenerator::gates": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiGenerator::keyPressures": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiGenerator::notes": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:6e7162c8-aae7-4919-b983-ad4b56cd7b32",
+  "slice": "redo-026"
+}

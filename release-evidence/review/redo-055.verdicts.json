@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::app::PortWidget::onDragEnter(const rack::widget::Widget::DragEnterEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::onDragLeave(const rack::widget::Widget::DragLeaveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::onDragStart(const rack::widget::Widget::DragStartEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::onEnter(const rack::widget::Widget::EnterEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::onLeave(const rack::widget::Widget::LeaveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::getGridOffset()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::getZoom()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::setGridOffset(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::setZoom(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::setZoom(float, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::zoomToBound(rack::math::Rect)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackScrollWidget::zoomToModules()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::addCable(rack::app::CableWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::addModule(rack::app::ModuleWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::addModuleAtMouse(rack::app::ModuleWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::appendSelectionContextMenu(rack::ui::Menu *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::bypassSelectionAction(bool)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:179d618b-8097-4464-a2cb-0c20e5c22f62",
+  "slice": "redo-055"
+}

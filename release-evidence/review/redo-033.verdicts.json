@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::settings::PluginWhitelist::subscribed": {
+      "verdict": "accept"
+    },
+    "field:rack::string::Location::column": {
+      "verdict": "accept"
+    },
+    "field:rack::string::Location::line": {
+      "verdict": "accept"
+    },
+    "field:rack::string::Version::parts": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::Button::quantity": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::Button::text": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::ColorDotMenuItem::color": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::Label::alignment": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::Label::color": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::Label::fontSize": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::Label::lineHeight": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::Label::text": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::Menu::activeEntry": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::Menu::childMenu": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::Menu::cornerFlags": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::Menu::parentMenu": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::MenuItem::disabled": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::MenuItem::rightText": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::MenuItem::text": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::MenuLabel::text": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::MenuOverlay::bgColor": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::ProgressBar::quantity": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::ScrollWidget::container": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::ScrollWidget::containerBox": {
+      "verdict": "accept"
+    },
+    "field:rack::ui::ScrollWidget::hideScrollbars": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:bd0ec2aa-8e22-4d52-a919-da897dc557dc",
+  "slice": "redo-033"
+}

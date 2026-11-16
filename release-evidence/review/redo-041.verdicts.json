@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "function:rack::simd::exp(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::fabs(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::floor(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::fmax(rack::simd::float_4, rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::fmin(rack::simd::float_4, rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::fmod(rack::simd::float_4, rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::hypot(rack::simd::float_4, rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::ifelse(bool, float, float)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::ifelse(rack::simd::float_4, rack::simd::float_4, rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::log(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::log10(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::log2(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::movemask(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::movemask(rack::simd::int32_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::movemaskInverse<rack::simd::float_4>(int)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::movemaskInverse<rack::simd::int32_4>(int)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::pow(float, rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::pow(rack::simd::float_4, rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::rcp(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::rescale(rack::simd::float_4, rack::simd::float_4, rack::simd::float_4, rack::simd::float_4, rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::round(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::rsqrt(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::sgn(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::sin(rack::simd::float_4)": {
+      "verdict": "accept"
+    },
+    "function:rack::simd::sqrt(rack::simd::float_4)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:dcbbf6ca-1011-4396-8c5f-7b292d306f21",
+  "slice": "redo-041"
+}

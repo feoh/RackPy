@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "variable:rack::componentlibrary::SCHEME_LIGHT_GRAY": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_ORANGE": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_PURPLE": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_RED": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_WHITE": {
+      "verdict": "accept"
+    },
+    "variable:rack::componentlibrary::SCHEME_YELLOW": {
+      "verdict": "accept"
+    },
+    "variable:rack::dsp::FREQ_A4": {
+      "verdict": "accept"
+    },
+    "variable:rack::dsp::FREQ_C4": {
+      "verdict": "accept"
+    },
+    "variable:rack::dsp::FREQ_SEMITONE": {
+      "verdict": "accept"
+    },
+    "variable:rack::engine::PORT_MAX_CHANNELS": {
+      "verdict": "accept"
+    },
+    "variable:rack::logger::logPath": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::allowCursorLock": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::autoCheckUpdates": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::autosaveInterval": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::browserSort": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::browserZoom": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::cableAutoRotate": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::cableColors": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::cableLabels": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::cableOpacity": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::cableTension": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::cpuMeter": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::devMode": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::frameRateLimit": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::haloBrightness": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:5c66e776-faf7-4025-895b-f1b35f0a5ac2",
+  "slice": "redo-098"
+}

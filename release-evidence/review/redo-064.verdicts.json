@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::dsp::MidiParser::assignChannel(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::fromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::getChannels()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::getMod(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::getPitchVoltage(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::getPw(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::getWheelChannels()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::panic()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::pressNote(uint8_t, uint8_t, uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::pressPedal()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::processCC(const rack::midi::Message &)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::processFilters(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::processMessage(const rack::midi::Message &)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::processPulses(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::processSystem(const rack::midi::Message &)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::refreshHeld()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::releaseNote(uint8_t, int8_t, int8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::releasePedal()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::setChannels(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::setFilterLambda(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::setMonoMode(rack::dsp::MidiParser<$c0>::MonoMode)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::setPolyMode(rack::dsp::MidiParser<$c0>::PolyMode)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MidiParser::toJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::MinBlepGenerator::insertDiscontinuity(float, $c2)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:9d377436-e576-4949-9296-d3b45f1c021a",
+  "slice": "redo-064"
+}

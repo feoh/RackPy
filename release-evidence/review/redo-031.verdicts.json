@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::engine::ParamHandle::text": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::defaultValue": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::description": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::displayBase": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::displayMultiplier": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::displayOffset": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::displayPrecision": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::maxValue": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::minValue": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::module": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::name": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::paramId": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::randomizeEnabled": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::resetEnabled": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::smoothEnabled": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::snapEnabled": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::ParamQuantity::unit": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Port::active": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Port::channels": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Port::plugLights": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Port::value": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::Port::voltages": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::PortInfo::description": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::PortInfo::module": {
+      "verdict": "accept"
+    },
+    "field:rack::engine::PortInfo::name": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:f9097c65-ebdc-4d79-bcb7-e6f7e1125087",
+  "slice": "redo-031"
+}

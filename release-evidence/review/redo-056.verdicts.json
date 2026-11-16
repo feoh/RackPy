@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::app::RackWidget::clear()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::clearCables()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::clearCablesAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::clearCablesOnPort(rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::cloneSelectionAction(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::copyClipboardSelection()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::deleteSelectionAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::deselectAll()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::disconnectSelectionAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::fromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getCable(int64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getCable(rack::app::PortWidget *, rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getCableContainer()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getCables()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getCablesOnPort(rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getCompleteCables()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getCompleteCablesOnPort(rack::app::PortWidget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getIncompleteCable()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getIncompleteCables()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getModule(int64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getModuleContainer()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getModuleDragAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getModules()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::RackWidget::getMousePos()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:9fd4175d-e097-4ab2-a152-5216decb4142",
+  "slice": "redo-056"
+}

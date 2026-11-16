@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "function:rack::dsp::exp2Floor<float>(float, float *)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::exp2Floor<rack::simd::float_4>(rack::simd::float_4, rack::simd::float_4 *)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::hannWindow(float *, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::minBlepImpulse(int, int, float *)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::sinc(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::logger::log(rack::logger::Level, const char *, int, const char *, const char *, ...)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::chop(float, float)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::clamp(float, float, float)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::clamp(int, int, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::clampSafe(float, float, float)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::clampSafe(int, int, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::complexMult(float, float, float, float, float *, float *)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::crossfade(float, float, float)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::eucDiv(int, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::eucDivMod(int, int, int *, int *)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::eucMod(float, float)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::eucMod(int, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::interpolateLinear(const float *, float)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::isNear(float, float, float)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::log2(int)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::normalizeZero(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator!=(const rack::math::Rect &, const rack::math::Rect &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator!=(const rack::math::Vec &, const rack::math::Vec &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator*(const float &, const rack::math::Vec &)": {
+      "verdict": "accept"
+    },
+    "function:rack::math::operator*(const rack::math::Vec &, const float &)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:4f2ef7b9-1fab-4c82-9f22-a2694e8f82e6",
+  "slice": "redo-038"
+}

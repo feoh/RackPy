@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::math::Vec::ceil() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::clamp(rack::math::Rect) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::clampSafe(rack::math::Rect) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::crossfade(rack::math::Vec, float)": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::div(float) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::div(rack::math::Vec) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::dot(rack::math::Vec) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::equals(rack::math::Vec) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::flip() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::floor() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::isEqual(rack::math::Vec) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::isFinite() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::isZero() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::max(rack::math::Vec) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::min(rack::math::Vec) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::minus(rack::math::Vec) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::mult(float) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::mult(rack::math::Vec) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::neg() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::norm() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::normalize() const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::operator[](int)": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::operator[](int) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::plus(rack::math::Vec) const": {
+      "verdict": "accept"
+    },
+    "method:rack::math::Vec::rotate(float)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:9d85756e-c10c-4967-b3dd-b14c216a90dc",
+  "slice": "redo-073"
+}

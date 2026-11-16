@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "constructor:rack::midi::Message::Message()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::midi::Output::Output()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::midi::Port::Port()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::random::Xoroshiro128Plus::Xoroshiro128Plus()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::random::Xoroshiro128Plus::Xoroshiro128Plus(uint64_t, uint64_t)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::string::Version::Version()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::string::Version::Version(const char *)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::string::Version::Version(const std::string &)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::ui::Button::Button()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::ui::Label::Label()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::ui::Menu::Menu()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::ui::MenuEntry::MenuEntry()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::ui::MenuOverlay::MenuOverlay()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::ui::MenuSeparator::MenuSeparator()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::ui::PasswordField::PasswordField()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::ui::ProgressBar::ProgressBar()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::ui::ScrollWidget::ScrollWidget()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::ui::Scrollbar::Scrollbar()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::ui::Slider::Slider()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::ui::TextField::TextField()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::widget::FramebufferWidget::FramebufferWidget()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::widget::SvgWidget::SvgWidget()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::widget::TransformWidget::TransformWidget()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::widget::Widget::PathDropEvent::PathDropEvent(const std::vector<std::string> &)": {
+      "verdict": "accept"
+    },
+    "conversion:rack::WeakPtr::operator bool() const": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:a491cf32-3816-45e1-909a-9ef0d91c9faa",
+  "slice": "redo-017"
+}

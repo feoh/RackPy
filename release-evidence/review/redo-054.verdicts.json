@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::app::ParamWidget::createTooltip()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::destroyTooltip()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::getParamQuantity()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::initParamQuantity()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::onDoubleClick(const rack::widget::Widget::DoubleClickEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::onEnter(const rack::widget::Widget::EnterEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::onLeave(const rack::widget::Widget::LeaveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::resetAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::ParamWidget::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PlugWidget::getCable()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PlugWidget::getType()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PlugWidget::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::appendContextMenu(rack::ui::Menu *)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::createContextMenu()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::createTooltip()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::deleteTopCableAction()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::destroyTooltip()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::getPort()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::getPortInfo()": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::onDragDrop(const rack::widget::Widget::DragDropEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::app::PortWidget::onDragEnd(const rack::widget::Widget::DragEndEvent &)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:b2578498-9caa-4473-a931-4c0b3c0c2183",
+  "slice": "redo-054"
+}

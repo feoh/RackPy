@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "constructor:rack::componentlibrary::Davies1900hWhiteKnob::Davies1900hWhiteKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::LargeLight::LargeLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::LargeSimpleLight::LargeSimpleLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::LightButton::LightButton<TBase, TLight>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::LightSlider::LightSlider<TBase, TLightBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::MediumLight::MediumLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::MediumSimpleLight::MediumSimpleLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::MomentarySwitch::MomentarySwitch<TSwitch>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::NKK::NKK()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::PB61303::PB61303()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::PB61303Light::PB61303Light<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::PJ301MPort::PJ301MPort()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::PJ3410Port::PJ3410Port()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PBlue::Rogan1PBlue()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PGreen::Rogan1PGreen()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PRed::Rogan1PRed()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PSBlue::Rogan1PSBlue()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PSGreen::Rogan1PSGreen()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PSRed::Rogan1PSRed()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PSWhite::Rogan1PSWhite()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan1PWhite::Rogan1PWhite()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PBlue::Rogan2PBlue()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PGreen::Rogan2PGreen()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PRed::Rogan2PRed()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::Rogan2PSBlue::Rogan2PSBlue()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:fb1be755-39b1-4d9a-aad3-ad9d13d7bef6",
+  "slice": "redo-013"
+}

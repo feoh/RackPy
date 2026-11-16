@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::window::Window::uiFont": {
+      "verdict": "accept"
+    },
+    "field:rack::window::Window::vg": {
+      "verdict": "accept"
+    },
+    "field:rack::window::Window::win": {
+      "verdict": "accept"
+    },
+    "field:rack::window::Window::windowRatio": {
+      "verdict": "accept"
+    },
+    "function:rack::appGet()": {
+      "verdict": "accept"
+    },
+    "function:rack::audio::addDriver(int, rack::audio::Driver *)": {
+      "verdict": "accept"
+    },
+    "function:rack::audio::getDriver(int)": {
+      "verdict": "accept"
+    },
+    "function:rack::audio::getDriverIds()": {
+      "verdict": "accept"
+    },
+    "function:rack::contextGet()": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::blackmanHarrisWindow(float *, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::blackmanNuttallWindow(float *, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::blackmanWindow(float, float *, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::boxcarLowpassIR(float *, int, float)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<float, float>(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<float, int16_t>(int16_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<float, int32_t>(int32_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<float, int64_t>(int64_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<float, int8_t>(int8_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<float, rack::dsp::Int24>(rack::dsp::Int24)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<int16_t, float>(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<int32_t, float>(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<int64_t, float>(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<int8_t, float>(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convert<rack::dsp::Int24, float>(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::dsp::convolveNaive(const float *, const float *, int)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:f9ffe7c2-0583-4480-abe4-ad922c336786",
+  "slice": "redo-037"
+}

@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::widget::EventState::handleHover(rack::math::Vec, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleKey(rack::math::Vec, int, int, int, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleLeave()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleScroll(rack::math::Vec, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::handleText(rack::math::Vec, uint32_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setDragHovered(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setDragHoveredWidget(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setDragged(rack::widget::Widget *, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setDraggedWidget(rack::widget::Widget *, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setHovered(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setHoveredWidget(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setSelected(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::EventState::setSelectedWidget(rack::widget::Widget *)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::FramebufferWidget::deleteFramebuffer()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::FramebufferWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::FramebufferWidget::drawFramebuffer()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::FramebufferWidget::getFramebuffer()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::FramebufferWidget::getFramebufferSize()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::FramebufferWidget::getImageHandle()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::FramebufferWidget::onContextCreate(const rack::widget::Widget::ContextCreateEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::FramebufferWidget::onContextDestroy(const rack::widget::Widget::ContextDestroyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::FramebufferWidget::onDirty(const rack::widget::Widget::DirtyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::FramebufferWidget::render(rack::math::Vec, rack::math::Vec, rack::math::Rect)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::FramebufferWidget::setDirty(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::FramebufferWidget::step()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:7c7d210f-0e1f-4729-98e6-ad3cff83f15f",
+  "slice": "redo-081"
+}

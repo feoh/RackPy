@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "function:rack::string::split(const std::string &, const std::string &, size_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::startsWith(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::strcasecmp(const char *, const char *)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::toBase64(const std::vector<uint8_t> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::toBase64(const uint8_t *, size_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::translate(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::translate(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::trim(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::truncate(const std::string &, size_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::truncatePrefix(const std::string &, size_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::string::uppercase(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::archiveDirectory(const std::string &, const std::string &, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::archiveDirectory(const std::string &, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::copy(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::createDirectories(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::createDirectory(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::createSymbolicLink(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::exists(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getAbsolute(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getCanonical(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getDirectory(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getEntries(const std::string &, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getExtension(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getFileSize(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getFilename(const std::string &)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:9dbc83c9-3b5a-4e2d-93fa-0d78ff9811d3",
+  "slice": "redo-043"
+}

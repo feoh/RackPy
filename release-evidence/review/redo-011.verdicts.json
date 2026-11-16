@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "class_template:rack::dsp::Frame<value, type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::MidiGenerator<value>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::MidiParser<value>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::MinBlepGenerator<value, value, type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::SampleRateConverter<value>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::dsp::Upsampler<value, value>": {
+      "verdict": "accept"
+    },
+    "constructor:rack::SharedLock::SharedLock<TMutex>($c0 &)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::SharedMutex::SharedMutex()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::WeakHandle::WeakHandle(void *)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::WeakPtr::WeakPtr<T>($c0 *)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::WeakPtr::WeakPtr<T>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::WeakPtr::WeakPtr<T>(const rack::WeakPtr<$c0> &)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::CircularShadow::CircularShadow()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::Knob::Knob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::LedDisplayChoice::LedDisplayChoice()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::LedDisplaySeparator::LedDisplaySeparator()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::LedDisplayTextField::LedDisplayTextField()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::ModuleLightWidget::ModuleLightWidget()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::ModuleWidget::ModuleWidget()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::ModuleWidget::ModuleWidget(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::ParamWidget::ParamWidget()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::PortWidget::PortWidget()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::RailWidget::RailWidget()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::SliderKnob::SliderKnob()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::app::SvgButton::SvgButton()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:31dd2e7a-b264-4419-8919-4ae8209973d3",
+  "slice": "redo-011"
+}

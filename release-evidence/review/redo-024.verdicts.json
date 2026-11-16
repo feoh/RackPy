@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::app::Scene::rackScroll": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgButton::fb": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgButton::frames": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgButton::shadow": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgButton::sw": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgKnob::fb": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgKnob::shadow": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgKnob::sw": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgKnob::tw": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgPanel::fb": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgPanel::panelBorder": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgPanel::svg": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgPanel::sw": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgPort::fb": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgPort::shadow": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgPort::sw": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgScrew::fb": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgScrew::sw": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgSlider::background": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgSlider::fb": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgSlider::handle": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgSlider::maxHandlePos": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgSlider::minHandlePos": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgSwitch::fb": {
+      "verdict": "accept"
+    },
+    "field:rack::app::SvgSwitch::frames": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:b7a351bd-c36a-4557-9494-0dafac31e927",
+  "slice": "redo-024"
+}

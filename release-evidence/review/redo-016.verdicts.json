@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "constructor:rack::componentlibrary::VCVLightLatch::VCVLightLatch<TLight>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVLightSlider::VCVLightSlider<TLightBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVSlider::VCVSlider()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::componentlibrary::VCVSliderLight::VCVSliderLight<TBase>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::ComplexFFT::ComplexFFT(size_t)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::Decimator::Decimator<OVERSAMPLE, QUALITY, T>(float)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::Int24::Int24()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::Int24::Int24(int32_t)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::MidiGenerator::MidiGenerator<CHANNELS>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::MidiParser::MidiParser<MAX_CHANNELS>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::MinBlepGenerator::MinBlepGenerator<Z, O, T>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::RealFFT::RealFFT(size_t)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::RealTimeConvolver::RealTimeConvolver(size_t)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::SampleRateConverter::SampleRateConverter<MAX_CHANNELS>()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::dsp::Upsampler::Upsampler<OVERSAMPLE, QUALITY>(float)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::engine::Module::Module()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::engine::Module::Module(int, int, int, int)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::math::Rect::Rect()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::math::Rect::Rect(float, float, float, float)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::math::Rect::Rect(rack::math::Vec, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::math::Vec::Vec()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::math::Vec::Vec(float)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::math::Vec::Vec(float, float)": {
+      "verdict": "accept"
+    },
+    "constructor:rack::midi::Input::Input()": {
+      "verdict": "accept"
+    },
+    "constructor:rack::midi::InputQueue::InputQueue()": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:0969e4eb-7387-4e30-a308-a0ffb03c8f58",
+  "slice": "redo-016"
+}

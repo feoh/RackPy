@@ -11,6 +11,10 @@
 
 The 604 verdicts were carried only where RP-46 found the manifest entry, its cited tests, and mapping sources byte-identical between the two commits. The other 2,489 records require fresh review. This is not a full-coverage verdict and does not promote any record to `verified`.
 
+## Fresh-review progress (2026-11-16)
+
+The `review/` folder now contains exact-slice verdict files for all 100 redo chunks (2,489 records), structurally checked by `bin/release-evidence verdicts` against the frozen SHA and slice list. These verdicts have not been promoted. Four candidate findings remain: three manifest ownership mismatches for `MidiParser::aftertouches`, `gates`, and `modFilters` in `redo-027`, and missing typed-template exposure for `ModuleWidget::getModule<T>()` in `redo-087`. They are preserved as `finding` verdicts and block promotion of those records; fix in a later candidate and re-review is required before a full-coverage claim. `bin/check_coverage.py check` still reports that runtime-package introspection evidence was not supplied. The coverage report shows 0 `verified` records. Exact-SHA platform/sample evidence and other RP-42 release gates remain outstanding.
+
 ## Reproduce
 
 From this checkout at commit `2ddd3084724d8ac3898e9cee1fb0b89fd5920acc` (the generated evidence is stored in the subsequent evidence commit):

@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::widget::OpaqueWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::OpaqueWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::OpaqueWidget::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::OpaqueWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::OpaqueWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::OpaqueWidget::onHoverText(const rack::widget::Widget::HoverTextEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::OpaqueWidget::onPathDrop(const rack::widget::Widget::PathDropEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::OpenGlWidget::drawFramebuffer()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::OpenGlWidget::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::SvgWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::SvgWidget::setSVG(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::SvgWidget::setSvg(std::shared_ptr<rack::window::Svg>)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::SvgWidget::wrap()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::TransformWidget::draw(const rack::widget::Widget::DrawArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::TransformWidget::drawLayer(const rack::widget::Widget::DrawArgs &, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::TransformWidget::identity()": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::TransformWidget::rotate(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::TransformWidget::rotate(float, rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::TransformWidget::scale(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::TransformWidget::translate(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::TransparentWidget::onButton(const rack::widget::Widget::ButtonEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::TransparentWidget::onDragHover(const rack::widget::Widget::DragHoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::TransparentWidget::onHover(const rack::widget::Widget::HoverEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::TransparentWidget::onHoverKey(const rack::widget::Widget::HoverKeyEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::widget::TransparentWidget::onHoverScroll(const rack::widget::Widget::HoverScrollEvent &)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:75428ddb-df53-4de4-981c-a04b3ccc63c1",
+  "slice": "redo-082"
+}

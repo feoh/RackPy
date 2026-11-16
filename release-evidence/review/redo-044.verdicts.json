@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "function:rack::system::getFpuFlags()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getLogicalCoreCount()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getOperatingSystemInfo()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getStackTrace()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getStem(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getTempDirectory()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getThreadTime()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getTime()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getUnixTime()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::getWorkingDirectory()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::isDirectory(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::isFile(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::join(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::openBrowser(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::openDirectory(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::readFile(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::readFile(const std::string &, size_t *)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::remove(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::removeRecursively(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::rename(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::resetFpuFlags()": {
+      "verdict": "accept"
+    },
+    "function:rack::system::runProcessDetached(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::setFpuFlags(uint32_t)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::setThreadName(const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::setWorkingDirectory(const std::string &)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:6dc64a12-3923-4ca6-887b-bb45fa6679f6",
+  "slice": "redo-044"
+}

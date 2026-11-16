@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "record:rack::componentlibrary::CL1362Port": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::DarkPJ301MPort": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Davies1900hBlackKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Davies1900hKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Davies1900hLargeBlackKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Davies1900hLargeRedKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Davies1900hLargeWhiteKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Davies1900hRedKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Davies1900hWhiteKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::LEDSliderBlue": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::LEDSliderGreen": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::LEDSliderRed": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::LEDSliderWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::LEDSliderYellow": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::NKK": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::PB61303": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::PJ301MPort": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::PJ3410Port": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan1PBlue": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan1PGreen": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan1PRed": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan1PSBlue": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan1PSGreen": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan1PSRed": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:42358884-bb29-4556-a692-ae2dfb644617",
+  "slice": "redo-090"
+}

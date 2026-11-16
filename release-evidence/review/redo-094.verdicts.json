@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "record:rack::math::Rect": {
+      "verdict": "accept"
+    },
+    "record:rack::math::Vec": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::Device": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::Driver": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::Input": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::InputDevice": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::InputQueue": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::Message": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::Output": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::OutputDevice": {
+      "verdict": "accept"
+    },
+    "record:rack::midi::Port": {
+      "verdict": "accept"
+    },
+    "record:rack::random::Xoroshiro128Plus": {
+      "verdict": "accept"
+    },
+    "record:rack::settings::ModuleInfo": {
+      "verdict": "accept"
+    },
+    "record:rack::settings::PluginWhitelist": {
+      "verdict": "accept"
+    },
+    "record:rack::string::CaseInsensitiveCompare": {
+      "verdict": "accept"
+    },
+    "record:rack::string::Location": {
+      "verdict": "accept"
+    },
+    "record:rack::string::Version": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::Button": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::ChoiceButton": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::ColorDotMenuItem": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::Label": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::List": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::Menu": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::MenuEntry": {
+      "verdict": "accept"
+    },
+    "record:rack::ui::MenuItem": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:80c457c3-b567-41b7-8a84-36d2870c551d",
+  "slice": "redo-094"
+}

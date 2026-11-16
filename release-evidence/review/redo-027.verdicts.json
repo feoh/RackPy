@@ -1,0 +1,85 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::dsp::MidiGenerator::pw": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiGenerator::start": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiGenerator::stop": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiGenerator::vels": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::aftertouches": {
+      "finding": "The pinned inventory declares uint8_t[$c0], and midi.cpp:321-322 returns view(self, self.cast<P&>().aftertouches, N). The test_midi.py state helper reads it via .tolist(); docs/reference/dsp.md describes parser arrays as live views. But bindings/manifest.json:843 labels ownership \"value\" and notes it is a live view retaining its owner. Manifest ownership contradicts the implementation and its own note.",
+      "verdict": "finding"
+    },
+    "field:rack::dsp::MidiParser::channels": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::clock": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::clockDividerPulse": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::clockDivision": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::clockPulse": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::continuePulse": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::gates": {
+      "finding": "The pinned inventory declares bool[$c0], and midi.cpp:319 returns view(self, self.cast<P&>().gates, N). test_midi.py reads and checks the live array; docs/reference/dsp.md says parser arrays are live views. But bindings/manifest.json:850 labels ownership \"value\" while its notes claim a live view retaining its owner. Manifest ownership contradicts the implementation and its own note.",
+      "verdict": "finding"
+    },
+    "field:rack::dsp::MidiParser::heldNotes": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::modFilters": {
+      "finding": "The pinned inventory declares dsp::ExponentialFilter[$c0], and midi.cpp:336 returns view(self, self.cast<P&>().modFilters, N). test_midi.py mutates a filter through the view; docs/reference/dsp.md explicitly describes mod_filters as live filter objects. But bindings/manifest.json:852 labels ownership \"value\" and notes it is a live view retaining its owner. Manifest ownership contradicts the implementation and its own note.",
+      "verdict": "finding"
+    },
+    "field:rack::dsp::MidiParser::mods": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::monoMode": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::notes": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::pedal": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::polyMode": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::pwFilters": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::pwRange": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::pws": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::releaseVelocityEnabled": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::retriggerOnResume": {
+      "verdict": "accept"
+    },
+    "field:rack::dsp::MidiParser::retriggerPulses": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:94b6573d-f141-4ebc-9b62-67d2de518764",
+  "slice": "redo-027"
+}

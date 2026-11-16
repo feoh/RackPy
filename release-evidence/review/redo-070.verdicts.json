@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::engine::Module::paramsFromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::paramsToJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::process(const rack::engine::Module::ProcessArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::processBypass(const rack::engine::Module::ProcessArgs &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::step()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::toJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Param::getValue()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Param::setValue(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::ParamQuantity::getDescription()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::ParamQuantity::getDisplayPrecision()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::ParamQuantity::getDisplayValue()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::ParamQuantity::getDisplayValueString()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::ParamQuantity::getImmediateValue()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::ParamQuantity::getLabel()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::ParamQuantity::getParam()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::ParamQuantity::getUnit()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::ParamQuantity::randomize()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::ParamQuantity::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::ParamQuantity::setDisplayValue(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::ParamQuantity::setDisplayValueString(std::string)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::ParamQuantity::setImmediateValue(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::clearVoltages()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::getChannels()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::getNormalPolyVoltage(float, uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Port::getNormalVoltage(float, uint8_t)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:d3595104-fe9b-41b4-b672-a4a60af1ad9c",
+  "slice": "redo-070"
+}

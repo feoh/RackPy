@@ -1,0 +1,83 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::window::Window::getSize()": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::isCursorLocked()": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::isFullScreen()": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::loadFont(const std::string &)": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::loadFontWithoutFallbacks(const std::string &)": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::loadImage(const std::string &)": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::loadSvg(const std::string &)": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::setFullScreen(bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::window::Window::setSize(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::app::ModuleWidget::getModule<type>()": {
+      "finding": "The pinned API surface declares this template with a TModule type parameter. bindings/generated/mapping.json maps it to rackpy.raw.app.ModuleWidget.get_module, but native/bindings/app/module_widget.cpp binds a parameterless getter returning a generic engine Module; src/rackpy/raw/app.pyi likewise declares only get_module() -> Module | None. tests/app/in_rack/test_module_widget.py checks only the parameterless getter. The template's typed result/class selection is not represented. docs/coverage.md policy 10 requires templates over widget or module types to map to factories accepting a class, including Python subclasses.",
+      "verdict": "finding"
+    },
+    "method_template:rack::componentlibrary::SegmentDisplay::setLights<type>(rack::engine::Module *, int, int)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Module::configButton<type>(int, std::string)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Module::configInput<type>(int, std::string)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Module::configLight<type>(int, std::string)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Module::configOutput<type>(int, std::string)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Module::configParam<type>(int, float, float, float, std::string, std::string, float, float, float)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Module::configSwitch<type>(int, float, float, float, std::string, std::vector<std::string>)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Port::getNormalPolyVoltageSimd<type>($0, uint8_t)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Port::getNormalVoltageSimd<type>($0, uint8_t)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Port::getPolyVoltageSimd<type>(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Port::getVoltageSimd<type>(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::engine::Port::setVoltageSimd<type>($0, uint8_t)": {
+      "verdict": "accept"
+    },
+    "method_template:rack::widget::Widget::getAncestorOfType<type>()": {
+      "verdict": "accept"
+    },
+    "method_template:rack::widget::Widget::getFirstDescendantOfType<type>()": {
+      "verdict": "accept"
+    },
+    "method_template:rack::widget::Widget::recurseEvent<type, type>($0, const $1 &)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:dbb3b3c3-2957-4545-9025-ca6e61156a66",
+  "slice": "redo-087"
+}

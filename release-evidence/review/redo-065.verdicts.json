@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::dsp::MinBlepGenerator::process()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RealFFT::irfft(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RealFFT::irfftUnordered(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RealFFT::rfft(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RealFFT::rfftUnordered(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RealFFT::scale(float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RealTimeConvolver::processBlock(const float *, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::RealTimeConvolver::setKernel(const float *, size_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::SampleRateConverter::process(const float *, int, int *, float *, int, int *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::SampleRateConverter::process(const rack::dsp::Frame<$c0> *, int *, rack::dsp::Frame<$c0> *, int *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::SampleRateConverter::refreshState()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::SampleRateConverter::setChannels(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::SampleRateConverter::setQuality(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::SampleRateConverter::setRates(int, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::Upsampler::process(float, float *)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::Upsampler::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::VuMeter2::getBrightness(float, float)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::VuMeter2::process(float, float)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::VuMeter2::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::VuMeter::getBrightness(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::dsp::VuMeter::setValue(float)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Cable::fromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Cable::toJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::addCable(rack::engine::Cable *)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Engine::addModule(rack::engine::Module *)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:daba4e44-383c-4f18-9973-c499153eaaee",
+  "slice": "redo-065"
+}

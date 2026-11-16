@@ -1,0 +1,49 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "variable:rack::settings::spotlightBrightness": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::spotlightRadius": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::squeezeModules": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::threadCount": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::tipIndex": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::token": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::tooltips": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::uiTheme": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::verifyHttpsCerts": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::windowMaximized": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::windowPos": {
+      "verdict": "accept"
+    },
+    "variable:rack::settings::windowSize": {
+      "verdict": "accept"
+    },
+    "variable:rack::window::MM_PER_IN": {
+      "verdict": "accept"
+    },
+    "variable:rack::window::SVG_DPI": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:0d3d9746-5e28-4073-819b-dfdf32da9b3e",
+  "slice": "redo-100"
+}

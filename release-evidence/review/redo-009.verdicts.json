@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "boundary_constant:GLFW_MOD_CONTROL": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOD_NUM_LOCK": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOD_SHIFT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOD_SUPER": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_1": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_2": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_3": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_4": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_5": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_6": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_7": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_8": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_LAST": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_LEFT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_MIDDLE": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_MOUSE_BUTTON_RIGHT": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_PRESS": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_RELEASE": {
+      "verdict": "accept"
+    },
+    "boundary_constant:GLFW_REPEAT": {
+      "verdict": "accept"
+    },
+    "class_template:rack::SharedLock<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::WeakPtr<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::LargeLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::LargeSimpleLight<type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::LightButton<type, type>": {
+      "verdict": "accept"
+    },
+    "class_template:rack::componentlibrary::LightSlider<type, type>": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:d1d10c02-4186-4a82-b47c-e843b0eb6521",
+  "slice": "redo-009"
+}

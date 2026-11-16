@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "field:rack::widget::EventState::draggedWidget": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::heldKeys": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::hoveredWidget": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::lastClickTime": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::lastClickedWidget": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::rootWidget": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::EventState::selectedWidget": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::FramebufferWidget::bypassed": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::FramebufferWidget::dirty": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::FramebufferWidget::dirtyOnSubpixelChange": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::FramebufferWidget::oversample": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::FramebufferWidget::viewportMargin": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::SvgWidget::svg": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::TransformWidget::transform": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::ButtonEvent::action": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::ButtonEvent::button": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::ButtonEvent::mods": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::ContextCreateEvent::vg": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::ContextDestroyEvent::vg": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::DragBaseEvent::button": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::DragDropEvent::origin": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::DragEnterEvent::origin": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::DragHoverEvent::mouseDelta": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::DragHoverEvent::origin": {
+      "verdict": "accept"
+    },
+    "field:rack::widget::Widget::DragLeaveEvent::origin": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:4e7105db-a6db-49f9-b30c-d68bed9aea78",
+  "slice": "redo-035"
+}

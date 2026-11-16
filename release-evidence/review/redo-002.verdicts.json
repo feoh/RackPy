@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "alias:rack::event::Deselect": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Dirty": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::DoubleClick": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::DragBase": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::DragDrop": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::DragEnd": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::DragEnter": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::DragHover": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::DragLeave": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::DragMove": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::DragStart": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Enter": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Hide": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Hover": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::HoverKey": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::HoverScroll": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::HoverText": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::KeyBase": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Leave": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::PathDrop": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::PositionBase": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Remove": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Reposition": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Resize": {
+      "verdict": "accept"
+    },
+    "alias:rack::event::Select": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:7500370a-ecc3-4562-a48a-ce7388ded17f",
+  "slice": "redo-002"
+}

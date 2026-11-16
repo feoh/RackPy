@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::engine::Module::getNumParams()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getOutput(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getOutputInfo(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getParam(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getParamQuantity(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getPatchStorageDirectory()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::getRightExpander()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::isBypassed()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onAdd()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onAdd(const rack::engine::Module::AddEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onBypass(const rack::engine::Module::BypassEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onExpanderChange(const rack::engine::Module::ExpanderChangeEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onPortChange(const rack::engine::Module::PortChangeEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onRandomize()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onRandomize(const rack::engine::Module::RandomizeEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onRemove()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onRemove(const rack::engine::Module::RemoveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onReset()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onReset(const rack::engine::Module::ResetEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onSampleRateChange()": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onSampleRateChange(const rack::engine::Module::SampleRateChangeEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onSave(const rack::engine::Module::SaveEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onSetMaster(const rack::engine::Module::SetMasterEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onUnBypass(const rack::engine::Module::UnBypassEvent &)": {
+      "verdict": "accept"
+    },
+    "method:rack::engine::Module::onUnsetMaster(const rack::engine::Module::UnsetMasterEvent &)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:b56ff8b8-4429-4882-bedd-4c9ed6b61149",
+  "slice": "redo-069"
+}

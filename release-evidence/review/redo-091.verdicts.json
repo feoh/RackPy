@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "record:rack::componentlibrary::Rogan1PSWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan1PWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PBlue": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PGreen": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PRed": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PSBlue": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PSGreen": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PSRed": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PSWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2PWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan2SGray": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PBlue": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PGreen": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PRed": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PSBlue": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PSGreen": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PSRed": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PSWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan3PWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan5PSGray": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::Rogan6PSWhite": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::RoundBigBlackKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::RoundBlackKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::RoundBlackSnapKnob": {
+      "verdict": "accept"
+    },
+    "record:rack::componentlibrary::RoundHugeBlackKnob": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:52402425-34ef-4c55-afe8-609fd0b70b59",
+  "slice": "redo-091"
+}

@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::midi::Port::fromJson(json_t *)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getChannel()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getChannelName(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getChannels()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getDefaultDeviceId()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getDevice()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getDeviceId()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getDeviceIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getDeviceName(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getDriver()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::getDriverId()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::setChannel(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::setDeviceId(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::setDriverId(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Port::toJson()": {
+      "verdict": "accept"
+    },
+    "method:rack::plugin::Model::appendContextMenu(rack::ui::Menu *, bool)": {
+      "verdict": "accept"
+    },
+    "method:rack::plugin::Model::createModule()": {
+      "verdict": "accept"
+    },
+    "method:rack::plugin::Model::createModuleWidget(rack::engine::Module *)": {
+      "verdict": "accept"
+    },
+    "method:rack::random::Xoroshiro128Plus::isSeeded()": {
+      "verdict": "accept"
+    },
+    "method:rack::random::Xoroshiro128Plus::max()": {
+      "verdict": "accept"
+    },
+    "method:rack::random::Xoroshiro128Plus::min()": {
+      "verdict": "accept"
+    },
+    "method:rack::random::Xoroshiro128Plus::operator()()": {
+      "verdict": "accept"
+    },
+    "method:rack::random::Xoroshiro128Plus::rotl(uint64_t, int)": {
+      "verdict": "accept"
+    },
+    "method:rack::random::Xoroshiro128Plus::seed(uint64_t, uint64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::string::CaseInsensitiveCompare::operator()(const std::string &, const std::string &) const": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:0cb835f8-a6aa-4a99-a5f1-39102b644039",
+  "slice": "redo-076"
+}

@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "function:rack::system::sleep(double)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::unarchiveToDirectory(const std::string &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::unarchiveToDirectory(const std::vector<uint8_t> &, const std::string &)": {
+      "verdict": "accept"
+    },
+    "function:rack::system::writeFile(const std::string &, const std::vector<uint8_t> &)": {
+      "verdict": "accept"
+    },
+    "function:rack::ui::refreshTheme()": {
+      "verdict": "accept"
+    },
+    "function:rack::ui::setTheme(NVGcolor, NVGcolor)": {
+      "verdict": "accept"
+    },
+    "function:rack::widget::getKeyCommandName(int, int)": {
+      "verdict": "accept"
+    },
+    "function:rack::widget::getKeyName(int)": {
+      "verdict": "accept"
+    },
+    "function:rack::window::in2px(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::window::in2px(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "function:rack::window::mm2px(float)": {
+      "verdict": "accept"
+    },
+    "function:rack::window::mm2px(rack::math::Vec)": {
+      "verdict": "accept"
+    },
+    "function:rack::window::svgDraw(NVGcontext *, NSVGimage *)": {
+      "verdict": "accept"
+    },
+    "function:sse_mathfun_atan2_ps(__m128, __m128)": {
+      "verdict": "accept"
+    },
+    "function:sse_mathfun_atan_ps(__m128)": {
+      "verdict": "accept"
+    },
+    "function:sse_mathfun_cos_ps(__m128)": {
+      "verdict": "accept"
+    },
+    "function:sse_mathfun_cot_ps(__m128)": {
+      "verdict": "accept"
+    },
+    "function:sse_mathfun_exp_ps(__m128)": {
+      "verdict": "accept"
+    },
+    "function:sse_mathfun_log_ps(__m128)": {
+      "verdict": "accept"
+    },
+    "function:sse_mathfun_one_ps()": {
+      "verdict": "accept"
+    },
+    "function:sse_mathfun_sin_ps(__m128)": {
+      "verdict": "accept"
+    },
+    "function:sse_mathfun_sincos_ps(__m128, __m128 *, __m128 *)": {
+      "verdict": "accept"
+    },
+    "function:sse_mathfun_tan_ps(__m128)": {
+      "verdict": "accept"
+    },
+    "function:sse_mathfun_tancot_ps(__m128, int)": {
+      "verdict": "accept"
+    },
+    "function_template:rack::createBoolMenuItem<type>(std::string, std::string, std::function<bool ()>, std::function<void (bool)>, bool, bool)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:9c5100e0-0b28-4832-9108-0464c0a5c58f",
+  "slice": "redo-045"
+}

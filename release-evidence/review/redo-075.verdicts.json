@@ -1,0 +1,82 @@
+{
+  "commit": "2ddd3084724d8ac3898e9cee1fb0b89fd5920acc",
+  "records": {
+    "method:rack::midi::InputQueue::size()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::InputQueue::tryPop(rack::midi::Message *, int64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::getChannel() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::getFrame() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::getNote() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::getSize() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::getStatus() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::getValue() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::setChannel(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::setFrame(int64_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::setNote(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::setSize(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::setStatus(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::setValue(uint8_t)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Message::toString() const": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Output::getChannels()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Output::getDefaultDeviceId()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Output::getDeviceIds()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Output::getDeviceName(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Output::reset()": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Output::sendMessage(const rack::midi::Message &)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::Output::setDeviceId(int)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::OutputDevice::sendMessage(const rack::midi::Message &)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::OutputDevice::subscribe(rack::midi::Output *)": {
+      "verdict": "accept"
+    },
+    "method:rack::midi::OutputDevice::unsubscribe(rack::midi::Output *)": {
+      "verdict": "accept"
+    }
+  },
+  "reviewer": "agent-review:a1a6f753-05d1-4f8d-962b-5bfb81c93f80",
+  "slice": "redo-075"
+}
