@@ -165,6 +165,13 @@ the fourteen [known release gaps](../docs/coverage.md#known-release-gaps) and
 accepted the Linux-only audio-guard proof for the four guard-instrumented
 samples. No acceptance criterion, coverage denominator or safety gate changed.
 
+**2026-11-16: RP-46 historical dry-run evidence.** The owner waived the specific
+`4fba8b9` → `e329b10` (~1,900/3,107 carried) dry run as unreproducible because
+the original review bundle was lost. This waives only that historical count; it
+does not weaken carry provenance, mutation tests or exact-SHA safeguards. RP-42
+must record actual carry/redo counts and both commit SHAs from a new reproducible
+review baseline. The lost historical count must not be claimed as reproduced.
+
 ## Witan project and recovery history
 
 The initial WorkflowProject search/create returned:
