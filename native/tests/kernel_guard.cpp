@@ -20,7 +20,7 @@
 #include "../engine/expanders.hpp"
 #include "../module/module.hpp"
 
-#include <dlfcn.h>
+#include "../testing/audio_guard_api.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -458,14 +458,19 @@ std::string runAudio(int blocks) {
 }  // namespace
 
 int main() {
-	enter = (GuardFn) dlsym(RTLD_DEFAULT, "audio_guard_enter");
-	leave = (GuardFn) dlsym(RTLD_DEFAULT, "audio_guard_leave");
-	resetCounts = (GuardFn) dlsym(RTLD_DEFAULT, "audio_guard_reset");
-	report = (ReportFn) dlsym(RTLD_DEFAULT, "audio_guard_report");
-	if (!enter || !leave || !resetCounts || !report) {
-		std::fprintf(stderr, "rackpy_kernel_guard needs LD_PRELOAD=audio_guard.so\n");
+	rackpy::testing::AudioGuardApi audioGuard;
+	if (!audioGuard.load()) {
+#if defined(_WIN32)
+		std::fprintf(stderr, "rackpy_kernel_guard needs RACKPY_AUDIO_GUARD_DLL and working import hooks\n");
+#else
+		std::fprintf(stderr, "rackpy_kernel_guard needs LD_PRELOAD/DYLD_INSERT_LIBRARIES audio_guard\n");
+#endif
 		return 2;
 	}
+	enter = audioGuard.enter;
+	leave = audioGuard.leave;
+	resetCounts = audioGuard.reset;
+	report = audioGuard.report;
 	runtime::markMainThread();
 	dsp::registerBuiltins();
 	const int frames = 100000;

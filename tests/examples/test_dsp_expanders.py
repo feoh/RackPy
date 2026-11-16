@@ -15,7 +15,6 @@ example builds with its kernel library and loads as its own plugin over two laun
 
 import json
 import math
-import os
 import shutil
 import subprocess
 from collections.abc import Callable
@@ -31,8 +30,9 @@ from tests.support import (
     MODULE,
     PLUGINS,
     assert_clean_exit,
+    audio_guard_env,
+    audio_guard_supported,
     bin_command,
-    linux_x64_only,
     rack_platforms,
     run_pytest_in_rack,
     run_rack,
@@ -120,7 +120,7 @@ def test_the_example_kernels_reference_no_python(dev_build: Path) -> None:
 
 
 @pytest.mark.native
-@linux_x64_only()  # the LD_PRELOAD audio-path guard
+@audio_guard_supported()
 def test_the_example_kernels_make_no_audio_path_calls(dev_build: Path) -> None:
     libraries = kernel_libraries(dev_build)
     guard = subprocess.run(
@@ -128,7 +128,7 @@ def test_the_example_kernels_make_no_audio_path_calls(dev_build: Path) -> None:
         capture_output=True,
         text=True,
         check=True,
-        env={**os.environ, "LD_PRELOAD": str(dev_build / "audio_guard.so")},
+        env=audio_guard_env(dev_build),
     )
     counts = json.loads(guard.stdout)
     assert sorted(counts) == ["dsp.Biquad", "expanders.Peek", "polyphony.Scalar", "polyphony.Simd"]

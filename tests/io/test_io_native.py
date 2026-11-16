@@ -17,9 +17,19 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import ASAN_OPTIONS, OBJECT, bin_command, linux_x64_only, nested_name, rack_platforms, symbol_names
+from tests.support import (
+    ASAN_OPTIONS,
+    OBJECT,
+    audio_guard_env,
+    audio_guard_supported,
+    bin_command,
+    linux_x64_only,
+    nested_name,
+    rack_platforms,
+    symbol_names,
+)
 
-pytestmark = [rack_platforms(), pytest.mark.native]  # the guard and sanitizer runs are Linux-only
+pytestmark = [rack_platforms(), pytest.mark.native]  # sanitizer runs are Linux-only
 
 
 def test_native_audio_and_midi_match_rack(dev_build: Path) -> None:
@@ -28,10 +38,15 @@ def test_native_audio_and_midi_match_rack(dev_build: Path) -> None:
     assert "io paths: all checks passed" in proc.stdout
 
 
-@linux_x64_only()
+@audio_guard_supported()
 def test_the_audio_paths_make_no_forbidden_calls(dev_build: Path) -> None:
-    env = {**os.environ, "LD_PRELOAD": str(dev_build / "audio_guard.so")}
-    out = subprocess.run([str(dev_build / "rackpy_kernel_guard")], capture_output=True, text=True, check=True, env=env)
+    out = subprocess.run(
+        [str(dev_build / "rackpy_kernel_guard")],
+        capture_output=True,
+        text=True,
+        check=True,
+        env=audio_guard_env(dev_build),
+    )
     report = json.loads(out.stdout)
     # As master and secondary, resampled and copied, a missed block, stream starts and stops, rackpy.AudioInterface.
     assert not any(report["audio"].values()) and report["audio_flowed"], report

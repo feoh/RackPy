@@ -15,7 +15,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-extern int PyGILState_Ensure(void);
+extern int PyGILState_Ensure(void) __attribute__((weak_import));
 
 // Intercepted APIs: malloc, free, calloc, realloc, posix_memalign,
 // aligned_alloc, pthread_mutex_lock, write(2), and PyGILState_Ensure.

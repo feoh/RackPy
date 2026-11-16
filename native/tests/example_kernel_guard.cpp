@@ -9,7 +9,11 @@
 #include <rack.hpp>
 #include <rackpy/kernel.hpp>
 
+#include "../testing/audio_guard_api.hpp"
+
+#if !defined(_WIN32)
 #include <dlfcn.h>
+#endif
 
 #include <cmath>
 #include <cstdio>
@@ -22,6 +26,18 @@ using GuardFn = void (*)();
 using ReportFn = void (*)(char*, size_t);
 GuardFn enter, leave, resetCounts;
 ReportFn report;
+
+#if defined(_WIN32)
+using DynamicLibrary = HMODULE;
+DynamicLibrary openLibrary(const char* path) { return LoadLibraryA(path); }
+void* findSymbol(DynamicLibrary library, const char* name) { return reinterpret_cast<void*>(GetProcAddress(library, name)); }
+const char* dynamicError() { return "LoadLibrary/GetProcAddress failed"; }
+#else
+using DynamicLibrary = void*;
+DynamicLibrary openLibrary(const char* path) { return dlopen(path, RTLD_NOW | RTLD_LOCAL); }
+void* findSymbol(DynamicLibrary library, const char* name) { return dlsym(library, name); }
+const char* dynamicError() { return dlerror(); }
+#endif
 
 struct Collect : rackpy::KernelRegistrar {
 	std::vector<rackpy::KernelType> types;
@@ -75,14 +91,19 @@ std::string run(const rackpy::KernelType& type, rack::plugin::Model& own, rack::
 }  // namespace
 
 int main(int argc, char** argv) {
-	enter = (GuardFn) dlsym(RTLD_DEFAULT, "audio_guard_enter");
-	leave = (GuardFn) dlsym(RTLD_DEFAULT, "audio_guard_leave");
-	resetCounts = (GuardFn) dlsym(RTLD_DEFAULT, "audio_guard_reset");
-	report = (ReportFn) dlsym(RTLD_DEFAULT, "audio_guard_report");
-	if (!enter || !leave || !resetCounts || !report) {
-		std::fprintf(stderr, "rackpy_example_kernel_guard needs LD_PRELOAD=audio_guard.so\n");
+	rackpy::testing::AudioGuardApi audioGuard;
+	if (!audioGuard.load()) {
+#if defined(_WIN32)
+		std::fprintf(stderr, "rackpy_example_kernel_guard needs RACKPY_AUDIO_GUARD_DLL and working import hooks\n");
+#else
+		std::fprintf(stderr, "rackpy_example_kernel_guard needs LD_PRELOAD/DYLD_INSERT_LIBRARIES audio_guard\n");
+#endif
 		return 2;
 	}
+	enter = audioGuard.enter;
+	leave = audioGuard.leave;
+	resetCounts = audioGuard.reset;
+	report = audioGuard.report;
 	rack::plugin::Plugin plugin;
 	rack::plugin::Model own, source;
 	own.plugin = source.plugin = &plugin;
@@ -95,11 +116,19 @@ int main(int argc, char** argv) {
 	std::printf("{");
 	int printed = 0;
 	for (int i = 1; i < argc; i++) {
-		void* library = dlopen(argv[i], RTLD_NOW | RTLD_LOCAL);
-		auto registerKernels = library ? (void (*)(rackpy::KernelRegistrar&)) dlsym(library, "rackpy_register_kernels") : nullptr;
-		auto ns = library ? (const char* (*) ()) dlsym(library, "rackpy_kernel_namespace") : nullptr;
+		DynamicLibrary library = openLibrary(argv[i]);
+#if defined(_WIN32)
+		// Newly loaded example kernels have their own imports, so patch them before registration/processing.
+		auto install = reinterpret_cast<int (*)()>(GetProcAddress(audioGuard.module, "audio_guard_install"));
+		if (!library || !install || !install()) {
+			std::fprintf(stderr, "cannot install the audio guard after loading %s\n", argv[i]);
+			return 2;
+		}
+#endif
+		auto registerKernels = library ? (void (*)(rackpy::KernelRegistrar&)) findSymbol(library, "rackpy_register_kernels") : nullptr;
+		auto ns = library ? (const char* (*) ()) findSymbol(library, "rackpy_kernel_namespace") : nullptr;
 		if (!registerKernels || !ns) {
-			std::fprintf(stderr, "cannot load %s: %s\n", argv[i], dlerror());
+			std::fprintf(stderr, "cannot load %s: %s\n", argv[i], dynamicError());
 			return 2;
 		}
 		Collect collect;

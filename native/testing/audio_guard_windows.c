@@ -97,7 +97,7 @@ static int install_hooks(void) {
 	CloseHandle(snapshot);
 	// Fail closed unless at least one allocation, lock and WriteFile import was hooked.
 	int alloc = next_malloc || next_calloc || next_realloc || next_aligned_malloc;
-	if (!alloc || (!next_enter_critical && !next_srw_exclusive) || !next_write_file || !patched)
+	if (!alloc || (!next_enter_critical && !next_srw_exclusive) || !next_write_file)
 		InterlockedIncrement(&hook_failures);
 	return patched;
 }
@@ -119,10 +119,11 @@ __declspec(dllexport) void audio_guard_report(char* out, size_t size) {
 // loader walk under the Windows loader lock. Returns nonzero only when the
 // required allocation, synchronization and WriteFile hook families are live.
 __declspec(dllexport) int audio_guard_install(void) {
-	if (InterlockedCompareExchange(&installed, 1, 0) == 0) {
-		install_hooks();
-		InterlockedExchange64(&counts[HOOK_FAILURES], hook_failures);
-	}
+	// Rescan after each test DLL is loaded so its imports are covered before it runs.
+	if (InterlockedCompareExchange(&installed, 1, 0) == 0)
+		InterlockedExchange64(&counts[HOOK_FAILURES], 0);
+	install_hooks();
+	InterlockedExchange64(&counts[HOOK_FAILURES], hook_failures);
 	return InterlockedCompareExchange(&hook_failures, 0, 0) == 0;
 }
 

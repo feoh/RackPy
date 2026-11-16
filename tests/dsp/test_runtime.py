@@ -8,7 +8,6 @@ kernels inside Rack's own engine.
 """
 
 import json
-import os
 import shutil
 import subprocess
 from collections.abc import Callable
@@ -16,9 +15,18 @@ from pathlib import Path
 
 import pytest
 
-from tests.support import MODULE, OBJECT, bin_command, linux_x64_only, rack_platforms, run_pytest_in_rack
+from tests.support import (
+    MACOS,
+    MODULE,
+    OBJECT,
+    audio_guard_env,
+    audio_guard_supported,
+    bin_command,
+    rack_platforms,
+    run_pytest_in_rack,
+)
 
-pytestmark = [rack_platforms()]  # the LD_PRELOAD audio-path guard runs are Linux-only
+pytestmark = [rack_platforms()]
 SUITE = Path(__file__).resolve().parent / "in_rack"
 LIBRARY_SUITE = Path(__file__).resolve().parent / "in_rack_libraries"
 LIBRARIES = [
@@ -41,6 +49,21 @@ LIBRARIES = [
 
 
 @pytest.mark.native
+@pytest.mark.skipif(not MACOS, reason="Darwin interposer positive control")
+def test_the_darwin_audio_guard_detects_injected_allocations(dev_build: Path) -> None:
+    result = subprocess.run(
+        [str(dev_build / "rackpy_audio_guard_positive")],
+        capture_output=True,
+        text=True,
+        check=False,
+        env=audio_guard_env(dev_build),
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    report = json.loads(result.stdout)
+    assert report["malloc"] == report["free"] == 1, report
+
+
+@pytest.mark.native
 def test_kernels_match_direct_cpp_and_hand_over_safely(dev_build: Path) -> None:
     proc = subprocess.run([str(dev_build / "rackpy_kernel_tests")], capture_output=True, text=True, check=False)
     assert proc.returncode == 0, proc.stdout + proc.stderr
@@ -48,10 +71,15 @@ def test_kernels_match_direct_cpp_and_hand_over_safely(dev_build: Path) -> None:
 
 
 @pytest.mark.native
-@linux_x64_only()
+@audio_guard_supported()
 def test_the_kernel_path_makes_no_forbidden_calls(dev_build: Path) -> None:
-    env = {**os.environ, "LD_PRELOAD": str(dev_build / "audio_guard.so")}
-    out = subprocess.run([str(dev_build / "rackpy_kernel_guard")], capture_output=True, text=True, check=True, env=env)
+    out = subprocess.run(
+        [str(dev_build / "rackpy_kernel_guard")],
+        capture_output=True,
+        text=True,
+        check=True,
+        env=audio_guard_env(dev_build),
+    )
     report = json.loads(out.stdout)
     assert not any(report["production"].values()), report  # pickup, controls, retirement, two kernel types
     assert not any(report["bypass"].values()), report  # Rack's route copy, then bypass kernels swapped (RP-34)
@@ -69,10 +97,11 @@ def test_the_overhead_benchmark_runs(dev_build: Path) -> None:
 
 
 @pytest.mark.native
-@linux_x64_only()
+@audio_guard_supported()
 def test_the_guard_run_needs_the_preload(dev_build: Path) -> None:
     proc = subprocess.run([str(dev_build / "rackpy_kernel_guard")], capture_output=True, text=True, check=False)
-    assert proc.returncode == 2 and "LD_PRELOAD" in proc.stderr
+    expected = "DYLD_INSERT_LIBRARIES" if MACOS else "LD_PRELOAD"
+    assert proc.returncode == 2 and expected in proc.stderr
 
 
 @pytest.mark.native

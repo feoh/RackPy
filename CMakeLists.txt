@@ -221,24 +221,39 @@ if(RACKPY_BUILD_TESTS)
     target_compile_options(rackpy_io_stress_tsan PRIVATE -fsanitize=thread -fno-omit-frame-pointer $<$<CXX_COMPILER_ID:GNU>:-Wno-tsan>)
     target_link_options(rackpy_io_stress_tsan PRIVATE -fsanitize=thread)
   endif()
-  # The RP-07 audio-path guard interposes on libc with LD_PRELOAD, which macOS has no equivalent of
-  # for these tests (DYLD_INSERT_LIBRARIES is limited by SIP): Linux only (RP-40).
-  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    # The RP-07 audio-path guard, preloaded (LD_PRELOAD) by tests/dsp/test_runtime.py around rackpy_kernel_guard.
-    add_library(rackpy_audio_guard MODULE native/testing/audio_guard.c)
+  # The audio-path guard uses platform-specific dynamic interposition. macOS is limited to these
+  # RackPy-owned, non-hardened test executables; DYLD_INSERT_LIBRARIES is not claimed to work in Rack.
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+      set(_rackpy_audio_guard_source native/testing/audio_guard_darwin.c)
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+      set(_rackpy_audio_guard_source native/testing/audio_guard_windows.c)
+    else()
+      set(_rackpy_audio_guard_source native/testing/audio_guard.c)
+    endif()
+    add_library(rackpy_audio_guard MODULE ${_rackpy_audio_guard_source})
     set_target_properties(rackpy_audio_guard PROPERTIES PREFIX "" OUTPUT_NAME audio_guard C_STANDARD 11)
-    target_link_libraries(rackpy_audio_guard PRIVATE dl)
-    # Runs the kernel path under the RP-07 audio-path guard (tests/dsp/test_runtime.py preloads it).
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+      set_target_properties(rackpy_audio_guard PROPERTIES SUFFIX ".dylib")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+      target_link_libraries(rackpy_audio_guard PRIVATE dl)
+    endif()
+    # Standalone tests insert the guard with LD_PRELOAD (Linux), DYLD_INSERT_LIBRARIES (macOS),
+    # or load the DLL and install IAT hooks explicitly (Windows).
     add_executable(rackpy_kernel_guard native/tests/kernel_guard.cpp tests/dsp/kernel_library/graphs.cpp
       native/module/lifecycle.cpp ${RACKPY_RUNTIME_CORE} ${RACKPY_DSP_RUNTIME})
     set_target_properties(rackpy_kernel_guard PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
     target_include_directories(rackpy_kernel_guard PRIVATE native/include)
-    target_link_libraries(rackpy_kernel_guard PRIVATE rackpy_sdk_program)
-    # RP-36: the example plugins' kernel libraries under the same guard (tests/examples preloads it).
+    target_link_libraries(rackpy_kernel_guard PRIVATE rackpy_sdk_program ${CMAKE_DL_LIBS})
+    # RP-36: the example plugins' kernel libraries under the same guard.
     add_executable(rackpy_example_kernel_guard native/tests/example_kernel_guard.cpp)
     set_target_properties(rackpy_example_kernel_guard PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
     target_include_directories(rackpy_example_kernel_guard PRIVATE native/include)
-    target_link_libraries(rackpy_example_kernel_guard PRIVATE rackpy_sdk_program dl)
+    target_link_libraries(rackpy_example_kernel_guard PRIVATE rackpy_sdk_program ${CMAKE_DL_LIBS})
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+      add_executable(rackpy_audio_guard_positive native/testing/audio_guard_darwin_test.c)
+      target_link_libraries(rackpy_audio_guard_positive PRIVATE ${CMAKE_DL_LIBS})
+    endif()
   endif()
 
   # RackPy's kernel path against plain C++ modules, per frame (timing only; not a CTest).

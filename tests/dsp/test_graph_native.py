@@ -9,15 +9,14 @@ tests/dsp/in_rack/test_graph.py, run by test_runtime.py's in-Rack suite.
 """
 
 import json
-import os
 import subprocess
 from pathlib import Path
 
 import pytest
 
-from tests.support import OBJECT, bin_command, linux_x64_only, rack_platforms
+from tests.support import OBJECT, audio_guard_env, audio_guard_supported, bin_command, rack_platforms
 
-pytestmark = [rack_platforms(), pytest.mark.native]  # the LD_PRELOAD guard run is Linux-only
+pytestmark = [rack_platforms(), pytest.mark.native]
 
 
 def test_plans_match_direct_cpp(dev_build: Path) -> None:
@@ -26,10 +25,15 @@ def test_plans_match_direct_cpp(dev_build: Path) -> None:
     assert "graph plans: all checks passed" in proc.stdout
 
 
-@linux_x64_only()
+@audio_guard_supported()
 def test_a_sixteen_channel_plan_makes_no_forbidden_calls(dev_build: Path) -> None:
-    env = {**os.environ, "LD_PRELOAD": str(dev_build / "audio_guard.so")}
-    out = subprocess.run([str(dev_build / "rackpy_kernel_guard")], capture_output=True, text=True, check=True, env=env)
+    out = subprocess.run(
+        [str(dev_build / "rackpy_kernel_guard")],
+        capture_output=True,
+        text=True,
+        check=True,
+        env=audio_guard_env(dev_build),
+    )
     report = json.loads(out.stdout)
     assert not any(report["graph"].values()), report["graph"]
     assert not any(report["compiled"].values()), report["compiled"]  # RP-21C: a compiled kernel, both paths

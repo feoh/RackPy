@@ -96,9 +96,32 @@ def require(name: str, available: bool, how: str) -> None:
 
 
 def linux_x64_only() -> pytest.MarkDecorator:
-    """Platform gate for tests of Linux-only tools or mechanisms (ELF inspection, LD_PRELOAD guards,
-    the official Linux toolchain, sanitizers, Xvfb)."""
+    """Platform gate for Linux-only tools (ELF inspection, the official Linux toolchain, sanitizers, Xvfb)."""
     return pytest.mark.skipif(PLATFORM != "lin-x64", reason="this test uses Linux x86_64-only tools")
+
+
+def audio_guard_supported() -> pytest.MarkDecorator:
+    """The dynamic audio-path guard runs on supported standalone native test programs."""
+    return pytest.mark.skipif(PLATFORM == "unsupported", reason="no native audio guard for this platform")
+
+
+def audio_guard_env(build: Path) -> dict[str, str]:
+    """Environment that inserts the platform audio guard into a RackPy-owned native test program."""
+    env = os.environ.copy()
+    if WINDOWS:
+        env["RACKPY_AUDIO_GUARD_DLL"] = str(build / "audio_guard.dll")
+    elif MACOS:
+        name = "DYLD_INSERT_LIBRARIES"
+        guard = str(build / "audio_guard.dylib")
+        env["DYLD_FORCE_FLAT_NAMESPACE"] = "1"
+        previous = env.get(name)
+        env[name] = f"{guard}:{previous}" if previous else guard
+    else:
+        name = "LD_PRELOAD"
+        guard = str(build / "audio_guard.so")
+        previous = env.get(name)
+        env[name] = f"{guard}:{previous}" if previous else guard
+    return env
 
 
 def rack_platforms() -> pytest.MarkDecorator:
