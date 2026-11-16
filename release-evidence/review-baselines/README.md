@@ -29,4 +29,4 @@ uv run bin/release-evidence slices \
   --dest release-evidence/review-baselines/2ddd308/redo
 ```
 
-The lost historical `4fba8b9` → `e329b10` count is waived by owner decision and is not used here. Exact-SHA, carry-provenance, and changed-record re-review safeguards remain in force. The 2,489-record redo is outstanding; until the fresh reviews, exact-candidate platform evidence, and remaining RP-42 gates pass, no completeness claim is permitted.
+The lost historical `4fba8b9` → `e329b10` count is waived by owner decision and is not used here. Exact-SHA, carry-provenance, and changed-record re-review safeguards remain in force. Fresh review of all 2,489 redo records is complete, with four findings still open. Until those findings are fixed in a later candidate and re-reviewed, exact-candidate platform/sample evidence is collected, and all remaining RP-42 gates pass, no completeness claim is permitted.
