@@ -1483,14 +1483,15 @@ tasks inherit the shared execution contract in tasks.json and AGENTS.md.
 ### Validation
 
 - Unit tests for carry, promote and collect pass with prek; existing exact-SHA regression tests still pass.
-- A dry run from 4fba8b9 to the current candidate reproduces roughly 1,900 carried of 3,107 records and lists the redo set.
+- The historical dry run from 4fba8b9 to e329b10 (~1,900 carried of 3,107) is waived as unreproducible: the original review bundle was lost. Do not report that count as reproduced.
+- RP-42 must establish a new reproducible review baseline, carry to a subsequent candidate, and record the actual carried/redo counts and both commit SHAs. The per-record equality, provenance, and exact-SHA checks remain mandatory.
 
 ### Acceptance criteria
 
 - The protocol is documented and enforced by the tools; no verdict can be promoted for a record whose inputs changed.
 - RP-42 can proceed without a full 3,107-record re-review per fix batch.
 
-**Notes:** Owner decision 2026-11-06 (RP-42 comment): incremental review is the method of record. The prototype prepare.py and carried.json live in /tmp/rp42-review-4fba8b9 on the build machine; /tmp is tmpfs, so copy anything worth keeping first.
+**Notes:** Owner decision 2026-11-06 (RP-42 comment): incremental review is the method of record. Owner decision 2026-11-16: waive only the lost historical carry-count dry run; see the validation requirement above and the Witan RP-46/RP-42 comments. Do not weaken provenance, mutation-test, or exact-SHA safeguards.
 
 ## RP-47 — Windows evidence for rack::system::runProcessDetached, or a listed Windows known gap
 
